@@ -861,6 +861,111 @@
         }
       }
     },
+    "/v2/portal/visualization:export": {
+      "post": {
+        "operationId": "prepareVisualizationExport",
+        "summary": "Prepare Visualization Export",
+        "description": "Asks an installed App to prepare a downloadable export of a visualization (consumption chart, dynamic tariff chart, etc.). The export is produced by the third-party App via a configured portal extension hook of type `dataExport` — this endpoint does not generate the file itself, it forwards the request to the configured hook and returns the descriptor the App provides (typically a `download_url`).\n",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "app_id": {
+                    "type": "string",
+                    "description": "App ID providing the dataExport hook."
+                  },
+                  "extension_id": {
+                    "type": "string",
+                    "description": "Extension ID providing the dataExport hook."
+                  },
+                  "hook_id": {
+                    "type": "string",
+                    "description": "Hook ID for the export."
+                  },
+                  "from": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Optional start date for the export window (ISO 8601 format)."
+                  },
+                  "to": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Optional end date for the export window (ISO 8601 format)."
+                  },
+                  "context_entities": {
+                    "$ref": "#/components/schemas/ContextEntities"
+                  }
+                },
+                "required": [
+                  "app_id",
+                  "extension_id",
+                  "hook_id"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Export descriptor returned by the App.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "download_url": {
+                      "type": "string",
+                      "description": "URL the client can use to download the exported file. May be a pre-signed or short-lived URL."
+                    },
+                    "filename": {
+                      "type": "string",
+                      "description": "Suggested filename for the exported file."
+                    },
+                    "content_type": {
+                      "type": "string",
+                      "description": "MIME type of the exported file.",
+                      "example": "text/csv"
+                    },
+                    "expires_at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "Optional expiration timestamp for the download URL."
+                    }
+                  },
+                  "required": [
+                    "download_url"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/v2/portal/costs": {
       "get": {
         "operationId": "getCosts",
@@ -13492,6 +13597,12 @@
               "$ref": "#/components/schemas/DataRetrievalItem"
             }
           },
+          "dataExport": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DataRetrievalItem"
+            }
+          },
           "priceDataRetrieval": {
             "type": "array",
             "items": {
@@ -13788,6 +13899,9 @@
                       "$ref": "#/components/schemas/ExtensionHookConsumptionDataRetrieval"
                     },
                     {
+                      "$ref": "#/components/schemas/ExtensionHookDataExport"
+                    },
+                    {
                       "$ref": "#/components/schemas/ExtensionHookCostDataRetrieval"
                     },
                     {
@@ -13950,7 +14064,8 @@
           },
           "use_static_ips": {
             "type": "boolean",
-            "description": "If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.",
+            "deprecated": true,
+            "description": "Deprecated. Prefer `secure_proxy` instead.\nIf true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.\n",
             "default": false
           },
           "secure_proxy": {
@@ -14052,7 +14167,8 @@
           },
           "use_static_ips": {
             "type": "boolean",
-            "description": "If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.",
+            "deprecated": true,
+            "description": "Deprecated. Prefer `secure_proxy` instead.\nIf true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.\n",
             "default": false
           },
           "secure_proxy": {
@@ -14162,7 +14278,8 @@
           },
           "use_static_ips": {
             "type": "boolean",
-            "description": "If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.",
+            "deprecated": true,
+            "description": "Deprecated. Prefer `secure_proxy` instead.\nIf true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.\n",
             "default": false
           },
           "secure_proxy": {
@@ -14240,7 +14357,8 @@
           },
           "use_static_ips": {
             "type": "boolean",
-            "description": "If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.",
+            "deprecated": true,
+            "description": "Deprecated. Prefer `secure_proxy` instead.\nIf true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.\n",
             "default": false
           },
           "secure_proxy": {
@@ -14317,7 +14435,77 @@
           },
           "use_static_ips": {
             "type": "boolean",
-            "description": "If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.",
+            "deprecated": true,
+            "description": "Deprecated. Prefer `secure_proxy` instead.\nIf true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.\n",
+            "default": false
+          },
+          "secure_proxy": {
+            "$ref": "#/components/schemas/SecureProxyConfig"
+          }
+        },
+        "required": [
+          "type",
+          "call"
+        ]
+      },
+      "ExtensionHookDataExport": {
+        "description": "Generic data export hook. When configured on a visualization block, the portal delegates the export action (e.g. CSV/Excel/PDF download) to the configured external source instead of generating the file itself. Can be used by any block that supports export — consumption charts, dynamic tariff charts, etc. The expected response to the call is:\n  - 200 with a JSON body describing the exported file (download_url, optional filename, content_type, expires_at)\n",
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "dataExport"
+            ]
+          },
+          "auth": {
+            "$ref": "#/components/schemas/ExtensionAuthBlock"
+          },
+          "call": {
+            "type": "object",
+            "properties": {
+              "method": {
+                "type": "string",
+                "description": "HTTP method to use for the call",
+                "default": "GET"
+              },
+              "url": {
+                "type": "string",
+                "description": "URL to call. Supports variable interpolation."
+              },
+              "params": {
+                "type": "object",
+                "description": "Parameters to append to the URL. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              },
+              "headers": {
+                "type": "object",
+                "description": "Headers to use. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              },
+              "body": {
+                "type": "object",
+                "description": "Request body to send. Supports variable interpolation. Content format is determined by Content-Type header.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              }
+            },
+            "required": [
+              "url"
+            ]
+          },
+          "use_static_ips": {
+            "type": "boolean",
+            "deprecated": true,
+            "description": "Deprecated. Prefer `secure_proxy` instead.\nIf true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.\n",
             "default": false
           },
           "secure_proxy": {
@@ -14394,7 +14582,8 @@
           },
           "use_static_ips": {
             "type": "boolean",
-            "description": "If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.",
+            "deprecated": true,
+            "description": "Deprecated. Prefer `secure_proxy` instead.\nIf true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.\n",
             "default": false
           },
           "secure_proxy": {

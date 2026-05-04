@@ -3173,6 +3173,11 @@ declare namespace Components {
              *
              */
             ExtensionHookConsumptionDataRetrieval | /**
+             * Generic data export hook. When configured on a visualization block, the portal delegates the export action (e.g. CSV/Excel/PDF download) to the configured external source instead of generating the file itself. Can be used by any block that supports export — consumption charts, dynamic tariff charts, etc. The expected response to the call is:
+             *   - 200 with a JSON body describing the exported file (download_url, optional filename, content_type, expires_at)
+             *
+             */
+            ExtensionHookDataExport | /**
              * Hook that will allow using the specified source as data for consumption visualizations. This hook is triggered to fetch the data. Format of the request and response has to follow the following specification: TBD. The expected response to the call is:
              *   - 200 with the time series data
              *
@@ -3295,7 +3300,9 @@ declare namespace Components {
                 dataPath?: string;
             };
             /**
+             * Deprecated. Prefer `secure_proxy` instead.
              * If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.
+             *
              */
             use_static_ips?: boolean;
             secure_proxy?: /* Configuration for routing requests through the ERP Integration secure proxy. Mutually exclusive with use_static_ips. */ SecureProxyConfig;
@@ -3372,7 +3379,9 @@ declare namespace Components {
                 en: string;
             };
             /**
+             * Deprecated. Prefer `secure_proxy` instead.
              * If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.
+             *
              */
             use_static_ips?: boolean;
             secure_proxy?: /* Configuration for routing requests through the ERP Integration secure proxy. Mutually exclusive with use_static_ips. */ SecureProxyConfig;
@@ -3420,7 +3429,53 @@ declare namespace Components {
                 dataPath?: string;
             };
             /**
+             * Deprecated. Prefer `secure_proxy` instead.
              * If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.
+             *
+             */
+            use_static_ips?: boolean;
+            secure_proxy?: /* Configuration for routing requests through the ERP Integration secure proxy. Mutually exclusive with use_static_ips. */ SecureProxyConfig;
+        }
+        /**
+         * Generic data export hook. When configured on a visualization block, the portal delegates the export action (e.g. CSV/Excel/PDF download) to the configured external source instead of generating the file itself. Can be used by any block that supports export — consumption charts, dynamic tariff charts, etc. The expected response to the call is:
+         *   - 200 with a JSON body describing the exported file (download_url, optional filename, content_type, expires_at)
+         *
+         */
+        export interface ExtensionHookDataExport {
+            type: "dataExport";
+            auth?: ExtensionAuthBlock;
+            call: {
+                /**
+                 * HTTP method to use for the call
+                 */
+                method?: string;
+                /**
+                 * URL to call. Supports variable interpolation.
+                 */
+                url: string;
+                /**
+                 * Parameters to append to the URL. Supports variable interpolation.
+                 */
+                params?: {
+                    [name: string]: string;
+                };
+                /**
+                 * Headers to use. Supports variable interpolation.
+                 */
+                headers?: {
+                    [name: string]: string;
+                };
+                /**
+                 * Request body to send. Supports variable interpolation. Content format is determined by Content-Type header.
+                 */
+                body?: {
+                    [name: string]: string;
+                };
+            };
+            /**
+             * Deprecated. Prefer `secure_proxy` instead.
+             * If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.
+             *
              */
             use_static_ips?: boolean;
             secure_proxy?: /* Configuration for routing requests through the ERP Integration secure proxy. Mutually exclusive with use_static_ips. */ SecureProxyConfig;
@@ -3512,7 +3567,9 @@ declare namespace Components {
                 lower_limit?: string;
             };
             /**
+             * Deprecated. Prefer `secure_proxy` instead.
              * If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.
+             *
              */
             use_static_ips?: boolean;
             secure_proxy?: /* Configuration for routing requests through the ERP Integration secure proxy. Mutually exclusive with use_static_ips. */ SecureProxyConfig;
@@ -3560,7 +3617,9 @@ declare namespace Components {
                 dataPath?: string;
             };
             /**
+             * Deprecated. Prefer `secure_proxy` instead.
              * If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.
+             *
              */
             use_static_ips?: boolean;
             secure_proxy?: /* Configuration for routing requests through the ERP Integration secure proxy. Mutually exclusive with use_static_ips. */ SecureProxyConfig;
@@ -3607,7 +3666,9 @@ declare namespace Components {
                 result?: string;
             };
             /**
+             * Deprecated. Prefer `secure_proxy` instead.
              * If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.
+             *
              */
             use_static_ips?: boolean;
             secure_proxy?: /* Configuration for routing requests through the ERP Integration secure proxy. Mutually exclusive with use_static_ips. */ SecureProxyConfig;
@@ -6209,6 +6270,7 @@ declare namespace Components {
         }
         export interface PublicExtensionCapabilities {
             consumptionDataRetrieval?: DataRetrievalItem[];
+            dataExport?: DataRetrievalItem[];
             priceDataRetrieval?: DataRetrievalItem[];
             costDataRetrieval?: DataRetrievalItem[];
             contractIdentification?: {
@@ -12126,6 +12188,67 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace PrepareVisualizationExport {
+        export interface RequestBody {
+            /**
+             * App ID providing the dataExport hook.
+             */
+            app_id: string;
+            /**
+             * Extension ID providing the dataExport hook.
+             */
+            extension_id: string;
+            /**
+             * Hook ID for the export.
+             */
+            hook_id: string;
+            /**
+             * Optional start date for the export window (ISO 8601 format).
+             */
+            from?: string; // date-time
+            /**
+             * Optional end date for the export window (ISO 8601 format).
+             */
+            to?: string; // date-time
+            context_entities?: /**
+             * Additional entities to include in the context for variable interpolation. Portal User and Contact entities are automatically part of the context.
+             * example:
+             * [
+             *   {
+             *     "entity_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+             *     "entity_schema": "contract"
+             *   }
+             * ]
+             */
+            Components.Schemas.ContextEntities;
+        }
+        namespace Responses {
+            export interface $200 {
+                /**
+                 * URL the client can use to download the exported file. May be a pre-signed or short-lived URL.
+                 */
+                download_url: string;
+                /**
+                 * Suggested filename for the exported file.
+                 */
+                filename?: string;
+                /**
+                 * MIME type of the exported file.
+                 * example:
+                 * text/csv
+                 */
+                content_type?: string;
+                /**
+                 * Optional expiration timestamp for the download URL.
+                 */
+                expires_at?: string; // date-time
+            }
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace PutPortalConfig {
         namespace Parameters {
             /**
@@ -13541,6 +13664,17 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetConsumption.Responses.$200>
+  /**
+   * prepareVisualizationExport - Prepare Visualization Export
+   * 
+   * Asks an installed App to prepare a downloadable export of a visualization (consumption chart, dynamic tariff chart, etc.). The export is produced by the third-party App via a configured portal extension hook of type `dataExport` — this endpoint does not generate the file itself, it forwards the request to the configured hook and returns the descriptor the App provides (typically a `download_url`).
+   * 
+   */
+  'prepareVisualizationExport'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.PrepareVisualizationExport.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.PrepareVisualizationExport.Responses.$200>
   /**
    * getCosts - Get Costs
    * 
@@ -15047,6 +15181,19 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetConsumption.Responses.$200>
+  }
+  ['/v2/portal/visualization:export']: {
+    /**
+     * prepareVisualizationExport - Prepare Visualization Export
+     * 
+     * Asks an installed App to prepare a downloadable export of a visualization (consumption chart, dynamic tariff chart, etc.). The export is produced by the third-party App via a configured portal extension hook of type `dataExport` — this endpoint does not generate the file itself, it forwards the request to the configured hook and returns the descriptor the App provides (typically a `download_url`).
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.PrepareVisualizationExport.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.PrepareVisualizationExport.Responses.$200>
   }
   ['/v2/portal/costs']: {
     /**
@@ -16679,6 +16826,7 @@ export type ExtensionHook = Components.Schemas.ExtensionHook;
 export type ExtensionHookConsumptionDataRetrieval = Components.Schemas.ExtensionHookConsumptionDataRetrieval;
 export type ExtensionHookContractIdentification = Components.Schemas.ExtensionHookContractIdentification;
 export type ExtensionHookCostDataRetrieval = Components.Schemas.ExtensionHookCostDataRetrieval;
+export type ExtensionHookDataExport = Components.Schemas.ExtensionHookDataExport;
 export type ExtensionHookMeterReadingPlausibilityCheck = Components.Schemas.ExtensionHookMeterReadingPlausibilityCheck;
 export type ExtensionHookPriceDataRetrieval = Components.Schemas.ExtensionHookPriceDataRetrieval;
 export type ExtensionHookRegistrationIdentifiersCheck = Components.Schemas.ExtensionHookRegistrationIdentifiersCheck;

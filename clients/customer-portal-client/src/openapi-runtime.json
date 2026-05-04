@@ -244,6 +244,18 @@
         "responses": {}
       }
     },
+    "/v2/portal/visualization:export": {
+      "post": {
+        "operationId": "prepareVisualizationExport",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v2/portal/costs": {
       "get": {
         "operationId": "getCosts",
