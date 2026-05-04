@@ -49,6 +49,7 @@ Full API documentation: [https://docs.epilot.io/api](https://docs.epilot.io/api)
 | `epilot.automation` | `@epilot/sdk/automation` | [docs](./docs/automation.md) |
 | `epilot.billing` | `@epilot/sdk/billing` | [docs](./docs/billing.md) |
 | `epilot.blueprintManifest` | `@epilot/sdk/blueprint-manifest` | [docs](./docs/blueprint-manifest.md) |
+| `epilot.calendar` | `@epilot/sdk/calendar` | [docs](./docs/calendar.md) |
 | `epilot.configurationHub` | `@epilot/sdk/configuration-hub` | [docs](./docs/configuration-hub.md) |
 | `epilot.consent` | `@epilot/sdk/consent` | [docs](./docs/consent.md) |
 | `epilot.customerPortal` | `@epilot/sdk/customer-portal` | [docs](./docs/customer-portal.md) |

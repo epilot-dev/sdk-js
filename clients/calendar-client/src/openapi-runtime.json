@@ -1,0 +1,87 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "",
+    "version": ""
+  },
+  "servers": [
+    {
+      "url": "https://calendar.sls.epilot.io"
+    }
+  ],
+  "paths": {
+    "/v1/calendar": {
+      "get": {
+        "operationId": "listCalendars",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "size"
+          },
+          {
+            "in": "query",
+            "name": "cursor"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/calendar/{calendar_id}": {
+      "get": {
+        "operationId": "getCalendar",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "calendar_id",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/calendar/events": {
+      "get": {
+        "operationId": "listEvents",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "from",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "calendar_id"
+          },
+          {
+            "in": "query",
+            "name": "size"
+          },
+          {
+            "in": "query",
+            "name": "cursor"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/calendar/events/{event_id}": {
+      "get": {
+        "operationId": "getEvent",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "event_id",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    }
+  },
+  "components": {}
+}
