@@ -2609,6 +2609,7 @@
                   "contractIdentification": "#/components/schemas/PortalExtensionHookContractIdentification",
                   "priceDataRetrieval": "#/components/schemas/PortalExtensionHookPriceDataRetrieval",
                   "consumptionDataRetrieval": "#/components/schemas/PortalExtensionHookConsumptionDataRetrieval",
+                  "consumptionExport": "#/components/schemas/PortalExtensionHookConsumptionExport",
                   "costDataRetrieval": "#/components/schemas/PortalExtensionHookCostDataRetrieval",
                   "meterReadingPlausibilityCheck": "#/components/schemas/PortalExtensionHookMeterReadingPlausibilityCheck"
                 }
@@ -2625,6 +2626,9 @@
                 },
                 {
                   "$ref": "#/components/schemas/PortalExtensionHookConsumptionDataRetrieval"
+                },
+                {
+                  "$ref": "#/components/schemas/PortalExtensionHookConsumptionExport"
                 },
                 {
                   "$ref": "#/components/schemas/PortalExtensionHookCostDataRetrieval"
@@ -2715,7 +2719,8 @@
           },
           "use_static_ips": {
             "type": "boolean",
-            "description": "If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.",
+            "deprecated": true,
+            "description": "Deprecated. Prefer `secure_proxy` instead.\nIf true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.\n",
             "default": false
           },
           "secure_proxy": {
@@ -2828,7 +2833,8 @@
           },
           "use_static_ips": {
             "type": "boolean",
-            "description": "If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.",
+            "deprecated": true,
+            "description": "Deprecated. Prefer `secure_proxy` instead.\nIf true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.\n",
             "default": false
           },
           "secure_proxy": {
@@ -2939,7 +2945,8 @@
           },
           "use_static_ips": {
             "type": "boolean",
-            "description": "If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.",
+            "deprecated": true,
+            "description": "Deprecated. Prefer `secure_proxy` instead.\nIf true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.\n",
             "default": false
           },
           "secure_proxy": {
@@ -3039,7 +3046,8 @@
           },
           "use_static_ips": {
             "type": "boolean",
-            "description": "If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.",
+            "deprecated": true,
+            "description": "Deprecated. Prefer `secure_proxy` instead.\nIf true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.\n",
             "default": false
           },
           "secure_proxy": {
@@ -3082,6 +3090,20 @@
                 "P1D",
                 "P1M"
               ]
+            }
+          },
+          "type_options": {
+            "type": "array",
+            "description": "Consumption types advertised by the hook (e.g. `ht`/`nt`, `feed-in`/`feed-out`). The `id` has to match the `type` field returned in the consumption response.\n",
+            "items": {
+              "$ref": "#/components/schemas/PortalExtensionHookConsumptionOption"
+            }
+          },
+          "aggregation_method_options": {
+            "type": "array",
+            "description": "Aggregation methods advertised by the hook (e.g. `sum`, `average`, `min`, `max`). The `id` has to match the `aggregation_method` field returned in the consumption response.\n",
+            "items": {
+              "$ref": "#/components/schemas/PortalExtensionHookConsumptionAggregationMethodOption"
             }
           },
           "auth": {
@@ -3138,7 +3160,8 @@
           },
           "use_static_ips": {
             "type": "boolean",
-            "description": "If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.",
+            "deprecated": true,
+            "description": "Deprecated. Prefer `secure_proxy` instead.\nIf true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.\n",
             "default": false
           },
           "secure_proxy": {
@@ -3149,6 +3172,125 @@
           "id",
           "type",
           "call"
+        ],
+        "additionalProperties": false
+      },
+      "PortalExtensionHookConsumptionExport": {
+        "description": "Hook that takes over the export of consumption data from the portal. When defined, the portal delegates exporting (e.g. CSV/Excel/PDF download) to the configured external source instead of generating the export itself. This hook is triggered when an end user requests a consumption export. The expected response to the call is:\n  - 200 with a JSON body describing the exported file (download_url, optional filename, content_type, expires_at)\n",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9_-]+$",
+            "description": "Identifier of the hook. Should not change between updates."
+          },
+          "name": {
+            "$ref": "#/components/schemas/TranslatedString"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "consumptionExport"
+            ]
+          },
+          "auth": {
+            "$ref": "#/components/schemas/PortalExtensionAuthBlock"
+          },
+          "call": {
+            "type": "object",
+            "properties": {
+              "method": {
+                "type": "string",
+                "description": "HTTP method to use for the call",
+                "default": "GET"
+              },
+              "url": {
+                "type": "string",
+                "description": "URL to call. Supports variable interpolation."
+              },
+              "params": {
+                "type": "object",
+                "description": "Parameters to append to the URL. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              },
+              "headers": {
+                "type": "object",
+                "description": "Headers to use. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              },
+              "body": {
+                "type": "object",
+                "description": "Request body to send. Supports variable interpolation. Content format is determined by Content-Type header.",
+                "additionalProperties": true
+              }
+            },
+            "required": [
+              "url"
+            ],
+            "additionalProperties": false
+          },
+          "use_static_ips": {
+            "type": "boolean",
+            "deprecated": true,
+            "description": "Deprecated. Prefer `secure_proxy` instead.\nIf true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.\n",
+            "default": false
+          },
+          "secure_proxy": {
+            "$ref": "#/components/schemas/PortalExtensionSecureProxy"
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "call"
+        ],
+        "additionalProperties": false
+      },
+      "PortalExtensionHookConsumptionOption": {
+        "type": "object",
+        "description": "A consumption type advertised by a consumption data retrieval hook.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Identifier of the option. Matches the `type` value returned by the hook (e.g. `ht`, `nt`, `feed-in`)."
+          },
+          "label": {
+            "$ref": "#/components/schemas/TranslatedString"
+          }
+        },
+        "required": [
+          "id",
+          "label"
+        ],
+        "additionalProperties": false
+      },
+      "PortalExtensionHookConsumptionAggregationMethodOption": {
+        "type": "object",
+        "description": "An aggregation method advertised by a consumption data retrieval hook.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "enum": [
+              "sum",
+              "average",
+              "min",
+              "max"
+            ],
+            "description": "Identifier of the option. Matches the `aggregation_method` value returned by the hook."
+          },
+          "label": {
+            "$ref": "#/components/schemas/TranslatedString"
+          }
+        },
+        "required": [
+          "id",
+          "label"
         ],
         "additionalProperties": false
       },
@@ -3237,7 +3379,8 @@
           },
           "use_static_ips": {
             "type": "boolean",
-            "description": "If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.",
+            "deprecated": true,
+            "description": "Deprecated. Prefer `secure_proxy` instead.\nIf true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.\n",
             "default": false
           },
           "secure_proxy": {

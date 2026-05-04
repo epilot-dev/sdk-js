@@ -1497,6 +1497,11 @@ declare namespace Components {
              *
              */
             PortalExtensionHookConsumptionDataRetrieval | /**
+             * Hook that takes over the export of consumption data from the portal. When defined, the portal delegates exporting (e.g. CSV/Excel/PDF download) to the configured external source instead of generating the export itself. This hook is triggered when an end user requests a consumption export. The expected response to the call is:
+             *   - 200 with a JSON body describing the exported file (download_url, optional filename, content_type, expires_at)
+             *
+             */
+            PortalExtensionHookConsumptionExport | /**
              * Hook that will allow using the specified source as data for consumption visualizations. This hook is triggered to fetch the data. Format of the request and response has to follow the following specification: TBD. The expected response to the call is:
              *   - 200 with the time series data
              *
@@ -1541,6 +1546,16 @@ declare namespace Components {
             }[];
         }
         /**
+         * An aggregation method advertised by a consumption data retrieval hook.
+         */
+        export interface PortalExtensionHookConsumptionAggregationMethodOption {
+            /**
+             * Identifier of the option. Matches the `aggregation_method` value returned by the hook.
+             */
+            id: "sum" | "average" | "min" | "max";
+            label: TranslatedString;
+        }
+        /**
          * Hook that will allow using the specified source as data for consumption visualizations. This hook is triggered to fetch the data. Format of the request and response has to follow the following specification: TBD. The expected response to the call is:
          *   - 200 with the time series data
          *
@@ -1556,6 +1571,16 @@ declare namespace Components {
              * Intervals supported by the API. If omitted, it is assumed that all intervals are supported.
              */
             intervals?: ("PT15M" | "PT1H" | "P1D" | "P1M")[];
+            /**
+             * Consumption types advertised by the hook (e.g. `ht`/`nt`, `feed-in`/`feed-out`). The `id` has to match the `type` field returned in the consumption response.
+             *
+             */
+            type_options?: /* A consumption type advertised by a consumption data retrieval hook. */ PortalExtensionHookConsumptionOption[];
+            /**
+             * Aggregation methods advertised by the hook (e.g. `sum`, `average`, `min`, `max`). The `id` has to match the `aggregation_method` field returned in the consumption response.
+             *
+             */
+            aggregation_method_options?: /* An aggregation method advertised by a consumption data retrieval hook. */ PortalExtensionHookConsumptionAggregationMethodOption[];
             auth?: PortalExtensionAuthBlock;
             call: {
                 /**
@@ -1592,10 +1617,71 @@ declare namespace Components {
                 dataPath?: string;
             };
             /**
+             * Deprecated. Prefer `secure_proxy` instead.
              * If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.
+             *
              */
             use_static_ips?: boolean;
             secure_proxy?: /* If set, requests are routed through the ERP Integration secure proxy. Mutually exclusive with use_static_ips. */ PortalExtensionSecureProxy;
+        }
+        /**
+         * Hook that takes over the export of consumption data from the portal. When defined, the portal delegates exporting (e.g. CSV/Excel/PDF download) to the configured external source instead of generating the export itself. This hook is triggered when an end user requests a consumption export. The expected response to the call is:
+         *   - 200 with a JSON body describing the exported file (download_url, optional filename, content_type, expires_at)
+         *
+         */
+        export interface PortalExtensionHookConsumptionExport {
+            /**
+             * Identifier of the hook. Should not change between updates.
+             */
+            id: string; // ^[a-zA-Z0-9_-]+$
+            name?: TranslatedString;
+            type: "consumptionExport";
+            auth?: PortalExtensionAuthBlock;
+            call: {
+                /**
+                 * HTTP method to use for the call
+                 */
+                method?: string;
+                /**
+                 * URL to call. Supports variable interpolation.
+                 */
+                url: string;
+                /**
+                 * Parameters to append to the URL. Supports variable interpolation.
+                 */
+                params?: {
+                    [name: string]: string;
+                };
+                /**
+                 * Headers to use. Supports variable interpolation.
+                 */
+                headers?: {
+                    [name: string]: string;
+                };
+                /**
+                 * Request body to send. Supports variable interpolation. Content format is determined by Content-Type header.
+                 */
+                body?: {
+                    [name: string]: any;
+                };
+            };
+            /**
+             * Deprecated. Prefer `secure_proxy` instead.
+             * If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.
+             *
+             */
+            use_static_ips?: boolean;
+            secure_proxy?: /* If set, requests are routed through the ERP Integration secure proxy. Mutually exclusive with use_static_ips. */ PortalExtensionSecureProxy;
+        }
+        /**
+         * A consumption type advertised by a consumption data retrieval hook.
+         */
+        export interface PortalExtensionHookConsumptionOption {
+            /**
+             * Identifier of the option. Matches the `type` value returned by the hook (e.g. `ht`, `nt`, `feed-in`).
+             */
+            id: string;
+            label: TranslatedString;
         }
         /**
          * Hook that replaces the built-in Contract identification for self-assignment. This hook involves an HTTP request whenever a user is trying to self-assign Contract(s).
@@ -1674,7 +1760,9 @@ declare namespace Components {
                 en: string;
             };
             /**
+             * Deprecated. Prefer `secure_proxy` instead.
              * If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.
+             *
              */
             use_static_ips?: boolean;
             secure_proxy?: /* If set, requests are routed through the ERP Integration secure proxy. Mutually exclusive with use_static_ips. */ PortalExtensionSecureProxy;
@@ -1731,7 +1819,9 @@ declare namespace Components {
                 dataPath?: string;
             };
             /**
+             * Deprecated. Prefer `secure_proxy` instead.
              * If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.
+             *
              */
             use_static_ips?: boolean;
             secure_proxy?: /* If set, requests are routed through the ERP Integration secure proxy. Mutually exclusive with use_static_ips. */ PortalExtensionSecureProxy;
@@ -1825,7 +1915,9 @@ declare namespace Components {
                 lower_limit?: string;
             };
             /**
+             * Deprecated. Prefer `secure_proxy` instead.
              * If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.
+             *
              */
             use_static_ips?: boolean;
             secure_proxy?: /* If set, requests are routed through the ERP Integration secure proxy. Mutually exclusive with use_static_ips. */ PortalExtensionSecureProxy;
@@ -1882,7 +1974,9 @@ declare namespace Components {
                 dataPath?: string;
             };
             /**
+             * Deprecated. Prefer `secure_proxy` instead.
              * If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.
+             *
              */
             use_static_ips?: boolean;
             secure_proxy?: /* If set, requests are routed through the ERP Integration secure proxy. Mutually exclusive with use_static_ips. */ PortalExtensionSecureProxy;
@@ -1934,7 +2028,9 @@ declare namespace Components {
                 result: string;
             };
             /**
+             * Deprecated. Prefer `secure_proxy` instead.
              * If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.
+             *
              */
             use_static_ips?: boolean;
             secure_proxy?: /* If set, requests are routed through the ERP Integration secure proxy. Mutually exclusive with use_static_ips. */ PortalExtensionSecureProxy;
@@ -3508,7 +3604,10 @@ export type PortalBlockSurfaceConfig = Components.Schemas.PortalBlockSurfaceConf
 export type PortalExtensionAuthBlock = Components.Schemas.PortalExtensionAuthBlock;
 export type PortalExtensionComponent = Components.Schemas.PortalExtensionComponent;
 export type PortalExtensionConfig = Components.Schemas.PortalExtensionConfig;
+export type PortalExtensionHookConsumptionAggregationMethodOption = Components.Schemas.PortalExtensionHookConsumptionAggregationMethodOption;
 export type PortalExtensionHookConsumptionDataRetrieval = Components.Schemas.PortalExtensionHookConsumptionDataRetrieval;
+export type PortalExtensionHookConsumptionExport = Components.Schemas.PortalExtensionHookConsumptionExport;
+export type PortalExtensionHookConsumptionOption = Components.Schemas.PortalExtensionHookConsumptionOption;
 export type PortalExtensionHookContractIdentification = Components.Schemas.PortalExtensionHookContractIdentification;
 export type PortalExtensionHookCostDataRetrieval = Components.Schemas.PortalExtensionHookCostDataRetrieval;
 export type PortalExtensionHookMeterReadingPlausibilityCheck = Components.Schemas.PortalExtensionHookMeterReadingPlausibilityCheck;
