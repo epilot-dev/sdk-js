@@ -2609,7 +2609,7 @@
                   "contractIdentification": "#/components/schemas/PortalExtensionHookContractIdentification",
                   "priceDataRetrieval": "#/components/schemas/PortalExtensionHookPriceDataRetrieval",
                   "consumptionDataRetrieval": "#/components/schemas/PortalExtensionHookConsumptionDataRetrieval",
-                  "consumptionExport": "#/components/schemas/PortalExtensionHookConsumptionExport",
+                  "dataExport": "#/components/schemas/PortalExtensionHookDataExport",
                   "costDataRetrieval": "#/components/schemas/PortalExtensionHookCostDataRetrieval",
                   "meterReadingPlausibilityCheck": "#/components/schemas/PortalExtensionHookMeterReadingPlausibilityCheck"
                 }
@@ -2628,7 +2628,7 @@
                   "$ref": "#/components/schemas/PortalExtensionHookConsumptionDataRetrieval"
                 },
                 {
-                  "$ref": "#/components/schemas/PortalExtensionHookConsumptionExport"
+                  "$ref": "#/components/schemas/PortalExtensionHookDataExport"
                 },
                 {
                   "$ref": "#/components/schemas/PortalExtensionHookCostDataRetrieval"
@@ -3175,8 +3175,8 @@
         ],
         "additionalProperties": false
       },
-      "PortalExtensionHookConsumptionExport": {
-        "description": "Hook that takes over the export of consumption data from the portal. When defined, the portal delegates exporting (e.g. CSV/Excel/PDF download) to the configured external source instead of generating the export itself. This hook is triggered when an end user requests a consumption export. The expected response to the call is:\n  - 200 with a JSON body describing the exported file (download_url, optional filename, content_type, expires_at)\n",
+      "PortalExtensionHookDataExport": {
+        "description": "Generic data export hook. When configured on blocks that support it, the portal delegates the export action (e.g. CSV/Excel/PDF download) to the configured external source instead of generating the file itself. Can be used by any block that supports export — consumption charts, dynamic tariff charts, etc. The expected response to the call is:\n  - 200 with a JSON body describing the exported file (download_url, optional filename, content_type, expires_at)\n",
         "type": "object",
         "properties": {
           "id": {
@@ -3190,7 +3190,7 @@
           "type": {
             "type": "string",
             "enum": [
-              "consumptionExport"
+              "dataExport"
             ]
           },
           "auth": {
@@ -3262,6 +3262,11 @@
           },
           "label": {
             "$ref": "#/components/schemas/TranslatedString"
+          },
+          "aggregation_group": {
+            "type": "string",
+            "description": "Optional grouping key. Types sharing the same aggregation_group are interpreted as values that can be aggregated (e.g. ht/nt shown as a stacked bar chart - summed into total consumption per interval). Types in different groups — or types without a group — are not (e.g. feed-in vs feed-out shown as separate bars).\n",
+            "example": "consumption"
           }
         },
         "required": [
