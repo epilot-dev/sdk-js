@@ -818,17 +818,6 @@
                             "description": "Optional type of the consumption, such as 'nt' (night time) and 'ht' (high time) or 'feed-in' and 'feed-out'. Can be any string.",
                             "example": "nt"
                           },
-                          "aggregation_method": {
-                            "type": "string",
-                            "description": "The method used to aggregate the consumption data. Assumed default is 'sum'.",
-                            "enum": [
-                              "sum",
-                              "average",
-                              "max",
-                              "min"
-                            ],
-                            "example": "sum"
-                          },
                           "unit": {
                             "type": "string",
                             "description": "Optional unit of the consumption value. Defaults to unit present on the relevant Meter Counter.",
@@ -946,6 +935,74 @@
                   "required": [
                     "download_url"
                   ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/visualization/metadata": {
+      "get": {
+        "operationId": "getVisualizationMetadata",
+        "summary": "Get Visualization Metadata",
+        "description": "Returns runtime metadata describing how a visualization (consumption / price / cost chart) should be rendered for a given portal context (meter, contract, etc). Resolves the extension's `visualizationMetadata` hook implicitly from `app_id` + `extensionId` and invokes it. Supplies the response as a structured payload that the portal uses to configure type/aggregation options, supported intervals, and the available data range.\n",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "app_id",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "App ID providing the visualizationMetadata hook."
+          },
+          {
+            "in": "query",
+            "name": "extensionId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Extension ID providing the visualizationMetadata hook."
+          },
+          {
+            "in": "query",
+            "name": "context_entities",
+            "required": false,
+            "description": "Entities to include in the context for variable interpolation in the hook (typically the meter and any other entities that scope the visualization).",
+            "schema": {
+              "$ref": "#/components/schemas/ContextEntities"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Visualization metadata returned successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VisualizationMetadata"
                 }
               }
             }
@@ -13727,10 +13784,11 @@
           },
           "intervals": {
             "type": "array",
+            "deprecated": true,
             "items": {
               "type": "string"
             },
-            "description": "The intervals associated with the hook."
+            "description": "Deprecated. Prefer fetching `intervals` from the `visualizationMetadata` endpoint\n(`GET /v2/portal/visualization/metadata`) so the supported intervals can vary per\nmeter/contract. Still emitted as a fallback for clients that have not migrated yet.\n"
           },
           "block_types": {
             "type": "array",
@@ -13738,6 +13796,88 @@
               "type": "string"
             },
             "description": "Optional list of portal block types the hook supports. Empty/missing means the hook is usable on any export-capable block."
+          }
+        }
+      },
+      "VisualizationMetadata": {
+        "type": "object",
+        "description": "Runtime metadata describing how a visualization should be rendered for a given portal context. Returned by `GET /v2/portal/visualization/metadata`.\n",
+        "properties": {
+          "type_options": {
+            "type": "array",
+            "description": "Types advertised for the current context (e.g. `ht`/`nt`, `feed-in`/`feed-out`). The `id` matches the `type` field returned by the data hook.\n",
+            "items": {
+              "$ref": "#/components/schemas/VisualizationTypeOption"
+            }
+          },
+          "statistical_method": {
+            "type": "string",
+            "enum": [
+              "sum",
+              "average",
+              "min",
+              "max"
+            ],
+            "description": "Statistical method already applied to the data the data hook returns. Determines the chart shape used to render the values: `sum` is shown as a bar chart; `min`, `average`, and `max` are shown as a line chart. Defaults to `sum` when omitted.\n"
+          },
+          "intervals": {
+            "type": "array",
+            "description": "Intervals supported for the current context. If omitted, all intervals are assumed supported.",
+            "items": {
+              "type": "string",
+              "enum": [
+                "PT15M",
+                "PT1H",
+                "P1D",
+                "P1M"
+              ]
+            }
+          },
+          "data_range": {
+            "$ref": "#/components/schemas/VisualizationDataRange"
+          }
+        }
+      },
+      "VisualizationTypeOption": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Identifier of the type. Matches the `type` field on the data hook response."
+          },
+          "label": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Localized label for the type, keyed by ISO 3166-1 alpha-2 language code."
+          },
+          "aggregation_group": {
+            "type": "string",
+            "description": "Optional grouping key. Types in the same `aggregation_group` are visually combined; types in different groups (or without a group) render separately. How they combine depends on `statistical_method`:\n  - bar chart (`sum`): same-group types are stacked into a single bar (e.g. ht/nt\n    summed into total consumption); different-group types render side-by-side.\n  - line chart (`min` / `average` / `max`): same-group types are rendered as an\n    area chart; different-group types render as separate lines.\n"
+          },
+          "unit": {
+            "type": "string",
+            "description": "Unit shared by all values of this type (e.g. \"kWh\")."
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "VisualizationDataRange": {
+        "type": "object",
+        "description": "Earliest / latest timestamps for which data is available in the current context.",
+        "properties": {
+          "from": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO 8601 timestamp of the earliest available data point."
+          },
+          "to": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO 8601 timestamp of the latest available data point."
           }
         }
       },
@@ -13940,6 +14080,9 @@
                     },
                     {
                       "$ref": "#/components/schemas/ExtensionHookMeterReadingPlausibilityCheck"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ExtensionHookVisualizationMetadata"
                     }
                   ]
                 }
@@ -14542,6 +14685,84 @@
             "required": [
               "url"
             ]
+          },
+          "use_static_ips": {
+            "type": "boolean",
+            "deprecated": true,
+            "description": "Deprecated. Prefer `secure_proxy` instead.\nIf true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.\n",
+            "default": false
+          },
+          "secure_proxy": {
+            "$ref": "#/components/schemas/SecureProxyConfig"
+          }
+        },
+        "required": [
+          "type",
+          "call"
+        ]
+      },
+      "ExtensionHookVisualizationMetadata": {
+        "description": "Hook that returns runtime metadata describing how a visualization should be rendered for a given portal context. Invoked by the portal before fetching data, with the same context the data hook receives.\n",
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "visualizationMetadata"
+            ]
+          },
+          "auth": {
+            "$ref": "#/components/schemas/ExtensionAuthBlock"
+          },
+          "call": {
+            "type": "object",
+            "properties": {
+              "method": {
+                "type": "string",
+                "description": "HTTP method to use for the call",
+                "default": "GET"
+              },
+              "url": {
+                "type": "string",
+                "description": "URL to call. Supports variable interpolation."
+              },
+              "params": {
+                "type": "object",
+                "description": "Parameters to append to the URL. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              },
+              "headers": {
+                "type": "object",
+                "description": "Headers to use. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              },
+              "body": {
+                "type": "object",
+                "description": "Request body to send. Supports variable interpolation. Content format is determined by Content-Type header.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              }
+            },
+            "required": [
+              "url"
+            ]
+          },
+          "resolved": {
+            "type": "object",
+            "properties": {
+              "dataPath": {
+                "type": "string",
+                "description": "Optional path to the metadata object in the response. If omitted, the metadata is assumed to be on the top level."
+              }
+            }
           },
           "use_static_ips": {
             "type": "boolean",

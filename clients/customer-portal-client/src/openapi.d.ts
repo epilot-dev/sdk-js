@@ -3192,7 +3192,11 @@ declare namespace Components {
              *       - valid: false
              *
              */
-            ExtensionHookMeterReadingPlausibilityCheck))[];
+            ExtensionHookMeterReadingPlausibilityCheck | /**
+             * Hook that returns runtime metadata describing how a visualization should be rendered for a given portal context. Invoked by the portal before fetching data, with the same context the data hook receives.
+             *
+             */
+            ExtensionHookVisualizationMetadata))[];
         }
         export interface ExtensionAuthBlock {
             /**
@@ -3696,6 +3700,55 @@ declare namespace Components {
              */
             hook_id: string;
         } | null;
+        /**
+         * Hook that returns runtime metadata describing how a visualization should be rendered for a given portal context. Invoked by the portal before fetching data, with the same context the data hook receives.
+         *
+         */
+        export interface ExtensionHookVisualizationMetadata {
+            type: "visualizationMetadata";
+            auth?: ExtensionAuthBlock;
+            call: {
+                /**
+                 * HTTP method to use for the call
+                 */
+                method?: string;
+                /**
+                 * URL to call. Supports variable interpolation.
+                 */
+                url: string;
+                /**
+                 * Parameters to append to the URL. Supports variable interpolation.
+                 */
+                params?: {
+                    [name: string]: string;
+                };
+                /**
+                 * Headers to use. Supports variable interpolation.
+                 */
+                headers?: {
+                    [name: string]: string;
+                };
+                /**
+                 * Request body to send. Supports variable interpolation. Content format is determined by Content-Type header.
+                 */
+                body?: {
+                    [name: string]: string;
+                };
+            };
+            resolved?: {
+                /**
+                 * Optional path to the metadata object in the response. If omitted, the metadata is assumed to be on the top level.
+                 */
+                dataPath?: string;
+            };
+            /**
+             * Deprecated. Prefer `secure_proxy` instead.
+             * If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.
+             *
+             */
+            use_static_ips?: boolean;
+            secure_proxy?: /* Configuration for routing requests through the ERP Integration secure proxy. Mutually exclusive with use_static_ips. */ SecureProxyConfig;
+        }
         export interface ExtensionSeamlessLink {
             /**
              * Identifier of the link. Should not change between updates.
@@ -6286,7 +6339,10 @@ declare namespace Components {
                 en: string;
             };
             /**
-             * The intervals associated with the hook.
+             * Deprecated. Prefer fetching `intervals` from the `visualizationMetadata` endpoint
+             * (`GET /v2/portal/visualization/metadata`) so the supported intervals can vary per
+             * meter/contract. Still emitted as a fallback for clients that have not migrated yet.
+             *
              */
             intervals?: string[];
             /**
@@ -7723,6 +7779,65 @@ declare namespace Components {
              * 5da0a718-c822-403d-9f5d-20d4584e0528
              */
             EntityId /* uuid */;
+        }
+        /**
+         * Earliest / latest timestamps for which data is available in the current context.
+         */
+        export interface VisualizationDataRange {
+            /**
+             * ISO 8601 timestamp of the earliest available data point.
+             */
+            from?: string; // date-time
+            /**
+             * ISO 8601 timestamp of the latest available data point.
+             */
+            to?: string; // date-time
+        }
+        /**
+         * Runtime metadata describing how a visualization should be rendered for a given portal context. Returned by `GET /v2/portal/visualization/metadata`.
+         *
+         */
+        export interface VisualizationMetadata {
+            /**
+             * Types advertised for the current context (e.g. `ht`/`nt`, `feed-in`/`feed-out`). The `id` matches the `type` field returned by the data hook.
+             *
+             */
+            type_options?: VisualizationTypeOption[];
+            /**
+             * Statistical method already applied to the data the data hook returns. Determines the chart shape used to render the values: `sum` is shown as a bar chart; `min`, `average`, and `max` are shown as a line chart. Defaults to `sum` when omitted.
+             *
+             */
+            statistical_method?: "sum" | "average" | "min" | "max";
+            /**
+             * Intervals supported for the current context. If omitted, all intervals are assumed supported.
+             */
+            intervals?: ("PT15M" | "PT1H" | "P1D" | "P1M")[];
+            data_range?: /* Earliest / latest timestamps for which data is available in the current context. */ VisualizationDataRange;
+        }
+        export interface VisualizationTypeOption {
+            /**
+             * Identifier of the type. Matches the `type` field on the data hook response.
+             */
+            id: string;
+            /**
+             * Localized label for the type, keyed by ISO 3166-1 alpha-2 language code.
+             */
+            label?: {
+                [name: string]: string;
+            };
+            /**
+             * Optional grouping key. Types in the same `aggregation_group` are visually combined; types in different groups (or without a group) render separately. How they combine depends on `statistical_method`:
+             *   - bar chart (`sum`): same-group types are stacked into a single bar (e.g. ht/nt
+             *     summed into total consumption); different-group types render side-by-side.
+             *   - line chart (`min` / `average` / `max`): same-group types are rendered as an
+             *     area chart; different-group types render as separate lines.
+             *
+             */
+            aggregation_group?: string;
+            /**
+             * Unit shared by all values of this type (e.g. "kWh").
+             */
+            unit?: string;
         }
         export interface WidgetAction {
             _id: string;
@@ -9250,12 +9365,6 @@ declare namespace Paths {
                      * nt
                      */
                     type?: string;
-                    /**
-                     * The method used to aggregate the consumption data. Assumed default is 'sum'.
-                     * example:
-                     * sum
-                     */
-                    aggregation_method?: "sum" | "average" | "max" | "min";
                     /**
                      * Optional unit of the consumption value. Defaults to unit present on the relevant Meter Counter.
                      * example:
@@ -12014,6 +12123,39 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace GetVisualizationMetadata {
+        namespace Parameters {
+            export type AppId = string;
+            export type ContextEntities = /**
+             * Additional entities to include in the context for variable interpolation. Portal User and Contact entities are automatically part of the context.
+             * example:
+             * [
+             *   {
+             *     "entity_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+             *     "entity_schema": "contract"
+             *   }
+             * ]
+             */
+            Components.Schemas.ContextEntities;
+            export type ExtensionId = string;
+        }
+        export interface QueryParameters {
+            app_id: Parameters.AppId;
+            extensionId: Parameters.ExtensionId;
+            context_entities?: Parameters.ContextEntities;
+        }
+        namespace Responses {
+            export type $200 = /**
+             * Runtime metadata describing how a visualization should be rendered for a given portal context. Returned by `GET /v2/portal/visualization/metadata`.
+             *
+             */
+            Components.Schemas.VisualizationMetadata;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace InterpolatePortalPages {
         export interface RequestBody {
             /**
@@ -13702,6 +13844,17 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.PrepareVisualizationExport.Responses.$200>
   /**
+   * getVisualizationMetadata - Get Visualization Metadata
+   * 
+   * Returns runtime metadata describing how a visualization (consumption / price / cost chart) should be rendered for a given portal context (meter, contract, etc). Resolves the extension's `visualizationMetadata` hook implicitly from `app_id` + `extensionId` and invokes it. Supplies the response as a structured payload that the portal uses to configure type/aggregation options, supported intervals, and the available data range.
+   * 
+   */
+  'getVisualizationMetadata'(
+    parameters?: Parameters<Paths.GetVisualizationMetadata.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetVisualizationMetadata.Responses.$200>
+  /**
    * getCosts - Get Costs
    * 
    * Get energy cost data between a given time period.
@@ -15220,6 +15373,19 @@ export interface PathsDictionary {
       data?: Paths.PrepareVisualizationExport.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.PrepareVisualizationExport.Responses.$200>
+  }
+  ['/v2/portal/visualization/metadata']: {
+    /**
+     * getVisualizationMetadata - Get Visualization Metadata
+     * 
+     * Returns runtime metadata describing how a visualization (consumption / price / cost chart) should be rendered for a given portal context (meter, contract, etc). Resolves the extension's `visualizationMetadata` hook implicitly from `app_id` + `extensionId` and invokes it. Supplies the response as a structured payload that the portal uses to configure type/aggregation options, supported intervals, and the available data range.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetVisualizationMetadata.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetVisualizationMetadata.Responses.$200>
   }
   ['/v2/portal/costs']: {
     /**
@@ -16857,6 +17023,7 @@ export type ExtensionHookMeterReadingPlausibilityCheck = Components.Schemas.Exte
 export type ExtensionHookPriceDataRetrieval = Components.Schemas.ExtensionHookPriceDataRetrieval;
 export type ExtensionHookRegistrationIdentifiersCheck = Components.Schemas.ExtensionHookRegistrationIdentifiersCheck;
 export type ExtensionHookSelection = Components.Schemas.ExtensionHookSelection;
+export type ExtensionHookVisualizationMetadata = Components.Schemas.ExtensionHookVisualizationMetadata;
 export type ExtensionSeamlessLink = Components.Schemas.ExtensionSeamlessLink;
 export type ExternalLink = Components.Schemas.ExternalLink;
 export type ExtraSchemaAttributes = Components.Schemas.ExtraSchemaAttributes;
@@ -16927,6 +17094,9 @@ export type UpsertPortalConfig = Components.Schemas.UpsertPortalConfig;
 export type UpsertPortalConfigV3 = Components.Schemas.UpsertPortalConfigV3;
 export type UpsertPortalWidget = Components.Schemas.UpsertPortalWidget;
 export type UserRequest = Components.Schemas.UserRequest;
+export type VisualizationDataRange = Components.Schemas.VisualizationDataRange;
+export type VisualizationMetadata = Components.Schemas.VisualizationMetadata;
+export type VisualizationTypeOption = Components.Schemas.VisualizationTypeOption;
 export type WidgetAction = Components.Schemas.WidgetAction;
 export type WidgetBase = Components.Schemas.WidgetBase;
 export type WorfklowIdentifier = Components.Schemas.WorfklowIdentifier;
