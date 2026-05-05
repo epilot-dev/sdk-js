@@ -7,6 +7,7 @@ import type { Client as AuditLogsClient } from './types/audit-logs';
 import type { Client as AutomationClient } from './types/automation';
 import type { Client as BillingClient } from './types/billing';
 import type { Client as BlueprintManifestClient } from './types/blueprint-manifest';
+import type { Client as CalendarClient } from './types/calendar';
 import type { Client as ConfigurationHubClient } from './types/configuration-hub';
 import type { Client as ConsentClient } from './types/consent';
 import type { Client as CustomerPortalClient } from './types/customer-portal';
@@ -58,6 +59,7 @@ export type SDKClientMap = {
   automation: AutomationClient;
   billing: BillingClient;
   blueprintManifest: BlueprintManifestClient;
+  calendar: CalendarClient;
   configurationHub: ConfigurationHubClient;
   consent: ConsentClient;
   customerPortal: CustomerPortalClient;

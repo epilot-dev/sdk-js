@@ -211,6 +211,14 @@ export const API_LIST: ApiInfo[] = [
     ],
   },
   {
+    apiName: 'calendar',
+    kebabName: 'calendar',
+    title: 'Calendar API',
+    serverUrl: 'https://calendar.sls.epilot.io',
+    operationCount: 4,
+    operationIds: ['listCalendars', 'getCalendar', 'listEvents', 'getEvent'],
+  },
+  {
     apiName: 'configurationHub',
     kebabName: 'configuration-hub',
     title: 'Configuration Hub API',

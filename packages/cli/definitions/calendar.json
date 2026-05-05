@@ -1,0 +1,675 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Calendar API",
+    "version": "0.1.0",
+    "description": "epilot's calendar API.\n\nExposes calendars and events as first-class epilot resources.\nToday, data is sourced from external providers (Microsoft 365, Google Calendar) synced into epilot.\nIn the future, epilot will also host native calendars created directly in the platform.\n\nThe provider is an implementation detail surfaced only through each resource's `source` field.\nConsumers interact with calendars and events through the same API regardless of origin."
+  },
+  "tags": [
+    {
+      "name": "Calendars",
+      "description": "User and organization calendars"
+    },
+    {
+      "name": "Events",
+      "description": "Calendar events"
+    }
+  ],
+  "servers": [
+    {
+      "url": "https://calendar.sls.epilot.io"
+    }
+  ],
+  "security": [
+    {
+      "EpilotAuth": []
+    },
+    {
+      "EpilotOrg": []
+    }
+  ],
+  "paths": {
+    "/v1/calendar": {
+      "get": {
+        "operationId": "listCalendars",
+        "summary": "listCalendars",
+        "description": "List calendars visible to the caller.",
+        "tags": [
+          "Calendars"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "size",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 250
+            }
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "description": "Opaque cursor from a previous response",
+            "schema": {
+              "type": "string",
+              "description": "Opaque cursor from a previous response"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of calendars",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Calendar"
+                      }
+                    },
+                    "next_cursor": {
+                      "type": "string",
+                      "nullable": true
+                    }
+                  },
+                  "required": [
+                    "results"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/calendar/{calendar_id}": {
+      "get": {
+        "operationId": "getCalendar",
+        "summary": "getCalendar",
+        "description": "Get a single calendar by its epilot ID.",
+        "tags": [
+          "Calendars"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "calendar_id",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Calendar",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Calendar"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/calendar/events": {
+      "get": {
+        "operationId": "listEvents",
+        "summary": "listEvents",
+        "description": "List events in a time window. Recurring events are returned as expanded occurrences – each instance appears as its own event.",
+        "tags": [
+          "Events"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "from",
+            "description": "Start of the time window (inclusive)",
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "description": "Start of the time window (inclusive)"
+            },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "description": "End of the time window (exclusive)",
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "description": "End of the time window (exclusive)"
+            },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "calendar_id",
+            "description": "Filter to a single calendar. Omit to query across all accessible calendars.",
+            "schema": {
+              "type": "string",
+              "description": "Filter to a single calendar. Omit to query across all accessible calendars."
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 250
+            }
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of events",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/CalendarEvent"
+                      }
+                    },
+                    "next_cursor": {
+                      "type": "string",
+                      "nullable": true
+                    }
+                  },
+                  "required": [
+                    "results"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/calendar/events/{event_id}": {
+      "get": {
+        "operationId": "getEvent",
+        "summary": "getEvent",
+        "description": "Get a single event by its epilot ID.",
+        "tags": [
+          "Events"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "event_id",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Event",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalendarEvent"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "EpilotAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Authorization header with epilot OAuth2 bearer token",
+        "bearerFormat": "JWT"
+      },
+      "EpilotOrg": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "x-epilot-org-id"
+      }
+    },
+    "schemas": {
+      "Calendar": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "description": "epilot calendar ID"
+          },
+          "_schema": {
+            "type": "string",
+            "enum": [
+              "calendar"
+            ]
+          },
+          "_org": {
+            "type": "string",
+            "description": "Organization the calendar belongs to"
+          },
+          "_title": {
+            "type": "string",
+            "description": "Computed display title"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "color": {
+            "type": "string",
+            "nullable": true,
+            "description": "Hex color (e.g. \"#3b82f6\") or provider-defined named color"
+          },
+          "is_default": {
+            "type": "boolean",
+            "description": "True if this is the user's primary calendar"
+          },
+          "read_only": {
+            "type": "boolean",
+            "description": "True if the caller cannot modify events in this calendar"
+          },
+          "owner_email": {
+            "type": "string",
+            "nullable": true,
+            "format": "email"
+          },
+          "source": {
+            "$ref": "#/components/schemas/CalendarSource"
+          },
+          "_created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "_updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "_id",
+          "_schema",
+          "_org",
+          "name",
+          "is_default",
+          "read_only",
+          "source"
+        ]
+      },
+      "CalendarSource": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "native",
+              "synced"
+            ],
+            "description": "`native` = hosted by epilot. `synced` = mirrored from an external provider."
+          },
+          "provider": {
+            "$ref": "#/components/schemas/Provider"
+          },
+          "provider_calendar_id": {
+            "type": "string",
+            "nullable": true
+          },
+          "last_synced_at": {
+            "type": "string",
+            "nullable": true,
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "Provider": {
+        "type": "string",
+        "nullable": true,
+        "enum": [
+          "outlook",
+          "google",
+          null
+        ],
+        "description": "Null for native epilot calendars"
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "message"
+        ]
+      },
+      "CalendarEvent": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "description": "epilot event ID"
+          },
+          "_schema": {
+            "type": "string",
+            "enum": [
+              "calendar_event"
+            ]
+          },
+          "_org": {
+            "type": "string"
+          },
+          "_title": {
+            "type": "string",
+            "nullable": true,
+            "description": "Null when sensitivity is private or confidential"
+          },
+          "_tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Provider categories (Outlook) or colours (Google) as epilot tags"
+          },
+          "calendar_id": {
+            "type": "string",
+            "description": "epilot calendar this event belongs to"
+          },
+          "event_type": {
+            "$ref": "#/components/schemas/EventType"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true,
+            "description": "Preview of the event body, truncated to 255 chars",
+            "maxLength": 255
+          },
+          "start_time": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Event start in UTC"
+          },
+          "end_time": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Event end in UTC"
+          },
+          "timezone": {
+            "type": "string",
+            "description": "IANA timezone of the original event (for display)"
+          },
+          "is_all_day": {
+            "type": "boolean"
+          },
+          "location": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "$ref": "#/components/schemas/EventStatus"
+          },
+          "busy": {
+            "type": "boolean",
+            "description": "Convenience flag, true when status is busy/oof/tentative"
+          },
+          "is_cancelled": {
+            "type": "boolean"
+          },
+          "sensitivity": {
+            "$ref": "#/components/schemas/Sensitivity"
+          },
+          "importance": {
+            "$ref": "#/components/schemas/Importance"
+          },
+          "is_online_meeting": {
+            "type": "boolean"
+          },
+          "online_meeting_url": {
+            "type": "string",
+            "nullable": true,
+            "format": "uri",
+            "description": "Teams, Meet, Zoom, or similar join URL"
+          },
+          "web_link": {
+            "type": "string",
+            "nullable": true,
+            "format": "uri",
+            "description": "Deep link to open the event in the originating provider"
+          },
+          "response_status": {
+            "$ref": "#/components/schemas/ResponseStatus"
+          },
+          "organizer_email": {
+            "type": "string",
+            "nullable": true,
+            "format": "email"
+          },
+          "attendees": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/Attendee"
+            },
+            "description": "Null when sensitivity is private or confidential"
+          },
+          "is_recurring": {
+            "type": "boolean"
+          },
+          "series_master_id": {
+            "type": "string",
+            "nullable": true,
+            "description": "ID of the recurring series this occurrence belongs to"
+          },
+          "source": {
+            "$ref": "#/components/schemas/EventSource"
+          },
+          "_created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "_updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "_id",
+          "_schema",
+          "_org",
+          "calendar_id",
+          "event_type",
+          "start_time",
+          "end_time",
+          "timezone",
+          "is_all_day",
+          "status",
+          "busy",
+          "is_cancelled",
+          "sensitivity",
+          "importance",
+          "is_online_meeting",
+          "response_status",
+          "is_recurring",
+          "source"
+        ]
+      },
+      "EventType": {
+        "type": "string",
+        "enum": [
+          "singleInstance",
+          "occurrence",
+          "exception",
+          "seriesMaster"
+        ]
+      },
+      "EventStatus": {
+        "type": "string",
+        "enum": [
+          "free",
+          "tentative",
+          "busy",
+          "oof",
+          "workingElsewhere",
+          "unknown"
+        ],
+        "description": "Free/busy state derived from provider `showAs`"
+      },
+      "Sensitivity": {
+        "type": "string",
+        "enum": [
+          "normal",
+          "personal",
+          "private",
+          "confidential"
+        ]
+      },
+      "Importance": {
+        "type": "string",
+        "enum": [
+          "low",
+          "normal",
+          "high"
+        ]
+      },
+      "ResponseStatus": {
+        "type": "string",
+        "enum": [
+          "none",
+          "organizer",
+          "tentativelyAccepted",
+          "accepted",
+          "declined",
+          "notResponded"
+        ],
+        "description": "Caller's response to the invite"
+      },
+      "Attendee": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "response": {
+            "$ref": "#/components/schemas/ResponseStatus"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "required",
+              "optional",
+              "resource"
+            ]
+          }
+        },
+        "required": [
+          "email",
+          "response",
+          "type"
+        ]
+      },
+      "EventSource": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "native",
+              "synced"
+            ],
+            "description": "`native` = hosted by epilot. `synced` = mirrored from an external provider."
+          },
+          "provider": {
+            "$ref": "#/components/schemas/Provider"
+          },
+          "provider_event_id": {
+            "type": "string",
+            "nullable": true
+          },
+          "provider_event_url": {
+            "type": "string",
+            "nullable": true,
+            "format": "uri",
+            "description": "Deep link to open the event in the originating provider"
+          },
+          "last_synced_at": {
+            "type": "string",
+            "nullable": true,
+            "format": "date-time"
+          },
+          "etag": {
+            "type": "string",
+            "nullable": true,
+            "description": "Provider-supplied version tag used for conflict detection"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      }
+    }
+  }
+}

@@ -69,6 +69,12 @@
       "require": "./dist/apis/blueprint-manifest.cjs"
     },
     "./blueprint-manifest/openapi.json": "./definitions/blueprint-manifest.json",
+    "./calendar": {
+      "types": "./dist/apis/calendar.d.ts",
+      "import": "./dist/apis/calendar.js",
+      "require": "./dist/apis/calendar.cjs"
+    },
+    "./calendar/openapi.json": "./definitions/calendar.json",
     "./configuration-hub": {
       "types": "./dist/apis/configuration-hub.d.ts",
       "import": "./dist/apis/configuration-hub.js",
@@ -385,6 +391,9 @@
       ],
       "blueprint-manifest": [
         "./dist/apis/blueprint-manifest.d.ts"
+      ],
+      "calendar": [
+        "./dist/apis/calendar.d.ts"
       ],
       "configuration-hub": [
         "./dist/apis/configuration-hub.d.ts"

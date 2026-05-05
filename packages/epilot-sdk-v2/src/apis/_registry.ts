@@ -57,6 +57,11 @@ export const registerBuiltinApis = (registry: Map<string, ApiEntry>) => {
   });
   registerApi({
     registry,
+    name: 'calendar',
+    loader: () => expandDef(require('../definitions/calendar-runtime.json')),
+  });
+  registerApi({
+    registry,
     name: 'configurationHub',
     loader: () => expandDef(require('../definitions/configuration-hub-runtime.json')),
   });

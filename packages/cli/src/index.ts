@@ -33,6 +33,7 @@ export const main = defineCommand({
     automation: () => import('./commands/apis/automation.js').then((m) => m.default),
     billing: () => import('./commands/apis/billing.js').then((m) => m.default),
     'blueprint-manifest': () => import('./commands/apis/blueprint-manifest.js').then((m) => m.default),
+    calendar: () => import('./commands/apis/calendar.js').then((m) => m.default),
     'configuration-hub': () => import('./commands/apis/configuration-hub.js').then((m) => m.default),
     consent: () => import('./commands/apis/consent.js').then((m) => m.default),
     'customer-portal': () => import('./commands/apis/customer-portal.js').then((m) => m.default),
