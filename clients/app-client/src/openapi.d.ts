@@ -1515,7 +1515,19 @@ declare namespace Components {
              *       - valid: false
              *
              */
-            PortalExtensionHookMeterReadingPlausibilityCheck)[];
+            PortalExtensionHookMeterReadingPlausibilityCheck | /**
+             * Hook that returns runtime metadata describing how a visualization (consumption / price / cost chart) should be rendered for a given portal context (meter, contract, etc). It is invoked by the portal before fetching data, with the same context the data hook would receive, so that the discovery shape can vary per meter/contract. The expected response to the call is:
+             *   - 200 with a JSON body of shape:
+             *     {
+             *       "type_options": [{ "id": "ht", "label": { "en": "High tariff" }, "aggregation_group": "consumption", "unit": "kWh" }, ...],
+             *       "intervals": ["PT15M", "PT1H", "P1D", "P1M"],
+             *       "data_range": { "from": "2024-01-01T00:00:00Z", "to": "2026-05-01T00:00:00Z" }
+             *     }
+             *   All fields are optional; the consumer falls back to its defaults for whatever the hook does not return.
+             * The portal looks up this hook implicitly per extension (one `visualizationMetadata` hook per extension) — there is no need for a data-retrieval hook to reference it explicitly.
+             *
+             */
+            PortalExtensionHookVisualizationMetadata)[];
             links?: {
                 /**
                  * Identifier of the link. Should not change between updates.
@@ -1546,16 +1558,6 @@ declare namespace Components {
             }[];
         }
         /**
-         * An aggregation method advertised by a consumption data retrieval hook.
-         */
-        export interface PortalExtensionHookConsumptionAggregationMethodOption {
-            /**
-             * Identifier of the option. Matches the `aggregation_method` value returned by the hook.
-             */
-            id: "sum" | "average" | "min" | "max";
-            label: TranslatedString;
-        }
-        /**
          * Hook that will allow using the specified source as data for consumption visualizations. This hook is triggered to fetch the data. Format of the request and response has to follow the following specification: TBD. The expected response to the call is:
          *   - 200 with the time series data
          *
@@ -1568,19 +1570,11 @@ declare namespace Components {
             name?: TranslatedString;
             type: "consumptionDataRetrieval";
             /**
+             * Deprecated. Prefer declaring a sibling `visualizationMetadata` hook on the same extension and returning `intervals` from its response — that way the supported intervals can vary per meter/contract.
              * Intervals supported by the API. If omitted, it is assumed that all intervals are supported.
+             *
              */
             intervals?: ("PT15M" | "PT1H" | "P1D" | "P1M")[];
-            /**
-             * Consumption types advertised by the hook (e.g. `ht`/`nt`, `feed-in`/`feed-out`). The `id` has to match the `type` field returned in the consumption response.
-             *
-             */
-            type_options?: /* A consumption type advertised by a consumption data retrieval hook. */ PortalExtensionHookConsumptionOption[];
-            /**
-             * Aggregation methods advertised by the hook (e.g. `sum`, `average`, `min`, `max`). The `id` has to match the `aggregation_method` field returned in the consumption response.
-             *
-             */
-            aggregation_method_options?: /* An aggregation method advertised by a consumption data retrieval hook. */ PortalExtensionHookConsumptionAggregationMethodOption[];
             auth?: PortalExtensionAuthBlock;
             call: {
                 /**
@@ -1623,23 +1617,6 @@ declare namespace Components {
              */
             use_static_ips?: boolean;
             secure_proxy?: /* If set, requests are routed through the ERP Integration secure proxy. Mutually exclusive with use_static_ips. */ PortalExtensionSecureProxy;
-        }
-        /**
-         * A consumption type advertised by a consumption data retrieval hook.
-         */
-        export interface PortalExtensionHookConsumptionOption {
-            /**
-             * Identifier of the option. Matches the `type` value returned by the hook (e.g. `ht`, `nt`, `feed-in`).
-             */
-            id: string;
-            label: TranslatedString;
-            /**
-             * Optional grouping key. Types sharing the same aggregation_group are interpreted as values that can be aggregated (e.g. ht/nt shown as a stacked bar chart - summed into total consumption per interval). Types in different groups — or types without a group — are not (e.g. feed-in vs feed-out shown as separate bars).
-             *
-             * example:
-             * consumption
-             */
-            aggregation_group?: string;
         }
         /**
          * Hook that replaces the built-in Contract identification for self-assignment. This hook involves an HTTP request whenever a user is trying to self-assign Contract(s).
@@ -1738,7 +1715,9 @@ declare namespace Components {
             name?: TranslatedString;
             type: "costDataRetrieval";
             /**
+             * Deprecated. Prefer declaring a sibling `visualizationMetadata` hook on the same extension and returning `intervals` from its response — that way the supported intervals can vary per meter/contract.
              * Intervals supported by the API. If omitted, it is assumed that all intervals are supported.
+             *
              */
             intervals?: ("PT15M" | "PT1H" | "P1D" | "P1M")[];
             auth?: PortalExtensionAuthBlock;
@@ -1796,6 +1775,14 @@ declare namespace Components {
             id: string; // ^[a-zA-Z0-9_-]+$
             name?: TranslatedString;
             type: "dataExport";
+            /**
+             * Optional list of portal block types this hook supports. If omitted,
+             * the hook is usable on any export-capable block. Allowed values match
+             * the block type identifiers used by the portal builder
+             * (e.g. `consumption_visualization`, `dynamic_tariff`).
+             *
+             */
+            block_types?: string[];
             auth?: PortalExtensionAuthBlock;
             call: {
                 /**
@@ -1942,7 +1929,9 @@ declare namespace Components {
             name?: TranslatedString;
             type: "priceDataRetrieval";
             /**
+             * Deprecated. Prefer declaring a sibling `visualizationMetadata` hook on the same extension and returning `intervals` from its response — that way the supported intervals can vary per meter/contract.
              * Intervals supported by the API. If omitted, it is assumed that all intervals are supported.
+             *
              */
             intervals?: ("PT15M" | "PT1H" | "P1D" | "P1M")[];
             auth?: PortalExtensionAuthBlock;
@@ -2033,6 +2022,68 @@ declare namespace Components {
                  * Contact ID usually retrieved from the response body, e.g. `{{CallResponse.data.contact_id}}`. If no result is passed and the request suceeds, we attempt to resolve the Contact ID automatically. Supports variable interpolation.
                  */
                 result: string;
+            };
+            /**
+             * Deprecated. Prefer `secure_proxy` instead.
+             * If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.
+             *
+             */
+            use_static_ips?: boolean;
+            secure_proxy?: /* If set, requests are routed through the ERP Integration secure proxy. Mutually exclusive with use_static_ips. */ PortalExtensionSecureProxy;
+        }
+        /**
+         * Hook that returns runtime metadata describing how a visualization (consumption / price / cost chart) should be rendered for a given portal context (meter, contract, etc). It is invoked by the portal before fetching data, with the same context the data hook would receive, so that the discovery shape can vary per meter/contract. The expected response to the call is:
+         *   - 200 with a JSON body of shape:
+         *     {
+         *       "type_options": [{ "id": "ht", "label": { "en": "High tariff" }, "aggregation_group": "consumption", "unit": "kWh" }, ...],
+         *       "intervals": ["PT15M", "PT1H", "P1D", "P1M"],
+         *       "data_range": { "from": "2024-01-01T00:00:00Z", "to": "2026-05-01T00:00:00Z" }
+         *     }
+         *   All fields are optional; the consumer falls back to its defaults for whatever the hook does not return.
+         * The portal looks up this hook implicitly per extension (one `visualizationMetadata` hook per extension) — there is no need for a data-retrieval hook to reference it explicitly.
+         *
+         */
+        export interface PortalExtensionHookVisualizationMetadata {
+            /**
+             * Identifier of the hook. Should not change between updates.
+             */
+            id: string; // ^[a-zA-Z0-9_-]+$
+            name?: TranslatedString;
+            type: "visualizationMetadata";
+            auth?: PortalExtensionAuthBlock;
+            call: {
+                /**
+                 * HTTP method to use for the call
+                 */
+                method?: string;
+                /**
+                 * URL to call. Supports variable interpolation.
+                 */
+                url: string;
+                /**
+                 * Parameters to append to the URL. Supports variable interpolation.
+                 */
+                params?: {
+                    [name: string]: string;
+                };
+                /**
+                 * Headers to use. Supports variable interpolation.
+                 */
+                headers?: {
+                    [name: string]: string;
+                };
+                /**
+                 * Request body to send. Supports variable interpolation. Content format is determined by Content-Type header.
+                 */
+                body?: {
+                    [name: string]: any;
+                };
+            };
+            resolved?: {
+                /**
+                 * Optional path to the metadata object in the response. If omitted, the metadata is assumed to be on the top level.
+                 */
+                dataPath?: string;
             };
             /**
              * Deprecated. Prefer `secure_proxy` instead.
@@ -3611,15 +3662,14 @@ export type PortalBlockSurfaceConfig = Components.Schemas.PortalBlockSurfaceConf
 export type PortalExtensionAuthBlock = Components.Schemas.PortalExtensionAuthBlock;
 export type PortalExtensionComponent = Components.Schemas.PortalExtensionComponent;
 export type PortalExtensionConfig = Components.Schemas.PortalExtensionConfig;
-export type PortalExtensionHookConsumptionAggregationMethodOption = Components.Schemas.PortalExtensionHookConsumptionAggregationMethodOption;
 export type PortalExtensionHookConsumptionDataRetrieval = Components.Schemas.PortalExtensionHookConsumptionDataRetrieval;
-export type PortalExtensionHookConsumptionOption = Components.Schemas.PortalExtensionHookConsumptionOption;
 export type PortalExtensionHookContractIdentification = Components.Schemas.PortalExtensionHookContractIdentification;
 export type PortalExtensionHookCostDataRetrieval = Components.Schemas.PortalExtensionHookCostDataRetrieval;
 export type PortalExtensionHookDataExport = Components.Schemas.PortalExtensionHookDataExport;
 export type PortalExtensionHookMeterReadingPlausibilityCheck = Components.Schemas.PortalExtensionHookMeterReadingPlausibilityCheck;
 export type PortalExtensionHookPriceDataRetrieval = Components.Schemas.PortalExtensionHookPriceDataRetrieval;
 export type PortalExtensionHookRegistrationIdentifiersCheck = Components.Schemas.PortalExtensionHookRegistrationIdentifiersCheck;
+export type PortalExtensionHookVisualizationMetadata = Components.Schemas.PortalExtensionHookVisualizationMetadata;
 export type PortalExtensionSeamlessLink = Components.Schemas.PortalExtensionSeamlessLink;
 export type PortalExtensionSecureProxy = Components.Schemas.PortalExtensionSecureProxy;
 export type Pricing = Components.Schemas.Pricing;
