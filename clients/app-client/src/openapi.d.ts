@@ -1520,9 +1520,14 @@ declare namespace Components {
              *   - 200 with a JSON body of shape:
              *     {
              *       "type_options": [{ "id": "ht", "label": { "en": "High tariff" }, "aggregation_group": "consumption", "unit": "kWh" }, ...],
+             *       "statistical_method": "sum",
              *       "intervals": ["PT15M", "PT1H", "P1D", "P1M"],
              *       "data_range": { "from": "2024-01-01T00:00:00Z", "to": "2026-05-01T00:00:00Z" }
              *     }
+             *   `statistical_method` describes the statistical method already applied to the data the data hook returns and dictates the chart shape: `sum` is rendered as a bar chart; `min`, `average`, and `max` are rendered as a line chart. Defaults to `sum` when omitted.
+             *   `aggregation_group` controls how types within a group are visually combined:
+             *     - bar chart (`sum`): same-group types are stacked into a single bar (e.g. ht/nt summed into total consumption); different-group types render side-by-side.
+             *     - line chart (`min` / `average` / `max`): same-group types are rendered as an area chart; different-group types render as separate lines.
              *   All fields are optional; the consumer falls back to its defaults for whatever the hook does not return.
              * The portal looks up this hook implicitly per extension (one `visualizationMetadata` hook per extension) — there is no need for a data-retrieval hook to reference it explicitly.
              *
@@ -2036,9 +2041,14 @@ declare namespace Components {
          *   - 200 with a JSON body of shape:
          *     {
          *       "type_options": [{ "id": "ht", "label": { "en": "High tariff" }, "aggregation_group": "consumption", "unit": "kWh" }, ...],
+         *       "statistical_method": "sum",
          *       "intervals": ["PT15M", "PT1H", "P1D", "P1M"],
          *       "data_range": { "from": "2024-01-01T00:00:00Z", "to": "2026-05-01T00:00:00Z" }
          *     }
+         *   `statistical_method` describes the statistical method already applied to the data the data hook returns and dictates the chart shape: `sum` is rendered as a bar chart; `min`, `average`, and `max` are rendered as a line chart. Defaults to `sum` when omitted.
+         *   `aggregation_group` controls how types within a group are visually combined:
+         *     - bar chart (`sum`): same-group types are stacked into a single bar (e.g. ht/nt summed into total consumption); different-group types render side-by-side.
+         *     - line chart (`min` / `average` / `max`): same-group types are rendered as an area chart; different-group types render as separate lines.
          *   All fields are optional; the consumer falls back to its defaults for whatever the hook does not return.
          * The portal looks up this hook implicitly per extension (one `visualizationMetadata` hook per extension) — there is no need for a data-retrieval hook to reference it explicitly.
          *
