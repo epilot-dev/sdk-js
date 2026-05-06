@@ -7804,11 +7804,6 @@ declare namespace Components {
              */
             type_options?: VisualizationTypeOption[];
             /**
-             * Statistical method already applied to the data the data hook returns. Determines the chart shape used to render the values: `sum` is shown as a bar chart; `min`, `average`, and `max` are shown as a line chart. Defaults to `sum` when omitted.
-             *
-             */
-            statistical_method?: "sum" | "average" | "min" | "max";
-            /**
              * Intervals supported for the current context. If omitted, all intervals are assumed supported.
              */
             intervals?: ("PT15M" | "PT1H" | "P1D" | "P1M")[];
@@ -7826,7 +7821,7 @@ declare namespace Components {
                 [name: string]: string;
             };
             /**
-             * Optional grouping key. Types in the same `aggregation_group` are visually combined; types in different groups (or without a group) render separately. How they combine depends on `statistical_method`:
+             * Optional grouping key. Types in the same `aggregation_group` are visually combined; types in different groups (or without a group) render separately. How they combine depends on each type's `statistical_method`:
              *   - bar chart (`sum`): same-group types are stacked into a single bar (e.g. ht/nt
              *     summed into total consumption); different-group types render side-by-side.
              *   - line chart (`min` / `average` / `max`): same-group types are rendered as an
@@ -7834,6 +7829,11 @@ declare namespace Components {
              *
              */
             aggregation_group?: string;
+            /**
+             * Statistical method already applied to this type's data. Determines the chart shape used to render the type's values: `sum` is shown as a bar chart; `min`, `average`, and `max` are shown as a line chart. Each type advertises its own method, so a single visualization can mix bar-shaped types with line-shaped types. Defaults to `sum` when omitted.
+             *
+             */
+            statistical_method?: "sum" | "average" | "min" | "max";
             /**
              * Unit shared by all values of this type (e.g. "kWh").
              */

@@ -13810,16 +13810,6 @@
               "$ref": "#/components/schemas/VisualizationTypeOption"
             }
           },
-          "statistical_method": {
-            "type": "string",
-            "enum": [
-              "sum",
-              "average",
-              "min",
-              "max"
-            ],
-            "description": "Statistical method already applied to the data the data hook returns. Determines the chart shape used to render the values: `sum` is shown as a bar chart; `min`, `average`, and `max` are shown as a line chart. Defaults to `sum` when omitted.\n"
-          },
           "intervals": {
             "type": "array",
             "description": "Intervals supported for the current context. If omitted, all intervals are assumed supported.",
@@ -13854,7 +13844,17 @@
           },
           "aggregation_group": {
             "type": "string",
-            "description": "Optional grouping key. Types in the same `aggregation_group` are visually combined; types in different groups (or without a group) render separately. How they combine depends on `statistical_method`:\n  - bar chart (`sum`): same-group types are stacked into a single bar (e.g. ht/nt\n    summed into total consumption); different-group types render side-by-side.\n  - line chart (`min` / `average` / `max`): same-group types are rendered as an\n    area chart; different-group types render as separate lines.\n"
+            "description": "Optional grouping key. Types in the same `aggregation_group` are visually combined; types in different groups (or without a group) render separately. How they combine depends on each type's `statistical_method`:\n  - bar chart (`sum`): same-group types are stacked into a single bar (e.g. ht/nt\n    summed into total consumption); different-group types render side-by-side.\n  - line chart (`min` / `average` / `max`): same-group types are rendered as an\n    area chart; different-group types render as separate lines.\n"
+          },
+          "statistical_method": {
+            "type": "string",
+            "enum": [
+              "sum",
+              "average",
+              "min",
+              "max"
+            ],
+            "description": "Statistical method already applied to this type's data. Determines the chart shape used to render the type's values: `sum` is shown as a bar chart; `min`, `average`, and `max` are shown as a line chart. Each type advertises its own method, so a single visualization can mix bar-shaped types with line-shaped types. Defaults to `sum` when omitted.\n"
           },
           "unit": {
             "type": "string",
