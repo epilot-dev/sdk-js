@@ -1519,13 +1519,17 @@ declare namespace Components {
              * Hook that returns runtime metadata describing how a visualization (consumption / price / cost chart) should be rendered for a given portal context (meter, contract, etc). It is invoked by the portal before fetching data, with the same context the data hook would receive, so that the discovery shape can vary per meter/contract. The expected response to the call is:
              *   - 200 with a JSON body of shape:
              *     {
-             *       "type_options": [{ "id": "ht", "label": { "en": "High tariff" }, "aggregation_group": "consumption", "unit": "kWh" }, ...],
-             *       "statistical_method": "sum",
+             *       "type_options": [
+             *         { "id": "feed-out", "label": { "en": "Grid import" }, "aggregation_group": "grid", "statistical_method": "sum", "direction": "out", "unit": "kWh" },
+             *         { "id": "feed-in",  "label": { "en": "Feed-in"     }, "aggregation_group": "grid", "statistical_method": "sum", "direction": "in",  "unit": "kWh" },
+             *         ...
+             *       ],
              *       "intervals": ["PT15M", "PT1H", "P1D", "P1M"],
              *       "data_range": { "from": "2024-01-01T00:00:00Z", "to": "2026-05-01T00:00:00Z" }
              *     }
-             *   `statistical_method` describes the statistical method already applied to the data the data hook returns and dictates the chart shape: `sum` is rendered as a bar chart; `min`, `average`, and `max` are rendered as a line chart. Defaults to `sum` when omitted.
-             *   `aggregation_group` controls how types within a group are visually combined:
+             *   Each type option carries its own `statistical_method`, which describes the method already applied to that type's data and dictates the chart shape: `sum` is rendered as a bar chart; `min`, `average`, and `max` are rendered as a line chart. A single visualization can therefore mix bar-shaped types with line-shaped types. Defaults to `sum` when omitted.
+             *   `direction` declares whether a type adds to or subtracts from the period total: `out` is grid-to-consumer (consumption, additive); `in` is consumer-to-grid (export, subtractive). With both present in a prosumer setup the chart computes a *net* consumption per period and can flip its label to "Total production" when the result is negative. Defaults to `out` when omitted.
+             *   `aggregation_group` controls how types within a group are visually combined (depends on the per-type `statistical_method`):
              *     - bar chart (`sum`): same-group types are stacked into a single bar (e.g. ht/nt summed into total consumption); different-group types render side-by-side.
              *     - line chart (`min` / `average` / `max`): same-group types are rendered as an area chart; different-group types render as separate lines.
              *   All fields are optional; the consumer falls back to its defaults for whatever the hook does not return.
@@ -2040,13 +2044,17 @@ declare namespace Components {
          * Hook that returns runtime metadata describing how a visualization (consumption / price / cost chart) should be rendered for a given portal context (meter, contract, etc). It is invoked by the portal before fetching data, with the same context the data hook would receive, so that the discovery shape can vary per meter/contract. The expected response to the call is:
          *   - 200 with a JSON body of shape:
          *     {
-         *       "type_options": [{ "id": "ht", "label": { "en": "High tariff" }, "aggregation_group": "consumption", "unit": "kWh" }, ...],
-         *       "statistical_method": "sum",
+         *       "type_options": [
+         *         { "id": "feed-out", "label": { "en": "Grid import" }, "aggregation_group": "grid", "statistical_method": "sum", "direction": "out", "unit": "kWh" },
+         *         { "id": "feed-in",  "label": { "en": "Feed-in"     }, "aggregation_group": "grid", "statistical_method": "sum", "direction": "in",  "unit": "kWh" },
+         *         ...
+         *       ],
          *       "intervals": ["PT15M", "PT1H", "P1D", "P1M"],
          *       "data_range": { "from": "2024-01-01T00:00:00Z", "to": "2026-05-01T00:00:00Z" }
          *     }
-         *   `statistical_method` describes the statistical method already applied to the data the data hook returns and dictates the chart shape: `sum` is rendered as a bar chart; `min`, `average`, and `max` are rendered as a line chart. Defaults to `sum` when omitted.
-         *   `aggregation_group` controls how types within a group are visually combined:
+         *   Each type option carries its own `statistical_method`, which describes the method already applied to that type's data and dictates the chart shape: `sum` is rendered as a bar chart; `min`, `average`, and `max` are rendered as a line chart. A single visualization can therefore mix bar-shaped types with line-shaped types. Defaults to `sum` when omitted.
+         *   `direction` declares whether a type adds to or subtracts from the period total: `out` is grid-to-consumer (consumption, additive); `in` is consumer-to-grid (export, subtractive). With both present in a prosumer setup the chart computes a *net* consumption per period and can flip its label to "Total production" when the result is negative. Defaults to `out` when omitted.
+         *   `aggregation_group` controls how types within a group are visually combined (depends on the per-type `statistical_method`):
          *     - bar chart (`sum`): same-group types are stacked into a single bar (e.g. ht/nt summed into total consumption); different-group types render side-by-side.
          *     - line chart (`min` / `average` / `max`): same-group types are rendered as an area chart; different-group types render as separate lines.
          *   All fields are optional; the consumer falls back to its defaults for whatever the hook does not return.
