@@ -1338,15 +1338,44 @@ declare namespace Components {
             events?: NotificationEvent[];
         }
         export type NotificationEvent = "app.installed" | "app.uninstalled";
+        /**
+         * One declared field inside a `type: object` option. Fields are primitives — object nesting
+         * is not supported.
+         *
+         */
+        export interface ObjectField {
+            /**
+             * Unique identifier for this field within the parent object.
+             */
+            key: string;
+            /**
+             * Human-readable label for the field.
+             */
+            label?: string;
+            /**
+             * Detailed description of what this field is for.
+             */
+            description?: string;
+            /**
+             * Flag to indicate if this field must be filled.
+             */
+            required?: boolean;
+            /**
+             * Primitive type of this field.
+             */
+            type: "text" | "number" | "boolean" | "secret";
+        }
         export interface Option {
             /**
              * Key matching a config_option from the component
              */
             key: string;
             /**
-             * The configured value for this option
+             * The configured value for this option. Shape depends on the matching component option's
+             * `type` and `repeatable` (see `Options.value`).
+             *
              */
-            value: string | boolean | number;
+            value: any;
         }
         /**
          * Options for the component configuration
@@ -1369,10 +1398,41 @@ declare namespace Components {
              */
             description?: string;
             /**
-             * The configured value for this option. Is only present when the component is installed.
+             * When true, the configured value is an array of entries, each tagged with a stable
+             * server-assigned `id`. Combine with any `type` to express "many of this thing."
+             * Defaults to false.
+             *
              */
-            value?: string | boolean | number;
-            type: "text" | "number" | "boolean" | "secret";
+            repeatable?: boolean;
+            /**
+             * Field declarations — required when `type: object`. Each entry describes one primitive
+             * sub-field of the object value. Object types may not nest (no `type: object` inside `fields`).
+             *
+             */
+            fields?: /**
+             * One declared field inside a `type: object` option. Fields are primitives — object nesting
+             * is not supported.
+             *
+             */
+            ObjectField[];
+            /**
+             * The configured value for this option. Shape depends on `type` and `repeatable`:
+             * - primitive `type` (text/number/boolean/secret), `repeatable` false → primitive
+             * - primitive `type`, `repeatable` true → array of `{id, value}` entries
+             * - `type: object`, `repeatable` false → object with declared fields
+             * - `type: object`, `repeatable` true → array of `{id, ...declared fields}` entries
+             *
+             * `id` is server-assigned and stable across edits so consumers can reference entries
+             * by id rather than by index.
+             *
+             */
+            value?: any;
+            /**
+             * The type of this option. `object` declares a structured value whose fields are listed
+             * under `fields`. Combine with `repeatable: true` to express a list of these objects.
+             *
+             */
+            type: "text" | "number" | "boolean" | "secret" | "object";
         }
         export interface OptionsRef {
             /**
@@ -1520,15 +1580,13 @@ declare namespace Components {
              *   - 200 with a JSON body of shape:
              *     {
              *       "type_options": [
-             *         { "id": "feed-out", "label": { "en": "Grid import" }, "aggregation_group": "grid", "statistical_method": "sum", "direction": "out", "unit": "kWh" },
-             *         { "id": "feed-in",  "label": { "en": "Feed-in"     }, "aggregation_group": "grid", "statistical_method": "sum", "direction": "in",  "unit": "kWh" },
+             *         { "id": "ht", "label": { "en": "High tariff" }, "aggregation_group": "consumption", "statistical_method": "sum", "unit": "kWh" },
              *         ...
              *       ],
              *       "intervals": ["PT15M", "PT1H", "P1D", "P1M"],
              *       "data_range": { "from": "2024-01-01T00:00:00Z", "to": "2026-05-01T00:00:00Z" }
              *     }
              *   Each type option carries its own `statistical_method`, which describes the method already applied to that type's data and dictates the chart shape: `sum` is rendered as a bar chart; `min`, `average`, and `max` are rendered as a line chart. A single visualization can therefore mix bar-shaped types with line-shaped types. Defaults to `sum` when omitted.
-             *   `direction` declares whether a type adds to or subtracts from the period total: `out` is grid-to-consumer (consumption, additive); `in` is consumer-to-grid (export, subtractive). With both present in a prosumer setup the chart computes a *net* consumption per period and can flip its label to "Total production" when the result is negative. Defaults to `out` when omitted.
              *   `aggregation_group` controls how types within a group are visually combined (depends on the per-type `statistical_method`):
              *     - bar chart (`sum`): same-group types are stacked into a single bar (e.g. ht/nt summed into total consumption); different-group types render side-by-side.
              *     - line chart (`min` / `average` / `max`): same-group types are rendered as an area chart; different-group types render as separate lines.
@@ -2045,15 +2103,13 @@ declare namespace Components {
          *   - 200 with a JSON body of shape:
          *     {
          *       "type_options": [
-         *         { "id": "feed-out", "label": { "en": "Grid import" }, "aggregation_group": "grid", "statistical_method": "sum", "direction": "out", "unit": "kWh" },
-         *         { "id": "feed-in",  "label": { "en": "Feed-in"     }, "aggregation_group": "grid", "statistical_method": "sum", "direction": "in",  "unit": "kWh" },
+         *         { "id": "ht", "label": { "en": "High tariff" }, "aggregation_group": "consumption", "statistical_method": "sum", "unit": "kWh" },
          *         ...
          *       ],
          *       "intervals": ["PT15M", "PT1H", "P1D", "P1M"],
          *       "data_range": { "from": "2024-01-01T00:00:00Z", "to": "2026-05-01T00:00:00Z" }
          *     }
          *   Each type option carries its own `statistical_method`, which describes the method already applied to that type's data and dictates the chart shape: `sum` is rendered as a bar chart; `min`, `average`, and `max` are rendered as a line chart. A single visualization can therefore mix bar-shaped types with line-shaped types. Defaults to `sum` when omitted.
-         *   `direction` declares whether a type adds to or subtracts from the period total: `out` is grid-to-consumer (consumption, additive); `in` is consumer-to-grid (export, subtractive). With both present in a prosumer setup the chart computes a *net* consumption per period and can flip its label to "Total production" when the result is negative. Defaults to `out` when omitted.
          *   `aggregation_group` controls how types within a group are visually combined (depends on the per-type `statistical_method`):
          *     - bar chart (`sum`): same-group types are stacked into a single bar (e.g. ht/nt summed into total consumption); different-group types render side-by-side.
          *     - line chart (`min` / `average` / `max`): same-group types are rendered as an area chart; different-group types render as separate lines.
@@ -3670,6 +3726,7 @@ export type JourneyBlockComponentArgs = Components.Schemas.JourneyBlockComponent
 export type JourneyBlockConfig = Components.Schemas.JourneyBlockConfig;
 export type NotificationConfig = Components.Schemas.NotificationConfig;
 export type NotificationEvent = Components.Schemas.NotificationEvent;
+export type ObjectField = Components.Schemas.ObjectField;
 export type Option = Components.Schemas.Option;
 export type Options = Components.Schemas.Options;
 export type OptionsRef = Components.Schemas.OptionsRef;
