@@ -13856,6 +13856,14 @@
             ],
             "description": "Statistical method already applied to this type's data. Determines the chart shape used to render the type's values: `sum` is shown as a bar chart; `min`, `average`, and `max` are shown as a line chart. Each type advertises its own method, so a single visualization can mix bar-shaped types with line-shaped types. Defaults to `sum` when omitted.\n"
           },
+          "direction": {
+            "type": "string",
+            "enum": [
+              "in",
+              "out"
+            ],
+            "description": "Direction of energy flow at the meter for this type:\n  - `out`: outflow from the grid to the consumer (e.g. household consumption,\n    grid import). Adds to the total consumption shown for the period.\n  - `in`: inflow to the grid from the consumer (e.g. PV export, feed-in).\n    Subtracts from the total consumption.\nWith both directions present in a prosumer setup, the chart computes a *net* consumption per period — when production exceeds consumption the period total is negative and the chart can flip its label to \"Total production\" instead. Defaults to `out` when omitted (the legacy assumption that all values are consumption from the grid).\n"
+          },
           "unit": {
             "type": "string",
             "description": "Unit shared by all values of this type (e.g. \"kWh\")."
