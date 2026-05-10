@@ -7835,19 +7835,19 @@ declare namespace Components {
              */
             statistical_method?: "sum" | "average" | "min" | "max";
             /**
-             * Direction of energy flow at the meter for this type:
-             *   - `out`: outflow from the grid to the consumer (e.g. household consumption,
-             *     grid import). Adds to the total consumption shown for the period.
-             *   - `in`: inflow to the grid from the consumer (e.g. PV export, feed-in).
-             *     Subtracts from the total consumption.
-             * With both directions present in a prosumer setup, the chart computes a *net* consumption per period — when production exceeds consumption the period total is negative and the chart can flip its label to "Total production" instead. Defaults to `out` when omitted (the legacy assumption that all values are consumption from the grid).
-             *
-             */
-            direction?: "in" | "out";
-            /**
              * Unit shared by all values of this type (e.g. "kWh").
              */
             unit?: string;
+            /**
+             * Optional Spark color token used to render this type in the visualization. Maps onto the portal's Spark palette (`primary` is the org's primary brand color). When omitted the consumer falls back to its own per-type default.
+             *
+             */
+            color?: "primary" | "slate" | "mauve" | "orange" | "red" | "tomato" | "amber" | "green" | "blue";
+            /**
+             * Optional number of decimal places to show when rendering values of this type in the visualization (axis labels, tooltips, summaries). When omitted the consumer falls back to its own default precision.
+             *
+             */
+            precision?: number;
         }
         export interface WidgetAction {
             _id: string;
