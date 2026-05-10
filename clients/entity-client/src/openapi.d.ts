@@ -516,10 +516,8 @@ declare namespace Components {
             repeatable?: boolean;
             has_primary?: boolean;
             /**
-             * Controls how updates to this attribute are handled.
-             * - `direct` (default): update is applied immediately. No changeset created.
-             * - `external`: update creates a changeset, auto-cleared on matching external update (e.g. ERP inbound sync via ?direct=true).
-             * - `approval`: update creates a changeset, requires explicit human approval.
+             * Controls how updates to this attribute are handled. See the `EditMode`
+             * schema for the per-mode semantics. Defaults to `direct`.
              *
              */
             edit_mode?: "direct" | "external" | "approval";
@@ -736,10 +734,8 @@ declare namespace Components {
             repeatable?: boolean;
             has_primary?: boolean;
             /**
-             * Controls how updates to this attribute are handled.
-             * - `direct` (default): update is applied immediately. No changeset created.
-             * - `external`: update creates a changeset, auto-cleared on matching external update (e.g. ERP inbound sync via ?direct=true).
-             * - `approval`: update creates a changeset, requires explicit human approval.
+             * Controls how updates to this attribute are handled. See the `EditMode`
+             * schema for the per-mode semantics. Defaults to `direct`.
              *
              */
             edit_mode?: "direct" | "external" | "approval";
@@ -973,10 +969,8 @@ declare namespace Components {
             repeatable?: boolean;
             has_primary?: boolean;
             /**
-             * Controls how updates to this attribute are handled.
-             * - `direct` (default): update is applied immediately. No changeset created.
-             * - `external`: update creates a changeset, auto-cleared on matching external update (e.g. ERP inbound sync via ?direct=true).
-             * - `approval`: update creates a changeset, requires explicit human approval.
+             * Controls how updates to this attribute are handled. See the `EditMode`
+             * schema for the per-mode semantics. Defaults to `direct`.
              *
              */
             edit_mode?: "direct" | "external" | "approval";
@@ -1225,10 +1219,8 @@ declare namespace Components {
             repeatable?: boolean;
             has_primary?: boolean;
             /**
-             * Controls how updates to this attribute are handled.
-             * - `direct` (default): update is applied immediately. No changeset created.
-             * - `external`: update creates a changeset, auto-cleared on matching external update (e.g. ERP inbound sync via ?direct=true).
-             * - `approval`: update creates a changeset, requires explicit human approval.
+             * Controls how updates to this attribute are handled. See the `EditMode`
+             * schema for the per-mode semantics. Defaults to `direct`.
              *
              */
             edit_mode?: "direct" | "external" | "approval";
@@ -1347,8 +1339,12 @@ declare namespace Components {
             _manifest?: string /* uuid */[] | null;
             /**
              * Pending attribute changesets for attributes configured with external or approval edit mode.
-             * Read-only via normal entity PATCH/PUT operations — cannot be set directly.
-             * Use the changeset management endpoints to apply or dismiss changesets.
+             *
+             * The value shape is `Changeset` (`proposed_value`, `created_at`, `edit_mode`, ...)
+             * and is what `:apply` / `:dismiss` operate on.
+             *
+             * Read-only via normal entity PATCH/PUT operations — those handlers strip `_changesets`
+             * from request bodies. Use the changeset management endpoints to mutate this field.
              *
              */
             _changesets?: {
@@ -1513,10 +1509,8 @@ declare namespace Components {
             repeatable?: boolean;
             has_primary?: boolean;
             /**
-             * Controls how updates to this attribute are handled.
-             * - `direct` (default): update is applied immediately. No changeset created.
-             * - `external`: update creates a changeset, auto-cleared on matching external update (e.g. ERP inbound sync via ?direct=true).
-             * - `approval`: update creates a changeset, requires explicit human approval.
+             * Controls how updates to this attribute are handled. See the `EditMode`
+             * schema for the per-mode semantics. Defaults to `direct`.
              *
              */
             edit_mode?: "direct" | "external" | "approval";
@@ -1820,10 +1814,8 @@ declare namespace Components {
             repeatable?: boolean;
             has_primary?: boolean;
             /**
-             * Controls how updates to this attribute are handled.
-             * - `direct` (default): update is applied immediately. No changeset created.
-             * - `external`: update creates a changeset, auto-cleared on matching external update (e.g. ERP inbound sync via ?direct=true).
-             * - `approval`: update creates a changeset, requires explicit human approval.
+             * Controls how updates to this attribute are handled. See the `EditMode`
+             * schema for the per-mode semantics. Defaults to `direct`.
              *
              */
             edit_mode?: "direct" | "external" | "approval";
@@ -2023,10 +2015,8 @@ declare namespace Components {
             repeatable?: boolean;
             has_primary?: boolean;
             /**
-             * Controls how updates to this attribute are handled.
-             * - `direct` (default): update is applied immediately. No changeset created.
-             * - `external`: update creates a changeset, auto-cleared on matching external update (e.g. ERP inbound sync via ?direct=true).
-             * - `approval`: update creates a changeset, requires explicit human approval.
+             * Controls how updates to this attribute are handled. See the `EditMode`
+             * schema for the per-mode semantics. Defaults to `direct`.
              *
              */
             edit_mode?: "direct" | "external" | "approval";
@@ -2219,10 +2209,8 @@ declare namespace Components {
             repeatable?: boolean;
             has_primary?: boolean;
             /**
-             * Controls how updates to this attribute are handled.
-             * - `direct` (default): update is applied immediately. No changeset created.
-             * - `external`: update creates a changeset, auto-cleared on matching external update (e.g. ERP inbound sync via ?direct=true).
-             * - `approval`: update creates a changeset, requires explicit human approval.
+             * Controls how updates to this attribute are handled. See the `EditMode`
+             * schema for the per-mode semantics. Defaults to `direct`.
              *
              */
             edit_mode?: "direct" | "external" | "approval";
@@ -2413,10 +2401,8 @@ declare namespace Components {
             repeatable?: boolean;
             has_primary?: boolean;
             /**
-             * Controls how updates to this attribute are handled.
-             * - `direct` (default): update is applied immediately. No changeset created.
-             * - `external`: update creates a changeset, auto-cleared on matching external update (e.g. ERP inbound sync via ?direct=true).
-             * - `approval`: update creates a changeset, requires explicit human approval.
+             * Controls how updates to this attribute are handled. See the `EditMode`
+             * schema for the per-mode semantics. Defaults to `direct`.
              *
              */
             edit_mode?: "direct" | "external" | "approval";
@@ -2617,10 +2603,8 @@ declare namespace Components {
             repeatable?: boolean;
             has_primary?: boolean;
             /**
-             * Controls how updates to this attribute are handled.
-             * - `direct` (default): update is applied immediately. No changeset created.
-             * - `external`: update creates a changeset, auto-cleared on matching external update (e.g. ERP inbound sync via ?direct=true).
-             * - `approval`: update creates a changeset, requires explicit human approval.
+             * Controls how updates to this attribute are handled. See the `EditMode`
+             * schema for the per-mode semantics. Defaults to `direct`.
              *
              */
             edit_mode?: "direct" | "external" | "approval";
@@ -2693,6 +2677,19 @@ declare namespace Components {
              */
             cluster?: string;
         }
+        /**
+         * Controls whether a write goes through immediately or is held as a pending entry
+         * on the parent entity's `_changesets` map.
+         *
+         * - `direct`: write applied immediately. No changeset created.
+         * - `external`: write held as a pending changeset; auto-cleared on a matching direct/ERP write.
+         * - `approval`: write held as a pending changeset; requires explicit human apply/dismiss.
+         *
+         * Used at two levels: per-attribute (entity-attribute changesets) and per-capability
+         * (currently the `meter_readings` capability on the Meter schema, gating reading submissions).
+         *
+         */
+        export type EditMode = "direct" | "external" | "approval";
         /**
          * Configuration for `edit_mode: external` auto-clear matching.
          * Fields here (`match_strategy`, `fuzzy_config`) only take effect when
@@ -2879,10 +2876,8 @@ declare namespace Components {
             repeatable?: boolean;
             has_primary?: boolean;
             /**
-             * Controls how updates to this attribute are handled.
-             * - `direct` (default): update is applied immediately. No changeset created.
-             * - `external`: update creates a changeset, auto-cleared on matching external update (e.g. ERP inbound sync via ?direct=true).
-             * - `approval`: update creates a changeset, requires explicit human approval.
+             * Controls how updates to this attribute are handled. See the `EditMode`
+             * schema for the per-mode semantics. Defaults to `direct`.
              *
              */
             edit_mode?: "direct" | "external" | "approval";
@@ -3002,8 +2997,12 @@ declare namespace Components {
             _manifest?: string /* uuid */[] | null;
             /**
              * Pending attribute changesets for attributes configured with external or approval edit mode.
-             * Read-only via normal entity PATCH/PUT operations — cannot be set directly.
-             * Use the changeset management endpoints to apply or dismiss changesets.
+             *
+             * The value shape is `Changeset` (`proposed_value`, `created_at`, `edit_mode`, ...)
+             * and is what `:apply` / `:dismiss` operate on.
+             *
+             * Read-only via normal entity PATCH/PUT operations — those handlers strip `_changesets`
+             * from request bodies. Use the changeset management endpoints to mutate this field.
              *
              */
             _changesets?: {
@@ -3506,8 +3505,12 @@ declare namespace Components {
             _manifest?: string /* uuid */[] | null;
             /**
              * Pending attribute changesets for attributes configured with external or approval edit mode.
-             * Read-only via normal entity PATCH/PUT operations — cannot be set directly.
-             * Use the changeset management endpoints to apply or dismiss changesets.
+             *
+             * The value shape is `Changeset` (`proposed_value`, `created_at`, `edit_mode`, ...)
+             * and is what `:apply` / `:dismiss` operate on.
+             *
+             * Read-only via normal entity PATCH/PUT operations — those handlers strip `_changesets`
+             * from request bodies. Use the changeset management endpoints to mutate this field.
              *
              */
             _changesets?: {
@@ -3797,8 +3800,12 @@ declare namespace Components {
                 _manifest?: string /* uuid */[] | null;
                 /**
                  * Pending attribute changesets for attributes configured with external or approval edit mode.
-                 * Read-only via normal entity PATCH/PUT operations — cannot be set directly.
-                 * Use the changeset management endpoints to apply or dismiss changesets.
+                 *
+                 * The value shape is `Changeset` (`proposed_value`, `created_at`, `edit_mode`, ...)
+                 * and is what `:apply` / `:dismiss` operate on.
+                 *
+                 * Read-only via normal entity PATCH/PUT operations — those handlers strip `_changesets`
+                 * from request bodies. Use the changeset management endpoints to mutate this field.
                  *
                  */
                 _changesets?: {
@@ -3890,8 +3897,12 @@ declare namespace Components {
                     _manifest?: string /* uuid */[] | null;
                     /**
                      * Pending attribute changesets for attributes configured with external or approval edit mode.
-                     * Read-only via normal entity PATCH/PUT operations — cannot be set directly.
-                     * Use the changeset management endpoints to apply or dismiss changesets.
+                     *
+                     * The value shape is `Changeset` (`proposed_value`, `created_at`, `edit_mode`, ...)
+                     * and is what `:apply` / `:dismiss` operate on.
+                     *
+                     * Read-only via normal entity PATCH/PUT operations — those handlers strip `_changesets`
+                     * from request bodies. Use the changeset management endpoints to mutate this field.
                      *
                      */
                     _changesets?: {
@@ -3982,8 +3993,12 @@ declare namespace Components {
                     _manifest?: string /* uuid */[] | null;
                     /**
                      * Pending attribute changesets for attributes configured with external or approval edit mode.
-                     * Read-only via normal entity PATCH/PUT operations — cannot be set directly.
-                     * Use the changeset management endpoints to apply or dismiss changesets.
+                     *
+                     * The value shape is `Changeset` (`proposed_value`, `created_at`, `edit_mode`, ...)
+                     * and is what `:apply` / `:dismiss` operate on.
+                     *
+                     * Read-only via normal entity PATCH/PUT operations — those handlers strip `_changesets`
+                     * from request bodies. Use the changeset management endpoints to mutate this field.
                      *
                      */
                     _changesets?: {
@@ -4074,8 +4089,12 @@ declare namespace Components {
                     _manifest?: string /* uuid */[] | null;
                     /**
                      * Pending attribute changesets for attributes configured with external or approval edit mode.
-                     * Read-only via normal entity PATCH/PUT operations — cannot be set directly.
-                     * Use the changeset management endpoints to apply or dismiss changesets.
+                     *
+                     * The value shape is `Changeset` (`proposed_value`, `created_at`, `edit_mode`, ...)
+                     * and is what `:apply` / `:dismiss` operate on.
+                     *
+                     * Read-only via normal entity PATCH/PUT operations — those handlers strip `_changesets`
+                     * from request bodies. Use the changeset management endpoints to mutate this field.
                      *
                      */
                     _changesets?: {
@@ -5415,10 +5434,8 @@ declare namespace Components {
             repeatable?: boolean;
             has_primary?: boolean;
             /**
-             * Controls how updates to this attribute are handled.
-             * - `direct` (default): update is applied immediately. No changeset created.
-             * - `external`: update creates a changeset, auto-cleared on matching external update (e.g. ERP inbound sync via ?direct=true).
-             * - `approval`: update creates a changeset, requires explicit human approval.
+             * Controls how updates to this attribute are handled. See the `EditMode`
+             * schema for the per-mode semantics. Defaults to `direct`.
              *
              */
             edit_mode?: "direct" | "external" | "approval";
@@ -6125,8 +6142,12 @@ declare namespace Components {
             _manifest?: string /* uuid */[] | null;
             /**
              * Pending attribute changesets for attributes configured with external or approval edit mode.
-             * Read-only via normal entity PATCH/PUT operations — cannot be set directly.
-             * Use the changeset management endpoints to apply or dismiss changesets.
+             *
+             * The value shape is `Changeset` (`proposed_value`, `created_at`, `edit_mode`, ...)
+             * and is what `:apply` / `:dismiss` operate on.
+             *
+             * Read-only via normal entity PATCH/PUT operations — those handlers strip `_changesets`
+             * from request bodies. Use the changeset management endpoints to mutate this field.
              *
              */
             _changesets?: {
@@ -6290,10 +6311,8 @@ declare namespace Components {
             repeatable?: boolean;
             has_primary?: boolean;
             /**
-             * Controls how updates to this attribute are handled.
-             * - `direct` (default): update is applied immediately. No changeset created.
-             * - `external`: update creates a changeset, auto-cleared on matching external update (e.g. ERP inbound sync via ?direct=true).
-             * - `approval`: update creates a changeset, requires explicit human approval.
+             * Controls how updates to this attribute are handled. See the `EditMode`
+             * schema for the per-mode semantics. Defaults to `direct`.
              *
              */
             edit_mode?: "direct" | "external" | "approval";
@@ -6484,10 +6503,8 @@ declare namespace Components {
             repeatable?: boolean;
             has_primary?: boolean;
             /**
-             * Controls how updates to this attribute are handled.
-             * - `direct` (default): update is applied immediately. No changeset created.
-             * - `external`: update creates a changeset, auto-cleared on matching external update (e.g. ERP inbound sync via ?direct=true).
-             * - `approval`: update creates a changeset, requires explicit human approval.
+             * Controls how updates to this attribute are handled. See the `EditMode`
+             * schema for the per-mode semantics. Defaults to `direct`.
              *
              */
             edit_mode?: "direct" | "external" | "approval";
@@ -6678,10 +6695,8 @@ declare namespace Components {
             repeatable?: boolean;
             has_primary?: boolean;
             /**
-             * Controls how updates to this attribute are handled.
-             * - `direct` (default): update is applied immediately. No changeset created.
-             * - `external`: update creates a changeset, auto-cleared on matching external update (e.g. ERP inbound sync via ?direct=true).
-             * - `approval`: update creates a changeset, requires explicit human approval.
+             * Controls how updates to this attribute are handled. See the `EditMode`
+             * schema for the per-mode semantics. Defaults to `direct`.
              *
              */
             edit_mode?: "direct" | "external" | "approval";
@@ -6880,10 +6895,8 @@ declare namespace Components {
             repeatable?: boolean;
             has_primary?: boolean;
             /**
-             * Controls how updates to this attribute are handled.
-             * - `direct` (default): update is applied immediately. No changeset created.
-             * - `external`: update creates a changeset, auto-cleared on matching external update (e.g. ERP inbound sync via ?direct=true).
-             * - `approval`: update creates a changeset, requires explicit human approval.
+             * Controls how updates to this attribute are handled. See the `EditMode`
+             * schema for the per-mode semantics. Defaults to `direct`.
              *
              */
             edit_mode?: "direct" | "external" | "approval";
@@ -7093,10 +7106,8 @@ declare namespace Components {
             repeatable?: boolean;
             has_primary?: boolean;
             /**
-             * Controls how updates to this attribute are handled.
-             * - `direct` (default): update is applied immediately. No changeset created.
-             * - `external`: update creates a changeset, auto-cleared on matching external update (e.g. ERP inbound sync via ?direct=true).
-             * - `approval`: update creates a changeset, requires explicit human approval.
+             * Controls how updates to this attribute are handled. See the `EditMode`
+             * schema for the per-mode semantics. Defaults to `direct`.
              *
              */
             edit_mode?: "direct" | "external" | "approval";
@@ -7135,6 +7146,90 @@ declare namespace Components {
             address?: string;
             send_status?: string;
             email_type?: string;
+        }
+        /**
+         * A meter readings changeset entry — service-managed by metering-api.
+         * Stored on `Meter._meter_readings_changeset` array attribute. Each entry mirrors a
+         * ClickHouse meter reading row plus a changeset metadata overlay.
+         *
+         * Note: `org_id` is NOT stored on the entry. The entries live on the Meter entity,
+         * which is already org-scoped (`_org`). Round-tripping it would only invite drift;
+         * downstream consumers receive the org from the meter / handler context.
+         *
+         */
+        export interface MeterReadingChangesetEntry {
+            value: number;
+            direction?: "feed-in" | "feed-out";
+            timestamp?: string; // date-time
+            meter_id: string; // uuid
+            counter_id: string; // uuid
+            source?: string;
+            reason?: string;
+            read_by?: string;
+            status?: "valid" | "in-validation" | "implausible";
+            external_id?: string;
+            remark?: string;
+            metadata?: {
+                [name: string]: string;
+            };
+            /**
+             * Unique changeset identifier (UUID v4).
+             */
+            changeset_id: string;
+            edit_mode: "external" | "approval";
+            match_strategy?: "exact" | "fuzzy";
+            /**
+             * Slack on `reading.timestamp` when metering-api auto-clear matches an
+             * incoming reading against this pending changeset.
+             *
+             * Variants:
+             * - `'exact'`: strict millisecond equality.
+             * - `{ type: 'same-day', timezone? }`: strip the time component and
+             *   compare year-month-day. Optional `timezone` is an IANA name
+             *   (e.g. `'Europe/Berlin'`); the day is bucketed in that zone.
+             *   Defaults to UTC when omitted.
+             * - `{ type: 'within-seconds', seconds }`: symmetric ±N-second window.
+             *
+             */
+            timestamp_tolerance?: /**
+             * Slack on `reading.timestamp` when metering-api auto-clear matches an
+             * incoming reading against this pending changeset.
+             *
+             * Variants:
+             * - `'exact'`: strict millisecond equality.
+             * - `{ type: 'same-day', timezone? }`: strip the time component and
+             *   compare year-month-day. Optional `timezone` is an IANA name
+             *   (e.g. `'Europe/Berlin'`); the day is bucketed in that zone.
+             *   Defaults to UTC when omitted.
+             * - `{ type: 'within-seconds', seconds }`: symmetric ±N-second window.
+             *
+             */
+            ("exact") | {
+                type: "same-day";
+                /**
+                 * IANA timezone identifier (e.g. `'Europe/Berlin'`, `'UTC'`).
+                 * When omitted, the day is bucketed in UTC.
+                 *
+                 */
+                timezone?: string;
+            } | {
+                type: "within-seconds";
+                /**
+                 * Tolerance in seconds. e.g. 60 = ±1 minute, 3600 = ±1 hour.
+                 */
+                seconds: number;
+            };
+            fuzzy_config?: {
+                percentage_threshold?: number;
+                absolute_threshold?: number;
+            };
+            created_at: string; // date-time
+            created_by?: /* Identifies the actor that created the changeset. */ ChangesetCreator;
+            previous?: {
+                value?: number;
+                direction?: "feed-in" | "feed-out";
+                timestamp?: string; // date-time
+            };
         }
         /**
          * Multi Choice Selection
@@ -7290,10 +7385,8 @@ declare namespace Components {
             repeatable?: boolean;
             has_primary?: boolean;
             /**
-             * Controls how updates to this attribute are handled.
-             * - `direct` (default): update is applied immediately. No changeset created.
-             * - `external`: update creates a changeset, auto-cleared on matching external update (e.g. ERP inbound sync via ?direct=true).
-             * - `approval`: update creates a changeset, requires explicit human approval.
+             * Controls how updates to this attribute are handled. See the `EditMode`
+             * schema for the per-mode semantics. Defaults to `direct`.
              *
              */
             edit_mode?: "direct" | "external" | "approval";
@@ -7429,8 +7522,12 @@ declare namespace Components {
             _manifest?: string /* uuid */[] | null;
             /**
              * Pending attribute changesets for attributes configured with external or approval edit mode.
-             * Read-only via normal entity PATCH/PUT operations — cannot be set directly.
-             * Use the changeset management endpoints to apply or dismiss changesets.
+             *
+             * The value shape is `Changeset` (`proposed_value`, `created_at`, `edit_mode`, ...)
+             * and is what `:apply` / `:dismiss` operate on.
+             *
+             * Read-only via normal entity PATCH/PUT operations — those handlers strip `_changesets`
+             * from request bodies. Use the changeset management endpoints to mutate this field.
              *
              */
             _changesets?: {
@@ -7591,10 +7688,8 @@ declare namespace Components {
             repeatable?: boolean;
             has_primary?: boolean;
             /**
-             * Controls how updates to this attribute are handled.
-             * - `direct` (default): update is applied immediately. No changeset created.
-             * - `external`: update creates a changeset, auto-cleared on matching external update (e.g. ERP inbound sync via ?direct=true).
-             * - `approval`: update creates a changeset, requires explicit human approval.
+             * Controls how updates to this attribute are handled. See the `EditMode`
+             * schema for the per-mode semantics. Defaults to `direct`.
              *
              */
             edit_mode?: "direct" | "external" | "approval";
@@ -7794,10 +7889,8 @@ declare namespace Components {
             repeatable?: boolean;
             has_primary?: boolean;
             /**
-             * Controls how updates to this attribute are handled.
-             * - `direct` (default): update is applied immediately. No changeset created.
-             * - `external`: update creates a changeset, auto-cleared on matching external update (e.g. ERP inbound sync via ?direct=true).
-             * - `approval`: update creates a changeset, requires explicit human approval.
+             * Controls how updates to this attribute are handled. See the `EditMode`
+             * schema for the per-mode semantics. Defaults to `direct`.
              *
              */
             edit_mode?: "direct" | "external" | "approval";
@@ -7988,10 +8081,8 @@ declare namespace Components {
             repeatable?: boolean;
             has_primary?: boolean;
             /**
-             * Controls how updates to this attribute are handled.
-             * - `direct` (default): update is applied immediately. No changeset created.
-             * - `external`: update creates a changeset, auto-cleared on matching external update (e.g. ERP inbound sync via ?direct=true).
-             * - `approval`: update creates a changeset, requires explicit human approval.
+             * Controls how updates to this attribute are handled. See the `EditMode`
+             * schema for the per-mode semantics. Defaults to `direct`.
              *
              */
             edit_mode?: "direct" | "external" | "approval";
@@ -8182,10 +8273,8 @@ declare namespace Components {
             repeatable?: boolean;
             has_primary?: boolean;
             /**
-             * Controls how updates to this attribute are handled.
-             * - `direct` (default): update is applied immediately. No changeset created.
-             * - `external`: update creates a changeset, auto-cleared on matching external update (e.g. ERP inbound sync via ?direct=true).
-             * - `approval`: update creates a changeset, requires explicit human approval.
+             * Controls how updates to this attribute are handled. See the `EditMode`
+             * schema for the per-mode semantics. Defaults to `direct`.
              *
              */
             edit_mode?: "direct" | "external" | "approval";
@@ -8376,10 +8465,8 @@ declare namespace Components {
             repeatable?: boolean;
             has_primary?: boolean;
             /**
-             * Controls how updates to this attribute are handled.
-             * - `direct` (default): update is applied immediately. No changeset created.
-             * - `external`: update creates a changeset, auto-cleared on matching external update (e.g. ERP inbound sync via ?direct=true).
-             * - `approval`: update creates a changeset, requires explicit human approval.
+             * Controls how updates to this attribute are handled. See the `EditMode`
+             * schema for the per-mode semantics. Defaults to `direct`.
              *
              */
             edit_mode?: "direct" | "external" | "approval";
@@ -8570,10 +8657,8 @@ declare namespace Components {
             repeatable?: boolean;
             has_primary?: boolean;
             /**
-             * Controls how updates to this attribute are handled.
-             * - `direct` (default): update is applied immediately. No changeset created.
-             * - `external`: update creates a changeset, auto-cleared on matching external update (e.g. ERP inbound sync via ?direct=true).
-             * - `approval`: update creates a changeset, requires explicit human approval.
+             * Controls how updates to this attribute are handled. See the `EditMode`
+             * schema for the per-mode semantics. Defaults to `direct`.
              *
              */
             edit_mode?: "direct" | "external" | "approval";
@@ -8764,10 +8849,8 @@ declare namespace Components {
             repeatable?: boolean;
             has_primary?: boolean;
             /**
-             * Controls how updates to this attribute are handled.
-             * - `direct` (default): update is applied immediately. No changeset created.
-             * - `external`: update creates a changeset, auto-cleared on matching external update (e.g. ERP inbound sync via ?direct=true).
-             * - `approval`: update creates a changeset, requires explicit human approval.
+             * Controls how updates to this attribute are handled. See the `EditMode`
+             * schema for the per-mode semantics. Defaults to `direct`.
              *
              */
             edit_mode?: "direct" | "external" | "approval";
@@ -8958,10 +9041,8 @@ declare namespace Components {
             repeatable?: boolean;
             has_primary?: boolean;
             /**
-             * Controls how updates to this attribute are handled.
-             * - `direct` (default): update is applied immediately. No changeset created.
-             * - `external`: update creates a changeset, auto-cleared on matching external update (e.g. ERP inbound sync via ?direct=true).
-             * - `approval`: update creates a changeset, requires explicit human approval.
+             * Controls how updates to this attribute are handled. See the `EditMode`
+             * schema for the per-mode semantics. Defaults to `direct`.
              *
              */
             edit_mode?: "direct" | "external" | "approval";
@@ -9152,10 +9233,8 @@ declare namespace Components {
             repeatable?: boolean;
             has_primary?: boolean;
             /**
-             * Controls how updates to this attribute are handled.
-             * - `direct` (default): update is applied immediately. No changeset created.
-             * - `external`: update creates a changeset, auto-cleared on matching external update (e.g. ERP inbound sync via ?direct=true).
-             * - `approval`: update creates a changeset, requires explicit human approval.
+             * Controls how updates to this attribute are handled. See the `EditMode`
+             * schema for the per-mode semantics. Defaults to `direct`.
              *
              */
             edit_mode?: "direct" | "external" | "approval";
@@ -9346,10 +9425,8 @@ declare namespace Components {
             repeatable?: boolean;
             has_primary?: boolean;
             /**
-             * Controls how updates to this attribute are handled.
-             * - `direct` (default): update is applied immediately. No changeset created.
-             * - `external`: update creates a changeset, auto-cleared on matching external update (e.g. ERP inbound sync via ?direct=true).
-             * - `approval`: update creates a changeset, requires explicit human approval.
+             * Controls how updates to this attribute are handled. See the `EditMode`
+             * schema for the per-mode semantics. Defaults to `direct`.
              *
              */
             edit_mode?: "direct" | "external" | "approval";
@@ -9555,10 +9632,8 @@ declare namespace Components {
             repeatable?: boolean;
             has_primary?: boolean;
             /**
-             * Controls how updates to this attribute are handled.
-             * - `direct` (default): update is applied immediately. No changeset created.
-             * - `external`: update creates a changeset, auto-cleared on matching external update (e.g. ERP inbound sync via ?direct=true).
-             * - `approval`: update creates a changeset, requires explicit human approval.
+             * Controls how updates to this attribute are handled. See the `EditMode`
+             * schema for the per-mode semantics. Defaults to `direct`.
              *
              */
             edit_mode?: "direct" | "external" | "approval" | "list-view";
@@ -9789,8 +9864,12 @@ declare namespace Components {
             _manifest?: string /* uuid */[] | null;
             /**
              * Pending attribute changesets for attributes configured with external or approval edit mode.
-             * Read-only via normal entity PATCH/PUT operations — cannot be set directly.
-             * Use the changeset management endpoints to apply or dismiss changesets.
+             *
+             * The value shape is `Changeset` (`proposed_value`, `created_at`, `edit_mode`, ...)
+             * and is what `:apply` / `:dismiss` operate on.
+             *
+             * Read-only via normal entity PATCH/PUT operations — those handlers strip `_changesets`
+             * from request bodies. Use the changeset management endpoints to mutate this field.
              *
              */
             _changesets?: {
@@ -9971,10 +10050,8 @@ declare namespace Components {
             repeatable?: boolean;
             has_primary?: boolean;
             /**
-             * Controls how updates to this attribute are handled.
-             * - `direct` (default): update is applied immediately. No changeset created.
-             * - `external`: update creates a changeset, auto-cleared on matching external update (e.g. ERP inbound sync via ?direct=true).
-             * - `approval`: update creates a changeset, requires explicit human approval.
+             * Controls how updates to this attribute are handled. See the `EditMode`
+             * schema for the per-mode semantics. Defaults to `direct`.
              *
              */
             edit_mode?: "direct" | "external" | "approval";
@@ -10569,10 +10646,8 @@ declare namespace Components {
             repeatable?: boolean;
             has_primary?: boolean;
             /**
-             * Controls how updates to this attribute are handled.
-             * - `direct` (default): update is applied immediately. No changeset created.
-             * - `external`: update creates a changeset, auto-cleared on matching external update (e.g. ERP inbound sync via ?direct=true).
-             * - `approval`: update creates a changeset, requires explicit human approval.
+             * Controls how updates to this attribute are handled. See the `EditMode`
+             * schema for the per-mode semantics. Defaults to `direct`.
              *
              */
             edit_mode?: "direct" | "external" | "approval";
@@ -10771,10 +10846,8 @@ declare namespace Components {
             repeatable?: boolean;
             has_primary?: boolean;
             /**
-             * Controls how updates to this attribute are handled.
-             * - `direct` (default): update is applied immediately. No changeset created.
-             * - `external`: update creates a changeset, auto-cleared on matching external update (e.g. ERP inbound sync via ?direct=true).
-             * - `approval`: update creates a changeset, requires explicit human approval.
+             * Controls how updates to this attribute are handled. See the `EditMode`
+             * schema for the per-mode semantics. Defaults to `direct`.
              *
              */
             edit_mode?: "direct" | "external" | "approval";
@@ -10982,10 +11055,8 @@ declare namespace Components {
             repeatable?: boolean;
             has_primary?: boolean;
             /**
-             * Controls how updates to this attribute are handled.
-             * - `direct` (default): update is applied immediately. No changeset created.
-             * - `external`: update creates a changeset, auto-cleared on matching external update (e.g. ERP inbound sync via ?direct=true).
-             * - `approval`: update creates a changeset, requires explicit human approval.
+             * Controls how updates to this attribute are handled. See the `EditMode`
+             * schema for the per-mode semantics. Defaults to `direct`.
              *
              */
             edit_mode?: "direct" | "external" | "approval";
@@ -11272,10 +11343,8 @@ declare namespace Components {
             repeatable?: boolean;
             has_primary?: boolean;
             /**
-             * Controls how updates to this attribute are handled.
-             * - `direct` (default): update is applied immediately. No changeset created.
-             * - `external`: update creates a changeset, auto-cleared on matching external update (e.g. ERP inbound sync via ?direct=true).
-             * - `approval`: update creates a changeset, requires explicit human approval.
+             * Controls how updates to this attribute are handled. See the `EditMode`
+             * schema for the per-mode semantics. Defaults to `direct`.
              *
              */
             edit_mode?: "direct" | "external" | "approval";
@@ -11522,10 +11591,8 @@ declare namespace Components {
             repeatable?: boolean;
             has_primary?: boolean;
             /**
-             * Controls how updates to this attribute are handled.
-             * - `direct` (default): update is applied immediately. No changeset created.
-             * - `external`: update creates a changeset, auto-cleared on matching external update (e.g. ERP inbound sync via ?direct=true).
-             * - `approval`: update creates a changeset, requires explicit human approval.
+             * Controls how updates to this attribute are handled. See the `EditMode`
+             * schema for the per-mode semantics. Defaults to `direct`.
              *
              */
             edit_mode?: "direct" | "external" | "approval";
@@ -11918,10 +11985,8 @@ declare namespace Components {
             repeatable?: boolean;
             has_primary?: boolean;
             /**
-             * Controls how updates to this attribute are handled.
-             * - `direct` (default): update is applied immediately. No changeset created.
-             * - `external`: update creates a changeset, auto-cleared on matching external update (e.g. ERP inbound sync via ?direct=true).
-             * - `approval`: update creates a changeset, requires explicit human approval.
+             * Controls how updates to this attribute are handled. See the `EditMode`
+             * schema for the per-mode semantics. Defaults to `direct`.
              *
              */
             edit_mode?: "direct" | "external" | "approval";
@@ -12125,10 +12190,8 @@ declare namespace Components {
             repeatable?: boolean;
             has_primary?: boolean;
             /**
-             * Controls how updates to this attribute are handled.
-             * - `direct` (default): update is applied immediately. No changeset created.
-             * - `external`: update creates a changeset, auto-cleared on matching external update (e.g. ERP inbound sync via ?direct=true).
-             * - `approval`: update creates a changeset, requires explicit human approval.
+             * Controls how updates to this attribute are handled. See the `EditMode`
+             * schema for the per-mode semantics. Defaults to `direct`.
              *
              */
             edit_mode?: "direct" | "external" | "approval";
@@ -18369,6 +18432,7 @@ export type CurrencyAttribute = Components.Schemas.CurrencyAttribute;
 export type DateAttribute = Components.Schemas.DateAttribute;
 export type DefaultAddressFields = Components.Schemas.DefaultAddressFields;
 export type ESClusterAssignment = Components.Schemas.ESClusterAssignment;
+export type EditMode = Components.Schemas.EditMode;
 export type EditModeConfig = Components.Schemas.EditModeConfig;
 export type EmailAttribute = Components.Schemas.EmailAttribute;
 export type Entity = Components.Schemas.Entity;
@@ -18434,6 +18498,7 @@ export type LinkAttribute = Components.Schemas.LinkAttribute;
 export type ListSavedViewsResults = Components.Schemas.ListSavedViewsResults;
 export type MatchStrategy = Components.Schemas.MatchStrategy;
 export type MessageEmailAddressAttribute = Components.Schemas.MessageEmailAddressAttribute;
+export type MeterReadingChangesetEntry = Components.Schemas.MeterReadingChangesetEntry;
 export type MultiSelectAttribute = Components.Schemas.MultiSelectAttribute;
 export type NullableEntity = Components.Schemas.NullableEntity;
 export type NumberAttribute = Components.Schemas.NumberAttribute;

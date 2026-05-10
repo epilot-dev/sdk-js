@@ -5640,14 +5640,12 @@
             "type": "boolean"
           },
           "edit_mode": {
-            "type": "string",
-            "description": "Controls how updates to this attribute are handled.\n- `direct` (default): update is applied immediately. No changeset created.\n- `external`: update creates a changeset, auto-cleared on matching external update (e.g. ERP inbound sync via ?direct=true).\n- `approval`: update creates a changeset, requires explicit human approval.\n",
-            "enum": [
-              "direct",
-              "external",
-              "approval"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EditMode"
+              }
             ],
-            "default": "direct"
+            "description": "Controls how updates to this attribute are handled. See the `EditMode`\nschema for the per-mode semantics. Defaults to `direct`.\n"
           },
           "edit_mode_config": {
             "description": "Configuration for auto-clear matching on `edit_mode: external` attributes.\n`match_strategy` and `fuzzy_config` are only consulted for `external` mode —\nthey are ignored for `approval` mode, which resolves via explicit\n`:apply` / `:dismiss` endpoints and never auto-clears.\n",
@@ -7581,7 +7579,7 @@
             "readOnly": true,
             "type": "object",
             "nullable": true,
-            "description": "Pending attribute changesets for attributes configured with external or approval edit mode.\nRead-only via normal entity PATCH/PUT operations — cannot be set directly.\nUse the changeset management endpoints to apply or dismiss changesets.\n",
+            "description": "Pending attribute changesets for attributes configured with external or approval edit mode.\n\nThe value shape is `Changeset` (`proposed_value`, `created_at`, `edit_mode`, ...)\nand is what `:apply` / `:dismiss` operate on.\n\nRead-only via normal entity PATCH/PUT operations — those handlers strip `_changesets`\nfrom request bodies. Use the changeset management endpoints to mutate this field.\n",
             "additionalProperties": {
               "$ref": "#/components/schemas/Changeset"
             }
@@ -9770,6 +9768,185 @@
         "additionalProperties": {
           "$ref": "#/components/schemas/Changeset"
         }
+      },
+      "MeterReadingChangesetEntry": {
+        "type": "object",
+        "description": "A meter readings changeset entry — service-managed by metering-api.\nStored on `Meter._meter_readings_changeset` array attribute. Each entry mirrors a\nClickHouse meter reading row plus a changeset metadata overlay.\n\nNote: `org_id` is NOT stored on the entry. The entries live on the Meter entity,\nwhich is already org-scoped (`_org`). Round-tripping it would only invite drift;\ndownstream consumers receive the org from the meter / handler context.\n",
+        "required": [
+          "changeset_id",
+          "meter_id",
+          "counter_id",
+          "value",
+          "edit_mode",
+          "created_at"
+        ],
+        "properties": {
+          "value": {
+            "type": "number"
+          },
+          "direction": {
+            "type": "string",
+            "enum": [
+              "feed-in",
+              "feed-out"
+            ]
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "meter_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "counter_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "source": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "read_by": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "valid",
+              "in-validation",
+              "implausible"
+            ]
+          },
+          "external_id": {
+            "type": "string"
+          },
+          "remark": {
+            "type": "string"
+          },
+          "metadata": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "changeset_id": {
+            "type": "string",
+            "description": "Unique changeset identifier (UUID v4)."
+          },
+          "edit_mode": {
+            "type": "string",
+            "enum": [
+              "external",
+              "approval"
+            ]
+          },
+          "match_strategy": {
+            "type": "string",
+            "enum": [
+              "exact",
+              "fuzzy"
+            ]
+          },
+          "timestamp_tolerance": {
+            "description": "Slack on `reading.timestamp` when metering-api auto-clear matches an\nincoming reading against this pending changeset.\n\nVariants:\n- `'exact'`: strict millisecond equality.\n- `{ type: 'same-day', timezone? }`: strip the time component and\n  compare year-month-day. Optional `timezone` is an IANA name\n  (e.g. `'Europe/Berlin'`); the day is bucketed in that zone.\n  Defaults to UTC when omitted.\n- `{ type: 'within-seconds', seconds }`: symmetric ±N-second window.\n",
+            "oneOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "exact"
+                ]
+              },
+              {
+                "type": "object",
+                "required": [
+                  "type"
+                ],
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "same-day"
+                    ]
+                  },
+                  "timezone": {
+                    "type": "string",
+                    "description": "IANA timezone identifier (e.g. `'Europe/Berlin'`, `'UTC'`).\nWhen omitted, the day is bucketed in UTC.\n"
+                  }
+                }
+              },
+              {
+                "type": "object",
+                "required": [
+                  "type",
+                  "seconds"
+                ],
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "within-seconds"
+                    ]
+                  },
+                  "seconds": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "description": "Tolerance in seconds. e.g. 60 = ±1 minute, 3600 = ±1 hour."
+                  }
+                }
+              }
+            ]
+          },
+          "fuzzy_config": {
+            "type": "object",
+            "properties": {
+              "percentage_threshold": {
+                "type": "number"
+              },
+              "absolute_threshold": {
+                "type": "number"
+              }
+            }
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "created_by": {
+            "$ref": "#/components/schemas/ChangesetCreator"
+          },
+          "previous": {
+            "type": "object",
+            "properties": {
+              "value": {
+                "type": "number"
+              },
+              "direction": {
+                "type": "string",
+                "enum": [
+                  "feed-in",
+                  "feed-out"
+                ]
+              },
+              "timestamp": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          }
+        }
+      },
+      "EditMode": {
+        "type": "string",
+        "description": "Controls whether a write goes through immediately or is held as a pending entry\non the parent entity's `_changesets` map.\n\n- `direct`: write applied immediately. No changeset created.\n- `external`: write held as a pending changeset; auto-cleared on a matching direct/ERP write.\n- `approval`: write held as a pending changeset; requires explicit human apply/dismiss.\n\nUsed at two levels: per-attribute (entity-attribute changesets) and per-capability\n(currently the `meter_readings` capability on the Meter schema, gating reading submissions).\n",
+        "enum": [
+          "direct",
+          "external",
+          "approval"
+        ],
+        "default": "direct"
       },
       "EditModeConfig": {
         "type": "object",
