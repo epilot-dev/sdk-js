@@ -354,7 +354,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object"
+                  "$ref": "#/components/schemas/ParseThemeFromDesignResp"
                 }
               }
             }
@@ -1714,6 +1714,30 @@
           },
           "application": {
             "$ref": "#/components/schemas/Application"
+          }
+        }
+      },
+      "ParseThemeFromDesignResp": {
+        "type": "object",
+        "properties": {
+          "theme": {
+            "$ref": "#/components/schemas/Theme"
+          },
+          "design": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ItemMetada"
+              },
+              {
+                "$ref": "#/components/schemas/DesignItem"
+              },
+              {
+                "$ref": "#/components/schemas/Custom_Style"
+              },
+              {
+                "$ref": "#/components/schemas/Journey"
+              }
+            ]
           }
         }
       }

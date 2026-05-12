@@ -1486,6 +1486,285 @@ declare namespace Components {
             navbar: string;
             portal_login_background?: string;
         }
+        export interface ParseThemeFromDesignResp {
+            theme?: /**
+             * Type of theme to be parsed and returned
+             * example:
+             * NEW
+             */
+            Theme;
+            design?: {
+                id?: string;
+                /**
+                 * Creation date and time
+                 * example:
+                 * 2021-01-30T08:30:00Z
+                 */
+                created_at?: string;
+                created_by?: string;
+                edited: boolean;
+                last_modified_at?: string;
+                brand_id?: string;
+                brand_name?: string;
+                user?: {
+                    emailaddress?: string;
+                    fullname?: string;
+                    name?: string;
+                    userid?: string;
+                };
+                style_name: string;
+                style: {
+                    logo?: LogoData;
+                    palette: PaletteData;
+                    typography: TypographyData;
+                    shape?: ShapeData;
+                    consumer: ConsumerData;
+                };
+                is_default?: boolean;
+                /**
+                 * The manifest IDs associated with this design
+                 */
+                _manifest?: string[];
+                custom_theme?: string;
+                use_custom_theme?: boolean;
+                /**
+                 * Design tokens for journey customization
+                 */
+                design_tokens?: {
+                    coupon?: string;
+                    cashback?: string;
+                    custom_css?: string;
+                    /**
+                     * Accent color, defaults to primary
+                     */
+                    accent_color?: string;
+                    /**
+                     * Global outline/focus color
+                     */
+                    outline_color?: string;
+                    /**
+                     * Divider line color
+                     */
+                    divider_color?: string;
+                    /**
+                     * Link text color
+                     */
+                    link_color?: string;
+                    /**
+                     * Link hover text color
+                     */
+                    link_hover_color?: string;
+                    /**
+                     * Font size scale factor
+                     */
+                    font_size_scale?: "xs" | "sm" | "md" | "lg" | "xl";
+                    /**
+                     * Topbar minimum height in pixels
+                     */
+                    topbar_height?: number;
+                    /**
+                     * Logo/content alignment in the top bar
+                     */
+                    topbar_logo_alignment?: "flex-start" | "center" | "flex-end";
+                    /**
+                     * Logo size in pixels
+                     */
+                    logo_size?: number;
+                    /**
+                     * Input field background color
+                     */
+                    input_background?: string;
+                    /**
+                     * Input field border color
+                     */
+                    input_border_color?: string;
+                    /**
+                     * Input field text color
+                     */
+                    input_text_color?: string;
+                    /**
+                     * Input field label color
+                     */
+                    input_label_color?: string;
+                    /**
+                     * Input field border radius in pixels
+                     */
+                    input_border_radius?: number;
+                    /**
+                     * Input field height in pixels
+                     */
+                    input_height?: number;
+                    /**
+                     * Input field variant style
+                     */
+                    input_variant?: "outlined" | "filled" | "underlined";
+                    /**
+                     * Primary button background color or gradient
+                     */
+                    button_primary_bg?: string;
+                    /**
+                     * Primary button text color
+                     */
+                    button_primary_text?: string;
+                    /**
+                     * Primary button hover background color or gradient
+                     */
+                    button_primary_hover_bg?: string;
+                    /**
+                     * Primary button hover text color
+                     */
+                    button_primary_hover_text?: string;
+                    /**
+                     * Outlined button border color
+                     */
+                    button_outlined_border?: string;
+                    /**
+                     * Outlined button text color
+                     */
+                    button_outlined_text?: string;
+                    /**
+                     * Outlined button hover background color
+                     */
+                    button_outlined_hover_bg?: string;
+                    /**
+                     * Outlined button hover text color
+                     */
+                    button_outlined_hover_text?: string;
+                    /**
+                     * Ghost button background color
+                     */
+                    button_ghost_bg?: string;
+                    /**
+                     * Ghost button text color
+                     */
+                    button_ghost_text?: string;
+                    /**
+                     * Ghost button hover background color
+                     */
+                    button_ghost_hover_bg?: string;
+                    /**
+                     * Ghost button hover text color
+                     */
+                    button_ghost_hover_text?: string;
+                    /**
+                     * Button border radius in pixels
+                     */
+                    button_border_radius?: number;
+                    /**
+                     * Button height in pixels
+                     */
+                    button_height?: number;
+                    /**
+                     * Card background color
+                     */
+                    card_background?: string;
+                    /**
+                     * Card border color for outlined variant
+                     */
+                    card_border_color?: string;
+                    /**
+                     * Card visual variant
+                     */
+                    card_variant?: "shadow" | "outlined";
+                    /**
+                     * Summary card background color
+                     */
+                    summary_card_background?: string;
+                    /**
+                     * Toggle button selected background color
+                     */
+                    toggle_selected_bg?: string;
+                    /**
+                     * Toggle button selected text color
+                     */
+                    toggle_selected_text?: string;
+                    /**
+                     * Toggle button hover background color
+                     */
+                    toggle_hover_bg?: string;
+                    /**
+                     * Toggle button hover text color
+                     */
+                    toggle_hover_text?: string;
+                    /**
+                     * Toggle group wrapper border color
+                     */
+                    toggle_border_color?: string;
+                    /**
+                     * Dropdown option hover background color
+                     */
+                    dropdown_hover_bg?: string;
+                    /**
+                     * Dropdown option hover text color
+                     */
+                    dropdown_hover_text?: string;
+                    /**
+                     * Dropdown option selected background color
+                     */
+                    dropdown_selected_bg?: string;
+                    /**
+                     * Dropdown option selected text color
+                     */
+                    dropdown_selected_text?: string;
+                    /**
+                     * Switch unchecked thumb color
+                     */
+                    switch_unchecked_color?: string;
+                    /**
+                     * Switch unchecked track background color
+                     */
+                    switch_unchecked_bg?: string;
+                    /**
+                     * Switch border radius in pixels
+                     */
+                    switch_border_radius?: number;
+                    /**
+                     * Checkbox unchecked border color
+                     */
+                    checkbox_unchecked_color?: string;
+                    /**
+                     * Checkbox label text color
+                     */
+                    checkbox_label_color?: string;
+                    /**
+                     * Radio button unchecked border color
+                     */
+                    radio_unchecked_color?: string;
+                    /**
+                     * Radio button label text color
+                     */
+                    radio_label_color?: string;
+                    /**
+                     * Date picker selected date background color
+                     */
+                    datepicker_selected_bg?: string;
+                    /**
+                     * Date picker selected date text color
+                     */
+                    datepicker_selected_color?: string;
+                    /**
+                     * Date picker border radius in pixels
+                     */
+                    datepicker_border_radius?: number;
+                    /**
+                     * Chip background color
+                     */
+                    chip_background?: string;
+                    /**
+                     * Chip hover background color
+                     */
+                    chip_hover_background?: string;
+                    /**
+                     * Chip text color
+                     */
+                    chip_text_color?: string;
+                    /**
+                     * Chip hover text color
+                     */
+                    chip_hover_text_color?: string;
+                };
+            };
+        }
         export interface RemoveConsumerReq {
             consumer_id: /**
              * Id of the design
@@ -1957,8 +2236,7 @@ declare namespace Paths {
             theme: Parameters.Theme;
         }
         namespace Responses {
-            export interface $200 {
-            }
+            export type $200 = Components.Schemas.ParseThemeFromDesignResp;
             export type $400 = Components.Schemas.ErrorResp;
             export type $401 = Components.Schemas.ErrorResp;
             export interface $404 {
@@ -2336,6 +2614,7 @@ export type ItemMetada = Components.Schemas.ItemMetada;
 export type Journey = Components.Schemas.Journey;
 export type LogoData = Components.Schemas.LogoData;
 export type PaletteData = Components.Schemas.PaletteData;
+export type ParseThemeFromDesignResp = Components.Schemas.ParseThemeFromDesignResp;
 export type RemoveConsumerReq = Components.Schemas.RemoveConsumerReq;
 export type ShapeData = Components.Schemas.ShapeData;
 export type Theme = Components.Schemas.Theme;
