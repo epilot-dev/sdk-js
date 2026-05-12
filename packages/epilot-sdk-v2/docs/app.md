@@ -60,9 +60,14 @@ const { data } = await appClient.getPublicFacingComponent(...)
 - [`queryEvents`](#queryevents)
 - [`ingestEvent`](#ingestevent)
 
+**App Proxy**
+- [`publicProxyGet`](#publicproxyget)
+- [`publicProxyPost`](#publicproxypost)
+
 **Schemas**
 - [`Role`](#role)
 - [`Options`](#options)
+- [`ObjectField`](#objectfield)
 - [`Option`](#option)
 - [`OptionsRef`](#optionsref)
 - [`S3Reference`](#s3reference)
@@ -72,6 +77,7 @@ const { data } = await appClient.getPublicFacingComponent(...)
 - [`NotificationEvent`](#notificationevent)
 - [`BaseComponentCommon`](#basecomponentcommon)
 - [`BaseComponent`](#basecomponent)
+- [`ApiProxyComponent`](#apiproxycomponent)
 - [`CustomCapabilityComponent`](#customcapabilitycomponent)
 - [`CustomPageComponent`](#custompagecomponent)
 - [`CustomPageConfig`](#custompageconfig)
@@ -94,6 +100,8 @@ const { data } = await appClient.getPublicFacingComponent(...)
 - [`PortalExtensionHookMeterReadingPlausibilityCheck`](#portalextensionhookmeterreadingplausibilitycheck)
 - [`PortalExtensionHookPriceDataRetrieval`](#portalextensionhookpricedataretrieval)
 - [`PortalExtensionHookConsumptionDataRetrieval`](#portalextensionhookconsumptiondataretrieval)
+- [`PortalExtensionHookDataExport`](#portalextensionhookdataexport)
+- [`PortalExtensionHookVisualizationMetadata`](#portalextensionhookvisualizationmetadata)
 - [`PortalExtensionHookCostDataRetrieval`](#portalextensionhookcostdataretrieval)
 - [`PortalExtensionSeamlessLink`](#portalextensionseamlesslink)
 - [`PortalExtensionAuthBlock`](#portalextensionauthblock)
@@ -107,6 +115,7 @@ const { data } = await appClient.getPublicFacingComponent(...)
 - [`JourneyBlockComponentArgs`](#journeyblockcomponentargs)
 - [`TextArg`](#textarg)
 - [`BooleanArg`](#booleanarg)
+- [`BlockReferenceArg`](#blockreferencearg)
 - [`EnumArg`](#enumarg)
 - [`BillingFrequency`](#billingfrequency)
 - [`Pricing`](#pricing)
@@ -114,6 +123,7 @@ const { data } = await appClient.getPublicFacingComponent(...)
 - [`Review`](#review)
 - [`ConfigurationMetadata`](#configurationmetadata)
 - [`ConfigurationVersion`](#configurationversion)
+- [`ApiProxyConfig`](#apiproxyconfig)
 - [`Grants`](#grants)
 - [`BlueprintRef`](#blueprintref)
 - [`Installation`](#installation)
@@ -1668,6 +1678,41 @@ const { data } = await client.ingestEvent(
 
 ---
 
+### `publicProxyGet`
+
+Forward a GET request to a registered proxy target from a public-facing component (e.g. journey blocks)
+
+`GET /v1/public/app/{appId}/proxy/{proxyName}/{path}`
+
+```ts
+const { data } = await client.publicProxyGet({
+  appId: 'example',
+  proxyName: 'example',
+  path: 'example',
+})
+```
+
+---
+
+### `publicProxyPost`
+
+Forward a POST request to a registered proxy target from a public-facing component (e.g. journey blocks)
+
+`POST /v1/public/app/{appId}/proxy/{proxyName}/{path}`
+
+```ts
+const { data } = await client.publicProxyPost(
+  {
+    appId: 'example',
+    proxyName: 'example',
+    path: 'example',
+  },
+  {},
+)
+```
+
+---
+
 ## Schemas
 
 ### `Role`
@@ -1692,7 +1737,31 @@ type Options = {
   label?: string
   required?: boolean
   description?: string
+  repeatable?: boolean
+  fields?: Array<{
+    key: string
+    label?: string
+    description?: string
+    required?: boolean
+    type: "text" | "number" | "boolean" | "secret"
+  }>
   value?: unknown
+  type: "text" | "number" | "boolean" | "secret" | "object"
+}
+```
+
+### `ObjectField`
+
+One declared field inside a `type: object` option. Fields are primitives — object nesting
+is not supported.
+
+
+```ts
+type ObjectField = {
+  key: string
+  label?: string
+  description?: string
+  required?: boolean
   type: "text" | "number" | "boolean" | "secret"
 }
 ```
@@ -1732,7 +1801,7 @@ type S3Reference = {
 Type of app component
 
 ```ts
-type ComponentType = "CUSTOM_JOURNEY_BLOCK" | "CUSTOM_PORTAL_BLOCK" | "PORTAL_EXTENSION" | "CUSTOM_FLOW_ACTION" | "ERP_INFORM_TOOLKIT" | "CUSTOM_CAPABILITY" | "EXTERNAL_PRODUCT_CATALOG" | "CUSTOM_PAGE"
+type ComponentType = "CUSTOM_JOURNEY_BLOCK" | "CUSTOM_PORTAL_BLOCK" | "PORTAL_EXTENSION" | "CUSTOM_FLOW_ACTION" | "ERP_INFORM_TOOLKIT" | "CUSTOM_CAPABILITY" | "EXTERNAL_PRODUCT_CATALOG" | "CUSTOM_PAGE" | "API_PROXY"
 ```
 
 ### `Author`
@@ -1778,8 +1847,16 @@ type BaseComponentCommon = {
     label?: string
     required?: boolean
     description?: string
+    repeatable?: boolean
+    fields?: Array<{
+      key: { ... }
+      label?: { ... }
+      description?: { ... }
+      required?: { ... }
+      type: { ... }
+    }>
     value?: unknown
-    type: "text" | "number" | "boolean" | "secret"
+    type: "text" | "number" | "boolean" | "secret" | "object"
   }>
   surfaces?: object
 }
@@ -1803,10 +1880,33 @@ type BaseComponent = {
     label?: string
     required?: boolean
     description?: string
+    repeatable?: boolean
+    fields?: Array<{
+      key: { ... }
+      label?: { ... }
+      description?: { ... }
+      required?: { ... }
+      type: { ... }
+    }>
     value?: unknown
-    type: "text" | "number" | "boolean" | "secret"
+    type: "text" | "number" | "boolean" | "secret" | "object"
   }>
   surfaces?: object
+}
+```
+
+### `ApiProxyComponent`
+
+```ts
+type ApiProxyComponent = {
+  component_type: "API_PROXY"
+  configuration: {
+    name: string
+    target: string // uri
+    auth_type: "header" | "bearer" | "oauth2" | "none"
+    auth_header?: string
+    token_url?: string // uri
+  }
 }
 ```
 
@@ -2190,6 +2290,15 @@ type PortalExtensionComponent = {
       id: { ... }
       name?: { ... }
       type: { ... }
+      block_types?: { ... }
+      auth?: { ... }
+      call: { ... }
+      use_static_ips?: { ... }
+      secure_proxy?: { ... }
+    } | {
+      id: { ... }
+      name?: { ... }
+      type: { ... }
       intervals?: { ... }
       auth?: { ... }
       call: { ... }
@@ -2204,6 +2313,15 @@ type PortalExtensionComponent = {
       auth?: { ... }
       call: { ... }
       resolved: { ... }
+      use_static_ips?: { ... }
+      secure_proxy?: { ... }
+    } | {
+      id: { ... }
+      name?: { ... }
+      type: { ... }
+      auth?: { ... }
+      call: { ... }
+      resolved?: { ... }
       use_static_ips?: { ... }
       secure_proxy?: { ... }
     }>
@@ -2553,6 +2671,86 @@ type PortalExtensionHookConsumptionDataRetrieval = {
 }
 ```
 
+### `PortalExtensionHookDataExport`
+
+Generic data export hook. When configured on blocks that support it, the portal delegates the export action (e.g. CSV/Excel/PDF download) to the configured external source instead of generating the file itself. Can be used by any block that supports export — consumption charts, dynamic tariff charts
+
+```ts
+type PortalExtensionHookDataExport = {
+  id: string
+  name?: {
+    en?: string
+    de: string
+  }
+  type: "dataExport"
+  block_types?: string[]
+  auth?: {
+    method?: string
+    url: string
+    params?: Record<string, string>
+    headers?: Record<string, string>
+    body?: Record<string, unknown>
+    cache?: {
+      key: { ... }
+      ttl: { ... }
+    }
+  }
+  call: {
+    method?: string
+    url: string
+    params?: Record<string, string>
+    headers?: Record<string, string>
+    body?: Record<string, unknown>
+  }
+  use_static_ips?: boolean
+  secure_proxy?: {
+    integration_id: string // uuid
+    use_case_slug: string
+  }
+}
+```
+
+### `PortalExtensionHookVisualizationMetadata`
+
+Hook that returns runtime metadata describing how a visualization (consumption / price / cost chart) should be rendered for a given portal context (meter, contract, etc). It is invoked by the portal before fetching data, with the same context the data hook would receive, so that the discovery shape 
+
+```ts
+type PortalExtensionHookVisualizationMetadata = {
+  id: string
+  name?: {
+    en?: string
+    de: string
+  }
+  type: "visualizationMetadata"
+  auth?: {
+    method?: string
+    url: string
+    params?: Record<string, string>
+    headers?: Record<string, string>
+    body?: Record<string, unknown>
+    cache?: {
+      key: { ... }
+      ttl: { ... }
+    }
+  }
+  call: {
+    method?: string
+    url: string
+    params?: Record<string, string>
+    headers?: Record<string, string>
+    body?: Record<string, unknown>
+  }
+  resolved?: {
+    dataPath?: string
+  }
+  use_static_ips?: boolean
+  secure_proxy?: {
+    integration_id: string // uuid
+    use_case_slug: string
+  }
+}
+```
+
 ### `PortalExtensionHookCostDataRetrieval`
 
 Hook that will allow using the specified source as data for consumption visualizations. This hook is triggered to fetch the data. Format of the request and response has to follow the following specification: TBD. The expected response to the call is:
@@ -2690,7 +2888,7 @@ type JourneyBlockConfig = {
   component_tag: string
   component_args?: Array<{
     key: string
-    type: "text" | "boolean" | "enum"
+    type: "text" | "boolean" | "enum" | "block_reference"
     required?: boolean
     description?: {
       en?: { ... }
@@ -2738,7 +2936,7 @@ type PortalBlockSurfaceConfig = {
 ```ts
 type JourneyBlockComponentArgs = {
   key: string
-  type: "text" | "boolean" | "enum"
+  type: "text" | "boolean" | "enum" | "block_reference"
   required?: boolean
   description?: {
     en?: string
@@ -2764,6 +2962,21 @@ type TextArg = {
 ```ts
 type BooleanArg = {
   type?: "boolean"
+}
+```
+
+### `BlockReferenceArg`
+
+References another journey block by its ID. The configuring user picks
+a block from the journey via a dropdown in the journey-builder; the
+chosen block's ID is stored as the arg value (a string). The bundle can
+then call `subscribe(blockId, cb)` / `getValue(blockId)` against that ID.
+
+
+```ts
+type BlockReferenceArg = {
+  type?: "block_reference"
+  allowed_types?: string[]
 }
 ```
 
@@ -2892,6 +3105,8 @@ type ConfigurationVersion = {
       label?: { ... }
       required?: { ... }
       description?: { ... }
+      repeatable?: { ... }
+      fields?: { ... }
       value?: { ... }
       type: { ... }
     }>
@@ -2925,6 +3140,20 @@ type ConfigurationVersion = {
     versioned_at?: string
     versioned_by?: string
   }
+}
+```
+
+### `ApiProxyConfig`
+
+Configuration for an API proxy component
+
+```ts
+type ApiProxyConfig = {
+  name: string
+  target: string // uri
+  auth_type: "header" | "bearer" | "oauth2" | "none"
+  auth_header?: string
+  token_url?: string // uri
 }
 ```
 
@@ -2982,6 +3211,8 @@ type Installation = {
       label?: { ... }
       required?: { ... }
       description?: { ... }
+      repeatable?: { ... }
+      fields?: { ... }
       value?: { ... }
       type: { ... }
     }>
@@ -3046,6 +3277,8 @@ type PublicConfiguration = {
       label?: { ... }
       required?: { ... }
       description?: { ... }
+      repeatable?: { ... }
+      fields?: { ... }
       value?: { ... }
       type: { ... }
     }>
@@ -3163,6 +3396,8 @@ type Configuration = {
       label?: { ... }
       required?: { ... }
       description?: { ... }
+      repeatable?: { ... }
+      fields?: { ... }
       value?: { ... }
       type: { ... }
     }>
@@ -3231,7 +3466,7 @@ type BatchEventRequest = {
     timestamp?: string
     correlation_id?: string
     event_type: "ERROR" | "WARNING" | "INFO"
-    source: "CUSTOM_JOURNEY_BLOCK" | "CUSTOM_PORTAL_BLOCK" | "PORTAL_EXTENSION" | "CUSTOM_FLOW_ACTION" | "ERP_INFORM_TOOLKIT" | "CUSTOM_CAPABILITY" | "EXTERNAL_PRODUCT_CATALOG" | "CUSTOM_PAGE"
+    source: "CUSTOM_JOURNEY_BLOCK" | "CUSTOM_PORTAL_BLOCK" | "PORTAL_EXTENSION" | "CUSTOM_FLOW_ACTION" | "ERP_INFORM_TOOLKIT" | "CUSTOM_CAPABILITY" | "EXTERNAL_PRODUCT_CATALOG" | "CUSTOM_PAGE" | "API_PROXY"
     actor: {
       org_id?: { ... }
       user_id?: { ... }
@@ -3263,7 +3498,7 @@ type AppEventData = {
   timestamp?: string
   correlation_id?: string
   event_type: "ERROR" | "WARNING" | "INFO"
-  source: "CUSTOM_JOURNEY_BLOCK" | "CUSTOM_PORTAL_BLOCK" | "PORTAL_EXTENSION" | "CUSTOM_FLOW_ACTION" | "ERP_INFORM_TOOLKIT" | "CUSTOM_CAPABILITY" | "EXTERNAL_PRODUCT_CATALOG" | "CUSTOM_PAGE"
+  source: "CUSTOM_JOURNEY_BLOCK" | "CUSTOM_PORTAL_BLOCK" | "PORTAL_EXTENSION" | "CUSTOM_FLOW_ACTION" | "ERP_INFORM_TOOLKIT" | "CUSTOM_CAPABILITY" | "EXTERNAL_PRODUCT_CATALOG" | "CUSTOM_PAGE" | "API_PROXY"
   actor: {
     org_id?: string
     user_id?: string
@@ -3283,7 +3518,7 @@ type EventsQuery = {
     preset?: "1h" | "6h" | "24h" | "7d" | "30d"
   }
   filters?: {
-    source?: "CUSTOM_JOURNEY_BLOCK" | "CUSTOM_PORTAL_BLOCK" | "PORTAL_EXTENSION" | "CUSTOM_FLOW_ACTION" | "ERP_INFORM_TOOLKIT" | "CUSTOM_CAPABILITY" | "EXTERNAL_PRODUCT_CATALOG" | "CUSTOM_PAGE"[]
+    source?: "CUSTOM_JOURNEY_BLOCK" | "CUSTOM_PORTAL_BLOCK" | "PORTAL_EXTENSION" | "CUSTOM_FLOW_ACTION" | "ERP_INFORM_TOOLKIT" | "CUSTOM_CAPABILITY" | "EXTERNAL_PRODUCT_CATALOG" | "CUSTOM_PAGE" | "API_PROXY"[]
     component_id?: string[]
     event_type?: "ERROR" | "WARNING" | "INFO"[]
     correlation_id?: string
@@ -3375,7 +3610,7 @@ type RawEvents = {
     timestamp?: string
     correlation_id?: string
     event_type: "ERROR" | "WARNING" | "INFO"
-    source: "CUSTOM_JOURNEY_BLOCK" | "CUSTOM_PORTAL_BLOCK" | "PORTAL_EXTENSION" | "CUSTOM_FLOW_ACTION" | "ERP_INFORM_TOOLKIT" | "CUSTOM_CAPABILITY" | "EXTERNAL_PRODUCT_CATALOG" | "CUSTOM_PAGE"
+    source: "CUSTOM_JOURNEY_BLOCK" | "CUSTOM_PORTAL_BLOCK" | "PORTAL_EXTENSION" | "CUSTOM_FLOW_ACTION" | "ERP_INFORM_TOOLKIT" | "CUSTOM_CAPABILITY" | "EXTERNAL_PRODUCT_CATALOG" | "CUSTOM_PAGE" | "API_PROXY"
     actor: {
       org_id?: { ... }
       user_id?: { ... }

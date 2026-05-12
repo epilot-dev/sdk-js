@@ -88,6 +88,19 @@
         "responses": {}
       }
     },
+    "/v1/webhooks/configs/{configId}/test-oauth": {
+      "post": {
+        "operationId": "testOAuth",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "configId",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v1/webhooks/configs/{configId}/trigger": {
       "post": {
         "operationId": "triggerWebhook",

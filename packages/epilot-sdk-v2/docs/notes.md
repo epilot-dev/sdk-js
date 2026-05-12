@@ -179,14 +179,17 @@ const { data } = await client.updateNote(
       }
     ],
     pinned_at: '1970-01-01T00:00:00.000Z',
-    created_by: {
-      type: 'user',
-      user_id: 'string',
-      display_name: 'string',
-      org_id: 'string',
-      email: 'string',
-      phone: 'string'
-    },
+    edited_at: '1970-01-01T00:00:00.000Z',
+    created_by: [
+      {
+        type: 'user',
+        user_id: 'string',
+        display_name: 'string',
+        org_id: 'string',
+        email: 'string',
+        phone: 'string'
+      }
+    ],
     read_by: ['string'],
     reactions: {}
   },
@@ -225,6 +228,7 @@ const { data } = await client.searchNotesByContext(
         id: 'string'
       }
     ],
+    include_related_schemas: ['string'],
     from: 0,
     size: 10
   },
@@ -476,14 +480,15 @@ type NotePatchRequestBody = {
     id: string
   }>
   pinned_at?: string // date-time
-  created_by?: {
+  edited_at?: string // date-time
+  created_by?: Array<{
     type: "user" | "group"
     user_id?: string
     display_name?: string
     org_id?: string
     email?: string
     phone?: string
-  }
+  }>
   read_by?: string[]
   reactions?: Record<string, string[]>
 }
@@ -561,14 +566,15 @@ type NotePutRequestBody = {
     id: string
   }>
   pinned_at?: string // date-time
-  created_by?: {
+  edited_at?: string // date-time
+  created_by?: Array<{
     type: "user" | "group"
     user_id?: string
     display_name?: string
     org_id?: string
     email?: string
     phone?: string
-  }
+  }>
   read_by?: string[]
   reactions?: Record<string, string[]>
 }
@@ -582,6 +588,7 @@ type NoteSearchByContextRequestBody = {
     type: "workflow_execution" | "workflow_task" | "workflow_configuration" | "journey_configuration" | "entity"
     id: string
   }>
+  include_related_schemas?: string[]
   from?: number
   size?: number
 }

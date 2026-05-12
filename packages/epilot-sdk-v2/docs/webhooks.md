@@ -32,6 +32,7 @@ const { data } = await webhooksClient.getPublicKey(...)
 - [`getConfig`](#getconfig)
 - [`updateConfig`](#updateconfig)
 - [`deleteConfig`](#deleteconfig)
+- [`testOAuth`](#testoauth)
 - [`triggerWebhook`](#triggerwebhook)
 - [`batchReplayEvents`](#batchreplayevents)
 - [`getEventById`](#geteventbyid)
@@ -67,6 +68,7 @@ const { data } = await webhooksClient.getPublicKey(...)
 - [`WebhookEvent`](#webhookevent)
 - [`ExampleRequest`](#examplerequest)
 - [`ExampleResponse`](#exampleresponse)
+- [`TestOAuthResponse`](#testoauthresponse)
 - [`BatchReplayRequest`](#batchreplayrequest)
 
 ### `getPublicKey`
@@ -328,6 +330,34 @@ const { data } = await client.deleteConfig({
   configId: 'example',
 })
 ```
+
+---
+
+### `testOAuth`
+
+Test OAuth connection
+
+`POST /v1/webhooks/configs/{configId}/test-oauth`
+
+```ts
+const { data } = await client.testOAuth({
+  configId: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "success": true,
+  "expires_in": 3600,
+  "token_type": "Bearer",
+  "message": "OAuth token exchange successful"
+}
+```
+
+</details>
 
 ---
 
@@ -798,6 +828,7 @@ type WebhookConfig = {
   eventName: string
   url?: string
   creationTime?: string
+  updatedTime?: string
   httpMethod?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | "OPTIONS" | "HEAD"
   enabled?: boolean
   auth?: {
@@ -830,6 +861,7 @@ type WebhookConfig = {
     include_relations?: boolean
     include_activity?: boolean
     include_changed_attributes?: boolean
+    apply_changesets?: boolean
     custom_headers?: Record<string, string>
   }
   enableStaticIP?: boolean
@@ -840,6 +872,11 @@ type WebhookConfig = {
   }
   status?: "active" | "inactive" | "incomplete"
   jsonataExpression?: string
+  deliveryMode?: "json_base64" | "binary_multipart"
+  multipartConfig?: {
+    fileFieldName?: string
+    metadataFieldName?: string
+  }
   filterConditions?: {
     conditions?: Array<{
       field: { ... }
@@ -907,6 +944,7 @@ type PayloadConfiguration = {
   include_relations?: boolean
   include_activity?: boolean
   include_changed_attributes?: boolean
+  apply_changesets?: boolean
   custom_headers?: Record<string, string>
 }
 ```
@@ -1035,6 +1073,17 @@ type ExampleResponse = {
   }
   entity?: Record<string, unknown>
   relations?: Record<string, unknown>[]
+}
+```
+
+### `TestOAuthResponse`
+
+```ts
+type TestOAuthResponse = {
+  success: boolean
+  expires_in?: number
+  token_type?: string
+  message: string
 }
 ```
 
