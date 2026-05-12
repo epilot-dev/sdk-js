@@ -14,7 +14,11 @@ export declare namespace Components {
          */
         export interface ApiKeyConfig {
             keyName: string;
-            keyValue?: string;
+            /**
+             * On update: omit to preserve existing, pass null to explicitly clear, pass string to set new value.
+             *
+             */
+            keyValue?: string | null;
             /**
              * When true, indicates the keyValue is an environment variable reference (e.g. {{ env.my_secret }})
              */
@@ -32,7 +36,11 @@ export declare namespace Components {
          */
         export interface BasicAuthConfig {
             username: string;
-            password?: string;
+            /**
+             * On update: omit to preserve existing, pass null to explicitly clear, pass string to set new value.
+             *
+             */
+            password?: string | null;
             /**
              * When true, indicates the password value is an environment variable reference (e.g. {{ env.my_secret }})
              */
@@ -306,7 +314,11 @@ export declare namespace Components {
          */
         export interface OAuthConfig {
             clientId: string;
-            clientSecret?: string;
+            /**
+             * On update: omit to preserve existing, pass null to explicitly clear, pass string to set new value.
+             *
+             */
+            clientSecret?: string | null;
             /**
              * When true, indicates the clientSecret value is an environment variable reference (e.g. {{ env.my_secret }})
              */
@@ -326,6 +338,10 @@ export declare namespace Components {
             include_relations?: boolean;
             include_activity?: boolean;
             include_changed_attributes?: boolean;
+            /**
+             * When true, entity fields show proposed changeset values instead of current values
+             */
+            apply_changesets?: boolean;
             custom_headers?: /* Object representing custom headers as key-value pairs. */ CustomHeader;
         }
         export interface PublicKeyResponse {
@@ -404,6 +420,32 @@ export declare namespace Components {
              * succeeded
              */
             status?: "succeeded" | "failed" | "skipped";
+        }
+        export interface TestOAuthResponse {
+            /**
+             * Whether the OAuth token exchange succeeded
+             * example:
+             * true
+             */
+            success: boolean;
+            /**
+             * Token validity in seconds as reported by the OAuth provider
+             * example:
+             * 3600
+             */
+            expires_in?: number;
+            /**
+             * Token type returned by the OAuth provider
+             * example:
+             * Bearer
+             */
+            token_type?: string;
+            /**
+             * Human-readable result message
+             * example:
+             * OAuth token exchange successful
+             */
+            message: string;
         }
         export interface TriggerWebhookResp {
             status_code?: string;
@@ -490,11 +532,17 @@ export declare namespace Components {
             eventName: string;
             url?: string;
             /**
-             * creation timestamp
+             * Timestamp the webhook was first created. Immutable after creation.
              * example:
              * 2021-04-27T12:01:13.000Z
              */
             creationTime?: string;
+            /**
+             * Timestamp of the most recent update to the webhook. Equals creationTime for never-edited webhooks. May be absent on legacy records written before this field was introduced.
+             * example:
+             * 2021-04-27T12:01:13.000Z
+             */
+            updatedTime?: string;
             httpMethod?: HttpMethod;
             enabled?: boolean;
             auth?: Auth;
@@ -517,6 +565,23 @@ export declare namespace Components {
              * JSONata expression to transform the payload
              */
             jsonataExpression?: string;
+            /**
+             * Controls how file data is delivered to the endpoint. Only relevant when the webhook is triggered by a file event. Absent for non-file-event webhooks.
+             */
+            deliveryMode?: "json_base64" | "binary_multipart";
+            /**
+             * Configuration for binary_multipart delivery mode. Specifies the field names used in the multipart form data request.
+             */
+            multipartConfig?: {
+                /**
+                 * The name of the form field containing the file binary data.
+                 */
+                fileFieldName?: string;
+                /**
+                 * The name of the form field containing the JSON metadata payload.
+                 */
+                metadataFieldName?: string;
+            };
             filterConditions?: /* A group of conditions with a logical operator. Multiple conditions are AND-ed by default. */ WebhookConditionGroup;
             /**
              * Manifest ID used to create/update the webhook resource
@@ -833,6 +898,20 @@ export declare namespace Paths {
             export type $500 = Components.Schemas.ErrorResp;
         }
     }
+    namespace TestOAuth {
+        namespace Parameters {
+            export type ConfigId = string;
+        }
+        export interface PathParameters {
+            configId: Parameters.ConfigId;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.TestOAuthResponse;
+            export type $400 = Components.Schemas.ErrorResp;
+            export type $404 = Components.Schemas.ErrorResp;
+            export type $500 = Components.Schemas.ErrorResp;
+        }
+    }
     namespace TriggerWebhook {
         namespace Parameters {
             export type ConfigId = string;
@@ -989,6 +1068,20 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteConfig.Responses.$204>
   /**
+   * testOAuth - Test OAuth connection
+   * 
+   * Tests the OAuth client credentials configuration for a saved webhook by attempting
+   * a token exchange against the configured OAuth endpoint. Returns success with token
+   * metadata (e.g. expires_in, token_type) or an error describing why the exchange failed.
+   * Does not send the actual webhook.
+   * 
+   */
+  'testOAuth'(
+    parameters?: Parameters<Paths.TestOAuth.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.TestOAuth.Responses.$200>
+  /**
    * triggerWebhook - triggers a webhook event either async or sync
    * 
    * Trigger a webhook
@@ -1141,6 +1234,22 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteConfig.Responses.$204>
   }
+  ['/v1/webhooks/configs/{configId}/test-oauth']: {
+    /**
+     * testOAuth - Test OAuth connection
+     * 
+     * Tests the OAuth client credentials configuration for a saved webhook by attempting
+     * a token exchange against the configured OAuth endpoint. Returns success with token
+     * metadata (e.g. expires_in, token_type) or an error describing why the exchange failed.
+     * Does not send the actual webhook.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.TestOAuth.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.TestOAuth.Responses.$200>
+  }
   ['/v1/webhooks/configs/{configId}/trigger']: {
     /**
      * triggerWebhook - triggers a webhook event either async or sync
@@ -1251,6 +1360,7 @@ export type OAuthConfig = Components.Schemas.OAuthConfig;
 export type PayloadConfiguration = Components.Schemas.PayloadConfiguration;
 export type PublicKeyResponse = Components.Schemas.PublicKeyResponse;
 export type SearchOptions = Components.Schemas.SearchOptions;
+export type TestOAuthResponse = Components.Schemas.TestOAuthResponse;
 export type TriggerWebhookResp = Components.Schemas.TriggerWebhookResp;
 export type WebhookCondition = Components.Schemas.WebhookCondition;
 export type WebhookConditionGroup = Components.Schemas.WebhookConditionGroup;

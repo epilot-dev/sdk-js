@@ -1,6 +1,4 @@
 /* Auto-copied from notes-client */
-/* eslint-disable */
-
 import type {
   OpenAPIClient,
   Parameters,
@@ -133,6 +131,10 @@ export declare namespace Components {
              * The timestamp of when this Note was pinned
              */
             pinned_at?: string; // date-time
+            /**
+             * The timestamp of when this Note was last updated
+             */
+            edited_at?: string; // date-time
             created_by?: {
                 type: "user" | "group";
                 user_id?: string;
@@ -140,7 +142,7 @@ export declare namespace Components {
                 org_id?: string;
                 email?: string;
                 phone?: string;
-            };
+            }[];
             /**
              * List of user IDs who have read this note
              */
@@ -232,7 +234,7 @@ export declare namespace Components {
                 org_id?: string;
                 email?: string;
                 phone?: string;
-            };
+            }[];
             /**
              * List of user IDs who have read this note
              */
@@ -325,7 +327,7 @@ export declare namespace Components {
                 org_id?: string;
                 email?: string;
                 phone?: string;
-            };
+            }[];
             /**
              * List of user IDs who have read this note
              */
@@ -367,6 +369,10 @@ export declare namespace Components {
              * The timestamp of when this Note was pinned
              */
             pinned_at?: string; // date-time
+            /**
+             * The timestamp of when this Note was last updated
+             */
+            edited_at?: string; // date-time
             created_by?: {
                 type: "user" | "group";
                 user_id?: string;
@@ -374,7 +380,7 @@ export declare namespace Components {
                 org_id?: string;
                 email?: string;
                 phone?: string;
-            };
+            }[];
             /**
              * List of user IDs who have read this note
              */
@@ -499,6 +505,10 @@ export declare namespace Components {
              * The timestamp of when this Note was pinned
              */
             pinned_at?: string; // date-time
+            /**
+             * The timestamp of when this Note was last updated
+             */
+            edited_at?: string; // date-time
             created_by?: {
                 type: "user" | "group";
                 user_id?: string;
@@ -506,7 +516,7 @@ export declare namespace Components {
                 org_id?: string;
                 email?: string;
                 phone?: string;
-            };
+            }[];
             /**
              * List of user IDs who have read this note
              */
@@ -519,10 +529,20 @@ export declare namespace Components {
             };
         }
         export interface NoteSearchByContextRequestBody {
-            contexts: {
-                type: ContextType;
-                id: string;
-            }[];
+            contexts: [
+                {
+                    type: ContextType;
+                    id: string;
+                },
+                ...{
+                    type: ContextType;
+                    id: string;
+                }[]
+            ];
+            /**
+             * When set, the API resolves related entities of these schemas for the primary entity context and includes their notes in the results.
+             */
+            include_related_schemas?: string[];
             /**
              * The index of the first Note to return in this query
              */
@@ -761,6 +781,7 @@ export declare namespace Paths {
         }
     }
 }
+
 
 export interface OperationMethods {
   /**
@@ -1029,6 +1050,7 @@ export interface PathsDictionary {
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
+
 
 export type ContextType = Components.Schemas.ContextType;
 export type CreatedByType = Components.Schemas.CreatedByType;

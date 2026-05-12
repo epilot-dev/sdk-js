@@ -4659,10 +4659,11 @@ type RecurrenceAmount = {
 
 ### `CashbackAmount`
 
-An amount associated with a specific cashback period.
+A detail associated with a specific cashback.
 
 ```ts
 type CashbackAmount = {
+  cashback_name?: string
   cashback_period: "0" | "12"
   amount_total: number
 }
@@ -4726,6 +4727,7 @@ type TotalDetails = {
       before_discount_amount_subtotal_decimal?: { ... }
     }>
     cashbacks?: Array<{
+      cashback_name?: { ... }
       cashback_period: { ... }
       amount_total: { ... }
     }>

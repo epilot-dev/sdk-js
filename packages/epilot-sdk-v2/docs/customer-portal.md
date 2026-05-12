@@ -102,6 +102,8 @@ const { data } = await customerPortalClient.upsertPortal(...)
 - [`validateToken`](#validatetoken)
 - [`revokeToken`](#revoketoken)
 - [`getConsumption`](#getconsumption)
+- [`prepareVisualizationExport`](#preparevisualizationexport)
+- [`getVisualizationMetadata`](#getvisualizationmetadata)
 - [`getCosts`](#getcosts)
 - [`getPrices`](#getprices)
 - [`getResolvedSeamlessLink`](#getresolvedseamlesslink)
@@ -248,8 +250,12 @@ const { data } = await customerPortalClient.upsertPortal(...)
 - [`ExtensionHookSelection`](#extensionhookselection)
 - [`PublicExtensionCapabilities`](#publicextensioncapabilities)
 - [`DataRetrievalItem`](#dataretrievalitem)
+- [`PublicAppDetails`](#publicappdetails)
 - [`PublicExtensionDetails`](#publicextensiondetails)
 - [`PublicDataRetrievalHookDetails`](#publicdataretrievalhookdetails)
+- [`VisualizationMetadata`](#visualizationmetadata)
+- [`VisualizationTypeOption`](#visualizationtypeoption)
+- [`VisualizationDataRange`](#visualizationdatarange)
 - [`PublicContractIdentificationDetails`](#publiccontractidentificationdetails)
 - [`PublicMeterReadingPlausibilityCheckDetails`](#publicmeterreadingplausibilitycheckdetails)
 - [`Extension`](#extension)
@@ -260,6 +266,8 @@ const { data } = await customerPortalClient.upsertPortal(...)
 - [`ExtensionHookMeterReadingPlausibilityCheck`](#extensionhookmeterreadingplausibilitycheck)
 - [`ExtensionHookPriceDataRetrieval`](#extensionhookpricedataretrieval)
 - [`ExtensionHookConsumptionDataRetrieval`](#extensionhookconsumptiondataretrieval)
+- [`ExtensionHookDataExport`](#extensionhookdataexport)
+- [`ExtensionHookVisualizationMetadata`](#extensionhookvisualizationmetadata)
 - [`ExtensionHookCostDataRetrieval`](#extensionhookcostdataretrieval)
 - [`SecureProxyConfig`](#secureproxyconfig)
 - [`ExtensionAuthBlock`](#extensionauthblock)
@@ -1299,74 +1307,45 @@ const { data } = await client.getPublicPortalExtensionDetails({
 {
   "consumptionDataRetrieval": [
     {
-      "extension": {
-        "id": "string",
-        "name": {
-          "en": "string"
-        }
-      },
-      "hook": {
-        "id": "string",
-        "name": {
-          "en": "string"
-        },
-        "intervals": ["string"]
-      }
+      "app": {},
+      "extension": {},
+      "hook": {}
+    }
+  ],
+  "dataExport": [
+    {
+      "app": {},
+      "extension": {},
+      "hook": {}
     }
   ],
   "priceDataRetrieval": [
     {
-      "extension": {
-        "id": "string",
-        "name": {
-          "en": "string"
-        }
-      },
-      "hook": {
-        "id": "string",
-        "name": {
-          "en": "string"
-        },
-        "intervals": ["string"]
-      }
+      "app": {},
+      "extension": {},
+      "hook": {}
     }
   ],
   "costDataRetrieval": [
     {
-      "extension": {
-        "id": "string",
-        "name": {
-          "en": "string"
-        }
-      },
-      "hook": {
-        "id": "string",
-        "name": {
-          "en": "string"
-        },
-        "intervals": ["string"]
-      }
+      "app": {},
+      "extension": {},
+      "hook": {}
     }
   ],
   "contractIdentification": {
     "extension": {
       "id": "string",
-      "name": {
-        "en": "string"
-      }
+      "name": {}
     },
     "hook": {
-      "explanation": {
-        "en": "This process will give you access to all Contracts kept"
-      }
+      "explanation": {}
     }
   },
   "meterReadingPlausibilityCheck": {
     "extension": {
       "id": "string",
-      "name": {
-        "en": "string"
-      }
+      "name": {}
     },
     "hook": {
       "plausibility_mode": "check"
@@ -1510,74 +1489,45 @@ const { data } = await client.getPublicPortalExtensionDetailsV3({
 {
   "consumptionDataRetrieval": [
     {
-      "extension": {
-        "id": "string",
-        "name": {
-          "en": "string"
-        }
-      },
-      "hook": {
-        "id": "string",
-        "name": {
-          "en": "string"
-        },
-        "intervals": ["string"]
-      }
+      "app": {},
+      "extension": {},
+      "hook": {}
+    }
+  ],
+  "dataExport": [
+    {
+      "app": {},
+      "extension": {},
+      "hook": {}
     }
   ],
   "priceDataRetrieval": [
     {
-      "extension": {
-        "id": "string",
-        "name": {
-          "en": "string"
-        }
-      },
-      "hook": {
-        "id": "string",
-        "name": {
-          "en": "string"
-        },
-        "intervals": ["string"]
-      }
+      "app": {},
+      "extension": {},
+      "hook": {}
     }
   ],
   "costDataRetrieval": [
     {
-      "extension": {
-        "id": "string",
-        "name": {
-          "en": "string"
-        }
-      },
-      "hook": {
-        "id": "string",
-        "name": {
-          "en": "string"
-        },
-        "intervals": ["string"]
-      }
+      "app": {},
+      "extension": {},
+      "hook": {}
     }
   ],
   "contractIdentification": {
     "extension": {
       "id": "string",
-      "name": {
-        "en": "string"
-      }
+      "name": {}
     },
     "hook": {
-      "explanation": {
-        "en": "This process will give you access to all Contracts kept"
-      }
+      "explanation": {}
     }
   },
   "meterReadingPlausibilityCheck": {
     "extension": {
       "id": "string",
-      "name": {
-        "en": "string"
-      }
+      "name": {}
     },
     "hook": {
       "plausibility_mode": "check"
@@ -1619,9 +1569,92 @@ const { data } = await client.getConsumption({
       "timestamp": "1970-01-01T00:00:00.000Z",
       "value": 0,
       "type": "nt",
-      "aggregation_method": "sum"
+      "unit": "kWh"
     }
   ]
+}
+```
+
+</details>
+
+---
+
+### `prepareVisualizationExport`
+
+Prepare Visualization Export
+
+`POST /v2/portal/visualization:export`
+
+```ts
+const { data } = await client.prepareVisualizationExport(
+  null,
+  {
+    app_id: 'string',
+    extension_id: 'string',
+    hook_id: 'string',
+    from: '1970-01-01T00:00:00.000Z',
+    to: '1970-01-01T00:00:00.000Z',
+    context_entities: [
+      {
+        entity_id: '5da0a718-c822-403d-9f5d-20d4584e0528',
+        entity_schema: 'contract'
+      }
+    ]
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "download_url": "string",
+  "filename": "string",
+  "content_type": "text/csv",
+  "expires_at": "1970-01-01T00:00:00.000Z"
+}
+```
+
+</details>
+
+---
+
+### `getVisualizationMetadata`
+
+Get Visualization Metadata
+
+`GET /v2/portal/visualization/metadata`
+
+```ts
+const { data } = await client.getVisualizationMetadata({
+  app_id: 'example',
+  extensionId: 'example',
+  context_entities: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "type_options": [
+    {
+      "id": "string",
+      "label": {},
+      "aggregation_group": "string",
+      "statistical_method": "sum",
+      "unit": "string",
+      "color": "primary",
+      "precision": 0
+    }
+  ],
+  "intervals": ["PT15M"],
+  "data_range": {
+    "from": "1970-01-01T00:00:00.000Z",
+    "to": "1970-01-01T00:00:00.000Z"
+  }
 }
 ```
 
@@ -2927,6 +2960,8 @@ const { data } = await client.getPublicPortalWidgetsV3({
 
 ```json
 {
+  "portal_sk_v3": "string",
+  "is_v3_item": true,
   "widgets": [
     {
       "id": "string",
@@ -2982,6 +3017,8 @@ const { data } = await client.getPortalWidgetsV3({
 
 ```json
 {
+  "portal_sk_v3": "string",
+  "is_v3_item": true,
   "widgets": [
     {
       "id": "string",
@@ -3031,6 +3068,8 @@ const { data } = await client.upsertPortalWidgetV3(
     portal_id: 'example',
   },
   {
+    portal_sk_v3: 'string',
+    is_v3_item: true,
     widgets: [
       {
         id: 'string',
@@ -3071,6 +3110,8 @@ const { data } = await client.upsertPortalWidgetV3(
 
 ```json
 {
+  "portal_sk_v3": "string",
+  "is_v3_item": true,
   "widgets": [
     {
       "id": "string",
@@ -5342,7 +5383,8 @@ const { data } = await client.uploadMeterReadingPhoto(
     },
     "reading": "000123.45",
     "sector": "water",
-    "meter_numbers": ["00123456"]
+    "meter_numbers": ["00123456"],
+    "file_id": "abc123def456"
   }
 }
 ```
@@ -5651,7 +5693,8 @@ const { data } = await client.getPortalPage({
   "is_deleted": false,
   "id": "c495fef9-eeca-4019-a989-8390dcd9825b",
   "last_modified_at": "2021-02-09T12:41:43.662Z",
-  "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c"
+  "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
+  "past_routes": ["old-dashboard", "home"]
 }
 ```
 
@@ -5732,7 +5775,8 @@ const { data } = await client.updatePortalPage(
   "is_deleted": false,
   "id": "c495fef9-eeca-4019-a989-8390dcd9825b",
   "last_modified_at": "2021-02-09T12:41:43.662Z",
-  "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c"
+  "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
+  "past_routes": ["old-dashboard", "home"]
 }
 ```
 
@@ -5803,7 +5847,8 @@ const { data } = await client.getPortalPages({
     "is_deleted": false,
     "id": "c495fef9-eeca-4019-a989-8390dcd9825b",
     "last_modified_at": "2021-02-09T12:41:43.662Z",
-    "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c"
+    "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
+    "past_routes": ["old-dashboard", "home"]
   }
 ]
 ```
@@ -5885,7 +5930,8 @@ const { data } = await client.createPortalPage(
   "is_deleted": false,
   "id": "c495fef9-eeca-4019-a989-8390dcd9825b",
   "last_modified_at": "2021-02-09T12:41:43.662Z",
-  "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c"
+  "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
+  "past_routes": ["old-dashboard", "home"]
 }
 ```
 
@@ -5940,7 +5986,8 @@ const { data } = await client.getPublicPages({
     "is_deleted": false,
     "id": "c495fef9-eeca-4019-a989-8390dcd9825b",
     "last_modified_at": "2021-02-09T12:41:43.662Z",
-    "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c"
+    "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
+    "past_routes": ["old-dashboard", "home"]
   }
 ]
 ```
@@ -5988,7 +6035,8 @@ const { data } = await client.interpolatePortalPages(
         is_deleted: false,
         id: 'c495fef9-eeca-4019-a989-8390dcd9825b',
         last_modified_at: '2021-02-09T12:41:43.662Z',
-        portal_id: '453ad7bf-86d5-46c8-8252-bcc868df5e3c'
+        portal_id: '453ad7bf-86d5-46c8-8252-bcc868df5e3c',
+        past_routes: ['old-dashboard', 'home']
       }
     ],
     context_entities: [
@@ -6035,7 +6083,8 @@ const { data } = await client.interpolatePortalPages(
     "is_deleted": false,
     "id": "c495fef9-eeca-4019-a989-8390dcd9825b",
     "last_modified_at": "2021-02-09T12:41:43.662Z",
-    "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c"
+    "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
+    "past_routes": ["old-dashboard", "home"]
   }
 ]
 ```
@@ -6087,7 +6136,8 @@ const { data } = await client.getDefaultPages()
     "is_deleted": false,
     "id": "c495fef9-eeca-4019-a989-8390dcd9825b",
     "last_modified_at": "2021-02-09T12:41:43.662Z",
-    "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c"
+    "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
+    "past_routes": ["old-dashboard", "home"]
   }
 ]
 ```
@@ -6901,7 +6951,8 @@ const { data } = await client.createPortalConfig(
       "is_deleted": false,
       "id": "c495fef9-eeca-4019-a989-8390dcd9825b",
       "last_modified_at": "2021-02-09T12:41:43.662Z",
-      "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c"
+      "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
+      "past_routes": ["old-dashboard", "home"]
     }
   ]
 }
@@ -7140,7 +7191,8 @@ const { data } = await client.getPortalConfigV3({
       "is_deleted": false,
       "id": "c495fef9-eeca-4019-a989-8390dcd9825b",
       "last_modified_at": "2021-02-09T12:41:43.662Z",
-      "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c"
+      "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
+      "past_routes": ["old-dashboard", "home"]
     }
   ]
 }
@@ -7375,7 +7427,8 @@ const { data } = await client.putPortalConfig(
         is_deleted: false,
         id: 'c495fef9-eeca-4019-a989-8390dcd9825b',
         last_modified_at: '2021-02-09T12:41:43.662Z',
-        portal_id: '453ad7bf-86d5-46c8-8252-bcc868df5e3c'
+        portal_id: '453ad7bf-86d5-46c8-8252-bcc868df5e3c',
+        past_routes: ['old-dashboard', 'home']
       }
     ]
   },
@@ -7599,7 +7652,8 @@ const { data } = await client.putPortalConfig(
       "is_deleted": false,
       "id": "c495fef9-eeca-4019-a989-8390dcd9825b",
       "last_modified_at": "2021-02-09T12:41:43.662Z",
-      "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c"
+      "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
+      "past_routes": ["old-dashboard", "home"]
     }
   ]
 }
@@ -7955,7 +8009,8 @@ const { data } = await client.clonePortalConfig(
       "is_deleted": false,
       "id": "c495fef9-eeca-4019-a989-8390dcd9825b",
       "last_modified_at": "2021-02-09T12:41:43.662Z",
-      "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c"
+      "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
+      "past_routes": ["old-dashboard", "home"]
     }
   ]
 }
@@ -8637,6 +8692,8 @@ type PortalConfig = {
 
 ```ts
 type UpsertPortalWidget = {
+  portal_sk_v3?: string
+  is_v3_item?: boolean
   widgets: Array<{
     id: string
     type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET" | "PRODUCT_RECOMMENDATIONS_WIDGET"
@@ -8734,8 +8791,6 @@ type UpsertPortalWidget = {
     subHeadline?: {
       en?: { ... }
       de?: { ... }
-    }
-    schema?: string
   // ...
 }
 ```
@@ -10052,6 +10107,10 @@ type ExtensionHookSelection = {
 ```ts
 type PublicExtensionCapabilities = {
   consumptionDataRetrieval?: Array<{
+    app?: {
+      app_id?: { ... }
+      name?: { ... }
+    }
     extension?: {
       id?: { ... }
       name?: { ... }
@@ -10060,9 +10119,30 @@ type PublicExtensionCapabilities = {
       id?: { ... }
       name?: { ... }
       intervals?: { ... }
+      block_types?: { ... }
+    }
+  }>
+  dataExport?: Array<{
+    app?: {
+      app_id?: { ... }
+      name?: { ... }
+    }
+    extension?: {
+      id?: { ... }
+      name?: { ... }
+    }
+    hook?: {
+      id?: { ... }
+      name?: { ... }
+      intervals?: { ... }
+      block_types?: { ... }
     }
   }>
   priceDataRetrieval?: Array<{
+    app?: {
+      app_id?: { ... }
+      name?: { ... }
+    }
     extension?: {
       id?: { ... }
       name?: { ... }
@@ -10071,9 +10151,14 @@ type PublicExtensionCapabilities = {
       id?: { ... }
       name?: { ... }
       intervals?: { ... }
+      block_types?: { ... }
     }
   }>
   costDataRetrieval?: Array<{
+    app?: {
+      app_id?: { ... }
+      name?: { ... }
+    }
     extension?: {
       id?: { ... }
       name?: { ... }
@@ -10082,6 +10167,7 @@ type PublicExtensionCapabilities = {
       id?: { ... }
       name?: { ... }
       intervals?: { ... }
+      block_types?: { ... }
     }
   }>
   contractIdentification?: {
@@ -10109,6 +10195,12 @@ type PublicExtensionCapabilities = {
 
 ```ts
 type DataRetrievalItem = {
+  app?: {
+    app_id?: string
+    name?: {
+      en: { ... }
+    }
+  }
   extension?: {
     id?: string
     name?: {
@@ -10121,6 +10213,18 @@ type DataRetrievalItem = {
       en: { ... }
     }
     intervals?: string[]
+    block_types?: string[]
+  }
+}
+```
+
+### `PublicAppDetails`
+
+```ts
+type PublicAppDetails = {
+  app_id?: string
+  name?: {
+    en: string
   }
 }
 ```
@@ -10145,6 +10249,56 @@ type PublicDataRetrievalHookDetails = {
     en: string
   }
   intervals?: string[]
+  block_types?: string[]
+}
+```
+
+### `VisualizationMetadata`
+
+Runtime metadata describing how a visualization should be rendered for a given portal context. Returned by `GET /v2/portal/visualization/metadata`.
+
+
+```ts
+type VisualizationMetadata = {
+  type_options?: Array<{
+    id: string
+    label?: Record<string, string>
+    aggregation_group?: string
+    statistical_method?: "sum" | "average" | "min" | "max"
+    unit?: string
+    color?: "primary" | "slate" | "mauve" | "orange" | "red" | "tomato" | "amber" | "green" | "blue"
+    precision?: number
+  }>
+  intervals?: "PT15M" | "PT1H" | "P1D" | "P1M"[]
+  data_range?: {
+    from?: string // date-time
+    to?: string // date-time
+  }
+}
+```
+
+### `VisualizationTypeOption`
+
+```ts
+type VisualizationTypeOption = {
+  id: string
+  label?: Record<string, string>
+  aggregation_group?: string
+  statistical_method?: "sum" | "average" | "min" | "max"
+  unit?: string
+  color?: "primary" | "slate" | "mauve" | "orange" | "red" | "tomato" | "amber" | "green" | "blue"
+  precision?: number
+}
+```
+
+### `VisualizationDataRange`
+
+Earliest / latest timestamps for which data is available in the current context.
+
+```ts
+type VisualizationDataRange = {
+  from?: string // date-time
+  to?: string // date-time
 }
 ```
 
@@ -10459,6 +10613,77 @@ type ExtensionHookConsumptionDataRetrieval = {
 }
 ```
 
+### `ExtensionHookDataExport`
+
+Generic data export hook. When configured on a visualization block, the portal delegates the export action (e.g. CSV/Excel/PDF download) to the configured external source instead of generating the file itself. Can be used by any block that supports export — consumption charts, dynamic tariff charts,
+
+```ts
+type ExtensionHookDataExport = {
+  type: "dataExport"
+  block_types?: string[]
+  auth?: {
+    method?: string
+    url: string
+    params?: Record<string, string>
+    headers?: Record<string, string>
+    body?: Record<string, string>
+    cache?: {
+      key: { ... }
+      ttl: { ... }
+    }
+  }
+  call: {
+    method?: string
+    url: string
+    params?: Record<string, string>
+    headers?: Record<string, string>
+    body?: Record<string, string>
+  }
+  use_static_ips?: boolean
+  secure_proxy?: {
+    integration_id: string // uuid
+    use_case_slug: string
+  }
+}
+```
+
+### `ExtensionHookVisualizationMetadata`
+
+Hook that returns runtime metadata describing how a visualization should be rendered for a given portal context. Invoked by the portal before fetching data, with the same context the data hook receives.
+
+
+```ts
+type ExtensionHookVisualizationMetadata = {
+  type: "visualizationMetadata"
+  auth?: {
+    method?: string
+    url: string
+    params?: Record<string, string>
+    headers?: Record<string, string>
+    body?: Record<string, string>
+    cache?: {
+      key: { ... }
+      ttl: { ... }
+    }
+  }
+  call: {
+    method?: string
+    url: string
+    params?: Record<string, string>
+    headers?: Record<string, string>
+    body?: Record<string, string>
+  }
+  resolved?: {
+    dataPath?: string
+  }
+  use_static_ips?: boolean
+  secure_proxy?: {
+    integration_id: string // uuid
+    use_case_slug: string
+  }
+}
+```
+
 ### `ExtensionHookCostDataRetrieval`
 
 Hook that will allow using the specified source as data for consumption visualizations. This hook is triggered to fetch the data. Format of the request and response has to follow the following specification: TBD. The expected response to the call is:
@@ -10608,6 +10833,7 @@ type MeterReadingPhotoData = {
   reading?: string
   sector?: string
   meter_numbers?: string[]
+  file_id?: string
 }
 ```
 
@@ -11038,6 +11264,7 @@ type Page = {
   id?: string // uuid
   last_modified_at?: string // date-time
   portal_id?: string
+  past_routes?: string[]
 }
 ```
 

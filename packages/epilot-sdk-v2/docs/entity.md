@@ -261,6 +261,8 @@ const { data } = await entityClient.listSchemas(...)
 - [`ChangesetCreator`](#changesetcreator)
 - [`Changeset`](#changeset)
 - [`ChangesetMap`](#changesetmap)
+- [`MeterReadingChangesetEntry`](#meterreadingchangesetentry)
+- [`EditMode`](#editmode)
 - [`EditModeConfig`](#editmodeconfig)
 - [`FuzzyConfig`](#fuzzyconfig)
 - [`MatchStrategy`](#matchstrategy)
@@ -10994,6 +10996,69 @@ type ChangesetMap = Record<string, {
     previous_value?: unknown
   }>
 }>
+```
+
+### `MeterReadingChangesetEntry`
+
+A meter readings changeset entry — service-managed by metering-api.
+Stored on `Meter._meter_readings_changeset` array attribute. Each entry mirrors a
+ClickHouse meter reading row plus a changeset metadata overlay.
+
+Note: `org_id` is NOT stored on the entry. The entries live on the Meter entity,
+whic
+
+```ts
+type MeterReadingChangesetEntry = {
+  value: number
+  direction?: "feed-in" | "feed-out"
+  timestamp?: string // date-time
+  meter_id: string // uuid
+  counter_id: string // uuid
+  source?: string
+  reason?: string
+  read_by?: string
+  status?: "valid" | "in-validation" | "implausible"
+  external_id?: string
+  remark?: string
+  metadata?: Record<string, string>
+  changeset_id: string
+  edit_mode: "external" | "approval"
+  match_strategy?: "exact" | "fuzzy"
+  timestamp_tolerance?: "exact" | {
+    type: "same-day"
+    timezone?: string
+  } | {
+    type: "within-seconds"
+    seconds: number
+  }
+  fuzzy_config?: {
+    percentage_threshold?: number
+    absolute_threshold?: number
+  }
+  created_at: string // date-time
+  created_by?: {
+    type?: "user" | "portal_user" | "api_client" | "automation"
+    id?: string
+  }
+  previous?: {
+    value?: number
+    direction?: "feed-in" | "feed-out"
+    timestamp?: string // date-time
+  }
+}
+```
+
+### `EditMode`
+
+Controls whether a write goes through immediately or is held as a pending entry
+on the parent entity's `_changesets` map.
+
+- `direct`: write applied immediately. No changeset created.
+- `external`: write held as a pending changeset; auto-cleared on a matching direct/ERP write.
+- `approval`: write he
+
+```ts
+type EditMode = "direct" | "external" | "approval"
 ```
 
 ### `EditModeConfig`
