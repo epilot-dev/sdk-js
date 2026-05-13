@@ -8,6 +8,11 @@
     "/v1/metering/meter": {
       "get": {
         "operationId": "getCustomerMeters",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IncludePendingChangesetsQueryParam"
+          }
+        ],
         "responses": {}
       }
     },
@@ -82,6 +87,11 @@
     "/v1/metering/reading": {
       "post": {
         "operationId": "createMeterReading",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/DirectQueryParam"
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -105,6 +115,9 @@
           },
           {
             "$ref": "#/components/parameters/SkipValidationQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/DirectQueryParam"
           }
         ],
         "requestBody": {
@@ -124,6 +137,9 @@
             "in": "path",
             "name": "meter_id",
             "required": true
+          },
+          {
+            "$ref": "#/components/parameters/DirectQueryParam"
           }
         ],
         "requestBody": {
@@ -149,6 +165,9 @@
           },
           {
             "$ref": "#/components/parameters/ActivityIdQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/DirectQueryParam"
           }
         ],
         "requestBody": {
@@ -250,6 +269,9 @@
             "in": "query",
             "name": "sort",
             "required": false
+          },
+          {
+            "$ref": "#/components/parameters/IncludePendingChangesetsQueryParam"
           }
         ],
         "responses": {}
@@ -300,6 +322,87 @@
             "required": true
           }
         ],
+        "responses": {}
+      }
+    },
+    "/v1/metering/reading/{meter_id}/{counter_id}/changesets": {
+      "get": {
+        "operationId": "getReadingChangesets",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/MeterIdParam"
+          },
+          {
+            "$ref": "#/components/parameters/CounterIdParam"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/metering/reading/{meter_id}/{counter_id}/changesets/{changeset_id}:apply": {
+      "post": {
+        "operationId": "applyReadingChangeset",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/MeterIdParam"
+          },
+          {
+            "$ref": "#/components/parameters/CounterIdParam"
+          },
+          {
+            "name": "changeset_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/metering/reading/{meter_id}/{counter_id}/changesets/{changeset_id}:dismiss": {
+      "post": {
+        "operationId": "dismissReadingChangeset",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/MeterIdParam"
+          },
+          {
+            "$ref": "#/components/parameters/CounterIdParam"
+          },
+          {
+            "name": "changeset_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/metering/reading/{meter_id}/{counter_id}/changesets/{changeset_id}": {
+      "patch": {
+        "operationId": "updateReadingChangeset",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/MeterIdParam"
+          },
+          {
+            "$ref": "#/components/parameters/CounterIdParam"
+          },
+          {
+            "name": "changeset_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
         "responses": {}
       }
     }
@@ -363,6 +466,26 @@
       }
     },
     "parameters": {
+      "MeterIdParam": {
+        "name": "meter_id",
+        "in": "path",
+        "required": true
+      },
+      "CounterIdParam": {
+        "name": "counter_id",
+        "in": "path",
+        "required": true
+      },
+      "DirectQueryParam": {
+        "name": "direct",
+        "in": "query",
+        "required": false
+      },
+      "IncludePendingChangesetsQueryParam": {
+        "name": "include_pending_changesets",
+        "in": "query",
+        "required": false
+      },
       "ActivityIdQueryParam": {
         "name": "activity_id",
         "in": "query",
@@ -375,9 +498,5 @@
       }
     }
   },
-  "servers": [
-    {
-      "url": "https://metering.sls.epilot.io"
-    }
-  ]
+  "servers": []
 }
