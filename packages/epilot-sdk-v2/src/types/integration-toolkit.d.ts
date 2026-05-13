@@ -297,10 +297,10 @@ export declare namespace Components {
              */
             name: string;
             /**
-             * URL-safe identifier for the use case. Recommended for portable cross-environment referencing. Must be unique per integration. Immutable after creation. Lowercase alphanumeric, hyphens, and underscores only.
+             * URL-safe identifier for the use case. Required for explicit creates so every use case has a portable cross-environment identifier. Must be unique per integration. Immutable after creation. Lowercase alphanumeric, hyphens, and underscores only.
              *
              */
-            slug?: string; // ^[a-z0-9][a-z0-9_-]*$
+            slug: string; // ^[a-z0-9][a-z0-9_-]*$
             /**
              * Whether the use case is enabled
              */
@@ -325,10 +325,10 @@ export declare namespace Components {
              */
             name: string;
             /**
-             * URL-safe identifier for the use case. Recommended for portable cross-environment referencing. Must be unique per integration. Immutable after creation. Lowercase alphanumeric, hyphens, and underscores only.
+             * URL-safe identifier for the use case. Required for explicit creates so every use case has a portable cross-environment identifier. Must be unique per integration. Immutable after creation. Lowercase alphanumeric, hyphens, and underscores only.
              *
              */
-            slug?: string; // ^[a-z0-9][a-z0-9_-]*$
+            slug: string; // ^[a-z0-9][a-z0-9_-]*$
             /**
              * Whether the use case is enabled
              */
@@ -382,10 +382,10 @@ export declare namespace Components {
              */
             name: string;
             /**
-             * URL-safe identifier for the use case. Recommended for portable cross-environment referencing. Must be unique per integration. Immutable after creation. Lowercase alphanumeric, hyphens, and underscores only.
+             * URL-safe identifier for the use case. Required for explicit creates so every use case has a portable cross-environment identifier. Must be unique per integration. Immutable after creation. Lowercase alphanumeric, hyphens, and underscores only.
              *
              */
-            slug?: string; // ^[a-z0-9][a-z0-9_-]*$
+            slug: string; // ^[a-z0-9][a-z0-9_-]*$
             /**
              * Whether the use case is enabled
              */
@@ -402,10 +402,10 @@ export declare namespace Components {
              */
             name: string;
             /**
-             * URL-safe identifier for the use case. Recommended for portable cross-environment referencing. Must be unique per integration. Immutable after creation. Lowercase alphanumeric, hyphens, and underscores only.
+             * URL-safe identifier for the use case. Required for explicit creates so every use case has a portable cross-environment identifier. Must be unique per integration. Immutable after creation. Lowercase alphanumeric, hyphens, and underscores only.
              *
              */
-            slug?: string; // ^[a-z0-9][a-z0-9_-]*$
+            slug: string; // ^[a-z0-9][a-z0-9_-]*$
             /**
              * Whether the use case is enabled
              */
@@ -422,10 +422,10 @@ export declare namespace Components {
              */
             name: string;
             /**
-             * URL-safe identifier for the use case. Recommended for portable cross-environment referencing. Must be unique per integration. Immutable after creation. Lowercase alphanumeric, hyphens, and underscores only.
+             * URL-safe identifier for the use case. Required for explicit creates so every use case has a portable cross-environment identifier. Must be unique per integration. Immutable after creation. Lowercase alphanumeric, hyphens, and underscores only.
              *
              */
-            slug?: string; // ^[a-z0-9][a-z0-9_-]*$
+            slug: string; // ^[a-z0-9][a-z0-9_-]*$
             /**
              * Whether the use case is enabled
              */
@@ -447,10 +447,10 @@ export declare namespace Components {
              */
             name: string;
             /**
-             * URL-safe identifier for the use case. Recommended for portable cross-environment referencing. Must be unique per integration. Immutable after creation. Lowercase alphanumeric, hyphens, and underscores only.
+             * URL-safe identifier for the use case. Required for explicit creates so every use case has a portable cross-environment identifier. Must be unique per integration. Immutable after creation. Lowercase alphanumeric, hyphens, and underscores only.
              *
              */
-            slug?: string; // ^[a-z0-9][a-z0-9_-]*$
+            slug: string; // ^[a-z0-9][a-z0-9_-]*$
             /**
              * Whether the use case is enabled
              */
@@ -501,7 +501,7 @@ export declare namespace Components {
              */
             name: string;
             /**
-             * URL-safe identifier for the use case. Recommended for portable cross-environment referencing. Must be unique per integration. Immutable after creation.
+             * URL-safe identifier for the use case. Optional on this upsert/sync endpoint — when omitted, the server derives one from the name and ensures uniqueness within the integration. Immutable after creation.
              *
              */
             slug?: string; // ^[a-z0-9][a-z0-9_-]*$
@@ -541,7 +541,7 @@ export declare namespace Components {
              */
             name: string;
             /**
-             * URL-safe identifier for the use case. Recommended for portable cross-environment referencing. Must be unique per integration. Immutable after creation.
+             * URL-safe identifier for the use case. Optional on this upsert/sync endpoint — when omitted, the server derives one from the name and ensures uniqueness within the integration. Immutable after creation.
              *
              */
             slug?: string; // ^[a-z0-9][a-z0-9_-]*$
@@ -573,7 +573,7 @@ export declare namespace Components {
              */
             name: string;
             /**
-             * URL-safe identifier for the use case. Recommended for portable cross-environment referencing. Must be unique per integration. Immutable after creation.
+             * URL-safe identifier for the use case. Optional on this upsert/sync endpoint — when omitted, the server derives one from the name and ensures uniqueness within the integration. Immutable after creation.
              *
              */
             slug?: string; // ^[a-z0-9][a-z0-9_-]*$
@@ -605,7 +605,7 @@ export declare namespace Components {
              */
             name: string;
             /**
-             * URL-safe identifier for the use case. Recommended for portable cross-environment referencing. Must be unique per integration. Immutable after creation.
+             * URL-safe identifier for the use case. Optional on this upsert/sync endpoint — when omitted, the server derives one from the name and ensures uniqueness within the integration. Immutable after creation.
              *
              */
             slug?: string; // ^[a-z0-9][a-z0-9_-]*$
@@ -637,7 +637,7 @@ export declare namespace Components {
              */
             name: string;
             /**
-             * URL-safe identifier for the use case. Recommended for portable cross-environment referencing. Must be unique per integration. Immutable after creation.
+             * URL-safe identifier for the use case. Optional on this upsert/sync endpoint — when omitted, the server derives one from the name and ensures uniqueness within the integration. Immutable after creation.
              *
              */
             slug?: string; // ^[a-z0-9][a-z0-9_-]*$
@@ -674,7 +674,7 @@ export declare namespace Components {
              */
             name: string;
             /**
-             * URL-safe identifier for the use case. Recommended for portable cross-environment referencing. Must be unique per integration. Immutable after creation.
+             * URL-safe identifier for the use case. Optional on this upsert/sync endpoint — when omitted, the server derives one from the name and ensures uniqueness within the integration. Immutable after creation.
              *
              */
             slug?: string; // ^[a-z0-9][a-z0-9_-]*$
@@ -705,6 +705,43 @@ export declare namespace Components {
                 [name: string]: any;
             };
         }
+        /**
+         * Resolves to an org-scoped environment variable from the epilot environments-api service at runtime, replacing hard-coded environment-specific values (URLs, prefixes, identifiers) in inbound mappings. Secrets (`SecretString` values) are never exposed; the runtime treats both "missing key" and "secret-typed key" as identical `undefined` outcomes (no info disclosure via error code). For secret-resolving contexts (e.g. authorization headers in managed-call or file-proxy step configurations), use the templated `{{ env.<key> }}` syntax instead — that mechanism does decrypt secrets.
+         *
+         */
+        export type EnvVarRefConfig = /**
+         * Resolves to an org-scoped environment variable from the epilot environments-api service at runtime, replacing hard-coded environment-specific values (URLs, prefixes, identifiers) in inbound mappings. Secrets (`SecretString` values) are never exposed; the runtime treats both "missing key" and "secret-typed key" as identical `undefined` outcomes (no info disclosure via error code). For secret-resolving contexts (e.g. authorization headers in managed-call or file-proxy step configurations), use the templated `{{ env.<key> }}` syntax instead — that mechanism does decrypt secrets.
+         *
+         */
+        {
+            /**
+             * Environment variable key. Must match the environments-api key contract (lowercase, digits, `_`, `.`, `-`; max 128 chars; starts with a lowercase letter or digit). Supports dot-namespaced keys like `erp_api.base_url`.
+             *
+             */
+            key: string; // ^[a-z0-9][a-z0-9_.-]{0,127}$
+            /**
+             * Literal string returned when the key is missing (or is a secret). When provided, the `ENV_VAR_REF_NOT_FOUND` warning is suppressed because the author signalled the absence is expected.
+             *
+             */
+            default?: string;
+            /**
+             * `value` returns the resolved env-var string as-is.
+             *
+             */
+            return?: "value";
+        } | {
+            key: string; // ^[a-z0-9][a-z0-9_.-]{0,127}$
+            default?: string;
+            /**
+             * Evaluate the sibling `jsonataExpression` against the resolved env-var value (the input `$` is the string value).
+             *
+             */
+            return: "jsonata";
+            /**
+             * JSONata expression evaluated against the resolved env-var value.
+             */
+            jsonataExpression: string;
+        };
         export interface EnvironmentFieldConfig {
             /**
              * Environment variable key, used to look up the value in the Environments API.
@@ -880,6 +917,31 @@ export declare namespace Components {
              * Optional ID that identifies the specific request for debugging purposes
              */
             correlation_id?: string;
+            /**
+             * Controls ordering and parallelism for this request's events.
+             *
+             * By default, all events for a given `integration_id` are processed
+             * **strictly in order, one at a time**. For high-volume integrations this
+             * can become a throughput bottleneck.
+             *
+             * Set `group_id` to opt into **parallel processing**:
+             * - Events sharing the same `group_id` are processed in the order received.
+             * - Events with different `group_id` values are processed in parallel.
+             *
+             * Typical usage is to derive `group_id` from a logical partition key in
+             * your payload — for example the customer ID, contract ID, or meter ID —
+             * so updates to the same business object remain ordered while unrelated
+             * objects are processed concurrently.
+             *
+             * Notes:
+             * - Up to 20 groups per integration are processed concurrently. Using
+             *   more distinct values than that yields no additional parallelism.
+             * - Omit this field if strict per-integration ordering is required.
+             *
+             * example:
+             * customer-42
+             */
+            group_id?: string;
             /**
              * List of ERP events to process
              */
@@ -1133,6 +1195,10 @@ export declare namespace Components {
              */
             params?: FileProxyParam[];
             /**
+             * Additional origins permitted to call /download for this use case (CORS, exact match). Portal origins are always allowed.
+             */
+            allowed_origins?: string /* uri ^https?:// */[];
+            /**
              * Ordered list of HTTP steps to execute to retrieve the file
              */
             steps: [
@@ -1170,6 +1236,10 @@ export declare namespace Components {
              * Description of the change that was made at this point in history
              */
             change_description?: string;
+            /**
+             * User ID of the user who made the change that produced this history entry
+             */
+            changed_by?: string;
             /**
              * ISO-8601 timestamp when the use case was originally created
              */
@@ -1507,6 +1577,10 @@ export declare namespace Components {
              */
             change_description?: string;
             /**
+             * User ID of the user who made the change that produced this history entry
+             */
+            changed_by?: string;
+            /**
              * ISO-8601 timestamp when the use case was originally created
              */
             created_at: string; // date-time
@@ -1730,6 +1804,16 @@ export declare namespace Components {
              *
              */
             FileProxyUrlConfig;
+            portal_ref?: /**
+             * Resolves to a property of one of the calling organization's epilot portal configurations at runtime, replacing hard-coded environment-specific portal UUIDs in inbound mappings. Matched portals are sorted ascending by `(_created_at, portal_id)`; portals without `_created_at` sort first (treated as oldest). When `select: "single"` matches more than one portal, the resolver still returns the oldest match and emits a `PORTAL_REF_AMBIGUOUS` warning.
+             *
+             */
+            PortalRefConfig;
+            env_var_ref?: /**
+             * Resolves to an org-scoped environment variable from the epilot environments-api service at runtime, replacing hard-coded environment-specific values (URLs, prefixes, identifiers) in inbound mappings. Secrets (`SecretString` values) are never exposed; the runtime treats both "missing key" and "secret-typed key" as identical `undefined` outcomes (no info disclosure via error code). For secret-resolving contexts (e.g. authorization headers in managed-call or file-proxy step configurations), use the templated `{{ env.<key> }}` syntax instead — that mechanism does decrypt secrets.
+             *
+             */
+            EnvVarRefConfig;
         }
         export interface IntegrationFieldV1 {
             /**
@@ -2089,6 +2173,10 @@ export declare namespace Components {
              */
             change_description?: string;
             /**
+             * User ID of the user who made the change that produced this history entry
+             */
+            changed_by?: string;
+            /**
              * ISO-8601 timestamp when the use case was originally created
              */
             created_at: string; // date-time
@@ -2202,7 +2290,7 @@ export declare namespace Components {
                 };
             };
             /**
-             * Meter reading attributes. Required: external_id, timestamp, source, value. `source` must be one of: ECP, ERP, 360, journey-submission. `reason` (optional) must be one of: regular, irregular, last, first, meter_change, contract_change, meter_adjustment (or empty/null).
+             * Meter reading attributes. Required: external_id, timestamp, source, value. `timestamp` must be ISO 8601 — either `YYYY-MM-DD` or `YYYY-MM-DDTHH:mm:ss` (with optional fractional seconds and optional `Z` / `±HH:mm` timezone offset); non-ISO formats (e.g. `DD.MM.YYYY` or epoch numbers) are rejected and must be converted upstream via a `jsonataExpression` (e.g. `$fromMillis(...)`). Date-only values are normalized to midnight UTC and offset-less date-times are anchored to UTC before being forwarded to the metering API. `source` must be one of: ECP, ERP, 360, journey-submission. `reason` (optional) must be one of: regular, irregular, last, first, meter_change, contract_change, meter_adjustment (or empty/null).
              */
             attributes: {
                 [name: string]: any;
@@ -2592,6 +2680,10 @@ export declare namespace Components {
              */
             change_description?: string;
             /**
+             * User ID of the user who made the change that produced this history entry
+             */
+            changed_by?: string;
+            /**
              * ISO-8601 timestamp when the use case was originally created
              */
             created_at: string; // date-time
@@ -2645,6 +2737,80 @@ export declare namespace Components {
              * List of detected conflicts, if any
              */
             conflicts?: OutboundConflict[];
+        }
+        /**
+         * Origin/type of an epilot portal configuration.
+         */
+        export type PortalOrigin = "END_CUSTOMER_PORTAL" | "INSTALLER_PORTAL" | "B2B_PORTAL" | "ADDITIONAL_PORTAL";
+        /**
+         * Resolves to a property of one of the calling organization's epilot portal configurations at runtime, replacing hard-coded environment-specific portal UUIDs in inbound mappings. Matched portals are sorted ascending by `(_created_at, portal_id)`; portals without `_created_at` sort first (treated as oldest). When `select: "single"` matches more than one portal, the resolver still returns the oldest match and emits a `PORTAL_REF_AMBIGUOUS` warning.
+         *
+         */
+        export type PortalRefConfig = /**
+         * Resolves to a property of one of the calling organization's epilot portal configurations at runtime, replacing hard-coded environment-specific portal UUIDs in inbound mappings. Matched portals are sorted ascending by `(_created_at, portal_id)`; portals without `_created_at` sort first (treated as oldest). When `select: "single"` matches more than one portal, the resolver still returns the oldest match and emits a `PORTAL_REF_AMBIGUOUS` warning.
+         *
+         */
+        {
+            filter?: /**
+             * Filter applied to the org's portal configurations before selection. All filters default to "match any" except `enabled` (default `true`) and `is_dummy` (default `false`). Set `enabled` or `is_dummy` to `null` to opt out of the default.
+             *
+             */
+            PortalRefFilter;
+            /**
+             * `single` returns one literal value (the oldest matching portal); `all` returns an array of literal values (0, 1, or many).
+             *
+             */
+            select?: "single" | "all";
+            /**
+             * Which portal field to emit.
+             */
+            return?: "portal_id" | "origin" | "domain" | "name";
+        } | {
+            filter?: /**
+             * Filter applied to the org's portal configurations before selection. All filters default to "match any" except `enabled` (default `true`) and `is_dummy` (default `false`). Set `enabled` or `is_dummy` to `null` to opt out of the default.
+             *
+             */
+            PortalRefFilter;
+            select?: "single" | "all";
+            /**
+             * Evaluate the sibling `jsonataExpression` against the matched portal(s). With `select: "single"` the input is the matched PortalConfig object; with `select: "all"` it is the full filtered+sorted array.
+             *
+             */
+            return: "jsonata";
+            /**
+             * JSONata expression evaluated against the matched portal(s).
+             */
+            jsonataExpression: string;
+        };
+        /**
+         * Filter applied to the org's portal configurations before selection. All filters default to "match any" except `enabled` (default `true`) and `is_dummy` (default `false`). Set `enabled` or `is_dummy` to `null` to opt out of the default.
+         *
+         */
+        export interface PortalRefFilter {
+            /**
+             * Single origin or array of origins (matches if origin is in the array).
+             */
+            origin?: /* Single origin or array of origins (matches if origin is in the array). */ /* Origin/type of an epilot portal configuration. */ PortalOrigin | /* Origin/type of an epilot portal configuration. */ PortalOrigin[];
+            /**
+             * Match portals with this `enabled` value. Default `true`. Set to `null` to ignore.
+             */
+            enabled?: boolean | null;
+            /**
+             * Match portals with this `is_dummy` value. Default `false`. Set to `null` to ignore.
+             */
+            is_dummy?: boolean | null;
+            /**
+             * Optional restriction on `is_epilot_domain`.
+             */
+            is_epilot_domain?: boolean;
+            /**
+             * Exact match on the portal's `name`.
+             */
+            name?: string;
+            /**
+             * Exact match on the portal's `domain`.
+             */
+            domain?: string;
         }
         /**
          * Scope configuration for upsert-prune-scope modes.
@@ -3356,6 +3522,10 @@ export declare namespace Components {
              */
             change_description?: string;
             /**
+             * User ID of the user who made the change that produced this history entry
+             */
+            changed_by?: string;
+            /**
              * ISO-8601 timestamp when the use case was originally created
              */
             created_at: string; // date-time
@@ -3376,6 +3546,53 @@ export declare namespace Components {
              *
              */
             SecureProxyUseCaseConfiguration;
+        }
+        /**
+         * Current whitelist state for a secure_proxy use case. vpc_mode is read-only
+         * context so the UI can show the user what mode the pool is in.
+         *
+         */
+        export interface SecureProxyWhitelist {
+            /**
+             * VPC routing mode (read-only). `null` if not yet set.
+             */
+            vpc_mode: "static_ip" | "secure_link";
+            /**
+             * Exact domain ("api.example.com") or wildcard prefix ("*.example.com").
+             * Wildcards must have at least 2 labels in the suffix.
+             *
+             */
+            allowed_domains: string[];
+            /**
+             * CIDR-notation IP ranges, e.g. "10.0.0.0/24".
+             */
+            allowed_ips: string[];
+        }
+        /**
+         * Partial update for a secure_proxy whitelist. At least one of
+         * `allowed_domains` or `allowed_ips` must be provided.
+         *
+         * Per-field semantics:
+         *   - **omitted** — the field is not modified; the stored value is preserved.
+         *   - **non-empty array** — the stored value is replaced with the supplied list.
+         *   - **empty array (`[]`)** — the list is cleared (stored as `[]`). This is the
+         *     canonical way to remove all entries from a list. `null` is not accepted.
+         *
+         */
+        export interface SecureProxyWhitelistUpdate {
+            /**
+             * Exact domain ("api.example.com") or wildcard prefix ("*.example.com").
+             * Wildcards must have at least 2 labels in the suffix.
+             * Pass `[]` to clear all allowed domains.
+             *
+             */
+            allowed_domains?: string[];
+            /**
+             * CIDR-notation IP ranges, e.g. "10.0.0.0/24".
+             * Pass `[]` to clear all allowed IPs.
+             *
+             */
+            allowed_ips?: string[];
         }
         export interface SetIntegrationAppMappingRequest {
             /**
@@ -3863,6 +4080,10 @@ export declare namespace Components {
              */
             change_description?: string;
             /**
+             * User ID of the user who made the change that produced this history entry
+             */
+            changed_by?: string;
+            /**
              * ISO-8601 timestamp when the use case was originally created
              */
             created_at: string; // date-time
@@ -4206,6 +4427,29 @@ export declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace GetSecureProxyWhitelist {
+        namespace Parameters {
+            export type IntegrationId = string; // uuid
+            export type UseCaseId = string; // uuid
+        }
+        export interface PathParameters {
+            integrationId: Parameters.IntegrationId /* uuid */;
+            useCaseId: Parameters.UseCaseId /* uuid */;
+        }
+        namespace Responses {
+            export type $200 = /**
+             * Current whitelist state for a secure_proxy use case. vpc_mode is read-only
+             * context so the UI can show the user what mode the pool is in.
+             *
+             */
+            Components.Schemas.SecureProxyWhitelist;
+            export type $400 = Components.Responses.BadRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export interface $404 {
+            }
+        }
+    }
     namespace GetUseCase {
         namespace Parameters {
             export type IntegrationId = string; // uuid
@@ -4247,6 +4491,37 @@ export declare namespace Paths {
                 secure_proxies: Components.Schemas.SecureProxySummary[];
             }
             export type $401 = Components.Responses.Unauthorized;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace ListSecureProxyWhitelistHistory {
+        namespace Parameters {
+            export type IntegrationId = string; // uuid
+            export type Limit = number;
+            export type UseCaseId = string; // uuid
+        }
+        export interface PathParameters {
+            integrationId: Parameters.IntegrationId /* uuid */;
+            useCaseId: Parameters.UseCaseId /* uuid */;
+        }
+        export interface QueryParameters {
+            limit?: Parameters.Limit;
+        }
+        namespace Responses {
+            export interface $200 {
+                /**
+                 * Entries are `SecureProxyUseCaseHistoryEntry` in reverse
+                 * chronological order (newest first). Entries older than the
+                 * requested `limit` are not returned.
+                 *
+                 */
+                history: Components.Schemas.SecureProxyUseCaseHistoryEntry[];
+            }
+            export type $400 = Components.Responses.BadRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export interface $404 {
+            }
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -4573,6 +4848,41 @@ export declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace UpdateSecureProxyWhitelist {
+        namespace Parameters {
+            export type IntegrationId = string; // uuid
+            export type UseCaseId = string; // uuid
+        }
+        export interface PathParameters {
+            integrationId: Parameters.IntegrationId /* uuid */;
+            useCaseId: Parameters.UseCaseId /* uuid */;
+        }
+        export type RequestBody = /**
+         * Partial update for a secure_proxy whitelist. At least one of
+         * `allowed_domains` or `allowed_ips` must be provided.
+         *
+         * Per-field semantics:
+         *   - **omitted** — the field is not modified; the stored value is preserved.
+         *   - **non-empty array** — the stored value is replaced with the supplied list.
+         *   - **empty array (`[]`)** — the list is cleared (stored as `[]`). This is the
+         *     canonical way to remove all entries from a list. `null` is not accepted.
+         *
+         */
+        Components.Schemas.SecureProxyWhitelistUpdate;
+        namespace Responses {
+            export type $200 = /**
+             * Current whitelist state for a secure_proxy use case. vpc_mode is read-only
+             * context so the UI can show the user what mode the pool is in.
+             *
+             */
+            Components.Schemas.SecureProxyWhitelist;
+            export type $400 = Components.Responses.BadRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export interface $404 {
+            }
+        }
+    }
     namespace UpdateUseCase {
         namespace Parameters {
             export type IntegrationId = string; // uuid
@@ -4872,6 +5182,66 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteIntegrationV2.Responses.$200>
+  /**
+   * getSecureProxyWhitelist - Get secure_proxy whitelist (admin portal only)
+   * 
+   * Returns the current allowed_domains, allowed_ips, and vpc_mode for a secure_proxy use case.
+   * Staff-only — gated by internal-auth issuer AND admin-portal Cognito user pool membership.
+   * Rejects Login-As tokens.
+   * 
+   */
+  'getSecureProxyWhitelist'(
+    parameters?: Parameters<Paths.GetSecureProxyWhitelist.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetSecureProxyWhitelist.Responses.$200>
+  /**
+   * updateSecureProxyWhitelist - Update secure_proxy whitelist (admin portal only)
+   * 
+   * Replaces allowed_domains and/or allowed_ips on a secure_proxy use case.
+   * At least one of the two fields is required. Validation mirrors the CLI's
+   * `validateDomainPatterns` / `validateCidrs`. Writes a USECASE_HISTORY row
+   * with the admin user's email as `changed_by`.
+   * 
+   * Update semantics per field:
+   *   - **omitted** — field is not modified; the stored value is preserved.
+   *   - **non-empty array** — the stored value is replaced with the supplied list.
+   *   - **empty array (`[]`)** — the list is cleared (stored as `[]`). This is
+   *     the canonical way to remove all entries. `null` is not accepted.
+   * 
+   * Staff-only — same auth gates as GET.
+   * 
+   */
+  'updateSecureProxyWhitelist'(
+    parameters?: Parameters<Paths.UpdateSecureProxyWhitelist.PathParameters> | null,
+    data?: Paths.UpdateSecureProxyWhitelist.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.UpdateSecureProxyWhitelist.Responses.$200>
+  /**
+   * listSecureProxyWhitelistHistory - List secure_proxy whitelist change history (admin portal only)
+   * 
+   * Returns the most recent USECASE_HISTORY entries for a secure_proxy use case,
+   * in reverse chronological order (newest first). Each entry includes the
+   * actor email (`changed_by`), the ISO-8601 timestamp (`history_created_at`),
+   * the `change_description` (free-text action), and the full `configuration`
+   * snapshot — from which UI-08 computes a before/after diff between consecutive
+   * entries.
+   * 
+   * Staff-only — gated by internal-auth issuer AND admin-portal Cognito user pool
+   * membership. Rejects Login-As tokens (same auth gate as the GET / PUT
+   * secure-proxy-whitelist operations).
+   * 
+   * Thin wrapper over the service-layer `listUseCaseHistory` that powers
+   * `GET /v1/integrations/{integrationId}/use-cases/{useCaseId}/history` — the
+   * separate path exists because the /v1 variant is tenant-gated and admin-portal
+   * internal-auth tokens do not carry tenant permissions.
+   * 
+   */
+  'listSecureProxyWhitelistHistory'(
+    parameters?: Parameters<Paths.ListSecureProxyWhitelistHistory.QueryParameters & Paths.ListSecureProxyWhitelistHistory.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ListSecureProxyWhitelistHistory.Responses.$200>
   /**
    * setIntegrationAppMapping - setIntegrationAppMapping
    * 
@@ -5404,6 +5774,70 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteIntegrationV2.Responses.$200>
   }
+  ['/v2/integrations/{integrationId}/use-cases/{useCaseId}/secure-proxy-whitelist']: {
+    /**
+     * getSecureProxyWhitelist - Get secure_proxy whitelist (admin portal only)
+     * 
+     * Returns the current allowed_domains, allowed_ips, and vpc_mode for a secure_proxy use case.
+     * Staff-only — gated by internal-auth issuer AND admin-portal Cognito user pool membership.
+     * Rejects Login-As tokens.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetSecureProxyWhitelist.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetSecureProxyWhitelist.Responses.$200>
+    /**
+     * updateSecureProxyWhitelist - Update secure_proxy whitelist (admin portal only)
+     * 
+     * Replaces allowed_domains and/or allowed_ips on a secure_proxy use case.
+     * At least one of the two fields is required. Validation mirrors the CLI's
+     * `validateDomainPatterns` / `validateCidrs`. Writes a USECASE_HISTORY row
+     * with the admin user's email as `changed_by`.
+     * 
+     * Update semantics per field:
+     *   - **omitted** — field is not modified; the stored value is preserved.
+     *   - **non-empty array** — the stored value is replaced with the supplied list.
+     *   - **empty array (`[]`)** — the list is cleared (stored as `[]`). This is
+     *     the canonical way to remove all entries. `null` is not accepted.
+     * 
+     * Staff-only — same auth gates as GET.
+     * 
+     */
+    'put'(
+      parameters?: Parameters<Paths.UpdateSecureProxyWhitelist.PathParameters> | null,
+      data?: Paths.UpdateSecureProxyWhitelist.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.UpdateSecureProxyWhitelist.Responses.$200>
+  }
+  ['/v2/integrations/{integrationId}/use-cases/{useCaseId}/secure-proxy-whitelist/history']: {
+    /**
+     * listSecureProxyWhitelistHistory - List secure_proxy whitelist change history (admin portal only)
+     * 
+     * Returns the most recent USECASE_HISTORY entries for a secure_proxy use case,
+     * in reverse chronological order (newest first). Each entry includes the
+     * actor email (`changed_by`), the ISO-8601 timestamp (`history_created_at`),
+     * the `change_description` (free-text action), and the full `configuration`
+     * snapshot — from which UI-08 computes a before/after diff between consecutive
+     * entries.
+     * 
+     * Staff-only — gated by internal-auth issuer AND admin-portal Cognito user pool
+     * membership. Rejects Login-As tokens (same auth gate as the GET / PUT
+     * secure-proxy-whitelist operations).
+     * 
+     * Thin wrapper over the service-layer `listUseCaseHistory` that powers
+     * `GET /v1/integrations/{integrationId}/use-cases/{useCaseId}/history` — the
+     * separate path exists because the /v1 variant is tenant-gated and admin-portal
+     * internal-auth tokens do not carry tenant permissions.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.ListSecureProxyWhitelistHistory.QueryParameters & Paths.ListSecureProxyWhitelistHistory.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ListSecureProxyWhitelistHistory.Responses.$200>
+  }
   ['/v1/integrations/{integrationId}/app-mapping']: {
     /**
      * setIntegrationAppMapping - setIntegrationAppMapping
@@ -5687,6 +6121,7 @@ export type EmbeddedSecureProxyUseCaseRequest = Components.Schemas.EmbeddedSecur
 export type EmbeddedUseCaseRequest = Components.Schemas.EmbeddedUseCaseRequest;
 export type EmbeddedUseCaseRequestBase = Components.Schemas.EmbeddedUseCaseRequestBase;
 export type EntityUpdate = Components.Schemas.EntityUpdate;
+export type EnvVarRefConfig = Components.Schemas.EnvVarRefConfig;
 export type EnvironmentFieldConfig = Components.Schemas.EnvironmentFieldConfig;
 export type ErpEvent = Components.Schemas.ErpEvent;
 export type ErpEventV3 = Components.Schemas.ErpEventV3;
@@ -5753,6 +6188,9 @@ export type OutboundStatusResponse = Components.Schemas.OutboundStatusResponse;
 export type OutboundUseCase = Components.Schemas.OutboundUseCase;
 export type OutboundUseCaseHistoryEntry = Components.Schemas.OutboundUseCaseHistoryEntry;
 export type OutboundUseCaseStatus = Components.Schemas.OutboundUseCaseStatus;
+export type PortalOrigin = Components.Schemas.PortalOrigin;
+export type PortalRefConfig = Components.Schemas.PortalRefConfig;
+export type PortalRefFilter = Components.Schemas.PortalRefFilter;
 export type PruneScopeConfig = Components.Schemas.PruneScopeConfig;
 export type QueryAccessLogsRequest = Components.Schemas.QueryAccessLogsRequest;
 export type QueryEventsRequest = Components.Schemas.QueryEventsRequest;
@@ -5773,6 +6211,8 @@ export type SecureProxySummary = Components.Schemas.SecureProxySummary;
 export type SecureProxyUseCase = Components.Schemas.SecureProxyUseCase;
 export type SecureProxyUseCaseConfiguration = Components.Schemas.SecureProxyUseCaseConfiguration;
 export type SecureProxyUseCaseHistoryEntry = Components.Schemas.SecureProxyUseCaseHistoryEntry;
+export type SecureProxyWhitelist = Components.Schemas.SecureProxyWhitelist;
+export type SecureProxyWhitelistUpdate = Components.Schemas.SecureProxyWhitelistUpdate;
 export type SetIntegrationAppMappingRequest = Components.Schemas.SetIntegrationAppMappingRequest;
 export type TimeSeriesBreakdownItemV2 = Components.Schemas.TimeSeriesBreakdownItemV2;
 export type TimeSeriesBucket = Components.Schemas.TimeSeriesBucket;
