@@ -1486,6 +1486,32 @@ declare namespace Components {
             navbar: string;
             portal_login_background?: string;
         }
+        export interface ParseThemeFromDesignResp {
+            theme?: /**
+             * Type of theme to be parsed and returned
+             * example:
+             * NEW
+             */
+            Theme;
+            design?: {
+                id?: string;
+                last_modified_at?: string;
+                style_name?: string;
+                style?: {
+                    logo?: LogoData;
+                    palette?: PaletteData;
+                    typography?: TypographyData;
+                };
+                custom_theme?: string;
+                use_custom_theme?: boolean;
+                /**
+                 * Design tokens for journey customization (renamed from design_tokens)
+                 */
+                journey_design_tokens?: {
+                    [key: string]: any;
+                };
+            };
+        }
         export interface RemoveConsumerReq {
             consumer_id: /**
              * Id of the design
@@ -1957,8 +1983,7 @@ declare namespace Paths {
             theme: Parameters.Theme;
         }
         namespace Responses {
-            export interface $200 {
-            }
+            export type $200 = Components.Schemas.ParseThemeFromDesignResp;
             export type $400 = Components.Schemas.ErrorResp;
             export type $401 = Components.Schemas.ErrorResp;
             export interface $404 {
@@ -2336,6 +2361,7 @@ export type ItemMetada = Components.Schemas.ItemMetada;
 export type Journey = Components.Schemas.Journey;
 export type LogoData = Components.Schemas.LogoData;
 export type PaletteData = Components.Schemas.PaletteData;
+export type ParseThemeFromDesignResp = Components.Schemas.ParseThemeFromDesignResp;
 export type RemoveConsumerReq = Components.Schemas.RemoveConsumerReq;
 export type ShapeData = Components.Schemas.ShapeData;
 export type Theme = Components.Schemas.Theme;

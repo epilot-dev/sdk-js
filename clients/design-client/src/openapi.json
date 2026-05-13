@@ -354,7 +354,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object"
+                  "$ref": "#/components/schemas/ParseThemeFromDesignResp"
                 }
               }
             }
@@ -1714,6 +1714,52 @@
           },
           "application": {
             "$ref": "#/components/schemas/Application"
+          }
+        }
+      },
+      "ParseThemeFromDesignResp": {
+        "type": "object",
+        "properties": {
+          "theme": {
+            "$ref": "#/components/schemas/Theme"
+          },
+          "design": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "last_modified_at": {
+                "type": "string"
+              },
+              "style_name": {
+                "type": "string"
+              },
+              "style": {
+                "type": "object",
+                "properties": {
+                  "logo": {
+                    "$ref": "#/components/schemas/LogoData"
+                  },
+                  "palette": {
+                    "$ref": "#/components/schemas/PaletteData"
+                  },
+                  "typography": {
+                    "$ref": "#/components/schemas/TypographyData"
+                  }
+                }
+              },
+              "custom_theme": {
+                "type": "string"
+              },
+              "use_custom_theme": {
+                "type": "boolean"
+              },
+              "journey_design_tokens": {
+                "type": "object",
+                "description": "Design tokens for journey customization (renamed from design_tokens)"
+              }
+            }
           }
         }
       }
