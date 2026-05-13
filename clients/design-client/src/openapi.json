@@ -1724,20 +1724,42 @@
             "$ref": "#/components/schemas/Theme"
           },
           "design": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/ItemMetada"
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
               },
-              {
-                "$ref": "#/components/schemas/DesignItem"
+              "last_modified_at": {
+                "type": "string"
               },
-              {
-                "$ref": "#/components/schemas/Custom_Style"
+              "style_name": {
+                "type": "string"
               },
-              {
-                "$ref": "#/components/schemas/Journey"
+              "style": {
+                "type": "object",
+                "properties": {
+                  "logo": {
+                    "$ref": "#/components/schemas/LogoData"
+                  },
+                  "palette": {
+                    "$ref": "#/components/schemas/PaletteData"
+                  },
+                  "typography": {
+                    "$ref": "#/components/schemas/TypographyData"
+                  }
+                }
+              },
+              "custom_theme": {
+                "type": "string"
+              },
+              "use_custom_theme": {
+                "type": "boolean"
+              },
+              "journey_design_tokens": {
+                "type": "object",
+                "description": "Design tokens for journey customization (renamed from design_tokens)"
               }
-            ]
+            }
           }
         }
       }
