@@ -353,6 +353,69 @@
         "responses": {}
       }
     },
+    "/v2/integrations/{integrationId}/use-cases/{useCaseId}/secure-proxy-whitelist": {
+      "get": {
+        "operationId": "getSecureProxyWhitelist",
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "useCaseId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      },
+      "put": {
+        "operationId": "updateSecureProxyWhitelist",
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "useCaseId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/integrations/{integrationId}/use-cases/{useCaseId}/secure-proxy-whitelist/history": {
+      "get": {
+        "operationId": "listSecureProxyWhitelistHistory",
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "useCaseId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v1/integrations/{integrationId}/app-mapping": {
       "put": {
         "operationId": "setIntegrationAppMapping",

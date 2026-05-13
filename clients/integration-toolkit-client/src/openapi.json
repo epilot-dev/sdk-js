@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Integration Toolkit API",
-    "version": "1.0.3",
+    "version": "1.0.11",
     "description": "API for integrating with external systems in a standardised way."
   },
   "tags": [
@@ -1839,6 +1839,227 @@
         }
       }
     },
+    "/v2/integrations/{integrationId}/use-cases/{useCaseId}/secure-proxy-whitelist": {
+      "get": {
+        "operationId": "getSecureProxyWhitelist",
+        "summary": "Get secure_proxy whitelist (admin portal only)",
+        "description": "Returns the current allowed_domains, allowed_ips, and vpc_mode for a secure_proxy use case.\nStaff-only — gated by internal-auth issuer AND admin-portal Cognito user pool membership.\nRejects Login-As tokens.\n",
+        "tags": [
+          "integrations",
+          "proxy"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true,
+            "description": "The integration ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "useCaseId",
+            "in": "path",
+            "required": true,
+            "description": "The use case ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Current whitelist",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SecureProxyWhitelist"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "description": "Use case not found or not of type secure_proxy"
+          }
+        }
+      },
+      "put": {
+        "operationId": "updateSecureProxyWhitelist",
+        "summary": "Update secure_proxy whitelist (admin portal only)",
+        "description": "Replaces allowed_domains and/or allowed_ips on a secure_proxy use case.\nAt least one of the two fields is required. Validation mirrors the CLI's\n`validateDomainPatterns` / `validateCidrs`. Writes a USECASE_HISTORY row\nwith the admin user's email as `changed_by`.\n\nUpdate semantics per field:\n  - **omitted** — field is not modified; the stored value is preserved.\n  - **non-empty array** — the stored value is replaced with the supplied list.\n  - **empty array (`[]`)** — the list is cleared (stored as `[]`). This is\n    the canonical way to remove all entries. `null` is not accepted.\n\nStaff-only — same auth gates as GET.\n",
+        "tags": [
+          "integrations",
+          "proxy"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true,
+            "description": "The integration ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "useCaseId",
+            "in": "path",
+            "required": true,
+            "description": "The use case ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SecureProxyWhitelistUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated whitelist (same shape as GET)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SecureProxyWhitelist"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "description": "Use case not found or not of type secure_proxy"
+          }
+        }
+      }
+    },
+    "/v2/integrations/{integrationId}/use-cases/{useCaseId}/secure-proxy-whitelist/history": {
+      "get": {
+        "operationId": "listSecureProxyWhitelistHistory",
+        "summary": "List secure_proxy whitelist change history (admin portal only)",
+        "description": "Returns the most recent USECASE_HISTORY entries for a secure_proxy use case,\nin reverse chronological order (newest first). Each entry includes the\nactor email (`changed_by`), the ISO-8601 timestamp (`history_created_at`),\nthe `change_description` (free-text action), and the full `configuration`\nsnapshot — from which UI-08 computes a before/after diff between consecutive\nentries.\n\nStaff-only — gated by internal-auth issuer AND admin-portal Cognito user pool\nmembership. Rejects Login-As tokens (same auth gate as the GET / PUT\nsecure-proxy-whitelist operations).\n\nThin wrapper over the service-layer `listUseCaseHistory` that powers\n`GET /v1/integrations/{integrationId}/use-cases/{useCaseId}/history` — the\nseparate path exists because the /v1 variant is tenant-gated and admin-portal\ninternal-auth tokens do not carry tenant permissions.\n",
+        "tags": [
+          "integrations",
+          "proxy"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true,
+            "description": "The integration ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "useCaseId",
+            "in": "path",
+            "required": true,
+            "description": "The use case ID (must be of type secure_proxy)",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Maximum number of history entries to return. Default 10, max 50.\nCapped at the service-layer page size (20) so `limit > 20` is silently\nclamped to 20. UI-08 requests 5-10 for the panel view.\n",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved secure_proxy history",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "history"
+                  ],
+                  "properties": {
+                    "history": {
+                      "type": "array",
+                      "description": "Entries are `SecureProxyUseCaseHistoryEntry` in reverse\nchronological order (newest first). Entries older than the\nrequested `limit` are not returned.\n",
+                      "items": {
+                        "$ref": "#/components/schemas/SecureProxyUseCaseHistoryEntry"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "description": "Use case not found or not of type secure_proxy"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/v1/integrations/{integrationId}/app-mapping": {
       "put": {
         "operationId": "setIntegrationAppMapping",
@@ -3043,6 +3264,12 @@
             "type": "string",
             "description": "Optional ID that identifies the specific request for debugging purposes"
           },
+          "group_id": {
+            "type": "string",
+            "description": "Controls ordering and parallelism for this request's events.\n\nBy default, all events for a given `integration_id` are processed\n**strictly in order, one at a time**. For high-volume integrations this\ncan become a throughput bottleneck.\n\nSet `group_id` to opt into **parallel processing**:\n- Events sharing the same `group_id` are processed in the order received.\n- Events with different `group_id` values are processed in parallel.\n\nTypical usage is to derive `group_id` from a logical partition key in\nyour payload — for example the customer ID, contract ID, or meter ID —\nso updates to the same business object remain ordered while unrelated\nobjects are processed concurrently.\n\nNotes:\n- Up to 20 groups per integration are processed concurrently. Using\n  more distinct values than that yields no additional parallelism.\n- Omit this field if strict per-integration ordering is required.\n",
+            "maxLength": 128,
+            "example": "customer-42"
+          },
           "events": {
             "type": "array",
             "description": "List of ERP events to process",
@@ -3817,6 +4044,12 @@
           },
           "file_proxy_url": {
             "$ref": "#/components/schemas/FileProxyUrlConfig"
+          },
+          "portal_ref": {
+            "$ref": "#/components/schemas/PortalRefConfig"
+          },
+          "env_var_ref": {
+            "$ref": "#/components/schemas/EnvVarRefConfig"
           }
         }
       },
@@ -3903,6 +4136,180 @@
           }
         ]
       },
+      "PortalOrigin": {
+        "type": "string",
+        "enum": [
+          "END_CUSTOMER_PORTAL",
+          "INSTALLER_PORTAL",
+          "B2B_PORTAL",
+          "ADDITIONAL_PORTAL"
+        ],
+        "description": "Origin/type of an epilot portal configuration."
+      },
+      "PortalRefFilter": {
+        "type": "object",
+        "description": "Filter applied to the org's portal configurations before selection. All filters default to \"match any\" except `enabled` (default `true`) and `is_dummy` (default `false`). Set `enabled` or `is_dummy` to `null` to opt out of the default.\n",
+        "properties": {
+          "origin": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/PortalOrigin"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/PortalOrigin"
+                }
+              }
+            ],
+            "description": "Single origin or array of origins (matches if origin is in the array)."
+          },
+          "enabled": {
+            "type": "boolean",
+            "nullable": true,
+            "description": "Match portals with this `enabled` value. Default `true`. Set to `null` to ignore."
+          },
+          "is_dummy": {
+            "type": "boolean",
+            "nullable": true,
+            "description": "Match portals with this `is_dummy` value. Default `false`. Set to `null` to ignore."
+          },
+          "is_epilot_domain": {
+            "type": "boolean",
+            "description": "Optional restriction on `is_epilot_domain`."
+          },
+          "name": {
+            "type": "string",
+            "description": "Exact match on the portal's `name`."
+          },
+          "domain": {
+            "type": "string",
+            "description": "Exact match on the portal's `domain`."
+          }
+        }
+      },
+      "PortalRefConfig": {
+        "description": "Resolves to a property of one of the calling organization's epilot portal configurations at runtime, replacing hard-coded environment-specific portal UUIDs in inbound mappings. Matched portals are sorted ascending by `(_created_at, portal_id)`; portals without `_created_at` sort first (treated as oldest). When `select: \"single\"` matches more than one portal, the resolver still returns the oldest match and emits a `PORTAL_REF_AMBIGUOUS` warning.\n",
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "filter": {
+                "$ref": "#/components/schemas/PortalRefFilter"
+              },
+              "select": {
+                "type": "string",
+                "enum": [
+                  "single",
+                  "all"
+                ],
+                "default": "single",
+                "description": "`single` returns one literal value (the oldest matching portal); `all` returns an array of literal values (0, 1, or many).\n"
+              },
+              "return": {
+                "type": "string",
+                "enum": [
+                  "portal_id",
+                  "origin",
+                  "domain",
+                  "name"
+                ],
+                "default": "portal_id",
+                "description": "Which portal field to emit."
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "return",
+              "jsonataExpression"
+            ],
+            "properties": {
+              "filter": {
+                "$ref": "#/components/schemas/PortalRefFilter"
+              },
+              "select": {
+                "type": "string",
+                "enum": [
+                  "single",
+                  "all"
+                ],
+                "default": "single"
+              },
+              "return": {
+                "type": "string",
+                "enum": [
+                  "jsonata"
+                ],
+                "description": "Evaluate the sibling `jsonataExpression` against the matched portal(s). With `select: \"single\"` the input is the matched PortalConfig object; with `select: \"all\"` it is the full filtered+sorted array.\n"
+              },
+              "jsonataExpression": {
+                "type": "string",
+                "description": "JSONata expression evaluated against the matched portal(s)."
+              }
+            }
+          }
+        ]
+      },
+      "EnvVarRefConfig": {
+        "description": "Resolves to an org-scoped environment variable from the epilot environments-api service at runtime, replacing hard-coded environment-specific values (URLs, prefixes, identifiers) in inbound mappings. Secrets (`SecretString` values) are never exposed; the runtime treats both \"missing key\" and \"secret-typed key\" as identical `undefined` outcomes (no info disclosure via error code). For secret-resolving contexts (e.g. authorization headers in managed-call or file-proxy step configurations), use the templated `{{ env.<key> }}` syntax instead — that mechanism does decrypt secrets.\n",
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "key"
+            ],
+            "properties": {
+              "key": {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9_.-]{0,127}$",
+                "description": "Environment variable key. Must match the environments-api key contract (lowercase, digits, `_`, `.`, `-`; max 128 chars; starts with a lowercase letter or digit). Supports dot-namespaced keys like `erp_api.base_url`.\n"
+              },
+              "default": {
+                "type": "string",
+                "description": "Literal string returned when the key is missing (or is a secret). When provided, the `ENV_VAR_REF_NOT_FOUND` warning is suppressed because the author signalled the absence is expected.\n"
+              },
+              "return": {
+                "type": "string",
+                "enum": [
+                  "value"
+                ],
+                "default": "value",
+                "description": "`value` returns the resolved env-var string as-is.\n"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "key",
+              "return",
+              "jsonataExpression"
+            ],
+            "properties": {
+              "key": {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9_.-]{0,127}$"
+              },
+              "default": {
+                "type": "string"
+              },
+              "return": {
+                "type": "string",
+                "enum": [
+                  "jsonata"
+                ],
+                "description": "Evaluate the sibling `jsonataExpression` against the resolved env-var value (the input `$` is the string value).\n"
+              },
+              "jsonataExpression": {
+                "type": "string",
+                "description": "JSONata expression evaluated against the resolved env-var value."
+              }
+            }
+          }
+        ]
+      },
       "EmbeddedUseCaseRequest": {
         "oneOf": [
           {
@@ -3956,7 +4363,7 @@
             "pattern": "^[a-z0-9][a-z0-9_-]*$",
             "minLength": 1,
             "maxLength": 255,
-            "description": "URL-safe identifier for the use case. Recommended for portable cross-environment referencing. Must be unique per integration. Immutable after creation.\n"
+            "description": "URL-safe identifier for the use case. Optional on this upsert/sync endpoint — when omitted, the server derives one from the name and ensures uniqueness within the integration. Immutable after creation.\n"
           },
           "enabled": {
             "type": "boolean",
@@ -4352,6 +4759,7 @@
         "type": "object",
         "required": [
           "name",
+          "slug",
           "type",
           "enabled"
         ],
@@ -4367,7 +4775,7 @@
             "pattern": "^[a-z0-9][a-z0-9_-]*$",
             "minLength": 1,
             "maxLength": 255,
-            "description": "URL-safe identifier for the use case. Recommended for portable cross-environment referencing. Must be unique per integration. Immutable after creation. Lowercase alphanumeric, hyphens, and underscores only.\n"
+            "description": "URL-safe identifier for the use case. Required for explicit creates so every use case has a portable cross-environment identifier. Must be unique per integration. Immutable after creation. Lowercase alphanumeric, hyphens, and underscores only.\n"
           },
           "enabled": {
             "type": "boolean",
@@ -4743,6 +5151,10 @@
             "type": "string",
             "description": "Description of the change that was made at this point in history"
           },
+          "changed_by": {
+            "type": "string",
+            "description": "User ID of the user who made the change that produced this history entry"
+          },
           "created_at": {
             "type": "string",
             "format": "date-time",
@@ -4923,6 +5335,61 @@
             },
             "readOnly": true,
             "description": "IP allowlist (CIDR notation) for secure_link mode. Admin-only — can only be modified directly in DynamoDB via admin script.\nRequired for secure_link mode. All DNS-resolved IPs must match at least one range.\nExample: [\"10.0.1.0/24\", \"192.168.1.0/24\"]\n"
+          }
+        }
+      },
+      "SecureProxyWhitelist": {
+        "type": "object",
+        "required": [
+          "vpc_mode",
+          "allowed_domains",
+          "allowed_ips"
+        ],
+        "description": "Current whitelist state for a secure_proxy use case. vpc_mode is read-only\ncontext so the UI can show the user what mode the pool is in.\n",
+        "properties": {
+          "vpc_mode": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "static_ip",
+              "secure_link"
+            ],
+            "description": "VPC routing mode (read-only). `null` if not yet set."
+          },
+          "allowed_domains": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Exact domain (\"api.example.com\") or wildcard prefix (\"*.example.com\").\nWildcards must have at least 2 labels in the suffix.\n"
+          },
+          "allowed_ips": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "CIDR-notation IP ranges, e.g. \"10.0.0.0/24\"."
+          }
+        }
+      },
+      "SecureProxyWhitelistUpdate": {
+        "type": "object",
+        "description": "Partial update for a secure_proxy whitelist. At least one of\n`allowed_domains` or `allowed_ips` must be provided.\n\nPer-field semantics:\n  - **omitted** — the field is not modified; the stored value is preserved.\n  - **non-empty array** — the stored value is replaced with the supplied list.\n  - **empty array (`[]`)** — the list is cleared (stored as `[]`). This is the\n    canonical way to remove all entries from a list. `null` is not accepted.\n",
+        "minProperties": 1,
+        "properties": {
+          "allowed_domains": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Exact domain (\"api.example.com\") or wildcard prefix (\"*.example.com\").\nWildcards must have at least 2 labels in the suffix.\nPass `[]` to clear all allowed domains.\n"
+          },
+          "allowed_ips": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "CIDR-notation IP ranges, e.g. \"10.0.0.0/24\".\nPass `[]` to clear all allowed IPs.\n"
           }
         }
       },
@@ -5467,6 +5934,15 @@
             },
             "description": "Additional use-case-specific parameters expected in the download URL query string (beyond the required orgId, integrationId, and useCaseSlug or useCaseId)"
           },
+          "allowed_origins": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uri",
+              "pattern": "^https?://"
+            },
+            "description": "Additional origins permitted to call /download for this use case (CORS, exact match). Portal origins are always allowed."
+          },
           "steps": {
             "type": "array",
             "minItems": 1,
@@ -5847,7 +6323,7 @@
           "attributes": {
             "type": "object",
             "additionalProperties": true,
-            "description": "Meter reading attributes. Required: external_id, timestamp, source, value. `source` must be one of: ECP, ERP, 360, journey-submission. `reason` (optional) must be one of: regular, irregular, last, first, meter_change, contract_change, meter_adjustment (or empty/null)."
+            "description": "Meter reading attributes. Required: external_id, timestamp, source, value. `timestamp` must be ISO 8601 — either `YYYY-MM-DD` or `YYYY-MM-DDTHH:mm:ss` (with optional fractional seconds and optional `Z` / `±HH:mm` timezone offset); non-ISO formats (e.g. `DD.MM.YYYY` or epoch numbers) are rejected and must be converted upstream via a `jsonataExpression` (e.g. `$fromMillis(...)`). Date-only values are normalized to midnight UTC and offset-less date-times are anchored to UTC before being forwarded to the metering API. `source` must be one of: ECP, ERP, 360, journey-submission. `reason` (optional) must be one of: regular, irregular, last, first, meter_change, contract_change, meter_adjustment (or empty/null)."
           }
         }
       },
