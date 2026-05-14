@@ -927,6 +927,30 @@
         "responses": {}
       }
     },
+    "/v3/portal/public/account/exists": {
+      "post": {
+        "operationId": "checkAccountExists",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "portal_id",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "domain",
+            "required": false
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v2/portal/contact/valid/secondary/attributes": {
       "get": {
         "operationId": "getValidSecondaryAttributes",
@@ -2384,6 +2408,31 @@
             "required": true
           }
         ],
+        "responses": {}
+      }
+    },
+    "/v3/portal/verify-dns": {
+      "post": {
+        "operationId": "verifyDns",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "portal_id",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/portal/proxy/execute": {
+      "post": {
+        "operationId": "portalProxyExecute",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
         "responses": {}
       }
     }

@@ -3561,6 +3561,84 @@
                     "contactId": {
                       "$ref": "#/components/schemas/EntityId",
                       "description": "ID of the contact if exists"
+                    },
+                    "accountId": {
+                      "$ref": "#/components/schemas/EntityId",
+                      "description": "ID of the resolved account when the portal is configured for account-based registration"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v3/portal/public/account/exists": {
+      "post": {
+        "operationId": "checkAccountExists",
+        "summary": "checkAccountExists",
+        "description": "True if account with given identifiers exists.\nSupports two identification methods:\n1. Using portal_id\n2. Using domain\n",
+        "security": [],
+        "tags": [
+          "Public"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "portal_id",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/PortalId"
+            },
+            "description": "PortalId of the portal (required if domain is not provided)"
+          },
+          {
+            "in": "query",
+            "name": "domain",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Portal domain for identification (alternative to portal_id)"
+          }
+        ],
+        "requestBody": {
+          "description": "Request payload",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AccountExistsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Return result true|false if the account with given identifiers exists.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "exists": {
+                      "type": "boolean",
+                      "description": "Whether the account exists with the given identifier values",
+                      "example": true
+                    },
+                    "accountId": {
+                      "$ref": "#/components/schemas/EntityId",
+                      "description": "ID of the account if exists"
                     }
                   }
                 }
@@ -9718,6 +9796,149 @@
           }
         }
       }
+    },
+    "/v3/portal/verify-dns": {
+      "post": {
+        "operationId": "verifyDns",
+        "summary": "verifyDns",
+        "description": "Manually triggers DNS verification for a portal's domain setup. Runs the same verification logic as the scheduled processAllPendingNetworks lambda.",
+        "tags": [
+          "ECP Admin"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "portal_id",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/PortalId"
+            },
+            "description": "PortalId of the portal"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "DNS verification result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "domain_status": {
+                      "type": "string",
+                      "description": "The status of the custom domain verification",
+                      "enum": [
+                        "PENDING",
+                        "SUCCEED"
+                      ]
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "A message describing the result"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/proxy/execute": {
+      "post": {
+        "operationId": "portalProxyExecute",
+        "summary": "portalProxyExecute",
+        "description": "Execute an Integration Hub managed-call use case on behalf of a portal user.\nBridges PortalAuth to the Integration API by generating an internal token.\n",
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "tags": [
+          "ECP"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "integration_id",
+                  "use_case_slug"
+                ],
+                "properties": {
+                  "integration_id": {
+                    "type": "string",
+                    "format": "uuid",
+                    "description": "Integration ID containing the managed-call use case"
+                  },
+                  "use_case_slug": {
+                    "type": "string",
+                    "description": "Use case slug (acts as the RPC method name)"
+                  },
+                  "payload": {
+                    "type": "object",
+                    "description": "Input data for the managed-call operation",
+                    "additionalProperties": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Managed-call execution result envelope.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "success"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "additionalProperties": true,
+                      "description": "Managed-call response payload. Shape is defined by the use\ncase's JSONata response_mapping; if no mapping is\nconfigured the raw external API response is returned.\n"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -10430,6 +10651,14 @@
             "type": "boolean",
             "description": "Mark true if the domain is an Epilot domain"
           },
+          "epilot_domain": {
+            "type": "string",
+            "description": "The URL on which the portal is accessible",
+            "example": "example-portal-12345.ecp.epilot.cloud"
+          },
+          "domain_settings": {
+            "$ref": "#/components/schemas/DomainSettings"
+          },
           "design_id": {
             "$ref": "#/components/schemas/EntityId",
             "description": "ID of the design used to build the portal"
@@ -10454,6 +10683,24 @@
               "ALWAYS_CREATE_CONTACT",
               "DISALLOW_COMPLETELY",
               "BLOCK_IF_PORTAL_USER_EXISTS"
+            ]
+          },
+          "self_registration_account_setting": {
+            "type": "string",
+            "description": "Controls behavior of self-registration when account is used as the registration entity",
+            "enum": [
+              "ALLOW_WITH_CONTACT_CREATION",
+              "DENY",
+              "ALWAYS_CREATE_CONTACT",
+              "DISALLOW_COMPLETELY"
+            ]
+          },
+          "self_registration_entity": {
+            "type": "string",
+            "description": "Entity type used as the primary identifier for self-registration",
+            "enum": [
+              "contact",
+              "account"
             ]
           },
           "user_account_self_management": {
@@ -10880,6 +11127,13 @@
             "additionalProperties": {
               "$ref": "#/components/schemas/Page"
             }
+          },
+          "global_blocks": {
+            "type": "object",
+            "description": "Portal-level blocks shared across all pages (e.g. footer). Keyed by block id.",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/Block"
+            }
           }
         }
       },
@@ -10983,6 +11237,24 @@
             "items": {
               "$ref": "#/components/schemas/PortalWidget"
             }
+          }
+        }
+      },
+      "DomainSettings": {
+        "type": "object",
+        "description": "Domain settings for the portal",
+        "properties": {
+          "is_custom_domain_enabled": {
+            "type": "boolean",
+            "description": "Whether the custom domain is enabled"
+          },
+          "is_epilot_domain_enabled": {
+            "type": "boolean",
+            "description": "Whether the Epilot domain is enabled"
+          },
+          "is_redirection_enabled": {
+            "type": "boolean",
+            "description": "Whether the redirection is enabled"
           }
         }
       },
@@ -11334,6 +11606,38 @@
             "example": {
               "contact": {
                 "email": "john.doe@example.com"
+              },
+              "contract": {
+                "contract_number": "123456"
+              }
+            }
+          }
+        }
+      },
+      "AccountExistsRequest": {
+        "type": "object",
+        "required": [
+          "registration_identifiers",
+          "org_id"
+        ],
+        "properties": {
+          "org_id": {
+            "type": "string",
+            "example": 728,
+            "description": "ID of the organization"
+          },
+          "registration_identifiers": {
+            "type": "object",
+            "description": "Identifier-value pairs per schema to identify an account during portal user registration",
+            "additionalProperties": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            },
+            "example": {
+              "account": {
+                "customer_number": "ACC-123456"
               },
               "contract": {
                 "contract_number": "123456"
@@ -15924,6 +16228,14 @@
             "type": "boolean",
             "description": "Mark true if the domain is an Epilot domain"
           },
+          "epilot_domain": {
+            "type": "string",
+            "description": "The Epilot domain on which the portal is accessible",
+            "example": "example-portal-1.ecp.epilot.io"
+          },
+          "domain_settings": {
+            "$ref": "#/components/schemas/DomainSettings"
+          },
           "design_id": {
             "$ref": "#/components/schemas/EntityId",
             "description": "ID of the design used to build the portal"
@@ -15948,6 +16260,24 @@
               "ALWAYS_CREATE_CONTACT",
               "DISALLOW_COMPLETELY",
               "BLOCK_IF_PORTAL_USER_EXISTS"
+            ]
+          },
+          "self_registration_account_setting": {
+            "type": "string",
+            "description": "Controls behavior of self-registration when account is used as the registration entity",
+            "enum": [
+              "ALLOW_WITH_CONTACT_CREATION",
+              "DENY",
+              "ALWAYS_CREATE_CONTACT",
+              "DISALLOW_COMPLETELY"
+            ]
+          },
+          "self_registration_entity": {
+            "type": "string",
+            "description": "Entity type used as the primary identifier for self-registration",
+            "enum": [
+              "contact",
+              "account"
             ]
           },
           "user_account_self_management": {
@@ -16368,6 +16698,13 @@
           },
           "origin": {
             "$ref": "#/components/schemas/Origin"
+          },
+          "global_blocks": {
+            "type": "object",
+            "description": "Portal-level blocks shared across all pages (e.g. footer). Keyed by block id.",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/Block"
+            }
           }
         }
       },
@@ -16480,6 +16817,11 @@
           "is_canary": {
             "type": "boolean",
             "description": "Whether the org is in canary mode"
+          },
+          "redirect_to": {
+            "type": "string",
+            "description": "The URL to redirect to",
+            "example": "https://example.com"
           }
         }
       },
