@@ -11,11 +11,40 @@ let cachedPublicKey: string | null = null;
 
 export type HttpRequest = IncomingMessage & { body: string | Buffer };
 
-export async function verifyEpilotSignature(req: HttpRequest): Promise<boolean> {
+export type OpenAPIContext = {
+  request: {
+    headers: Record<string, string | string[] | undefined>;
+    requestBody?: unknown;
+  };
+};
+
+export type SignatureInput = HttpRequest | OpenAPIContext;
+
+function isOpenAPIContext(input: SignatureInput): input is OpenAPIContext {
+  return 'request' in input && typeof (input as OpenAPIContext).request?.headers === 'object';
+}
+
+function extractSignatureParams(input: SignatureInput) {
+  if (isOpenAPIContext(input)) {
+    return {
+      webhookId: input.request.headers['webhook-id'] as string,
+      webhookTimestamp: input.request.headers['webhook-timestamp'] as string,
+      webhookSignature: input.request.headers['webhook-signature'] as string,
+      payload: JSON.stringify(input.request.requestBody),
+    };
+  }
+
+  return {
+    webhookId: input.headers['webhook-id'] as string,
+    webhookTimestamp: input.headers['webhook-timestamp'] as string,
+    webhookSignature: input.headers['webhook-signature'] as string,
+    payload: input.body,
+  };
+}
+
+export async function verifyEpilotSignature(input: SignatureInput): Promise<boolean> {
   try {
-    const webhookId = req.headers['webhook-id'] as string;
-    const webhookTimestamp = req.headers['webhook-timestamp'] as string;
-    const webhookSignature = req.headers['webhook-signature'] as string;
+    const { webhookId, webhookTimestamp, webhookSignature, payload } = extractSignatureParams(input);
 
     if (!isFreshTimestamp(webhookTimestamp)) return false;
 
@@ -25,7 +54,7 @@ export async function verifyEpilotSignature(req: HttpRequest): Promise<boolean> 
     const signatures = parseSignatures(webhookSignature);
     if (!signatures.v1a) return false;
 
-    const signedContent = constructSignedContent({ webhookId, webhookTimestamp, payload: req.body });
+    const signedContent = constructSignedContent({ webhookId, webhookTimestamp, payload });
     const messageBuffer = Buffer.from(signedContent, 'utf8');
     const signatureBuffer = Buffer.from(signatures.v1a, 'base64');
 

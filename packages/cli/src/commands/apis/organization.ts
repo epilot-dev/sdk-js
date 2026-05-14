@@ -12,6 +12,8 @@ export default defineCommand({
     include: { type: 'boolean', alias: 'i', description: 'Include response headers' },
     definition: { type: 'string', description: 'Override OpenAPI spec file/URL' },
     server: { type: 'string', alias: 's', description: 'Override server base URL' },
+    'use-dev': { type: 'boolean', description: 'Target dev environment' },
+    'use-staging': { type: 'boolean', description: 'Target staging environment' },
     profile: { type: 'string', description: 'Use a named profile' },
     token: { type: 'string', alias: 't', description: 'Bearer token' },
     json: { type: 'boolean', description: 'Output raw JSON' },

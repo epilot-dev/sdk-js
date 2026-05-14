@@ -138,6 +138,35 @@ declare namespace Components {
                 };
             }[];
         }
+        export interface ApiProxyComponent {
+            component_type: "API_PROXY";
+            configuration: /* Configuration for an API proxy component */ ApiProxyConfig;
+        }
+        /**
+         * Configuration for an API proxy component
+         */
+        export interface ApiProxyConfig {
+            /**
+             * Human-friendly proxy name used in SDK calls
+             */
+            name: string; // ^[a-zA-Z0-9_-]+$
+            /**
+             * Base URL of the target API. Must be HTTPS.
+             */
+            target: string; // uri ^https://
+            /**
+             * Authentication strategy
+             */
+            auth_type: "header" | "bearer" | "oauth2" | "none";
+            /**
+             * Header name for 'header' auth type
+             */
+            auth_header?: string;
+            /**
+             * OAuth2 token endpoint URL
+             */
+            token_url?: string; // uri ^https://
+        }
         export interface AppBridgeSurfaceConfig {
             /**
              * URL of the uploaded App Bridge App. This is the entrypoint for the app
@@ -245,7 +274,7 @@ declare namespace Components {
             surfaces?: {
                 [key: string]: any;
             };
-        } & (JourneyBlockComponent | PortalBlockComponent | PortalExtensionComponent | CustomFlowActionComponent | ErpInformToolkitComponent | CustomCapabilityComponent | ExternalProductCatalogComponent | CustomPageComponent);
+        } & (JourneyBlockComponent | PortalBlockComponent | PortalExtensionComponent | CustomFlowActionComponent | ErpInformToolkitComponent | CustomCapabilityComponent | ExternalProductCatalogComponent | CustomPageComponent | ApiProxyComponent);
         export interface BaseComponentCommon {
             /**
              * Unique identifier for the component
@@ -407,6 +436,22 @@ declare namespace Components {
          * How often the subscription is billed
          */
         export type BillingFrequency = "MONTHLY" | "QUARTERLY" | "YEARLY" | "CUSTOM";
+        /**
+         * References another journey block by its ID. The configuring user picks
+         * a block from the journey via a dropdown in the journey-builder; the
+         * chosen block's ID is stored as the arg value (a string). The bundle can
+         * then call `subscribe(blockId, cb)` / `getValue(blockId)` against that ID.
+         *
+         */
+        export interface BlockReferenceArg {
+            type?: "block_reference";
+            /**
+             * Restrict the picker to blocks of these journey block types
+             * (e.g. ["availability-check", "address"]). Omit to allow any type.
+             *
+             */
+            allowed_types?: string[];
+        }
         export interface BlueprintRef {
             /**
              * ID of the blueprint
@@ -453,7 +498,7 @@ declare namespace Components {
         /**
          * Type of app component
          */
-        export type ComponentType = "CUSTOM_JOURNEY_BLOCK" | "CUSTOM_PORTAL_BLOCK" | "PORTAL_EXTENSION" | "CUSTOM_FLOW_ACTION" | "ERP_INFORM_TOOLKIT" | "CUSTOM_CAPABILITY" | "EXTERNAL_PRODUCT_CATALOG" | "CUSTOM_PAGE";
+        export type ComponentType = "CUSTOM_JOURNEY_BLOCK" | "CUSTOM_PORTAL_BLOCK" | "PORTAL_EXTENSION" | "CUSTOM_FLOW_ACTION" | "ERP_INFORM_TOOLKIT" | "CUSTOM_CAPABILITY" | "EXTERNAL_PRODUCT_CATALOG" | "CUSTOM_PAGE" | "API_PROXY";
         /**
          * Configuration of the published app
          */
@@ -1214,7 +1259,7 @@ declare namespace Components {
              * Unique identifier for this component arg
              */
             key: string;
-            type: "text" | "boolean" | "enum";
+            type: "text" | "boolean" | "enum" | "block_reference";
             /**
              * Flag to indicate if this option is required
              */
@@ -1245,7 +1290,14 @@ declare namespace Components {
                  */
                 de: string;
             };
-        } & (TextArg | BooleanArg | EnumArg);
+        } & (TextArg | BooleanArg | EnumArg | /**
+         * References another journey block by its ID. The configuring user picks
+         * a block from the journey via a dropdown in the journey-builder; the
+         * chosen block's ID is stored as the arg value (a string). The bundle can
+         * then call `subscribe(blockId, cb)` / `getValue(blockId)` against that ID.
+         *
+         */
+        BlockReferenceArg);
         export interface JourneyBlockConfig {
             override_dev_mode?: /* Override URL when app is in dev mode */ OverrideDevMode;
             /**
@@ -1286,15 +1338,44 @@ declare namespace Components {
             events?: NotificationEvent[];
         }
         export type NotificationEvent = "app.installed" | "app.uninstalled";
+        /**
+         * One declared field inside a `type: object` option. Fields are primitives — object nesting
+         * is not supported.
+         *
+         */
+        export interface ObjectField {
+            /**
+             * Unique identifier for this field within the parent object.
+             */
+            key: string;
+            /**
+             * Human-readable label for the field.
+             */
+            label?: string;
+            /**
+             * Detailed description of what this field is for.
+             */
+            description?: string;
+            /**
+             * Flag to indicate if this field must be filled.
+             */
+            required?: boolean;
+            /**
+             * Primitive type of this field.
+             */
+            type: "text" | "number" | "boolean" | "secret";
+        }
         export interface Option {
             /**
              * Key matching a config_option from the component
              */
             key: string;
             /**
-             * The configured value for this option
+             * The configured value for this option. Shape depends on the matching component option's
+             * `type` and `repeatable` (see `Options.value`).
+             *
              */
-            value: string | boolean | number;
+            value: any;
         }
         /**
          * Options for the component configuration
@@ -1317,10 +1398,41 @@ declare namespace Components {
              */
             description?: string;
             /**
-             * The configured value for this option. Is only present when the component is installed.
+             * When true, the configured value is an array of entries, each tagged with a stable
+             * server-assigned `id`. Combine with any `type` to express "many of this thing."
+             * Defaults to false.
+             *
              */
-            value?: string | boolean | number;
-            type: "text" | "number" | "boolean" | "secret";
+            repeatable?: boolean;
+            /**
+             * Field declarations — required when `type: object`. Each entry describes one primitive
+             * sub-field of the object value. Object types may not nest (no `type: object` inside `fields`).
+             *
+             */
+            fields?: /**
+             * One declared field inside a `type: object` option. Fields are primitives — object nesting
+             * is not supported.
+             *
+             */
+            ObjectField[];
+            /**
+             * The configured value for this option. Shape depends on `type` and `repeatable`:
+             * - primitive `type` (text/number/boolean/secret), `repeatable` false → primitive
+             * - primitive `type`, `repeatable` true → array of `{id, value}` entries
+             * - `type: object`, `repeatable` false → object with declared fields
+             * - `type: object`, `repeatable` true → array of `{id, ...declared fields}` entries
+             *
+             * `id` is server-assigned and stable across edits so consumers can reference entries
+             * by id rather than by index.
+             *
+             */
+            value?: any;
+            /**
+             * The type of this option. `object` declares a structured value whose fields are listed
+             * under `fields`. Combine with `repeatable: true` to express a list of these objects.
+             *
+             */
+            type: "text" | "number" | "boolean" | "secret" | "object";
         }
         export interface OptionsRef {
             /**
@@ -1445,6 +1557,11 @@ declare namespace Components {
              *
              */
             PortalExtensionHookConsumptionDataRetrieval | /**
+             * Generic data export hook. When configured on blocks that support it, the portal delegates the export action (e.g. CSV/Excel/PDF download) to the configured external source instead of generating the file itself. Can be used by any block that supports export — consumption charts, dynamic tariff charts, etc. The expected response to the call is:
+             *   - 200 with a JSON body describing the exported file (download_url, optional filename, content_type, expires_at)
+             *
+             */
+            PortalExtensionHookDataExport | /**
              * Hook that will allow using the specified source as data for consumption visualizations. This hook is triggered to fetch the data. Format of the request and response has to follow the following specification: TBD. The expected response to the call is:
              *   - 200 with the time series data
              *
@@ -1458,7 +1575,26 @@ declare namespace Components {
              *       - valid: false
              *
              */
-            PortalExtensionHookMeterReadingPlausibilityCheck)[];
+            PortalExtensionHookMeterReadingPlausibilityCheck | /**
+             * Hook that returns runtime metadata describing how a visualization (consumption / price / cost chart) should be rendered for a given portal context (meter, contract, etc). It is invoked by the portal before fetching data, with the same context the data hook would receive, so that the discovery shape can vary per meter/contract. The expected response to the call is:
+             *   - 200 with a JSON body of shape:
+             *     {
+             *       "type_options": [
+             *         { "id": "ht", "label": { "en": "High tariff" }, "aggregation_group": "consumption", "statistical_method": "sum", "unit": "kWh" },
+             *         ...
+             *       ],
+             *       "intervals": ["PT15M", "PT1H", "P1D", "P1M"],
+             *       "data_range": { "from": "2024-01-01T00:00:00Z", "to": "2026-05-01T00:00:00Z" }
+             *     }
+             *   Each type option carries its own `statistical_method`, which describes the method already applied to that type's data and dictates the chart shape: `sum` is rendered as a bar chart; `min`, `average`, and `max` are rendered as a line chart. A single visualization can therefore mix bar-shaped types with line-shaped types. Defaults to `sum` when omitted.
+             *   `aggregation_group` controls how types within a group are visually combined (depends on the per-type `statistical_method`):
+             *     - bar chart (`sum`): same-group types are stacked into a single bar (e.g. ht/nt summed into total consumption); different-group types render side-by-side.
+             *     - line chart (`min` / `average` / `max`): same-group types are rendered as an area chart; different-group types render as separate lines.
+             *   All fields are optional; the consumer falls back to its defaults for whatever the hook does not return.
+             * The portal looks up this hook implicitly per extension (one `visualizationMetadata` hook per extension) — there is no need for a data-retrieval hook to reference it explicitly.
+             *
+             */
+            PortalExtensionHookVisualizationMetadata)[];
             links?: {
                 /**
                  * Identifier of the link. Should not change between updates.
@@ -1501,7 +1637,9 @@ declare namespace Components {
             name?: TranslatedString;
             type: "consumptionDataRetrieval";
             /**
+             * Deprecated. Prefer declaring a sibling `visualizationMetadata` hook on the same extension and returning `intervals` from its response — that way the supported intervals can vary per meter/contract.
              * Intervals supported by the API. If omitted, it is assumed that all intervals are supported.
+             *
              */
             intervals?: ("PT15M" | "PT1H" | "P1D" | "P1M")[];
             auth?: PortalExtensionAuthBlock;
@@ -1540,7 +1678,9 @@ declare namespace Components {
                 dataPath?: string;
             };
             /**
+             * Deprecated. Prefer `secure_proxy` instead.
              * If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.
+             *
              */
             use_static_ips?: boolean;
             secure_proxy?: /* If set, requests are routed through the ERP Integration secure proxy. Mutually exclusive with use_static_ips. */ PortalExtensionSecureProxy;
@@ -1622,7 +1762,9 @@ declare namespace Components {
                 en: string;
             };
             /**
+             * Deprecated. Prefer `secure_proxy` instead.
              * If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.
+             *
              */
             use_static_ips?: boolean;
             secure_proxy?: /* If set, requests are routed through the ERP Integration secure proxy. Mutually exclusive with use_static_ips. */ PortalExtensionSecureProxy;
@@ -1640,7 +1782,9 @@ declare namespace Components {
             name?: TranslatedString;
             type: "costDataRetrieval";
             /**
+             * Deprecated. Prefer declaring a sibling `visualizationMetadata` hook on the same extension and returning `intervals` from its response — that way the supported intervals can vary per meter/contract.
              * Intervals supported by the API. If omitted, it is assumed that all intervals are supported.
+             *
              */
             intervals?: ("PT15M" | "PT1H" | "P1D" | "P1M")[];
             auth?: PortalExtensionAuthBlock;
@@ -1679,7 +1823,66 @@ declare namespace Components {
                 dataPath?: string;
             };
             /**
+             * Deprecated. Prefer `secure_proxy` instead.
              * If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.
+             *
+             */
+            use_static_ips?: boolean;
+            secure_proxy?: /* If set, requests are routed through the ERP Integration secure proxy. Mutually exclusive with use_static_ips. */ PortalExtensionSecureProxy;
+        }
+        /**
+         * Generic data export hook. When configured on blocks that support it, the portal delegates the export action (e.g. CSV/Excel/PDF download) to the configured external source instead of generating the file itself. Can be used by any block that supports export — consumption charts, dynamic tariff charts, etc. The expected response to the call is:
+         *   - 200 with a JSON body describing the exported file (download_url, optional filename, content_type, expires_at)
+         *
+         */
+        export interface PortalExtensionHookDataExport {
+            /**
+             * Identifier of the hook. Should not change between updates.
+             */
+            id: string; // ^[a-zA-Z0-9_-]+$
+            name?: TranslatedString;
+            type: "dataExport";
+            /**
+             * Optional list of portal block types this hook supports. If omitted,
+             * the hook is usable on any export-capable block. Allowed values match
+             * the block type identifiers used by the portal builder
+             * (e.g. `consumption_visualization`, `dynamic_tariff`).
+             *
+             */
+            block_types?: string[];
+            auth?: PortalExtensionAuthBlock;
+            call: {
+                /**
+                 * HTTP method to use for the call
+                 */
+                method?: string;
+                /**
+                 * URL to call. Supports variable interpolation.
+                 */
+                url: string;
+                /**
+                 * Parameters to append to the URL. Supports variable interpolation.
+                 */
+                params?: {
+                    [name: string]: string;
+                };
+                /**
+                 * Headers to use. Supports variable interpolation.
+                 */
+                headers?: {
+                    [name: string]: string;
+                };
+                /**
+                 * Request body to send. Supports variable interpolation. Content format is determined by Content-Type header.
+                 */
+                body?: {
+                    [name: string]: any;
+                };
+            };
+            /**
+             * Deprecated. Prefer `secure_proxy` instead.
+             * If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.
+             *
              */
             use_static_ips?: boolean;
             secure_proxy?: /* If set, requests are routed through the ERP Integration secure proxy. Mutually exclusive with use_static_ips. */ PortalExtensionSecureProxy;
@@ -1773,7 +1976,9 @@ declare namespace Components {
                 lower_limit?: string;
             };
             /**
+             * Deprecated. Prefer `secure_proxy` instead.
              * If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.
+             *
              */
             use_static_ips?: boolean;
             secure_proxy?: /* If set, requests are routed through the ERP Integration secure proxy. Mutually exclusive with use_static_ips. */ PortalExtensionSecureProxy;
@@ -1791,7 +1996,9 @@ declare namespace Components {
             name?: TranslatedString;
             type: "priceDataRetrieval";
             /**
+             * Deprecated. Prefer declaring a sibling `visualizationMetadata` hook on the same extension and returning `intervals` from its response — that way the supported intervals can vary per meter/contract.
              * Intervals supported by the API. If omitted, it is assumed that all intervals are supported.
+             *
              */
             intervals?: ("PT15M" | "PT1H" | "P1D" | "P1M")[];
             auth?: PortalExtensionAuthBlock;
@@ -1830,7 +2037,9 @@ declare namespace Components {
                 dataPath?: string;
             };
             /**
+             * Deprecated. Prefer `secure_proxy` instead.
              * If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.
+             *
              */
             use_static_ips?: boolean;
             secure_proxy?: /* If set, requests are routed through the ERP Integration secure proxy. Mutually exclusive with use_static_ips. */ PortalExtensionSecureProxy;
@@ -1882,7 +2091,78 @@ declare namespace Components {
                 result: string;
             };
             /**
+             * Deprecated. Prefer `secure_proxy` instead.
              * If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.
+             *
+             */
+            use_static_ips?: boolean;
+            secure_proxy?: /* If set, requests are routed through the ERP Integration secure proxy. Mutually exclusive with use_static_ips. */ PortalExtensionSecureProxy;
+        }
+        /**
+         * Hook that returns runtime metadata describing how a visualization (consumption / price / cost chart) should be rendered for a given portal context (meter, contract, etc). It is invoked by the portal before fetching data, with the same context the data hook would receive, so that the discovery shape can vary per meter/contract. The expected response to the call is:
+         *   - 200 with a JSON body of shape:
+         *     {
+         *       "type_options": [
+         *         { "id": "ht", "label": { "en": "High tariff" }, "aggregation_group": "consumption", "statistical_method": "sum", "unit": "kWh" },
+         *         ...
+         *       ],
+         *       "intervals": ["PT15M", "PT1H", "P1D", "P1M"],
+         *       "data_range": { "from": "2024-01-01T00:00:00Z", "to": "2026-05-01T00:00:00Z" }
+         *     }
+         *   Each type option carries its own `statistical_method`, which describes the method already applied to that type's data and dictates the chart shape: `sum` is rendered as a bar chart; `min`, `average`, and `max` are rendered as a line chart. A single visualization can therefore mix bar-shaped types with line-shaped types. Defaults to `sum` when omitted.
+         *   `aggregation_group` controls how types within a group are visually combined (depends on the per-type `statistical_method`):
+         *     - bar chart (`sum`): same-group types are stacked into a single bar (e.g. ht/nt summed into total consumption); different-group types render side-by-side.
+         *     - line chart (`min` / `average` / `max`): same-group types are rendered as an area chart; different-group types render as separate lines.
+         *   All fields are optional; the consumer falls back to its defaults for whatever the hook does not return.
+         * The portal looks up this hook implicitly per extension (one `visualizationMetadata` hook per extension) — there is no need for a data-retrieval hook to reference it explicitly.
+         *
+         */
+        export interface PortalExtensionHookVisualizationMetadata {
+            /**
+             * Identifier of the hook. Should not change between updates.
+             */
+            id: string; // ^[a-zA-Z0-9_-]+$
+            name?: TranslatedString;
+            type: "visualizationMetadata";
+            auth?: PortalExtensionAuthBlock;
+            call: {
+                /**
+                 * HTTP method to use for the call
+                 */
+                method?: string;
+                /**
+                 * URL to call. Supports variable interpolation.
+                 */
+                url: string;
+                /**
+                 * Parameters to append to the URL. Supports variable interpolation.
+                 */
+                params?: {
+                    [name: string]: string;
+                };
+                /**
+                 * Headers to use. Supports variable interpolation.
+                 */
+                headers?: {
+                    [name: string]: string;
+                };
+                /**
+                 * Request body to send. Supports variable interpolation. Content format is determined by Content-Type header.
+                 */
+                body?: {
+                    [name: string]: any;
+                };
+            };
+            resolved?: {
+                /**
+                 * Optional path to the metadata object in the response. If omitted, the metadata is assumed to be on the top level.
+                 */
+                dataPath?: string;
+            };
+            /**
+             * Deprecated. Prefer `secure_proxy` instead.
+             * If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.
+             *
              */
             use_static_ips?: boolean;
             secure_proxy?: /* If set, requests are routed through the ERP Integration secure proxy. Mutually exclusive with use_static_ips. */ PortalExtensionSecureProxy;
@@ -2607,6 +2887,32 @@ declare namespace Paths {
             }
         }
     }
+    namespace PublicProxyGet {
+        namespace Responses {
+            export interface $200 {
+            }
+            export interface $403 {
+            }
+            export interface $404 {
+            }
+            export interface $502 {
+            }
+        }
+    }
+    namespace PublicProxyPost {
+        export interface RequestBody {
+        }
+        namespace Responses {
+            export interface $200 {
+            }
+            export interface $403 {
+            }
+            export interface $404 {
+            }
+            export interface $502 {
+            }
+        }
+    }
     namespace QueryEvents {
         namespace Parameters {
             export type AppId = string;
@@ -2669,6 +2975,18 @@ declare namespace Paths {
         export interface PathParameters {
             appId: Parameters.AppId;
             componentId: Parameters.ComponentId;
+        }
+    }
+    namespace V1PublicApp$AppIdProxy$ProxyName$Path {
+        namespace Parameters {
+            export type AppId = string;
+            export type Path = string;
+            export type ProxyName = string;
+        }
+        export interface PathParameters {
+            appId: Parameters.AppId;
+            proxyName: Parameters.ProxyName;
+            path: Parameters.Path;
         }
     }
 }
@@ -2976,6 +3294,26 @@ export interface OperationMethods {
     data?: Paths.IngestEvent.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.IngestEvent.Responses.$202>
+  /**
+   * publicProxyGet - publicProxyGet
+   * 
+   * Forward a GET request to a registered proxy target from a public-facing component (e.g. journey blocks)
+   */
+  'publicProxyGet'(
+    parameters?: Parameters<Paths.V1PublicApp$AppIdProxy$ProxyName$Path.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.PublicProxyGet.Responses.$200>
+  /**
+   * publicProxyPost - publicProxyPost
+   * 
+   * Forward a POST request to a registered proxy target from a public-facing component (e.g. journey blocks)
+   */
+  'publicProxyPost'(
+    parameters?: Parameters<Paths.V1PublicApp$AppIdProxy$ProxyName$Path.PathParameters> | null,
+    data?: Paths.PublicProxyPost.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.PublicProxyPost.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -3318,6 +3656,28 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.IngestEvent.Responses.$202>
   }
+  ['/v1/public/app/{appId}/proxy/{proxyName}/{path}']: {
+    /**
+     * publicProxyGet - publicProxyGet
+     * 
+     * Forward a GET request to a registered proxy target from a public-facing component (e.g. journey blocks)
+     */
+    'get'(
+      parameters?: Parameters<Paths.V1PublicApp$AppIdProxy$ProxyName$Path.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.PublicProxyGet.Responses.$200>
+    /**
+     * publicProxyPost - publicProxyPost
+     * 
+     * Forward a POST request to a registered proxy target from a public-facing component (e.g. journey blocks)
+     */
+    'post'(
+      parameters?: Parameters<Paths.V1PublicApp$AppIdProxy$ProxyName$Path.PathParameters> | null,
+      data?: Paths.PublicProxyPost.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.PublicProxyPost.Responses.$200>
+  }
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
@@ -3325,6 +3685,8 @@ export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
 export type Actor = Components.Schemas.Actor;
 export type AggregatedEvents = Components.Schemas.AggregatedEvents;
+export type ApiProxyComponent = Components.Schemas.ApiProxyComponent;
+export type ApiProxyConfig = Components.Schemas.ApiProxyConfig;
 export type AppBridgeSurfaceConfig = Components.Schemas.AppBridgeSurfaceConfig;
 export type AppEventData = Components.Schemas.AppEventData;
 export type Audit = Components.Schemas.Audit;
@@ -3334,6 +3696,7 @@ export type BaseComponentCommon = Components.Schemas.BaseComponentCommon;
 export type BaseCustomActionConfig = Components.Schemas.BaseCustomActionConfig;
 export type BatchEventRequest = Components.Schemas.BatchEventRequest;
 export type BillingFrequency = Components.Schemas.BillingFrequency;
+export type BlockReferenceArg = Components.Schemas.BlockReferenceArg;
 export type BlueprintRef = Components.Schemas.BlueprintRef;
 export type BooleanArg = Components.Schemas.BooleanArg;
 export type CallerIdentity = Components.Schemas.CallerIdentity;
@@ -3363,6 +3726,7 @@ export type JourneyBlockComponentArgs = Components.Schemas.JourneyBlockComponent
 export type JourneyBlockConfig = Components.Schemas.JourneyBlockConfig;
 export type NotificationConfig = Components.Schemas.NotificationConfig;
 export type NotificationEvent = Components.Schemas.NotificationEvent;
+export type ObjectField = Components.Schemas.ObjectField;
 export type Option = Components.Schemas.Option;
 export type Options = Components.Schemas.Options;
 export type OptionsRef = Components.Schemas.OptionsRef;
@@ -3376,9 +3740,11 @@ export type PortalExtensionConfig = Components.Schemas.PortalExtensionConfig;
 export type PortalExtensionHookConsumptionDataRetrieval = Components.Schemas.PortalExtensionHookConsumptionDataRetrieval;
 export type PortalExtensionHookContractIdentification = Components.Schemas.PortalExtensionHookContractIdentification;
 export type PortalExtensionHookCostDataRetrieval = Components.Schemas.PortalExtensionHookCostDataRetrieval;
+export type PortalExtensionHookDataExport = Components.Schemas.PortalExtensionHookDataExport;
 export type PortalExtensionHookMeterReadingPlausibilityCheck = Components.Schemas.PortalExtensionHookMeterReadingPlausibilityCheck;
 export type PortalExtensionHookPriceDataRetrieval = Components.Schemas.PortalExtensionHookPriceDataRetrieval;
 export type PortalExtensionHookRegistrationIdentifiersCheck = Components.Schemas.PortalExtensionHookRegistrationIdentifiersCheck;
+export type PortalExtensionHookVisualizationMetadata = Components.Schemas.PortalExtensionHookVisualizationMetadata;
 export type PortalExtensionSeamlessLink = Components.Schemas.PortalExtensionSeamlessLink;
 export type PortalExtensionSecureProxy = Components.Schemas.PortalExtensionSecureProxy;
 export type Pricing = Components.Schemas.Pricing;

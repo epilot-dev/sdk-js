@@ -2,17 +2,12 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Configuration Hub API",
-    "description": "Lightweight index API for exploring epilot organization configurations.\n\nProvides a unified tree view across all config types. Returns summary metadata only —\nthe frontend calls individual epilot APIs directly (via @epilot/sdk) for full config payloads.\n",
+    "description": "Lightweight index API for exploring epilot organization configurations.\n\nProvides a unified tree view across all config types. Returns summary metadata only —\nthe frontend calls individual epilot APIs directly (via @epilot/sdk) for full config payloads.\n\n## Source APIs per resource type\n\nEach resource type maps to a specific epilot API. The frontend should use the corresponding\n@epilot/sdk client to fetch full config details (e.g., for the side panel JSON view).\n\n| Resource Type | Source API | SDK Client |\n|---|---|---|\n| `journey` | journey.sls.epilot.io | `@epilot/sdk/journey` |\n| `automation_flow` | automation.sls.epilot.io | `@epilot/sdk/automation` |\n| `workflow_definition` | workflow-definition.sls.epilot.io | `@epilot/sdk/workflow-definition` |\n| `closing_reason` | workflow-definition.sls.epilot.io | `@epilot/sdk/workflow-definition` |\n| `flow_template` | workflow-definition.sls.epilot.io | `@epilot/sdk/workflow-definition` |\n| `schema` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `taxonomy` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `taxonomy_classification` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `emailtemplate` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `product` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `price` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `tax` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `coupon` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `file` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `webhook` | webhooks.sls.epilot.io | `@epilot/sdk/webhooks` |\n| `saved_view` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `dashboard` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `kanban` | kanban.sls.epilot.io | `@epilot/sdk/kanban` |\n| `role` | permissions.sls.epilot.io | `@epilot/sdk/permissions` |\n| `usergroup` | user.sls.epilot.io | `@epilot/sdk/user` |\n| `validation_rule` | entity.sls.epilot.io | `@epilot/sdk/validation-rules` |\n| `integration` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `app` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `designbuilder` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `notification_template` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `custom_variable` | entity.sls.epilot.io | `@epilot/sdk/template-variables` |\n| `environment_variable` | environments.sls.epilot.io | `@epilot/sdk/environments` |\n| `entity_mapping` | entity-mapping.sls.epilot.io | `@epilot/sdk/entity-mapping` |\n| `portal_config` | customer-portal.sls.epilot.io | `@epilot/sdk/customer-portal` |\n| `target` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `product_recommendation` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n",
     "version": "0.2.0"
   },
   "servers": [
     {
-      "url": "https://configuration-hub.dev.sls.epilot.io",
-      "description": "Dev"
-    },
-    {
-      "url": "https://configuration-hub.sls.epilot.io",
-      "description": "Production"
+      "url": "https://configuration-hub.sls.epilot.io"
     }
   ],
   "security": [
@@ -77,6 +72,40 @@
           },
           {
             "$ref": "#/components/parameters/SizeParam"
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "description": "Search query to filter configs by name/title",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "updated_after",
+            "in": "query",
+            "description": "Filter configs updated after this date (ISO 8601)",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "updated_before",
+            "in": "query",
+            "description": "Filter configs updated before this date (ISO 8601)",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "purposes",
+            "in": "query",
+            "description": "Filter by purpose classification IDs (comma-separated)",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -142,6 +171,28 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/index/rebuild": {
+      "post": {
+        "operationId": "rebuildIndex",
+        "summary": "rebuildIndex",
+        "description": "Rebuild the configuration index for the caller's organization.\nCalls all adapter APIs in parallel and stores results in DynamoDB.\nIf a build is already in progress (within 60s), returns immediately.\n",
+        "tags": [
+          "Index"
+        ],
+        "responses": {
+          "200": {
+            "description": "Index build status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IndexRebuildResponse"
                 }
               }
             }
@@ -377,6 +428,40 @@
         },
         "required": [
           "results"
+        ]
+      },
+      "IndexRebuildResponse": {
+        "type": "object",
+        "description": "Result of an index rebuild operation",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "ready",
+              "building",
+              "failed",
+              "already_building"
+            ]
+          },
+          "last_built_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "total_items": {
+            "type": "integer"
+          },
+          "build_duration_ms": {
+            "type": "integer"
+          },
+          "failed_types": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "status"
         ]
       },
       "ErrorResponse": {

@@ -24,6 +24,8 @@ export type ProfileConfig = {
   active?: string;
   /** Named profiles */
   profiles: Record<string, Profile>;
+  /** Global stage preference: 'prod' | 'dev' | 'staging' */
+  stage?: string;
 };
 
 const getConfigDir = (): string => {
@@ -103,6 +105,17 @@ export const deleteProfile = (name: string): boolean => {
   if (config.active === name) config.active = undefined;
   saveProfiles(config);
   return true;
+};
+
+export const getStage = (): string | undefined => {
+  const config = loadProfiles();
+  return config.stage;
+};
+
+export const setStage = (stage: string | undefined): void => {
+  const config = loadProfiles();
+  config.stage = stage;
+  saveProfiles(config);
 };
 
 export const listProfiles = (): { name: string; profile: Profile; active: boolean }[] => {

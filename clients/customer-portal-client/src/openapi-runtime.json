@@ -212,7 +212,7 @@
           {
             "in": "query",
             "name": "hookId",
-            "required": true
+            "required": false
           },
           {
             "in": "query",
@@ -244,6 +244,41 @@
         "responses": {}
       }
     },
+    "/v2/portal/visualization:export": {
+      "post": {
+        "operationId": "prepareVisualizationExport",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/portal/visualization/metadata": {
+      "get": {
+        "operationId": "getVisualizationMetadata",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "app_id",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "extensionId",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "context_entities",
+            "required": false
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v2/portal/costs": {
       "get": {
         "operationId": "getCosts",
@@ -261,7 +296,7 @@
           {
             "in": "query",
             "name": "hookId",
-            "required": true
+            "required": false
           },
           {
             "in": "query",
@@ -310,7 +345,7 @@
           {
             "in": "query",
             "name": "hookId",
-            "required": true
+            "required": false
           },
           {
             "in": "query",
@@ -871,6 +906,30 @@
     "/v3/portal/public/contact/exists": {
       "post": {
         "operationId": "checkContactExistsV3",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "portal_id",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "domain",
+            "required": false
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v3/portal/public/account/exists": {
+      "post": {
+        "operationId": "checkAccountExists",
         "parameters": [
           {
             "in": "query",
@@ -1841,6 +1900,39 @@
         "responses": {}
       }
     },
+    "/v2/portal/public/sso/providers/{provider_slug}": {
+      "get": {
+        "operationId": "getSSOProvider",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "provider_slug",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "org_id",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "origin",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "portal_id",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "domain",
+            "required": false
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v2/portal/public/sso/login": {
       "post": {
         "operationId": "ssoLogin",
@@ -2349,6 +2441,31 @@
             "required": true
           }
         ],
+        "responses": {}
+      }
+    },
+    "/v3/portal/verify-dns": {
+      "post": {
+        "operationId": "verifyDns",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "portal_id",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/portal/proxy/execute": {
+      "post": {
+        "operationId": "portalProxyExecute",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
         "responses": {}
       }
     }

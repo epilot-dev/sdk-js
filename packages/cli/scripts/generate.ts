@@ -364,6 +364,8 @@ export default defineCommand({
     include: { type: 'boolean', alias: 'i', description: 'Include response headers' },
     definition: { type: 'string', description: 'Override OpenAPI spec file/URL' },
     server: { type: 'string', alias: 's', description: 'Override server base URL' },
+    'use-dev': { type: 'boolean', description: 'Target dev environment' },
+    'use-staging': { type: 'boolean', description: 'Target staging environment' },
     profile: { type: 'string', description: 'Use a named profile' },
     token: { type: 'string', alias: 't', description: 'Bearer token' },
     json: { type: 'boolean', description: 'Output raw JSON' },
@@ -426,6 +428,8 @@ export const main = defineCommand({
     token: { type: 'string', alias: 't', description: 'Bearer token' },
     profile: { type: 'string', description: 'Use a named profile (or EPILOT_PROFILE env)' },
     server: { type: 'string', alias: 's', description: 'Override server base URL' },
+    'use-dev': { type: 'boolean', description: 'Target dev environment' },
+    'use-staging': { type: 'boolean', description: 'Target staging environment' },
     json: { type: 'boolean', description: 'Output raw JSON' },
     verbose: { type: 'boolean', alias: 'v', description: 'Verbose output' },
     guided: { type: 'boolean', description: 'Prompt for all parameters interactively' },
@@ -435,6 +439,7 @@ export const main = defineCommand({
   subCommands: {
     auth: () => import('./commands/auth.js').then((m) => m.default),
     profile: () => import('./commands/profile.js').then((m) => m.default),
+    config: () => import('./commands/config.js').then((m) => m.default),
     completion: () => import('./commands/completion.js').then((m) => m.default),
     upgrade: () => import('./commands/upgrade.js').then((m) => m.default),
 ${subCommandEntries.join('\n')}

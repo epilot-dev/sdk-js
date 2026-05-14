@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.4.1
+
+### Patch Changes
+
+- Add task group type
+
 ## 1.4.0
 
 ### Minor Changes

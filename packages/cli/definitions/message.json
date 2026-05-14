@@ -2,7 +2,7 @@
   "openapi": "3.0.2",
   "info": {
     "title": "Message API",
-    "version": "1.4.0",
+    "version": "1.5.0",
     "description": "Send and receive email messages via your epilot organization\n"
   },
   "security": [
@@ -1680,6 +1680,16 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "unlink_mapped_entities",
+            "description": "When true, also removes unassigned entities from mapped_entities on related source entities",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
           }
         ],
         "requestBody": {
@@ -2775,7 +2785,7 @@
           "timestamp": {
             "type": "string",
             "description": "Timestamp of the event",
-            "example": "2024-01-01T00:00:00.000Z"
+            "example": "2024-01-01T00:00:00Z"
           }
         }
       },

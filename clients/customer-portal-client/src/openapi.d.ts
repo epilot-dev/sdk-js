@@ -49,6 +49,31 @@ declare namespace Components {
              */
             decision: "accept" | "decline";
         }
+        export interface AccountExistsRequest {
+            /**
+             * ID of the organization
+             * example:
+             * 728
+             */
+            org_id: string;
+            /**
+             * Identifier-value pairs per schema to identify an account during portal user registration
+             * example:
+             * {
+             *   "account": {
+             *     "customer_number": "ACC-123456"
+             *   },
+             *   "contract": {
+             *     "contract_number": "123456"
+             *   }
+             * }
+             */
+            registration_identifiers: {
+                [name: string]: {
+                    [name: string]: string;
+                };
+            };
+        }
         export interface ActionLabel {
             en?: string | null;
             de?: string | null;
@@ -908,6 +933,13 @@ declare namespace Components {
              */
             is_epilot_domain?: boolean;
             /**
+             * The URL on which the portal is accessible
+             * example:
+             * example-portal-12345.ecp.epilot.cloud
+             */
+            epilot_domain?: string;
+            domain_settings?: /* Domain settings for the portal */ DomainSettings;
+            /**
              * ID of the design used to build the portal
              */
             design_id?: /**
@@ -926,6 +958,14 @@ declare namespace Components {
              */
             allowed_portal_entities?: string[];
             self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY" | "BLOCK_IF_PORTAL_USER_EXISTS";
+            /**
+             * Controls behavior of self-registration when account is used as the registration entity
+             */
+            self_registration_account_setting?: "ALLOW_WITH_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY";
+            /**
+             * Entity type used as the primary identifier for self-registration
+             */
+            self_registration_entity?: "contact" | "account";
             /**
              * Enable or disable user account self management
              * example:
@@ -1306,6 +1346,12 @@ declare namespace Components {
             pages?: {
                 [name: string]: Page;
             };
+            /**
+             * Portal-level blocks shared across all pages (e.g. footer). Keyed by block id.
+             */
+            global_blocks?: {
+                [name: string]: Block;
+            };
         }
         export interface CommonConfigAttributesV3 {
             /**
@@ -1329,6 +1375,13 @@ declare namespace Components {
              */
             is_epilot_domain?: boolean;
             /**
+             * The Epilot domain on which the portal is accessible
+             * example:
+             * example-portal-1.ecp.epilot.io
+             */
+            epilot_domain?: string;
+            domain_settings?: /* Domain settings for the portal */ DomainSettings;
+            /**
              * ID of the design used to build the portal
              */
             design_id?: /**
@@ -1347,6 +1400,14 @@ declare namespace Components {
              */
             allowed_portal_entities?: string[];
             self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY" | "BLOCK_IF_PORTAL_USER_EXISTS";
+            /**
+             * Controls behavior of self-registration when account is used as the registration entity
+             */
+            self_registration_account_setting?: "ALLOW_WITH_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY";
+            /**
+             * Entity type used as the primary identifier for self-registration
+             */
+            self_registration_entity?: "contact" | "account";
             /**
              * Enable or disable user account self management
              * example:
@@ -1724,6 +1785,12 @@ declare namespace Components {
              */
             portal_sk_v3?: string;
             origin?: /* Origin of the portal */ Origin;
+            /**
+             * Portal-level blocks shared across all pages (e.g. footer). Keyed by block id.
+             */
+            global_blocks?: {
+                [name: string]: Block;
+            };
         }
         /**
          * The mapped contact of the portal user
@@ -2158,6 +2225,7 @@ declare namespace Components {
          */
         export type Currency = string;
         export interface DataRetrievalItem {
+            app?: PublicAppDetails;
             extension?: PublicExtensionDetails;
             hook?: PublicDataRetrievalHookDetails;
         }
@@ -2208,6 +2276,23 @@ declare namespace Components {
                 en?: string;
                 de?: string;
             };
+        }
+        /**
+         * Domain settings for the portal
+         */
+        export interface DomainSettings {
+            /**
+             * Whether the custom domain is enabled
+             */
+            is_custom_domain_enabled?: boolean;
+            /**
+             * Whether the Epilot domain is enabled
+             */
+            is_epilot_domain_enabled?: boolean;
+            /**
+             * Whether the redirection is enabled
+             */
+            is_redirection_enabled?: boolean;
         }
         /**
          * Email templates used for authentication and internal processes
@@ -3173,6 +3258,11 @@ declare namespace Components {
              *
              */
             ExtensionHookConsumptionDataRetrieval | /**
+             * Generic data export hook. When configured on a visualization block, the portal delegates the export action (e.g. CSV/Excel/PDF download) to the configured external source instead of generating the file itself. Can be used by any block that supports export — consumption charts, dynamic tariff charts, etc. The expected response to the call is:
+             *   - 200 with a JSON body describing the exported file (download_url, optional filename, content_type, expires_at)
+             *
+             */
+            ExtensionHookDataExport | /**
              * Hook that will allow using the specified source as data for consumption visualizations. This hook is triggered to fetch the data. Format of the request and response has to follow the following specification: TBD. The expected response to the call is:
              *   - 200 with the time series data
              *
@@ -3186,7 +3276,11 @@ declare namespace Components {
              *       - valid: false
              *
              */
-            ExtensionHookMeterReadingPlausibilityCheck))[];
+            ExtensionHookMeterReadingPlausibilityCheck | /**
+             * Hook that returns runtime metadata describing how a visualization should be rendered for a given portal context. Invoked by the portal before fetching data, with the same context the data hook receives.
+             *
+             */
+            ExtensionHookVisualizationMetadata))[];
         }
         export interface ExtensionAuthBlock {
             /**
@@ -3295,7 +3389,9 @@ declare namespace Components {
                 dataPath?: string;
             };
             /**
+             * Deprecated. Prefer `secure_proxy` instead.
              * If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.
+             *
              */
             use_static_ips?: boolean;
             secure_proxy?: /* Configuration for routing requests through the ERP Integration secure proxy. Mutually exclusive with use_static_ips. */ SecureProxyConfig;
@@ -3372,7 +3468,9 @@ declare namespace Components {
                 en: string;
             };
             /**
+             * Deprecated. Prefer `secure_proxy` instead.
              * If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.
+             *
              */
             use_static_ips?: boolean;
             secure_proxy?: /* Configuration for routing requests through the ERP Integration secure proxy. Mutually exclusive with use_static_ips. */ SecureProxyConfig;
@@ -3420,7 +3518,61 @@ declare namespace Components {
                 dataPath?: string;
             };
             /**
+             * Deprecated. Prefer `secure_proxy` instead.
              * If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.
+             *
+             */
+            use_static_ips?: boolean;
+            secure_proxy?: /* Configuration for routing requests through the ERP Integration secure proxy. Mutually exclusive with use_static_ips. */ SecureProxyConfig;
+        }
+        /**
+         * Generic data export hook. When configured on a visualization block, the portal delegates the export action (e.g. CSV/Excel/PDF download) to the configured external source instead of generating the file itself. Can be used by any block that supports export — consumption charts, dynamic tariff charts, etc. The expected response to the call is:
+         *   - 200 with a JSON body describing the exported file (download_url, optional filename, content_type, expires_at)
+         *
+         */
+        export interface ExtensionHookDataExport {
+            type: "dataExport";
+            /**
+             * Optional list of portal block types this hook supports. If omitted,
+             * the hook is usable on any export-capable block. Allowed values match
+             * the block type identifiers used by the portal builder
+             * (e.g. `consumption_visualization`, `dynamic_tariff`).
+             *
+             */
+            block_types?: string[];
+            auth?: ExtensionAuthBlock;
+            call: {
+                /**
+                 * HTTP method to use for the call
+                 */
+                method?: string;
+                /**
+                 * URL to call. Supports variable interpolation.
+                 */
+                url: string;
+                /**
+                 * Parameters to append to the URL. Supports variable interpolation.
+                 */
+                params?: {
+                    [name: string]: string;
+                };
+                /**
+                 * Headers to use. Supports variable interpolation.
+                 */
+                headers?: {
+                    [name: string]: string;
+                };
+                /**
+                 * Request body to send. Supports variable interpolation. Content format is determined by Content-Type header.
+                 */
+                body?: {
+                    [name: string]: string;
+                };
+            };
+            /**
+             * Deprecated. Prefer `secure_proxy` instead.
+             * If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.
+             *
              */
             use_static_ips?: boolean;
             secure_proxy?: /* Configuration for routing requests through the ERP Integration secure proxy. Mutually exclusive with use_static_ips. */ SecureProxyConfig;
@@ -3512,7 +3664,9 @@ declare namespace Components {
                 lower_limit?: string;
             };
             /**
+             * Deprecated. Prefer `secure_proxy` instead.
              * If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.
+             *
              */
             use_static_ips?: boolean;
             secure_proxy?: /* Configuration for routing requests through the ERP Integration secure proxy. Mutually exclusive with use_static_ips. */ SecureProxyConfig;
@@ -3560,7 +3714,9 @@ declare namespace Components {
                 dataPath?: string;
             };
             /**
+             * Deprecated. Prefer `secure_proxy` instead.
              * If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.
+             *
              */
             use_static_ips?: boolean;
             secure_proxy?: /* Configuration for routing requests through the ERP Integration secure proxy. Mutually exclusive with use_static_ips. */ SecureProxyConfig;
@@ -3607,7 +3763,9 @@ declare namespace Components {
                 result?: string;
             };
             /**
+             * Deprecated. Prefer `secure_proxy` instead.
              * If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.
+             *
              */
             use_static_ips?: boolean;
             secure_proxy?: /* Configuration for routing requests through the ERP Integration secure proxy. Mutually exclusive with use_static_ips. */ SecureProxyConfig;
@@ -3626,6 +3784,55 @@ declare namespace Components {
              */
             hook_id: string;
         } | null;
+        /**
+         * Hook that returns runtime metadata describing how a visualization should be rendered for a given portal context. Invoked by the portal before fetching data, with the same context the data hook receives.
+         *
+         */
+        export interface ExtensionHookVisualizationMetadata {
+            type: "visualizationMetadata";
+            auth?: ExtensionAuthBlock;
+            call: {
+                /**
+                 * HTTP method to use for the call
+                 */
+                method?: string;
+                /**
+                 * URL to call. Supports variable interpolation.
+                 */
+                url: string;
+                /**
+                 * Parameters to append to the URL. Supports variable interpolation.
+                 */
+                params?: {
+                    [name: string]: string;
+                };
+                /**
+                 * Headers to use. Supports variable interpolation.
+                 */
+                headers?: {
+                    [name: string]: string;
+                };
+                /**
+                 * Request body to send. Supports variable interpolation. Content format is determined by Content-Type header.
+                 */
+                body?: {
+                    [name: string]: string;
+                };
+            };
+            resolved?: {
+                /**
+                 * Optional path to the metadata object in the response. If omitted, the metadata is assumed to be on the top level.
+                 */
+                dataPath?: string;
+            };
+            /**
+             * Deprecated. Prefer `secure_proxy` instead.
+             * If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.
+             *
+             */
+            use_static_ips?: boolean;
+            secure_proxy?: /* Configuration for routing requests through the ERP Integration secure proxy. Mutually exclusive with use_static_ips. */ SecureProxyConfig;
+        }
         export interface ExtensionSeamlessLink {
             /**
              * Identifier of the link. Should not change between updates.
@@ -4095,6 +4302,12 @@ declare namespace Components {
              * Whether the org is in canary mode
              */
             is_canary?: boolean;
+            /**
+             * The URL to redirect to
+             * example:
+             * https://example.com
+             */
+            redirect_to?: string;
         }
         /**
          * The meter entity
@@ -4326,6 +4539,12 @@ declare namespace Components {
              * ]
              */
             meter_numbers?: string[];
+            /**
+             * ID of the created file entity for the uploaded photo.
+             * example:
+             * abc123def456
+             */
+            file_id?: string;
         }
         export interface MeterReadingWidget {
             id: string;
@@ -4344,40 +4563,57 @@ declare namespace Components {
             };
             schema?: string;
         }
+        /**
+         * Mobile OIDC configuration. All string fields support env var interpolation
+         * (incl. secrets) via mustache-like templates, e.g. `{{ env.MOBILE_CLIENT_SECRET }}`.
+         *
+         */
         export interface MoblieOIDCConfig {
             /**
-             * Client ID for the mobile app
+             * Client ID for the mobile app. Supports env var interpolation.
              * example:
              * 123456
              */
             client_id?: string;
             /**
-             * Client Secret for the mobile app
+             * Client Secret for the mobile app. Supports env var interpolation (incl. secrets),
+             * e.g. `{{ env.MOBILE_CLIENT_SECRET }}`.
+             *
              * example:
              * 123456
              */
             client_secret?: string;
         }
+        /**
+         * OIDC provider configuration. All string fields support env var interpolation
+         * (incl. secrets) via mustache-like templates, e.g. `{{ env.MY_PROVIDER_CLIENT_SECRET }}`.
+         *
+         */
         export interface OIDCProviderConfig {
             type?: "authorization_code" | "implicit";
             /**
-             * Issuing Authority URL
+             * Issuing Authority URL. Supports env var interpolation, e.g. `{{ env.MY_ISSUER }}`.
              * example:
              * https://login.microsoftonline.com/33d4f3e5-3df2-421e-b92e-a63cfa680a88/v2.0
              */
             oidc_issuer: string;
             /**
-             * Redirect URI for the OIDC flow
+             * Redirect URI for the OIDC flow. Supports env var interpolation.
              * example:
              * https://customer-portal.com/login
              */
             redirect_uri?: string;
             /**
+             * Supports env var interpolation, e.g. `{{ env.MY_CLIENT_ID }}`.
              * example:
              * ab81daf8-8b1f-42d6-94ca-c51621054c75
              */
             client_id: string;
             /**
+             * Client Secret. Supports env var interpolation (incl. secrets), e.g.
+             * `{{ env.MY_CLIENT_SECRET }}`. Prefer storing the actual secret as an org
+             * env var and referencing it here.
+             *
              * example:
              * 7BIUnn~6shh.7fNtXb..3k1Mp3s6k6WK3B
              */
@@ -4439,15 +4675,60 @@ declare namespace Components {
              */
             mobile_redirect_uri?: string;
             /**
-             * The username for the test auth, only used for testing on auth code flow
+             * The username for the test auth, only used for testing on auth code flow.
+             * Supports env var interpolation, e.g. `{{ env.MY_TEST_AUTH_USERNAME }}`.
+             *
              * example:
              * test@epilot.io
              */
             test_auth_username?: string;
             /**
-             * The password for the test auth, only used for testing on auth code flow
+             * The password for the test auth, only used for testing on auth code flow.
+             * Supports env var interpolation (incl. secrets), e.g. `{{ env.MY_TEST_AUTH_PASSWORD }}`.
+             *
              */
             test_auth_password?: string;
+        }
+        /**
+         * Public OIDC provider configuration. Same as OIDCProviderConfig but never includes
+         * the `client_secret` field — it is kept server-side and only used to exchange the
+         * authorization code at the SSO callback. String fields are returned with env var
+         * placeholders already resolved when fetched via `GET /v2/portal/public/sso/providers/{provider_slug}`.
+         *
+         */
+        export interface OIDCProviderPublicConfig {
+            type?: "authorization_code" | "implicit";
+            /**
+             * Issuing Authority URL
+             * example:
+             * https://login.microsoftonline.com/33d4f3e5-3df2-421e-b92e-a63cfa680a88/v2.0
+             */
+            oidc_issuer: string;
+            /**
+             * Redirect URI for the OIDC flow
+             * example:
+             * https://customer-portal.com/login
+             */
+            redirect_uri?: string;
+            /**
+             * example:
+             * ab81daf8-8b1f-42d6-94ca-c51621054c75
+             */
+            client_id: string;
+            /**
+             * Whether the client secret is present (the value itself is kept server-side)
+             * example:
+             * true
+             */
+            has_client_secret?: boolean;
+            /**
+             * Space-separated list of OAuth 2.0 scopes to request from OpenID Connect
+             * example:
+             * openid email
+             */
+            scope: string;
+            metadata?: OIDCProviderMetadata;
+            prompt?: "login" | "select_account" | "consent";
         }
         /**
          * The opportunity entity
@@ -4843,6 +5124,16 @@ declare namespace Components {
              * 453ad7bf-86d5-46c8-8252-bcc868df5e3c
              */
             portal_id?: string;
+            /**
+             * Slugs that previously belonged to this page. The portal redirects requests for these slugs to the current slug. Managed by the server: when a page's slug changes, the old slug is appended here, and when another page claims one of these slugs it is removed from this list.
+             *
+             * example:
+             * [
+             *   "old-dashboard",
+             *   "home"
+             * ]
+             */
+            past_routes?: string[];
         }
         export interface PageRequest {
             [name: string]: any;
@@ -5004,6 +5295,13 @@ declare namespace Components {
              * Mark true if the domain is an Epilot domain
              */
             is_epilot_domain?: boolean;
+            /**
+             * The URL on which the portal is accessible
+             * example:
+             * example-portal-12345.ecp.epilot.cloud
+             */
+            epilot_domain?: string;
+            domain_settings?: /* Domain settings for the portal */ DomainSettings;
             design_id?: /**
              * Entity ID
              * example:
@@ -5020,6 +5318,14 @@ declare namespace Components {
              */
             allowed_portal_entities?: string[];
             self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY" | "BLOCK_IF_PORTAL_USER_EXISTS";
+            /**
+             * Controls behavior of self-registration when account is used as the registration entity
+             */
+            self_registration_account_setting?: "ALLOW_WITH_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY";
+            /**
+             * Entity type used as the primary identifier for self-registration
+             */
+            self_registration_entity?: "contact" | "account";
             /**
              * Enable or disable user account self management
              * example:
@@ -5401,6 +5707,12 @@ declare namespace Components {
                 [name: string]: Page;
             };
             /**
+             * Portal-level blocks shared across all pages (e.g. footer). Keyed by block id.
+             */
+            global_blocks?: {
+                [name: string]: Block;
+            };
+            /**
              * ID of the organization
              * example:
              * 12345
@@ -5508,6 +5820,13 @@ declare namespace Components {
              * Mark true if the domain is an Epilot domain
              */
             is_epilot_domain?: boolean;
+            /**
+             * The Epilot domain on which the portal is accessible
+             * example:
+             * example-portal-1.ecp.epilot.io
+             */
+            epilot_domain?: string;
+            domain_settings?: /* Domain settings for the portal */ DomainSettings;
             design_id?: /**
              * Entity ID
              * example:
@@ -5524,6 +5843,14 @@ declare namespace Components {
              */
             allowed_portal_entities?: string[];
             self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY" | "BLOCK_IF_PORTAL_USER_EXISTS";
+            /**
+             * Controls behavior of self-registration when account is used as the registration entity
+             */
+            self_registration_account_setting?: "ALLOW_WITH_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY";
+            /**
+             * Entity type used as the primary identifier for self-registration
+             */
+            self_registration_entity?: "contact" | "account";
             /**
              * Enable or disable user account self management
              * example:
@@ -5902,6 +6229,12 @@ declare namespace Components {
             portal_sk_v3?: string;
             origin?: /* Origin of the portal */ Origin;
             /**
+             * Portal-level blocks shared across all pages (e.g. footer). Keyed by block id.
+             */
+            global_blocks?: {
+                [name: string]: Block;
+            };
+            /**
              * ID of the organization
              * example:
              * 12345
@@ -6113,6 +6446,20 @@ declare namespace Components {
              */
             campaign_id?: string;
         }
+        /**
+         * SSO identity provider configuration.
+         *
+         * Env var interpolation: only string fields under `oidc_config` and
+         * `mobile_oidc_config` (incl. their nested `metadata`) are passed through
+         * Liquid templating, so they may contain `{{ env.VAR }}` placeholders that
+         * get resolved at runtime against the organization's environment.
+         *
+         * The following fields are used as literal values and MUST NOT contain
+         * template syntax: `slug`, `display_name`, `provider_type`, all keys and
+         * values under `attribute_mappings` (used as JSONPath-like accessors into
+         * token claims), and all keys and values under `entity_matching`.
+         *
+         */
         export interface ProviderConfig {
             slug?: /**
              * URL-friendly slug to use as organization-unique identifier for Provider
@@ -6129,8 +6476,18 @@ declare namespace Components {
             provider_type: "OIDC";
             attribute_mappings?: /* Dictionary of epilot user attributes to claims */ AttributeMappingConfig;
             entity_matching?: /* Configuration for matching existing entities during SSO login using token claims */ EntityMatchingConfig;
-            oidc_config?: OIDCProviderConfig;
-            mobile_oidc_config?: MoblieOIDCConfig;
+            oidc_config?: /**
+             * OIDC provider configuration. All string fields support env var interpolation
+             * (incl. secrets) via mustache-like templates, e.g. `{{ env.MY_PROVIDER_CLIENT_SECRET }}`.
+             *
+             */
+            OIDCProviderConfig;
+            mobile_oidc_config?: /**
+             * Mobile OIDC configuration. All string fields support env var interpolation
+             * (incl. secrets) via mustache-like templates, e.g. `{{ env.MOBILE_CLIENT_SECRET }}`.
+             *
+             */
+            MoblieOIDCConfig;
         }
         /**
          * Human-readable display name for identity provider shown in login
@@ -6151,8 +6508,20 @@ declare namespace Components {
              * Office 365 Login
              */
             ProviderDisplayName;
-            oidc_config?: OIDCProviderConfig;
-            mobile_oidc_config?: MoblieOIDCConfig;
+            oidc_config?: /**
+             * Public OIDC provider configuration. Same as OIDCProviderConfig but never includes
+             * the `client_secret` field — it is kept server-side and only used to exchange the
+             * authorization code at the SSO callback. String fields are returned with env var
+             * placeholders already resolved when fetched via `GET /v2/portal/public/sso/providers/{provider_slug}`.
+             *
+             */
+            OIDCProviderPublicConfig;
+            mobile_oidc_config?: /**
+             * Mobile OIDC configuration. All string fields support env var interpolation
+             * (incl. secrets) via mustache-like templates, e.g. `{{ env.MOBILE_CLIENT_SECRET }}`.
+             *
+             */
+            MoblieOIDCConfig;
         }
         /**
          * URL-friendly slug to use as organization-unique identifier for Provider
@@ -6160,6 +6529,19 @@ declare namespace Components {
          * office-365-login
          */
         export type ProviderSlug = string; // [0-9a-z-]+
+        export interface PublicAppDetails {
+            /**
+             * Identifier of the app.
+             */
+            app_id?: string;
+            name?: {
+                [name: string]: string;
+                /**
+                 * Name of the app in English.
+                 */
+                en: string;
+            };
+        }
         export interface PublicContractIdentificationDetails {
             /**
              * Explanation of the hook.
@@ -6187,12 +6569,20 @@ declare namespace Components {
                 en: string;
             };
             /**
-             * The intervals associated with the hook.
+             * Deprecated. Prefer fetching `intervals` from the `visualizationMetadata` endpoint
+             * (`GET /v2/portal/visualization/metadata`) so the supported intervals can vary per
+             * meter/contract. Still emitted as a fallback for clients that have not migrated yet.
+             *
              */
             intervals?: string[];
+            /**
+             * Optional list of portal block types the hook supports. Empty/missing means the hook is usable on any export-capable block.
+             */
+            block_types?: string[];
         }
         export interface PublicExtensionCapabilities {
             consumptionDataRetrieval?: DataRetrievalItem[];
+            dataExport?: DataRetrievalItem[];
             priceDataRetrieval?: DataRetrievalItem[];
             costDataRetrieval?: DataRetrievalItem[];
             contractIdentification?: {
@@ -6727,6 +7117,13 @@ declare namespace Components {
              * Mark true if the domain is an Epilot domain
              */
             is_epilot_domain?: boolean;
+            /**
+             * The URL on which the portal is accessible
+             * example:
+             * example-portal-12345.ecp.epilot.cloud
+             */
+            epilot_domain?: string;
+            domain_settings?: /* Domain settings for the portal */ DomainSettings;
             design_id?: /**
              * Entity ID
              * example:
@@ -6743,6 +7140,14 @@ declare namespace Components {
              */
             allowed_portal_entities?: string[];
             self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY" | "BLOCK_IF_PORTAL_USER_EXISTS";
+            /**
+             * Controls behavior of self-registration when account is used as the registration entity
+             */
+            self_registration_account_setting?: "ALLOW_WITH_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY";
+            /**
+             * Entity type used as the primary identifier for self-registration
+             */
+            self_registration_entity?: "contact" | "account";
             /**
              * Enable or disable user account self management
              * example:
@@ -7123,6 +7528,12 @@ declare namespace Components {
             pages?: {
                 [name: string]: Page;
             };
+            /**
+             * Portal-level blocks shared across all pages (e.g. footer). Keyed by block id.
+             */
+            global_blocks?: {
+                [name: string]: Block;
+            };
         }
         export interface UpsertPortalConfigV3 {
             /**
@@ -7185,6 +7596,13 @@ declare namespace Components {
              * Mark true if the domain is an Epilot domain
              */
             is_epilot_domain?: boolean;
+            /**
+             * The Epilot domain on which the portal is accessible
+             * example:
+             * example-portal-1.ecp.epilot.io
+             */
+            epilot_domain?: string;
+            domain_settings?: /* Domain settings for the portal */ DomainSettings;
             design_id?: /**
              * Entity ID
              * example:
@@ -7201,6 +7619,14 @@ declare namespace Components {
              */
             allowed_portal_entities?: string[];
             self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY" | "BLOCK_IF_PORTAL_USER_EXISTS";
+            /**
+             * Controls behavior of self-registration when account is used as the registration entity
+             */
+            self_registration_account_setting?: "ALLOW_WITH_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY";
+            /**
+             * Entity type used as the primary identifier for self-registration
+             */
+            self_registration_entity?: "contact" | "account";
             /**
              * Enable or disable user account self management
              * example:
@@ -7578,9 +8004,23 @@ declare namespace Components {
              */
             portal_sk_v3?: string;
             origin?: /* Origin of the portal */ Origin;
+            /**
+             * Portal-level blocks shared across all pages (e.g. footer). Keyed by block id.
+             */
+            global_blocks?: {
+                [name: string]: Block;
+            };
             pages?: PageRequest[];
         }
         export interface UpsertPortalWidget {
+            /**
+             * V3 portal-scoped storage key for the widget configuration
+             */
+            portal_sk_v3?: string;
+            /**
+             * Indicates whether the widget configuration is stored as a V3 portal-scoped item
+             */
+            is_v3_item?: boolean;
             widgets: PortalWidget[];
         }
         export interface UserRequest {
@@ -7611,6 +8051,75 @@ declare namespace Components {
              * 5da0a718-c822-403d-9f5d-20d4584e0528
              */
             EntityId /* uuid */;
+        }
+        /**
+         * Earliest / latest timestamps for which data is available in the current context.
+         */
+        export interface VisualizationDataRange {
+            /**
+             * ISO 8601 timestamp of the earliest available data point.
+             */
+            from?: string; // date-time
+            /**
+             * ISO 8601 timestamp of the latest available data point.
+             */
+            to?: string; // date-time
+        }
+        /**
+         * Runtime metadata describing how a visualization should be rendered for a given portal context. Returned by `GET /v2/portal/visualization/metadata`.
+         *
+         */
+        export interface VisualizationMetadata {
+            /**
+             * Types advertised for the current context (e.g. `ht`/`nt`, `feed-in`/`feed-out`). The `id` matches the `type` field returned by the data hook.
+             *
+             */
+            type_options?: VisualizationTypeOption[];
+            /**
+             * Intervals supported for the current context. If omitted, all intervals are assumed supported.
+             */
+            intervals?: ("PT15M" | "PT1H" | "P1D" | "P1M")[];
+            data_range?: /* Earliest / latest timestamps for which data is available in the current context. */ VisualizationDataRange;
+        }
+        export interface VisualizationTypeOption {
+            /**
+             * Identifier of the type. Matches the `type` field on the data hook response.
+             */
+            id: string;
+            /**
+             * Localized label for the type, keyed by ISO 3166-1 alpha-2 language code.
+             */
+            label?: {
+                [name: string]: string;
+            };
+            /**
+             * Optional grouping key. Types in the same `aggregation_group` are visually combined; types in different groups (or without a group) render separately. How they combine depends on each type's `statistical_method`:
+             *   - bar chart (`sum`): same-group types are stacked into a single bar (e.g. ht/nt
+             *     summed into total consumption); different-group types render side-by-side.
+             *   - line chart (`min` / `average` / `max`): same-group types are rendered as an
+             *     area chart; different-group types render as separate lines.
+             *
+             */
+            aggregation_group?: string;
+            /**
+             * Statistical method already applied to this type's data. Determines the chart shape used to render the type's values: `sum` is shown as a bar chart; `min`, `average`, and `max` are shown as a line chart. Each type advertises its own method, so a single visualization can mix bar-shaped types with line-shaped types. Defaults to `sum` when omitted.
+             *
+             */
+            statistical_method?: "sum" | "average" | "min" | "max";
+            /**
+             * Unit shared by all values of this type (e.g. "kWh").
+             */
+            unit?: string;
+            /**
+             * Optional Spark color token used to render this type in the visualization. Maps onto the portal's Spark palette (`primary` is the org's primary brand color). When omitted the consumer falls back to its own per-type default.
+             *
+             */
+            color?: "primary" | "slate" | "mauve" | "orange" | "red" | "tomato" | "amber" | "green" | "blue";
+            /**
+             * Optional number of decimal places to show when rendering values of this type in the visualization (axis labels, tooltips, summaries). When omitted the consumer falls back to its own default precision.
+             *
+             */
+            precision?: number;
         }
         export interface WidgetAction {
             _id: string;
@@ -7793,6 +8302,44 @@ declare namespace Paths {
             }
         }
     }
+    namespace CheckAccountExists {
+        namespace Parameters {
+            export type Domain = string;
+            export type PortalId = /**
+             * ID of the portal
+             * example:
+             * 453ad7bf-86d5-46c8-8252-bcc868df5e3c
+             */
+            Components.Schemas.PortalId;
+        }
+        export interface QueryParameters {
+            portal_id?: Parameters.PortalId;
+            domain?: Parameters.Domain;
+        }
+        export type RequestBody = Components.Schemas.AccountExistsRequest;
+        namespace Responses {
+            export interface $200 {
+                /**
+                 * Whether the account exists with the given identifier values
+                 * example:
+                 * true
+                 */
+                exists?: boolean;
+                /**
+                 * ID of the account if exists
+                 */
+                accountId?: /**
+                 * Entity ID
+                 * example:
+                 * 5da0a718-c822-403d-9f5d-20d4584e0528
+                 */
+                Components.Schemas.EntityId /* uuid */;
+            }
+            export type $400 = Components.Responses.InvalidRequest;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace CheckContactExists {
         namespace Parameters {
             export type Origin = /* Origin of the portal */ Components.Schemas.Origin;
@@ -7851,6 +8398,15 @@ declare namespace Paths {
                  * ID of the contact if exists
                  */
                 contactId?: /**
+                 * Entity ID
+                 * example:
+                 * 5da0a718-c822-403d-9f5d-20d4584e0528
+                 */
+                Components.Schemas.EntityId /* uuid */;
+                /**
+                 * ID of the resolved account when the portal is configured for account-based registration
+                 */
+                accountId?: /**
                  * Entity ID
                  * example:
                  * 5da0a718-c822-403d-9f5d-20d4584e0528
@@ -9114,7 +9670,7 @@ declare namespace Paths {
         export interface QueryParameters {
             app_id?: Parameters.AppId;
             extensionId: Parameters.ExtensionId;
-            hookId: Parameters.HookId;
+            hookId?: Parameters.HookId;
             meter_id?: Parameters.MeterId;
             from: Parameters.From /* date-time */;
             to: Parameters.To /* date-time */;
@@ -9139,11 +9695,11 @@ declare namespace Paths {
                      */
                     type?: string;
                     /**
-                     * The method used to aggregate the consumption data. Assumed default is 'sum'.
+                     * Optional unit of the consumption value. Defaults to unit present on the relevant Meter Counter.
                      * example:
-                     * sum
+                     * kWh
                      */
-                    aggregation_method?: "sum" | "average" | "max" | "min";
+                    unit?: string;
                 }[];
             }
             export type $401 = Components.Responses.Unauthorized;
@@ -9278,7 +9834,7 @@ declare namespace Paths {
         export interface QueryParameters {
             app_id?: Parameters.AppId;
             extensionId: Parameters.ExtensionId;
-            hookId: Parameters.HookId;
+            hookId?: Parameters.HookId;
             meter_id?: Parameters.MeterId;
             from: Parameters.From /* date-time */;
             to: Parameters.To /* date-time */;
@@ -9893,6 +10449,13 @@ declare namespace Paths {
                  * Mark true if the domain is an Epilot domain
                  */
                 is_epilot_domain?: boolean;
+                /**
+                 * The URL on which the portal is accessible
+                 * example:
+                 * example-portal-12345.ecp.epilot.cloud
+                 */
+                epilot_domain?: string;
+                domain_settings?: /* Domain settings for the portal */ Components.Schemas.DomainSettings;
                 design_id?: /**
                  * Entity ID
                  * example:
@@ -9909,6 +10472,14 @@ declare namespace Paths {
                  */
                 allowed_portal_entities?: string[];
                 self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY" | "BLOCK_IF_PORTAL_USER_EXISTS";
+                /**
+                 * Controls behavior of self-registration when account is used as the registration entity
+                 */
+                self_registration_account_setting?: "ALLOW_WITH_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY";
+                /**
+                 * Entity type used as the primary identifier for self-registration
+                 */
+                self_registration_entity?: "contact" | "account";
                 /**
                  * Enable or disable user account self management
                  * example:
@@ -10288,6 +10859,12 @@ declare namespace Paths {
                 origin?: /* Origin of the portal */ Components.Schemas.Origin;
                 pages?: {
                     [name: string]: Components.Schemas.Page;
+                };
+                /**
+                 * Portal-level blocks shared across all pages (e.g. footer). Keyed by block id.
+                 */
+                global_blocks?: {
+                    [name: string]: Components.Schemas.Block;
                 };
                 /**
                  * ID of the organization
@@ -10387,6 +10964,13 @@ declare namespace Paths {
                  * Mark true if the domain is an Epilot domain
                  */
                 is_epilot_domain?: boolean;
+                /**
+                 * The URL on which the portal is accessible
+                 * example:
+                 * example-portal-12345.ecp.epilot.cloud
+                 */
+                epilot_domain?: string;
+                domain_settings?: /* Domain settings for the portal */ Components.Schemas.DomainSettings;
                 design_id?: /**
                  * Entity ID
                  * example:
@@ -10403,6 +10987,14 @@ declare namespace Paths {
                  */
                 allowed_portal_entities?: string[];
                 self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY" | "BLOCK_IF_PORTAL_USER_EXISTS";
+                /**
+                 * Controls behavior of self-registration when account is used as the registration entity
+                 */
+                self_registration_account_setting?: "ALLOW_WITH_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY";
+                /**
+                 * Entity type used as the primary identifier for self-registration
+                 */
+                self_registration_entity?: "contact" | "account";
                 /**
                  * Enable or disable user account self management
                  * example:
@@ -10782,6 +11374,12 @@ declare namespace Paths {
                 origin?: /* Origin of the portal */ Components.Schemas.Origin;
                 pages?: {
                     [name: string]: Components.Schemas.Page;
+                };
+                /**
+                 * Portal-level blocks shared across all pages (e.g. footer). Keyed by block id.
+                 */
+                global_blocks?: {
+                    [name: string]: Components.Schemas.Block;
                 };
                 /**
                  * ID of the organization
@@ -11140,7 +11738,7 @@ declare namespace Paths {
         export interface QueryParameters {
             app_id?: Parameters.AppId;
             extensionId: Parameters.ExtensionId;
-            hookId: Parameters.HookId;
+            hookId?: Parameters.HookId;
             meter_id?: Parameters.MeterId;
             from: Parameters.From /* date-time */;
             to: Parameters.To /* date-time */;
@@ -11691,6 +12289,48 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace GetSSOProvider {
+        namespace Parameters {
+            export type Domain = string;
+            /**
+             * example:
+             * 123
+             */
+            export type OrgId = string;
+            export type Origin = "END_CUSTOMER_PORTAL" | "INSTALLER_PORTAL";
+            export type PortalId = /**
+             * ID of the portal
+             * example:
+             * 453ad7bf-86d5-46c8-8252-bcc868df5e3c
+             */
+            Components.Schemas.PortalId;
+            export type ProviderSlug = /**
+             * URL-friendly slug to use as organization-unique identifier for Provider
+             * example:
+             * office-365-login
+             */
+            Components.Schemas.ProviderSlug /* [0-9a-z-]+ */;
+        }
+        export interface PathParameters {
+            provider_slug: Parameters.ProviderSlug;
+        }
+        export interface QueryParameters {
+            org_id?: /**
+             * example:
+             * 123
+             */
+            Parameters.OrgId;
+            origin?: Parameters.Origin;
+            portal_id?: Parameters.PortalId;
+            domain?: Parameters.Domain;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.ProviderPublicConfig;
+            export type $400 = Components.Responses.InvalidRequest;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace GetSchemas {
         namespace Responses {
             export interface $200 {
@@ -11896,6 +12536,39 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace GetVisualizationMetadata {
+        namespace Parameters {
+            export type AppId = string;
+            export type ContextEntities = /**
+             * Additional entities to include in the context for variable interpolation. Portal User and Contact entities are automatically part of the context.
+             * example:
+             * [
+             *   {
+             *     "entity_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+             *     "entity_schema": "contract"
+             *   }
+             * ]
+             */
+            Components.Schemas.ContextEntities;
+            export type ExtensionId = string;
+        }
+        export interface QueryParameters {
+            app_id: Parameters.AppId;
+            extensionId: Parameters.ExtensionId;
+            context_entities?: Parameters.ContextEntities;
+        }
+        namespace Responses {
+            export type $200 = /**
+             * Runtime metadata describing how a visualization should be rendered for a given portal context. Returned by `GET /v2/portal/visualization/metadata`.
+             *
+             */
+            Components.Schemas.VisualizationMetadata;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace InterpolatePortalPages {
         export interface RequestBody {
             /**
@@ -12072,6 +12745,42 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace PortalProxyExecute {
+        export interface RequestBody {
+            /**
+             * Integration ID containing the managed-call use case
+             */
+            integration_id: string; // uuid
+            /**
+             * Use case slug (acts as the RPC method name)
+             */
+            use_case_slug: string;
+            /**
+             * Input data for the managed-call operation
+             */
+            payload?: {
+                [name: string]: any;
+            };
+        }
+        namespace Responses {
+            export interface $200 {
+                success: boolean;
+                /**
+                 * Managed-call response payload. Shape is defined by the use
+                 * case's JSONata response_mapping; if no mapping is
+                 * configured the raw external API response is returned.
+                 *
+                 */
+                data?: {
+                    [name: string]: any;
+                };
+            }
+            export type $400 = Components.Responses.InvalidRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace PostOrderAcceptance {
         namespace Parameters {
             export type Id = /**
@@ -12093,6 +12802,67 @@ declare namespace Paths {
             export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
             export type $409 = Components.Responses.Conflict;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace PrepareVisualizationExport {
+        export interface RequestBody {
+            /**
+             * App ID providing the dataExport hook.
+             */
+            app_id: string;
+            /**
+             * Extension ID providing the dataExport hook.
+             */
+            extension_id: string;
+            /**
+             * Optional Hook ID. If omitted, the only `dataExport` hook on the extension is used; if the extension has multiple `dataExport` hooks, this becomes required.
+             */
+            hook_id?: string;
+            /**
+             * Optional start date for the export window (ISO 8601 format).
+             */
+            from?: string; // date-time
+            /**
+             * Optional end date for the export window (ISO 8601 format).
+             */
+            to?: string; // date-time
+            context_entities?: /**
+             * Additional entities to include in the context for variable interpolation. Portal User and Contact entities are automatically part of the context.
+             * example:
+             * [
+             *   {
+             *     "entity_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+             *     "entity_schema": "contract"
+             *   }
+             * ]
+             */
+            Components.Schemas.ContextEntities;
+        }
+        namespace Responses {
+            export interface $200 {
+                /**
+                 * URL the client can use to download the exported file. May be a pre-signed or short-lived URL.
+                 */
+                download_url: string;
+                /**
+                 * Suggested filename for the exported file.
+                 */
+                filename?: string;
+                /**
+                 * MIME type of the exported file.
+                 * example:
+                 * text/csv
+                 */
+                content_type?: string;
+                /**
+                 * Optional expiration timestamp for the download URL.
+                 */
+                expires_at?: string; // date-time
+            }
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -13369,6 +14139,34 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace VerifyDns {
+        namespace Parameters {
+            export type PortalId = /**
+             * ID of the portal
+             * example:
+             * 453ad7bf-86d5-46c8-8252-bcc868df5e3c
+             */
+            Components.Schemas.PortalId;
+        }
+        export interface QueryParameters {
+            portal_id: Parameters.PortalId;
+        }
+        namespace Responses {
+            export interface $200 {
+                /**
+                 * The status of the custom domain verification
+                 */
+                domain_status?: "PENDING" | "SUCCEED";
+                /**
+                 * A message describing the result
+                 */
+                message?: string;
+            }
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
 }
 
 
@@ -13511,6 +14309,28 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetConsumption.Responses.$200>
+  /**
+   * prepareVisualizationExport - Prepare Visualization Export
+   * 
+   * Asks an installed App to prepare a downloadable export of a visualization (consumption chart, dynamic tariff chart, etc.). The export is produced by the third-party App via a configured portal extension hook of type `dataExport` — this endpoint does not generate the file itself, it forwards the request to the configured hook and returns the descriptor the App provides (typically a `download_url`).
+   * 
+   */
+  'prepareVisualizationExport'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.PrepareVisualizationExport.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.PrepareVisualizationExport.Responses.$200>
+  /**
+   * getVisualizationMetadata - Get Visualization Metadata
+   * 
+   * Returns runtime metadata describing how a visualization (consumption / price / cost chart) should be rendered for a given portal context (meter, contract, etc). Resolves the extension's `visualizationMetadata` hook implicitly from `app_id` + `extensionId` and invokes it. Supplies the response as a structured payload that the portal uses to configure type/aggregation options, supported intervals, and the available data range.
+   * 
+   */
+  'getVisualizationMetadata'(
+    parameters?: Parameters<Paths.GetVisualizationMetadata.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetVisualizationMetadata.Responses.$200>
   /**
    * getCosts - Get Costs
    * 
@@ -13893,6 +14713,20 @@ export interface OperationMethods {
     data?: Paths.CheckContactExistsV3.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CheckContactExistsV3.Responses.$200>
+  /**
+   * checkAccountExists - checkAccountExists
+   * 
+   * True if account with given identifiers exists.
+   * Supports two identification methods:
+   * 1. Using portal_id
+   * 2. Using domain
+   * 
+   */
+  'checkAccountExists'(
+    parameters?: Parameters<Paths.CheckAccountExists.QueryParameters> | null,
+    data?: Paths.CheckAccountExists.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CheckAccountExists.Responses.$200>
   /**
    * getValidSecondaryAttributes - getValidSecondaryAttributes
    * 
@@ -14486,6 +15320,28 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetMeterReadings.Responses.$200>
   /**
+   * getSSOProvider - getSSOProvider
+   * 
+   * Returns the public configuration of a single SSO identity provider with env var
+   * placeholders (incl. secrets) already resolved against the organization's environment.
+   * 
+   * Use this endpoint at SSO initiation time (i.e. when the end user clicks "Sign in with X")
+   * to obtain the resolved OIDC settings needed to construct the authorization URL.
+   * The web `client_secret` is intentionally never returned — it is used server-side by
+   * the SSO callback to exchange the authorization code for tokens.
+   * 
+   * Supports three identification methods:
+   * 1. `org_id` + `origin`
+   * 2. `org_id` + `portal_id`
+   * 3. `domain`
+   * 
+   */
+  'getSSOProvider'(
+    parameters?: Parameters<Paths.GetSSOProvider.QueryParameters & Paths.GetSSOProvider.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetSSOProvider.Responses.$200>
+  /**
    * ssoLogin - ssoLogin
    * 
    * Initiate login using external SSO identity.
@@ -14853,6 +15709,28 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.EnablePartner.Responses.$200>
+  /**
+   * verifyDns - verifyDns
+   * 
+   * Manually triggers DNS verification for a portal's domain setup. Runs the same verification logic as the scheduled processAllPendingNetworks lambda.
+   */
+  'verifyDns'(
+    parameters?: Parameters<Paths.VerifyDns.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.VerifyDns.Responses.$200>
+  /**
+   * portalProxyExecute - portalProxyExecute
+   * 
+   * Execute an Integration Hub managed-call use case on behalf of a portal user.
+   * Bridges PortalAuth to the Integration API by generating an internal token.
+   * 
+   */
+  'portalProxyExecute'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.PortalProxyExecute.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.PortalProxyExecute.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -15017,6 +15895,32 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetConsumption.Responses.$200>
+  }
+  ['/v2/portal/visualization:export']: {
+    /**
+     * prepareVisualizationExport - Prepare Visualization Export
+     * 
+     * Asks an installed App to prepare a downloadable export of a visualization (consumption chart, dynamic tariff chart, etc.). The export is produced by the third-party App via a configured portal extension hook of type `dataExport` — this endpoint does not generate the file itself, it forwards the request to the configured hook and returns the descriptor the App provides (typically a `download_url`).
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.PrepareVisualizationExport.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.PrepareVisualizationExport.Responses.$200>
+  }
+  ['/v2/portal/visualization/metadata']: {
+    /**
+     * getVisualizationMetadata - Get Visualization Metadata
+     * 
+     * Returns runtime metadata describing how a visualization (consumption / price / cost chart) should be rendered for a given portal context (meter, contract, etc). Resolves the extension's `visualizationMetadata` hook implicitly from `app_id` + `extensionId` and invokes it. Supplies the response as a structured payload that the portal uses to configure type/aggregation options, supported intervals, and the available data range.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetVisualizationMetadata.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetVisualizationMetadata.Responses.$200>
   }
   ['/v2/portal/costs']: {
     /**
@@ -15463,6 +16367,22 @@ export interface PathsDictionary {
       data?: Paths.CheckContactExistsV3.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.CheckContactExistsV3.Responses.$200>
+  }
+  ['/v3/portal/public/account/exists']: {
+    /**
+     * checkAccountExists - checkAccountExists
+     * 
+     * True if account with given identifiers exists.
+     * Supports two identification methods:
+     * 1. Using portal_id
+     * 2. Using domain
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.CheckAccountExists.QueryParameters> | null,
+      data?: Paths.CheckAccountExists.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CheckAccountExists.Responses.$200>
   }
   ['/v2/portal/contact/valid/secondary/attributes']: {
     /**
@@ -16158,6 +17078,30 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetMeterReadings.Responses.$200>
   }
+  ['/v2/portal/public/sso/providers/{provider_slug}']: {
+    /**
+     * getSSOProvider - getSSOProvider
+     * 
+     * Returns the public configuration of a single SSO identity provider with env var
+     * placeholders (incl. secrets) already resolved against the organization's environment.
+     * 
+     * Use this endpoint at SSO initiation time (i.e. when the end user clicks "Sign in with X")
+     * to obtain the resolved OIDC settings needed to construct the authorization URL.
+     * The web `client_secret` is intentionally never returned — it is used server-side by
+     * the SSO callback to exchange the authorization code for tokens.
+     * 
+     * Supports three identification methods:
+     * 1. `org_id` + `origin`
+     * 2. `org_id` + `portal_id`
+     * 3. `domain`
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetSSOProvider.QueryParameters & Paths.GetSSOProvider.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetSSOProvider.Responses.$200>
+  }
   ['/v2/portal/public/sso/login']: {
     /**
      * ssoLogin - ssoLogin
@@ -16580,12 +17524,39 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.EnablePartner.Responses.$200>
   }
+  ['/v3/portal/verify-dns']: {
+    /**
+     * verifyDns - verifyDns
+     * 
+     * Manually triggers DNS verification for a portal's domain setup. Runs the same verification logic as the scheduled processAllPendingNetworks lambda.
+     */
+    'post'(
+      parameters?: Parameters<Paths.VerifyDns.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.VerifyDns.Responses.$200>
+  }
+  ['/v2/portal/proxy/execute']: {
+    /**
+     * portalProxyExecute - portalProxyExecute
+     * 
+     * Execute an Integration Hub managed-call use case on behalf of a portal user.
+     * Bridges PortalAuth to the Integration API by generating an internal token.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.PortalProxyExecute.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.PortalProxyExecute.Responses.$200>
+  }
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
 
 export type AcceptanceDecision = Components.Schemas.AcceptanceDecision;
+export type AccountExistsRequest = Components.Schemas.AccountExistsRequest;
 export type ActionLabel = Components.Schemas.ActionLabel;
 export type ActionWidget = Components.Schemas.ActionWidget;
 export type Activity = Components.Schemas.Activity;
@@ -16624,6 +17595,7 @@ export type DataRetrievalItem = Components.Schemas.DataRetrievalItem;
 export type DeleteEntityFile = Components.Schemas.DeleteEntityFile;
 export type Direction = Components.Schemas.Direction;
 export type DocumentWidget = Components.Schemas.DocumentWidget;
+export type DomainSettings = Components.Schemas.DomainSettings;
 export type EmailTemplates = Components.Schemas.EmailTemplates;
 export type Entity = Components.Schemas.Entity;
 export type EntityEditRule = Components.Schemas.EntityEditRule;
@@ -16649,10 +17621,12 @@ export type ExtensionHook = Components.Schemas.ExtensionHook;
 export type ExtensionHookConsumptionDataRetrieval = Components.Schemas.ExtensionHookConsumptionDataRetrieval;
 export type ExtensionHookContractIdentification = Components.Schemas.ExtensionHookContractIdentification;
 export type ExtensionHookCostDataRetrieval = Components.Schemas.ExtensionHookCostDataRetrieval;
+export type ExtensionHookDataExport = Components.Schemas.ExtensionHookDataExport;
 export type ExtensionHookMeterReadingPlausibilityCheck = Components.Schemas.ExtensionHookMeterReadingPlausibilityCheck;
 export type ExtensionHookPriceDataRetrieval = Components.Schemas.ExtensionHookPriceDataRetrieval;
 export type ExtensionHookRegistrationIdentifiersCheck = Components.Schemas.ExtensionHookRegistrationIdentifiersCheck;
 export type ExtensionHookSelection = Components.Schemas.ExtensionHookSelection;
+export type ExtensionHookVisualizationMetadata = Components.Schemas.ExtensionHookVisualizationMetadata;
 export type ExtensionSeamlessLink = Components.Schemas.ExtensionSeamlessLink;
 export type ExternalLink = Components.Schemas.ExternalLink;
 export type ExtraSchemaAttributes = Components.Schemas.ExtraSchemaAttributes;
@@ -16673,6 +17647,7 @@ export type MeterReadingWidget = Components.Schemas.MeterReadingWidget;
 export type MoblieOIDCConfig = Components.Schemas.MoblieOIDCConfig;
 export type OIDCProviderConfig = Components.Schemas.OIDCProviderConfig;
 export type OIDCProviderMetadata = Components.Schemas.OIDCProviderMetadata;
+export type OIDCProviderPublicConfig = Components.Schemas.OIDCProviderPublicConfig;
 export type Opportunity = Components.Schemas.Opportunity;
 export type Order = Components.Schemas.Order;
 export type OrganizationSettings = Components.Schemas.OrganizationSettings;
@@ -16692,6 +17667,7 @@ export type ProviderConfig = Components.Schemas.ProviderConfig;
 export type ProviderDisplayName = Components.Schemas.ProviderDisplayName;
 export type ProviderPublicConfig = Components.Schemas.ProviderPublicConfig;
 export type ProviderSlug = Components.Schemas.ProviderSlug;
+export type PublicAppDetails = Components.Schemas.PublicAppDetails;
 export type PublicContractIdentificationDetails = Components.Schemas.PublicContractIdentificationDetails;
 export type PublicDataRetrievalHookDetails = Components.Schemas.PublicDataRetrievalHookDetails;
 export type PublicExtensionCapabilities = Components.Schemas.PublicExtensionCapabilities;
@@ -16722,6 +17698,9 @@ export type UpsertPortalConfig = Components.Schemas.UpsertPortalConfig;
 export type UpsertPortalConfigV3 = Components.Schemas.UpsertPortalConfigV3;
 export type UpsertPortalWidget = Components.Schemas.UpsertPortalWidget;
 export type UserRequest = Components.Schemas.UserRequest;
+export type VisualizationDataRange = Components.Schemas.VisualizationDataRange;
+export type VisualizationMetadata = Components.Schemas.VisualizationMetadata;
+export type VisualizationTypeOption = Components.Schemas.VisualizationTypeOption;
 export type WidgetAction = Components.Schemas.WidgetAction;
 export type WidgetBase = Components.Schemas.WidgetBase;
 export type WorfklowIdentifier = Components.Schemas.WorfklowIdentifier;

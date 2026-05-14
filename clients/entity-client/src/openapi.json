@@ -2,7 +2,7 @@
   "openapi": "3.0.2",
   "info": {
     "title": "Entity API",
-    "version": "2.8.0",
+    "version": "2.9.0",
     "description": "Flexible data layer for epilot Entities.\n\nUse this API configure and access your business objects like Contacts, Opportunities and Products.\n\n[Feature Documentation](https://docs.epilot.io/docs/entities/flexible-entities)\n"
   },
   "tags": [
@@ -1428,6 +1428,9 @@
             "schema": {
               "$ref": "#/components/schemas/FieldsParam"
             }
+          },
+          {
+            "$ref": "#/components/parameters/ApplyChangesetsQueryParam"
           }
         ],
         "responses": {
@@ -1619,6 +1622,9 @@
           },
           {
             "$ref": "#/components/parameters/ValidateEntityQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/DirectQueryParam"
           }
         ],
         "requestBody": {
@@ -1682,6 +1688,9 @@
           },
           {
             "$ref": "#/components/parameters/ValidateEntityQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/DirectQueryParam"
           }
         ],
         "requestBody": {
@@ -2019,6 +2028,138 @@
           },
           "429": {
             "$ref": "#/components/responses/TooManyRequestsError"
+          }
+        }
+      }
+    },
+    "/v1/entity/{slug}/{id}/changesets/{attribute}:apply": {
+      "post": {
+        "operationId": "applyChangeset",
+        "summary": "applyChangeset",
+        "description": "Applies the proposed value from a pending changeset to the entity attribute\nand removes the changeset. Used for human approval of pending changes.\n",
+        "tags": [
+          "Entities"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntitySlugPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/EntityIdPathParam"
+          },
+          {
+            "in": "path",
+            "name": "attribute",
+            "required": true,
+            "description": "Attribute name of the changeset to apply",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Changeset applied successfully — returns updated entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntityItem"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      }
+    },
+    "/v1/entity/{slug}/{id}/changesets/{attribute}:dismiss": {
+      "post": {
+        "operationId": "dismissChangeset",
+        "summary": "dismissChangeset",
+        "description": "Removes a pending changeset without applying it. The attribute value remains unchanged.\n",
+        "tags": [
+          "Entities"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntitySlugPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/EntityIdPathParam"
+          },
+          {
+            "in": "path",
+            "name": "attribute",
+            "required": true,
+            "description": "Attribute name of the changeset to dismiss",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "reason": {
+                    "type": "string",
+                    "description": "Optional reason for dismissing the changeset"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Changeset dismissed successfully — returns updated entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntityItem"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      }
+    },
+    "/v1/entity/{slug}/{id}/changesets": {
+      "get": {
+        "operationId": "listChangesets",
+        "summary": "listChangesets",
+        "description": "Returns all pending changesets for an entity.",
+        "tags": [
+          "Entities"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntitySlugPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/EntityIdPathParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Pending changesets for the entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChangesetMap"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
           }
         }
       }
@@ -3704,7 +3845,7 @@
               "description": "ISO 8601 timestamp to filter jobs created after this time (e.g., 2023-01-01T00:00:00Z).",
               "type": "string",
               "format": "date-time",
-              "example": "2023-01-01T00:00:00.000Z"
+              "example": "2023-01-01T00:00:00Z"
             }
           },
           {
@@ -5497,6 +5638,22 @@
           },
           "has_primary": {
             "type": "boolean"
+          },
+          "edit_mode": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EditMode"
+              }
+            ],
+            "description": "Controls how updates to this attribute are handled. See the `EditMode`\nschema for the per-mode semantics. Defaults to `direct`.\n"
+          },
+          "edit_mode_config": {
+            "description": "Configuration for auto-clear matching on `edit_mode: external` attributes.\n`match_strategy` and `fuzzy_config` are only consulted for `external` mode —\nthey are ignored for `approval` mode, which resolves via explicit\n`:apply` / `:dismiss` endpoints and never auto-clears.\n",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EditModeConfig"
+              }
+            ]
           }
         },
         "required": [
@@ -7417,6 +7574,15 @@
               "example": "123e4567-e89b-12d3-a456-426614174000"
             },
             "nullable": true
+          },
+          "_changesets": {
+            "readOnly": true,
+            "type": "object",
+            "nullable": true,
+            "description": "Pending attribute changesets for attributes configured with external or approval edit mode.\n\nThe value shape is `Changeset` (`proposed_value`, `created_at`, `edit_mode`, ...)\nand is what `:apply` / `:dismiss` operate on.\n\nRead-only via normal entity PATCH/PUT operations — those handlers strip `_changesets`\nfrom request bodies. Use the changeset management endpoints to mutate this field.\n",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/Changeset"
+            }
           }
         },
         "example": {
@@ -8350,6 +8516,11 @@
             "type": "boolean",
             "description": "If true, return full entity objects in entityNodes instead of just entity IDs in nodes",
             "default": false
+          },
+          "apply_changesets": {
+            "type": "boolean",
+            "description": "When true and hydrate is also true, entity objects in entityNodes have pending changeset proposed values applied in-place. The _changesets field is still included in the response.",
+            "default": false
           }
         }
       },
@@ -8646,11 +8817,16 @@
                 "float",
                 "date",
                 "flattened",
-                "nested"
+                "nested",
+                "object"
               ]
             },
             "fields": {
               "additionalProperties": true
+            },
+            "dynamic": {
+              "type": "boolean",
+              "description": "When false, prevents ES from inferring types for nested fields. Used for _changesets where values can be any type."
             }
           }
         }
@@ -8717,7 +8893,7 @@
       },
       "ActivityType": {
         "type": "string",
-        "description": "A type for the activity. Used to categorize activities in the activity feed and for event subscriptions.\n\nBuilt-in entity activity types (custom activities can be defined as well):\n- EntityCreated\n- EntityUpdated\n- EntityDeleted\n- EntitySoftDeleted\n- EntityRestored\n- RelationsAdded\n- RelationsRemoved\n- RelationsSoftDeleted\n- RelationsRestored\n- RelationsDeleted\n"
+        "description": "A type for the activity. Used to categorize activities in the activity feed and for event subscriptions.\n\nBuilt-in entity activity types (custom activities can be defined as well):\n- EntityCreated\n- EntityUpdated\n- EntityDeleted\n- EntitySoftDeleted\n- EntityRestored\n- RelationsAdded\n- RelationsRemoved\n- RelationsSoftDeleted\n- RelationsRestored\n- RelationsDeleted\n- ChangesetCreated\n- ChangesetAutoCleared\n- ChangesetApplied\n- ChangesetDismissed\n"
       },
       "Activity": {
         "type": "object",
@@ -9505,6 +9681,374 @@
             "example": "Bad Request"
           }
         }
+      },
+      "ChangesetCreator": {
+        "type": "object",
+        "description": "Identifies the actor that created the changeset.",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "Type of actor that created the changeset",
+            "enum": [
+              "user",
+              "portal_user",
+              "api_client",
+              "automation"
+            ]
+          },
+          "id": {
+            "type": "string",
+            "description": "ID of the actor (user ID, portal user ID, API client ID, etc.)"
+          }
+        }
+      },
+      "Changeset": {
+        "type": "object",
+        "description": "A pending proposed change for a single entity attribute, awaiting external confirmation or human approval.",
+        "required": [
+          "proposed_value",
+          "created_at",
+          "edit_mode"
+        ],
+        "properties": {
+          "proposed_value": {
+            "description": "The proposed new value for the attribute. Type matches the attribute type."
+          },
+          "previous_value": {
+            "description": "The attribute value at the time the changeset was created. Stored for reference."
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when the changeset was created"
+          },
+          "created_by": {
+            "$ref": "#/components/schemas/ChangesetCreator"
+          },
+          "edit_mode": {
+            "type": "string",
+            "description": "The edit mode that triggered this changeset.\n- `external`: auto-cleared by a matching `?direct=true` write (see `match_strategy`).\n- `approval`: resolved only via explicit `:apply` / `:dismiss` endpoints; never auto-clears.\n",
+            "enum": [
+              "external",
+              "approval"
+            ]
+          },
+          "match_strategy": {
+            "description": "Match strategy copied from the attribute's `edit_mode_config` at changeset\ncreation time. Only consulted when `edit_mode` is `external`; ignored for\n`approval` (which never auto-clears).\n",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/MatchStrategy"
+              }
+            ]
+          },
+          "source": {
+            "type": "string",
+            "description": "Optional label indicating where the change originated (e.g. end_customer_portal, installer_portal, journey, automation)"
+          },
+          "related_values": {
+            "type": "object",
+            "description": "Proposed and previous values for related fields in a multi-field attribute group (e.g. currency _decimal/_currency suffixes). Keyed by full field name.",
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "proposed_value": {
+                  "description": "The proposed new value for the related field."
+                },
+                "previous_value": {
+                  "description": "The value of the related field when the changeset was created."
+                }
+              }
+            }
+          }
+        }
+      },
+      "ChangesetMap": {
+        "type": "object",
+        "description": "Map of attribute name to pending changeset. At most one changeset per attribute.",
+        "additionalProperties": {
+          "$ref": "#/components/schemas/Changeset"
+        }
+      },
+      "MeterReadingChangesetEntry": {
+        "type": "object",
+        "description": "A meter readings changeset entry — service-managed by metering-api.\nStored on `Meter._meter_readings_changeset` array attribute. Each entry mirrors a\nClickHouse meter reading row plus a changeset metadata overlay.\n\nNote: `org_id` is NOT stored on the entry. The entries live on the Meter entity,\nwhich is already org-scoped (`_org`). Round-tripping it would only invite drift;\ndownstream consumers receive the org from the meter / handler context.\n",
+        "required": [
+          "changeset_id",
+          "meter_id",
+          "counter_id",
+          "value",
+          "edit_mode",
+          "created_at"
+        ],
+        "properties": {
+          "value": {
+            "type": "number"
+          },
+          "direction": {
+            "type": "string",
+            "enum": [
+              "feed-in",
+              "feed-out"
+            ]
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "meter_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "counter_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "source": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "read_by": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "valid",
+              "in-validation",
+              "implausible"
+            ]
+          },
+          "external_id": {
+            "type": "string"
+          },
+          "remark": {
+            "type": "string"
+          },
+          "metadata": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "changeset_id": {
+            "type": "string",
+            "description": "Unique changeset identifier (UUID v4)."
+          },
+          "edit_mode": {
+            "type": "string",
+            "enum": [
+              "external",
+              "approval"
+            ]
+          },
+          "match_strategy": {
+            "type": "string",
+            "enum": [
+              "exact",
+              "fuzzy"
+            ]
+          },
+          "timestamp_tolerance": {
+            "description": "Slack on `reading.timestamp` when metering-api auto-clear matches an\nincoming reading against this pending changeset.\n\nVariants:\n- `'exact'`: strict millisecond equality.\n- `{ type: 'same-day', timezone? }`: strip the time component and\n  compare year-month-day. Optional `timezone` is an IANA name\n  (e.g. `'Europe/Berlin'`); the day is bucketed in that zone.\n  Defaults to UTC when omitted.\n- `{ type: 'within-seconds', seconds }`: symmetric ±N-second window.\n",
+            "oneOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "exact"
+                ]
+              },
+              {
+                "type": "object",
+                "required": [
+                  "type"
+                ],
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "same-day"
+                    ]
+                  },
+                  "timezone": {
+                    "type": "string",
+                    "description": "IANA timezone identifier (e.g. `'Europe/Berlin'`, `'UTC'`).\nWhen omitted, the day is bucketed in UTC.\n"
+                  }
+                }
+              },
+              {
+                "type": "object",
+                "required": [
+                  "type",
+                  "seconds"
+                ],
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "within-seconds"
+                    ]
+                  },
+                  "seconds": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "description": "Tolerance in seconds. e.g. 60 = ±1 minute, 3600 = ±1 hour."
+                  }
+                }
+              }
+            ]
+          },
+          "fuzzy_config": {
+            "type": "object",
+            "properties": {
+              "percentage_threshold": {
+                "type": "number"
+              },
+              "absolute_threshold": {
+                "type": "number"
+              }
+            }
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "created_by": {
+            "$ref": "#/components/schemas/ChangesetCreator"
+          },
+          "previous": {
+            "type": "object",
+            "properties": {
+              "value": {
+                "type": "number"
+              },
+              "direction": {
+                "type": "string",
+                "enum": [
+                  "feed-in",
+                  "feed-out"
+                ]
+              },
+              "timestamp": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          }
+        }
+      },
+      "EditMode": {
+        "type": "string",
+        "description": "Controls whether a write goes through immediately or is held as a pending entry\non the parent entity's `_changesets` map.\n\n- `direct`: write applied immediately. No changeset created.\n- `external`: write held as a pending changeset; auto-cleared on a matching direct/ERP write.\n- `approval`: write held as a pending changeset; requires explicit human apply/dismiss.\n\nUsed at two levels: per-attribute (entity-attribute changesets) and per-capability\n(currently the `meter_readings` capability on the Meter schema, gating reading submissions).\n",
+        "enum": [
+          "direct",
+          "external",
+          "approval"
+        ],
+        "default": "direct"
+      },
+      "EditModeConfig": {
+        "type": "object",
+        "description": "Configuration for `edit_mode: external` auto-clear matching.\nFields here (`match_strategy`, `fuzzy_config`) only take effect when\n`edit_mode` is `external`. They are ignored for `edit_mode: approval`,\nwhich never auto-clears and is resolved exclusively via the\n`:apply` / `:dismiss` changeset endpoints.\n",
+        "properties": {
+          "match_strategy": {
+            "$ref": "#/components/schemas/MatchStrategy"
+          },
+          "fuzzy_config": {
+            "$ref": "#/components/schemas/FuzzyConfig"
+          }
+        }
+      },
+      "FuzzyConfig": {
+        "type": "object",
+        "description": "Configuration for fuzzy auto-clear matching on `edit_mode: external` attributes.\nNot used for `edit_mode: approval`.\n\nType compatibility with attribute shape is enforced at schema save time:\n- scalar string attributes: `suffix`, `digits_only`, `regex`\n- repeatable attributes: `set_equivalent`, `entry_match`, `ignore_fields`, `normalize_phone`\n- relation attributes: `relation_set`\n",
+        "required": [
+          "type"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "Which fuzzy algorithm to apply.",
+            "enum": [
+              "suffix",
+              "digits_only",
+              "normalize_phone",
+              "ignore_fields",
+              "set_equivalent",
+              "entry_match",
+              "relation_set",
+              "regex"
+            ]
+          },
+          "suffix_length": {
+            "type": "integer",
+            "description": "For type=suffix: number of characters to compare from end of string."
+          },
+          "fields_to_ignore": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "For type=ignore_fields and type=set_equivalent: field names to exclude when comparing array entries. `_id` is always stripped by the platform regardless of this config."
+          },
+          "regex_flags": {
+            "type": "string",
+            "description": "For type=regex: flags to apply to the regex (e.g. 'i' for case-insensitive)."
+          },
+          "country_code": {
+            "type": "string",
+            "description": "For type=normalize_phone: country dialing code digits to strip (e.g. '49' for Germany). No '+' prefix."
+          },
+          "match_on": {
+            "type": "string",
+            "description": "For type=normalize_phone: attribute key within array entries to compare on (e.g. 'phone_number')."
+          },
+          "key": {
+            "description": "For type=entry_match: business key(s) within each entry used to match proposed entries against incoming entries.",
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            ]
+          },
+          "mode": {
+            "type": "string",
+            "description": "For type=entry_match and type=set_equivalent: how strict the comparison is.\n- `subset` (default for entry_match): every proposed entry must exist in incoming; extra incoming entries are allowed.\n- `exact_set` (default for set_equivalent): the two sides must contain the same entries (order-insensitive, multiset semantics).\n",
+            "enum": [
+              "subset",
+              "exact_set"
+            ]
+          },
+          "ordered": {
+            "type": "boolean",
+            "description": "For type=relation_set: when true, relation order is significant. Defaults to false (order-insensitive)."
+          },
+          "require_tags_match": {
+            "type": "boolean",
+            "description": "For type=relation_set: when true, each relation item's `_tags` must match on both sides (order-insensitive). Defaults to false — `_tags` are stripped before compare."
+          },
+          "pattern": {
+            "type": "string",
+            "description": "For type=regex: regular expression pattern to test the incoming value against."
+          }
+        }
+      },
+      "MatchStrategy": {
+        "type": "string",
+        "description": "Strategy for auto-clearing a changeset on an `edit_mode: external` attribute\nwhen a direct write (`?direct=true`) arrives — typically an ERP inbound sync.\nIgnored for `edit_mode: approval`, which does not auto-clear and is resolved\nexclusively via the `:apply` / `:dismiss` changeset endpoints.\n- `exact`: The inbound value must exactly match the proposed value (deep equality).\n- `fuzzy`: The inbound value is compared using the configured `fuzzy_config` algorithm.\n- `any`: Any update to the attribute clears the changeset, regardless of value.\n",
+        "enum": [
+          "exact",
+          "fuzzy",
+          "any"
+        ],
+        "default": "exact"
       }
     },
     "parameters": {
@@ -9740,6 +10284,26 @@
         "schema": {
           "default": false,
           "type": "boolean"
+        }
+      },
+      "DirectQueryParam": {
+        "name": "direct",
+        "description": "When true, bypasses changeset interception: attribute values in the payload\nare written directly to the entity regardless of each attribute's `edit_mode`.\nThe write always lands, independently of any auto-clear outcome below.\n\nAfter the direct write, for each attribute in the payload that also has a\npending changeset:\n- `edit_mode: external` — the incoming value is checked against the\n  changeset's `match_strategy` (and `fuzzy_config` when `fuzzy`). On match,\n  `_changesets[attr]` is cleared. On no-match, the write still stands and\n  the changeset stays pending (signalling the ERP/trusted source applied a\n  different correction than originally proposed; resolve via a later\n  matching direct write, or via the `:apply` / `:dismiss` endpoints).\n- `edit_mode: approval` — never auto-cleared. The write lands but the\n  pending changeset remains until explicitly resolved via `:apply` or\n  `:dismiss`.\n\nIntended for trusted integrations (e.g. ERP inbound sync). ERP middleware\nmust always use `?direct=true` — without it, an inbound sync on an\n`external` attribute would create a new changeset instead of confirming\nthe pending one.\n\nDefaults to false — no breaking change for existing callers.\n",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "ApplyChangesetsQueryParam": {
+        "name": "apply_changesets",
+        "description": "When true, applies pending changeset proposed values in-place on the response entity.\nThe response includes both the hydrated values and the raw _changesets field.\nDoes not mutate stored data — pure read-time transform.\n",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "boolean",
+          "default": false
         }
       }
     },

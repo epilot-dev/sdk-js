@@ -68,6 +68,7 @@ const { data } = await workflowDefinitionClient.getMaxAllowedLimit(...)
 - [`ManualTask`](#manualtask)
 - [`AutomationTask`](#automationtask)
 - [`AutomationConfig`](#automationconfig)
+- [`AutomationInputContext`](#automationinputcontext)
 - [`AiAgentTask`](#aiagenttask)
 - [`AgentConfig`](#agentconfig)
 - [`TriggerMode`](#triggermode)
@@ -437,6 +438,7 @@ const { data } = await client.createFlowTemplate(
         id: 'string',
         type: 'automation',
         automation_id: 'string',
+        input_entity: 'thread',
         trigger_config: [ /* ... */ ]
       },
       /* ... 2 more */
@@ -559,6 +561,7 @@ const { data } = await client.createFlowTemplate(
       "id": "string",
       "type": "automation",
       "automation_id": "string",
+      "input_entity": "thread",
       "trigger_config": []
     }
   ],
@@ -755,6 +758,7 @@ const { data } = await client.getFlowTemplate({
       "id": "string",
       "type": "automation",
       "automation_id": "string",
+      "input_entity": "thread",
       "trigger_config": []
     }
   ],
@@ -885,6 +889,7 @@ const { data } = await client.updateFlowTemplate(
         id: 'string',
         type: 'automation',
         automation_id: 'string',
+        input_entity: 'thread',
         trigger_config: [ /* ... */ ]
       },
       /* ... 2 more */
@@ -1007,6 +1012,7 @@ const { data } = await client.updateFlowTemplate(
       "id": "string",
       "type": "automation",
       "automation_id": "string",
+      "input_entity": "thread",
       "trigger_config": []
     }
   ],
@@ -1156,6 +1162,7 @@ const { data } = await client.duplicateFlowTemplate({
       "id": "string",
       "type": "automation",
       "automation_id": "string",
+      "input_entity": "thread",
       "trigger_config": []
     }
   ],
@@ -1736,6 +1743,7 @@ type FlowTemplateBase = {
     id?: string
     type: "automation"
     automation_id?: string
+    input_entity?: "thread" | "first_email" | "last_email"
     trigger_config?: Array<{
       type: { ... }
       configuration?: { ... }
@@ -1776,6 +1784,7 @@ type FlowTemplateBase = {
     id?: string
     type: "automation"
     automation_id?: string
+    input_entity?: "thread" | "first_email" | "last_email"
     trigger_config?: Array<{
       type: { ... }
       configuration?: { ... }
@@ -1821,8 +1830,6 @@ type FlowTemplateBase = {
       name?: { ... }
       complete_task_automatically?: { ... }
     }
-    due_date?: string
-    due_date_config?: {
   // ...
 }
 ```
@@ -1843,6 +1850,7 @@ type FlowTemplate = {
     id?: string
     type: "automation"
     automation_id?: string
+    input_entity?: "thread" | "first_email" | "last_email"
     trigger_config?: Array<{
       type: { ... }
       configuration?: { ... }
@@ -1883,6 +1891,7 @@ type FlowTemplate = {
     id?: string
     type: "automation"
     automation_id?: string
+    input_entity?: "thread" | "first_email" | "last_email"
     trigger_config?: Array<{
       type: { ... }
       configuration?: { ... }
@@ -1928,8 +1937,6 @@ type FlowTemplate = {
       name?: { ... }
       complete_task_automatically?: { ... }
     }
-    due_date?: string
-    due_date_config?: {
   // ...
 }
 ```
@@ -1957,6 +1964,7 @@ type Trigger = {
   id?: string
   type: "automation"
   automation_id?: string
+  input_entity?: "thread" | "first_email" | "last_email"
   trigger_config?: Array<{
     type: string
     configuration?: Record<string, unknown>
@@ -1991,6 +1999,7 @@ type AutomationTrigger = {
   id?: string
   type: "automation"
   automation_id?: string
+  input_entity?: "thread" | "first_email" | "last_email"
   trigger_config?: Array<{
     type: string
     configuration?: Record<string, unknown>
@@ -2036,6 +2045,7 @@ type CreateFlowTemplate = {
     id?: string
     type: "automation"
     automation_id?: string
+    input_entity?: "thread" | "first_email" | "last_email"
     trigger_config?: Array<{
       type: { ... }
       configuration?: { ... }
@@ -2076,6 +2086,7 @@ type CreateFlowTemplate = {
     id?: string
     type: "automation"
     automation_id?: string
+    input_entity?: "thread" | "first_email" | "last_email"
     trigger_config?: Array<{
       type: { ... }
       configuration?: { ... }
@@ -2121,8 +2132,6 @@ type CreateFlowTemplate = {
       name?: { ... }
       complete_task_automatically?: { ... }
     }
-    due_date?: string
-    due_date_config?: {
   // ...
 }
 ```
@@ -2159,6 +2168,7 @@ type FlowTemplatesList = {
       id?: { ... }
       type: { ... }
       automation_id?: { ... }
+      input_entity?: { ... }
       trigger_config?: { ... }
     } | {
       id?: { ... }
@@ -2196,6 +2206,7 @@ type FlowTemplatesList = {
       id?: { ... }
       type: { ... }
       automation_id?: { ... }
+      input_entity?: { ... }
       trigger_config?: { ... }
     } | {
       id?: { ... }
@@ -2243,8 +2254,6 @@ type FlowTemplatesList = {
       ecp?: { ... }
       installer?: { ... }
       partner?: { ... }
-      taxonomies?: { ... }
-      phase_id?: { ... }
   // ...
 }
 ```
@@ -2499,6 +2508,11 @@ type AutomationTask = {
       type: { ... }
       config?: { ... }
     }
+    duplicated_flow_id?: string
+    input_context?: {
+      source: { ... }
+      task_id?: { ... }
+    }
   }
   trigger_mode?: "manual" | "automatic"
   schedule?: {
@@ -2534,6 +2548,23 @@ type AutomationConfig = {
     type: string
     config?: Record<string, unknown>
   }
+  duplicated_flow_id?: string
+  input_context?: {
+    source: "trigger" | "task"
+    task_id?: string
+  }
+}
+```
+
+### `AutomationInputContext`
+
+Optional. Source of the entity fed into this automation task. If omitted, the workflow's primary entity is used.
+
+
+```ts
+type AutomationInputContext = {
+  source: "trigger" | "task"
+  task_id?: string
 }
 ```
 
@@ -2756,6 +2787,7 @@ type DecisionTask = {
       value_type?: { ... }
     }>
   }>
+  allow_parallel_execution?: boolean
   schedule?: {
     mode: "delayed"
     duration: number

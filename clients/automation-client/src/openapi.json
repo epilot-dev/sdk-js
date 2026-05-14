@@ -71,6 +71,15 @@
             }
           },
           {
+            "name": "target_workflow",
+            "in": "query",
+            "description": "Filter by target workflow ID. Returns only automations that have a trigger-workflow action targeting this workflow.",
+            "schema": {
+              "type": "string",
+              "example": "wfABCDEFGH"
+            }
+          },
+          {
             "name": "include_flows",
             "in": "query",
             "description": "Include flow automations in the response",
@@ -2239,6 +2248,11 @@
             "type": "boolean",
             "description": "When enabled, the email thread will be automatically marked as done after this action completes.",
             "default": false
+          },
+          "mark_as_read": {
+            "type": "boolean",
+            "description": "When enabled, the email thread will be marked as read after this action completes.",
+            "default": true
           }
         },
         "required": [
@@ -2323,6 +2337,11 @@
             "type": "boolean",
             "description": "When enabled, the email thread will be automatically marked as done after this action completes.",
             "default": false
+          },
+          "mark_as_read": {
+            "type": "boolean",
+            "description": "When enabled, the email thread will be marked as read after this action completes.",
+            "default": false
           }
         }
       },
@@ -2371,6 +2390,11 @@
           "mark_as_done": {
             "type": "boolean",
             "description": "When enabled, the email thread will be automatically marked as done after this action completes.",
+            "default": true
+          },
+          "mark_as_read": {
+            "type": "boolean",
+            "description": "When enabled, the email thread will be marked as read after this action completes.",
             "default": true
           },
           "attachments": {
@@ -3438,6 +3462,24 @@
           },
           "_execution_chain": {
             "$ref": "#/components/schemas/ExecutionChain"
+          },
+          "entity_contexts": {
+            "type": "array",
+            "description": "Additional entity contexts from the parent flow execution. Used when an automation is triggered from a workflow task to carry all flow contexts into the automation, not just the primary entity.\n",
+            "items": {
+              "type": "object",
+              "properties": {
+                "entity_id": {
+                  "type": "string"
+                },
+                "entity_schema": {
+                  "type": "string"
+                },
+                "is_primary": {
+                  "type": "boolean"
+                }
+              }
+            }
           }
         }
       },

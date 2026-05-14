@@ -469,6 +469,27 @@ export declare namespace Components {
              */
             _updated_at: string; // date-time
             /**
+             * Template outputs with search highlight <em> tags merged in. Only present when highlight is requested and matches exist.
+             */
+            templates_output_highlighted?: {
+                [name: string]: string | {
+                    [name: string]: string;
+                };
+            };
+            /**
+             * Highlighted fragments for search matches on fields not shown in template content. Max 1 entry.
+             */
+            search_snippets?: {
+                /**
+                 * Human-readable field label
+                 */
+                field?: string;
+                /**
+                 * Highlighted text fragment with <em> tags
+                 */
+                fragment?: string;
+            }[];
+            /**
              * Amount to be paid in cents i.e. precision 2
              * example:
              * 10050
@@ -593,6 +614,27 @@ export declare namespace Components {
              * 2021-02-09T12:41:43.662Z
              */
             _updated_at: string; // date-time
+            /**
+             * Template outputs with search highlight <em> tags merged in. Only present when highlight is requested and matches exist.
+             */
+            templates_output_highlighted?: {
+                [name: string]: string | {
+                    [name: string]: string;
+                };
+            };
+            /**
+             * Highlighted fragments for search matches on fields not shown in template content. Max 1 entry.
+             */
+            search_snippets?: {
+                /**
+                 * Human-readable field label
+                 */
+                field?: string;
+                /**
+                 * Highlighted text fragment with <em> tags
+                 */
+                fragment?: string;
+            }[];
             /**
              * Billing account number
              */
@@ -1728,6 +1770,27 @@ export declare namespace Components {
              * 2021-02-09T12:41:43.662Z
              */
             _updated_at: string; // date-time
+            /**
+             * Template outputs with search highlight <em> tags merged in. Only present when highlight is requested and matches exist.
+             */
+            templates_output_highlighted?: {
+                [name: string]: string | {
+                    [name: string]: string;
+                };
+            };
+            /**
+             * Highlighted fragments for search matches on fields not shown in template content. Max 1 entry.
+             */
+            search_snippets?: {
+                /**
+                 * Human-readable field label
+                 */
+                field?: string;
+                /**
+                 * Highlighted text fragment with <em> tags
+                 */
+                fragment?: string;
+            }[];
             _schema: "contact";
         }
         export interface ContactCountRequest {
@@ -1858,6 +1921,27 @@ export declare namespace Components {
              * 2021-02-09T12:41:43.662Z
              */
             _updated_at: string; // date-time
+            /**
+             * Template outputs with search highlight <em> tags merged in. Only present when highlight is requested and matches exist.
+             */
+            templates_output_highlighted?: {
+                [name: string]: string | {
+                    [name: string]: string;
+                };
+            };
+            /**
+             * Highlighted fragments for search matches on fields not shown in template content. Max 1 entry.
+             */
+            search_snippets?: {
+                /**
+                 * Human-readable field label
+                 */
+                field?: string;
+                /**
+                 * Highlighted text fragment with <em> tags
+                 */
+                fragment?: string;
+            }[];
             /**
              * The name of the contract.
              * example:
@@ -2075,6 +2159,7 @@ export declare namespace Components {
          */
         export type Currency = string;
         export interface DataRetrievalItem {
+            app?: PublicAppDetails;
             extension?: PublicExtensionDetails;
             hook?: PublicDataRetrievalHookDetails;
         }
@@ -2268,6 +2353,27 @@ export declare namespace Components {
         }
         export interface Entity {
             [name: string]: any;
+            /**
+             * Template outputs with search highlight <em> tags merged in. Only present when highlight is requested and matches exist.
+             */
+            templates_output_highlighted?: {
+                [name: string]: string | {
+                    [name: string]: string;
+                };
+            };
+            /**
+             * Highlighted fragments for search matches on fields not shown in template content. Max 1 entry.
+             */
+            search_snippets?: {
+                /**
+                 * Human-readable field label
+                 */
+                field?: string;
+                /**
+                 * Highlighted text fragment with <em> tags
+                 */
+                fragment?: string;
+            }[];
         }
         export interface EntityEditRule {
             slug?: /**
@@ -2457,6 +2563,27 @@ export declare namespace Components {
              * 2021-02-09T12:41:43.662Z
              */
             _updated_at: string; // date-time
+            /**
+             * Template outputs with search highlight <em> tags merged in. Only present when highlight is requested and matches exist.
+             */
+            templates_output_highlighted?: {
+                [name: string]: string | {
+                    [name: string]: string;
+                };
+            };
+            /**
+             * Highlighted fragments for search matches on fields not shown in template content. Max 1 entry.
+             */
+            search_snippets?: {
+                /**
+                 * Human-readable field label
+                 */
+                field?: string;
+                /**
+                 * Highlighted text fragment with <em> tags
+                 */
+                fragment?: string;
+            }[];
             /**
              * Resolved template strings corresponding to the templates parameter. Supports both string values and nested objects of strings.
              * example:
@@ -2794,6 +2921,12 @@ export declare namespace Components {
              * ]
              */
             include?: ("active_workflow")[];
+            /**
+             * Elasticsearch highlight configuration passed through to the Entity API. When provided, matching results include a `highlight` object with field names as keys and arrays of highlighted fragments as values.
+             */
+            highlight?: {
+                [key: string]: any;
+            };
         }
         /**
          * URL-friendly identifier for the entity schema
@@ -3042,6 +3175,11 @@ export declare namespace Components {
              *
              */
             ExtensionHookConsumptionDataRetrieval | /**
+             * Generic data export hook. When configured on a visualization block, the portal delegates the export action (e.g. CSV/Excel/PDF download) to the configured external source instead of generating the file itself. Can be used by any block that supports export — consumption charts, dynamic tariff charts, etc. The expected response to the call is:
+             *   - 200 with a JSON body describing the exported file (download_url, optional filename, content_type, expires_at)
+             *
+             */
+            ExtensionHookDataExport | /**
              * Hook that will allow using the specified source as data for consumption visualizations. This hook is triggered to fetch the data. Format of the request and response has to follow the following specification: TBD. The expected response to the call is:
              *   - 200 with the time series data
              *
@@ -3055,7 +3193,11 @@ export declare namespace Components {
              *       - valid: false
              *
              */
-            ExtensionHookMeterReadingPlausibilityCheck))[];
+            ExtensionHookMeterReadingPlausibilityCheck | /**
+             * Hook that returns runtime metadata describing how a visualization should be rendered for a given portal context. Invoked by the portal before fetching data, with the same context the data hook receives.
+             *
+             */
+            ExtensionHookVisualizationMetadata))[];
         }
         export interface ExtensionAuthBlock {
             /**
@@ -3164,7 +3306,9 @@ export declare namespace Components {
                 dataPath?: string;
             };
             /**
+             * Deprecated. Prefer `secure_proxy` instead.
              * If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.
+             *
              */
             use_static_ips?: boolean;
             secure_proxy?: /* Configuration for routing requests through the ERP Integration secure proxy. Mutually exclusive with use_static_ips. */ SecureProxyConfig;
@@ -3241,7 +3385,9 @@ export declare namespace Components {
                 en: string;
             };
             /**
+             * Deprecated. Prefer `secure_proxy` instead.
              * If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.
+             *
              */
             use_static_ips?: boolean;
             secure_proxy?: /* Configuration for routing requests through the ERP Integration secure proxy. Mutually exclusive with use_static_ips. */ SecureProxyConfig;
@@ -3289,7 +3435,61 @@ export declare namespace Components {
                 dataPath?: string;
             };
             /**
+             * Deprecated. Prefer `secure_proxy` instead.
              * If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.
+             *
+             */
+            use_static_ips?: boolean;
+            secure_proxy?: /* Configuration for routing requests through the ERP Integration secure proxy. Mutually exclusive with use_static_ips. */ SecureProxyConfig;
+        }
+        /**
+         * Generic data export hook. When configured on a visualization block, the portal delegates the export action (e.g. CSV/Excel/PDF download) to the configured external source instead of generating the file itself. Can be used by any block that supports export — consumption charts, dynamic tariff charts, etc. The expected response to the call is:
+         *   - 200 with a JSON body describing the exported file (download_url, optional filename, content_type, expires_at)
+         *
+         */
+        export interface ExtensionHookDataExport {
+            type: "dataExport";
+            /**
+             * Optional list of portal block types this hook supports. If omitted,
+             * the hook is usable on any export-capable block. Allowed values match
+             * the block type identifiers used by the portal builder
+             * (e.g. `consumption_visualization`, `dynamic_tariff`).
+             *
+             */
+            block_types?: string[];
+            auth?: ExtensionAuthBlock;
+            call: {
+                /**
+                 * HTTP method to use for the call
+                 */
+                method?: string;
+                /**
+                 * URL to call. Supports variable interpolation.
+                 */
+                url: string;
+                /**
+                 * Parameters to append to the URL. Supports variable interpolation.
+                 */
+                params?: {
+                    [name: string]: string;
+                };
+                /**
+                 * Headers to use. Supports variable interpolation.
+                 */
+                headers?: {
+                    [name: string]: string;
+                };
+                /**
+                 * Request body to send. Supports variable interpolation. Content format is determined by Content-Type header.
+                 */
+                body?: {
+                    [name: string]: string;
+                };
+            };
+            /**
+             * Deprecated. Prefer `secure_proxy` instead.
+             * If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.
+             *
              */
             use_static_ips?: boolean;
             secure_proxy?: /* Configuration for routing requests through the ERP Integration secure proxy. Mutually exclusive with use_static_ips. */ SecureProxyConfig;
@@ -3381,7 +3581,9 @@ export declare namespace Components {
                 lower_limit?: string;
             };
             /**
+             * Deprecated. Prefer `secure_proxy` instead.
              * If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.
+             *
              */
             use_static_ips?: boolean;
             secure_proxy?: /* Configuration for routing requests through the ERP Integration secure proxy. Mutually exclusive with use_static_ips. */ SecureProxyConfig;
@@ -3429,7 +3631,9 @@ export declare namespace Components {
                 dataPath?: string;
             };
             /**
+             * Deprecated. Prefer `secure_proxy` instead.
              * If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.
+             *
              */
             use_static_ips?: boolean;
             secure_proxy?: /* Configuration for routing requests through the ERP Integration secure proxy. Mutually exclusive with use_static_ips. */ SecureProxyConfig;
@@ -3476,7 +3680,9 @@ export declare namespace Components {
                 result?: string;
             };
             /**
+             * Deprecated. Prefer `secure_proxy` instead.
              * If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.
+             *
              */
             use_static_ips?: boolean;
             secure_proxy?: /* Configuration for routing requests through the ERP Integration secure proxy. Mutually exclusive with use_static_ips. */ SecureProxyConfig;
@@ -3495,6 +3701,55 @@ export declare namespace Components {
              */
             hook_id: string;
         } | null;
+        /**
+         * Hook that returns runtime metadata describing how a visualization should be rendered for a given portal context. Invoked by the portal before fetching data, with the same context the data hook receives.
+         *
+         */
+        export interface ExtensionHookVisualizationMetadata {
+            type: "visualizationMetadata";
+            auth?: ExtensionAuthBlock;
+            call: {
+                /**
+                 * HTTP method to use for the call
+                 */
+                method?: string;
+                /**
+                 * URL to call. Supports variable interpolation.
+                 */
+                url: string;
+                /**
+                 * Parameters to append to the URL. Supports variable interpolation.
+                 */
+                params?: {
+                    [name: string]: string;
+                };
+                /**
+                 * Headers to use. Supports variable interpolation.
+                 */
+                headers?: {
+                    [name: string]: string;
+                };
+                /**
+                 * Request body to send. Supports variable interpolation. Content format is determined by Content-Type header.
+                 */
+                body?: {
+                    [name: string]: string;
+                };
+            };
+            resolved?: {
+                /**
+                 * Optional path to the metadata object in the response. If omitted, the metadata is assumed to be on the top level.
+                 */
+                dataPath?: string;
+            };
+            /**
+             * Deprecated. Prefer `secure_proxy` instead.
+             * If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.
+             *
+             */
+            use_static_ips?: boolean;
+            secure_proxy?: /* Configuration for routing requests through the ERP Integration secure proxy. Mutually exclusive with use_static_ips. */ SecureProxyConfig;
+        }
         export interface ExtensionSeamlessLink {
             /**
              * Identifier of the link. Should not change between updates.
@@ -3661,6 +3916,27 @@ export declare namespace Components {
              * 2021-02-09T12:41:43.662Z
              */
             _updated_at: string; // date-time
+            /**
+             * Template outputs with search highlight <em> tags merged in. Only present when highlight is requested and matches exist.
+             */
+            templates_output_highlighted?: {
+                [name: string]: string | {
+                    [name: string]: string;
+                };
+            };
+            /**
+             * Highlighted fragments for search matches on fields not shown in template content. Max 1 entry.
+             */
+            search_snippets?: {
+                /**
+                 * Human-readable field label
+                 */
+                field?: string;
+                /**
+                 * Highlighted text fragment with <em> tags
+                 */
+                fragment?: string;
+            }[];
             _schema: "file";
         }
         /**
@@ -3707,6 +3983,27 @@ export declare namespace Components {
              * 2021-02-09T12:41:43.662Z
              */
             _updated_at: string; // date-time
+            /**
+             * Template outputs with search highlight <em> tags merged in. Only present when highlight is requested and matches exist.
+             */
+            templates_output_highlighted?: {
+                [name: string]: string | {
+                    [name: string]: string;
+                };
+            };
+            /**
+             * Highlighted fragments for search matches on fields not shown in template content. Max 1 entry.
+             */
+            search_snippets?: {
+                /**
+                 * Human-readable field label
+                 */
+                field?: string;
+                /**
+                 * Highlighted text fragment with <em> tags
+                 */
+                fragment?: string;
+            }[];
             _schema: "file";
             /**
              * example:
@@ -3838,6 +4135,27 @@ export declare namespace Components {
              */
             _updated_at: string; // date-time
             /**
+             * Template outputs with search highlight <em> tags merged in. Only present when highlight is requested and matches exist.
+             */
+            templates_output_highlighted?: {
+                [name: string]: string | {
+                    [name: string]: string;
+                };
+            };
+            /**
+             * Highlighted fragments for search matches on fields not shown in template content. Max 1 entry.
+             */
+            search_snippets?: {
+                /**
+                 * Human-readable field label
+                 */
+                field?: string;
+                /**
+                 * Highlighted text fragment with <em> tags
+                 */
+                fragment?: string;
+            }[];
+            /**
              * Amount to be paid in cents i.e. precision 2
              * example:
              * 10050
@@ -3946,6 +4264,27 @@ export declare namespace Components {
              * 2021-02-09T12:41:43.662Z
              */
             _updated_at: string; // date-time
+            /**
+             * Template outputs with search highlight <em> tags merged in. Only present when highlight is requested and matches exist.
+             */
+            templates_output_highlighted?: {
+                [name: string]: string | {
+                    [name: string]: string;
+                };
+            };
+            /**
+             * Highlighted fragments for search matches on fields not shown in template content. Max 1 entry.
+             */
+            search_snippets?: {
+                /**
+                 * Human-readable field label
+                 */
+                field?: string;
+                /**
+                 * Highlighted text fragment with <em> tags
+                 */
+                fragment?: string;
+            }[];
             _schema: "meter";
         }
         export interface MeterChartWidget {
@@ -4111,6 +4450,12 @@ export declare namespace Components {
              * ]
              */
             meter_numbers?: string[];
+            /**
+             * ID of the created file entity for the uploaded photo.
+             * example:
+             * abc123def456
+             */
+            file_id?: string;
         }
         export interface MeterReadingWidget {
             id: string;
@@ -4278,6 +4623,27 @@ export declare namespace Components {
              * 2021-02-09T12:41:43.662Z
              */
             _updated_at: string; // date-time
+            /**
+             * Template outputs with search highlight <em> tags merged in. Only present when highlight is requested and matches exist.
+             */
+            templates_output_highlighted?: {
+                [name: string]: string | {
+                    [name: string]: string;
+                };
+            };
+            /**
+             * Highlighted fragments for search matches on fields not shown in template content. Max 1 entry.
+             */
+            search_snippets?: {
+                /**
+                 * Human-readable field label
+                 */
+                field?: string;
+                /**
+                 * Highlighted text fragment with <em> tags
+                 */
+                fragment?: string;
+            }[];
             _schema: "opportunity";
         }
         /**
@@ -4324,6 +4690,27 @@ export declare namespace Components {
              * 2021-02-09T12:41:43.662Z
              */
             _updated_at: string; // date-time
+            /**
+             * Template outputs with search highlight <em> tags merged in. Only present when highlight is requested and matches exist.
+             */
+            templates_output_highlighted?: {
+                [name: string]: string | {
+                    [name: string]: string;
+                };
+            };
+            /**
+             * Highlighted fragments for search matches on fields not shown in template content. Max 1 entry.
+             */
+            search_snippets?: {
+                /**
+                 * Human-readable field label
+                 */
+                field?: string;
+                /**
+                 * Highlighted text fragment with <em> tags
+                 */
+                fragment?: string;
+            }[];
             _schema: "order";
         }
         export interface OrganizationSettings {
@@ -4586,6 +4973,16 @@ export declare namespace Components {
              * 453ad7bf-86d5-46c8-8252-bcc868df5e3c
              */
             portal_id?: string;
+            /**
+             * Slugs that previously belonged to this page. The portal redirects requests for these slugs to the current slug. Managed by the server: when a page's slug changes, the old slug is appended here, and when another page claims one of these slugs it is removed from this list.
+             *
+             * example:
+             * [
+             *   "old-dashboard",
+             *   "home"
+             * ]
+             */
+            past_routes?: string[];
         }
         export interface PageRequest {
             [name: string]: any;
@@ -5736,6 +6133,27 @@ export declare namespace Components {
              * 2021-02-09T12:41:43.662Z
              */
             _updated_at: string; // date-time
+            /**
+             * Template outputs with search highlight <em> tags merged in. Only present when highlight is requested and matches exist.
+             */
+            templates_output_highlighted?: {
+                [name: string]: string | {
+                    [name: string]: string;
+                };
+            };
+            /**
+             * Highlighted fragments for search matches on fields not shown in template content. Max 1 entry.
+             */
+            search_snippets?: {
+                /**
+                 * Human-readable field label
+                 */
+                field?: string;
+                /**
+                 * Highlighted text fragment with <em> tags
+                 */
+                fragment?: string;
+            }[];
             _schema: "portal_user";
         }
         export type PortalUserRegistrationStatus = "Registration Pending" | "Confirmation Email Sent" | "Registered" | "Email Update In Progress";
@@ -5784,6 +6202,27 @@ export declare namespace Components {
              * 2021-02-09T12:41:43.662Z
              */
             _updated_at: string; // date-time
+            /**
+             * Template outputs with search highlight <em> tags merged in. Only present when highlight is requested and matches exist.
+             */
+            templates_output_highlighted?: {
+                [name: string]: string | {
+                    [name: string]: string;
+                };
+            };
+            /**
+             * Highlighted fragments for search matches on fields not shown in template content. Max 1 entry.
+             */
+            search_snippets?: {
+                /**
+                 * Human-readable field label
+                 */
+                field?: string;
+                /**
+                 * Highlighted text fragment with <em> tags
+                 */
+                fragment?: string;
+            }[];
             _schema: "product";
         }
         export interface ProductRecommendationsWidget {
@@ -5861,6 +6300,19 @@ export declare namespace Components {
          * office-365-login
          */
         export type ProviderSlug = string; // [0-9a-z-]+
+        export interface PublicAppDetails {
+            /**
+             * Identifier of the app.
+             */
+            app_id?: string;
+            name?: {
+                [name: string]: string;
+                /**
+                 * Name of the app in English.
+                 */
+                en: string;
+            };
+        }
         export interface PublicContractIdentificationDetails {
             /**
              * Explanation of the hook.
@@ -5888,12 +6340,20 @@ export declare namespace Components {
                 en: string;
             };
             /**
-             * The intervals associated with the hook.
+             * Deprecated. Prefer fetching `intervals` from the `visualizationMetadata` endpoint
+             * (`GET /v2/portal/visualization/metadata`) so the supported intervals can vary per
+             * meter/contract. Still emitted as a fallback for clients that have not migrated yet.
+             *
              */
             intervals?: string[];
+            /**
+             * Optional list of portal block types the hook supports. Empty/missing means the hook is usable on any export-capable block.
+             */
+            block_types?: string[];
         }
         export interface PublicExtensionCapabilities {
             consumptionDataRetrieval?: DataRetrievalItem[];
+            dataExport?: DataRetrievalItem[];
             priceDataRetrieval?: DataRetrievalItem[];
             costDataRetrieval?: DataRetrievalItem[];
             contractIdentification?: {
@@ -5998,6 +6458,27 @@ export declare namespace Components {
              * 2021-02-09T12:41:43.662Z
              */
             _updated_at: string; // date-time
+            /**
+             * Template outputs with search highlight <em> tags merged in. Only present when highlight is requested and matches exist.
+             */
+            templates_output_highlighted?: {
+                [name: string]: string | {
+                    [name: string]: string;
+                };
+            };
+            /**
+             * Highlighted fragments for search matches on fields not shown in template content. Max 1 entry.
+             */
+            search_snippets?: {
+                /**
+                 * Human-readable field label
+                 */
+                field?: string;
+                /**
+                 * Highlighted text fragment with <em> tags
+                 */
+                fragment?: string;
+            }[];
             /**
              * Amount to be paid in cents i.e. precision 2
              * example:
@@ -7261,6 +7742,14 @@ export declare namespace Components {
             pages?: PageRequest[];
         }
         export interface UpsertPortalWidget {
+            /**
+             * V3 portal-scoped storage key for the widget configuration
+             */
+            portal_sk_v3?: string;
+            /**
+             * Indicates whether the widget configuration is stored as a V3 portal-scoped item
+             */
+            is_v3_item?: boolean;
             widgets: PortalWidget[];
         }
         export interface UserRequest {
@@ -7291,6 +7780,75 @@ export declare namespace Components {
              * 5da0a718-c822-403d-9f5d-20d4584e0528
              */
             EntityId /* uuid */;
+        }
+        /**
+         * Earliest / latest timestamps for which data is available in the current context.
+         */
+        export interface VisualizationDataRange {
+            /**
+             * ISO 8601 timestamp of the earliest available data point.
+             */
+            from?: string; // date-time
+            /**
+             * ISO 8601 timestamp of the latest available data point.
+             */
+            to?: string; // date-time
+        }
+        /**
+         * Runtime metadata describing how a visualization should be rendered for a given portal context. Returned by `GET /v2/portal/visualization/metadata`.
+         *
+         */
+        export interface VisualizationMetadata {
+            /**
+             * Types advertised for the current context (e.g. `ht`/`nt`, `feed-in`/`feed-out`). The `id` matches the `type` field returned by the data hook.
+             *
+             */
+            type_options?: VisualizationTypeOption[];
+            /**
+             * Intervals supported for the current context. If omitted, all intervals are assumed supported.
+             */
+            intervals?: ("PT15M" | "PT1H" | "P1D" | "P1M")[];
+            data_range?: /* Earliest / latest timestamps for which data is available in the current context. */ VisualizationDataRange;
+        }
+        export interface VisualizationTypeOption {
+            /**
+             * Identifier of the type. Matches the `type` field on the data hook response.
+             */
+            id: string;
+            /**
+             * Localized label for the type, keyed by ISO 3166-1 alpha-2 language code.
+             */
+            label?: {
+                [name: string]: string;
+            };
+            /**
+             * Optional grouping key. Types in the same `aggregation_group` are visually combined; types in different groups (or without a group) render separately. How they combine depends on each type's `statistical_method`:
+             *   - bar chart (`sum`): same-group types are stacked into a single bar (e.g. ht/nt
+             *     summed into total consumption); different-group types render side-by-side.
+             *   - line chart (`min` / `average` / `max`): same-group types are rendered as an
+             *     area chart; different-group types render as separate lines.
+             *
+             */
+            aggregation_group?: string;
+            /**
+             * Statistical method already applied to this type's data. Determines the chart shape used to render the type's values: `sum` is shown as a bar chart; `min`, `average`, and `max` are shown as a line chart. Each type advertises its own method, so a single visualization can mix bar-shaped types with line-shaped types. Defaults to `sum` when omitted.
+             *
+             */
+            statistical_method?: "sum" | "average" | "min" | "max";
+            /**
+             * Unit shared by all values of this type (e.g. "kWh").
+             */
+            unit?: string;
+            /**
+             * Optional Spark color token used to render this type in the visualization. Maps onto the portal's Spark palette (`primary` is the org's primary brand color). When omitted the consumer falls back to its own per-type default.
+             *
+             */
+            color?: "primary" | "slate" | "mauve" | "orange" | "red" | "tomato" | "amber" | "green" | "blue";
+            /**
+             * Optional number of decimal places to show when rendering values of this type in the visualization (axis labels, tooltips, summaries). When omitted the consumer falls back to its own default precision.
+             *
+             */
+            precision?: number;
         }
         export interface WidgetAction {
             _id: string;
@@ -7538,6 +8096,28 @@ export declare namespace Paths {
                 Components.Schemas.EntityId /* uuid */;
             }
             export type $400 = Components.Responses.InvalidRequest;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace ClonePortalConfig {
+        export interface RequestBody {
+            source_portal_id: /**
+             * ID of the portal
+             * example:
+             * 453ad7bf-86d5-46c8-8252-bcc868df5e3c
+             */
+            Components.Schemas.PortalId;
+            /**
+             * Name for the cloned portal. Defaults to "Copy of <source portal name>".
+             */
+            name?: string;
+        }
+        namespace Responses {
+            export type $201 = Components.Schemas.PortalConfigV3;
+            export type $400 = Components.Responses.InvalidRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
             export type $500 = Components.Responses.InternalServerError;
         }
@@ -8052,6 +8632,27 @@ export declare namespace Paths {
                      */
                     _updated_at: string; // date-time
                     /**
+                     * Template outputs with search highlight <em> tags merged in. Only present when highlight is requested and matches exist.
+                     */
+                    templates_output_highlighted?: {
+                        [name: string]: string | {
+                            [name: string]: string;
+                        };
+                    };
+                    /**
+                     * Highlighted fragments for search matches on fields not shown in template content. Max 1 entry.
+                     */
+                    search_snippets?: {
+                        /**
+                         * Human-readable field label
+                         */
+                        field?: string;
+                        /**
+                         * Highlighted text fragment with <em> tags
+                         */
+                        fragment?: string;
+                    }[];
+                    /**
                      * The name of the contract.
                      * example:
                      * Grid Contract
@@ -8356,6 +8957,27 @@ export declare namespace Paths {
                      * 2021-02-09T12:41:43.662Z
                      */
                     _updated_at: string; // date-time
+                    /**
+                     * Template outputs with search highlight <em> tags merged in. Only present when highlight is requested and matches exist.
+                     */
+                    templates_output_highlighted?: {
+                        [name: string]: string | {
+                            [name: string]: string;
+                        };
+                    };
+                    /**
+                     * Highlighted fragments for search matches on fields not shown in template content. Max 1 entry.
+                     */
+                    search_snippets?: {
+                        /**
+                         * Human-readable field label
+                         */
+                        field?: string;
+                        /**
+                         * Highlighted text fragment with <em> tags
+                         */
+                        fragment?: string;
+                    }[];
                     _schema: "opportunity";
                     journey_actions?: Components.Schemas.JourneyActions;
                 }[];
@@ -8438,6 +9060,27 @@ export declare namespace Paths {
                      * 2021-02-09T12:41:43.662Z
                      */
                     _updated_at: string; // date-time
+                    /**
+                     * Template outputs with search highlight <em> tags merged in. Only present when highlight is requested and matches exist.
+                     */
+                    templates_output_highlighted?: {
+                        [name: string]: string | {
+                            [name: string]: string;
+                        };
+                    };
+                    /**
+                     * Highlighted fragments for search matches on fields not shown in template content. Max 1 entry.
+                     */
+                    search_snippets?: {
+                        /**
+                         * Human-readable field label
+                         */
+                        field?: string;
+                        /**
+                         * Highlighted text fragment with <em> tags
+                         */
+                        fragment?: string;
+                    }[];
                     _schema: "order";
                     journey_actions?: Components.Schemas.JourneyActions;
                 }[];
@@ -8709,7 +9352,7 @@ export declare namespace Paths {
         export interface QueryParameters {
             app_id?: Parameters.AppId;
             extensionId: Parameters.ExtensionId;
-            hookId: Parameters.HookId;
+            hookId?: Parameters.HookId;
             meter_id?: Parameters.MeterId;
             from: Parameters.From /* date-time */;
             to: Parameters.To /* date-time */;
@@ -8728,9 +9371,17 @@ export declare namespace Paths {
                      */
                     value: number;
                     /**
-                     * Optional type of the consumption, such as 'nt' (night time) or 'ht' (high time). Can be any string.
+                     * Optional type of the consumption, such as 'nt' (night time) and 'ht' (high time) or 'feed-in' and 'feed-out'. Can be any string.
+                     * example:
+                     * nt
                      */
                     type?: string;
+                    /**
+                     * Optional unit of the consumption value. Defaults to unit present on the relevant Meter Counter.
+                     * example:
+                     * kWh
+                     */
+                    unit?: string;
                 }[];
             }
             export type $401 = Components.Responses.Unauthorized;
@@ -8865,7 +9516,7 @@ export declare namespace Paths {
         export interface QueryParameters {
             app_id?: Parameters.AppId;
             extensionId: Parameters.ExtensionId;
-            hookId: Parameters.HookId;
+            hookId?: Parameters.HookId;
             meter_id?: Parameters.MeterId;
             from: Parameters.From /* date-time */;
             to: Parameters.To /* date-time */;
@@ -9228,6 +9879,48 @@ export declare namespace Paths {
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace GetMeterReadings {
+        export interface RequestBody {
+            meter_id: string;
+            counter_id: string;
+            sort?: "asc" | "desc";
+            from?: number;
+            size?: number;
+            /**
+             * Template map (key to Handlebars template string). Each template is resolved per reading.
+             */
+            templates?: {
+                [name: string]: string;
+            };
+            /**
+             * Template map resolved against the counter entity.
+             */
+            counter_templates?: {
+                [name: string]: string;
+            };
+        }
+        namespace Responses {
+            export interface $200 {
+                results?: {
+                    [name: string]: any;
+                    templates_output?: {
+                        [name: string]: string;
+                    };
+                }[];
+                hits?: number;
+                /**
+                 * Resolved counter templates.
+                 */
+                counter_templates_output?: {
+                    [name: string]: string;
+                };
+            }
+            export type $400 = Components.Responses.InvalidRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -10685,7 +11378,7 @@ export declare namespace Paths {
         export interface QueryParameters {
             app_id?: Parameters.AppId;
             extensionId: Parameters.ExtensionId;
-            hookId: Parameters.HookId;
+            hookId?: Parameters.HookId;
             meter_id?: Parameters.MeterId;
             from: Parameters.From /* date-time */;
             to: Parameters.To /* date-time */;
@@ -10977,6 +11670,70 @@ export declare namespace Paths {
         }
         namespace Responses {
             export type $200 = Components.Schemas.UpsertPortalWidget;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace GetPublicPortalWidgetsV3 {
+        namespace Parameters {
+            export type Domain = string;
+            /**
+             * example:
+             * 12324
+             */
+            export type OrgId = string;
+            export type PortalId = /**
+             * ID of the portal
+             * example:
+             * 453ad7bf-86d5-46c8-8252-bcc868df5e3c
+             */
+            Components.Schemas.PortalId;
+        }
+        export interface QueryParameters {
+            org_id?: /**
+             * example:
+             * 12324
+             */
+            Parameters.OrgId;
+            portal_id?: Parameters.PortalId;
+            domain?: Parameters.Domain;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.UpsertPortalWidget;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace GetPublicSchemasV3 {
+        namespace Parameters {
+            export type Domain = string;
+            /**
+             * example:
+             * 12324
+             */
+            export type OrgId = string;
+            export type PortalId = /**
+             * ID of the portal
+             * example:
+             * 453ad7bf-86d5-46c8-8252-bcc868df5e3c
+             */
+            Components.Schemas.PortalId;
+        }
+        export interface QueryParameters {
+            org_id?: /**
+             * example:
+             * 12324
+             */
+            Parameters.OrgId;
+            portal_id?: Parameters.PortalId;
+            domain?: Parameters.Domain;
+        }
+        namespace Responses {
+            export interface $200 {
+                schemas?: Components.Schemas.Schema[];
+            }
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
             export type $500 = Components.Responses.InternalServerError;
@@ -11377,6 +12134,39 @@ export declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace GetVisualizationMetadata {
+        namespace Parameters {
+            export type AppId = string;
+            export type ContextEntities = /**
+             * Additional entities to include in the context for variable interpolation. Portal User and Contact entities are automatically part of the context.
+             * example:
+             * [
+             *   {
+             *     "entity_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+             *     "entity_schema": "contract"
+             *   }
+             * ]
+             */
+            Components.Schemas.ContextEntities;
+            export type ExtensionId = string;
+        }
+        export interface QueryParameters {
+            app_id: Parameters.AppId;
+            extensionId: Parameters.ExtensionId;
+            context_entities?: Parameters.ContextEntities;
+        }
+        namespace Responses {
+            export type $200 = /**
+             * Runtime metadata describing how a visualization should be rendered for a given portal context. Returned by `GET /v2/portal/visualization/metadata`.
+             *
+             */
+            Components.Schemas.VisualizationMetadata;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace InterpolatePortalPages {
         export interface RequestBody {
             /**
@@ -11574,6 +12364,67 @@ export declare namespace Paths {
             export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
             export type $409 = Components.Responses.Conflict;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace PrepareVisualizationExport {
+        export interface RequestBody {
+            /**
+             * App ID providing the dataExport hook.
+             */
+            app_id: string;
+            /**
+             * Extension ID providing the dataExport hook.
+             */
+            extension_id: string;
+            /**
+             * Optional Hook ID. If omitted, the only `dataExport` hook on the extension is used; if the extension has multiple `dataExport` hooks, this becomes required.
+             */
+            hook_id?: string;
+            /**
+             * Optional start date for the export window (ISO 8601 format).
+             */
+            from?: string; // date-time
+            /**
+             * Optional end date for the export window (ISO 8601 format).
+             */
+            to?: string; // date-time
+            context_entities?: /**
+             * Additional entities to include in the context for variable interpolation. Portal User and Contact entities are automatically part of the context.
+             * example:
+             * [
+             *   {
+             *     "entity_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+             *     "entity_schema": "contract"
+             *   }
+             * ]
+             */
+            Components.Schemas.ContextEntities;
+        }
+        namespace Responses {
+            export interface $200 {
+                /**
+                 * URL the client can use to download the exported file. May be a pre-signed or short-lived URL.
+                 */
+                download_url: string;
+                /**
+                 * Suggested filename for the exported file.
+                 */
+                filename?: string;
+                /**
+                 * MIME type of the exported file.
+                 * example:
+                 * text/csv
+                 */
+                content_type?: string;
+                /**
+                 * Optional expiration timestamp for the download URL.
+                 */
+                expires_at?: string; // date-time
+            }
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -12993,6 +13844,28 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetConsumption.Responses.$200>
   /**
+   * prepareVisualizationExport - Prepare Visualization Export
+   * 
+   * Asks an installed App to prepare a downloadable export of a visualization (consumption chart, dynamic tariff chart, etc.). The export is produced by the third-party App via a configured portal extension hook of type `dataExport` — this endpoint does not generate the file itself, it forwards the request to the configured hook and returns the descriptor the App provides (typically a `download_url`).
+   * 
+   */
+  'prepareVisualizationExport'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.PrepareVisualizationExport.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.PrepareVisualizationExport.Responses.$200>
+  /**
+   * getVisualizationMetadata - Get Visualization Metadata
+   * 
+   * Returns runtime metadata describing how a visualization (consumption / price / cost chart) should be rendered for a given portal context (meter, contract, etc). Resolves the extension's `visualizationMetadata` hook implicitly from `app_id` + `extensionId` and invokes it. Supplies the response as a structured payload that the portal uses to configure type/aggregation options, supported intervals, and the available data range.
+   * 
+   */
+  'getVisualizationMetadata'(
+    parameters?: Parameters<Paths.GetVisualizationMetadata.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetVisualizationMetadata.Responses.$200>
+  /**
    * getCosts - Get Costs
    * 
    * Get energy cost data between a given time period.
@@ -13163,6 +14036,20 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetPublicPortalWidgets.Responses.$200>
   /**
+   * getPublicPortalWidgetsV3 - getPublicPortalWidgetsV3
+   * 
+   * Retrieves the public widgets of a portal.
+   * Supports two identification methods:
+   * 1. Using org_id + portal_id
+   * 2. Using domain
+   * 
+   */
+  'getPublicPortalWidgetsV3'(
+    parameters?: Parameters<Paths.GetPublicPortalWidgetsV3.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetPublicPortalWidgetsV3.Responses.$200>
+  /**
    * getPortalWidgets - getPortalWidgets
    * 
    * Retrieves the widgets of a portal.
@@ -13252,6 +14139,20 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetSchemasByDomain.Responses.$200>
+  /**
+   * getPublicSchemasV3 - getPublicSchemasV3
+   * 
+   * Retrieves schemas by portal. Only schemas and attributes used on public pages are returned.
+   * Supports two identification methods:
+   * 1. Using org_id + portal_id
+   * 2. Using domain
+   * 
+   */
+  'getPublicSchemasV3'(
+    parameters?: Parameters<Paths.GetPublicSchemasV3.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetPublicSchemasV3.Responses.$200>
   /**
    * getOrganizationSettingsByDomain - getOrganizationSettingsByDomain
    * 
@@ -13916,8 +14817,8 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CreateMeterReading.Responses.$200>
   /**
-   * getAllowedMeterReadingRange - Get allowed reading range for all counters of a meter from the configured 
-   * third-party plausibility check hook using 'range' mode. This endpoint requires 
+   * getAllowedMeterReadingRange - Get allowed reading range for all counters of a meter from the configured
+   * third-party plausibility check hook using 'range' mode. This endpoint requires
    * a plausibility check hook to be configured for the portal.
    * 
    */
@@ -13926,6 +14827,18 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetAllowedMeterReadingRange.Responses.$200>
+  /**
+   * getMeterReadings - Get meter readings with optional template resolution
+   * 
+   * Fetches meter readings for a counter and optionally resolves Handlebars
+   * template strings against each reading object using @epilot/variables.
+   * 
+   */
+  'getMeterReadings'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.GetMeterReadings.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetMeterReadings.Responses.$200>
   /**
    * ssoLogin - ssoLogin
    * 
@@ -14225,6 +15138,16 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.SwapPortalConfig.Responses.$200>
   /**
+   * clonePortalConfig - clonePortalConfig
+   * 
+   * Creates a new portal by cloning configuration and pages from an existing portal. The new portal gets its own domain, users, email templates, and authentication settings.
+   */
+  'clonePortalConfig'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.ClonePortalConfig.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ClonePortalConfig.Responses.$201>
+  /**
    * invitePartner - invitePartner
    * 
    * Invites a partner to a portal
@@ -14449,6 +15372,32 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetConsumption.Responses.$200>
   }
+  ['/v2/portal/visualization:export']: {
+    /**
+     * prepareVisualizationExport - Prepare Visualization Export
+     * 
+     * Asks an installed App to prepare a downloadable export of a visualization (consumption chart, dynamic tariff chart, etc.). The export is produced by the third-party App via a configured portal extension hook of type `dataExport` — this endpoint does not generate the file itself, it forwards the request to the configured hook and returns the descriptor the App provides (typically a `download_url`).
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.PrepareVisualizationExport.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.PrepareVisualizationExport.Responses.$200>
+  }
+  ['/v2/portal/visualization/metadata']: {
+    /**
+     * getVisualizationMetadata - Get Visualization Metadata
+     * 
+     * Returns runtime metadata describing how a visualization (consumption / price / cost chart) should be rendered for a given portal context (meter, contract, etc). Resolves the extension's `visualizationMetadata` hook implicitly from `app_id` + `extensionId` and invokes it. Supplies the response as a structured payload that the portal uses to configure type/aggregation options, supported intervals, and the available data range.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetVisualizationMetadata.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetVisualizationMetadata.Responses.$200>
+  }
   ['/v2/portal/costs']: {
     /**
      * getCosts - Get Costs
@@ -14649,6 +15598,22 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetPublicPortalWidgets.Responses.$200>
   }
+  ['/v3/portal/public/widgets']: {
+    /**
+     * getPublicPortalWidgetsV3 - getPublicPortalWidgetsV3
+     * 
+     * Retrieves the public widgets of a portal.
+     * Supports two identification methods:
+     * 1. Using org_id + portal_id
+     * 2. Using domain
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetPublicPortalWidgetsV3.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetPublicPortalWidgetsV3.Responses.$200>
+  }
   ['/v2/portal/widgets']: {
     /**
      * upsertPortalWidget - upsertPortalWidget
@@ -14752,6 +15717,22 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetSchemasByDomain.Responses.$200>
+  }
+  ['/v3/portal/public/schemas']: {
+    /**
+     * getPublicSchemasV3 - getPublicSchemasV3
+     * 
+     * Retrieves schemas by portal. Only schemas and attributes used on public pages are returned.
+     * Supports two identification methods:
+     * 1. Using org_id + portal_id
+     * 2. Using domain
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetPublicSchemasV3.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetPublicSchemasV3.Responses.$200>
   }
   ['/v2/portal/public/org/settings']: {
     /**
@@ -15532,8 +16513,8 @@ export interface PathsDictionary {
   }
   ['/v2/portal/metering/reading/allowed-range/{meter_id}']: {
     /**
-     * getAllowedMeterReadingRange - Get allowed reading range for all counters of a meter from the configured 
-     * third-party plausibility check hook using 'range' mode. This endpoint requires 
+     * getAllowedMeterReadingRange - Get allowed reading range for all counters of a meter from the configured
+     * third-party plausibility check hook using 'range' mode. This endpoint requires
      * a plausibility check hook to be configured for the portal.
      * 
      */
@@ -15542,6 +16523,20 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetAllowedMeterReadingRange.Responses.$200>
+  }
+  ['/v2/portal/metering/readings']: {
+    /**
+     * getMeterReadings - Get meter readings with optional template resolution
+     * 
+     * Fetches meter readings for a counter and optionally resolves Handlebars
+     * template strings against each reading object using @epilot/variables.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.GetMeterReadings.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetMeterReadings.Responses.$200>
   }
   ['/v2/portal/public/sso/login']: {
     /**
@@ -15881,6 +16876,18 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.SwapPortalConfig.Responses.$200>
   }
+  ['/v3/portal/config/clone']: {
+    /**
+     * clonePortalConfig - clonePortalConfig
+     * 
+     * Creates a new portal by cloning configuration and pages from an existing portal. The new portal gets its own domain, users, email templates, and authentication settings.
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.ClonePortalConfig.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ClonePortalConfig.Responses.$201>
+  }
   ['/v3/portal/partner/invite']: {
     /**
      * invitePartner - invitePartner
@@ -16022,10 +17029,12 @@ export type ExtensionHook = Components.Schemas.ExtensionHook;
 export type ExtensionHookConsumptionDataRetrieval = Components.Schemas.ExtensionHookConsumptionDataRetrieval;
 export type ExtensionHookContractIdentification = Components.Schemas.ExtensionHookContractIdentification;
 export type ExtensionHookCostDataRetrieval = Components.Schemas.ExtensionHookCostDataRetrieval;
+export type ExtensionHookDataExport = Components.Schemas.ExtensionHookDataExport;
 export type ExtensionHookMeterReadingPlausibilityCheck = Components.Schemas.ExtensionHookMeterReadingPlausibilityCheck;
 export type ExtensionHookPriceDataRetrieval = Components.Schemas.ExtensionHookPriceDataRetrieval;
 export type ExtensionHookRegistrationIdentifiersCheck = Components.Schemas.ExtensionHookRegistrationIdentifiersCheck;
 export type ExtensionHookSelection = Components.Schemas.ExtensionHookSelection;
+export type ExtensionHookVisualizationMetadata = Components.Schemas.ExtensionHookVisualizationMetadata;
 export type ExtensionSeamlessLink = Components.Schemas.ExtensionSeamlessLink;
 export type ExternalLink = Components.Schemas.ExternalLink;
 export type ExtraSchemaAttributes = Components.Schemas.ExtraSchemaAttributes;
@@ -16065,6 +17074,7 @@ export type ProviderConfig = Components.Schemas.ProviderConfig;
 export type ProviderDisplayName = Components.Schemas.ProviderDisplayName;
 export type ProviderPublicConfig = Components.Schemas.ProviderPublicConfig;
 export type ProviderSlug = Components.Schemas.ProviderSlug;
+export type PublicAppDetails = Components.Schemas.PublicAppDetails;
 export type PublicContractIdentificationDetails = Components.Schemas.PublicContractIdentificationDetails;
 export type PublicDataRetrievalHookDetails = Components.Schemas.PublicDataRetrievalHookDetails;
 export type PublicExtensionCapabilities = Components.Schemas.PublicExtensionCapabilities;
@@ -16095,6 +17105,9 @@ export type UpsertPortalConfig = Components.Schemas.UpsertPortalConfig;
 export type UpsertPortalConfigV3 = Components.Schemas.UpsertPortalConfigV3;
 export type UpsertPortalWidget = Components.Schemas.UpsertPortalWidget;
 export type UserRequest = Components.Schemas.UserRequest;
+export type VisualizationDataRange = Components.Schemas.VisualizationDataRange;
+export type VisualizationMetadata = Components.Schemas.VisualizationMetadata;
+export type VisualizationTypeOption = Components.Schemas.VisualizationTypeOption;
 export type WidgetAction = Components.Schemas.WidgetAction;
 export type WidgetBase = Components.Schemas.WidgetBase;
 export type WorfklowIdentifier = Components.Schemas.WorfklowIdentifier;

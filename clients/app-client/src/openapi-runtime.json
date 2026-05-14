@@ -501,6 +501,41 @@
         },
         "responses": {}
       }
+    },
+    "/v1/public/app/{appId}/proxy/{proxyName}/{path}": {
+      "parameters": [
+        {
+          "name": "appId",
+          "in": "path",
+          "required": true,
+          "description": "ID of the installed app"
+        },
+        {
+          "name": "proxyName",
+          "in": "path",
+          "required": true,
+          "description": "Name of the proxy target as defined in the app manifest"
+        },
+        {
+          "name": "path",
+          "in": "path",
+          "required": true,
+          "description": "Path to forward to the proxy target"
+        }
+      ],
+      "get": {
+        "operationId": "publicProxyGet",
+        "responses": {}
+      },
+      "post": {
+        "operationId": "publicProxyPost",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
     }
   },
   "components": {

@@ -733,8 +733,8 @@
             "schema": {
               "type": "string"
             },
-            "required": true,
-            "description": "Hook ID for consumption data."
+            "required": false,
+            "description": "Optional Hook ID. If omitted, the only matching hook on the extension is used; if the extension has multiple hooks of the relevant type, this becomes required."
           },
           {
             "in": "query",
@@ -818,16 +818,10 @@
                             "description": "Optional type of the consumption, such as 'nt' (night time) and 'ht' (high time) or 'feed-in' and 'feed-out'. Can be any string.",
                             "example": "nt"
                           },
-                          "aggregation_method": {
+                          "unit": {
                             "type": "string",
-                            "description": "The method used to aggregate the consumption data. Assumed default is 'sum'.",
-                            "enum": [
-                              "sum",
-                              "average",
-                              "max",
-                              "min"
-                            ],
-                            "example": "sum"
+                            "description": "Optional unit of the consumption value. Defaults to unit present on the relevant Meter Counter.",
+                            "example": "kWh"
                           }
                         },
                         "required": [
@@ -837,6 +831,178 @@
                       }
                     }
                   }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/visualization:export": {
+      "post": {
+        "operationId": "prepareVisualizationExport",
+        "summary": "Prepare Visualization Export",
+        "description": "Asks an installed App to prepare a downloadable export of a visualization (consumption chart, dynamic tariff chart, etc.). The export is produced by the third-party App via a configured portal extension hook of type `dataExport` — this endpoint does not generate the file itself, it forwards the request to the configured hook and returns the descriptor the App provides (typically a `download_url`).\n",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "app_id": {
+                    "type": "string",
+                    "description": "App ID providing the dataExport hook."
+                  },
+                  "extension_id": {
+                    "type": "string",
+                    "description": "Extension ID providing the dataExport hook."
+                  },
+                  "hook_id": {
+                    "type": "string",
+                    "description": "Optional Hook ID. If omitted, the only `dataExport` hook on the extension is used; if the extension has multiple `dataExport` hooks, this becomes required."
+                  },
+                  "from": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Optional start date for the export window (ISO 8601 format)."
+                  },
+                  "to": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Optional end date for the export window (ISO 8601 format)."
+                  },
+                  "context_entities": {
+                    "$ref": "#/components/schemas/ContextEntities"
+                  }
+                },
+                "required": [
+                  "app_id",
+                  "extension_id"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Export descriptor returned by the App.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "download_url": {
+                      "type": "string",
+                      "description": "URL the client can use to download the exported file. May be a pre-signed or short-lived URL."
+                    },
+                    "filename": {
+                      "type": "string",
+                      "description": "Suggested filename for the exported file."
+                    },
+                    "content_type": {
+                      "type": "string",
+                      "description": "MIME type of the exported file.",
+                      "example": "text/csv"
+                    },
+                    "expires_at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "Optional expiration timestamp for the download URL."
+                    }
+                  },
+                  "required": [
+                    "download_url"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/visualization/metadata": {
+      "get": {
+        "operationId": "getVisualizationMetadata",
+        "summary": "Get Visualization Metadata",
+        "description": "Returns runtime metadata describing how a visualization (consumption / price / cost chart) should be rendered for a given portal context (meter, contract, etc). Resolves the extension's `visualizationMetadata` hook implicitly from `app_id` + `extensionId` and invokes it. Supplies the response as a structured payload that the portal uses to configure type/aggregation options, supported intervals, and the available data range.\n",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "app_id",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "App ID providing the visualizationMetadata hook."
+          },
+          {
+            "in": "query",
+            "name": "extensionId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Extension ID providing the visualizationMetadata hook."
+          },
+          {
+            "in": "query",
+            "name": "context_entities",
+            "required": false,
+            "description": "Entities to include in the context for variable interpolation in the hook (typically the meter and any other entities that scope the visualization).",
+            "schema": {
+              "$ref": "#/components/schemas/ContextEntities"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Visualization metadata returned successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VisualizationMetadata"
                 }
               }
             }
@@ -894,8 +1060,8 @@
             "schema": {
               "type": "string"
             },
-            "required": true,
-            "description": "Hook ID for cost data."
+            "required": false,
+            "description": "Optional Hook ID. If omitted, the only matching hook on the extension is used; if the extension has multiple hooks of the relevant type, this becomes required."
           },
           {
             "in": "query",
@@ -1068,8 +1234,8 @@
             "schema": {
               "type": "string"
             },
-            "required": true,
-            "description": "Hook ID for price data."
+            "required": false,
+            "description": "Optional Hook ID. If omitted, the only matching hook on the extension is used; if the extension has multiple hooks of the relevant type, this becomes required."
           },
           {
             "in": "query",
@@ -3395,6 +3561,84 @@
                     "contactId": {
                       "$ref": "#/components/schemas/EntityId",
                       "description": "ID of the contact if exists"
+                    },
+                    "accountId": {
+                      "$ref": "#/components/schemas/EntityId",
+                      "description": "ID of the resolved account when the portal is configured for account-based registration"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v3/portal/public/account/exists": {
+      "post": {
+        "operationId": "checkAccountExists",
+        "summary": "checkAccountExists",
+        "description": "True if account with given identifiers exists.\nSupports two identification methods:\n1. Using portal_id\n2. Using domain\n",
+        "security": [],
+        "tags": [
+          "Public"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "portal_id",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/PortalId"
+            },
+            "description": "PortalId of the portal (required if domain is not provided)"
+          },
+          {
+            "in": "query",
+            "name": "domain",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Portal domain for identification (alternative to portal_id)"
+          }
+        ],
+        "requestBody": {
+          "description": "Request payload",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AccountExistsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Return result true|false if the account with given identifiers exists.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "exists": {
+                      "type": "boolean",
+                      "description": "Whether the account exists with the given identifier values",
+                      "example": true
+                    },
+                    "accountId": {
+                      "$ref": "#/components/schemas/EntityId",
+                      "description": "ID of the account if exists"
                     }
                   }
                 }
@@ -7361,6 +7605,90 @@
         }
       }
     },
+    "/v2/portal/public/sso/providers/{provider_slug}": {
+      "get": {
+        "operationId": "getSSOProvider",
+        "summary": "getSSOProvider",
+        "description": "Returns the public configuration of a single SSO identity provider with env var\nplaceholders (incl. secrets) already resolved against the organization's environment.\n\nUse this endpoint at SSO initiation time (i.e. when the end user clicks \"Sign in with X\")\nto obtain the resolved OIDC settings needed to construct the authorization URL.\nThe web `client_secret` is intentionally never returned — it is used server-side by\nthe SSO callback to exchange the authorization code for tokens.\n\nSupports three identification methods:\n1. `org_id` + `origin`\n2. `org_id` + `portal_id`\n3. `domain`\n",
+        "security": [],
+        "tags": [
+          "Public"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "provider_slug",
+            "required": true,
+            "description": "Provider slug (organization-unique)",
+            "schema": {
+              "$ref": "#/components/schemas/ProviderSlug"
+            }
+          },
+          {
+            "in": "query",
+            "name": "org_id",
+            "required": false,
+            "description": "epilot organization id (required with `origin` or `portal_id`)",
+            "schema": {
+              "type": "string",
+              "example": 123
+            }
+          },
+          {
+            "in": "query",
+            "name": "origin",
+            "required": false,
+            "description": "Origin of the Portal",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "END_CUSTOMER_PORTAL",
+                "INSTALLER_PORTAL"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "portal_id",
+            "required": false,
+            "description": "ID of the Portal",
+            "schema": {
+              "$ref": "#/components/schemas/PortalId"
+            }
+          },
+          {
+            "in": "query",
+            "name": "domain",
+            "required": false,
+            "description": "Portal domain for identification (alternative to org_id + origin/portal_id)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Resolved public SSO provider configuration",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProviderPublicConfig"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/v2/portal/public/sso/login": {
       "post": {
         "operationId": "ssoLogin",
@@ -9552,6 +9880,149 @@
           }
         }
       }
+    },
+    "/v3/portal/verify-dns": {
+      "post": {
+        "operationId": "verifyDns",
+        "summary": "verifyDns",
+        "description": "Manually triggers DNS verification for a portal's domain setup. Runs the same verification logic as the scheduled processAllPendingNetworks lambda.",
+        "tags": [
+          "ECP Admin"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "portal_id",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/PortalId"
+            },
+            "description": "PortalId of the portal"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "DNS verification result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "domain_status": {
+                      "type": "string",
+                      "description": "The status of the custom domain verification",
+                      "enum": [
+                        "PENDING",
+                        "SUCCEED"
+                      ]
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "A message describing the result"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/proxy/execute": {
+      "post": {
+        "operationId": "portalProxyExecute",
+        "summary": "portalProxyExecute",
+        "description": "Execute an Integration Hub managed-call use case on behalf of a portal user.\nBridges PortalAuth to the Integration API by generating an internal token.\n",
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "tags": [
+          "ECP"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "integration_id",
+                  "use_case_slug"
+                ],
+                "properties": {
+                  "integration_id": {
+                    "type": "string",
+                    "format": "uuid",
+                    "description": "Integration ID containing the managed-call use case"
+                  },
+                  "use_case_slug": {
+                    "type": "string",
+                    "description": "Use case slug (acts as the RPC method name)"
+                  },
+                  "payload": {
+                    "type": "object",
+                    "description": "Input data for the managed-call operation",
+                    "additionalProperties": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Managed-call execution result envelope.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "success"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "additionalProperties": true,
+                      "description": "Managed-call response payload. Shape is defined by the use\ncase's JSONata response_mapping; if no mapping is\nconfigured the raw external API response is returned.\n"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -10264,6 +10735,14 @@
             "type": "boolean",
             "description": "Mark true if the domain is an Epilot domain"
           },
+          "epilot_domain": {
+            "type": "string",
+            "description": "The URL on which the portal is accessible",
+            "example": "example-portal-12345.ecp.epilot.cloud"
+          },
+          "domain_settings": {
+            "$ref": "#/components/schemas/DomainSettings"
+          },
           "design_id": {
             "$ref": "#/components/schemas/EntityId",
             "description": "ID of the design used to build the portal"
@@ -10288,6 +10767,24 @@
               "ALWAYS_CREATE_CONTACT",
               "DISALLOW_COMPLETELY",
               "BLOCK_IF_PORTAL_USER_EXISTS"
+            ]
+          },
+          "self_registration_account_setting": {
+            "type": "string",
+            "description": "Controls behavior of self-registration when account is used as the registration entity",
+            "enum": [
+              "ALLOW_WITH_CONTACT_CREATION",
+              "DENY",
+              "ALWAYS_CREATE_CONTACT",
+              "DISALLOW_COMPLETELY"
+            ]
+          },
+          "self_registration_entity": {
+            "type": "string",
+            "description": "Entity type used as the primary identifier for self-registration",
+            "enum": [
+              "contact",
+              "account"
             ]
           },
           "user_account_self_management": {
@@ -10714,6 +11211,13 @@
             "additionalProperties": {
               "$ref": "#/components/schemas/Page"
             }
+          },
+          "global_blocks": {
+            "type": "object",
+            "description": "Portal-level blocks shared across all pages (e.g. footer). Keyed by block id.",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/Block"
+            }
           }
         }
       },
@@ -10804,11 +11308,37 @@
           "widgets"
         ],
         "properties": {
+          "portal_sk_v3": {
+            "type": "string",
+            "description": "V3 portal-scoped storage key for the widget configuration"
+          },
+          "is_v3_item": {
+            "type": "boolean",
+            "description": "Indicates whether the widget configuration is stored as a V3 portal-scoped item"
+          },
           "widgets": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/PortalWidget"
             }
+          }
+        }
+      },
+      "DomainSettings": {
+        "type": "object",
+        "description": "Domain settings for the portal",
+        "properties": {
+          "is_custom_domain_enabled": {
+            "type": "boolean",
+            "description": "Whether the custom domain is enabled"
+          },
+          "is_epilot_domain_enabled": {
+            "type": "boolean",
+            "description": "Whether the Epilot domain is enabled"
+          },
+          "is_redirection_enabled": {
+            "type": "boolean",
+            "description": "Whether the redirection is enabled"
           }
         }
       },
@@ -11160,6 +11690,38 @@
             "example": {
               "contact": {
                 "email": "john.doe@example.com"
+              },
+              "contract": {
+                "contract_number": "123456"
+              }
+            }
+          }
+        }
+      },
+      "AccountExistsRequest": {
+        "type": "object",
+        "required": [
+          "registration_identifiers",
+          "org_id"
+        ],
+        "properties": {
+          "org_id": {
+            "type": "string",
+            "example": 728,
+            "description": "ID of the organization"
+          },
+          "registration_identifiers": {
+            "type": "object",
+            "description": "Identifier-value pairs per schema to identify an account during portal user registration",
+            "additionalProperties": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            },
+            "example": {
+              "account": {
+                "customer_number": "ACC-123456"
               },
               "contract": {
                 "contract_number": "123456"
@@ -13479,6 +14041,12 @@
               "$ref": "#/components/schemas/DataRetrievalItem"
             }
           },
+          "dataExport": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DataRetrievalItem"
+            }
+          },
           "priceDataRetrieval": {
             "type": "array",
             "items": {
@@ -13518,11 +14086,39 @@
       "DataRetrievalItem": {
         "type": "object",
         "properties": {
+          "app": {
+            "$ref": "#/components/schemas/PublicAppDetails"
+          },
           "extension": {
             "$ref": "#/components/schemas/PublicExtensionDetails"
           },
           "hook": {
             "$ref": "#/components/schemas/PublicDataRetrievalHookDetails"
+          }
+        }
+      },
+      "PublicAppDetails": {
+        "type": "object",
+        "properties": {
+          "app_id": {
+            "type": "string",
+            "description": "Identifier of the app."
+          },
+          "name": {
+            "type": "object",
+            "properties": {
+              "en": {
+                "type": "string",
+                "description": "Name of the app in English."
+              }
+            },
+            "additionalProperties": {
+              "type": "string",
+              "description": "Name of the app in some other language denoted by ISO 3166-1 alpha-2 code."
+            },
+            "required": [
+              "en"
+            ]
           }
         }
       },
@@ -13576,10 +14172,121 @@
           },
           "intervals": {
             "type": "array",
+            "deprecated": true,
             "items": {
               "type": "string"
             },
-            "description": "The intervals associated with the hook."
+            "description": "Deprecated. Prefer fetching `intervals` from the `visualizationMetadata` endpoint\n(`GET /v2/portal/visualization/metadata`) so the supported intervals can vary per\nmeter/contract. Still emitted as a fallback for clients that have not migrated yet.\n"
+          },
+          "block_types": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Optional list of portal block types the hook supports. Empty/missing means the hook is usable on any export-capable block."
+          }
+        }
+      },
+      "VisualizationMetadata": {
+        "type": "object",
+        "description": "Runtime metadata describing how a visualization should be rendered for a given portal context. Returned by `GET /v2/portal/visualization/metadata`.\n",
+        "properties": {
+          "type_options": {
+            "type": "array",
+            "description": "Types advertised for the current context (e.g. `ht`/`nt`, `feed-in`/`feed-out`). The `id` matches the `type` field returned by the data hook.\n",
+            "items": {
+              "$ref": "#/components/schemas/VisualizationTypeOption"
+            }
+          },
+          "intervals": {
+            "type": "array",
+            "description": "Intervals supported for the current context. If omitted, all intervals are assumed supported.",
+            "items": {
+              "type": "string",
+              "enum": [
+                "PT15M",
+                "PT1H",
+                "P1D",
+                "P1M"
+              ]
+            }
+          },
+          "data_range": {
+            "$ref": "#/components/schemas/VisualizationDataRange"
+          }
+        }
+      },
+      "VisualizationTypeOption": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Identifier of the type. Matches the `type` field on the data hook response."
+          },
+          "label": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Localized label for the type, keyed by ISO 3166-1 alpha-2 language code."
+          },
+          "aggregation_group": {
+            "type": "string",
+            "description": "Optional grouping key. Types in the same `aggregation_group` are visually combined; types in different groups (or without a group) render separately. How they combine depends on each type's `statistical_method`:\n  - bar chart (`sum`): same-group types are stacked into a single bar (e.g. ht/nt\n    summed into total consumption); different-group types render side-by-side.\n  - line chart (`min` / `average` / `max`): same-group types are rendered as an\n    area chart; different-group types render as separate lines.\n"
+          },
+          "statistical_method": {
+            "type": "string",
+            "enum": [
+              "sum",
+              "average",
+              "min",
+              "max"
+            ],
+            "description": "Statistical method already applied to this type's data. Determines the chart shape used to render the type's values: `sum` is shown as a bar chart; `min`, `average`, and `max` are shown as a line chart. Each type advertises its own method, so a single visualization can mix bar-shaped types with line-shaped types. Defaults to `sum` when omitted.\n"
+          },
+          "unit": {
+            "type": "string",
+            "description": "Unit shared by all values of this type (e.g. \"kWh\")."
+          },
+          "color": {
+            "type": "string",
+            "enum": [
+              "primary",
+              "slate",
+              "mauve",
+              "orange",
+              "red",
+              "tomato",
+              "amber",
+              "green",
+              "blue"
+            ],
+            "description": "Optional Spark color token used to render this type in the visualization. Maps onto the portal's Spark palette (`primary` is the org's primary brand color). When omitted the consumer falls back to its own per-type default.\n"
+          },
+          "precision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 10,
+            "description": "Optional number of decimal places to show when rendering values of this type in the visualization (axis labels, tooltips, summaries). When omitted the consumer falls back to its own default precision.\n"
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "VisualizationDataRange": {
+        "type": "object",
+        "description": "Earliest / latest timestamps for which data is available in the current context.",
+        "properties": {
+          "from": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO 8601 timestamp of the earliest available data point."
+          },
+          "to": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO 8601 timestamp of the latest available data point."
           }
         }
       },
@@ -13775,10 +14482,16 @@
                       "$ref": "#/components/schemas/ExtensionHookConsumptionDataRetrieval"
                     },
                     {
+                      "$ref": "#/components/schemas/ExtensionHookDataExport"
+                    },
+                    {
                       "$ref": "#/components/schemas/ExtensionHookCostDataRetrieval"
                     },
                     {
                       "$ref": "#/components/schemas/ExtensionHookMeterReadingPlausibilityCheck"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ExtensionHookVisualizationMetadata"
                     }
                   ]
                 }
@@ -13937,7 +14650,8 @@
           },
           "use_static_ips": {
             "type": "boolean",
-            "description": "If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.",
+            "deprecated": true,
+            "description": "Deprecated. Prefer `secure_proxy` instead.\nIf true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.\n",
             "default": false
           },
           "secure_proxy": {
@@ -14039,7 +14753,8 @@
           },
           "use_static_ips": {
             "type": "boolean",
-            "description": "If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.",
+            "deprecated": true,
+            "description": "Deprecated. Prefer `secure_proxy` instead.\nIf true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.\n",
             "default": false
           },
           "secure_proxy": {
@@ -14149,7 +14864,8 @@
           },
           "use_static_ips": {
             "type": "boolean",
-            "description": "If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.",
+            "deprecated": true,
+            "description": "Deprecated. Prefer `secure_proxy` instead.\nIf true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.\n",
             "default": false
           },
           "secure_proxy": {
@@ -14227,7 +14943,8 @@
           },
           "use_static_ips": {
             "type": "boolean",
-            "description": "If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.",
+            "deprecated": true,
+            "description": "Deprecated. Prefer `secure_proxy` instead.\nIf true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.\n",
             "default": false
           },
           "secure_proxy": {
@@ -14304,7 +15021,162 @@
           },
           "use_static_ips": {
             "type": "boolean",
-            "description": "If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.",
+            "deprecated": true,
+            "description": "Deprecated. Prefer `secure_proxy` instead.\nIf true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.\n",
+            "default": false
+          },
+          "secure_proxy": {
+            "$ref": "#/components/schemas/SecureProxyConfig"
+          }
+        },
+        "required": [
+          "type",
+          "call"
+        ]
+      },
+      "ExtensionHookDataExport": {
+        "description": "Generic data export hook. When configured on a visualization block, the portal delegates the export action (e.g. CSV/Excel/PDF download) to the configured external source instead of generating the file itself. Can be used by any block that supports export — consumption charts, dynamic tariff charts, etc. The expected response to the call is:\n  - 200 with a JSON body describing the exported file (download_url, optional filename, content_type, expires_at)\n",
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "dataExport"
+            ]
+          },
+          "block_types": {
+            "type": "array",
+            "description": "Optional list of portal block types this hook supports. If omitted,\nthe hook is usable on any export-capable block. Allowed values match\nthe block type identifiers used by the portal builder\n(e.g. `consumption_visualization`, `dynamic_tariff`).\n",
+            "items": {
+              "type": "string"
+            }
+          },
+          "auth": {
+            "$ref": "#/components/schemas/ExtensionAuthBlock"
+          },
+          "call": {
+            "type": "object",
+            "properties": {
+              "method": {
+                "type": "string",
+                "description": "HTTP method to use for the call",
+                "default": "GET"
+              },
+              "url": {
+                "type": "string",
+                "description": "URL to call. Supports variable interpolation."
+              },
+              "params": {
+                "type": "object",
+                "description": "Parameters to append to the URL. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              },
+              "headers": {
+                "type": "object",
+                "description": "Headers to use. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              },
+              "body": {
+                "type": "object",
+                "description": "Request body to send. Supports variable interpolation. Content format is determined by Content-Type header.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              }
+            },
+            "required": [
+              "url"
+            ]
+          },
+          "use_static_ips": {
+            "type": "boolean",
+            "deprecated": true,
+            "description": "Deprecated. Prefer `secure_proxy` instead.\nIf true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.\n",
+            "default": false
+          },
+          "secure_proxy": {
+            "$ref": "#/components/schemas/SecureProxyConfig"
+          }
+        },
+        "required": [
+          "type",
+          "call"
+        ]
+      },
+      "ExtensionHookVisualizationMetadata": {
+        "description": "Hook that returns runtime metadata describing how a visualization should be rendered for a given portal context. Invoked by the portal before fetching data, with the same context the data hook receives.\n",
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "visualizationMetadata"
+            ]
+          },
+          "auth": {
+            "$ref": "#/components/schemas/ExtensionAuthBlock"
+          },
+          "call": {
+            "type": "object",
+            "properties": {
+              "method": {
+                "type": "string",
+                "description": "HTTP method to use for the call",
+                "default": "GET"
+              },
+              "url": {
+                "type": "string",
+                "description": "URL to call. Supports variable interpolation."
+              },
+              "params": {
+                "type": "object",
+                "description": "Parameters to append to the URL. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              },
+              "headers": {
+                "type": "object",
+                "description": "Headers to use. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              },
+              "body": {
+                "type": "object",
+                "description": "Request body to send. Supports variable interpolation. Content format is determined by Content-Type header.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              }
+            },
+            "required": [
+              "url"
+            ]
+          },
+          "resolved": {
+            "type": "object",
+            "properties": {
+              "dataPath": {
+                "type": "string",
+                "description": "Optional path to the metadata object in the response. If omitted, the metadata is assumed to be on the top level."
+              }
+            }
+          },
+          "use_static_ips": {
+            "type": "boolean",
+            "deprecated": true,
+            "description": "Deprecated. Prefer `secure_proxy` instead.\nIf true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.\n",
             "default": false
           },
           "secure_proxy": {
@@ -14381,7 +15253,8 @@
           },
           "use_static_ips": {
             "type": "boolean",
-            "description": "If true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.",
+            "deprecated": true,
+            "description": "Deprecated. Prefer `secure_proxy` instead.\nIf true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.\n",
             "default": false
           },
           "secure_proxy": {
@@ -14672,6 +15545,11 @@
             "example": [
               "00123456"
             ]
+          },
+          "file_id": {
+            "type": "string",
+            "description": "ID of the created file entity for the uploaded photo.",
+            "example": "abc123def456"
           }
         }
       },
@@ -14691,6 +15569,7 @@
       },
       "ProviderConfig": {
         "type": "object",
+        "description": "SSO identity provider configuration.\n\nEnv var interpolation: only string fields under `oidc_config` and\n`mobile_oidc_config` (incl. their nested `metadata`) are passed through\nLiquid templating, so they may contain `{{ env.VAR }}` placeholders that\nget resolved at runtime against the organization's environment.\n\nThe following fields are used as literal values and MUST NOT contain\ntemplate syntax: `slug`, `display_name`, `provider_type`, all keys and\nvalues under `attribute_mappings` (used as JSONPath-like accessors into\ntoken claims), and all keys and values under `entity_matching`.\n",
         "properties": {
           "slug": {
             "$ref": "#/components/schemas/ProviderSlug"
@@ -14732,7 +15611,7 @@
             "$ref": "#/components/schemas/ProviderDisplayName"
           },
           "oidc_config": {
-            "$ref": "#/components/schemas/OIDCProviderConfig"
+            "$ref": "#/components/schemas/OIDCProviderPublicConfig"
           },
           "mobile_oidc_config": {
             "$ref": "#/components/schemas/MoblieOIDCConfig"
@@ -14882,6 +15761,7 @@
       },
       "OIDCProviderConfig": {
         "type": "object",
+        "description": "OIDC provider configuration. All string fields support env var interpolation\n(incl. secrets) via mustache-like templates, e.g. `{{ env.MY_PROVIDER_CLIENT_SECRET }}`.\n",
         "properties": {
           "type": {
             "type": "string",
@@ -14893,20 +15773,22 @@
           },
           "oidc_issuer": {
             "type": "string",
-            "description": "Issuing Authority URL",
+            "description": "Issuing Authority URL. Supports env var interpolation, e.g. `{{ env.MY_ISSUER }}`.",
             "example": "https://login.microsoftonline.com/33d4f3e5-3df2-421e-b92e-a63cfa680a88/v2.0"
           },
           "redirect_uri": {
             "type": "string",
-            "description": "Redirect URI for the OIDC flow",
+            "description": "Redirect URI for the OIDC flow. Supports env var interpolation.",
             "example": "https://customer-portal.com/login"
           },
           "client_id": {
             "type": "string",
+            "description": "Supports env var interpolation, e.g. `{{ env.MY_CLIENT_ID }}`.",
             "example": "ab81daf8-8b1f-42d6-94ca-c51621054c75"
           },
           "client_secret": {
             "type": "string",
+            "description": "Client Secret. Supports env var interpolation (incl. secrets), e.g.\n`{{ env.MY_CLIENT_SECRET }}`. Prefer storing the actual secret as an org\nenv var and referencing it here.\n",
             "example": "7BIUnn~6shh.7fNtXb..3k1Mp3s6k6WK3B"
           },
           "has_client_secret": {
@@ -14937,17 +15819,72 @@
           "scope"
         ]
       },
+      "OIDCProviderPublicConfig": {
+        "type": "object",
+        "description": "Public OIDC provider configuration. Same as OIDCProviderConfig but never includes\nthe `client_secret` field — it is kept server-side and only used to exchange the\nauthorization code at the SSO callback. String fields are returned with env var\nplaceholders already resolved when fetched via `GET /v2/portal/public/sso/providers/{provider_slug}`.\n",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "authorization_code",
+              "implicit"
+            ],
+            "default": "implicit"
+          },
+          "oidc_issuer": {
+            "type": "string",
+            "description": "Issuing Authority URL",
+            "example": "https://login.microsoftonline.com/33d4f3e5-3df2-421e-b92e-a63cfa680a88/v2.0"
+          },
+          "redirect_uri": {
+            "type": "string",
+            "description": "Redirect URI for the OIDC flow",
+            "example": "https://customer-portal.com/login"
+          },
+          "client_id": {
+            "type": "string",
+            "example": "ab81daf8-8b1f-42d6-94ca-c51621054c75"
+          },
+          "has_client_secret": {
+            "type": "boolean",
+            "description": "Whether the client secret is present (the value itself is kept server-side)",
+            "example": true
+          },
+          "scope": {
+            "type": "string",
+            "description": "Space-separated list of OAuth 2.0 scopes to request from OpenID Connect",
+            "example": "openid email"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/OIDCProviderMetadata"
+          },
+          "prompt": {
+            "type": "string",
+            "enum": [
+              "login",
+              "select_account",
+              "consent"
+            ]
+          }
+        },
+        "required": [
+          "oidc_issuer",
+          "client_id",
+          "scope"
+        ]
+      },
       "MoblieOIDCConfig": {
         "type": "object",
+        "description": "Mobile OIDC configuration. All string fields support env var interpolation\n(incl. secrets) via mustache-like templates, e.g. `{{ env.MOBILE_CLIENT_SECRET }}`.\n",
         "properties": {
           "client_id": {
             "type": "string",
-            "description": "Client ID for the mobile app",
+            "description": "Client ID for the mobile app. Supports env var interpolation.",
             "example": 123456
           },
           "client_secret": {
             "type": "string",
-            "description": "Client Secret for the mobile app",
+            "description": "Client Secret for the mobile app. Supports env var interpolation (incl. secrets),\ne.g. `{{ env.MOBILE_CLIENT_SECRET }}`.\n",
             "example": 123456
           }
         }
@@ -14992,12 +15929,12 @@
           },
           "test_auth_username": {
             "type": "string",
-            "description": "The username for the test auth, only used for testing on auth code flow",
+            "description": "The username for the test auth, only used for testing on auth code flow.\nSupports env var interpolation, e.g. `{{ env.MY_TEST_AUTH_USERNAME }}`.\n",
             "example": "test@epilot.io"
           },
           "test_auth_password": {
             "type": "string",
-            "description": "The password for the test auth, only used for testing on auth code flow"
+            "description": "The password for the test auth, only used for testing on auth code flow.\nSupports env var interpolation (incl. secrets), e.g. `{{ env.MY_TEST_AUTH_PASSWORD }}`.\n"
           }
         }
       },
@@ -15397,6 +16334,17 @@
                 "type": "string",
                 "description": "The id of the portal",
                 "example": "453ad7bf-86d5-46c8-8252-bcc868df5e3c"
+              },
+              "past_routes": {
+                "type": "array",
+                "description": "Slugs that previously belonged to this page. The portal redirects requests for these slugs to the current slug. Managed by the server: when a page's slug changes, the old slug is appended here, and when another page claims one of these slugs it is removed from this list.\n",
+                "items": {
+                  "type": "string"
+                },
+                "example": [
+                  "old-dashboard",
+                  "home"
+                ]
               }
             }
           }
@@ -15423,6 +16371,14 @@
             "type": "boolean",
             "description": "Mark true if the domain is an Epilot domain"
           },
+          "epilot_domain": {
+            "type": "string",
+            "description": "The Epilot domain on which the portal is accessible",
+            "example": "example-portal-1.ecp.epilot.io"
+          },
+          "domain_settings": {
+            "$ref": "#/components/schemas/DomainSettings"
+          },
           "design_id": {
             "$ref": "#/components/schemas/EntityId",
             "description": "ID of the design used to build the portal"
@@ -15447,6 +16403,24 @@
               "ALWAYS_CREATE_CONTACT",
               "DISALLOW_COMPLETELY",
               "BLOCK_IF_PORTAL_USER_EXISTS"
+            ]
+          },
+          "self_registration_account_setting": {
+            "type": "string",
+            "description": "Controls behavior of self-registration when account is used as the registration entity",
+            "enum": [
+              "ALLOW_WITH_CONTACT_CREATION",
+              "DENY",
+              "ALWAYS_CREATE_CONTACT",
+              "DISALLOW_COMPLETELY"
+            ]
+          },
+          "self_registration_entity": {
+            "type": "string",
+            "description": "Entity type used as the primary identifier for self-registration",
+            "enum": [
+              "contact",
+              "account"
             ]
           },
           "user_account_self_management": {
@@ -15867,6 +16841,13 @@
           },
           "origin": {
             "$ref": "#/components/schemas/Origin"
+          },
+          "global_blocks": {
+            "type": "object",
+            "description": "Portal-level blocks shared across all pages (e.g. footer). Keyed by block id.",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/Block"
+            }
           }
         }
       },
@@ -15979,6 +16960,11 @@
           "is_canary": {
             "type": "boolean",
             "description": "Whether the org is in canary mode"
+          },
+          "redirect_to": {
+            "type": "string",
+            "description": "The URL to redirect to",
+            "example": "https://example.com"
           }
         }
       },

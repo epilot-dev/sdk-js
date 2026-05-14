@@ -72,16 +72,18 @@ const { data } = await customerPortalClient.upsertPortal(...)
 - [`deletePortalConfig`](#deleteportalconfig)
 - [`listAllPortalConfigs`](#listallportalconfigs)
 - [`swapPortalConfig`](#swapportalconfig)
+- [`clonePortalConfig`](#cloneportalconfig)
 
 **Public**
-- [`createUser`](#createuser)
 - [`createUserV3`](#createuserv3)
 - [`getPortalConfigByDomain`](#getportalconfigbydomain)
 - [`getPublicPortalExtensionDetails`](#getpublicportalextensiondetails)
 - [`getPublicPortalExtensionDetailsV3`](#getpublicportalextensiondetailsv3)
 - [`getPublicPortalConfig`](#getpublicportalconfig)
 - [`getPublicPortalConfigV3`](#getpublicportalconfigv3)
+- [`getPublicPortalWidgetsV3`](#getpublicportalwidgetsv3)
 - [`getSchemasByDomain`](#getschemasbydomain)
+- [`getPublicSchemasV3`](#getpublicschemasv3)
 - [`getOrganizationSettingsByDomain`](#getorganizationsettingsbydomain)
 - [`checkContactExists`](#checkcontactexists)
 - [`checkContactExistsV3`](#checkcontactexistsv3)
@@ -100,6 +102,8 @@ const { data } = await customerPortalClient.upsertPortal(...)
 - [`validateToken`](#validatetoken)
 - [`revokeToken`](#revoketoken)
 - [`getConsumption`](#getconsumption)
+- [`prepareVisualizationExport`](#preparevisualizationexport)
+- [`getVisualizationMetadata`](#getvisualizationmetadata)
 - [`getCosts`](#getcosts)
 - [`getPrices`](#getprices)
 - [`getResolvedSeamlessLink`](#getresolvedseamlesslink)
@@ -128,6 +132,7 @@ const { data } = await customerPortalClient.upsertPortal(...)
 - [`uploadMeterReadingPhoto`](#uploadmeterreadingphoto)
 - [`createMeterReading`](#createmeterreading)
 - [`getAllowedMeterReadingRange`](#getallowedmeterreadingrange)
+- [`getMeterReadings`](#getmeterreadings)
 - [`getPortalPage`](#getportalpage)
 - [`getPortalPages`](#getportalpages)
 - [`getPortalPageBlocks`](#getportalpageblocks)
@@ -245,8 +250,12 @@ const { data } = await customerPortalClient.upsertPortal(...)
 - [`ExtensionHookSelection`](#extensionhookselection)
 - [`PublicExtensionCapabilities`](#publicextensioncapabilities)
 - [`DataRetrievalItem`](#dataretrievalitem)
+- [`PublicAppDetails`](#publicappdetails)
 - [`PublicExtensionDetails`](#publicextensiondetails)
 - [`PublicDataRetrievalHookDetails`](#publicdataretrievalhookdetails)
+- [`VisualizationMetadata`](#visualizationmetadata)
+- [`VisualizationTypeOption`](#visualizationtypeoption)
+- [`VisualizationDataRange`](#visualizationdatarange)
 - [`PublicContractIdentificationDetails`](#publiccontractidentificationdetails)
 - [`PublicMeterReadingPlausibilityCheckDetails`](#publicmeterreadingplausibilitycheckdetails)
 - [`Extension`](#extension)
@@ -257,6 +266,8 @@ const { data } = await customerPortalClient.upsertPortal(...)
 - [`ExtensionHookMeterReadingPlausibilityCheck`](#extensionhookmeterreadingplausibilitycheck)
 - [`ExtensionHookPriceDataRetrieval`](#extensionhookpricedataretrieval)
 - [`ExtensionHookConsumptionDataRetrieval`](#extensionhookconsumptiondataretrieval)
+- [`ExtensionHookDataExport`](#extensionhookdataexport)
+- [`ExtensionHookVisualizationMetadata`](#extensionhookvisualizationmetadata)
 - [`ExtensionHookCostDataRetrieval`](#extensionhookcostdataretrieval)
 - [`SecureProxyConfig`](#secureproxyconfig)
 - [`ExtensionAuthBlock`](#extensionauthblock)
@@ -663,51 +674,6 @@ const { data } = await client.upsertPortal(
       "mobile_oidc_config": {}
     }
   ]
-}
-```
-
-</details>
-
----
-
-### `createUser`
-
-Registers a portal user
-
-`POST /v2/portal/public/user`
-
-```ts
-const { data } = await client.createUser(
-  {
-    origin: 'example',
-  },
-  {
-    email: 'testemail921@yopmail.com',
-    first_name: 'John',
-    last_name: 'Doe',
-    contactId: '5da0a718-c822-403d-9f5d-20d4584e0528',
-    orgId: 728,
-    password: '124n$aAJs*d41h4',
-    contactIdentifiers: {},
-    registration_identifiers: {
-      contact: {
-        email: 'john.doe@example.com'
-      },
-      contract: {
-        contract_number: '123456'
-      }
-    },
-    account_id: 'string'
-  },
-)
-```
-
-<details>
-<summary>Response</summary>
-
-```json
-{
-  "message": "User created successfully"
 }
 ```
 
@@ -1341,74 +1307,45 @@ const { data } = await client.getPublicPortalExtensionDetails({
 {
   "consumptionDataRetrieval": [
     {
-      "extension": {
-        "id": "string",
-        "name": {
-          "en": "string"
-        }
-      },
-      "hook": {
-        "id": "string",
-        "name": {
-          "en": "string"
-        },
-        "intervals": ["string"]
-      }
+      "app": {},
+      "extension": {},
+      "hook": {}
+    }
+  ],
+  "dataExport": [
+    {
+      "app": {},
+      "extension": {},
+      "hook": {}
     }
   ],
   "priceDataRetrieval": [
     {
-      "extension": {
-        "id": "string",
-        "name": {
-          "en": "string"
-        }
-      },
-      "hook": {
-        "id": "string",
-        "name": {
-          "en": "string"
-        },
-        "intervals": ["string"]
-      }
+      "app": {},
+      "extension": {},
+      "hook": {}
     }
   ],
   "costDataRetrieval": [
     {
-      "extension": {
-        "id": "string",
-        "name": {
-          "en": "string"
-        }
-      },
-      "hook": {
-        "id": "string",
-        "name": {
-          "en": "string"
-        },
-        "intervals": ["string"]
-      }
+      "app": {},
+      "extension": {},
+      "hook": {}
     }
   ],
   "contractIdentification": {
     "extension": {
       "id": "string",
-      "name": {
-        "en": "string"
-      }
+      "name": {}
     },
     "hook": {
-      "explanation": {
-        "en": "This process will give you access to all Contracts kept"
-      }
+      "explanation": {}
     }
   },
   "meterReadingPlausibilityCheck": {
     "extension": {
       "id": "string",
-      "name": {
-        "en": "string"
-      }
+      "name": {}
     },
     "hook": {
       "plausibility_mode": "check"
@@ -1552,74 +1489,45 @@ const { data } = await client.getPublicPortalExtensionDetailsV3({
 {
   "consumptionDataRetrieval": [
     {
-      "extension": {
-        "id": "string",
-        "name": {
-          "en": "string"
-        }
-      },
-      "hook": {
-        "id": "string",
-        "name": {
-          "en": "string"
-        },
-        "intervals": ["string"]
-      }
+      "app": {},
+      "extension": {},
+      "hook": {}
+    }
+  ],
+  "dataExport": [
+    {
+      "app": {},
+      "extension": {},
+      "hook": {}
     }
   ],
   "priceDataRetrieval": [
     {
-      "extension": {
-        "id": "string",
-        "name": {
-          "en": "string"
-        }
-      },
-      "hook": {
-        "id": "string",
-        "name": {
-          "en": "string"
-        },
-        "intervals": ["string"]
-      }
+      "app": {},
+      "extension": {},
+      "hook": {}
     }
   ],
   "costDataRetrieval": [
     {
-      "extension": {
-        "id": "string",
-        "name": {
-          "en": "string"
-        }
-      },
-      "hook": {
-        "id": "string",
-        "name": {
-          "en": "string"
-        },
-        "intervals": ["string"]
-      }
+      "app": {},
+      "extension": {},
+      "hook": {}
     }
   ],
   "contractIdentification": {
     "extension": {
       "id": "string",
-      "name": {
-        "en": "string"
-      }
+      "name": {}
     },
     "hook": {
-      "explanation": {
-        "en": "This process will give you access to all Contracts kept"
-      }
+      "explanation": {}
     }
   },
   "meterReadingPlausibilityCheck": {
     "extension": {
       "id": "string",
-      "name": {
-        "en": "string"
-      }
+      "name": {}
     },
     "hook": {
       "plausibility_mode": "check"
@@ -1660,9 +1568,93 @@ const { data } = await client.getConsumption({
     {
       "timestamp": "1970-01-01T00:00:00.000Z",
       "value": 0,
-      "type": "string"
+      "type": "nt",
+      "unit": "kWh"
     }
   ]
+}
+```
+
+</details>
+
+---
+
+### `prepareVisualizationExport`
+
+Prepare Visualization Export
+
+`POST /v2/portal/visualization:export`
+
+```ts
+const { data } = await client.prepareVisualizationExport(
+  null,
+  {
+    app_id: 'string',
+    extension_id: 'string',
+    hook_id: 'string',
+    from: '1970-01-01T00:00:00.000Z',
+    to: '1970-01-01T00:00:00.000Z',
+    context_entities: [
+      {
+        entity_id: '5da0a718-c822-403d-9f5d-20d4584e0528',
+        entity_schema: 'contract'
+      }
+    ]
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "download_url": "string",
+  "filename": "string",
+  "content_type": "text/csv",
+  "expires_at": "1970-01-01T00:00:00.000Z"
+}
+```
+
+</details>
+
+---
+
+### `getVisualizationMetadata`
+
+Get Visualization Metadata
+
+`GET /v2/portal/visualization/metadata`
+
+```ts
+const { data } = await client.getVisualizationMetadata({
+  app_id: 'example',
+  extensionId: 'example',
+  context_entities: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "type_options": [
+    {
+      "id": "string",
+      "label": {},
+      "aggregation_group": "string",
+      "statistical_method": "sum",
+      "unit": "string",
+      "color": "primary",
+      "precision": 0
+    }
+  ],
+  "intervals": ["PT15M"],
+  "data_range": {
+    "from": "1970-01-01T00:00:00.000Z",
+    "to": "1970-01-01T00:00:00.000Z"
+  }
 }
 ```
 
@@ -2946,6 +2938,67 @@ const { data } = await client.getEmailTemplatesByPortalId({
 
 ---
 
+### `getPublicPortalWidgetsV3`
+
+Retrieves the public widgets of a portal.
+Supports two identification methods:
+1. Using org_id + portal_id
+2. Using domain
+
+`GET /v3/portal/public/widgets`
+
+```ts
+const { data } = await client.getPublicPortalWidgetsV3({
+  org_id: 'example',
+  portal_id: 'example',
+  domain: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "portal_sk_v3": "string",
+  "is_v3_item": true,
+  "widgets": [
+    {
+      "id": "string",
+      "type": "ACTION_WIDGET",
+      "listIndex": 0,
+      "headline": {
+        "en": "string",
+        "de": "string"
+      },
+      "subHeadline": {
+        "en": "string",
+        "de": "string"
+      },
+      "schema": "string"
+    },
+    {
+      "id": "string",
+      "type": "ACTION_WIDGET",
+      "listIndex": 0,
+      "headline": {
+        "en": "string",
+        "de": "string"
+      },
+      "subHeadline": {
+        "en": "string",
+        "de": "string"
+      },
+      "content": "string"
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
 ### `getPortalWidgetsV3`
 
 Retrieves the widgets of a portal by portal_id.
@@ -2964,6 +3017,8 @@ const { data } = await client.getPortalWidgetsV3({
 
 ```json
 {
+  "portal_sk_v3": "string",
+  "is_v3_item": true,
   "widgets": [
     {
       "id": "string",
@@ -3013,6 +3068,8 @@ const { data } = await client.upsertPortalWidgetV3(
     portal_id: 'example',
   },
   {
+    portal_sk_v3: 'string',
+    is_v3_item: true,
     widgets: [
       {
         id: 'string',
@@ -3053,6 +3110,8 @@ const { data } = await client.upsertPortalWidgetV3(
 
 ```json
 {
+  "portal_sk_v3": "string",
+  "is_v3_item": true,
   "widgets": [
     {
       "id": "string",
@@ -3131,6 +3190,13 @@ const { data } = await client.savePortalFilesV3(
       "_tags": ["example", "mock"],
       "_created_at": "2021-02-09T12:41:43.662Z",
       "_updated_at": "2021-02-09T12:41:43.662Z",
+      "templates_output_highlighted": {},
+      "search_snippets": [
+        {
+          "field": "string",
+          "fragment": "string"
+        }
+      ],
       "_schema": "file"
     }
   ]
@@ -3222,6 +3288,40 @@ Retrieves schemas by domain. Only schemas and attributes used on public pages ar
 
 ```ts
 const { data } = await client.getSchemasByDomain({
+  domain: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "schemas": [
+    {
+      "slug": "contact"
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `getPublicSchemasV3`
+
+Retrieves schemas by portal. Only schemas and attributes used on public pages are returned.
+Supports two identification methods:
+1. Using org_id + portal_id
+2. Using domain
+
+`GET /v3/portal/public/schemas`
+
+```ts
+const { data } = await client.getPublicSchemasV3({
+  org_id: 'example',
+  portal_id: 'example',
   domain: 'example',
 })
 ```
@@ -3468,6 +3568,13 @@ const { data } = await client.getContact()
     "_tags": ["example", "mock"],
     "_created_at": "2021-02-09T12:41:43.662Z",
     "_updated_at": "2021-02-09T12:41:43.662Z",
+    "templates_output_highlighted": {},
+    "search_snippets": [
+      {
+        "field": "string",
+        "fragment": "string"
+      }
+    ],
     "_schema": "contact"
   },
   "files": [
@@ -3478,6 +3585,13 @@ const { data } = await client.getContact()
       "_tags": ["example", "mock"],
       "_created_at": "2021-02-09T12:41:43.662Z",
       "_updated_at": "2021-02-09T12:41:43.662Z",
+      "templates_output_highlighted": {},
+      "search_snippets": [
+        {
+          "field": "string",
+          "fragment": "string"
+        }
+      ],
       "_schema": "file"
     }
   ],
@@ -3489,6 +3603,13 @@ const { data } = await client.getContact()
       "_tags": ["example", "mock"],
       "_created_at": "2021-02-09T12:41:43.662Z",
       "_updated_at": "2021-02-09T12:41:43.662Z",
+      "templates_output_highlighted": {},
+      "search_snippets": [
+        {
+          "field": "string",
+          "fragment": "string"
+        }
+      ],
       "templates_output": {
         "content_top_name": "Customer #123456",
         "main_content_name": "Orange Flexible A2 (654321)",
@@ -3549,6 +3670,13 @@ const { data } = await client.getECPContact({
     "_tags": ["example", "mock"],
     "_created_at": "2021-02-09T12:41:43.662Z",
     "_updated_at": "2021-02-09T12:41:43.662Z",
+    "templates_output_highlighted": {},
+    "search_snippets": [
+      {
+        "field": "string",
+        "fragment": "string"
+      }
+    ],
     "_schema": "contact"
   }
 }
@@ -3690,6 +3818,13 @@ const { data } = await client.getPortalUser()
     "_tags": ["example", "mock"],
     "_created_at": "2021-02-09T12:41:43.662Z",
     "_updated_at": "2021-02-09T12:41:43.662Z",
+    "templates_output_highlighted": {},
+    "search_snippets": [
+      {
+        "field": "string",
+        "fragment": "string"
+      }
+    ],
     "_schema": "portal_user"
   }
 }
@@ -3708,7 +3843,15 @@ Update the portal user details
 ```ts
 const { data } = await client.updatePortalUser(
   null,
-  {},
+  {
+    templates_output_highlighted: {},
+    search_snippets: [
+      {
+        field: 'string',
+        fragment: 'string'
+      }
+    ]
+  },
 )
 ```
 
@@ -3724,6 +3867,13 @@ const { data } = await client.updatePortalUser(
     "_tags": ["example", "mock"],
     "_created_at": "2021-02-09T12:41:43.662Z",
     "_updated_at": "2021-02-09T12:41:43.662Z",
+    "templates_output_highlighted": {},
+    "search_snippets": [
+      {
+        "field": "string",
+        "fragment": "string"
+      }
+    ],
     "_schema": "portal_user"
   }
 }
@@ -3837,6 +3987,13 @@ const { data } = await client.fetchPortalUsersByRelatedEntity({
       "_tags": ["example", "mock"],
       "_created_at": "2021-02-09T12:41:43.662Z",
       "_updated_at": "2021-02-09T12:41:43.662Z",
+      "templates_output_highlighted": {},
+      "search_snippets": [
+        {
+          "field": "string",
+          "fragment": "string"
+        }
+      ],
       "_schema": "portal_user"
     }
   ]
@@ -4063,6 +4220,13 @@ const { data } = await client.postOrderAcceptance(
     "_tags": ["example", "mock"],
     "_created_at": "2021-02-09T12:41:43.662Z",
     "_updated_at": "2021-02-09T12:41:43.662Z",
+    "templates_output_highlighted": {},
+    "search_snippets": [
+      {
+        "field": "string",
+        "fragment": "string"
+      }
+    ],
     "_schema": "order"
   }
 }
@@ -4105,6 +4269,13 @@ const { data } = await client.addContractByIdentifiers(
       "_tags": ["example", "mock"],
       "_created_at": "2021-02-09T12:41:43.662Z",
       "_updated_at": "2021-02-09T12:41:43.662Z",
+      "templates_output_highlighted": {},
+      "search_snippets": [
+        {
+          "field": "string",
+          "fragment": "string"
+        }
+      ],
       "templates_output": {
         "content_top_name": "Customer #123456",
         "main_content_name": "Orange Flexible A2 (654321)",
@@ -4266,6 +4437,13 @@ const { data } = await client.searchPaymentRelationsInEntities({
       "_tags": ["example", "mock"],
       "_created_at": "2021-02-09T12:41:43.662Z",
       "_updated_at": "2021-02-09T12:41:43.662Z",
+      "templates_output_highlighted": {},
+      "search_snippets": [
+        {
+          "field": "string",
+          "fragment": "string"
+        }
+      ],
       "templates_output": {
         "content_top_name": "Customer #123456",
         "main_content_name": "Orange Flexible A2 (654321)",
@@ -4365,6 +4543,13 @@ const { data } = await client.saveEntityFile(
       "_tags": ["example", "mock"],
       "_created_at": "2021-02-09T12:41:43.662Z",
       "_updated_at": "2021-02-09T12:41:43.662Z",
+      "templates_output_highlighted": {},
+      "search_snippets": [
+        {
+          "field": "string",
+          "fragment": "string"
+        }
+      ],
       "_schema": "file"
     }
   ]
@@ -4433,6 +4618,13 @@ const { data } = await client.savePortalFiles(
       "_tags": ["example", "mock"],
       "_created_at": "2021-02-09T12:41:43.662Z",
       "_updated_at": "2021-02-09T12:41:43.662Z",
+      "templates_output_highlighted": {},
+      "search_snippets": [
+        {
+          "field": "string",
+          "fragment": "string"
+        }
+      ],
       "_schema": "file"
     }
   ]
@@ -4505,6 +4697,13 @@ const { data } = await client.trackFileDownloaded({
     "_tags": ["example", "mock"],
     "_created_at": "2021-02-09T12:41:43.662Z",
     "_updated_at": "2021-02-09T12:41:43.662Z",
+    "templates_output_highlighted": {},
+    "search_snippets": [
+      {
+        "field": "string",
+        "fragment": "string"
+      }
+    ],
     "_schema": "file",
     "filename": "document.pdf",
     "access_control": "private",
@@ -4571,6 +4770,13 @@ const { data } = await client.getBillingEvents({
       "_tags": ["example", "mock"],
       "_created_at": "2021-02-09T12:41:43.662Z",
       "_updated_at": "2021-02-09T12:41:43.662Z",
+      "templates_output_highlighted": {},
+      "search_snippets": [
+        {
+          "field": "string",
+          "fragment": "string"
+        }
+      ],
       "type": "installment",
       "due_date": "1970-01-01",
       "paid_date": "1970-01-01"
@@ -4652,7 +4858,14 @@ const { data } = await client.getBillingAccount({
     "_org": "123",
     "_tags": ["example", "mock"],
     "_created_at": "2021-02-09T12:41:43.662Z",
-    "_updated_at": "2021-02-09T12:41:43.662Z"
+    "_updated_at": "2021-02-09T12:41:43.662Z",
+    "templates_output_highlighted": {},
+    "search_snippets": [
+      {
+        "field": "string",
+        "fragment": "string"
+      }
+    ]
   },
   "relations": [
     {
@@ -4662,6 +4875,13 @@ const { data } = await client.getBillingAccount({
       "_tags": ["example", "mock"],
       "_created_at": "2021-02-09T12:41:43.662Z",
       "_updated_at": "2021-02-09T12:41:43.662Z",
+      "templates_output_highlighted": {},
+      "search_snippets": [
+        {
+          "field": "string",
+          "fragment": "string"
+        }
+      ],
       "templates_output": {
         "content_top_name": "Customer #123456",
         "main_content_name": "Orange Flexible A2 (654321)",
@@ -4833,6 +5053,13 @@ const { data } = await client.getPortalUserEntity(
     "_tags": ["example", "mock"],
     "_created_at": "2021-02-09T12:41:43.662Z",
     "_updated_at": "2021-02-09T12:41:43.662Z",
+    "templates_output_highlighted": {},
+    "search_snippets": [
+      {
+        "field": "string",
+        "fragment": "string"
+      }
+    ],
     "templates_output": {
       "content_top_name": "Customer #123456",
       "main_content_name": "Orange Flexible A2 (654321)",
@@ -4903,7 +5130,8 @@ const { data } = await client.searchPortalUserEntities(
       /* ... 1 more */
     ],
     targets: ['3ec28ab5-8598-41ef-9486-b57fca1d5e2a'],
-    include: ['active_workflow']
+    include: ['active_workflow'],
+    highlight: {}
   },
 )
 ```
@@ -4921,6 +5149,13 @@ const { data } = await client.searchPortalUserEntities(
       "_tags": ["example", "mock"],
       "_created_at": "2021-02-09T12:41:43.662Z",
       "_updated_at": "2021-02-09T12:41:43.662Z",
+      "templates_output_highlighted": {},
+      "search_snippets": [
+        {
+          "field": "string",
+          "fragment": "string"
+        }
+      ],
       "templates_output": {
         "content_top_name": "Customer #123456",
         "main_content_name": "Orange Flexible A2 (654321)",
@@ -5148,7 +5383,8 @@ const { data } = await client.uploadMeterReadingPhoto(
     },
     "reading": "000123.45",
     "sector": "water",
-    "meter_numbers": ["00123456"]
+    "meter_numbers": ["00123456"],
+    "file_id": "abc123def456"
   }
 }
 ```
@@ -5242,6 +5478,46 @@ const { data } = await client.getAllowedMeterReadingRange({
       "max_value": 0
     }
   ]
+}
+```
+
+</details>
+
+---
+
+### `getMeterReadings`
+
+Get meter readings with optional template resolution
+
+`POST /v2/portal/metering/readings`
+
+```ts
+const { data } = await client.getMeterReadings(
+  null,
+  {
+    meter_id: 'string',
+    counter_id: 'string',
+    sort: 'desc',
+    from: 0,
+    size: 10,
+    templates: {},
+    counter_templates: {}
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "results": [
+    {
+      "templates_output": {}
+    }
+  ],
+  "hits": 0,
+  "counter_templates_output": {}
 }
 ```
 
@@ -5417,7 +5693,8 @@ const { data } = await client.getPortalPage({
   "is_deleted": false,
   "id": "c495fef9-eeca-4019-a989-8390dcd9825b",
   "last_modified_at": "2021-02-09T12:41:43.662Z",
-  "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c"
+  "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
+  "past_routes": ["old-dashboard", "home"]
 }
 ```
 
@@ -5498,7 +5775,8 @@ const { data } = await client.updatePortalPage(
   "is_deleted": false,
   "id": "c495fef9-eeca-4019-a989-8390dcd9825b",
   "last_modified_at": "2021-02-09T12:41:43.662Z",
-  "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c"
+  "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
+  "past_routes": ["old-dashboard", "home"]
 }
 ```
 
@@ -5569,7 +5847,8 @@ const { data } = await client.getPortalPages({
     "is_deleted": false,
     "id": "c495fef9-eeca-4019-a989-8390dcd9825b",
     "last_modified_at": "2021-02-09T12:41:43.662Z",
-    "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c"
+    "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
+    "past_routes": ["old-dashboard", "home"]
   }
 ]
 ```
@@ -5651,7 +5930,8 @@ const { data } = await client.createPortalPage(
   "is_deleted": false,
   "id": "c495fef9-eeca-4019-a989-8390dcd9825b",
   "last_modified_at": "2021-02-09T12:41:43.662Z",
-  "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c"
+  "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
+  "past_routes": ["old-dashboard", "home"]
 }
 ```
 
@@ -5706,7 +5986,8 @@ const { data } = await client.getPublicPages({
     "is_deleted": false,
     "id": "c495fef9-eeca-4019-a989-8390dcd9825b",
     "last_modified_at": "2021-02-09T12:41:43.662Z",
-    "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c"
+    "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
+    "past_routes": ["old-dashboard", "home"]
   }
 ]
 ```
@@ -5754,7 +6035,8 @@ const { data } = await client.interpolatePortalPages(
         is_deleted: false,
         id: 'c495fef9-eeca-4019-a989-8390dcd9825b',
         last_modified_at: '2021-02-09T12:41:43.662Z',
-        portal_id: '453ad7bf-86d5-46c8-8252-bcc868df5e3c'
+        portal_id: '453ad7bf-86d5-46c8-8252-bcc868df5e3c',
+        past_routes: ['old-dashboard', 'home']
       }
     ],
     context_entities: [
@@ -5801,7 +6083,8 @@ const { data } = await client.interpolatePortalPages(
     "is_deleted": false,
     "id": "c495fef9-eeca-4019-a989-8390dcd9825b",
     "last_modified_at": "2021-02-09T12:41:43.662Z",
-    "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c"
+    "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
+    "past_routes": ["old-dashboard", "home"]
   }
 ]
 ```
@@ -5853,7 +6136,8 @@ const { data } = await client.getDefaultPages()
     "is_deleted": false,
     "id": "c495fef9-eeca-4019-a989-8390dcd9825b",
     "last_modified_at": "2021-02-09T12:41:43.662Z",
-    "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c"
+    "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
+    "past_routes": ["old-dashboard", "home"]
   }
 ]
 ```
@@ -6667,7 +6951,8 @@ const { data } = await client.createPortalConfig(
       "is_deleted": false,
       "id": "c495fef9-eeca-4019-a989-8390dcd9825b",
       "last_modified_at": "2021-02-09T12:41:43.662Z",
-      "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c"
+      "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
+      "past_routes": ["old-dashboard", "home"]
     }
   ]
 }
@@ -6906,7 +7191,8 @@ const { data } = await client.getPortalConfigV3({
       "is_deleted": false,
       "id": "c495fef9-eeca-4019-a989-8390dcd9825b",
       "last_modified_at": "2021-02-09T12:41:43.662Z",
-      "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c"
+      "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
+      "past_routes": ["old-dashboard", "home"]
     }
   ]
 }
@@ -7141,7 +7427,8 @@ const { data } = await client.putPortalConfig(
         is_deleted: false,
         id: 'c495fef9-eeca-4019-a989-8390dcd9825b',
         last_modified_at: '2021-02-09T12:41:43.662Z',
-        portal_id: '453ad7bf-86d5-46c8-8252-bcc868df5e3c'
+        portal_id: '453ad7bf-86d5-46c8-8252-bcc868df5e3c',
+        past_routes: ['old-dashboard', 'home']
       }
     ]
   },
@@ -7365,7 +7652,8 @@ const { data } = await client.putPortalConfig(
       "is_deleted": false,
       "id": "c495fef9-eeca-4019-a989-8390dcd9825b",
       "last_modified_at": "2021-02-09T12:41:43.662Z",
-      "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c"
+      "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
+      "past_routes": ["old-dashboard", "home"]
     }
   ]
 }
@@ -7481,6 +7769,250 @@ const { data } = await client.swapPortalConfig(
 ```json
 {
   "message": "Domain and users swapped successfully."
+}
+```
+
+</details>
+
+---
+
+### `clonePortalConfig`
+
+Creates a new portal by cloning configuration and pages from an existing portal. The new portal gets its own domain, users, email templates, and authentication settings.
+
+`POST /v3/portal/config/clone`
+
+```ts
+const { data } = await client.clonePortalConfig(
+  null,
+  {
+    source_portal_id: '453ad7bf-86d5-46c8-8252-bcc868df5e3c',
+    name: 'string'
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "entity_actions": [
+    {
+      "journey_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+      "slug": "contact",
+      "action_Label": {}
+    }
+  ],
+  "extensions": [
+    {
+      "id": "string",
+      "status": "installed",
+      "options": {}
+    }
+  ],
+  "extension_hooks": {},
+  "default_user_to_notify": {
+    "onPendingUser": [
+      {}
+    ]
+  },
+  "enabled": true,
+  "name": "Installer Portal",
+  "domain": "abc.com",
+  "is_epilot_domain": true,
+  "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+  "allowed_portal_entities": ["contact", "contract"],
+  "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
+  "user_account_self_management": false,
+  "feature_settings": {
+    "start_page": true,
+    "billing": true,
+    "change_due_date": true,
+    "new_design": true
+  },
+  "accessToken": "string",
+  "advanced_mfa": {
+    "enabled": true
+  },
+  "auth_settings": {
+    "passwordless_login": {
+      "enabled": true
+    },
+    "entry_point": "PASSWORD",
+    "preferred_sso_providers": ["office-365-login"],
+    "auto_redirect_to_sso": true
+  },
+  "cognito_details": {
+    "cognito_user_pool_client_id": "6bsd0jkgoie74k2i8mrhc1vest",
+    "cognito_user_pool_arn": "arn:aws:cognito-idp:us-east-1:123412341234:userpool/us-east-1_123412341",
+    "cognito_user_pool_id": "eu-central-1_CUEQRNbUb",
+    "timeouts": {
+      "refresh_token": 300,
+      "access_token": 300,
+      "id_token": 300
+    },
+    "advanced_authentication": {
+      "user_activity_logging": true,
+      "adaptive_authentication": true,
+      "compromised_credentials_detection": true
+    },
+    "password_policy": {
+      "minimum_length": 8,
+      "maximum_length": 256,
+      "require_lowercase": true,
+      "require_uppercase": true,
+      "require_numbers": true,
+      "require_symbols": true
+    }
+  },
+  "config": "string",
+  "contact_identifiers": ["email", "last_name"],
+  "approval_state_attributes": {
+    "contact": ["name", "address"],
+    "contract": ["installment_amount"]
+  },
+  "email_templates": {
+    "confirmAccount": "5da0a718-c822-403d-9f5d-20d4584e0528",
+    "advancedAuth": "5da0a718-c822-403d-9f5d-20d4584e0528",
+    "advancedMFA": "5da0a718-c822-403d-9f5d-20d4584e0528",
+    "journeySignUp": "5da0a718-c822-403d-9f5d-20d4584e0528",
+    "journeySignInOneTimePassword": "5da0a718-c822-403d-9f5d-20d4584e0528",
+    "journeyLoginOTP": "5da0a718-c822-403d-9f5d-20d4584e0528",
+    "forgotPassword": "5da0a718-c822-403d-9f5d-20d4584e0528",
+    "invitation": "5da0a718-c822-403d-9f5d-20d4584e0528",
+    "partnerInvitation": "5da0a718-c822-403d-9f5d-20d4584e0528",
+    "onNewQuote": "5da0a718-c822-403d-9f5d-20d4584e0528",
+    "onMapAPendingUser": "5da0a718-c822-403d-9f5d-20d4584e0528",
+    "onDocUpload": "5da0a718-c822-403d-9f5d-20d4584e0528",
+    "onWorkflowStepAssigned": "5da0a718-c822-403d-9f5d-20d4584e0528",
+    "confirmEmailUpdate": "5da0a718-c822-403d-9f5d-20d4584e0528",
+    "verifyCodeToSetPassword": "5da0a718-c822-403d-9f5d-20d4584e0528"
+  },
+  "images": {
+    "orderLeftTeaser": "https://epilot-bucket.s3.eu-central-1.amazonaws.com/12344/6538fddb-f0e9-4f0f-af51-6e57891ff20a/order-left-teaser.jpeg",
+    "orderRightTeaser": "https://epilot-bucket.s3.eu-central-1.amazonaws.com/12344/6538fddb-f0e9-4f0f-af51-6e57891ff20a/order-right-teaser.jpeg",
+    "welcomeBanner": "https://epilot-bucket.s3.eu-central-1.amazonaws.com/12344/6538fddb-f0e9-4f0f-af51-6e57891ff20a/welcome-banner.jpeg"
+  },
+  "entity_identifiers": {
+    "type": {
+      "isEnabled": true,
+      "attributes": ["contract_number"]
+    }
+  },
+  "contract_identifiers": [
+    {
+      "name": "email",
+      "schema": "contact"
+    },
+    {
+      "name": "last_name",
+      "schema": "contact"
+    }
+  ],
+  "contract_selector_config": {
+    "show_inactive": true,
+    "title_path": "string"
+  },
+  "registration_identifiers": [
+    {
+      "name": "last_name",
+      "schema": "contact"
+    },
+    {
+      "name": "contract_number",
+      "schema": "contract"
+    }
+  ],
+  "triggered_journeys": [
+    {
+      "trigger_name": "FIRST_LOGIN",
+      "journey_id": "5da0a718-c822-403d-9f5d-20d4584e0528"
+    }
+  ],
+  "entity_edit_rules": [
+    {
+      "slug": "contact",
+      "attribute": "first_name",
+      "rule_type": "cadence",
+      "cadence_period_type": "days",
+      "cadence_period": 1,
+      "changes_allowed": 1,
+      "grace_period": 1,
+      "allowed_increment": "10%",
+      "allowed_decrement": "10%",
+      "number_of_days_before_restriction": 10
+    }
+  ],
+  "allowed_file_extensions": {
+    "document": ["pdf"],
+    "image": ["jpg"],
+    "spreadsheet": ["xls"],
+    "presentation": ["ppt"],
+    "audioVideo": ["mp4"],
+    "email": ["eml"],
+    "archive": ["zip"],
+    "cad": ["cad"],
+    "calendar": ["ics"],
+    "other": ["txt"]
+  },
+  "prevent_search_engine_indexing": true,
+  "meter_reading_grace_period": 0,
+  "inactive_contract_cutoff_years": 0,
+  "is_dummy": true,
+  "is_v3_item": true,
+  "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
+  "portal_sk_v3": "PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c",
+  "origin": "string",
+  "organization_id": 12345,
+  "org_settings": {
+    "canary": {
+      "enabled": true
+    },
+    "notracking": {
+      "enabled": true
+    }
+  },
+  "feature_flags": {},
+  "grants": [
+    {
+      "action": "entity-read",
+      "resource": "entity:123:contact:f7c22299-ca72-4bca-8538-0a88eeefc947",
+      "effect": "allow"
+    }
+  ],
+  "identity_providers": [
+    {
+      "slug": "office-365-login",
+      "display_name": "Office 365 Login",
+      "oidc_config": {},
+      "mobile_oidc_config": {}
+    }
+  ],
+  "pages": [
+    {
+      "slug": "dashboard",
+      "path": "/dashboard",
+      "schema": ["string"],
+      "visibility": {},
+      "content": {},
+      "design": {},
+      "blocks": {},
+      "order": 1,
+      "is_system": false,
+      "is_detail": false,
+      "detail_schema": "contact",
+      "show_in_navigation": false,
+      "is_public": true,
+      "parentId": "c495fef9-eeca-4019-a989-8390dcd9825b",
+      "is_entry_route": false,
+      "is_deleted": false,
+      "id": "c495fef9-eeca-4019-a989-8390dcd9825b",
+      "last_modified_at": "2021-02-09T12:41:43.662Z",
+      "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
+      "past_routes": ["old-dashboard", "home"]
+    }
+  ]
 }
 ```
 
@@ -8160,6 +8692,8 @@ type PortalConfig = {
 
 ```ts
 type UpsertPortalWidget = {
+  portal_sk_v3?: string
+  is_v3_item?: boolean
   widgets: Array<{
     id: string
     type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET" | "PRODUCT_RECOMMENDATIONS_WIDGET"
@@ -8257,8 +8791,6 @@ type UpsertPortalWidget = {
     subHeadline?: {
       en?: { ... }
       de?: { ... }
-    }
-    schema?: string
   // ...
 }
 ```
@@ -8774,7 +9306,13 @@ type Schema = {
 ### `Entity`
 
 ```ts
-type Entity = Record<string, unknown>
+type Entity = {
+  templates_output_highlighted?: Record<string, string | Record<string, string>>
+  search_snippets?: Array<{
+    field?: string
+    fragment?: string
+  }>
+}
 ```
 
 ### `EntityTemplates`
@@ -8795,6 +9333,11 @@ type EntityItem = {
   _tags?: string[]
   _created_at: string // date-time
   _updated_at: string // date-time
+  templates_output_highlighted?: Record<string, string | Record<string, string>>
+  search_snippets?: Array<{
+    field?: string
+    fragment?: string
+  }>
   templates_output?: Record<string, string | Record<string, string>>
   _schema: string
 }
@@ -8813,6 +9356,11 @@ type EntityResponse = {
     _tags?: string[]
     _created_at: string // date-time
     _updated_at: string // date-time
+    templates_output_highlighted?: Record<string, string | Record<string, string>>
+    search_snippets?: Array<{
+      field?: { ... }
+      fragment?: { ... }
+    }>
     templates_output?: Record<string, string | Record<string, string>>
     _schema: string
   }
@@ -8832,6 +9380,11 @@ type EntityResponseWithHits = {
     _tags?: string[]
     _created_at: string // date-time
     _updated_at: string // date-time
+    templates_output_highlighted?: Record<string, string | Record<string, string>>
+    search_snippets?: Array<{
+      field?: { ... }
+      fragment?: { ... }
+    }>
     templates_output?: Record<string, string | Record<string, string>>
     _schema: string
   }>
@@ -8865,6 +9418,8 @@ type EntityResponseGroupedWithHits = {
       _tags?: { ... }
       _created_at: { ... }
       _updated_at: { ... }
+      templates_output_highlighted?: { ... }
+      search_snippets?: { ... }
       templates_output?: { ... }
       _schema: { ... }
     }>
@@ -8908,6 +9463,11 @@ type PortalUser = {
   _tags?: string[]
   _created_at: string // date-time
   _updated_at: string // date-time
+  templates_output_highlighted?: Record<string, string | Record<string, string>>
+  search_snippets?: Array<{
+    field?: string
+    fragment?: string
+  }>
   _schema: "portal_user"
 }
 ```
@@ -8924,6 +9484,11 @@ type Contact = {
   _tags?: string[]
   _created_at: string // date-time
   _updated_at: string // date-time
+  templates_output_highlighted?: Record<string, string | Record<string, string>>
+  search_snippets?: Array<{
+    field?: string
+    fragment?: string
+  }>
   _schema: "contact"
 }
 ```
@@ -8951,6 +9516,11 @@ type Meter = {
   _tags?: string[]
   _created_at: string // date-time
   _updated_at: string // date-time
+  templates_output_highlighted?: Record<string, string | Record<string, string>>
+  search_snippets?: Array<{
+    field?: string
+    fragment?: string
+  }>
   _schema: "meter"
 }
 ```
@@ -8967,6 +9537,11 @@ type Order = {
   _tags?: string[]
   _created_at: string // date-time
   _updated_at: string // date-time
+  templates_output_highlighted?: Record<string, string | Record<string, string>>
+  search_snippets?: Array<{
+    field?: string
+    fragment?: string
+  }>
   _schema: "order"
 }
 ```
@@ -8983,6 +9558,11 @@ type Opportunity = {
   _tags?: string[]
   _created_at: string // date-time
   _updated_at: string // date-time
+  templates_output_highlighted?: Record<string, string | Record<string, string>>
+  search_snippets?: Array<{
+    field?: string
+    fragment?: string
+  }>
   _schema: "opportunity"
 }
 ```
@@ -8999,6 +9579,11 @@ type Contract = {
   _tags?: string[]
   _created_at: string // date-time
   _updated_at: string // date-time
+  templates_output_highlighted?: Record<string, string | Record<string, string>>
+  search_snippets?: Array<{
+    field?: string
+    fragment?: string
+  }>
   contract_name?: string
   contract_number?: string
   status?: "draft" | "in_approval_process" | "approved" | "active" | "deactivated" | "revoked" | "terminated" | "expired"
@@ -9036,6 +9621,11 @@ type File = {
   _tags?: string[]
   _created_at: string // date-time
   _updated_at: string // date-time
+  templates_output_highlighted?: Record<string, string | Record<string, string>>
+  search_snippets?: Array<{
+    field?: string
+    fragment?: string
+  }>
   _schema: "file"
 }
 ```
@@ -9052,6 +9642,11 @@ type Product = {
   _tags?: string[]
   _created_at: string // date-time
   _updated_at: string // date-time
+  templates_output_highlighted?: Record<string, string | Record<string, string>>
+  search_snippets?: Array<{
+    field?: string
+    fragment?: string
+  }>
   _schema: "product"
 }
 ```
@@ -9270,6 +9865,11 @@ type BaseBillingEvent = {
   _tags?: string[]
   _created_at: string // date-time
   _updated_at: string // date-time
+  templates_output_highlighted?: Record<string, string | Record<string, string>>
+  search_snippets?: Array<{
+    field?: string
+    fragment?: string
+  }>
 }
 ```
 
@@ -9361,6 +9961,11 @@ type BillingAccount = {
   _tags?: string[]
   _created_at: string // date-time
   _updated_at: string // date-time
+  templates_output_highlighted?: Record<string, string | Record<string, string>>
+  search_snippets?: Array<{
+    field?: string
+    fragment?: string
+  }>
 }
 ```
 
@@ -9423,6 +10028,7 @@ type EntitySearchParams = {
   filters_context?: Record<string, boolean | string>[]
   targets?: string // uuid[]
   include?: "active_workflow"[]
+  highlight?: object
 }
 ```
 
@@ -9501,6 +10107,10 @@ type ExtensionHookSelection = {
 ```ts
 type PublicExtensionCapabilities = {
   consumptionDataRetrieval?: Array<{
+    app?: {
+      app_id?: { ... }
+      name?: { ... }
+    }
     extension?: {
       id?: { ... }
       name?: { ... }
@@ -9509,9 +10119,30 @@ type PublicExtensionCapabilities = {
       id?: { ... }
       name?: { ... }
       intervals?: { ... }
+      block_types?: { ... }
+    }
+  }>
+  dataExport?: Array<{
+    app?: {
+      app_id?: { ... }
+      name?: { ... }
+    }
+    extension?: {
+      id?: { ... }
+      name?: { ... }
+    }
+    hook?: {
+      id?: { ... }
+      name?: { ... }
+      intervals?: { ... }
+      block_types?: { ... }
     }
   }>
   priceDataRetrieval?: Array<{
+    app?: {
+      app_id?: { ... }
+      name?: { ... }
+    }
     extension?: {
       id?: { ... }
       name?: { ... }
@@ -9520,9 +10151,14 @@ type PublicExtensionCapabilities = {
       id?: { ... }
       name?: { ... }
       intervals?: { ... }
+      block_types?: { ... }
     }
   }>
   costDataRetrieval?: Array<{
+    app?: {
+      app_id?: { ... }
+      name?: { ... }
+    }
     extension?: {
       id?: { ... }
       name?: { ... }
@@ -9531,6 +10167,7 @@ type PublicExtensionCapabilities = {
       id?: { ... }
       name?: { ... }
       intervals?: { ... }
+      block_types?: { ... }
     }
   }>
   contractIdentification?: {
@@ -9558,6 +10195,12 @@ type PublicExtensionCapabilities = {
 
 ```ts
 type DataRetrievalItem = {
+  app?: {
+    app_id?: string
+    name?: {
+      en: { ... }
+    }
+  }
   extension?: {
     id?: string
     name?: {
@@ -9570,6 +10213,18 @@ type DataRetrievalItem = {
       en: { ... }
     }
     intervals?: string[]
+    block_types?: string[]
+  }
+}
+```
+
+### `PublicAppDetails`
+
+```ts
+type PublicAppDetails = {
+  app_id?: string
+  name?: {
+    en: string
   }
 }
 ```
@@ -9594,6 +10249,56 @@ type PublicDataRetrievalHookDetails = {
     en: string
   }
   intervals?: string[]
+  block_types?: string[]
+}
+```
+
+### `VisualizationMetadata`
+
+Runtime metadata describing how a visualization should be rendered for a given portal context. Returned by `GET /v2/portal/visualization/metadata`.
+
+
+```ts
+type VisualizationMetadata = {
+  type_options?: Array<{
+    id: string
+    label?: Record<string, string>
+    aggregation_group?: string
+    statistical_method?: "sum" | "average" | "min" | "max"
+    unit?: string
+    color?: "primary" | "slate" | "mauve" | "orange" | "red" | "tomato" | "amber" | "green" | "blue"
+    precision?: number
+  }>
+  intervals?: "PT15M" | "PT1H" | "P1D" | "P1M"[]
+  data_range?: {
+    from?: string // date-time
+    to?: string // date-time
+  }
+}
+```
+
+### `VisualizationTypeOption`
+
+```ts
+type VisualizationTypeOption = {
+  id: string
+  label?: Record<string, string>
+  aggregation_group?: string
+  statistical_method?: "sum" | "average" | "min" | "max"
+  unit?: string
+  color?: "primary" | "slate" | "mauve" | "orange" | "red" | "tomato" | "amber" | "green" | "blue"
+  precision?: number
+}
+```
+
+### `VisualizationDataRange`
+
+Earliest / latest timestamps for which data is available in the current context.
+
+```ts
+type VisualizationDataRange = {
+  from?: string // date-time
+  to?: string // date-time
 }
 ```
 
@@ -9908,6 +10613,77 @@ type ExtensionHookConsumptionDataRetrieval = {
 }
 ```
 
+### `ExtensionHookDataExport`
+
+Generic data export hook. When configured on a visualization block, the portal delegates the export action (e.g. CSV/Excel/PDF download) to the configured external source instead of generating the file itself. Can be used by any block that supports export — consumption charts, dynamic tariff charts,
+
+```ts
+type ExtensionHookDataExport = {
+  type: "dataExport"
+  block_types?: string[]
+  auth?: {
+    method?: string
+    url: string
+    params?: Record<string, string>
+    headers?: Record<string, string>
+    body?: Record<string, string>
+    cache?: {
+      key: { ... }
+      ttl: { ... }
+    }
+  }
+  call: {
+    method?: string
+    url: string
+    params?: Record<string, string>
+    headers?: Record<string, string>
+    body?: Record<string, string>
+  }
+  use_static_ips?: boolean
+  secure_proxy?: {
+    integration_id: string // uuid
+    use_case_slug: string
+  }
+}
+```
+
+### `ExtensionHookVisualizationMetadata`
+
+Hook that returns runtime metadata describing how a visualization should be rendered for a given portal context. Invoked by the portal before fetching data, with the same context the data hook receives.
+
+
+```ts
+type ExtensionHookVisualizationMetadata = {
+  type: "visualizationMetadata"
+  auth?: {
+    method?: string
+    url: string
+    params?: Record<string, string>
+    headers?: Record<string, string>
+    body?: Record<string, string>
+    cache?: {
+      key: { ... }
+      ttl: { ... }
+    }
+  }
+  call: {
+    method?: string
+    url: string
+    params?: Record<string, string>
+    headers?: Record<string, string>
+    body?: Record<string, string>
+  }
+  resolved?: {
+    dataPath?: string
+  }
+  use_static_ips?: boolean
+  secure_proxy?: {
+    integration_id: string // uuid
+    use_case_slug: string
+  }
+}
+```
+
 ### `ExtensionHookCostDataRetrieval`
 
 Hook that will allow using the specified source as data for consumption visualizations. This hook is triggered to fetch the data. Format of the request and response has to follow the following specification: TBD. The expected response to the call is:
@@ -10057,6 +10833,7 @@ type MeterReadingPhotoData = {
   reading?: string
   sector?: string
   meter_numbers?: string[]
+  file_id?: string
 }
 ```
 
@@ -10487,6 +11264,7 @@ type Page = {
   id?: string // uuid
   last_modified_at?: string // date-time
   portal_id?: string
+  past_routes?: string[]
 }
 ```
 

@@ -50,6 +50,9 @@ const { data } = await integrationToolkitClient.acknowledgeTracking(...)
 - [`getIntegrationV2`](#getintegrationv2)
 - [`updateIntegrationV2`](#updateintegrationv2)
 - [`deleteIntegrationV2`](#deleteintegrationv2)
+- [`getSecureProxyWhitelist`](#getsecureproxywhitelist)
+- [`updateSecureProxyWhitelist`](#updatesecureproxywhitelist)
+- [`listSecureProxyWhitelistHistory`](#listsecureproxywhitelisthistory)
 - [`setIntegrationAppMapping`](#setintegrationappmapping)
 - [`deleteIntegrationAppMapping`](#deleteintegrationappmapping)
 - [`getOutboundStatus`](#getoutboundstatus)
@@ -108,6 +111,10 @@ const { data } = await integrationToolkitClient.acknowledgeTracking(...)
 - [`FileProxyUrlParam`](#fileproxyurlparam)
 - [`FileProxyUrlParams`](#fileproxyurlparams)
 - [`FileProxyUrlConfig`](#fileproxyurlconfig)
+- [`PortalOrigin`](#portalorigin)
+- [`PortalRefFilter`](#portalreffilter)
+- [`PortalRefConfig`](#portalrefconfig)
+- [`EnvVarRefConfig`](#envvarrefconfig)
 - [`EmbeddedUseCaseRequest`](#embeddedusecaserequest)
 - [`EmbeddedUseCaseRequestBase`](#embeddedusecaserequestbase)
 - [`EmbeddedInboundUseCaseRequest`](#embeddedinboundusecaserequest)
@@ -144,6 +151,8 @@ const { data } = await integrationToolkitClient.acknowledgeTracking(...)
 - [`ManagedCallUseCaseHistoryEntry`](#managedcallusecasehistoryentry)
 - [`SecureProxyUseCaseHistoryEntry`](#secureproxyusecasehistoryentry)
 - [`SecureProxyUseCaseConfiguration`](#secureproxyusecaseconfiguration)
+- [`SecureProxyWhitelist`](#secureproxywhitelist)
+- [`SecureProxyWhitelistUpdate`](#secureproxywhitelistupdate)
 - [`SecureProxySummary`](#secureproxysummary)
 - [`SecureProxyRequest`](#secureproxyrequest)
 - [`SecureProxyResponse`](#secureproxyresponse)
@@ -295,6 +304,7 @@ const { data } = await client.processErpUpdatesEventsV3(
   {
     integration_id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
     correlation_id: 'string',
+    group_id: 'customer-42',
     events: [
       {},
       {}
@@ -1182,6 +1192,7 @@ const { data } = await client.listUseCaseHistory({
       "slug": "string",
       "enabled": true,
       "change_description": "string",
+      "changed_by": "string",
       "created_at": "1970-01-01T00:00:00.000Z",
       "updated_at": "1970-01-01T00:00:00.000Z",
       "history_created_at": "1970-01-01T00:00:00.000Z",
@@ -1644,6 +1655,115 @@ const { data } = await client.deleteIntegrationV2({
 ```json
 {
   "message": "string"
+}
+```
+
+</details>
+
+---
+
+### `getSecureProxyWhitelist`
+
+Get secure_proxy whitelist (admin portal only)
+
+`GET /v2/integrations/{integrationId}/use-cases/{useCaseId}/secure-proxy-whitelist`
+
+```ts
+const { data } = await client.getSecureProxyWhitelist({
+  integrationId: 'example',
+  useCaseId: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "vpc_mode": "static_ip",
+  "allowed_domains": ["string"],
+  "allowed_ips": ["string"]
+}
+```
+
+</details>
+
+---
+
+### `updateSecureProxyWhitelist`
+
+Update secure_proxy whitelist (admin portal only)
+
+`PUT /v2/integrations/{integrationId}/use-cases/{useCaseId}/secure-proxy-whitelist`
+
+```ts
+const { data } = await client.updateSecureProxyWhitelist(
+  {
+    integrationId: 'example',
+    useCaseId: 'example',
+  },
+  {
+    allowed_domains: ['string'],
+    allowed_ips: ['string']
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "vpc_mode": "static_ip",
+  "allowed_domains": ["string"],
+  "allowed_ips": ["string"]
+}
+```
+
+</details>
+
+---
+
+### `listSecureProxyWhitelistHistory`
+
+List secure_proxy whitelist change history (admin portal only)
+
+`GET /v2/integrations/{integrationId}/use-cases/{useCaseId}/secure-proxy-whitelist/history`
+
+```ts
+const { data } = await client.listSecureProxyWhitelistHistory({
+  integrationId: 'example',
+  useCaseId: 'example',
+  limit: 1,
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "history": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "useCaseId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "integrationId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "name": "string",
+      "slug": "string",
+      "enabled": true,
+      "change_description": "string",
+      "changed_by": "string",
+      "created_at": "1970-01-01T00:00:00.000Z",
+      "updated_at": "1970-01-01T00:00:00.000Z",
+      "history_created_at": "1970-01-01T00:00:00.000Z",
+      "type": "secure_proxy",
+      "configuration": {
+        "vpc_mode": "static_ip",
+        "allowed_domains": ["string"],
+        "allowed_ips": ["string"]
+      }
+    }
+  ]
 }
 ```
 
@@ -2524,6 +2644,7 @@ type ErpEventV3 = unknown | unknown
 type ErpUpdatesEventsV3Request = {
   integration_id: string // uuid
   correlation_id?: string
+  group_id?: string
   events: unknown | unknown[]
 }
 ```
@@ -2950,6 +3071,7 @@ type IntegrationWithUseCases = {
       secure_proxy?: { ... }
       auth?: { ... }
       params?: { ... }
+      allowed_origins?: { ... }
       steps: { ... }
       response: { ... }
     }
@@ -3078,6 +3200,7 @@ type UpsertIntegrationWithUseCasesRequest = {
       secure_proxy?: { ... }
       auth?: { ... }
       params?: { ... }
+      allowed_origins?: { ... }
       steps: { ... }
       response: { ... }
     }
@@ -3095,7 +3218,6 @@ type UpsertIntegrationWithUseCasesRequest = {
       inbound_use_case_slug?: { ... }
     }
   } | {
-    id?: string // uuid
   // ...
 }
 ```
@@ -3128,6 +3250,8 @@ type InboundIntegrationEventConfiguration = {
       relations?: { ... }
       relation_refs?: { ... }
       file_proxy_url?: { ... }
+      portal_ref?: { ... }
+      env_var_ref?: { ... }
     }>
   }>
   meter_readings?: Array<{
@@ -3153,6 +3277,8 @@ type InboundIntegrationEventConfiguration = {
       relations?: { ... }
       relation_refs?: { ... }
       file_proxy_url?: { ... }
+      portal_ref?: { ... }
+      env_var_ref?: { ... }
     }>
   }>
 }
@@ -3233,6 +3359,26 @@ type IntegrationEntity = {
       use_case_id: { ... }
       params?: { ... }
     }
+    portal_ref?: {
+      filter?: { ... }
+      select?: { ... }
+      return?: { ... }
+    } | {
+      filter?: { ... }
+      select?: { ... }
+      return: { ... }
+      jsonataExpression: { ... }
+    }
+    env_var_ref?: {
+      key: { ... }
+      default?: { ... }
+      return?: { ... }
+    } | {
+      key: { ... }
+      default?: { ... }
+      return: { ... }
+      jsonataExpression: { ... }
+    }
   }>
 }
 ```
@@ -3288,6 +3434,26 @@ type IntegrationMeterReading = {
     } | {
       use_case_id: { ... }
       params?: { ... }
+    }
+    portal_ref?: {
+      filter?: { ... }
+      select?: { ... }
+      return?: { ... }
+    } | {
+      filter?: { ... }
+      select?: { ... }
+      return: { ... }
+      jsonataExpression: { ... }
+    }
+    env_var_ref?: {
+      key: { ... }
+      default?: { ... }
+      return?: { ... }
+    } | {
+      key: { ... }
+      default?: { ... }
+      return: { ... }
+      jsonataExpression: { ... }
     }
   }>
 }
@@ -3395,6 +3561,40 @@ type IntegrationEntityField = {
       jsonataExpression: { ... }
     }>
   }
+  portal_ref?: {
+    filter?: {
+      origin?: { ... }
+      enabled?: { ... }
+      is_dummy?: { ... }
+      is_epilot_domain?: { ... }
+      name?: { ... }
+      domain?: { ... }
+    }
+    select?: "single" | "all"
+    return?: "portal_id" | "origin" | "domain" | "name"
+  } | {
+    filter?: {
+      origin?: { ... }
+      enabled?: { ... }
+      is_dummy?: { ... }
+      is_epilot_domain?: { ... }
+      name?: { ... }
+      domain?: { ... }
+    }
+    select?: "single" | "all"
+    return: "jsonata"
+    jsonataExpression: string
+  }
+  env_var_ref?: {
+    key: string
+    default?: string
+    return?: "value"
+  } | {
+    key: string
+    default?: string
+    return: "jsonata"
+    jsonataExpression: string
+  }
 }
 ```
 
@@ -3450,6 +3650,78 @@ type FileProxyUrlConfig = {
   } | {
     jsonataExpression: string
   }>
+}
+```
+
+### `PortalOrigin`
+
+Origin/type of an epilot portal configuration.
+
+```ts
+type PortalOrigin = "END_CUSTOMER_PORTAL" | "INSTALLER_PORTAL" | "B2B_PORTAL" | "ADDITIONAL_PORTAL"
+```
+
+### `PortalRefFilter`
+
+Filter applied to the org's portal configurations before selection. All filters default to "match any" except `enabled` (default `true`) and `is_dummy` (default `false`). Set `enabled` or `is_dummy` to `null` to opt out of the default.
+
+
+```ts
+type PortalRefFilter = {
+  origin?: "END_CUSTOMER_PORTAL" | "INSTALLER_PORTAL" | "B2B_PORTAL" | "ADDITIONAL_PORTAL" | "END_CUSTOMER_PORTAL" | "INSTALLER_PORTAL" | "B2B_PORTAL" | "ADDITIONAL_PORTAL"[]
+  enabled?: boolean
+  is_dummy?: boolean
+  is_epilot_domain?: boolean
+  name?: string
+  domain?: string
+}
+```
+
+### `PortalRefConfig`
+
+Resolves to a property of one of the calling organization's epilot portal configurations at runtime, replacing hard-coded environment-specific portal UUIDs in inbound mappings. Matched portals are sorted ascending by `(_created_at, portal_id)`; portals without `_created_at` sort first (treated as ol
+
+```ts
+type PortalRefConfig = {
+  filter?: {
+    origin?: "END_CUSTOMER_PORTAL" | "INSTALLER_PORTAL" | "B2B_PORTAL" | "ADDITIONAL_PORTAL" | "END_CUSTOMER_PORTAL" | "INSTALLER_PORTAL" | "B2B_PORTAL" | "ADDITIONAL_PORTAL"[]
+    enabled?: boolean
+    is_dummy?: boolean
+    is_epilot_domain?: boolean
+    name?: string
+    domain?: string
+  }
+  select?: "single" | "all"
+  return?: "portal_id" | "origin" | "domain" | "name"
+} | {
+  filter?: {
+    origin?: "END_CUSTOMER_PORTAL" | "INSTALLER_PORTAL" | "B2B_PORTAL" | "ADDITIONAL_PORTAL" | "END_CUSTOMER_PORTAL" | "INSTALLER_PORTAL" | "B2B_PORTAL" | "ADDITIONAL_PORTAL"[]
+    enabled?: boolean
+    is_dummy?: boolean
+    is_epilot_domain?: boolean
+    name?: string
+    domain?: string
+  }
+  select?: "single" | "all"
+  return: "jsonata"
+  jsonataExpression: string
+}
+```
+
+### `EnvVarRefConfig`
+
+Resolves to an org-scoped environment variable from the epilot environments-api service at runtime, replacing hard-coded environment-specific values (URLs, prefixes, identifiers) in inbound mappings. Secrets (`SecretString` values) are never exposed; the runtime treats both "missing key" and "secret
+
+```ts
+type EnvVarRefConfig = {
+  key: string
+  default?: string
+  return?: "value"
+} | {
+  key: string
+  default?: string
+  return: "jsonata"
+  jsonataExpression: string
 }
 ```
 
@@ -3532,6 +3804,7 @@ type EmbeddedUseCaseRequest = {
       required: { ... }
       description?: { ... }
     }>
+    allowed_origins?: string // uri[]
     steps: Array<{
       url: { ... }
       method: { ... }
@@ -3555,7 +3828,6 @@ type EmbeddedUseCaseRequest = {
   type: "managed_call"
   configuration?: {
     operation: {
-      method: { ... }
   // ...
 }
 ```
@@ -3663,6 +3935,7 @@ type EmbeddedFileProxyUseCaseRequest = {
       required: { ... }
       description?: { ... }
     }>
+    allowed_origins?: string // uri[]
     steps: Array<{
       url: { ... }
       method: { ... }
@@ -3838,6 +4111,7 @@ type FileProxyUseCase = {
       required: { ... }
       description?: { ... }
     }>
+    allowed_origins?: string // uri[]
     steps: Array<{
       url: { ... }
       method: { ... }
@@ -3996,6 +4270,7 @@ type UseCase = {
       required: { ... }
       description?: { ... }
     }>
+    allowed_origins?: string // uri[]
     steps: Array<{
       url: { ... }
       method: { ... }
@@ -4010,7 +4285,6 @@ type UseCase = {
       content_type?: { ... }
     }
   }
-} | {
   // ...
 }
 ```
@@ -4020,7 +4294,7 @@ type UseCase = {
 ```ts
 type CreateUseCaseRequest = {
   name: string
-  slug?: string
+  slug: string
   enabled: boolean
   type: "inbound"
   configuration?: {
@@ -4045,7 +4319,7 @@ type CreateUseCaseRequest = {
   }
 } | {
   name: string
-  slug?: string
+  slug: string
   enabled: boolean
   type: "outbound"
   configuration?: {
@@ -4062,7 +4336,7 @@ type CreateUseCaseRequest = {
   }
 } | {
   name: string
-  slug?: string
+  slug: string
   enabled: boolean
   type: "file_proxy"
   configuration?: {
@@ -4088,6 +4362,7 @@ type CreateUseCaseRequest = {
       required: { ... }
       description?: { ... }
     }>
+    allowed_origins?: string // uri[]
     steps: Array<{
       url: { ... }
       method: { ... }
@@ -4104,7 +4379,7 @@ type CreateUseCaseRequest = {
   }
 } | {
   name: string
-  slug?: string
+  slug: string
   enabled: boolean
   type: "managed_call"
   configuration?: {
@@ -4117,7 +4392,6 @@ type CreateUseCaseRequest = {
     request_mapping?: string
     response_mapping?: string
     inbound_use_case_slug?: string
-  }
   // ...
 }
 ```
@@ -4127,7 +4401,7 @@ type CreateUseCaseRequest = {
 ```ts
 type CreateUseCaseRequestBase = {
   name: string
-  slug?: string
+  slug: string
   enabled: boolean
 }
 ```
@@ -4137,7 +4411,7 @@ type CreateUseCaseRequestBase = {
 ```ts
 type CreateInboundUseCaseRequest = {
   name: string
-  slug?: string
+  slug: string
   enabled: boolean
   type: "inbound"
   configuration?: {
@@ -4168,7 +4442,7 @@ type CreateInboundUseCaseRequest = {
 ```ts
 type CreateOutboundUseCaseRequest = {
   name: string
-  slug?: string
+  slug: string
   enabled: boolean
   type: "outbound"
   configuration?: {
@@ -4191,7 +4465,7 @@ type CreateOutboundUseCaseRequest = {
 ```ts
 type CreateFileProxyUseCaseRequest = {
   name: string
-  slug?: string
+  slug: string
   enabled: boolean
   type: "file_proxy"
   configuration?: {
@@ -4217,6 +4491,7 @@ type CreateFileProxyUseCaseRequest = {
       required: { ... }
       description?: { ... }
     }>
+    allowed_origins?: string // uri[]
     steps: Array<{
       url: { ... }
       method: { ... }
@@ -4239,7 +4514,7 @@ type CreateFileProxyUseCaseRequest = {
 ```ts
 type CreateManagedCallUseCaseRequest = {
   name: string
-  slug?: string
+  slug: string
   enabled: boolean
   type: "managed_call"
   configuration?: {
@@ -4261,7 +4536,7 @@ type CreateManagedCallUseCaseRequest = {
 ```ts
 type CreateSecureProxyUseCaseRequest = {
   name: string
-  slug?: string
+  slug: string
   enabled: boolean
   type: "secure_proxy"
   configuration?: {
@@ -4348,6 +4623,7 @@ type UpdateUseCaseRequest = {
       required: { ... }
       description?: { ... }
     }>
+    allowed_origins?: string // uri[]
     steps: Array<{
       url: { ... }
       method: { ... }
@@ -4374,7 +4650,6 @@ type UpdateUseCaseRequest = {
       path: { ... }
       headers?: { ... }
       query_params?: { ... }
-    }
   // ...
 }
 ```
@@ -4478,6 +4753,7 @@ type UpdateFileProxyUseCaseRequest = {
       required: { ... }
       description?: { ... }
     }>
+    allowed_origins?: string // uri[]
     steps: Array<{
       url: { ... }
       method: { ... }
@@ -4550,6 +4826,7 @@ type UseCaseHistoryEntry = {
   slug?: string
   enabled: boolean
   change_description?: string
+  changed_by?: string
   created_at: string // date-time
   updated_at: string // date-time
   history_created_at: string // date-time
@@ -4582,6 +4859,7 @@ type UseCaseHistoryEntry = {
   slug?: string
   enabled: boolean
   change_description?: string
+  changed_by?: string
   created_at: string // date-time
   updated_at: string // date-time
   history_created_at: string // date-time
@@ -4606,6 +4884,7 @@ type UseCaseHistoryEntry = {
   slug?: string
   enabled: boolean
   change_description?: string
+  changed_by?: string
   created_at: string // date-time
   updated_at: string // date-time
   history_created_at: string // date-time
@@ -4633,15 +4912,12 @@ type UseCaseHistoryEntry = {
       required: { ... }
       description?: { ... }
     }>
+    allowed_origins?: string // uri[]
     steps: Array<{
       url: { ... }
       method: { ... }
       headers?: { ... }
       body?: { ... }
-      response_type: { ... }
-    }>
-    response: {
-      body: { ... }
   // ...
 }
 ```
@@ -4657,6 +4933,7 @@ type UseCaseHistoryEntryBase = {
   slug?: string
   enabled: boolean
   change_description?: string
+  changed_by?: string
   created_at: string // date-time
   updated_at: string // date-time
   history_created_at: string // date-time
@@ -4674,6 +4951,7 @@ type InboundUseCaseHistoryEntry = {
   slug?: string
   enabled: boolean
   change_description?: string
+  changed_by?: string
   created_at: string // date-time
   updated_at: string // date-time
   history_created_at: string // date-time
@@ -4712,6 +4990,7 @@ type OutboundUseCaseHistoryEntry = {
   slug?: string
   enabled: boolean
   change_description?: string
+  changed_by?: string
   created_at: string // date-time
   updated_at: string // date-time
   history_created_at: string // date-time
@@ -4742,6 +5021,7 @@ type FileProxyUseCaseHistoryEntry = {
   slug?: string
   enabled: boolean
   change_description?: string
+  changed_by?: string
   created_at: string // date-time
   updated_at: string // date-time
   history_created_at: string // date-time
@@ -4769,6 +5049,7 @@ type FileProxyUseCaseHistoryEntry = {
       required: { ... }
       description?: { ... }
     }>
+    allowed_origins?: string // uri[]
     steps: Array<{
       url: { ... }
       method: { ... }
@@ -4797,6 +5078,7 @@ type ManagedCallUseCaseHistoryEntry = {
   slug?: string
   enabled: boolean
   change_description?: string
+  changed_by?: string
   created_at: string // date-time
   updated_at: string // date-time
   history_created_at: string // date-time
@@ -4831,6 +5113,7 @@ type SecureProxyUseCaseHistoryEntry = {
   slug?: string
   enabled: boolean
   change_description?: string
+  changed_by?: string
   created_at: string // date-time
   updated_at: string // date-time
   history_created_at: string // date-time
@@ -4851,6 +5134,37 @@ Configuration for secure_proxy use cases. Defines how to route requests through 
 ```ts
 type SecureProxyUseCaseConfiguration = {
   vpc_mode: "static_ip" | "secure_link"
+  allowed_domains?: string[]
+  allowed_ips?: string[]
+}
+```
+
+### `SecureProxyWhitelist`
+
+Current whitelist state for a secure_proxy use case. vpc_mode is read-only
+context so the UI can show the user what mode the pool is in.
+
+
+```ts
+type SecureProxyWhitelist = {
+  vpc_mode: "static_ip" | "secure_link"
+  allowed_domains: string[]
+  allowed_ips: string[]
+}
+```
+
+### `SecureProxyWhitelistUpdate`
+
+Partial update for a secure_proxy whitelist. At least one of
+`allowed_domains` or `allowed_ips` must be provided.
+
+Per-field semantics:
+  - **omitted** — the field is not modified; the stored value is preserved.
+  - **non-empty array** — the stored value is replaced with the supplied list.
+  - **emp
+
+```ts
+type SecureProxyWhitelistUpdate = {
   allowed_domains?: string[]
   allowed_ips?: string[]
 }
@@ -5243,6 +5557,7 @@ type FileProxyUseCaseConfiguration = {
     required: boolean
     description?: string
   }>
+  allowed_origins?: string // uri[]
   steps: Array<{
     url: string
     method: "GET" | "POST"

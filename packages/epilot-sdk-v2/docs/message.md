@@ -922,7 +922,7 @@ const { data } = await client.getThreadTimeline({
         "user_id": "123",
         "organization_id": "456"
       },
-      "timestamp": "2024-01-01T00:00:00.000Z"
+      "timestamp": "2024-01-01T00:00:00Z"
     }
   ]
 }
@@ -1315,6 +1315,7 @@ Unassign thread from entities
 const { data } = await client.unassignThread(
   {
     id: '123e4567-e89b-12d3-a456-426614174000',
+    unlink_mapped_entities: true,
   },
   [
     {

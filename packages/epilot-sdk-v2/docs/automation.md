@@ -192,6 +192,7 @@ const { data } = await client.searchFlows({
   size: 1,
   from: 1,
   trigger_source_id: 'example',
+  target_workflow: 'example',
   include_flows: true,
 })
 ```
@@ -340,7 +341,14 @@ const { data } = await client.startExecution(
         parent_execution_id: 'string',
         parent_task_id: 'string',
         depth: 0
-      }
+      },
+      entity_contexts: [
+        {
+          entity_id: 'string',
+          entity_schema: 'string',
+          is_primary: true
+        }
+      ]
     },
     flow_execution_id: 'string',
     flow_automation_task_id: 'string'
@@ -451,7 +459,10 @@ const { data } = await client.startExecution(
       "parent_execution_id": "string",
       "parent_task_id": "string",
       "depth": 0
-    }
+    },
+    "entity_contexts": [
+      {}
+    ]
   }
 }
 ```
@@ -735,7 +746,10 @@ const { data } = await client.getExecution({
       "parent_execution_id": "string",
       "parent_task_id": "string",
       "depth": 0
-    }
+    },
+    "entity_contexts": [
+      {}
+    ]
   }
 }
 ```
@@ -859,7 +873,10 @@ const { data } = await client.cancelExecution({
       "parent_execution_id": "string",
       "parent_task_id": "string",
       "depth": 0
-    }
+    },
+    "entity_contexts": [
+      {}
+    ]
   }
 }
 ```
@@ -954,7 +971,8 @@ const { data } = await client.resumeExecutionWithToken(
       "workflow_exec_id": "string",
       "workflow_exec_task_id": "string",
       "workflow_role": "trigger_workflow",
-      "_execution_chain": {}
+      "_execution_chain": {},
+      "entity_contexts": []
     }
   },
   "resumedAction": {
@@ -2176,6 +2194,7 @@ type SendEmailActionConfig = {
     reply_to_sender?: boolean
     reply_mode?: "reply_in_thread" | "new_email"
     mark_as_done?: boolean
+    mark_as_read?: boolean
     attachments?: Array<{
       source_filter?: { ... }
     }>
@@ -2209,6 +2228,7 @@ type SendEmailAction = {
     reply_to_sender?: boolean
     reply_mode?: "reply_in_thread" | "new_email"
     mark_as_done?: boolean
+    mark_as_read?: boolean
     attachments?: Array<{
       source_filter?: { ... }
     }>
@@ -2235,6 +2255,7 @@ type ForwardEmailActionConfig = {
     include_attachments?: boolean
     subject_prefix?: string
     mark_as_done?: boolean
+    mark_as_read?: boolean
   }
   allow_failure?: boolean
   created_automatically?: boolean
@@ -2261,6 +2282,7 @@ type ForwardEmailAction = {
     include_attachments?: boolean
     subject_prefix?: string
     mark_as_done?: boolean
+    mark_as_read?: boolean
   }
 }
 ```
@@ -2276,6 +2298,7 @@ type ForwardEmailConfig = {
   include_attachments?: boolean
   subject_prefix?: string
   mark_as_done?: boolean
+  mark_as_read?: boolean
 }
 ```
 
@@ -2292,6 +2315,7 @@ type ReplyEmailActionConfig = {
     language_code?: "de" | "en"
     reply_mode?: "reply_in_thread" | "new_email"
     mark_as_done?: boolean
+    mark_as_read?: boolean
   }
   allow_failure?: boolean
   created_automatically?: boolean
@@ -2315,6 +2339,7 @@ type ReplyEmailAction = {
     language_code?: "de" | "en"
     reply_mode?: "reply_in_thread" | "new_email"
     mark_as_done?: boolean
+    mark_as_read?: boolean
   }
 }
 ```
@@ -2327,6 +2352,7 @@ type ReplyEmailConfig = {
   language_code?: "de" | "en"
   reply_mode?: "reply_in_thread" | "new_email"
   mark_as_done?: boolean
+  mark_as_read?: boolean
 }
 ```
 
@@ -2342,6 +2368,7 @@ type SendEmailConfig = {
   reply_to_sender?: boolean
   reply_mode?: "reply_in_thread" | "new_email"
   mark_as_done?: boolean
+  mark_as_read?: boolean
   attachments?: Array<{
     source_filter?: {
       limit?: { ... }
@@ -2993,6 +3020,11 @@ type WorkflowExecutionContext = {
     parent_task_id?: string
     depth?: number
   }
+  entity_contexts?: Array<{
+    entity_id?: string
+    entity_schema?: string
+    is_primary?: boolean
+  }>
 }
 ```
 
@@ -3229,6 +3261,11 @@ type StartExecutionRequest = {
       parent_task_id?: { ... }
       depth?: { ... }
     }
+    entity_contexts?: Array<{
+      entity_id?: { ... }
+      entity_schema?: { ... }
+      is_primary?: { ... }
+    }>
   }
   flow_execution_id?: string
   flow_automation_task_id?: string

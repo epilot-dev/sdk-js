@@ -3,13 +3,15 @@ import { defineCommand } from 'citty';
 export const main = defineCommand({
   meta: {
     name: 'epilot',
-    version: '0.1.14',
+    version: '0.1.19',
     description: 'CLI for epilot APIs',
   },
   args: {
     token: { type: 'string', alias: 't', description: 'Bearer token' },
     profile: { type: 'string', description: 'Use a named profile (or EPILOT_PROFILE env)' },
     server: { type: 'string', alias: 's', description: 'Override server base URL' },
+    'use-dev': { type: 'boolean', description: 'Target dev environment' },
+    'use-staging': { type: 'boolean', description: 'Target staging environment' },
     json: { type: 'boolean', description: 'Output raw JSON' },
     verbose: { type: 'boolean', alias: 'v', description: 'Verbose output' },
     guided: { type: 'boolean', description: 'Prompt for all parameters interactively' },
@@ -19,6 +21,7 @@ export const main = defineCommand({
   subCommands: {
     auth: () => import('./commands/auth.js').then((m) => m.default),
     profile: () => import('./commands/profile.js').then((m) => m.default),
+    config: () => import('./commands/config.js').then((m) => m.default),
     completion: () => import('./commands/completion.js').then((m) => m.default),
     upgrade: () => import('./commands/upgrade.js').then((m) => m.default),
     'access-token': () => import('./commands/apis/access-token.js').then((m) => m.default),
@@ -30,6 +33,7 @@ export const main = defineCommand({
     automation: () => import('./commands/apis/automation.js').then((m) => m.default),
     billing: () => import('./commands/apis/billing.js').then((m) => m.default),
     'blueprint-manifest': () => import('./commands/apis/blueprint-manifest.js').then((m) => m.default),
+    calendar: () => import('./commands/apis/calendar.js').then((m) => m.default),
     'configuration-hub': () => import('./commands/apis/configuration-hub.js').then((m) => m.default),
     consent: () => import('./commands/apis/consent.js').then((m) => m.default),
     'customer-portal': () => import('./commands/apis/customer-portal.js').then((m) => m.default),

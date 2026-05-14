@@ -379,6 +379,13 @@
     "/v1/public/external-catalog/products": {
       "post": {
         "operationId": "$getExternalCatalogProducts",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "x-epilot-org-id",
+            "required": false
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -391,6 +398,13 @@
     "/v1/public/external-catalog/product-recommendations": {
       "post": {
         "operationId": "$getExternalCatalogProductRecommendations",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "x-epilot-org-id",
+            "required": false
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {

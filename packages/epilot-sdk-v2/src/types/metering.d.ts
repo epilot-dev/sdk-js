@@ -1,6 +1,4 @@
 /* Auto-copied from metering-client */
-/* eslint-disable */
-
 import type {
   OpenAPIClient,
   Parameters,
@@ -17,9 +15,19 @@ export declare namespace Components {
          * 01F130Q52Q6MWSNS8N2AVXV4JN
          */
         Schemas.ActivityId /* ulid */;
+        export type CounterIdParam = Schemas.Id;
+        export type DirectQueryParam = boolean;
+        export type IncludePendingChangesetsQueryParam = boolean;
+        export type MeterIdParam = Schemas.Id;
         export type SkipValidationQueryParam = boolean;
     }
+    export interface PathParameters {
+        MeterIdParam?: Parameters.MeterIdParam;
+        CounterIdParam?: Parameters.CounterIdParam;
+    }
     export interface QueryParameters {
+        DirectQueryParam?: Parameters.DirectQueryParam;
+        IncludePendingChangesetsQueryParam?: Parameters.IncludePendingChangesetsQueryParam;
         ActivityIdQueryParam?: Parameters.ActivityIdQueryParam;
         SkipValidationQueryParam?: Parameters.SkipValidationQueryParam;
     }
@@ -124,6 +132,61 @@ export declare namespace Components {
              */
             _updated_at: string; // date-time
         }
+        /**
+         * A meter reading for batch operations. The required fields depend on the operation:
+         * - create/update: requires value, source, and meter_id
+         * - delete: only requires the fields specified in the identifiers parameter
+         *
+         */
+        export type BatchReading = /**
+         * A meter reading for batch operations. The required fields depend on the operation:
+         * - create/update: requires value, source, and meter_id
+         * - delete: only requires the fields specified in the identifiers parameter
+         *
+         */
+        /* Schema for create or update operations - requires value, source, and meter_id */ CreateOrUpdateBatchReading | /* Schema for delete operations - only requires identifier fields specified in the identifiers parameter */ DeleteBatchReading;
+        /**
+         * Base properties shared by all batch reading operations
+         */
+        export interface BatchReadingBase {
+            /**
+             * The ID of the associated meter
+             */
+            meter_id?: EntityId /* uuid */;
+            /**
+             * The ID of the associated meter counter
+             */
+            counter_id?: EntityId /* uuid */;
+            /**
+             * The direction of the reading (feed-in or feed-out)
+             */
+            direction?: Direction;
+            /**
+             * The timestamp of the reading. If not provided, the system will use the current time.
+             * example:
+             * 2022-10-10T10:00:00Z
+             */
+            timestamp?: string; // date-time
+            /**
+             * The external ID of the reading
+             */
+            external_id?: string;
+            /**
+             * Additional metadata for the reading
+             * example:
+             * {
+             *   "registration_id": "1234567890",
+             *   "business_unit": "ABC"
+             * }
+             */
+            metadata?: {
+                [name: string]: string;
+            };
+        }
+        export interface ChangesetCreator {
+            type?: "user" | "portal_user" | "api_client" | "automation";
+            id?: string;
+        }
         export interface CounterReadingOnSubmission {
             /**
              * The ID of the associated meter counter
@@ -140,6 +203,103 @@ export declare namespace Components {
              * 240
              */
             value: number;
+        }
+        /**
+         * Schema for create or update operations - requires value, source, and meter_id
+         */
+        export interface CreateOrUpdateBatchReading {
+            meter_id: EntityId /* uuid */;
+            counter_id?: EntityId /* uuid */;
+            direction?: Direction;
+            /**
+             * The timestamp of the reading. If not provided, the system will use the current time.
+             * example:
+             * 2022-10-10T10:00:00Z
+             */
+            timestamp?: string; // date-time
+            /**
+             * The external ID of the reading
+             */
+            external_id?: string;
+            /**
+             * Additional metadata for the reading
+             * example:
+             * {
+             *   "registration_id": "1234567890",
+             *   "business_unit": "ABC"
+             * }
+             */
+            metadata?: {
+                [name: string]: string;
+            };
+            /**
+             * The operation to perform. Defaults to "create" if omitted.
+             */
+            operation?: "create" | "update";
+            /**
+             * The reading value of the meter
+             * example:
+             * 240
+             */
+            value: number;
+            source: Source;
+            read_by?: /**
+             * The person who recorded the reading
+             * example:
+             * John Doe
+             */
+            ReadBy;
+            reason?: /**
+             * The reason for recording the reading
+             * If no reason is specified or left empty, the Epilot UI will show 'Regular' as the default display text
+             *
+             */
+            Reason;
+            status?: ReadingStatus;
+            /**
+             * A remark or comment for the reading
+             * example:
+             * Customer reported unusual consumption
+             */
+            remark?: string | null;
+            /**
+             * Notes to record a meter reading
+             */
+            note?: string;
+            unit?: Unit;
+        }
+        /**
+         * Schema for delete operations - only requires identifier fields specified in the identifiers parameter
+         */
+        export interface DeleteBatchReading {
+            meter_id?: EntityId /* uuid */;
+            counter_id?: EntityId /* uuid */;
+            direction?: Direction;
+            /**
+             * The timestamp of the reading. If not provided, the system will use the current time.
+             * example:
+             * 2022-10-10T10:00:00Z
+             */
+            timestamp?: string; // date-time
+            /**
+             * The external ID of the reading
+             */
+            external_id?: string;
+            /**
+             * Additional metadata for the reading
+             * example:
+             * {
+             *   "registration_id": "1234567890",
+             *   "business_unit": "ABC"
+             * }
+             */
+            metadata?: {
+                [name: string]: string;
+            };
+            /**
+             * The operation to perform (must be "delete")
+             */
+            operation: "delete";
         }
         export type Direction = "feed-in" | "feed-out";
         export interface Entity {
@@ -198,6 +358,32 @@ export declare namespace Components {
              * Error message
              */
             message?: string;
+        }
+        /**
+         * Numeric-threshold fuzzy matching for meter reading auto-clear.
+         *
+         * NOTE: This is intentionally different from entity-api's FuzzyConfig. Entity-api's
+         * fuzzy strategies (suffix, digits_only, normalize_phone, ignore_fields,
+         * contains_entry, regex) are designed for strings and structured objects (IBAN, phone
+         * numbers, arrays of relations). Meter readings are purely numeric, so numeric
+         * tolerance (percentage + absolute) is the right primitive. Do not try to unify
+         * these two types — they serve different domains.
+         *
+         * When match_strategy is 'fuzzy', the auto-clear logic uses these thresholds to
+         * decide whether an incoming ERP value is "close enough" to the proposed value.
+         * If both percentage_threshold and absolute_threshold are provided, a match
+         * succeeds if either threshold is satisfied (logical OR).
+         *
+         */
+        export interface FuzzyConfig {
+            /**
+             * Percentage threshold (0-1). 0.01 = 1%. Default 0.01.
+             */
+            percentage_threshold?: number;
+            /**
+             * Absolute threshold in the reading's unit.
+             */
+            absolute_threshold?: number;
         }
         export type Id = string;
         export interface JourneyActions {
@@ -311,7 +497,7 @@ export declare namespace Components {
             /**
              * The calibration date of the meter
              * example:
-             * 2022-10-10T00:00:00.000Z
+             * 2022-10-10
              */
             calibration_date?: string;
             /**
@@ -386,7 +572,7 @@ export declare namespace Components {
             /**
              * The date as of which the forecast reading value is applicable
              * example:
-             * 2022-12-10T00:00:00.000Z
+             * 2022-12-10
              */
             forecast_as_of?: string;
             /**
@@ -398,7 +584,7 @@ export declare namespace Components {
             /**
              * The timestamp of the last reading
              * example:
-             * 2022-10-10T00:00:00.000Z
+             * 2022-10-10
              */
             last_reading?: string;
             /**
@@ -434,7 +620,7 @@ export declare namespace Components {
             /**
              * If the value is not provided, the system will be set with the time the request is processed.
              * example:
-             * 2022-10-10T00:00:00.000Z
+             * 2022-10-10
              */
             timestamp?: string; // date-time
             source: Source;
@@ -466,6 +652,79 @@ export declare namespace Components {
             note?: string;
             unit?: Unit;
         }
+        export interface MeterReadingChangeset {
+            /**
+             * Unique changeset identifier (UUID v4)
+             */
+            changeset_id: string;
+            meter_id?: string; // uuid
+            counter_id?: string; // uuid
+            proposed: ProposedReading;
+            /**
+             * Snapshot of the reading at changeset creation time
+             */
+            previous?: ProposedReading;
+            edit_mode: "external" | "approval";
+            match_strategy?: "exact" | "fuzzy";
+            timestamp_tolerance?: /**
+             * Slack on `reading.timestamp` when auto-clear matches an incoming reading
+             * against a pending changeset. Both sides reference the SAME physical
+             * meter-read event — one as stored when the user submitted, the other as
+             * echoed back by the ERP. The tolerance accommodates round-trip format
+             * drift between the two writes.
+             *
+             * Variants:
+             * - `'exact'`: strict millisecond equality. Right when both sides
+             *   round-trip the timestamp cleanly.
+             * - `{ type: 'same-day', timezone? }`: strip the time component and
+             *   compare year-month-day. Use this when the ERP emits date-only
+             *   readings (the inbound pipeline promotes those to midnight UTC).
+             *   Optional `timezone` is an IANA name (e.g. `'Europe/Berlin'`); the
+             *   day is bucketed in that zone. Defaults to UTC when omitted. Set
+             *   a local zone for tenants whose readings are taken near midnight
+             *   in non-UTC timezones — UTC bucketing would otherwise split such
+             *   readings across two day-buckets and miss matches.
+             * - `{ type: 'within-seconds', seconds }`: symmetric ±N-second
+             *   window. Use for sub-minute normalization drift (`seconds: 60`).
+             *
+             */
+            TimestampTolerance;
+            created_at: string; // date-time
+            created_by?: ChangesetCreator;
+            source?: "360" | "ECP" | "ERP" | "journey-submission";
+            fuzzy_config?: /**
+             * Numeric-threshold fuzzy matching for meter reading auto-clear.
+             *
+             * NOTE: This is intentionally different from entity-api's FuzzyConfig. Entity-api's
+             * fuzzy strategies (suffix, digits_only, normalize_phone, ignore_fields,
+             * contains_entry, regex) are designed for strings and structured objects (IBAN, phone
+             * numbers, arrays of relations). Meter readings are purely numeric, so numeric
+             * tolerance (percentage + absolute) is the right primitive. Do not try to unify
+             * these two types — they serve different domains.
+             *
+             * When match_strategy is 'fuzzy', the auto-clear logic uses these thresholds to
+             * decide whether an incoming ERP value is "close enough" to the proposed value.
+             * If both percentage_threshold and absolute_threshold are provided, a match
+             * succeeds if either threshold is satisfied (logical OR).
+             *
+             */
+            FuzzyConfig;
+            /**
+             * Reason for dismissing the changeset. Only present in the dismiss HTTP response
+             * and on the unified `MeterReadings` EventBridge event payload (when the
+             * `activity_type` discriminator is `ChangesetDismissed`). Not persisted —
+             * the event stream is the authoritative audit trail (aligned with entity-api's
+             * approach where dismissal context lives in the activity record).
+             *
+             */
+            dismissed_reason?: string;
+            /**
+             * ISO 8601 timestamp of when the changeset was dismissed. Like dismissed_reason,
+             * this is only present in the dismiss response and EventBridge event, not persisted.
+             *
+             */
+            dismissed_at?: string; // date-time
+        }
         export interface PortalMeterReading {
             /**
              * The reading value of the meter
@@ -491,7 +750,7 @@ export declare namespace Components {
             /**
              * If the value is not provided, the system will be set with the time the request is processed.
              * example:
-             * 2022-10-10T00:00:00.000Z
+             * 2022-10-10
              */
             timestamp?: string; // date-time
             source: Source;
@@ -522,6 +781,16 @@ export declare namespace Components {
              */
             note?: string;
             unit?: Unit;
+        }
+        export interface ProposedReading {
+            value: number;
+            direction?: "feed-in" | "feed-out";
+            timestamp?: string; // date-time
+            reason?: string;
+            remark?: string;
+            read_by?: string;
+            status?: "valid" | "in-validation" | "implausible";
+            external_id?: string;
         }
         /**
          * The person who recorded the reading
@@ -563,7 +832,7 @@ export declare namespace Components {
             /**
              * If the value is not provided, the system will be set with the time the request is processed.
              * example:
-             * 2022-10-10T00:00:00.000Z
+             * 2022-10-10
              */
             timestamp?: string; // date-time
             /**
@@ -761,6 +1030,65 @@ export declare namespace Components {
             ntValue?: number;
         } | null;
         export type TariffType = "ht" | "nt";
+        /**
+         * Slack on `reading.timestamp` when auto-clear matches an incoming reading
+         * against a pending changeset. Both sides reference the SAME physical
+         * meter-read event — one as stored when the user submitted, the other as
+         * echoed back by the ERP. The tolerance accommodates round-trip format
+         * drift between the two writes.
+         *
+         * Variants:
+         * - `'exact'`: strict millisecond equality. Right when both sides
+         *   round-trip the timestamp cleanly.
+         * - `{ type: 'same-day', timezone? }`: strip the time component and
+         *   compare year-month-day. Use this when the ERP emits date-only
+         *   readings (the inbound pipeline promotes those to midnight UTC).
+         *   Optional `timezone` is an IANA name (e.g. `'Europe/Berlin'`); the
+         *   day is bucketed in that zone. Defaults to UTC when omitted. Set
+         *   a local zone for tenants whose readings are taken near midnight
+         *   in non-UTC timezones — UTC bucketing would otherwise split such
+         *   readings across two day-buckets and miss matches.
+         * - `{ type: 'within-seconds', seconds }`: symmetric ±N-second
+         *   window. Use for sub-minute normalization drift (`seconds: 60`).
+         *
+         */
+        export type TimestampTolerance = /**
+         * Slack on `reading.timestamp` when auto-clear matches an incoming reading
+         * against a pending changeset. Both sides reference the SAME physical
+         * meter-read event — one as stored when the user submitted, the other as
+         * echoed back by the ERP. The tolerance accommodates round-trip format
+         * drift between the two writes.
+         *
+         * Variants:
+         * - `'exact'`: strict millisecond equality. Right when both sides
+         *   round-trip the timestamp cleanly.
+         * - `{ type: 'same-day', timezone? }`: strip the time component and
+         *   compare year-month-day. Use this when the ERP emits date-only
+         *   readings (the inbound pipeline promotes those to midnight UTC).
+         *   Optional `timezone` is an IANA name (e.g. `'Europe/Berlin'`); the
+         *   day is bucketed in that zone. Defaults to UTC when omitted. Set
+         *   a local zone for tenants whose readings are taken near midnight
+         *   in non-UTC timezones — UTC bucketing would otherwise split such
+         *   readings across two day-buckets and miss matches.
+         * - `{ type: 'within-seconds', seconds }`: symmetric ±N-second
+         *   window. Use for sub-minute normalization drift (`seconds: 60`).
+         *
+         */
+        ("exact") | {
+            type: "same-day";
+            /**
+             * IANA timezone identifier (e.g. `'Europe/Berlin'`, `'UTC'`).
+             * When omitted, the day is bucketed in UTC.
+             *
+             */
+            timezone?: string;
+        } | {
+            type: "within-seconds";
+            /**
+             * Tolerance in seconds. e.g. 60 = ±1 minute, 3600 = ±1 hour.
+             */
+            seconds: number;
+        };
         export type Unit = string;
         export interface UpdateMeterReading {
             /**
@@ -795,7 +1123,7 @@ export declare namespace Components {
             /**
              * If the value is not provided, the system will be set with the time the request is processed.
              * example:
-             * 2022-10-10T00:00:00.000Z
+             * 2022-10-10
              */
             timestamp?: string; // date-time
             /**
@@ -831,6 +1159,29 @@ export declare namespace Components {
     }
 }
 export declare namespace Paths {
+    namespace ApplyReadingChangeset {
+        namespace Parameters {
+            export type ChangesetId = string;
+            export type CounterId = Components.Schemas.Id;
+            export type MeterId = Components.Schemas.Id;
+        }
+        export interface PathParameters {
+            meter_id: Parameters.MeterId;
+            counter_id: Parameters.CounterId;
+            changeset_id: Parameters.ChangesetId;
+        }
+        namespace Responses {
+            export interface $200 {
+                reading?: Components.Schemas.Reading;
+                changeset?: Components.Schemas.MeterReadingChangeset;
+            }
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export interface $404 {
+            }
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace BatchWriteMeterReadings {
         namespace Parameters {
             export type ActivityId = /**
@@ -840,12 +1191,14 @@ export declare namespace Paths {
              */
             Components.Schemas.ActivityId /* ulid */;
             export type Async = boolean;
+            export type Direct = boolean;
             export type SkipValidation = boolean;
         }
         export interface QueryParameters {
             async?: Parameters.Async;
             skip_validation?: Parameters.SkipValidation;
             activity_id?: Parameters.ActivityId;
+            direct?: Parameters.Direct;
         }
         export interface RequestBody {
             /**
@@ -857,64 +1210,13 @@ export declare namespace Paths {
              *
              */
             identifiers?: string[];
-            readings?: {
-                /**
-                 * The reading value of the meter
-                 * example:
-                 * 240
-                 */
-                value: number;
-                read_by?: /**
-                 * The person who recorded the reading
-                 * example:
-                 * John Doe
-                 */
-                Components.Schemas.ReadBy;
-                reason?: /**
-                 * The reason for recording the reading
-                 * If no reason is specified or left empty, the Epilot UI will show 'Regular' as the default display text
-                 *
-                 */
-                Components.Schemas.Reason;
-                meter_id: Components.Schemas.EntityId /* uuid */;
-                counter_id?: Components.Schemas.EntityId /* uuid */;
-                direction?: Components.Schemas.Direction;
-                /**
-                 * If the value is not provided, the system will be set with the time the request is processed.
-                 * example:
-                 * 2022-10-10T00:00:00.000Z
-                 */
-                timestamp?: string; // date-time
-                source: Components.Schemas.Source;
-                status?: Components.Schemas.ReadingStatus;
-                /**
-                 * The external ID of the reading
-                 */
-                external_id?: string;
-                /**
-                 * A remark or comment for the reading
-                 * example:
-                 * Customer reported unusual consumption
-                 */
-                remark?: string | null;
-                /**
-                 * Additional metadata for the reading
-                 * example:
-                 * {
-                 *   "registration_id": "1234567890",
-                 *   "business_unit": "ABC"
-                 * }
-                 */
-                metadata?: {
-                    [name: string]: string;
-                };
-                /**
-                 * Notes to record a meter reading
-                 */
-                note?: string;
-                unit?: Components.Schemas.Unit;
-                operation?: "create" | "update" | "delete";
-            }[];
+            readings?: /**
+             * A meter reading for batch operations. The required fields depend on the operation:
+             * - create/update: requires value, source, and meter_id
+             * - delete: only requires the fields specified in the identifiers parameter
+             *
+             */
+            Components.Schemas.BatchReading[];
         }
         namespace Responses {
             export interface $200 {
@@ -927,6 +1229,12 @@ export declare namespace Paths {
         }
     }
     namespace CreateMeterReading {
+        namespace Parameters {
+            export type Direct = boolean;
+        }
+        export interface QueryParameters {
+            direct?: Parameters.Direct;
+        }
         export type RequestBody = Components.Schemas.MeterReading;
         namespace Responses {
             export interface $200 {
@@ -977,12 +1285,14 @@ export declare namespace Paths {
              */
             Components.Schemas.ActivityId /* ulid */;
             export type Async = boolean;
+            export type Direct = boolean;
             export type SkipValidation = boolean;
         }
         export interface QueryParameters {
             async?: Parameters.Async;
             activity_id?: Parameters.ActivityId;
             skip_validation?: Parameters.SkipValidation;
+            direct?: Parameters.Direct;
         }
         export interface RequestBody {
             readings?: Components.Schemas.MeterReading[];
@@ -999,13 +1309,20 @@ export declare namespace Paths {
     }
     namespace CreatePortalMeterReadings {
         namespace Parameters {
+            export type Direct = boolean;
             export type MeterId = Components.Schemas.Id;
         }
         export interface PathParameters {
             meter_id: Parameters.MeterId;
         }
+        export interface QueryParameters {
+            direct?: Parameters.Direct;
+        }
         export interface RequestBody {
-            readings?: Components.Schemas.PortalMeterReading[];
+            readings?: [
+                Components.Schemas.PortalMeterReading,
+                ...Components.Schemas.PortalMeterReading[]
+            ];
         }
         namespace Responses {
             export interface $200 {
@@ -1068,6 +1385,32 @@ export declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace DismissReadingChangeset {
+        namespace Parameters {
+            export type ChangesetId = string;
+            export type CounterId = Components.Schemas.Id;
+            export type MeterId = Components.Schemas.Id;
+        }
+        export interface PathParameters {
+            meter_id: Parameters.MeterId;
+            counter_id: Parameters.CounterId;
+            changeset_id: Parameters.ChangesetId;
+        }
+        export interface RequestBody {
+            /**
+             * Optional reason for dismissing the changeset
+             */
+            reason?: string;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.MeterReadingChangeset;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export interface $404 {
+            }
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace GetAllowedReadingForMeter {
         namespace Parameters {
             export type MeterId = Components.Schemas.Id;
@@ -1125,6 +1468,12 @@ export declare namespace Paths {
         }
     }
     namespace GetCustomerMeters {
+        namespace Parameters {
+            export type IncludePendingChangesets = boolean;
+        }
+        export interface QueryParameters {
+            include_pending_changesets?: Parameters.IncludePendingChangesets;
+        }
         namespace Responses {
             export interface $200 {
                 data?: {
@@ -1232,7 +1581,7 @@ export declare namespace Paths {
                     /**
                      * The calibration date of the meter
                      * example:
-                     * 2022-10-10T00:00:00.000Z
+                     * 2022-10-10
                      */
                     calibration_date?: string;
                     /**
@@ -1251,7 +1600,7 @@ export declare namespace Paths {
                     /**
                      * The timestamp of the last reading
                      * example:
-                     * 2022-10-10T00:00:00.000Z
+                     * 2022-10-10
                      */
                     last_reading?: string;
                     /**
@@ -1323,6 +1672,24 @@ export declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace GetReadingChangesets {
+        namespace Parameters {
+            export type CounterId = Components.Schemas.Id;
+            export type MeterId = Components.Schemas.Id;
+        }
+        export interface PathParameters {
+            meter_id: Parameters.MeterId;
+            counter_id: Parameters.CounterId;
+        }
+        namespace Responses {
+            export interface $200 {
+                changesets?: Components.Schemas.MeterReadingChangeset[];
+            }
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace GetReadingsByInterval {
         namespace Parameters {
             export type CounterId = Components.Schemas.Id;
@@ -1337,6 +1704,7 @@ export declare namespace Paths {
              * 0
              */
             export type From = number;
+            export type IncludePendingChangesets = boolean;
             export type MeterId = Components.Schemas.Id;
             /**
              * example:
@@ -1379,6 +1747,7 @@ export declare namespace Paths {
             Parameters.From;
             type: Parameters.Type;
             sort?: Parameters.Sort;
+            include_pending_changesets?: Parameters.IncludePendingChangesets;
         }
         namespace Responses {
             export interface $200 {
@@ -1450,23 +1819,54 @@ export declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace UpdateReadingChangeset {
+        namespace Parameters {
+            export type ChangesetId = string;
+            export type CounterId = Components.Schemas.Id;
+            export type MeterId = Components.Schemas.Id;
+        }
+        export interface PathParameters {
+            meter_id: Parameters.MeterId;
+            counter_id: Parameters.CounterId;
+            changeset_id: Parameters.ChangesetId;
+        }
+        export interface RequestBody {
+            proposed?: Components.Schemas.ProposedReading;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.MeterReadingChangeset;
+            export type $400 = Components.Responses.InvalidRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export interface $404 {
+            }
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
 }
+
 
 export interface OperationMethods {
   /**
-   * getCustomerMeters - Get Customer Meters
+   * getCustomerMeters - getCustomerMeters
    * 
-   * Retrieves all meters related to a customer.
+   * Retrieves all meters associated with the authenticated portal customer.
+   * 
+   * Returns meter details along with any configured journey actions and the last meter reading timestamp and current consumption.
+   * 
    */
   'getCustomerMeters'(
-    parameters?: Parameters<UnknownParamsObject> | null,
+    parameters?: Parameters<Paths.GetCustomerMeters.QueryParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetCustomerMeters.Responses.$200>
   /**
    * getMetersByContractId - getMetersByContractId
    * 
-   * Retrieves all meters related to a contract.
+   * Retrieves all meters associated with a given contract entity.
+   * 
+   * Use this endpoint to display all meters linked to a customer's contract in the portal.
+   * 
    */
   'getMetersByContractId'(
     parameters?: Parameters<Paths.GetMetersByContractId.PathParameters> | null,
@@ -1474,9 +1874,12 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetMetersByContractId.Responses.$200>
   /**
-   * getMeter - Get Meter
+   * getMeter - getMeter
    * 
-   * Retrieves the details of a meter.
+   * Retrieves the full details of a specific meter by ID, including related entities and available journey actions.
+   * 
+   * The response includes the meter entity, any configured journey action (e.g. a reading submission journey), and related entities such as contracts and contacts.
+   * 
    */
   'getMeter'(
     parameters?: Parameters<Paths.GetMeter.PathParameters> | null,
@@ -1484,9 +1887,9 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetMeter.Responses.$200>
   /**
-   * updateMeter - Update Meter
+   * updateMeter - updateMeter
    * 
-   * Updates the details of a meter.
+   * Partially updates the details of a meter entity by ID.
    */
   'updateMeter'(
     parameters?: Parameters<Paths.UpdateMeter.PathParameters> | null,
@@ -1494,9 +1897,12 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UpdateMeter.Responses.$200>
   /**
-   * getMeterCounters - Get Meter Counters
+   * getMeterCounters - getMeterCounters
    * 
-   * Retrieves all counters for a given meter.
+   * Retrieves all meter counters associated with a given meter.
+   * 
+   * Meter counters represent individual measurement channels on a meter (e.g. HT/NT tariff channels, feed-in/feed-out directions).
+   * 
    */
   'getMeterCounters'(
     parameters?: Parameters<Paths.GetMeterCounters.QueryParameters> | null,
@@ -1504,9 +1910,12 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetMeterCounters.Responses.$200>
   /**
-   * getCounterDetails - Get Counter Details
+   * getCounterDetails - getCounterDetails
    * 
-   * Retrieves the details of a meter counter.
+   * Retrieves the full details of a single meter counter by its ID.
+   * 
+   * Counter details include the OBIS number, direction, tariff type, transformer ratio, conversion factor, unit, and the last reading value and timestamp.
+   * 
    */
   'getCounterDetails'(
     parameters?: Parameters<Paths.GetCounterDetails.PathParameters> | null,
@@ -1514,19 +1923,25 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetCounterDetails.Responses.$200>
   /**
-   * createMeterReading - Create Meter Reading
+   * createMeterReading - createMeterReading
    * 
    * Inserts a new meter reading.
+   * 
+   * When `source: 'ERP'` is set in the request body, the write is treated as a direct confirmation (same as `?direct=true`). This triggers auto-clear of matching pending changesets.
+   * 
    */
   'createMeterReading'(
-    parameters?: Parameters<UnknownParamsObject> | null,
+    parameters?: Parameters<Paths.CreateMeterReading.QueryParameters> | null,
     data?: Paths.CreateMeterReading.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CreateMeterReading.Responses.$200>
   /**
-   * createMeterReadings - Create Meter Readings
+   * createMeterReadings - createMeterReadings
    * 
    * Inserts multiple meter readings at once. Limited to 100 readings per request.
+   * 
+   * When `source: 'ERP'` is set in the request body, the write is treated as a direct confirmation (same as `?direct=true`). This triggers auto-clear of matching pending changesets.
+   * 
    */
   'createMeterReadings'(
     parameters?: Parameters<Paths.CreateMeterReadings.QueryParameters> | null,
@@ -1536,17 +1951,29 @@ export interface OperationMethods {
   /**
    * createPortalMeterReadings - createPortalMeterReadings
    * 
-   * Inserts multiple meter readings at once for a given meter. Limited to 2 readings per request.
+   * Inserts multiple meter readings at once for a given meter via the end customer portal.
+   * Limited to 100 readings per request.
+   * 
+   * This endpoint is designed for portal users submitting readings for a specific meter identified by path parameter.
+   * 
+   * When `source: 'ERP'` is set in the request body, the write is treated as a direct confirmation (same as `?direct=true`). This triggers auto-clear of matching pending changesets.
+   * 
    */
   'createPortalMeterReadings'(
-    parameters?: Parameters<Paths.CreatePortalMeterReadings.PathParameters> | null,
+    parameters?: Parameters<Paths.CreatePortalMeterReadings.QueryParameters & Paths.CreatePortalMeterReadings.PathParameters> | null,
     data?: Paths.CreatePortalMeterReadings.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CreatePortalMeterReadings.Responses.$200>
   /**
-   * batchWriteMeterReadings - Batch Write Readings
+   * batchWriteMeterReadings - batchWriteMeterReadings
    * 
-   * Upserts/Deletes multiple meter readings at once. Limited to 100 readings per request.
+   * Upserts or deletes multiple meter readings at once. Limited to 100 readings per request.
+   * 
+   * Use the `operation` field on each reading to specify `create`, `update`, or `delete`.
+   * Custom `identifiers` can be provided to control how unique readings are matched (e.g. by `external_id` or `metadata` fields).
+   * 
+   * When `source: 'ERP'` is set in the request body, the write is treated as a direct confirmation (same as `?direct=true`). This triggers auto-clear of matching pending changesets.
+   * 
    */
   'batchWriteMeterReadings'(
     parameters?: Parameters<Paths.BatchWriteMeterReadings.QueryParameters> | null,
@@ -1554,9 +1981,12 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.BatchWriteMeterReadings.Responses.$200>
   /**
-   * createMeterReadingFromSubmission - Create Meter Reading from Submission
+   * createMeterReadingFromSubmission - createMeterReadingFromSubmission
    * 
-   * Creates a reading from a journey submission.
+   * Creates meter readings from a journey submission payload.
+   * 
+   * This endpoint is called internally by the journey automation engine when a customer submits meter readings through a journey. It parses the submission payload and stores the readings for the relevant meters.
+   * 
    */
   'createMeterReadingFromSubmission'(
     parameters?: Parameters<UnknownParamsObject> | null,
@@ -1566,7 +1996,11 @@ export interface OperationMethods {
   /**
    * getAllowedReadingForMeter - getAllowedReadingForMeter
    * 
-   * Get allowed reading for the given meter
+   * Returns the allowed min/max reading range for each counter of the given meter.
+   * 
+   * Use this endpoint to validate end-customer input before submitting a new reading.
+   * If no timestamp is provided, the system defaults to the current time.
+   * 
    */
   'getAllowedReadingForMeter'(
     parameters?: Parameters<Paths.GetAllowedReadingForMeter.QueryParameters & Paths.GetAllowedReadingForMeter.PathParameters> | null,
@@ -1574,9 +2008,12 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetAllowedReadingForMeter.Responses.$200>
   /**
-   * createReadingWithMeter - Create Reading with Meter
+   * createReadingWithMeter - createReadingWithMeter
    * 
-   * Creates a reading along with a meter.
+   * Creates a meter reading along with meter lookup or creation by MA-LO ID and OBIS number.
+   * 
+   * If a meter matching the provided `ma_lo_id` and `obis_number` already exists, the reading is added to it. Otherwise, a new meter counter is created as needed.
+   * 
    */
   'createReadingWithMeter'(
     parameters?: Parameters<UnknownParamsObject> | null,
@@ -1584,7 +2021,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CreateReadingWithMeter.Responses.$200>
   /**
-   * getReadingsByInterval - Get Readings by Interval
+   * getReadingsByInterval - getReadingsByInterval
    * 
    * Retrieves all readings specified in an interval.
    * If the start_date and end_date are equal, then it returns the readings of the specified date.
@@ -1597,9 +2034,9 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetReadingsByInterval.Responses.$200>
   /**
-   * updateMeterReading - Update Meter Reading
+   * updateMeterReading - updateMeterReading
    * 
-   * Updates a meter reading.
+   * Updates an existing meter reading identified by meter ID, counter ID, and timestamp.
    */
   'updateMeterReading'(
     parameters?: Parameters<Paths.UpdateMeterReading.QueryParameters & Paths.UpdateMeterReading.PathParameters> | null,
@@ -1607,26 +2044,74 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UpdateMeterReading.Responses.$200>
   /**
-   * deleteMeterReading - Delete Meter Reading
+   * deleteMeterReading - deleteMeterReading
    * 
-   * Deletes a meter reading.
+   * Permanently deletes a meter reading identified by meter ID, counter ID, and timestamp.
    */
   'deleteMeterReading'(
     parameters?: Parameters<Paths.DeleteMeterReading.QueryParameters & Paths.DeleteMeterReading.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteMeterReading.Responses.$200>
+  /**
+   * getReadingChangesets - List pending reading changesets for a counter
+   */
+  'getReadingChangesets'(
+    parameters?: Parameters<Paths.GetReadingChangesets.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetReadingChangesets.Responses.$200>
+  /**
+   * applyReadingChangeset - Apply (approve) a pending reading changeset
+   * 
+   * Applies the proposed reading value to ClickHouse and removes the pending changeset.
+   * 
+   * Requires `meter_reading:edit` permission (approval workflow action on the reading's approval state).
+   * 
+   */
+  'applyReadingChangeset'(
+    parameters?: Parameters<Paths.ApplyReadingChangeset.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ApplyReadingChangeset.Responses.$200>
+  /**
+   * dismissReadingChangeset - Dismiss (reject) a pending reading changeset
+   * 
+   * Removes the pending changeset without applying it. The reading value remains unchanged.
+   * 
+   * Requires `meter_reading:edit` permission (approval workflow action on the reading's approval state).
+   * 
+   */
+  'dismissReadingChangeset'(
+    parameters?: Parameters<Paths.DismissReadingChangeset.PathParameters> | null,
+    data?: Paths.DismissReadingChangeset.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.DismissReadingChangeset.Responses.$200>
+  /**
+   * updateReadingChangeset - Edit a pending reading changeset
+   * 
+   * Updates the proposed value of a pending changeset without going through the normal write path.
+   * 
+   */
+  'updateReadingChangeset'(
+    parameters?: Parameters<Paths.UpdateReadingChangeset.PathParameters> | null,
+    data?: Paths.UpdateReadingChangeset.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.UpdateReadingChangeset.Responses.$200>
 }
 
 export interface PathsDictionary {
   ['/v1/metering/meter']: {
     /**
-     * getCustomerMeters - Get Customer Meters
+     * getCustomerMeters - getCustomerMeters
      * 
-     * Retrieves all meters related to a customer.
+     * Retrieves all meters associated with the authenticated portal customer.
+     * 
+     * Returns meter details along with any configured journey actions and the last meter reading timestamp and current consumption.
+     * 
      */
     'get'(
-      parameters?: Parameters<UnknownParamsObject> | null,
+      parameters?: Parameters<Paths.GetCustomerMeters.QueryParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetCustomerMeters.Responses.$200>
@@ -1635,7 +2120,10 @@ export interface PathsDictionary {
     /**
      * getMetersByContractId - getMetersByContractId
      * 
-     * Retrieves all meters related to a contract.
+     * Retrieves all meters associated with a given contract entity.
+     * 
+     * Use this endpoint to display all meters linked to a customer's contract in the portal.
+     * 
      */
     'get'(
       parameters?: Parameters<Paths.GetMetersByContractId.PathParameters> | null,
@@ -1645,9 +2133,9 @@ export interface PathsDictionary {
   }
   ['/v1/metering/meter/{id}']: {
     /**
-     * updateMeter - Update Meter
+     * updateMeter - updateMeter
      * 
-     * Updates the details of a meter.
+     * Partially updates the details of a meter entity by ID.
      */
     'patch'(
       parameters?: Parameters<Paths.UpdateMeter.PathParameters> | null,
@@ -1655,9 +2143,12 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.UpdateMeter.Responses.$200>
     /**
-     * getMeter - Get Meter
+     * getMeter - getMeter
      * 
-     * Retrieves the details of a meter.
+     * Retrieves the full details of a specific meter by ID, including related entities and available journey actions.
+     * 
+     * The response includes the meter entity, any configured journey action (e.g. a reading submission journey), and related entities such as contracts and contacts.
+     * 
      */
     'get'(
       parameters?: Parameters<Paths.GetMeter.PathParameters> | null,
@@ -1667,9 +2158,12 @@ export interface PathsDictionary {
   }
   ['/v1/metering/counter']: {
     /**
-     * getMeterCounters - Get Meter Counters
+     * getMeterCounters - getMeterCounters
      * 
-     * Retrieves all counters for a given meter.
+     * Retrieves all meter counters associated with a given meter.
+     * 
+     * Meter counters represent individual measurement channels on a meter (e.g. HT/NT tariff channels, feed-in/feed-out directions).
+     * 
      */
     'get'(
       parameters?: Parameters<Paths.GetMeterCounters.QueryParameters> | null,
@@ -1679,9 +2173,12 @@ export interface PathsDictionary {
   }
   ['/v1/metering/counter/{counter_id}']: {
     /**
-     * getCounterDetails - Get Counter Details
+     * getCounterDetails - getCounterDetails
      * 
-     * Retrieves the details of a meter counter.
+     * Retrieves the full details of a single meter counter by its ID.
+     * 
+     * Counter details include the OBIS number, direction, tariff type, transformer ratio, conversion factor, unit, and the last reading value and timestamp.
+     * 
      */
     'get'(
       parameters?: Parameters<Paths.GetCounterDetails.PathParameters> | null,
@@ -1691,21 +2188,27 @@ export interface PathsDictionary {
   }
   ['/v1/metering/reading']: {
     /**
-     * createMeterReading - Create Meter Reading
+     * createMeterReading - createMeterReading
      * 
      * Inserts a new meter reading.
+     * 
+     * When `source: 'ERP'` is set in the request body, the write is treated as a direct confirmation (same as `?direct=true`). This triggers auto-clear of matching pending changesets.
+     * 
      */
     'post'(
-      parameters?: Parameters<UnknownParamsObject> | null,
+      parameters?: Parameters<Paths.CreateMeterReading.QueryParameters> | null,
       data?: Paths.CreateMeterReading.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.CreateMeterReading.Responses.$200>
   }
   ['/v1/metering/readings']: {
     /**
-     * createMeterReadings - Create Meter Readings
+     * createMeterReadings - createMeterReadings
      * 
      * Inserts multiple meter readings at once. Limited to 100 readings per request.
+     * 
+     * When `source: 'ERP'` is set in the request body, the write is treated as a direct confirmation (same as `?direct=true`). This triggers auto-clear of matching pending changesets.
+     * 
      */
     'post'(
       parameters?: Parameters<Paths.CreateMeterReadings.QueryParameters> | null,
@@ -1717,19 +2220,31 @@ export interface PathsDictionary {
     /**
      * createPortalMeterReadings - createPortalMeterReadings
      * 
-     * Inserts multiple meter readings at once for a given meter. Limited to 2 readings per request.
+     * Inserts multiple meter readings at once for a given meter via the end customer portal.
+     * Limited to 100 readings per request.
+     * 
+     * This endpoint is designed for portal users submitting readings for a specific meter identified by path parameter.
+     * 
+     * When `source: 'ERP'` is set in the request body, the write is treated as a direct confirmation (same as `?direct=true`). This triggers auto-clear of matching pending changesets.
+     * 
      */
     'post'(
-      parameters?: Parameters<Paths.CreatePortalMeterReadings.PathParameters> | null,
+      parameters?: Parameters<Paths.CreatePortalMeterReadings.QueryParameters & Paths.CreatePortalMeterReadings.PathParameters> | null,
       data?: Paths.CreatePortalMeterReadings.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.CreatePortalMeterReadings.Responses.$200>
   }
   ['/v2/metering/readings']: {
     /**
-     * batchWriteMeterReadings - Batch Write Readings
+     * batchWriteMeterReadings - batchWriteMeterReadings
      * 
-     * Upserts/Deletes multiple meter readings at once. Limited to 100 readings per request.
+     * Upserts or deletes multiple meter readings at once. Limited to 100 readings per request.
+     * 
+     * Use the `operation` field on each reading to specify `create`, `update`, or `delete`.
+     * Custom `identifiers` can be provided to control how unique readings are matched (e.g. by `external_id` or `metadata` fields).
+     * 
+     * When `source: 'ERP'` is set in the request body, the write is treated as a direct confirmation (same as `?direct=true`). This triggers auto-clear of matching pending changesets.
+     * 
      */
     'post'(
       parameters?: Parameters<Paths.BatchWriteMeterReadings.QueryParameters> | null,
@@ -1739,9 +2254,12 @@ export interface PathsDictionary {
   }
   ['/v1/metering/reading/submission']: {
     /**
-     * createMeterReadingFromSubmission - Create Meter Reading from Submission
+     * createMeterReadingFromSubmission - createMeterReadingFromSubmission
      * 
-     * Creates a reading from a journey submission.
+     * Creates meter readings from a journey submission payload.
+     * 
+     * This endpoint is called internally by the journey automation engine when a customer submits meter readings through a journey. It parses the submission payload and stores the readings for the relevant meters.
+     * 
      */
     'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
@@ -1753,7 +2271,11 @@ export interface PathsDictionary {
     /**
      * getAllowedReadingForMeter - getAllowedReadingForMeter
      * 
-     * Get allowed reading for the given meter
+     * Returns the allowed min/max reading range for each counter of the given meter.
+     * 
+     * Use this endpoint to validate end-customer input before submitting a new reading.
+     * If no timestamp is provided, the system defaults to the current time.
+     * 
      */
     'get'(
       parameters?: Parameters<Paths.GetAllowedReadingForMeter.QueryParameters & Paths.GetAllowedReadingForMeter.PathParameters> | null,
@@ -1763,9 +2285,12 @@ export interface PathsDictionary {
   }
   ['/v1/metering/reading/with-meter']: {
     /**
-     * createReadingWithMeter - Create Reading with Meter
+     * createReadingWithMeter - createReadingWithMeter
      * 
-     * Creates a reading along with a meter.
+     * Creates a meter reading along with meter lookup or creation by MA-LO ID and OBIS number.
+     * 
+     * If a meter matching the provided `ma_lo_id` and `obis_number` already exists, the reading is added to it. Otherwise, a new meter counter is created as needed.
+     * 
      */
     'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
@@ -1775,7 +2300,7 @@ export interface PathsDictionary {
   }
   ['/v1/metering/reading/{meter_id}/{counter_id}']: {
     /**
-     * getReadingsByInterval - Get Readings by Interval
+     * getReadingsByInterval - getReadingsByInterval
      * 
      * Retrieves all readings specified in an interval.
      * If the start_date and end_date are equal, then it returns the readings of the specified date.
@@ -1788,9 +2313,9 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetReadingsByInterval.Responses.$200>
     /**
-     * updateMeterReading - Update Meter Reading
+     * updateMeterReading - updateMeterReading
      * 
-     * Updates a meter reading.
+     * Updates an existing meter reading identified by meter ID, counter ID, and timestamp.
      */
     'put'(
       parameters?: Parameters<Paths.UpdateMeterReading.QueryParameters & Paths.UpdateMeterReading.PathParameters> | null,
@@ -1798,9 +2323,9 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.UpdateMeterReading.Responses.$200>
     /**
-     * deleteMeterReading - Delete Meter Reading
+     * deleteMeterReading - deleteMeterReading
      * 
-     * Deletes a meter reading.
+     * Permanently deletes a meter reading identified by meter ID, counter ID, and timestamp.
      */
     'delete'(
       parameters?: Parameters<Paths.DeleteMeterReading.QueryParameters & Paths.DeleteMeterReading.PathParameters> | null,
@@ -1808,14 +2333,73 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteMeterReading.Responses.$200>
   }
+  ['/v1/metering/reading/{meter_id}/{counter_id}/changesets']: {
+    /**
+     * getReadingChangesets - List pending reading changesets for a counter
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetReadingChangesets.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetReadingChangesets.Responses.$200>
+  }
+  ['/v1/metering/reading/{meter_id}/{counter_id}/changesets/{changeset_id}:apply']: {
+    /**
+     * applyReadingChangeset - Apply (approve) a pending reading changeset
+     * 
+     * Applies the proposed reading value to ClickHouse and removes the pending changeset.
+     * 
+     * Requires `meter_reading:edit` permission (approval workflow action on the reading's approval state).
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.ApplyReadingChangeset.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ApplyReadingChangeset.Responses.$200>
+  }
+  ['/v1/metering/reading/{meter_id}/{counter_id}/changesets/{changeset_id}:dismiss']: {
+    /**
+     * dismissReadingChangeset - Dismiss (reject) a pending reading changeset
+     * 
+     * Removes the pending changeset without applying it. The reading value remains unchanged.
+     * 
+     * Requires `meter_reading:edit` permission (approval workflow action on the reading's approval state).
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.DismissReadingChangeset.PathParameters> | null,
+      data?: Paths.DismissReadingChangeset.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.DismissReadingChangeset.Responses.$200>
+  }
+  ['/v1/metering/reading/{meter_id}/{counter_id}/changesets/{changeset_id}']: {
+    /**
+     * updateReadingChangeset - Edit a pending reading changeset
+     * 
+     * Updates the proposed value of a pending changeset without going through the normal write path.
+     * 
+     */
+    'patch'(
+      parameters?: Parameters<Paths.UpdateReadingChangeset.PathParameters> | null,
+      data?: Paths.UpdateReadingChangeset.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.UpdateReadingChangeset.Responses.$200>
+  }
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
+
 export type ActionLabel = Components.Schemas.ActionLabel;
 export type ActivityId = Components.Schemas.ActivityId;
 export type BaseEntity = Components.Schemas.BaseEntity;
+export type BatchReading = Components.Schemas.BatchReading;
+export type BatchReadingBase = Components.Schemas.BatchReadingBase;
+export type ChangesetCreator = Components.Schemas.ChangesetCreator;
 export type CounterReadingOnSubmission = Components.Schemas.CounterReadingOnSubmission;
+export type CreateOrUpdateBatchReading = Components.Schemas.CreateOrUpdateBatchReading;
+export type DeleteBatchReading = Components.Schemas.DeleteBatchReading;
 export type Direction = Components.Schemas.Direction;
 export type Entity = Components.Schemas.Entity;
 export type EntityId = Components.Schemas.EntityId;
@@ -1823,12 +2407,15 @@ export type EntityItem = Components.Schemas.EntityItem;
 export type EntityRelation = Components.Schemas.EntityRelation;
 export type EntitySlug = Components.Schemas.EntitySlug;
 export type ErrorResp = Components.Schemas.ErrorResp;
+export type FuzzyConfig = Components.Schemas.FuzzyConfig;
 export type Id = Components.Schemas.Id;
 export type JourneyActions = Components.Schemas.JourneyActions;
 export type Meter = Components.Schemas.Meter;
 export type MeterCounter = Components.Schemas.MeterCounter;
 export type MeterReading = Components.Schemas.MeterReading;
+export type MeterReadingChangeset = Components.Schemas.MeterReadingChangeset;
 export type PortalMeterReading = Components.Schemas.PortalMeterReading;
+export type ProposedReading = Components.Schemas.ProposedReading;
 export type ReadBy = Components.Schemas.ReadBy;
 export type Reading = Components.Schemas.Reading;
 export type ReadingStatus = Components.Schemas.ReadingStatus;
@@ -1839,5 +2426,6 @@ export type Rule = Components.Schemas.Rule;
 export type Source = Components.Schemas.Source;
 export type SubmissionMeterReading = Components.Schemas.SubmissionMeterReading;
 export type TariffType = Components.Schemas.TariffType;
+export type TimestampTolerance = Components.Schemas.TimestampTolerance;
 export type Unit = Components.Schemas.Unit;
 export type UpdateMeterReading = Components.Schemas.UpdateMeterReading;

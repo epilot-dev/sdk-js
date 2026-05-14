@@ -1,6 +1,5 @@
 # Metering API
 
-- **Base URL:** `https://metering.sls.epilot.io`
 - **Full API Docs:** [https://docs.epilot.io/api/metering](https://docs.epilot.io/api/metering)
 
 ## Usage
@@ -44,6 +43,12 @@ const { data } = await meteringClient.getCustomerMeters(...)
 - [`updateMeterReading`](#updatemeterreading)
 - [`deleteMeterReading`](#deletemeterreading)
 
+**Metering**
+- [`getReadingChangesets`](#getreadingchangesets)
+- [`applyReadingChangeset`](#applyreadingchangeset)
+- [`dismissReadingChangeset`](#dismissreadingchangeset)
+- [`updateReadingChangeset`](#updatereadingchangeset)
+
 **Schemas**
 - [`ErrorResp`](#errorresp)
 - [`EntityId`](#entityid)
@@ -63,6 +68,10 @@ const { data } = await meteringClient.getCustomerMeters(...)
 - [`Reading`](#reading)
 - [`MeterReading`](#meterreading)
 - [`PortalMeterReading`](#portalmeterreading)
+- [`BatchReadingBase`](#batchreadingbase)
+- [`CreateOrUpdateBatchReading`](#createorupdatebatchreading)
+- [`DeleteBatchReading`](#deletebatchreading)
+- [`BatchReading`](#batchreading)
 - [`UpdateMeterReading`](#updatemeterreading)
 - [`MeterCounter`](#metercounter)
 - [`CounterReadingOnSubmission`](#counterreadingonsubmission)
@@ -73,16 +82,23 @@ const { data } = await meteringClient.getCustomerMeters(...)
 - [`Rule`](#rule)
 - [`JourneyActions`](#journeyactions)
 - [`ReadingWithMeter`](#readingwithmeter)
+- [`MeterReadingChangeset`](#meterreadingchangeset)
+- [`FuzzyConfig`](#fuzzyconfig)
+- [`ProposedReading`](#proposedreading)
+- [`ChangesetCreator`](#changesetcreator)
+- [`TimestampTolerance`](#timestamptolerance)
 - [`ActivityId`](#activityid)
 
 ### `getCustomerMeters`
 
-Get Customer Meters
+Retrieves all meters associated with the authenticated portal customer.
 
 `GET /v1/metering/meter`
 
 ```ts
-const { data } = await client.getCustomerMeters()
+const { data } = await client.getCustomerMeters({
+  include_pending_changesets: true,
+})
 ```
 
 <details>
@@ -118,7 +134,7 @@ const { data } = await client.getCustomerMeters()
       ],
       "used_for": "Domestic Usage",
       "manufacturer": "Energy One",
-      "calibration_date": "2022-10-10T00:00:00.000Z",
+      "calibration_date": "2022-10-10",
       "contract": {
         "$relation": [
           {
@@ -150,7 +166,7 @@ const { data } = await client.getCustomerMeters()
           }
         ]
       },
-      "last_reading": "2022-10-10T00:00:00.000Z",
+      "last_reading": "2022-10-10",
       "current_consumption": 100.5
     }
   ]
@@ -163,7 +179,7 @@ const { data } = await client.getCustomerMeters()
 
 ### `getMetersByContractId`
 
-Retrieves all meters related to a contract.
+Retrieves all meters associated with a given contract entity.
 
 `GET /v1/metering/contract/meters/{contract_id}`
 
@@ -206,7 +222,7 @@ const { data } = await client.getMetersByContractId({
       ],
       "used_for": "Domestic Usage",
       "manufacturer": "Energy One",
-      "calibration_date": "2022-10-10T00:00:00.000Z",
+      "calibration_date": "2022-10-10",
       "contract": {
         "$relation": [
           {
@@ -234,7 +250,7 @@ const { data } = await client.getMetersByContractId({
 
 ### `updateMeter`
 
-Update Meter
+Partially updates the details of a meter entity by ID.
 
 `PATCH /v1/metering/meter/{id}`
 
@@ -279,7 +295,7 @@ const { data } = await client.updateMeter(
     ],
     "used_for": "Domestic Usage",
     "manufacturer": "Energy One",
-    "calibration_date": "2022-10-10T00:00:00.000Z",
+    "calibration_date": "2022-10-10",
     "contract": {
       "$relation": [
         {
@@ -306,7 +322,7 @@ const { data } = await client.updateMeter(
 
 ### `getMeter`
 
-Get Meter
+Retrieves the full details of a specific meter by ID, including related entities and available journey actions.
 
 `GET /v1/metering/meter/{id}`
 
@@ -349,7 +365,7 @@ const { data } = await client.getMeter({
       ],
       "used_for": "Domestic Usage",
       "manufacturer": "Energy One",
-      "calibration_date": "2022-10-10T00:00:00.000Z",
+      "calibration_date": "2022-10-10",
       "contract": {
         "$relation": [
           {
@@ -402,7 +418,7 @@ const { data } = await client.getMeter({
 
 ### `getMeterCounters`
 
-Get Meter Counters
+Retrieves all meter counters associated with a given meter.
 
 `GET /v1/metering/counter`
 
@@ -431,9 +447,9 @@ const { data } = await client.getMeterCounters({
       "transformer_ratio": 70,
       "unit": "string",
       "forecast_reading_value": 270,
-      "forecast_as_of": "2022-12-10T00:00:00.000Z",
+      "forecast_as_of": "2022-12-10",
       "current_consumption": 240,
-      "last_reading": "2022-10-10T00:00:00.000Z",
+      "last_reading": "2022-10-10",
       "conversion_factor": 3,
       "tariff_type": "ht"
     }
@@ -447,7 +463,7 @@ const { data } = await client.getMeterCounters({
 
 ### `getCounterDetails`
 
-Get Counter Details
+Retrieves the full details of a single meter counter by its ID.
 
 `GET /v1/metering/counter/{counter_id}`
 
@@ -475,9 +491,9 @@ const { data } = await client.getCounterDetails({
     "transformer_ratio": 70,
     "unit": "string",
     "forecast_reading_value": 270,
-    "forecast_as_of": "2022-12-10T00:00:00.000Z",
+    "forecast_as_of": "2022-12-10",
     "current_consumption": 240,
-    "last_reading": "2022-10-10T00:00:00.000Z",
+    "last_reading": "2022-10-10",
     "conversion_factor": 3,
     "tariff_type": "ht"
   }
@@ -490,13 +506,15 @@ const { data } = await client.getCounterDetails({
 
 ### `createMeterReading`
 
-Create Meter Reading
+Inserts a new meter reading.
 
 `POST /v1/metering/reading`
 
 ```ts
 const { data } = await client.createMeterReading(
-  null,
+  {
+    direct: true,
+  },
   {
     value: 240,
     read_by: 'John Doe',
@@ -504,7 +522,7 @@ const { data } = await client.createMeterReading(
     meter_id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
     counter_id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
     direction: 'feed-in',
-    timestamp: '2022-10-10T00:00:00.000Z',
+    timestamp: '2022-10-10',
     source: 'ECP',
     status: 'valid',
     external_id: 'string',
@@ -531,7 +549,7 @@ const { data } = await client.createMeterReading(
     "meter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
     "counter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
     "direction": "feed-in",
-    "timestamp": "2022-10-10T00:00:00.000Z",
+    "timestamp": "2022-10-10",
     "source": "ECP",
     "status": "valid",
     "external_id": "string",
@@ -552,7 +570,7 @@ const { data } = await client.createMeterReading(
 
 ### `createMeterReadings`
 
-Create Meter Readings
+Inserts multiple meter readings at once. Limited to 100 readings per request.
 
 `POST /v1/metering/readings`
 
@@ -562,6 +580,7 @@ const { data } = await client.createMeterReadings(
     async: true,
     activity_id: 'example',
     skip_validation: true,
+    direct: true,
   },
   {
     readings: [
@@ -572,7 +591,7 @@ const { data } = await client.createMeterReadings(
         meter_id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
         counter_id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
         direction: 'feed-in',
-        timestamp: '2022-10-10T00:00:00.000Z',
+        timestamp: '2022-10-10',
         source: 'ECP',
         status: 'valid',
         external_id: 'string',
@@ -602,7 +621,7 @@ const { data } = await client.createMeterReadings(
       "meter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
       "counter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
       "direction": "feed-in",
-      "timestamp": "2022-10-10T00:00:00.000Z",
+      "timestamp": "2022-10-10",
       "source": "ECP",
       "status": "valid",
       "external_id": "string",
@@ -624,7 +643,8 @@ const { data } = await client.createMeterReadings(
 
 ### `createPortalMeterReadings`
 
-Inserts multiple meter readings at once for a given meter. Limited to 2 readings per request.
+Inserts multiple meter readings at once for a given meter via the end customer portal.
+Limited to 100 readings per request.
 
 `POST /v1/metering/readings/{meter_id}`
 
@@ -632,6 +652,7 @@ Inserts multiple meter readings at once for a given meter. Limited to 2 readings
 const { data } = await client.createPortalMeterReadings(
   {
     meter_id: 'example',
+    direct: true,
   },
   {
     readings: [
@@ -642,7 +663,7 @@ const { data } = await client.createPortalMeterReadings(
         meter_id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
         counter_id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
         direction: 'feed-in',
-        timestamp: '2022-10-10T00:00:00.000Z',
+        timestamp: '2022-10-10',
         source: 'ECP',
         status: 'valid',
         external_id: 'string',
@@ -672,7 +693,7 @@ const { data } = await client.createPortalMeterReadings(
       "meter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
       "counter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
       "direction": "feed-in",
-      "timestamp": "2022-10-10T00:00:00.000Z",
+      "timestamp": "2022-10-10",
       "source": "ECP",
       "status": "valid",
       "external_id": "string",
@@ -694,7 +715,7 @@ const { data } = await client.createPortalMeterReadings(
 
 ### `batchWriteMeterReadings`
 
-Batch Write Readings
+Upserts or deletes multiple meter readings at once. Limited to 100 readings per request.
 
 `POST /v2/metering/readings`
 
@@ -704,29 +725,30 @@ const { data } = await client.batchWriteMeterReadings(
     async: true,
     skip_validation: true,
     activity_id: 'example',
+    direct: true,
   },
   {
     identifiers: ['string'],
     readings: [
       {
-        value: 240,
-        read_by: 'John Doe',
-        reason: '',
         meter_id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
         counter_id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
         direction: 'feed-in',
-        timestamp: '2022-10-10T00:00:00.000Z',
-        source: 'ECP',
-        status: 'valid',
+        timestamp: '2022-10-10T10:00:00Z',
         external_id: 'string',
-        remark: 'Customer reported unusual consumption',
         metadata: {
           registration_id: '1234567890',
           business_unit: 'ABC'
         },
+        operation: 'create',
+        value: 240,
+        source: 'ECP',
+        read_by: 'John Doe',
+        reason: '',
+        status: 'valid',
+        remark: 'Customer reported unusual consumption',
         note: 'string',
-        unit: 'string',
-        operation: 'create'
+        unit: 'string'
       }
     ]
   },
@@ -746,7 +768,7 @@ const { data } = await client.batchWriteMeterReadings(
       "meter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
       "counter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
       "direction": "feed-in",
-      "timestamp": "2022-10-10T00:00:00.000Z",
+      "timestamp": "2022-10-10",
       "source": "ECP",
       "status": "valid",
       "external_id": "string",
@@ -768,7 +790,7 @@ const { data } = await client.batchWriteMeterReadings(
 
 ### `createMeterReadingFromSubmission`
 
-Create Meter Reading from Submission
+Creates meter readings from a journey submission payload.
 
 `POST /v1/metering/reading/submission`
 
@@ -824,7 +846,7 @@ const { data } = await client.createMeterReadingFromSubmission(
 
 ### `getAllowedReadingForMeter`
 
-Get allowed reading for the given meter
+Returns the allowed min/max reading range for each counter of the given meter.
 
 `GET /v1/metering/allowed/reading/{meter_id}`
 
@@ -856,7 +878,7 @@ const { data } = await client.getAllowedReadingForMeter({
 
 ### `createReadingWithMeter`
 
-Create Reading with Meter
+Creates a meter reading along with meter lookup or creation by MA-LO ID and OBIS number.
 
 `POST /v1/metering/reading/with-meter`
 
@@ -891,7 +913,7 @@ const { data } = await client.createReadingWithMeter(
     "meter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
     "counter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
     "direction": "feed-in",
-    "timestamp": "2022-10-10T00:00:00.000Z",
+    "timestamp": "2022-10-10",
     "source": "ECP",
     "status": "valid",
     "external_id": "string",
@@ -912,7 +934,9 @@ const { data } = await client.createReadingWithMeter(
 
 ### `getReadingsByInterval`
 
-Get Readings by Interval
+Retrieves all readings specified in an interval.
+If the start_date and end_date are equal, then it returns the readings of the specified date.
+The start_date should be less than or equal to the end_da
 
 `GET /v1/metering/reading/{meter_id}/{counter_id}`
 
@@ -927,6 +951,7 @@ const { data } = await client.getReadingsByInterval({
   from: 1,
   type: 'example',
   sort: 'example',
+  include_pending_changesets: true,
 })
 ```
 
@@ -943,7 +968,7 @@ const { data } = await client.getReadingsByInterval({
       "meter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
       "counter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
       "direction": "feed-in",
-      "timestamp": "2022-10-10T00:00:00.000Z",
+      "timestamp": "2022-10-10",
       "source": "ECP",
       "status": "valid",
       "external_id": "string",
@@ -967,7 +992,7 @@ const { data } = await client.getReadingsByInterval({
 
 ### `updateMeterReading`
 
-Update Meter Reading
+Updates an existing meter reading identified by meter ID, counter ID, and timestamp.
 
 `PUT /v1/metering/reading/{meter_id}/{counter_id}`
 
@@ -985,7 +1010,7 @@ const { data } = await client.updateMeterReading(
     meter_id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
     counter_id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
     direction: 'feed-in',
-    timestamp: '2022-10-10T00:00:00.000Z',
+    timestamp: '2022-10-10',
     source: 'ECP',
     status: 'valid',
     external_id: 'string',
@@ -1010,7 +1035,7 @@ const { data } = await client.updateMeterReading(
     "meter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
     "counter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
     "direction": "feed-in",
-    "timestamp": "2022-10-10T00:00:00.000Z",
+    "timestamp": "2022-10-10",
     "source": "ECP",
     "status": "valid",
     "external_id": "string",
@@ -1031,7 +1056,7 @@ const { data } = await client.updateMeterReading(
 
 ### `deleteMeterReading`
 
-Delete Meter Reading
+Permanently deletes a meter reading identified by meter ID, counter ID, and timestamp.
 
 `DELETE /v1/metering/reading/{meter_id}/{counter_id}`
 
@@ -1053,6 +1078,305 @@ const { data } = await client.deleteMeterReading({
     "counterId": "string",
     "timestamp": "2022-10-01T20:00:00.000Z"
   }
+}
+```
+
+</details>
+
+---
+
+### `getReadingChangesets`
+
+List pending reading changesets for a counter
+
+`GET /v1/metering/reading/{meter_id}/{counter_id}/changesets`
+
+```ts
+const { data } = await client.getReadingChangesets({
+  meter_id: 'example',
+  counter_id: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "changesets": [
+    {
+      "changeset_id": "string",
+      "meter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "counter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "proposed": {
+        "value": 0,
+        "direction": "feed-in",
+        "timestamp": "1970-01-01T00:00:00.000Z",
+        "reason": "string",
+        "remark": "string",
+        "read_by": "string",
+        "status": "valid",
+        "external_id": "string"
+      },
+      "previous": {
+        "value": 0,
+        "direction": "feed-in",
+        "timestamp": "1970-01-01T00:00:00.000Z",
+        "reason": "string",
+        "remark": "string",
+        "read_by": "string",
+        "status": "valid",
+        "external_id": "string"
+      },
+      "edit_mode": "external",
+      "match_strategy": "exact",
+      "timestamp_tolerance": "exact",
+      "created_at": "1970-01-01T00:00:00.000Z",
+      "created_by": {
+        "type": "user",
+        "id": "string"
+      },
+      "source": "360",
+      "fuzzy_config": {
+        "percentage_threshold": 0.01,
+        "absolute_threshold": 0
+      },
+      "dismissed_reason": "string",
+      "dismissed_at": "1970-01-01T00:00:00.000Z"
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `applyReadingChangeset`
+
+Apply (approve) a pending reading changeset
+
+`POST /v1/metering/reading/{meter_id}/{counter_id}/changesets/{changeset_id}:apply`
+
+```ts
+const { data } = await client.applyReadingChangeset({
+  meter_id: 'example',
+  counter_id: 'example',
+  changeset_id: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "reading": {
+    "value": 240,
+    "read_by": "John Doe",
+    "reason": "",
+    "meter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "counter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "direction": "feed-in",
+    "timestamp": "2022-10-10",
+    "source": "ECP",
+    "status": "valid",
+    "external_id": "string",
+    "remark": "Customer reported unusual consumption",
+    "metadata": {
+      "registration_id": "1234567890",
+      "business_unit": "ABC"
+    },
+    "note": "string",
+    "unit": "string"
+  },
+  "changeset": {
+    "changeset_id": "string",
+    "meter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "counter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "proposed": {
+      "value": 0,
+      "direction": "feed-in",
+      "timestamp": "1970-01-01T00:00:00.000Z",
+      "reason": "string",
+      "remark": "string",
+      "read_by": "string",
+      "status": "valid",
+      "external_id": "string"
+    },
+    "previous": {
+      "value": 0,
+      "direction": "feed-in",
+      "timestamp": "1970-01-01T00:00:00.000Z",
+      "reason": "string",
+      "remark": "string",
+      "read_by": "string",
+      "status": "valid",
+      "external_id": "string"
+    },
+    "edit_mode": "external",
+    "match_strategy": "exact",
+    "timestamp_tolerance": "exact",
+    "created_at": "1970-01-01T00:00:00.000Z",
+    "created_by": {
+      "type": "user",
+      "id": "string"
+    },
+    "source": "360",
+    "fuzzy_config": {
+      "percentage_threshold": 0.01,
+      "absolute_threshold": 0
+    },
+    "dismissed_reason": "string",
+    "dismissed_at": "1970-01-01T00:00:00.000Z"
+  }
+}
+```
+
+</details>
+
+---
+
+### `dismissReadingChangeset`
+
+Dismiss (reject) a pending reading changeset
+
+`POST /v1/metering/reading/{meter_id}/{counter_id}/changesets/{changeset_id}:dismiss`
+
+```ts
+const { data } = await client.dismissReadingChangeset(
+  {
+    meter_id: 'example',
+    counter_id: 'example',
+    changeset_id: 'example',
+  },
+  {
+    reason: 'string'
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "changeset_id": "string",
+  "meter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "counter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "proposed": {
+    "value": 0,
+    "direction": "feed-in",
+    "timestamp": "1970-01-01T00:00:00.000Z",
+    "reason": "string",
+    "remark": "string",
+    "read_by": "string",
+    "status": "valid",
+    "external_id": "string"
+  },
+  "previous": {
+    "value": 0,
+    "direction": "feed-in",
+    "timestamp": "1970-01-01T00:00:00.000Z",
+    "reason": "string",
+    "remark": "string",
+    "read_by": "string",
+    "status": "valid",
+    "external_id": "string"
+  },
+  "edit_mode": "external",
+  "match_strategy": "exact",
+  "timestamp_tolerance": "exact",
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "created_by": {
+    "type": "user",
+    "id": "string"
+  },
+  "source": "360",
+  "fuzzy_config": {
+    "percentage_threshold": 0.01,
+    "absolute_threshold": 0
+  },
+  "dismissed_reason": "string",
+  "dismissed_at": "1970-01-01T00:00:00.000Z"
+}
+```
+
+</details>
+
+---
+
+### `updateReadingChangeset`
+
+Edit a pending reading changeset
+
+`PATCH /v1/metering/reading/{meter_id}/{counter_id}/changesets/{changeset_id}`
+
+```ts
+const { data } = await client.updateReadingChangeset(
+  {
+    meter_id: 'example',
+    counter_id: 'example',
+    changeset_id: 'example',
+  },
+  {
+    proposed: {
+      value: 0,
+      direction: 'feed-in',
+      timestamp: '1970-01-01T00:00:00.000Z',
+      reason: 'string',
+      remark: 'string',
+      read_by: 'string',
+      status: 'valid',
+      external_id: 'string'
+    }
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "changeset_id": "string",
+  "meter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "counter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "proposed": {
+    "value": 0,
+    "direction": "feed-in",
+    "timestamp": "1970-01-01T00:00:00.000Z",
+    "reason": "string",
+    "remark": "string",
+    "read_by": "string",
+    "status": "valid",
+    "external_id": "string"
+  },
+  "previous": {
+    "value": 0,
+    "direction": "feed-in",
+    "timestamp": "1970-01-01T00:00:00.000Z",
+    "reason": "string",
+    "remark": "string",
+    "read_by": "string",
+    "status": "valid",
+    "external_id": "string"
+  },
+  "edit_mode": "external",
+  "match_strategy": "exact",
+  "timestamp_tolerance": "exact",
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "created_by": {
+    "type": "user",
+    "id": "string"
+  },
+  "source": "360",
+  "fuzzy_config": {
+    "percentage_threshold": 0.01,
+    "absolute_threshold": 0
+  },
+  "dismissed_reason": "string",
+  "dismissed_at": "1970-01-01T00:00:00.000Z"
 }
 ```
 
@@ -1275,6 +1599,96 @@ type PortalMeterReading = {
 }
 ```
 
+### `BatchReadingBase`
+
+Base properties shared by all batch reading operations
+
+```ts
+type BatchReadingBase = {
+  meter_id?: string // uuid
+  counter_id?: string // uuid
+  direction?: "feed-in" | "feed-out"
+  timestamp?: string // date-time
+  external_id?: string
+  metadata?: Record<string, string>
+}
+```
+
+### `CreateOrUpdateBatchReading`
+
+Schema for create or update operations - requires value, source, and meter_id
+
+```ts
+type CreateOrUpdateBatchReading = {
+  meter_id: string // uuid
+  counter_id?: string // uuid
+  direction?: "feed-in" | "feed-out"
+  timestamp?: string // date-time
+  external_id?: string
+  metadata?: Record<string, string>
+  operation?: "create" | "update"
+  value: number
+  source: "ECP" | "ERP" | "360" | "journey-submission"
+  read_by?: string
+  reason?: "" | "regular" | "irregular" | "last" | "first" | "meter_change" | "contract_change" | "meter_adjustment"
+  status?: "valid" | "in-validation" | "implausible" | null | ""
+  remark?: string
+  note?: string
+  unit?: string
+}
+```
+
+### `DeleteBatchReading`
+
+Schema for delete operations - only requires identifier fields specified in the identifiers parameter
+
+```ts
+type DeleteBatchReading = {
+  meter_id?: string // uuid
+  counter_id?: string // uuid
+  direction?: "feed-in" | "feed-out"
+  timestamp?: string // date-time
+  external_id?: string
+  metadata?: Record<string, string>
+  operation: "delete"
+}
+```
+
+### `BatchReading`
+
+A meter reading for batch operations. The required fields depend on the operation:
+- create/update: requires value, source, and meter_id
+- delete: only requires the fields specified in the identifiers parameter
+
+
+```ts
+type BatchReading = {
+  meter_id: string // uuid
+  counter_id?: string // uuid
+  direction?: "feed-in" | "feed-out"
+  timestamp?: string // date-time
+  external_id?: string
+  metadata?: Record<string, string>
+  operation?: "create" | "update"
+  value: number
+  source: "ECP" | "ERP" | "360" | "journey-submission"
+  read_by?: string
+  reason?: "" | "regular" | "irregular" | "last" | "first" | "meter_change" | "contract_change" | "meter_adjustment"
+  status?: "valid" | "in-validation" | "implausible" | null | ""
+  remark?: string
+  note?: string
+  unit?: string
+} | {
+  meter_id?: string // uuid
+  counter_id?: string // uuid
+  direction?: "feed-in" | "feed-out"
+  timestamp?: string // date-time
+  external_id?: string
+  metadata?: Record<string, string>
+  operation: "delete"
+}
+```
+
 ### `UpdateMeterReading`
 
 ```ts
@@ -1419,6 +1833,114 @@ type ReadingWithMeter = {
   reason?: "" | "regular" | "irregular" | "last" | "first" | "meter_change" | "contract_change" | "meter_adjustment"
   timestamp?: string
   source?: "ECP" | "ERP" | "360" | "journey-submission"
+}
+```
+
+### `MeterReadingChangeset`
+
+```ts
+type MeterReadingChangeset = {
+  changeset_id: string
+  meter_id?: string // uuid
+  counter_id?: string // uuid
+  proposed: {
+    value: number
+    direction?: "feed-in" | "feed-out"
+    timestamp?: string // date-time
+    reason?: string
+    remark?: string
+    read_by?: string
+    status?: "valid" | "in-validation" | "implausible"
+    external_id?: string
+  }
+  previous?: {
+    value: number
+    direction?: "feed-in" | "feed-out"
+    timestamp?: string // date-time
+    reason?: string
+    remark?: string
+    read_by?: string
+    status?: "valid" | "in-validation" | "implausible"
+    external_id?: string
+  }
+  edit_mode: "external" | "approval"
+  match_strategy?: "exact" | "fuzzy"
+  timestamp_tolerance?: "exact" | {
+    type: "same-day"
+    timezone?: string
+  } | {
+    type: "within-seconds"
+    seconds: number
+  }
+  created_at: string // date-time
+  created_by?: {
+    type?: "user" | "portal_user" | "api_client" | "automation"
+    id?: string
+  }
+  source?: "360" | "ECP" | "ERP" | "journey-submission"
+  fuzzy_config?: {
+    percentage_threshold?: number
+    absolute_threshold?: number
+  }
+  dismissed_reason?: string
+  dismissed_at?: string // date-time
+}
+```
+
+### `FuzzyConfig`
+
+Numeric-threshold fuzzy matching for meter reading auto-clear.
+
+NOTE: This is intentionally different from entity-api's FuzzyConfig. Entity-api's
+fuzzy strategies (suffix, digits_only, normalize_phone, ignore_fields,
+contains_entry, regex) are designed for strings and structured objects (IBAN, phone
+
+```ts
+type FuzzyConfig = {
+  percentage_threshold?: number
+  absolute_threshold?: number
+}
+```
+
+### `ProposedReading`
+
+```ts
+type ProposedReading = {
+  value: number
+  direction?: "feed-in" | "feed-out"
+  timestamp?: string // date-time
+  reason?: string
+  remark?: string
+  read_by?: string
+  status?: "valid" | "in-validation" | "implausible"
+  external_id?: string
+}
+```
+
+### `ChangesetCreator`
+
+```ts
+type ChangesetCreator = {
+  type?: "user" | "portal_user" | "api_client" | "automation"
+  id?: string
+}
+```
+
+### `TimestampTolerance`
+
+Slack on `reading.timestamp` when auto-clear matches an incoming reading
+against a pending changeset. Both sides reference the SAME physical
+meter-read event — one as stored when the user submitted, the other as
+echoed back by the ERP. The tolerance accommodates round-trip format
+drift between the t
+
+```ts
+type TimestampTolerance = "exact" | {
+  type: "same-day"
+  timezone?: string
+} | {
+  type: "within-seconds"
+  seconds: number
 }
 ```
 
