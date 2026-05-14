@@ -141,8 +141,14 @@
       }
     },
     "/v2/outlook/connect": {
-      "get": {
+      "post": {
         "operationId": "connectOutlook",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
         "responses": {}
       }
     },
@@ -407,6 +413,18 @@
     "/v1/email-settings/domain/name-servers:verify": {
       "post": {
         "operationId": "verifyNameServers",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/email-settings/domain/dns-records:verify": {
+      "post": {
+        "operationId": "verifyDnsRecords",
         "requestBody": {
           "required": true,
           "content": {

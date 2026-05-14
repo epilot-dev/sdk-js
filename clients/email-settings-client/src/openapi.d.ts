@@ -38,6 +38,22 @@ declare namespace Components {
     }
     namespace Schemas {
         /**
+         * Feature flags selecting which Microsoft Graph scopes to request.
+         * At least one flag must be true. Passing a superset of previously
+         * granted features triggers incremental consent for the delta only.
+         *
+         */
+        export interface ConnectOutlookRequest {
+            /**
+             * Request 'mail' specific scopes.
+             */
+            mail?: boolean;
+            /**
+             * Request 'calendar' specific scopes.
+             */
+            calendar?: boolean;
+        }
+        /**
          * Mapping between an Outlook email and its Outlook Connection.
          * This tracks which provider/tenant provisions each Outlook email.
          *
@@ -343,14 +359,24 @@ declare namespace Components {
              */
             status: "connected" | "expired" | "pending_auth" | "not_connected";
             /**
-             * Action for UI to take (all call GET /outlook/connect):
+             * Action for UI to take (all call POST /outlook/connect):
              * - connect: No connection, initiate OAuth
              * - authorize: Admin consent done, complete OAuth
-             * - reconnect: Re-authenticate expired session
+             * - reconnect: Re-authenticate expired session or approve updated permissions
              * - none: Fully connected, no action needed
              *
              */
             action: "connect" | "authorize" | "reconnect" | "none";
+            /**
+             * Discriminates the cause when `action` is `reconnect`:
+             * - expired: Stored tokens are no longer valid; user must re-authenticate
+             * - permission_update: Token is valid, but the granted scopes do not cover the
+             *   scopes required by the configured Outlook integrations (currently `mail`).
+             *   The user must reconnect to grant the additional permissions; Microsoft's
+             *   incremental-consent flow will only prompt for the delta.
+             *
+             */
+            action_reason?: "expired" | "permission_update";
             /**
              * Display name of user who connected
              */
@@ -790,10 +816,18 @@ declare namespace Paths {
         }
     }
     namespace ConnectOutlook {
+        export type RequestBody = /**
+         * Feature flags selecting which Microsoft Graph scopes to request.
+         * At least one flag must be true. Passing a superset of previously
+         * granted features triggers incremental consent for the delta only.
+         *
+         */
+        Components.Schemas.ConnectOutlookRequest;
         namespace Responses {
             export interface $200 {
-                authorization_url?: string;
+                authorization_url: string;
             }
+            export type $400 = Components.Responses.OutlookErrorResponse;
             export type $403 = Components.Responses.OutlookErrorResponse;
         }
     }
@@ -1315,6 +1349,14 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace VerifyDnsRecords {
+        export type RequestBody = /* Custom email domain configuration. */ Components.Schemas.Domain;
+        namespace Responses {
+            export type $200 = Components.Schemas.SettingsResponse;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+        }
+    }
     namespace VerifyDomain {
         export type RequestBody = /* Custom email domain configuration. */ Components.Schemas.Domain;
         namespace Responses {
@@ -1332,6 +1374,7 @@ declare namespace Paths {
         }
     }
 }
+
 
 export interface OperationMethods {
   /**
@@ -1532,11 +1575,18 @@ export interface OperationMethods {
   /**
    * connectOutlook - connectOutlook
    * 
-   * Returns Microsoft authorization URL for Outlook OAuth.
+   * Returns the Microsoft authorization URL for Outlook OAuth.
+   * 
+   * The request body selects which features to request scopes for. Feature
+   * flags are additive; Microsoft OAuth scopes are cumulative. Calling this
+   * endpoint again with a superset of features (e.g. `mail` already connected,
+   * and `calendar` added) triggers Microsoft's incremental-consent flow —
+   * the user only sees a consent prompt for the new scopes.
+   * 
    */
   'connectOutlook'(
     parameters?: Parameters<UnknownParamsObject> | null,
-    data?: any,
+    data?: Paths.ConnectOutlook.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ConnectOutlook.Responses.$200>
   /**
@@ -1808,12 +1858,31 @@ export interface OperationMethods {
    * 
    * Run this verification after configuring NS records in your DNS provider.
    * 
+   * **Deprecated**: Use `/domain/dns-records:verify` for new integrations.
+   * 
    */
   'verifyNameServers'(
     parameters?: Parameters<UnknownParamsObject> | null,
     data?: Paths.VerifyNameServers.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.VerifyNameServers.Responses.$200>
+  /**
+   * verifyDnsRecords - verifyDnsRecords
+   * 
+   * Verifies that the domain's DNS records (MX, TXT, CNAME) are correctly configured
+   * in the customer's DNS provider.
+   * 
+   * This check performs DNS lookups to confirm each required record is present
+   * before proceeding with full domain identity verification.
+   * 
+   * Run this verification after configuring all DNS records in your DNS provider.
+   * 
+   */
+  'verifyDnsRecords'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.VerifyDnsRecords.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.VerifyDnsRecords.Responses.$200>
   /**
    * verifyDomain - verifyDomain
    * 
@@ -2049,11 +2118,18 @@ export interface PathsDictionary {
     /**
      * connectOutlook - connectOutlook
      * 
-     * Returns Microsoft authorization URL for Outlook OAuth.
+     * Returns the Microsoft authorization URL for Outlook OAuth.
+     * 
+     * The request body selects which features to request scopes for. Feature
+     * flags are additive; Microsoft OAuth scopes are cumulative. Calling this
+     * endpoint again with a superset of features (e.g. `mail` already connected,
+     * and `calendar` added) triggers Microsoft's incremental-consent flow —
+     * the user only sees a consent prompt for the new scopes.
+     * 
      */
-    'get'(
+    'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
-      data?: any,
+      data?: Paths.ConnectOutlook.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ConnectOutlook.Responses.$200>
   }
@@ -2357,12 +2433,33 @@ export interface PathsDictionary {
      * 
      * Run this verification after configuring NS records in your DNS provider.
      * 
+     * **Deprecated**: Use `/domain/dns-records:verify` for new integrations.
+     * 
      */
     'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
       data?: Paths.VerifyNameServers.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.VerifyNameServers.Responses.$200>
+  }
+  ['/v1/email-settings/domain/dns-records:verify']: {
+    /**
+     * verifyDnsRecords - verifyDnsRecords
+     * 
+     * Verifies that the domain's DNS records (MX, TXT, CNAME) are correctly configured
+     * in the customer's DNS provider.
+     * 
+     * This check performs DNS lookups to confirm each required record is present
+     * before proceeding with full domain identity verification.
+     * 
+     * Run this verification after configuring all DNS records in your DNS provider.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.VerifyDnsRecords.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.VerifyDnsRecords.Responses.$200>
   }
   ['/v1/email-settings/domain:verify']: {
     /**
@@ -2389,6 +2486,8 @@ export interface PathsDictionary {
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
+
+export type ConnectOutlookRequest = Components.Schemas.ConnectOutlookRequest;
 export type ConnectedOutlookEmail = Components.Schemas.ConnectedOutlookEmail;
 export type CreateEmailAddressPayload = Components.Schemas.CreateEmailAddressPayload;
 export type CreateSharedInboxPayload = Components.Schemas.CreateSharedInboxPayload;
