@@ -4563,40 +4563,57 @@ declare namespace Components {
             };
             schema?: string;
         }
+        /**
+         * Mobile OIDC configuration. All string fields support env var interpolation
+         * (incl. secrets) via mustache-like templates, e.g. `{{ env.MOBILE_CLIENT_SECRET }}`.
+         *
+         */
         export interface MoblieOIDCConfig {
             /**
-             * Client ID for the mobile app
+             * Client ID for the mobile app. Supports env var interpolation.
              * example:
              * 123456
              */
             client_id?: string;
             /**
-             * Client Secret for the mobile app
+             * Client Secret for the mobile app. Supports env var interpolation (incl. secrets),
+             * e.g. `{{ env.MOBILE_CLIENT_SECRET }}`.
+             *
              * example:
              * 123456
              */
             client_secret?: string;
         }
+        /**
+         * OIDC provider configuration. All string fields support env var interpolation
+         * (incl. secrets) via mustache-like templates, e.g. `{{ env.MY_PROVIDER_CLIENT_SECRET }}`.
+         *
+         */
         export interface OIDCProviderConfig {
             type?: "authorization_code" | "implicit";
             /**
-             * Issuing Authority URL
+             * Issuing Authority URL. Supports env var interpolation, e.g. `{{ env.MY_ISSUER }}`.
              * example:
              * https://login.microsoftonline.com/33d4f3e5-3df2-421e-b92e-a63cfa680a88/v2.0
              */
             oidc_issuer: string;
             /**
-             * Redirect URI for the OIDC flow
+             * Redirect URI for the OIDC flow. Supports env var interpolation.
              * example:
              * https://customer-portal.com/login
              */
             redirect_uri?: string;
             /**
+             * Supports env var interpolation, e.g. `{{ env.MY_CLIENT_ID }}`.
              * example:
              * ab81daf8-8b1f-42d6-94ca-c51621054c75
              */
             client_id: string;
             /**
+             * Client Secret. Supports env var interpolation (incl. secrets), e.g.
+             * `{{ env.MY_CLIENT_SECRET }}`. Prefer storing the actual secret as an org
+             * env var and referencing it here.
+             *
              * example:
              * 7BIUnn~6shh.7fNtXb..3k1Mp3s6k6WK3B
              */
@@ -4658,15 +4675,60 @@ declare namespace Components {
              */
             mobile_redirect_uri?: string;
             /**
-             * The username for the test auth, only used for testing on auth code flow
+             * The username for the test auth, only used for testing on auth code flow.
+             * Supports env var interpolation, e.g. `{{ env.MY_TEST_AUTH_USERNAME }}`.
+             *
              * example:
              * test@epilot.io
              */
             test_auth_username?: string;
             /**
-             * The password for the test auth, only used for testing on auth code flow
+             * The password for the test auth, only used for testing on auth code flow.
+             * Supports env var interpolation (incl. secrets), e.g. `{{ env.MY_TEST_AUTH_PASSWORD }}`.
+             *
              */
             test_auth_password?: string;
+        }
+        /**
+         * Public OIDC provider configuration. Same as OIDCProviderConfig but never includes
+         * the `client_secret` field — it is kept server-side and only used to exchange the
+         * authorization code at the SSO callback. String fields are returned with env var
+         * placeholders already resolved when fetched via `GET /v2/portal/public/sso/providers/{provider_slug}`.
+         *
+         */
+        export interface OIDCProviderPublicConfig {
+            type?: "authorization_code" | "implicit";
+            /**
+             * Issuing Authority URL
+             * example:
+             * https://login.microsoftonline.com/33d4f3e5-3df2-421e-b92e-a63cfa680a88/v2.0
+             */
+            oidc_issuer: string;
+            /**
+             * Redirect URI for the OIDC flow
+             * example:
+             * https://customer-portal.com/login
+             */
+            redirect_uri?: string;
+            /**
+             * example:
+             * ab81daf8-8b1f-42d6-94ca-c51621054c75
+             */
+            client_id: string;
+            /**
+             * Whether the client secret is present (the value itself is kept server-side)
+             * example:
+             * true
+             */
+            has_client_secret?: boolean;
+            /**
+             * Space-separated list of OAuth 2.0 scopes to request from OpenID Connect
+             * example:
+             * openid email
+             */
+            scope: string;
+            metadata?: OIDCProviderMetadata;
+            prompt?: "login" | "select_account" | "consent";
         }
         /**
          * The opportunity entity
@@ -6384,6 +6446,20 @@ declare namespace Components {
              */
             campaign_id?: string;
         }
+        /**
+         * SSO identity provider configuration.
+         *
+         * Env var interpolation: only string fields under `oidc_config` and
+         * `mobile_oidc_config` (incl. their nested `metadata`) are passed through
+         * Liquid templating, so they may contain `{{ env.VAR }}` placeholders that
+         * get resolved at runtime against the organization's environment.
+         *
+         * The following fields are used as literal values and MUST NOT contain
+         * template syntax: `slug`, `display_name`, `provider_type`, all keys and
+         * values under `attribute_mappings` (used as JSONPath-like accessors into
+         * token claims), and all keys and values under `entity_matching`.
+         *
+         */
         export interface ProviderConfig {
             slug?: /**
              * URL-friendly slug to use as organization-unique identifier for Provider
@@ -6400,8 +6476,18 @@ declare namespace Components {
             provider_type: "OIDC";
             attribute_mappings?: /* Dictionary of epilot user attributes to claims */ AttributeMappingConfig;
             entity_matching?: /* Configuration for matching existing entities during SSO login using token claims */ EntityMatchingConfig;
-            oidc_config?: OIDCProviderConfig;
-            mobile_oidc_config?: MoblieOIDCConfig;
+            oidc_config?: /**
+             * OIDC provider configuration. All string fields support env var interpolation
+             * (incl. secrets) via mustache-like templates, e.g. `{{ env.MY_PROVIDER_CLIENT_SECRET }}`.
+             *
+             */
+            OIDCProviderConfig;
+            mobile_oidc_config?: /**
+             * Mobile OIDC configuration. All string fields support env var interpolation
+             * (incl. secrets) via mustache-like templates, e.g. `{{ env.MOBILE_CLIENT_SECRET }}`.
+             *
+             */
+            MoblieOIDCConfig;
         }
         /**
          * Human-readable display name for identity provider shown in login
@@ -6422,8 +6508,20 @@ declare namespace Components {
              * Office 365 Login
              */
             ProviderDisplayName;
-            oidc_config?: OIDCProviderConfig;
-            mobile_oidc_config?: MoblieOIDCConfig;
+            oidc_config?: /**
+             * Public OIDC provider configuration. Same as OIDCProviderConfig but never includes
+             * the `client_secret` field — it is kept server-side and only used to exchange the
+             * authorization code at the SSO callback. String fields are returned with env var
+             * placeholders already resolved when fetched via `GET /v2/portal/public/sso/providers/{provider_slug}`.
+             *
+             */
+            OIDCProviderPublicConfig;
+            mobile_oidc_config?: /**
+             * Mobile OIDC configuration. All string fields support env var interpolation
+             * (incl. secrets) via mustache-like templates, e.g. `{{ env.MOBILE_CLIENT_SECRET }}`.
+             *
+             */
+            MoblieOIDCConfig;
         }
         /**
          * URL-friendly slug to use as organization-unique identifier for Provider
@@ -12191,6 +12289,48 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace GetSSOProvider {
+        namespace Parameters {
+            export type Domain = string;
+            /**
+             * example:
+             * 123
+             */
+            export type OrgId = string;
+            export type Origin = "END_CUSTOMER_PORTAL" | "INSTALLER_PORTAL";
+            export type PortalId = /**
+             * ID of the portal
+             * example:
+             * 453ad7bf-86d5-46c8-8252-bcc868df5e3c
+             */
+            Components.Schemas.PortalId;
+            export type ProviderSlug = /**
+             * URL-friendly slug to use as organization-unique identifier for Provider
+             * example:
+             * office-365-login
+             */
+            Components.Schemas.ProviderSlug /* [0-9a-z-]+ */;
+        }
+        export interface PathParameters {
+            provider_slug: Parameters.ProviderSlug;
+        }
+        export interface QueryParameters {
+            org_id?: /**
+             * example:
+             * 123
+             */
+            Parameters.OrgId;
+            origin?: Parameters.Origin;
+            portal_id?: Parameters.PortalId;
+            domain?: Parameters.Domain;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.ProviderPublicConfig;
+            export type $400 = Components.Responses.InvalidRequest;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace GetSchemas {
         namespace Responses {
             export interface $200 {
@@ -15180,6 +15320,28 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetMeterReadings.Responses.$200>
   /**
+   * getSSOProvider - getSSOProvider
+   * 
+   * Returns the public configuration of a single SSO identity provider with env var
+   * placeholders (incl. secrets) already resolved against the organization's environment.
+   * 
+   * Use this endpoint at SSO initiation time (i.e. when the end user clicks "Sign in with X")
+   * to obtain the resolved OIDC settings needed to construct the authorization URL.
+   * The web `client_secret` is intentionally never returned — it is used server-side by
+   * the SSO callback to exchange the authorization code for tokens.
+   * 
+   * Supports three identification methods:
+   * 1. `org_id` + `origin`
+   * 2. `org_id` + `portal_id`
+   * 3. `domain`
+   * 
+   */
+  'getSSOProvider'(
+    parameters?: Parameters<Paths.GetSSOProvider.QueryParameters & Paths.GetSSOProvider.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetSSOProvider.Responses.$200>
+  /**
    * ssoLogin - ssoLogin
    * 
    * Initiate login using external SSO identity.
@@ -16916,6 +17078,30 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetMeterReadings.Responses.$200>
   }
+  ['/v2/portal/public/sso/providers/{provider_slug}']: {
+    /**
+     * getSSOProvider - getSSOProvider
+     * 
+     * Returns the public configuration of a single SSO identity provider with env var
+     * placeholders (incl. secrets) already resolved against the organization's environment.
+     * 
+     * Use this endpoint at SSO initiation time (i.e. when the end user clicks "Sign in with X")
+     * to obtain the resolved OIDC settings needed to construct the authorization URL.
+     * The web `client_secret` is intentionally never returned — it is used server-side by
+     * the SSO callback to exchange the authorization code for tokens.
+     * 
+     * Supports three identification methods:
+     * 1. `org_id` + `origin`
+     * 2. `org_id` + `portal_id`
+     * 3. `domain`
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetSSOProvider.QueryParameters & Paths.GetSSOProvider.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetSSOProvider.Responses.$200>
+  }
   ['/v2/portal/public/sso/login']: {
     /**
      * ssoLogin - ssoLogin
@@ -17461,6 +17647,7 @@ export type MeterReadingWidget = Components.Schemas.MeterReadingWidget;
 export type MoblieOIDCConfig = Components.Schemas.MoblieOIDCConfig;
 export type OIDCProviderConfig = Components.Schemas.OIDCProviderConfig;
 export type OIDCProviderMetadata = Components.Schemas.OIDCProviderMetadata;
+export type OIDCProviderPublicConfig = Components.Schemas.OIDCProviderPublicConfig;
 export type Opportunity = Components.Schemas.Opportunity;
 export type Order = Components.Schemas.Order;
 export type OrganizationSettings = Components.Schemas.OrganizationSettings;
