@@ -2982,6 +2982,11 @@
                 "type": "string",
                 "description": "Lower allowed limit of the meter reading",
                 "example": "{{CallResponse.data.lower_limit}}"
+              },
+              "errorMessagePath": {
+                "type": "string",
+                "description": "Optional path to a human-readable error message in the third-party response body, used when the call fails (non-2xx status).\nIf specified and the path resolves to a string, that message is forwarded to the end user instead of a generic error.\n",
+                "example": "error.message"
               }
             },
             "additionalProperties": false
@@ -3084,6 +3089,11 @@
               "dataPath": {
                 "type": "string",
                 "description": "Optional path to the data (array) in the response. If omitted, the data is assumed to be on the top level."
+              },
+              "errorMessagePath": {
+                "type": "string",
+                "description": "Optional path to a human-readable error message in the third-party response body, used when the call fails (non-2xx status).\nIf specified and the path resolves to a string, that message is forwarded to the end user instead of a generic error.\n",
+                "example": "error.message"
               }
             },
             "additionalProperties": false
@@ -3185,6 +3195,11 @@
               "dataPath": {
                 "type": "string",
                 "description": "Optional path to the data (array) in the response. If omitted, the data is assumed to be on the top level."
+              },
+              "errorMessagePath": {
+                "type": "string",
+                "description": "Optional path to a human-readable error message in the third-party response body, used when the call fails (non-2xx status).\nIf specified and the path resolves to a string, that message is forwarded to the end user instead of a generic error.\n",
+                "example": "error.message"
               }
             },
             "additionalProperties": false
@@ -3273,6 +3288,17 @@
             ],
             "additionalProperties": false
           },
+          "resolved": {
+            "type": "object",
+            "properties": {
+              "errorMessagePath": {
+                "type": "string",
+                "description": "Optional path to a human-readable error message in the third-party response body, used when the call fails (non-2xx status).\nIf specified and the path resolves to a string, that message is forwarded to the end user instead of a generic error.\n",
+                "example": "error.message"
+              }
+            },
+            "additionalProperties": false
+          },
           "use_static_ips": {
             "type": "boolean",
             "deprecated": true,
@@ -3291,7 +3317,7 @@
         "additionalProperties": false
       },
       "PortalExtensionHookVisualizationMetadata": {
-        "description": "Hook that returns runtime metadata describing how a visualization (consumption / price / cost chart) should be rendered for a given portal context (meter, contract, etc). It is invoked by the portal before fetching data, with the same context the data hook would receive, so that the discovery shape can vary per meter/contract. The expected response to the call is:\n  - 200 with a JSON body of shape:\n    {\n      \"type_options\": [\n        { \"id\": \"ht\", \"label\": { \"en\": \"High tariff\" }, \"aggregation_group\": \"consumption\", \"statistical_method\": \"sum\", \"unit\": \"kWh\" },\n        ...\n      ],\n      \"intervals\": [\"PT15M\", \"PT1H\", \"P1D\", \"P1M\"],\n      \"data_range\": { \"from\": \"2024-01-01T00:00:00Z\", \"to\": \"2026-05-01T00:00:00Z\" }\n    }\n  Each type option carries its own `statistical_method`, which describes the method already applied to that type's data and dictates the chart shape: `sum` is rendered as a bar chart; `min`, `average`, and `max` are rendered as a line chart. A single visualization can therefore mix bar-shaped types with line-shaped types. Defaults to `sum` when omitted.\n  `aggregation_group` controls how types within a group are visually combined (depends on the per-type `statistical_method`):\n    - bar chart (`sum`): same-group types are stacked into a single bar (e.g. ht/nt summed into total consumption); different-group types render side-by-side.\n    - line chart (`min` / `average` / `max`): same-group types are rendered as an area chart; different-group types render as separate lines.\n  All fields are optional; the consumer falls back to its defaults for whatever the hook does not return.\nThe portal looks up this hook implicitly per extension (one `visualizationMetadata` hook per extension) — there is no need for a data-retrieval hook to reference it explicitly.\n",
+        "description": "Hook that returns runtime metadata describing how a visualization (consumption / price / cost chart) should be rendered for a given portal context (meter, contract, etc). It is invoked by the portal before fetching data, with the same context the data hook would receive, so that the discovery shape can vary per meter/contract. The expected response to the call is:\n  - 200 with a JSON body of shape:\n    {\n      \"type_options\": [\n        { \"id\": \"ht\", \"label\": { \"en\": \"High tariff\" }, \"aggregation_group\": \"consumption\", \"statistical_method\": \"sum\", \"unit\": \"kWh\", \"color\": \"primary\", \"precision\": 2 },\n        ...\n      ],\n      \"intervals\": [\"PT15M\", \"PT1H\", \"P1D\", \"P1M\"],\n      \"data_range\": { \"from\": \"2024-01-01T00:00:00Z\", \"to\": \"2026-05-01T00:00:00Z\" }\n    }\n  Each type option carries its own `statistical_method`, which describes the method already applied to that type's data and dictates the chart shape: `sum` is rendered as a bar chart; `min`, `average`, and `max` are rendered as a line chart. A single visualization can therefore mix bar-shaped types with line-shaped types. Defaults to `sum` when omitted.\n  Each type option may also customize its rendering: `color` picks a Spark palette color (`primary`, `slate`, `mauve`, `orange`, `red`, `tomato`, `amber`, `green`, `blue`) used to draw the type's series; `precision` sets the number of decimal places to show for that type's values (axis labels, tooltips, summaries). Both are optional — the consumer falls back to its own defaults when they are omitted.\n  `aggregation_group` controls how types within a group are visually combined (depends on the per-type `statistical_method`):\n    - bar chart (`sum`): same-group types are stacked into a single bar (e.g. ht/nt summed into total consumption); different-group types render side-by-side.\n    - line chart (`min` / `average` / `max`): same-group types are rendered as an area chart; different-group types render as separate lines.\n  All fields are optional; the consumer falls back to its defaults for whatever the hook does not return.\nThe portal looks up this hook implicitly per extension (one `visualizationMetadata` hook per extension) — there is no need for a data-retrieval hook to reference it explicitly.\n",
         "type": "object",
         "properties": {
           "id": {
@@ -3356,6 +3382,11 @@
               "dataPath": {
                 "type": "string",
                 "description": "Optional path to the metadata object in the response. If omitted, the metadata is assumed to be on the top level."
+              },
+              "errorMessagePath": {
+                "type": "string",
+                "description": "Optional path to a human-readable error message in the third-party response body, used when the call fails (non-2xx status).\nIf specified and the path resolves to a string, that message is forwarded to the end user instead of a generic error.\n",
+                "example": "error.message"
               }
             },
             "additionalProperties": false
@@ -3457,6 +3488,11 @@
               "dataPath": {
                 "type": "string",
                 "description": "Optional path to the data (array) in the response. If omitted, the data is assumed to be on the top level."
+              },
+              "errorMessagePath": {
+                "type": "string",
+                "description": "Optional path to a human-readable error message in the third-party response body, used when the call fails (non-2xx status).\nIf specified and the path resolves to a string, that message is forwarded to the end user instead of a generic error.\n",
+                "example": "error.message"
               }
             },
             "additionalProperties": false
