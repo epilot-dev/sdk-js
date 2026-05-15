@@ -100,6 +100,7 @@ Get journey by id. Private journeys requires valid private token to be passed
 ```ts
 const { data } = await client.getJourney({
   id: '123e4567-e89b-12d3-a456-426614174000',
+  version: 1,
   source: 'example',
   orgId: 'example',
 })
@@ -1432,6 +1433,7 @@ Get journey by id
 ```ts
 const { data } = await client.getJourneyV2({
   id: '123e4567-e89b-12d3-a456-426614174000',
+  version: 1,
 })
 ```
 
