@@ -7605,90 +7605,6 @@
         }
       }
     },
-    "/v2/portal/public/sso/providers/{provider_slug}": {
-      "get": {
-        "operationId": "getSSOProvider",
-        "summary": "getSSOProvider",
-        "description": "Returns the public configuration of a single SSO identity provider with env var\nplaceholders (incl. secrets) already resolved against the organization's environment.\n\nUse this endpoint at SSO initiation time (i.e. when the end user clicks \"Sign in with X\")\nto obtain the resolved OIDC settings needed to construct the authorization URL.\nThe web `client_secret` is intentionally never returned — it is used server-side by\nthe SSO callback to exchange the authorization code for tokens.\n\nSupports three identification methods:\n1. `org_id` + `origin`\n2. `org_id` + `portal_id`\n3. `domain`\n",
-        "security": [],
-        "tags": [
-          "Public"
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "provider_slug",
-            "required": true,
-            "description": "Provider slug (organization-unique)",
-            "schema": {
-              "$ref": "#/components/schemas/ProviderSlug"
-            }
-          },
-          {
-            "in": "query",
-            "name": "org_id",
-            "required": false,
-            "description": "epilot organization id (required with `origin` or `portal_id`)",
-            "schema": {
-              "type": "string",
-              "example": 123
-            }
-          },
-          {
-            "in": "query",
-            "name": "origin",
-            "required": false,
-            "description": "Origin of the Portal",
-            "schema": {
-              "type": "string",
-              "enum": [
-                "END_CUSTOMER_PORTAL",
-                "INSTALLER_PORTAL"
-              ]
-            }
-          },
-          {
-            "in": "query",
-            "name": "portal_id",
-            "required": false,
-            "description": "ID of the Portal",
-            "schema": {
-              "$ref": "#/components/schemas/PortalId"
-            }
-          },
-          {
-            "in": "query",
-            "name": "domain",
-            "required": false,
-            "description": "Portal domain for identification (alternative to org_id + origin/portal_id)",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Resolved public SSO provider configuration",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProviderPublicConfig"
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/InvalidRequest"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFound"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalServerError"
-          }
-        }
-      }
-    },
     "/v2/portal/public/sso/login": {
       "post": {
         "operationId": "ssoLogin",
@@ -9881,67 +9797,6 @@
         }
       }
     },
-    "/v3/portal/verify-dns": {
-      "post": {
-        "operationId": "verifyDns",
-        "summary": "verifyDns",
-        "description": "Manually triggers DNS verification for a portal's domain setup. Runs the same verification logic as the scheduled processAllPendingNetworks lambda.",
-        "tags": [
-          "ECP Admin"
-        ],
-        "security": [
-          {
-            "EpilotAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "in": "query",
-            "name": "portal_id",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/PortalId"
-            },
-            "description": "PortalId of the portal"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "DNS verification result",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "domain_status": {
-                      "type": "string",
-                      "description": "The status of the custom domain verification",
-                      "enum": [
-                        "PENDING",
-                        "SUCCEED"
-                      ]
-                    },
-                    "message": {
-                      "type": "string",
-                      "description": "A message describing the result"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalServerError"
-          }
-        }
-      }
-    },
     "/v2/portal/proxy/execute": {
       "post": {
         "operationId": "portalProxyExecute",
@@ -10735,14 +10590,6 @@
             "type": "boolean",
             "description": "Mark true if the domain is an Epilot domain"
           },
-          "epilot_domain": {
-            "type": "string",
-            "description": "The URL on which the portal is accessible",
-            "example": "example-portal-12345.ecp.epilot.cloud"
-          },
-          "domain_settings": {
-            "$ref": "#/components/schemas/DomainSettings"
-          },
           "design_id": {
             "$ref": "#/components/schemas/EntityId",
             "description": "ID of the design used to build the portal"
@@ -11211,13 +11058,6 @@
             "additionalProperties": {
               "$ref": "#/components/schemas/Page"
             }
-          },
-          "global_blocks": {
-            "type": "object",
-            "description": "Portal-level blocks shared across all pages (e.g. footer). Keyed by block id.",
-            "additionalProperties": {
-              "$ref": "#/components/schemas/Block"
-            }
           }
         }
       },
@@ -11321,24 +11161,6 @@
             "items": {
               "$ref": "#/components/schemas/PortalWidget"
             }
-          }
-        }
-      },
-      "DomainSettings": {
-        "type": "object",
-        "description": "Domain settings for the portal",
-        "properties": {
-          "is_custom_domain_enabled": {
-            "type": "boolean",
-            "description": "Whether the custom domain is enabled"
-          },
-          "is_epilot_domain_enabled": {
-            "type": "boolean",
-            "description": "Whether the Epilot domain is enabled"
-          },
-          "is_redirection_enabled": {
-            "type": "boolean",
-            "description": "Whether the redirection is enabled"
           }
         }
       },
@@ -14859,6 +14681,11 @@
                 "type": "string",
                 "description": "Lower allowed limit of the meter reading",
                 "example": "{{CallResponse.data.lower_limit}}"
+              },
+              "errorMessagePath": {
+                "type": "string",
+                "description": "Optional path to a human-readable error message in the third-party response body, used when the call fails (non-2xx status).\nIf specified and the path resolves to a string, that message is forwarded to the end user instead of a generic error.\n",
+                "example": "error.message"
               }
             }
           },
@@ -14938,6 +14765,11 @@
               "dataPath": {
                 "type": "string",
                 "description": "Optional path to the data (array) in the response. If omitted, the data is assumed to be on the top level."
+              },
+              "errorMessagePath": {
+                "type": "string",
+                "description": "Optional path to a human-readable error message in the third-party response body, used when the call fails (non-2xx status).\nIf specified and the path resolves to a string, that message is forwarded to the end user instead of a generic error.\n",
+                "example": "error.message"
               }
             }
           },
@@ -15016,6 +14848,11 @@
               "dataPath": {
                 "type": "string",
                 "description": "Optional path to the data (array) in the response. If omitted, the data is assumed to be on the top level."
+              },
+              "errorMessagePath": {
+                "type": "string",
+                "description": "Optional path to a human-readable error message in the third-party response body, used when the call fails (non-2xx status).\nIf specified and the path resolves to a string, that message is forwarded to the end user instead of a generic error.\n",
+                "example": "error.message"
               }
             }
           },
@@ -15095,6 +14932,16 @@
               "url"
             ]
           },
+          "resolved": {
+            "type": "object",
+            "properties": {
+              "errorMessagePath": {
+                "type": "string",
+                "description": "Optional path to a human-readable error message in the third-party response body, used when the call fails (non-2xx status).\nIf specified and the path resolves to a string, that message is forwarded to the end user instead of a generic error.\n",
+                "example": "error.message"
+              }
+            }
+          },
           "use_static_ips": {
             "type": "boolean",
             "deprecated": true,
@@ -15170,6 +15017,11 @@
               "dataPath": {
                 "type": "string",
                 "description": "Optional path to the metadata object in the response. If omitted, the metadata is assumed to be on the top level."
+              },
+              "errorMessagePath": {
+                "type": "string",
+                "description": "Optional path to a human-readable error message in the third-party response body, used when the call fails (non-2xx status).\nIf specified and the path resolves to a string, that message is forwarded to the end user instead of a generic error.\n",
+                "example": "error.message"
               }
             }
           },
@@ -15248,6 +15100,11 @@
               "dataPath": {
                 "type": "string",
                 "description": "Optional path to the data (array) in the response. If omitted, the data is assumed to be on the top level."
+              },
+              "errorMessagePath": {
+                "type": "string",
+                "description": "Optional path to a human-readable error message in the third-party response body, used when the call fails (non-2xx status).\nIf specified and the path resolves to a string, that message is forwarded to the end user instead of a generic error.\n",
+                "example": "error.message"
               }
             }
           },
@@ -15569,7 +15426,6 @@
       },
       "ProviderConfig": {
         "type": "object",
-        "description": "SSO identity provider configuration.\n\nEnv var interpolation: only string fields under `oidc_config` and\n`mobile_oidc_config` (incl. their nested `metadata`) are passed through\nLiquid templating, so they may contain `{{ env.VAR }}` placeholders that\nget resolved at runtime against the organization's environment.\n\nThe following fields are used as literal values and MUST NOT contain\ntemplate syntax: `slug`, `display_name`, `provider_type`, all keys and\nvalues under `attribute_mappings` (used as JSONPath-like accessors into\ntoken claims), and all keys and values under `entity_matching`.\n",
         "properties": {
           "slug": {
             "$ref": "#/components/schemas/ProviderSlug"
@@ -15611,7 +15467,7 @@
             "$ref": "#/components/schemas/ProviderDisplayName"
           },
           "oidc_config": {
-            "$ref": "#/components/schemas/OIDCProviderPublicConfig"
+            "$ref": "#/components/schemas/OIDCProviderConfig"
           },
           "mobile_oidc_config": {
             "$ref": "#/components/schemas/MoblieOIDCConfig"
@@ -15761,7 +15617,6 @@
       },
       "OIDCProviderConfig": {
         "type": "object",
-        "description": "OIDC provider configuration. All string fields support env var interpolation\n(incl. secrets) via mustache-like templates, e.g. `{{ env.MY_PROVIDER_CLIENT_SECRET }}`.\n",
         "properties": {
           "type": {
             "type": "string",
@@ -15773,22 +15628,20 @@
           },
           "oidc_issuer": {
             "type": "string",
-            "description": "Issuing Authority URL. Supports env var interpolation, e.g. `{{ env.MY_ISSUER }}`.",
+            "description": "Issuing Authority URL",
             "example": "https://login.microsoftonline.com/33d4f3e5-3df2-421e-b92e-a63cfa680a88/v2.0"
           },
           "redirect_uri": {
             "type": "string",
-            "description": "Redirect URI for the OIDC flow. Supports env var interpolation.",
+            "description": "Redirect URI for the OIDC flow",
             "example": "https://customer-portal.com/login"
           },
           "client_id": {
             "type": "string",
-            "description": "Supports env var interpolation, e.g. `{{ env.MY_CLIENT_ID }}`.",
             "example": "ab81daf8-8b1f-42d6-94ca-c51621054c75"
           },
           "client_secret": {
             "type": "string",
-            "description": "Client Secret. Supports env var interpolation (incl. secrets), e.g.\n`{{ env.MY_CLIENT_SECRET }}`. Prefer storing the actual secret as an org\nenv var and referencing it here.\n",
             "example": "7BIUnn~6shh.7fNtXb..3k1Mp3s6k6WK3B"
           },
           "has_client_secret": {
@@ -15819,72 +15672,17 @@
           "scope"
         ]
       },
-      "OIDCProviderPublicConfig": {
-        "type": "object",
-        "description": "Public OIDC provider configuration. Same as OIDCProviderConfig but never includes\nthe `client_secret` field — it is kept server-side and only used to exchange the\nauthorization code at the SSO callback. String fields are returned with env var\nplaceholders already resolved when fetched via `GET /v2/portal/public/sso/providers/{provider_slug}`.\n",
-        "properties": {
-          "type": {
-            "type": "string",
-            "enum": [
-              "authorization_code",
-              "implicit"
-            ],
-            "default": "implicit"
-          },
-          "oidc_issuer": {
-            "type": "string",
-            "description": "Issuing Authority URL",
-            "example": "https://login.microsoftonline.com/33d4f3e5-3df2-421e-b92e-a63cfa680a88/v2.0"
-          },
-          "redirect_uri": {
-            "type": "string",
-            "description": "Redirect URI for the OIDC flow",
-            "example": "https://customer-portal.com/login"
-          },
-          "client_id": {
-            "type": "string",
-            "example": "ab81daf8-8b1f-42d6-94ca-c51621054c75"
-          },
-          "has_client_secret": {
-            "type": "boolean",
-            "description": "Whether the client secret is present (the value itself is kept server-side)",
-            "example": true
-          },
-          "scope": {
-            "type": "string",
-            "description": "Space-separated list of OAuth 2.0 scopes to request from OpenID Connect",
-            "example": "openid email"
-          },
-          "metadata": {
-            "$ref": "#/components/schemas/OIDCProviderMetadata"
-          },
-          "prompt": {
-            "type": "string",
-            "enum": [
-              "login",
-              "select_account",
-              "consent"
-            ]
-          }
-        },
-        "required": [
-          "oidc_issuer",
-          "client_id",
-          "scope"
-        ]
-      },
       "MoblieOIDCConfig": {
         "type": "object",
-        "description": "Mobile OIDC configuration. All string fields support env var interpolation\n(incl. secrets) via mustache-like templates, e.g. `{{ env.MOBILE_CLIENT_SECRET }}`.\n",
         "properties": {
           "client_id": {
             "type": "string",
-            "description": "Client ID for the mobile app. Supports env var interpolation.",
+            "description": "Client ID for the mobile app",
             "example": 123456
           },
           "client_secret": {
             "type": "string",
-            "description": "Client Secret for the mobile app. Supports env var interpolation (incl. secrets),\ne.g. `{{ env.MOBILE_CLIENT_SECRET }}`.\n",
+            "description": "Client Secret for the mobile app",
             "example": 123456
           }
         }
@@ -15929,12 +15727,12 @@
           },
           "test_auth_username": {
             "type": "string",
-            "description": "The username for the test auth, only used for testing on auth code flow.\nSupports env var interpolation, e.g. `{{ env.MY_TEST_AUTH_USERNAME }}`.\n",
+            "description": "The username for the test auth, only used for testing on auth code flow",
             "example": "test@epilot.io"
           },
           "test_auth_password": {
             "type": "string",
-            "description": "The password for the test auth, only used for testing on auth code flow.\nSupports env var interpolation (incl. secrets), e.g. `{{ env.MY_TEST_AUTH_PASSWORD }}`.\n"
+            "description": "The password for the test auth, only used for testing on auth code flow"
           }
         }
       },
@@ -16370,14 +16168,6 @@
           "is_epilot_domain": {
             "type": "boolean",
             "description": "Mark true if the domain is an Epilot domain"
-          },
-          "epilot_domain": {
-            "type": "string",
-            "description": "The Epilot domain on which the portal is accessible",
-            "example": "example-portal-1.ecp.epilot.io"
-          },
-          "domain_settings": {
-            "$ref": "#/components/schemas/DomainSettings"
           },
           "design_id": {
             "$ref": "#/components/schemas/EntityId",
@@ -16841,13 +16631,6 @@
           },
           "origin": {
             "$ref": "#/components/schemas/Origin"
-          },
-          "global_blocks": {
-            "type": "object",
-            "description": "Portal-level blocks shared across all pages (e.g. footer). Keyed by block id.",
-            "additionalProperties": {
-              "$ref": "#/components/schemas/Block"
-            }
           }
         }
       },
@@ -16960,11 +16743,6 @@
           "is_canary": {
             "type": "boolean",
             "description": "Whether the org is in canary mode"
-          },
-          "redirect_to": {
-            "type": "string",
-            "description": "The URL to redirect to",
-            "example": "https://example.com"
           }
         }
       },

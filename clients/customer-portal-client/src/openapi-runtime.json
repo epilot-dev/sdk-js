@@ -1900,39 +1900,6 @@
         "responses": {}
       }
     },
-    "/v2/portal/public/sso/providers/{provider_slug}": {
-      "get": {
-        "operationId": "getSSOProvider",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "provider_slug",
-            "required": true
-          },
-          {
-            "in": "query",
-            "name": "org_id",
-            "required": false
-          },
-          {
-            "in": "query",
-            "name": "origin",
-            "required": false
-          },
-          {
-            "in": "query",
-            "name": "portal_id",
-            "required": false
-          },
-          {
-            "in": "query",
-            "name": "domain",
-            "required": false
-          }
-        ],
-        "responses": {}
-      }
-    },
     "/v2/portal/public/sso/login": {
       "post": {
         "operationId": "ssoLogin",
@@ -2438,19 +2405,6 @@
           {
             "name": "partner_id",
             "in": "path",
-            "required": true
-          }
-        ],
-        "responses": {}
-      }
-    },
-    "/v3/portal/verify-dns": {
-      "post": {
-        "operationId": "verifyDns",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "portal_id",
             "required": true
           }
         ],
