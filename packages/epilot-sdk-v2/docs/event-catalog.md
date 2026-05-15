@@ -31,6 +31,8 @@ const { data } = await eventCatalogClient.listEvents(...)
 - [`getEventJSONSchema`](#geteventjsonschema)
 - [`getEventExample`](#geteventexample)
 - [`searchEventHistory`](#searcheventhistory)
+- [`searchEventHistoryV2`](#searcheventhistoryv2)
+- [`getHistoricalEvent`](#gethistoricalevent)
 - [`triggerEvent`](#triggerevent)
 
 **Schemas**
@@ -39,18 +41,22 @@ const { data } = await eventCatalogClient.listEvents(...)
 - [`UpdateEventPayload`](#updateeventpayload)
 - [`PrimitiveField`](#primitivefield)
 - [`ContextEntity`](#contextentity)
+- [`AttachmentField`](#attachmentfield)
 - [`SchemaField`](#schemafield)
 - [`CommonEventMetadata`](#commoneventmetadata)
 - [`EventJsonSchema`](#eventjsonschema)
 - [`Event`](#event)
+- [`EventSummary`](#eventsummary)
 - [`GraphDefinition`](#graphdefinition)
 - [`GraphNode`](#graphnode)
 - [`GraphEdge`](#graphedge)
 - [`EntityOperationTrigger`](#entityoperationtrigger)
 - [`SearchOptions`](#searchoptions)
+- [`SearchOptionsV2`](#searchoptionsv2)
 - [`FieldsParam`](#fieldsparam)
 - [`TriggerEventPayload`](#triggereventpayload)
 - [`TriggerEventResponse`](#triggereventresponse)
+- [`EventAttachment`](#eventattachment)
 
 ### `listEvents`
 
@@ -470,6 +476,108 @@ const { data } = await client.searchEventHistory(
 
 ---
 
+### `searchEventHistoryV2`
+
+Paginated history of events with projected/lightweight payload (v2).
+
+`POST /v2/events/{event_name}:history`
+
+```ts
+const { data } = await client.searchEventHistoryV2(
+  {
+    event_name: 'example',
+  },
+  {
+    limit: 10,
+    cursor: {
+      event_time: '2025-10-31 12:34:56',
+      event_id: 'evt_1234567890abcdef'
+    },
+    timestamp: {
+      from: '2025-10-01T00:00:00Z',
+      to: '2025-10-31T23:59:59Z'
+    },
+    event_id: 'evt_1234567890abcdef',
+    fields: ['_id', '_title', 'first_name', 'account', '!account.*._files', '**._product']
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "results": [
+    {
+      "_org_id": "string",
+      "_event_time": "1970-01-01T00:00:00.000Z",
+      "_event_id": "string",
+      "_event_name": "string",
+      "_event_version": "1.0.0",
+      "_event_source": "string",
+      "_trigger_source_type": "api",
+      "_trigger_source": "string",
+      "_ack_id": "string"
+    }
+  ],
+  "next_cursor": {
+    "event_time": "2025-10-31T12:34:56Z",
+    "event_id": "evt_1234567890abcdef"
+  }
+}
+```
+
+</details>
+
+---
+
+### `getHistoricalEvent`
+
+Fetch a single historical event by id with full hydration
+
+`GET /v2/events/{event_name}/history/{event_id}`
+
+```ts
+const { data } = await client.getHistoricalEvent({
+  event_name: 'example',
+  event_id: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "_org_id": "org_123456",
+  "_event_time": "2024-01-01T12:00:00Z",
+  "_event_id": "01FZ4Z5FZ5FZ5FZ5FZ5FZ5FZ5F",
+  "_event_name": "MeterReading",
+  "_event_version": "1.0.0",
+  "_event_source": "api",
+  "_trigger_source_type": "api",
+  "_trigger_source": "user_123456",
+  "reading_value": 123.45,
+  "reading_date": "2024-01-01T11:59:00Z",
+  "read_by": "John Doe",
+  "reason": "regular",
+  "direction": "feed-out",
+  "source": "portal",
+  "meter_id": "550e8400-e29b-41d4-a716-446655440000",
+  "counter_id": "660e8400-e29b-41d4-a716-446655440000",
+  "meter_number": "MT123456789",
+  "obis_number": "1-0:1.8.0",
+  "unit": "kWh",
+  "customer_id": "770e8400-e29b-41d4-a716-446655440000",
+  "contract_id": "880e8400-e29b-41d4-a716-446655440000"
+}
+```
+
+</details>
+
+---
+
 ### `triggerEvent`
 
 Explicitly trigger an event by providing input field values and an optional entity seed
@@ -531,6 +639,17 @@ type EventConfigBase = {
   } | {
     entity_schema: string
     required?: boolean
+  } | {
+    items: {
+      entity_id: { ... }
+      filename?: { ... }
+      mime_type?: { ... }
+      size_bytes?: { ... }
+      s3ref?: { ... }
+      version_index: { ... }
+      readable_size?: { ... }
+    }
+    required?: boolean
   }>
   entity_graph?: {
     nodes: Array<{
@@ -575,6 +694,17 @@ type EventConfig = {
   } | {
     entity_schema: string
     required?: boolean
+  } | {
+    items: {
+      entity_id: { ... }
+      filename?: { ... }
+      mime_type?: { ... }
+      size_bytes?: { ... }
+      s3ref?: { ... }
+      version_index: { ... }
+      readable_size?: { ... }
+    }
+    required?: boolean
   }>
   entity_graph?: {
     nodes: Array<{
@@ -604,7 +734,7 @@ type EventConfig = {
 
 Payload for updating an event configuration.
 Accepts the same fields as EventConfig (all optional for PATCH).
-Currently only `enabled` and `auto_trigger` fields are processed, other fields are ignored.
+Currently `enabled` and `auto_trigger` fields are processed.
 
 
 ```ts
@@ -621,6 +751,17 @@ type UpdateEventPayload = {
     graph_source?: string
   } | {
     entity_schema: string
+    required?: boolean
+  } | {
+    items: {
+      entity_id: { ... }
+      filename?: { ... }
+      mime_type?: { ... }
+      size_bytes?: { ... }
+      s3ref?: { ... }
+      version_index: { ... }
+      readable_size?: { ... }
+    }
     required?: boolean
   }>
   entity_graph?: {
@@ -668,6 +809,30 @@ type ContextEntity = {
 }
 ```
 
+### `AttachmentField`
+
+A schema field representing file attachments associated with the event.
+Present in schema_fields for events tagged with "attachment".
+
+
+```ts
+type AttachmentField = {
+  items: {
+    entity_id: string // uuid
+    filename?: string
+    mime_type?: string
+    size_bytes?: number
+    s3ref?: {
+      bucket: { ... }
+      key: { ... }
+    }
+    version_index: number
+    readable_size?: string
+  }
+  required?: boolean
+}
+```
+
 ### `SchemaField`
 
 ```ts
@@ -677,6 +842,20 @@ type SchemaField = {
   graph_source?: string
 } | {
   entity_schema: string
+  required?: boolean
+} | {
+  items: {
+    entity_id: string // uuid
+    filename?: string
+    mime_type?: string
+    size_bytes?: number
+    s3ref?: {
+      bucket: { ... }
+      key: { ... }
+    }
+    version_index: number
+    readable_size?: string
+  }
   required?: boolean
 }
 ```
@@ -703,6 +882,29 @@ An event instance in the event history
 
 ```ts
 type Event = {
+  _org_id: string
+  _event_time: string // date-time
+  _event_id: string
+  _event_name: string
+  _event_version: string
+  _event_source: string
+  _trigger_source_type?: string
+  _trigger_source?: string
+  _ack_id?: string
+}
+```
+
+### `EventSummary`
+
+A lightweight event summary returned by the v2 history endpoint.
+
+Includes the standard `_*` metadata fields plus a projected subset of the
+event payload. Hydrated entity objects (values carrying `_schema` or `_id`
+and arrays of such objects) are stripped — fetch via
+`GET /v2/events/{event_name}/his
+
+```ts
+type EventSummary = {
   _org_id: string
   _event_time: string // date-time
   _event_id: string
@@ -792,6 +994,31 @@ type SearchOptions = {
 }
 ```
 
+### `SearchOptionsV2`
+
+Search options for the v2 history endpoint.
+
+Extends `SearchOptions` with an optional `fields` projection. When `fields`
+is omitted, the response includes all `_*` metadata plus all scalar payload
+fields (and primitive arrays / empty objects/arrays) after entity stripping.
+When `fields` is provided,
+
+```ts
+type SearchOptionsV2 = {
+  limit?: number
+  cursor?: {
+    event_time?: string
+    event_id?: string
+  }
+  timestamp?: {
+    from?: string // date-time
+    to?: string // date-time
+  }
+  event_id?: string
+  fields?: string[]
+}
+```
+
 ### `FieldsParam`
 
 List of entity fields to include or exclude in the response
@@ -831,5 +1058,24 @@ type TriggerEventResponse = {
   success: boolean
   event_id: string
   event_bridge_event_id?: string
+}
+```
+
+### `EventAttachment`
+
+A file attachment associated with an event
+
+```ts
+type EventAttachment = {
+  entity_id: string // uuid
+  filename?: string
+  mime_type?: string
+  size_bytes?: number
+  s3ref?: {
+    bucket: string
+    key: string
+  }
+  version_index: number
+  readable_size?: string
 }
 ```

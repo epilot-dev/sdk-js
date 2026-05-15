@@ -570,17 +570,53 @@ export declare namespace Components {
              */
             deliveryMode?: "json_base64" | "binary_multipart";
             /**
-             * Configuration for binary_multipart delivery mode. Specifies the field names used in the multipart form data request.
+             * Configuration for `binary_multipart` delivery mode. Describes the
+             * shape of the multipart/form-data body the receiver expects — pick
+             * the attachment(s) via a JSONata expression and add scalar form
+             * parts on the side.
+             *
              */
             multipartConfig?: {
                 /**
-                 * The name of the form field containing the file binary data.
+                 * Name of the binary form part(s). Default `"file"`. The same
+                 * name is reused when `fileFieldStrategy="multi"` produces
+                 * multiple file parts.
+                 *
                  */
                 fileFieldName?: string;
                 /**
-                 * The name of the form field containing the JSON metadata payload.
+                 * Assertion on the picker result. `single` (default) fails the
+                 * delivery when `fileSource` resolves to more than one
+                 * attachment. `multi` accepts any non-empty count.
+                 *
                  */
-                metadataFieldName?: string;
+                fileFieldStrategy?: "single" | "multi";
+                /**
+                 * JSONata expression evaluated against the event payload that
+                 * picks the attachment(s) to send. Default `"event_attachments"`
+                 * (all attachments). When the result is `undefined`, `null`, or
+                 * an empty array, the event is silently skipped (no HTTP
+                 * request, no error notification). Validated for syntax at
+                 * config-save time.
+                 *
+                 */
+                fileSource?: string;
+                /**
+                 * Map of `formFieldName → JSONata expression`. Each value is
+                 * evaluated against the event payload, then passed through
+                 * env-resolution (same as `custom_headers`). Static literals
+                 * must be JSONata-quoted: a bare `"business_partner"` is
+                 * treated as a path lookup and yields `undefined`; for a
+                 * literal value, single-quote inside the JSON string:
+                 * `"'business_partner'"`. Expressions yielding `undefined` or
+                 * `null` silently omit the field. Object/array results are
+                 * JSON-stringified before being appended. Values are not part
+                 * of the signed payload.
+                 *
+                 */
+                extraFields?: {
+                    [name: string]: string;
+                };
             };
             filterConditions?: /* A group of conditions with a logical operator. Multiple conditions are AND-ed by default. */ WebhookConditionGroup;
             /**

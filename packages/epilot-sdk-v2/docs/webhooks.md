@@ -875,7 +875,9 @@ type WebhookConfig = {
   deliveryMode?: "json_base64" | "binary_multipart"
   multipartConfig?: {
     fileFieldName?: string
-    metadataFieldName?: string
+    fileFieldStrategy?: "single" | "multi"
+    fileSource?: string
+    extraFields?: Record<string, string>
   }
   filterConditions?: {
     conditions?: Array<{

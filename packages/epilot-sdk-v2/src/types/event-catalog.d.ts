@@ -1,6 +1,4 @@
 /* Auto-copied from event-catalog-client */
-/* eslint-disable */
-
 import type {
   OpenAPIClient,
   Parameters,
@@ -11,6 +9,18 @@ import type {
 
 export declare namespace Components {
     namespace Schemas {
+        /**
+         * A schema field representing file attachments associated with the event.
+         * Present in schema_fields for events tagged with "attachment".
+         *
+         */
+        export interface AttachmentField {
+            items: /* A file attachment associated with an event */ EventAttachment;
+            /**
+             * Whether this field is required in the event payload
+             */
+            required?: boolean;
+        }
         /**
          * Common metadata fields present in all event payloads
          * example:
@@ -196,6 +206,48 @@ export declare namespace Components {
              *
              */
             _ack_id?: string;
+        }
+        /**
+         * A file attachment associated with an event
+         */
+        export interface EventAttachment {
+            /**
+             * Entity ID of the file
+             */
+            entity_id: string; // uuid
+            /**
+             * Name of the file
+             */
+            filename?: string;
+            /**
+             * MIME type of the file (e.g., application/pdf)
+             */
+            mime_type?: string;
+            /**
+             * File size in bytes
+             */
+            size_bytes?: number;
+            /**
+             * S3 reference for the file content
+             */
+            s3ref?: {
+                /**
+                 * S3 bucket name
+                 */
+                bucket: string;
+                /**
+                 * S3 object key
+                 */
+                key: string;
+            };
+            /**
+             * File version index (always 0 for newly created files)
+             */
+            version_index: number;
+            /**
+             * Human-readable file size (e.g., "200 KB")
+             */
+            readable_size?: string;
         }
         /**
          * Event configuration with required fields
@@ -639,6 +691,64 @@ export declare namespace Components {
         export interface EventJsonSchema {
         }
         /**
+         * A lightweight event summary returned by the v2 history endpoint.
+         *
+         * Includes the standard `_*` metadata fields plus a projected subset of the
+         * event payload. Hydrated entity objects (values carrying `_schema` or `_id`
+         * and arrays of such objects) are stripped — fetch via
+         * `GET /v2/events/{event_name}/history/{event_id}` for full hydration.
+         *
+         * Projected scalar payload fields appear as additional top-level properties.
+         *
+         */
+        export interface EventSummary {
+            [name: string]: any;
+            /**
+             * epilot tenant/organization ID
+             */
+            _org_id: string;
+            /**
+             * ISO 8601 timestamp when event occurred
+             */
+            _event_time: string; // date-time
+            /**
+             * Unique event identifier (ULID)
+             */
+            _event_id: string;
+            /**
+             * Event name from catalog
+             */
+            _event_name: string;
+            /**
+             * Event version (semver)
+             * example:
+             * 1.0.0
+             */
+            _event_version: string;
+            /**
+             * Source that triggered the event
+             */
+            _event_source: string;
+            /**
+             * The type of system that triggered the event.
+             * Common values: api, automation, operation, portal_user
+             *
+             * example:
+             * api
+             */
+            _trigger_source_type?: string;
+            /**
+             * Identifier of the specific trigger source.
+             *
+             */
+            _trigger_source?: string;
+            /**
+             * Unique acknowledgment tracking ID for the event.
+             *
+             */
+            _ack_id?: string;
+        }
+        /**
          * List of entity fields to include or exclude in the response
          *
          * Use ! to exclude fields, e.g. `!_id` to exclude the `_id` field.
@@ -766,7 +876,12 @@ export declare namespace Components {
              */
             graph_source?: string;
         }
-        export type SchemaField = /* A primitive JSON Schema field definition */ PrimitiveField | ContextEntity;
+        export type SchemaField = /* A primitive JSON Schema field definition */ PrimitiveField | ContextEntity | /**
+         * A schema field representing file attachments associated with the event.
+         * Present in schema_fields for events tagged with "attachment".
+         *
+         */
+        AttachmentField;
         export interface SearchOptions {
             /**
              * Maximum number of results to return
@@ -812,6 +927,81 @@ export declare namespace Components {
              * evt_1234567890abcdef
              */
             event_id?: string;
+        }
+        /**
+         * Search options for the v2 history endpoint.
+         *
+         * Extends `SearchOptions` with an optional `fields` projection. When `fields`
+         * is omitted, the response includes all `_*` metadata plus all scalar payload
+         * fields (and primitive arrays / empty objects/arrays) after entity stripping.
+         * When `fields` is provided, glob/exclusion semantics from `FieldsParam` apply
+         * against `payload.*` paths; `_*` metadata is always included. Entity stripping
+         * runs AFTER selection.
+         *
+         */
+        export interface SearchOptionsV2 {
+            /**
+             * Maximum number of results to return
+             */
+            limit?: number;
+            /**
+             * Cursor for pagination. Use the next_cursor from the previous response to get the next page.
+             */
+            cursor?: {
+                /**
+                 * Timestamp from the last event in the previous page
+                 * example:
+                 * 2025-10-31 12:34:56
+                 */
+                event_time?: string;
+                /**
+                 * Event ID from the last event in the previous page
+                 * example:
+                 * evt_1234567890abcdef
+                 */
+                event_id?: string;
+            };
+            /**
+             * Filter events by timestamp range
+             */
+            timestamp?: {
+                /**
+                 * Start timestamp in ISO 8601 format
+                 * example:
+                 * 2025-10-01T00:00:00Z
+                 */
+                from?: string; // date-time
+                /**
+                 * End timestamp in ISO 8601 format
+                 * example:
+                 * 2025-10-31T23:59:59Z
+                 */
+                to?: string; // date-time
+            };
+            /**
+             * Filter by specific event ID
+             * example:
+             * evt_1234567890abcdef
+             */
+            event_id?: string;
+            fields?: /**
+             * List of entity fields to include or exclude in the response
+             *
+             * Use ! to exclude fields, e.g. `!_id` to exclude the `_id` field.
+             *
+             * Globbing and globstart (**) is supported for nested fields.
+             *
+             * example:
+             * [
+             *   "_id",
+             *   "_title",
+             *   "first_name",
+             *   "account",
+             *   "!account.*._files",
+             *   "**._product"
+             * ]
+             */
+            FieldsParam;
         }
         /**
          * Payload for explicitly triggering an event via API
@@ -884,7 +1074,7 @@ export declare namespace Components {
         /**
          * Payload for updating an event configuration.
          * Accepts the same fields as EventConfig (all optional for PATCH).
-         * Currently only `enabled` and `auto_trigger` fields are processed, other fields are ignored.
+         * Currently `enabled` and `auto_trigger` fields are processed.
          *
          */
         export interface UpdateEventPayload {
@@ -1213,6 +1403,48 @@ export declare namespace Paths {
             Components.Schemas.EventJsonSchema;
         }
     }
+    namespace GetHistoricalEvent {
+        namespace Parameters {
+            export type EventId = string;
+            export type EventName = string;
+        }
+        export interface PathParameters {
+            event_name: Parameters.EventName;
+            event_id: Parameters.EventId;
+        }
+        namespace Responses {
+            export type $200 = /**
+             * An event instance in the event history
+             * example:
+             * {
+             *   "_org_id": "org_123456",
+             *   "_event_time": "2024-01-01T12:00:00Z",
+             *   "_event_id": "01FZ4Z5FZ5FZ5FZ5FZ5FZ5FZ5F",
+             *   "_event_name": "MeterReading",
+             *   "_event_version": "1.0.0",
+             *   "_event_source": "api",
+             *   "_trigger_source_type": "api",
+             *   "_trigger_source": "user_123456",
+             *   "reading_value": 123.45,
+             *   "reading_date": "2024-01-01T11:59:00Z",
+             *   "read_by": "John Doe",
+             *   "reason": "regular",
+             *   "direction": "feed-out",
+             *   "source": "portal",
+             *   "meter_id": "550e8400-e29b-41d4-a716-446655440000",
+             *   "counter_id": "660e8400-e29b-41d4-a716-446655440000",
+             *   "meter_number": "MT123456789",
+             *   "obis_number": "1-0:1.8.0",
+             *   "unit": "kWh",
+             *   "customer_id": "770e8400-e29b-41d4-a716-446655440000",
+             *   "contract_id": "880e8400-e29b-41d4-a716-446655440000"
+             * }
+             */
+            Components.Schemas.Event;
+            export interface $404 {
+            }
+        }
+    }
     namespace ListEvents {
         namespace Responses {
             export interface $200 {
@@ -1230,7 +1462,7 @@ export declare namespace Paths {
         export type RequestBody = /**
          * Payload for updating an event configuration.
          * Accepts the same fields as EventConfig (all optional for PATCH).
-         * Currently only `enabled` and `auto_trigger` fields are processed, other fields are ignored.
+         * Currently `enabled` and `auto_trigger` fields are processed.
          *
          */
         Components.Schemas.UpdateEventPayload;
@@ -1278,6 +1510,59 @@ export declare namespace Paths {
                  * }
                  */
                 Components.Schemas.Event[];
+                /**
+                 * Cursor for pagination. Use this to get the next page of results.
+                 */
+                next_cursor?: {
+                    /**
+                     * Timestamp from the last event in the current page
+                     * example:
+                     * 2025-10-31T12:34:56Z
+                     */
+                    event_time?: string;
+                    /**
+                     * Event ID from the last event in the current page
+                     * example:
+                     * evt_1234567890abcdef
+                     */
+                    event_id?: string;
+                } | null;
+            }
+        }
+    }
+    namespace SearchEventHistoryV2 {
+        namespace Parameters {
+            export type EventName = string;
+        }
+        export interface PathParameters {
+            event_name: Parameters.EventName;
+        }
+        export type RequestBody = /**
+         * Search options for the v2 history endpoint.
+         *
+         * Extends `SearchOptions` with an optional `fields` projection. When `fields`
+         * is omitted, the response includes all `_*` metadata plus all scalar payload
+         * fields (and primitive arrays / empty objects/arrays) after entity stripping.
+         * When `fields` is provided, glob/exclusion semantics from `FieldsParam` apply
+         * against `payload.*` paths; `_*` metadata is always included. Entity stripping
+         * runs AFTER selection.
+         *
+         */
+        Components.Schemas.SearchOptionsV2;
+        namespace Responses {
+            export interface $200 {
+                results?: /**
+                 * A lightweight event summary returned by the v2 history endpoint.
+                 *
+                 * Includes the standard `_*` metadata fields plus a projected subset of the
+                 * event payload. Hydrated entity objects (values carrying `_schema` or `_id`
+                 * and arrays of such objects) are stripped — fetch via
+                 * `GET /v2/events/{event_name}/history/{event_id}` for full hydration.
+                 *
+                 * Projected scalar payload fields appear as additional top-level properties.
+                 *
+                 */
+                Components.Schemas.EventSummary[];
                 /**
                  * Cursor for pagination. Use this to get the next page of results.
                  */
@@ -1381,6 +1666,32 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.SearchEventHistory.Responses.$200>
   /**
+   * searchEventHistoryV2 - searchEventHistoryV2
+   * 
+   * Paginated history of events with projected/lightweight payload (v2).
+   * 
+   * Returns `EventSummary` objects instead of fully hydrated `Event` objects:
+   * nested entity graphs (objects/arrays-of-objects carrying `_schema`/`_id`)
+   * are stripped. Use GET /v2/events/{event_name}/history/{event_id} to fetch
+   * the full hydrated event for a single result.
+   * 
+   */
+  'searchEventHistoryV2'(
+    parameters?: Parameters<Paths.SearchEventHistoryV2.PathParameters> | null,
+    data?: Paths.SearchEventHistoryV2.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.SearchEventHistoryV2.Responses.$200>
+  /**
+   * getHistoricalEvent - getHistoricalEvent
+   * 
+   * Fetch a single historical event by id with full hydration
+   */
+  'getHistoricalEvent'(
+    parameters?: Parameters<Paths.GetHistoricalEvent.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetHistoricalEvent.Responses.$200>
+  /**
    * triggerEvent - triggerEvent
    * 
    * Explicitly trigger an event by providing input field values and an optional entity seed
@@ -1470,6 +1781,36 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.SearchEventHistory.Responses.$200>
   }
+  ['/v2/events/{event_name}:history']: {
+    /**
+     * searchEventHistoryV2 - searchEventHistoryV2
+     * 
+     * Paginated history of events with projected/lightweight payload (v2).
+     * 
+     * Returns `EventSummary` objects instead of fully hydrated `Event` objects:
+     * nested entity graphs (objects/arrays-of-objects carrying `_schema`/`_id`)
+     * are stripped. Use GET /v2/events/{event_name}/history/{event_id} to fetch
+     * the full hydrated event for a single result.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.SearchEventHistoryV2.PathParameters> | null,
+      data?: Paths.SearchEventHistoryV2.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.SearchEventHistoryV2.Responses.$200>
+  }
+  ['/v2/events/{event_name}/history/{event_id}']: {
+    /**
+     * getHistoricalEvent - getHistoricalEvent
+     * 
+     * Fetch a single historical event by id with full hydration
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetHistoricalEvent.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetHistoricalEvent.Responses.$200>
+  }
   ['/v1/events/{event_name}:trigger']: {
     /**
      * triggerEvent - triggerEvent
@@ -1494,13 +1835,16 @@ export interface PathsDictionary {
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
 
+export type AttachmentField = Components.Schemas.AttachmentField;
 export type CommonEventMetadata = Components.Schemas.CommonEventMetadata;
 export type ContextEntity = Components.Schemas.ContextEntity;
 export type EntityOperationTrigger = Components.Schemas.EntityOperationTrigger;
 export type Event = Components.Schemas.Event;
+export type EventAttachment = Components.Schemas.EventAttachment;
 export type EventConfig = Components.Schemas.EventConfig;
 export type EventConfigBase = Components.Schemas.EventConfigBase;
 export type EventJsonSchema = Components.Schemas.EventJsonSchema;
+export type EventSummary = Components.Schemas.EventSummary;
 export type FieldsParam = Components.Schemas.FieldsParam;
 export type GraphDefinition = Components.Schemas.GraphDefinition;
 export type GraphEdge = Components.Schemas.GraphEdge;
@@ -1508,6 +1852,7 @@ export type GraphNode = Components.Schemas.GraphNode;
 export type PrimitiveField = Components.Schemas.PrimitiveField;
 export type SchemaField = Components.Schemas.SchemaField;
 export type SearchOptions = Components.Schemas.SearchOptions;
+export type SearchOptionsV2 = Components.Schemas.SearchOptionsV2;
 export type TriggerEventPayload = Components.Schemas.TriggerEventPayload;
 export type TriggerEventResponse = Components.Schemas.TriggerEventResponse;
 export type UpdateEventPayload = Components.Schemas.UpdateEventPayload;
