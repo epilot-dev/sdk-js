@@ -73,6 +73,7 @@ const { data } = await customerPortalClient.upsertPortal(...)
 - [`listAllPortalConfigs`](#listallportalconfigs)
 - [`swapPortalConfig`](#swapportalconfig)
 - [`clonePortalConfig`](#cloneportalconfig)
+- [`verifyDns`](#verifydns)
 
 **Public**
 - [`createUserV3`](#createuserv3)
@@ -87,10 +88,12 @@ const { data } = await customerPortalClient.upsertPortal(...)
 - [`getOrganizationSettingsByDomain`](#getorganizationsettingsbydomain)
 - [`checkContactExists`](#checkcontactexists)
 - [`checkContactExistsV3`](#checkcontactexistsv3)
+- [`checkAccountExists`](#checkaccountexists)
 - [`confirmUser`](#confirmuser)
 - [`confirmUserWithUserId`](#confirmuserwithuserid)
 - [`userExists`](#userexists)
 - [`userExistsV3`](#userexistsv3)
+- [`getSSOProvider`](#getssoprovider)
 - [`ssoRedirect`](#ssoredirect)
 - [`ssoCallback`](#ssocallback)
 - [`getPublicPages`](#getpublicpages)
@@ -145,6 +148,7 @@ const { data } = await customerPortalClient.upsertPortal(...)
 - [`revokePartner`](#revokepartner)
 - [`disablePartner`](#disablepartner)
 - [`enablePartner`](#enablepartner)
+- [`portalProxyExecute`](#portalproxyexecute)
 
 **Activity**
 - [`getEntityActivityFeed`](#getentityactivityfeed)
@@ -176,6 +180,7 @@ const { data } = await customerPortalClient.upsertPortal(...)
 - [`UpsertPortalConfig`](#upsertportalconfig)
 - [`PortalConfig`](#portalconfig)
 - [`UpsertPortalWidget`](#upsertportalwidget)
+- [`DomainSettings`](#domainsettings)
 - [`WidgetBase`](#widgetbase)
 - [`EntityWidget`](#entitywidget)
 - [`MeterReadingWidget`](#meterreadingwidget)
@@ -191,6 +196,7 @@ const { data } = await customerPortalClient.upsertPortal(...)
 - [`PortalWidget`](#portalwidget)
 - [`ContactCountRequest`](#contactcountrequest)
 - [`ContactExistsRequest`](#contactexistsrequest)
+- [`AccountExistsRequest`](#accountexistsrequest)
 - [`UserRequest`](#userrequest)
 - [`CreateUserRequest`](#createuserrequest)
 - [`OrganizationSettings`](#organizationsettings)
@@ -288,6 +294,7 @@ const { data } = await customerPortalClient.upsertPortal(...)
 - [`AttributeMappingConfig`](#attributemappingconfig)
 - [`EntityMatchingConfig`](#entitymatchingconfig)
 - [`OIDCProviderConfig`](#oidcproviderconfig)
+- [`OIDCProviderPublicConfig`](#oidcproviderpublicconfig)
 - [`MoblieOIDCConfig`](#moblieoidcconfig)
 - [`OIDCProviderMetadata`](#oidcprovidermetadata)
 - [`SAMLProviderConfig`](#samlproviderconfig)
@@ -346,9 +353,17 @@ const { data } = await client.upsertPortal(
     name: 'Installer Portal',
     domain: 'abc.com',
     is_epilot_domain: true,
+    epilot_domain: 'example-portal-12345.ecp.epilot.cloud',
+    domain_settings: {
+      is_custom_domain_enabled: true,
+      is_epilot_domain_enabled: true,
+      is_redirection_enabled: true
+    },
     design_id: '5da0a718-c822-403d-9f5d-20d4584e0528',
     allowed_portal_entities: ['contact', 'contract'],
     self_registration_setting: 'ALLOW_WITH_CONTACT_CREATION',
+    self_registration_account_setting: 'ALLOW_WITH_CONTACT_CREATION',
+    self_registration_entity: 'contact',
     user_account_self_management: false,
     feature_settings: {
       start_page: true,
@@ -490,7 +505,8 @@ const { data } = await client.upsertPortal(
     portal_id: '453ad7bf-86d5-46c8-8252-bcc868df5e3c',
     portal_sk_v3: 'PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c',
     origin: 'string',
-    pages: {}
+    pages: {},
+    global_blocks: {}
   },
 )
 ```
@@ -504,9 +520,17 @@ const { data } = await client.upsertPortal(
   "name": "Installer Portal",
   "domain": "abc.com",
   "is_epilot_domain": true,
+  "epilot_domain": "example-portal-12345.ecp.epilot.cloud",
+  "domain_settings": {
+    "is_custom_domain_enabled": true,
+    "is_epilot_domain_enabled": true,
+    "is_redirection_enabled": true
+  },
   "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
   "allowed_portal_entities": ["contact", "contract"],
   "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
+  "self_registration_account_setting": "ALLOW_WITH_CONTACT_CREATION",
+  "self_registration_entity": "contact",
   "user_account_self_management": false,
   "feature_settings": {
     "start_page": true,
@@ -648,6 +672,7 @@ const { data } = await client.upsertPortal(
   "portal_sk_v3": "PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c",
   "origin": "string",
   "pages": {},
+  "global_blocks": {},
   "id": 12345,
   "organization_id": 12345,
   "org_settings": {
@@ -791,9 +816,17 @@ const { data } = await client.getPortalConfigByDomain({
   "name": "Installer Portal",
   "domain": "abc.com",
   "is_epilot_domain": true,
+  "epilot_domain": "example-portal-12345.ecp.epilot.cloud",
+  "domain_settings": {
+    "is_custom_domain_enabled": true,
+    "is_epilot_domain_enabled": true,
+    "is_redirection_enabled": true
+  },
   "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
   "allowed_portal_entities": ["contact", "contract"],
   "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
+  "self_registration_account_setting": "ALLOW_WITH_CONTACT_CREATION",
+  "self_registration_entity": "contact",
   "user_account_self_management": false,
   "feature_settings": {
     "start_page": true,
@@ -935,6 +968,7 @@ const { data } = await client.getPortalConfigByDomain({
   "portal_sk_v3": "PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c",
   "origin": "string",
   "pages": {},
+  "global_blocks": {},
   "id": 12345,
   "organization_id": 12345,
   "org_settings": {
@@ -989,9 +1023,17 @@ const { data } = await client.getPortalConfig({
   "name": "Installer Portal",
   "domain": "abc.com",
   "is_epilot_domain": true,
+  "epilot_domain": "example-portal-12345.ecp.epilot.cloud",
+  "domain_settings": {
+    "is_custom_domain_enabled": true,
+    "is_epilot_domain_enabled": true,
+    "is_redirection_enabled": true
+  },
   "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
   "allowed_portal_entities": ["contact", "contract"],
   "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
+  "self_registration_account_setting": "ALLOW_WITH_CONTACT_CREATION",
+  "self_registration_entity": "contact",
   "user_account_self_management": false,
   "feature_settings": {
     "start_page": true,
@@ -1133,6 +1175,7 @@ const { data } = await client.getPortalConfig({
   "portal_sk_v3": "PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c",
   "origin": "string",
   "pages": {},
+  "global_blocks": {},
   "id": 12345,
   "organization_id": 12345,
   "org_settings": {
@@ -1892,9 +1935,17 @@ const { data } = await client.getPublicPortalConfig({
   "name": "Installer Portal",
   "domain": "abc.com",
   "is_epilot_domain": true,
+  "epilot_domain": "example-portal-12345.ecp.epilot.cloud",
+  "domain_settings": {
+    "is_custom_domain_enabled": true,
+    "is_epilot_domain_enabled": true,
+    "is_redirection_enabled": true
+  },
   "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
   "allowed_portal_entities": ["contact", "contract"],
   "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
+  "self_registration_account_setting": "ALLOW_WITH_CONTACT_CREATION",
+  "self_registration_entity": "contact",
   "user_account_self_management": false,
   "feature_settings": {
     "start_page": true,
@@ -2036,6 +2087,7 @@ const { data } = await client.getPublicPortalConfig({
   "portal_sk_v3": "PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c",
   "origin": "string",
   "pages": {},
+  "global_blocks": {},
   "id": 12345,
   "organization_id": 12345,
   "org_settings": {
@@ -2090,9 +2142,17 @@ const { data } = await client.getOrgPortalConfig({
   "name": "Installer Portal",
   "domain": "abc.com",
   "is_epilot_domain": true,
+  "epilot_domain": "example-portal-12345.ecp.epilot.cloud",
+  "domain_settings": {
+    "is_custom_domain_enabled": true,
+    "is_epilot_domain_enabled": true,
+    "is_redirection_enabled": true
+  },
   "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
   "allowed_portal_entities": ["contact", "contract"],
   "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
+  "self_registration_account_setting": "ALLOW_WITH_CONTACT_CREATION",
+  "self_registration_entity": "contact",
   "user_account_self_management": false,
   "feature_settings": {
     "start_page": true,
@@ -2234,6 +2294,7 @@ const { data } = await client.getOrgPortalConfig({
   "portal_sk_v3": "PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c",
   "origin": "string",
   "pages": {},
+  "global_blocks": {},
   "id": 12345,
   "organization_id": 12345,
   "org_settings": {
@@ -2293,9 +2354,17 @@ const { data } = await client.getPublicPortalConfigV3({
   "name": "Installer Portal",
   "domain": "abc.com",
   "is_epilot_domain": true,
+  "epilot_domain": "example-portal-12345.ecp.epilot.cloud",
+  "domain_settings": {
+    "is_custom_domain_enabled": true,
+    "is_epilot_domain_enabled": true,
+    "is_redirection_enabled": true
+  },
   "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
   "allowed_portal_entities": ["contact", "contract"],
   "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
+  "self_registration_account_setting": "ALLOW_WITH_CONTACT_CREATION",
+  "self_registration_entity": "contact",
   "user_account_self_management": false,
   "feature_settings": {
     "start_page": true,
@@ -2437,6 +2506,7 @@ const { data } = await client.getPublicPortalConfigV3({
   "portal_sk_v3": "PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c",
   "origin": "string",
   "pages": {},
+  "global_blocks": {},
   "id": 12345,
   "organization_id": 12345,
   "org_settings": {
@@ -2491,9 +2561,17 @@ const { data } = await client.getOrgPortalConfigV3({
   "name": "Installer Portal",
   "domain": "abc.com",
   "is_epilot_domain": true,
+  "epilot_domain": "example-portal-12345.ecp.epilot.cloud",
+  "domain_settings": {
+    "is_custom_domain_enabled": true,
+    "is_epilot_domain_enabled": true,
+    "is_redirection_enabled": true
+  },
   "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
   "allowed_portal_entities": ["contact", "contract"],
   "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
+  "self_registration_account_setting": "ALLOW_WITH_CONTACT_CREATION",
+  "self_registration_entity": "contact",
   "user_account_self_management": false,
   "feature_settings": {
     "start_page": true,
@@ -2635,6 +2713,7 @@ const { data } = await client.getOrgPortalConfigV3({
   "portal_sk_v3": "PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c",
   "origin": "string",
   "pages": {},
+  "global_blocks": {},
   "id": 12345,
   "organization_id": 12345,
   "org_settings": {
@@ -2693,9 +2772,13 @@ const { data } = await client.getAllPortalConfigs()
       "name": "Installer Portal",
       "domain": "abc.com",
       "is_epilot_domain": true,
+      "epilot_domain": "example-portal-12345.ecp.epilot.cloud",
+      "domain_settings": {},
       "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
       "allowed_portal_entities": ["contact", "contract"],
       "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
+      "self_registration_account_setting": "ALLOW_WITH_CONTACT_CREATION",
+      "self_registration_entity": "contact",
       "user_account_self_management": false,
       "feature_settings": {},
       "accessToken": "string",
@@ -2723,6 +2806,7 @@ const { data } = await client.getAllPortalConfigs()
       "portal_sk_v3": "PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c",
       "origin": "string",
       "pages": {},
+      "global_blocks": {},
       "id": 12345,
       "organization_id": 12345,
       "org_settings": {},
@@ -3760,7 +3844,51 @@ const { data } = await client.checkContactExistsV3(
 ```json
 {
   "exists": true,
-  "contactId": "5da0a718-c822-403d-9f5d-20d4584e0528"
+  "contactId": "5da0a718-c822-403d-9f5d-20d4584e0528",
+  "accountId": "5da0a718-c822-403d-9f5d-20d4584e0528"
+}
+```
+
+</details>
+
+---
+
+### `checkAccountExists`
+
+True if account with given identifiers exists.
+Supports two identification methods:
+1. Using portal_id
+2. Using domain
+
+`POST /v3/portal/public/account/exists`
+
+```ts
+const { data } = await client.checkAccountExists(
+  {
+    portal_id: 'example',
+    domain: 'example',
+  },
+  {
+    org_id: 728,
+    registration_identifiers: {
+      account: {
+        customer_number: 'ACC-123456'
+      },
+      contract: {
+        contract_number: '123456'
+      }
+    }
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "exists": true,
+  "accountId": "5da0a718-c822-403d-9f5d-20d4584e0528"
 }
 ```
 
@@ -5525,6 +5653,61 @@ const { data } = await client.getMeterReadings(
 
 ---
 
+### `getSSOProvider`
+
+Returns the public configuration of a single SSO identity provider with env var
+placeholders (incl. secrets) already resolved against the organization's environment.
+
+`GET /v2/portal/public/sso/providers/{provider_slug}`
+
+```ts
+const { data } = await client.getSSOProvider({
+  provider_slug: 'example',
+  org_id: 'example',
+  origin: 'example',
+  portal_id: 'example',
+  domain: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "slug": "office-365-login",
+  "display_name": "Office 365 Login",
+  "oidc_config": {
+    "type": "implicit",
+    "oidc_issuer": "https://login.microsoftonline.com/33d4f3e5-3df2-421e-b92e-a63cfa680a88/v2.0",
+    "redirect_uri": "https://customer-portal.com/login",
+    "client_id": "ab81daf8-8b1f-42d6-94ca-c51621054c75",
+    "has_client_secret": true,
+    "scope": "openid email",
+    "metadata": {
+      "authorization_endpoint": "https://www.facebook.com/v12.0/dialog/oauth",
+      "token_endpoint": "https://graph.facebook.com/v12.0/oauth/access_token",
+      "userinfo_endpoint": "https://graph.facebook.com/me",
+      "logout_uri": "https://login.microsoftonline.com/common/oauth2/v2.0/logout",
+      "logout_redirect_uri": "https://customer-portal.com/login",
+      "skip_login_as_logout": false,
+      "mobile_redirect_uri": "msauth.io.epilot.ecp://auth",
+      "test_auth_username": "test@epilot.io",
+      "test_auth_password": "string"
+    },
+    "prompt": "login"
+  },
+  "mobile_oidc_config": {
+    "client_id": 123456,
+    "client_secret": 123456
+  }
+}
+```
+
+</details>
+
+---
+
 ### `ssoLogin`
 
 Initiate login using external SSO identity.
@@ -6566,9 +6749,17 @@ const { data } = await client.createPortalConfig(
     name: 'Installer Portal',
     domain: 'abc.com',
     is_epilot_domain: true,
+    epilot_domain: 'example-portal-1.ecp.epilot.io',
+    domain_settings: {
+      is_custom_domain_enabled: true,
+      is_epilot_domain_enabled: true,
+      is_redirection_enabled: true
+    },
     design_id: '5da0a718-c822-403d-9f5d-20d4584e0528',
     allowed_portal_entities: ['contact', 'contract'],
     self_registration_setting: 'ALLOW_WITH_CONTACT_CREATION',
+    self_registration_account_setting: 'ALLOW_WITH_CONTACT_CREATION',
+    self_registration_entity: 'contact',
     user_account_self_management: false,
     feature_settings: {
       start_page: true,
@@ -6710,6 +6901,7 @@ const { data } = await client.createPortalConfig(
     portal_id: '453ad7bf-86d5-46c8-8252-bcc868df5e3c',
     portal_sk_v3: 'PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c',
     origin: 'string',
+    global_blocks: {},
     pages: [
       {
         slug: 'dashboard',
@@ -6763,9 +6955,17 @@ const { data } = await client.createPortalConfig(
   "name": "Installer Portal",
   "domain": "abc.com",
   "is_epilot_domain": true,
+  "epilot_domain": "example-portal-1.ecp.epilot.io",
+  "domain_settings": {
+    "is_custom_domain_enabled": true,
+    "is_epilot_domain_enabled": true,
+    "is_redirection_enabled": true
+  },
   "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
   "allowed_portal_entities": ["contact", "contract"],
   "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
+  "self_registration_account_setting": "ALLOW_WITH_CONTACT_CREATION",
+  "self_registration_entity": "contact",
   "user_account_self_management": false,
   "feature_settings": {
     "start_page": true,
@@ -6906,6 +7106,7 @@ const { data } = await client.createPortalConfig(
   "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
   "portal_sk_v3": "PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c",
   "origin": "string",
+  "global_blocks": {},
   "organization_id": 12345,
   "org_settings": {
     "canary": {
@@ -7003,9 +7204,17 @@ const { data } = await client.getPortalConfigV3({
   "name": "Installer Portal",
   "domain": "abc.com",
   "is_epilot_domain": true,
+  "epilot_domain": "example-portal-1.ecp.epilot.io",
+  "domain_settings": {
+    "is_custom_domain_enabled": true,
+    "is_epilot_domain_enabled": true,
+    "is_redirection_enabled": true
+  },
   "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
   "allowed_portal_entities": ["contact", "contract"],
   "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
+  "self_registration_account_setting": "ALLOW_WITH_CONTACT_CREATION",
+  "self_registration_entity": "contact",
   "user_account_self_management": false,
   "feature_settings": {
     "start_page": true,
@@ -7146,6 +7355,7 @@ const { data } = await client.getPortalConfigV3({
   "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
   "portal_sk_v3": "PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c",
   "origin": "string",
+  "global_blocks": {},
   "organization_id": 12345,
   "org_settings": {
     "canary": {
@@ -7238,9 +7448,17 @@ const { data } = await client.putPortalConfig(
     name: 'Installer Portal',
     domain: 'abc.com',
     is_epilot_domain: true,
+    epilot_domain: 'example-portal-1.ecp.epilot.io',
+    domain_settings: {
+      is_custom_domain_enabled: true,
+      is_epilot_domain_enabled: true,
+      is_redirection_enabled: true
+    },
     design_id: '5da0a718-c822-403d-9f5d-20d4584e0528',
     allowed_portal_entities: ['contact', 'contract'],
     self_registration_setting: 'ALLOW_WITH_CONTACT_CREATION',
+    self_registration_account_setting: 'ALLOW_WITH_CONTACT_CREATION',
+    self_registration_entity: 'contact',
     user_account_self_management: false,
     feature_settings: {
       start_page: true,
@@ -7382,6 +7600,7 @@ const { data } = await client.putPortalConfig(
     portal_id: '453ad7bf-86d5-46c8-8252-bcc868df5e3c',
     portal_sk_v3: 'PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c',
     origin: 'string',
+    global_blocks: {},
     organization_id: 12345,
     org_settings: {
       canary: {
@@ -7464,9 +7683,17 @@ const { data } = await client.putPortalConfig(
   "name": "Installer Portal",
   "domain": "abc.com",
   "is_epilot_domain": true,
+  "epilot_domain": "example-portal-1.ecp.epilot.io",
+  "domain_settings": {
+    "is_custom_domain_enabled": true,
+    "is_epilot_domain_enabled": true,
+    "is_redirection_enabled": true
+  },
   "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
   "allowed_portal_entities": ["contact", "contract"],
   "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
+  "self_registration_account_setting": "ALLOW_WITH_CONTACT_CREATION",
+  "self_registration_entity": "contact",
   "user_account_self_management": false,
   "feature_settings": {
     "start_page": true,
@@ -7607,6 +7834,7 @@ const { data } = await client.putPortalConfig(
   "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
   "portal_sk_v3": "PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c",
   "origin": "string",
+  "global_blocks": {},
   "organization_id": 12345,
   "org_settings": {
     "canary": {
@@ -7702,9 +7930,13 @@ const { data } = await client.listAllPortalConfigs()
       "name": "Installer Portal",
       "domain": "abc.com",
       "is_epilot_domain": true,
+      "epilot_domain": "example-portal-1.ecp.epilot.io",
+      "domain_settings": {},
       "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
       "allowed_portal_entities": ["contact", "contract"],
       "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
+      "self_registration_account_setting": "ALLOW_WITH_CONTACT_CREATION",
+      "self_registration_entity": "contact",
       "user_account_self_management": false,
       "feature_settings": {},
       "accessToken": "string",
@@ -7731,6 +7963,7 @@ const { data } = await client.listAllPortalConfigs()
       "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
       "portal_sk_v3": "PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c",
       "origin": "string",
+      "global_blocks": {},
       "organization_id": 12345,
       "org_settings": {},
       "feature_flags": {},
@@ -7821,9 +8054,17 @@ const { data } = await client.clonePortalConfig(
   "name": "Installer Portal",
   "domain": "abc.com",
   "is_epilot_domain": true,
+  "epilot_domain": "example-portal-1.ecp.epilot.io",
+  "domain_settings": {
+    "is_custom_domain_enabled": true,
+    "is_epilot_domain_enabled": true,
+    "is_redirection_enabled": true
+  },
   "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
   "allowed_portal_entities": ["contact", "contract"],
   "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
+  "self_registration_account_setting": "ALLOW_WITH_CONTACT_CREATION",
+  "self_registration_entity": "contact",
   "user_account_self_management": false,
   "feature_settings": {
     "start_page": true,
@@ -7964,6 +8205,7 @@ const { data } = await client.clonePortalConfig(
   "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
   "portal_sk_v3": "PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c",
   "origin": "string",
+  "global_blocks": {},
   "organization_id": 12345,
   "org_settings": {
     "canary": {
@@ -8185,6 +8427,64 @@ const { data } = await client.enablePartner({
 
 ---
 
+### `verifyDns`
+
+Manually triggers DNS verification for a portal's domain setup. Runs the same verification logic as the scheduled processAllPendingNetworks lambda.
+
+`POST /v3/portal/verify-dns`
+
+```ts
+const { data } = await client.verifyDns({
+  portal_id: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "domain_status": "PENDING",
+  "message": "string"
+}
+```
+
+</details>
+
+---
+
+### `portalProxyExecute`
+
+Execute an Integration Hub managed-call use case on behalf of a portal user.
+Bridges PortalAuth to the Integration API by generating an internal token.
+
+`POST /v2/portal/proxy/execute`
+
+```ts
+const { data } = await client.portalProxyExecute(
+  null,
+  {
+    integration_id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+    use_case_slug: 'string',
+    payload: {}
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "success": true,
+  "data": {}
+}
+```
+
+</details>
+
+---
+
 ## Schemas
 
 ### `ContextEntity`
@@ -8375,9 +8675,17 @@ type CommonConfigAttributes = {
   name?: string
   domain: string
   is_epilot_domain?: boolean
+  epilot_domain?: string
+  domain_settings?: {
+    is_custom_domain_enabled?: boolean
+    is_epilot_domain_enabled?: boolean
+    is_redirection_enabled?: boolean
+  }
   design_id?: string // uuid
   allowed_portal_entities?: string[]
   self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY" | "BLOCK_IF_PORTAL_USER_EXISTS"
+  self_registration_account_setting?: "ALLOW_WITH_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY"
+  self_registration_entity?: "contact" | "account"
   user_account_self_management?: boolean
   feature_settings?: {
     start_page?: boolean
@@ -8462,14 +8770,6 @@ type CommonConfigAttributes = {
   registration_identifiers?: Array<{
     name?: string
     schema?: string
-  }>
-  triggered_journeys?: Array<{
-    trigger_name?: "FIRST_LOGIN" | "ACCEPT_ORDER" | "DECLINE_ORDER"
-    journey_id?: string // uuid
-  }>
-  entity_edit_rules?: Array<{
-    slug?: string
-    attribute?: string
   // ...
 }
 ```
@@ -8511,9 +8811,17 @@ type UpsertPortalConfig = {
   name?: string
   domain: string
   is_epilot_domain?: boolean
+  epilot_domain?: string
+  domain_settings?: {
+    is_custom_domain_enabled?: boolean
+    is_epilot_domain_enabled?: boolean
+    is_redirection_enabled?: boolean
+  }
   design_id?: string // uuid
   allowed_portal_entities?: string[]
   self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY" | "BLOCK_IF_PORTAL_USER_EXISTS"
+  self_registration_account_setting?: "ALLOW_WITH_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY"
+  self_registration_entity?: "contact" | "account"
   user_account_self_management?: boolean
   feature_settings?: {
     start_page?: boolean
@@ -8569,14 +8877,6 @@ type UpsertPortalConfig = {
     forgotPassword?: string // uuid
     invitation?: string // uuid
     partnerInvitation?: string // uuid
-    onNewQuote?: string // uuid
-    onMapAPendingUser?: string // uuid
-    onDocUpload?: string // uuid
-    onWorkflowStepAssigned?: string // uuid
-    confirmEmailUpdate?: string // uuid
-    verifyCodeToSetPassword?: string // uuid
-  }
-  images?: {
   // ...
 }
 ```
@@ -8589,9 +8889,17 @@ type PortalConfig = {
   name?: string
   domain: string
   is_epilot_domain?: boolean
+  epilot_domain?: string
+  domain_settings?: {
+    is_custom_domain_enabled?: boolean
+    is_epilot_domain_enabled?: boolean
+    is_redirection_enabled?: boolean
+  }
   design_id?: string // uuid
   allowed_portal_entities?: string[]
   self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY" | "BLOCK_IF_PORTAL_USER_EXISTS"
+  self_registration_account_setting?: "ALLOW_WITH_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY"
+  self_registration_entity?: "contact" | "account"
   user_account_self_management?: boolean
   feature_settings?: {
     start_page?: boolean
@@ -8676,14 +8984,6 @@ type PortalConfig = {
   registration_identifiers?: Array<{
     name?: string
     schema?: string
-  }>
-  triggered_journeys?: Array<{
-    trigger_name?: "FIRST_LOGIN" | "ACCEPT_ORDER" | "DECLINE_ORDER"
-    journey_id?: string // uuid
-  }>
-  entity_edit_rules?: Array<{
-    slug?: string
-    attribute?: string
   // ...
 }
 ```
@@ -8792,6 +9092,18 @@ type UpsertPortalWidget = {
       en?: { ... }
       de?: { ... }
   // ...
+}
+```
+
+### `DomainSettings`
+
+Domain settings for the portal
+
+```ts
+type DomainSettings = {
+  is_custom_domain_enabled?: boolean
+  is_epilot_domain_enabled?: boolean
+  is_redirection_enabled?: boolean
 }
 ```
 
@@ -9138,6 +9450,15 @@ type ContactCountRequest = {
 
 ```ts
 type ContactExistsRequest = {
+  org_id: string
+  registration_identifiers: Record<string, Record<string, string>>
+}
+```
+
+### `AccountExistsRequest`
+
+```ts
+type AccountExistsRequest = {
   org_id: string
   registration_identifiers: Record<string, Record<string, string>>
 }
@@ -10861,6 +11182,13 @@ type ProviderDisplayName = string
 
 ### `ProviderConfig`
 
+SSO identity provider configuration.
+
+Env var interpolation: only string fields under `oidc_config` and
+`mobile_oidc_config` (incl. their nested `metadata`) are passed through
+Liquid templating, so they may contain `{{ env.VAR }}` placeholders that
+get resolved at runtime against the organization's 
+
 ```ts
 type ProviderConfig = {
   slug?: string
@@ -10937,7 +11265,6 @@ type ProviderPublicConfig = {
     oidc_issuer: string
     redirect_uri?: string
     client_id: string
-    client_secret?: string
     has_client_secret?: boolean
     scope: string
     metadata?: {
@@ -11008,6 +11335,10 @@ type EntityMatchingConfig = {
 
 ### `OIDCProviderConfig`
 
+OIDC provider configuration. All string fields support env var interpolation
+(incl. secrets) via mustache-like templates, e.g. `{{ env.MY_PROVIDER_CLIENT_SECRET }}`.
+
+
 ```ts
 type OIDCProviderConfig = {
   type?: "authorization_code" | "implicit"
@@ -11032,7 +11363,41 @@ type OIDCProviderConfig = {
 }
 ```
 
+### `OIDCProviderPublicConfig`
+
+Public OIDC provider configuration. Same as OIDCProviderConfig but never includes
+the `client_secret` field — it is kept server-side and only used to exchange the
+authorization code at the SSO callback. String fields are returned with env var
+placeholders already resolved when fetched via `GET /v2/p
+
+```ts
+type OIDCProviderPublicConfig = {
+  type?: "authorization_code" | "implicit"
+  oidc_issuer: string
+  redirect_uri?: string
+  client_id: string
+  has_client_secret?: boolean
+  scope: string
+  metadata?: {
+    authorization_endpoint?: string
+    token_endpoint?: string
+    userinfo_endpoint?: string
+    logout_uri?: string
+    logout_redirect_uri?: string
+    skip_login_as_logout?: boolean
+    mobile_redirect_uri?: string
+    test_auth_username?: string
+    test_auth_password?: string
+  }
+  prompt?: "login" | "select_account" | "consent"
+}
+```
+
 ### `MoblieOIDCConfig`
+
+Mobile OIDC configuration. All string fields support env var interpolation
+(incl. secrets) via mustache-like templates, e.g. `{{ env.MOBILE_CLIENT_SECRET }}`.
+
 
 ```ts
 type MoblieOIDCConfig = {
@@ -11276,9 +11641,17 @@ type CommonConfigAttributesV3 = {
   name?: string
   domain?: string
   is_epilot_domain?: boolean
+  epilot_domain?: string
+  domain_settings?: {
+    is_custom_domain_enabled?: boolean
+    is_epilot_domain_enabled?: boolean
+    is_redirection_enabled?: boolean
+  }
   design_id?: string // uuid
   allowed_portal_entities?: string[]
   self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY" | "BLOCK_IF_PORTAL_USER_EXISTS"
+  self_registration_account_setting?: "ALLOW_WITH_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY"
+  self_registration_entity?: "contact" | "account"
   user_account_self_management?: boolean
   feature_settings?: {
     start_page?: boolean
@@ -11363,14 +11736,6 @@ type CommonConfigAttributesV3 = {
   registration_identifiers?: Array<{
     name?: string
     schema?: string
-  }>
-  triggered_journeys?: Array<{
-    trigger_name?: "FIRST_LOGIN" | "ACCEPT_ORDER" | "DECLINE_ORDER"
-    journey_id?: string // uuid
-  }>
-  entity_edit_rules?: Array<{
-    slug?: string
-    attribute?: string
   // ...
 }
 ```
@@ -11420,9 +11785,17 @@ type UpsertPortalConfigV3 = {
   name?: string
   domain?: string
   is_epilot_domain?: boolean
+  epilot_domain?: string
+  domain_settings?: {
+    is_custom_domain_enabled?: boolean
+    is_epilot_domain_enabled?: boolean
+    is_redirection_enabled?: boolean
+  }
   design_id?: string // uuid
   allowed_portal_entities?: string[]
   self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY" | "BLOCK_IF_PORTAL_USER_EXISTS"
+  self_registration_account_setting?: "ALLOW_WITH_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY"
+  self_registration_entity?: "contact" | "account"
   user_account_self_management?: boolean
   feature_settings?: {
     start_page?: boolean
@@ -11478,14 +11851,6 @@ type UpsertPortalConfigV3 = {
     forgotPassword?: string // uuid
     invitation?: string // uuid
     partnerInvitation?: string // uuid
-    onNewQuote?: string // uuid
-    onMapAPendingUser?: string // uuid
-    onDocUpload?: string // uuid
-    onWorkflowStepAssigned?: string // uuid
-    confirmEmailUpdate?: string // uuid
-    verifyCodeToSetPassword?: string // uuid
-  }
-  images?: {
   // ...
 }
 ```
@@ -11527,9 +11892,17 @@ type PortalConfigV3 = {
   name?: string
   domain?: string
   is_epilot_domain?: boolean
+  epilot_domain?: string
+  domain_settings?: {
+    is_custom_domain_enabled?: boolean
+    is_epilot_domain_enabled?: boolean
+    is_redirection_enabled?: boolean
+  }
   design_id?: string // uuid
   allowed_portal_entities?: string[]
   self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY" | "BLOCK_IF_PORTAL_USER_EXISTS"
+  self_registration_account_setting?: "ALLOW_WITH_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY"
+  self_registration_entity?: "contact" | "account"
   user_account_self_management?: boolean
   feature_settings?: {
     start_page?: boolean
@@ -11585,14 +11958,6 @@ type PortalConfigV3 = {
     forgotPassword?: string // uuid
     invitation?: string // uuid
     partnerInvitation?: string // uuid
-    onNewQuote?: string // uuid
-    onMapAPendingUser?: string // uuid
-    onDocUpload?: string // uuid
-    onWorkflowStepAssigned?: string // uuid
-    confirmEmailUpdate?: string // uuid
-    verifyCodeToSetPassword?: string // uuid
-  }
-  images?: {
   // ...
 }
 ```
@@ -11603,6 +11968,7 @@ type PortalConfigV3 = {
 type JuiceSettings = {
   is_dummy?: boolean
   is_canary?: boolean
+  redirect_to?: string
 }
 ```
 

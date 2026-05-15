@@ -32,6 +32,8 @@ const { data } = await fileClient.uploadFileV2(...)
 - [`downloadFile`](#downloadfile)
 - [`downloadS3File`](#downloads3file)
 - [`downloadFiles`](#downloadfiles)
+- [`createZipJob`](#createzipjob)
+- [`getZipJob`](#getzipjob)
 - [`verifyCustomDownloadUrl`](#verifycustomdownloadurl)
 - [`uploadFilePublic`](#uploadfilepublic)
 
@@ -78,6 +80,8 @@ const { data } = await fileClient.uploadFileV2(...)
 - [`UploadFilePayload`](#uploadfilepayload)
 - [`FileUpload`](#fileupload)
 - [`DownloadFilesPayload`](#downloadfilespayload)
+- [`CreateZipJobPayload`](#createzipjobpayload)
+- [`ZipJob`](#zipjob)
 - [`VerifyCustomDownloadUrlPayload`](#verifycustomdownloadurlpayload)
 - [`S3Reference`](#s3reference)
 - [`S3Ref`](#s3ref)
@@ -448,6 +452,63 @@ const { data } = await client.downloadFiles(
 
 ---
 
+### `createZipJob`
+
+Create a background job to ZIP multiple files and send a download link via email.
+
+`POST /v1/files:zipJob`
+
+```ts
+const { data } = await client.createZipJob(
+  null,
+  {},
+)
+```
+
+---
+
+### `getZipJob`
+
+Get the status of a ZIP job
+
+`GET /v1/files:zipJob/{job_id}`
+
+```ts
+const { data } = await client.getZipJob({
+  job_id: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "job_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "status": "completed",
+  "progress": {
+    "total_files": 100,
+    "downloaded_files": 75,
+    "failed_files": 2
+  },
+  "result": {
+    "file_entity_id": "ef7d985c-2385-44f4-9c71-ae06a52264f8",
+    "download_url": "https://epilot-prod-user-content.s3.eu-central-1.amazonaws.com/123/files.zip?X-Amz-...",
+    "expires_at": "2024-01-02T12:00:00Z",
+    "zip_size_bytes": 104857600
+  },
+  "error": "Failed to download file: access denied",
+  "created_at": "2024-01-01T12:00:00Z",
+  "created_by": "10234",
+  "org_id": "123",
+  "updated_at": "2024-01-01T12:05:00Z"
+}
+```
+
+</details>
+
+---
+
 ### `previewFile`
 
 Generate a thumbnail preview for a file entity.
@@ -567,7 +628,7 @@ const { data } = await client.generatePublicLink({
 
 ### `listPublicLinksForFile`
 
-**Not yet implemented.**
+Fetches all public links previously generated for a file
 
 `GET /v1/files/{id}/public/links`
 
@@ -614,7 +675,7 @@ const { data } = await client.accessPublicLink({
 
 ### `revokePublicLink`
 
-**Not yet implemented.**
+Revokes a given public link by ID
 
 `DELETE /v1/files/public/links/{id}`
 
@@ -1302,6 +1363,44 @@ type DownloadFilesPayload = Array<{
   id: string | string // uuid
   version?: number
 }>
+```
+
+### `CreateZipJobPayload`
+
+Request payload to create a ZIP job for bulk file download.
+Provide either an explicit list of `file_entity_ids` (up to 1000) or an
+`entity_query` that resolves to file entities (up to 10000).
+
+
+```ts
+type CreateZipJobPayload = unknown | unknown
+```
+
+### `ZipJob`
+
+ZIP job status and result
+
+```ts
+type ZipJob = {
+  job_id?: string // uuid
+  status?: "queued" | "downloading" | "zipping" | "uploading" | "sending_notification" | "completed" | "failed"
+  progress?: {
+    total_files?: number
+    downloaded_files?: number
+    failed_files?: number
+  }
+  result?: {
+    file_entity_id?: string // uuid
+    download_url?: string // uri
+    expires_at?: string // date-time
+    zip_size_bytes?: number
+  }
+  error?: string
+  created_at?: string // date-time
+  created_by?: string
+  org_id?: string
+  updated_at?: string // date-time
+}
 ```
 
 ### `VerifyCustomDownloadUrlPayload`
