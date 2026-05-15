@@ -50,6 +50,31 @@ export declare namespace Components {
              */
             decision: "accept" | "decline";
         }
+        export interface AccountExistsRequest {
+            /**
+             * ID of the organization
+             * example:
+             * 728
+             */
+            org_id: string;
+            /**
+             * Identifier-value pairs per schema to identify an account during portal user registration
+             * example:
+             * {
+             *   "account": {
+             *     "customer_number": "ACC-123456"
+             *   },
+             *   "contract": {
+             *     "contract_number": "123456"
+             *   }
+             * }
+             */
+            registration_identifiers: {
+                [name: string]: {
+                    [name: string]: string;
+                };
+            };
+        }
         export interface ActionLabel {
             en?: string | null;
             de?: string | null;
@@ -909,6 +934,13 @@ export declare namespace Components {
              */
             is_epilot_domain?: boolean;
             /**
+             * The URL on which the portal is accessible
+             * example:
+             * example-portal-12345.ecp.epilot.cloud
+             */
+            epilot_domain?: string;
+            domain_settings?: /* Domain settings for the portal */ DomainSettings;
+            /**
              * ID of the design used to build the portal
              */
             design_id?: /**
@@ -927,6 +959,14 @@ export declare namespace Components {
              */
             allowed_portal_entities?: string[];
             self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY" | "BLOCK_IF_PORTAL_USER_EXISTS";
+            /**
+             * Controls behavior of self-registration when account is used as the registration entity
+             */
+            self_registration_account_setting?: "ALLOW_WITH_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY";
+            /**
+             * Entity type used as the primary identifier for self-registration
+             */
+            self_registration_entity?: "contact" | "account";
             /**
              * Enable or disable user account self management
              * example:
@@ -1307,6 +1347,12 @@ export declare namespace Components {
             pages?: {
                 [name: string]: Page;
             };
+            /**
+             * Portal-level blocks shared across all pages (e.g. footer). Keyed by block id.
+             */
+            global_blocks?: {
+                [name: string]: Block;
+            };
         }
         export interface CommonConfigAttributesV3 {
             /**
@@ -1330,6 +1376,13 @@ export declare namespace Components {
              */
             is_epilot_domain?: boolean;
             /**
+             * The Epilot domain on which the portal is accessible
+             * example:
+             * example-portal-1.ecp.epilot.io
+             */
+            epilot_domain?: string;
+            domain_settings?: /* Domain settings for the portal */ DomainSettings;
+            /**
              * ID of the design used to build the portal
              */
             design_id?: /**
@@ -1348,6 +1401,14 @@ export declare namespace Components {
              */
             allowed_portal_entities?: string[];
             self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY" | "BLOCK_IF_PORTAL_USER_EXISTS";
+            /**
+             * Controls behavior of self-registration when account is used as the registration entity
+             */
+            self_registration_account_setting?: "ALLOW_WITH_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY";
+            /**
+             * Entity type used as the primary identifier for self-registration
+             */
+            self_registration_entity?: "contact" | "account";
             /**
              * Enable or disable user account self management
              * example:
@@ -1725,6 +1786,12 @@ export declare namespace Components {
              */
             portal_sk_v3?: string;
             origin?: /* Origin of the portal */ Origin;
+            /**
+             * Portal-level blocks shared across all pages (e.g. footer). Keyed by block id.
+             */
+            global_blocks?: {
+                [name: string]: Block;
+            };
         }
         /**
          * The mapped contact of the portal user
@@ -2210,6 +2277,23 @@ export declare namespace Components {
                 en?: string;
                 de?: string;
             };
+        }
+        /**
+         * Domain settings for the portal
+         */
+        export interface DomainSettings {
+            /**
+             * Whether the custom domain is enabled
+             */
+            is_custom_domain_enabled?: boolean;
+            /**
+             * Whether the Epilot domain is enabled
+             */
+            is_epilot_domain_enabled?: boolean;
+            /**
+             * Whether the redirection is enabled
+             */
+            is_redirection_enabled?: boolean;
         }
         /**
          * Email templates used for authentication and internal processes
@@ -4219,6 +4303,12 @@ export declare namespace Components {
              * Whether the org is in canary mode
              */
             is_canary?: boolean;
+            /**
+             * The URL to redirect to
+             * example:
+             * https://example.com
+             */
+            redirect_to?: string;
         }
         /**
          * The meter entity
@@ -4474,40 +4564,57 @@ export declare namespace Components {
             };
             schema?: string;
         }
+        /**
+         * Mobile OIDC configuration. All string fields support env var interpolation
+         * (incl. secrets) via mustache-like templates, e.g. `{{ env.MOBILE_CLIENT_SECRET }}`.
+         *
+         */
         export interface MoblieOIDCConfig {
             /**
-             * Client ID for the mobile app
+             * Client ID for the mobile app. Supports env var interpolation.
              * example:
              * 123456
              */
             client_id?: string;
             /**
-             * Client Secret for the mobile app
+             * Client Secret for the mobile app. Supports env var interpolation (incl. secrets),
+             * e.g. `{{ env.MOBILE_CLIENT_SECRET }}`.
+             *
              * example:
              * 123456
              */
             client_secret?: string;
         }
+        /**
+         * OIDC provider configuration. All string fields support env var interpolation
+         * (incl. secrets) via mustache-like templates, e.g. `{{ env.MY_PROVIDER_CLIENT_SECRET }}`.
+         *
+         */
         export interface OIDCProviderConfig {
             type?: "authorization_code" | "implicit";
             /**
-             * Issuing Authority URL
+             * Issuing Authority URL. Supports env var interpolation, e.g. `{{ env.MY_ISSUER }}`.
              * example:
              * https://login.microsoftonline.com/33d4f3e5-3df2-421e-b92e-a63cfa680a88/v2.0
              */
             oidc_issuer: string;
             /**
-             * Redirect URI for the OIDC flow
+             * Redirect URI for the OIDC flow. Supports env var interpolation.
              * example:
              * https://customer-portal.com/login
              */
             redirect_uri?: string;
             /**
+             * Supports env var interpolation, e.g. `{{ env.MY_CLIENT_ID }}`.
              * example:
              * ab81daf8-8b1f-42d6-94ca-c51621054c75
              */
             client_id: string;
             /**
+             * Client Secret. Supports env var interpolation (incl. secrets), e.g.
+             * `{{ env.MY_CLIENT_SECRET }}`. Prefer storing the actual secret as an org
+             * env var and referencing it here.
+             *
              * example:
              * 7BIUnn~6shh.7fNtXb..3k1Mp3s6k6WK3B
              */
@@ -4569,15 +4676,60 @@ export declare namespace Components {
              */
             mobile_redirect_uri?: string;
             /**
-             * The username for the test auth, only used for testing on auth code flow
+             * The username for the test auth, only used for testing on auth code flow.
+             * Supports env var interpolation, e.g. `{{ env.MY_TEST_AUTH_USERNAME }}`.
+             *
              * example:
              * test@epilot.io
              */
             test_auth_username?: string;
             /**
-             * The password for the test auth, only used for testing on auth code flow
+             * The password for the test auth, only used for testing on auth code flow.
+             * Supports env var interpolation (incl. secrets), e.g. `{{ env.MY_TEST_AUTH_PASSWORD }}`.
+             *
              */
             test_auth_password?: string;
+        }
+        /**
+         * Public OIDC provider configuration. Same as OIDCProviderConfig but never includes
+         * the `client_secret` field — it is kept server-side and only used to exchange the
+         * authorization code at the SSO callback. String fields are returned with env var
+         * placeholders already resolved when fetched via `GET /v2/portal/public/sso/providers/{provider_slug}`.
+         *
+         */
+        export interface OIDCProviderPublicConfig {
+            type?: "authorization_code" | "implicit";
+            /**
+             * Issuing Authority URL
+             * example:
+             * https://login.microsoftonline.com/33d4f3e5-3df2-421e-b92e-a63cfa680a88/v2.0
+             */
+            oidc_issuer: string;
+            /**
+             * Redirect URI for the OIDC flow
+             * example:
+             * https://customer-portal.com/login
+             */
+            redirect_uri?: string;
+            /**
+             * example:
+             * ab81daf8-8b1f-42d6-94ca-c51621054c75
+             */
+            client_id: string;
+            /**
+             * Whether the client secret is present (the value itself is kept server-side)
+             * example:
+             * true
+             */
+            has_client_secret?: boolean;
+            /**
+             * Space-separated list of OAuth 2.0 scopes to request from OpenID Connect
+             * example:
+             * openid email
+             */
+            scope: string;
+            metadata?: OIDCProviderMetadata;
+            prompt?: "login" | "select_account" | "consent";
         }
         /**
          * The opportunity entity
@@ -5144,6 +5296,13 @@ export declare namespace Components {
              * Mark true if the domain is an Epilot domain
              */
             is_epilot_domain?: boolean;
+            /**
+             * The URL on which the portal is accessible
+             * example:
+             * example-portal-12345.ecp.epilot.cloud
+             */
+            epilot_domain?: string;
+            domain_settings?: /* Domain settings for the portal */ DomainSettings;
             design_id?: /**
              * Entity ID
              * example:
@@ -5160,6 +5319,14 @@ export declare namespace Components {
              */
             allowed_portal_entities?: string[];
             self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY" | "BLOCK_IF_PORTAL_USER_EXISTS";
+            /**
+             * Controls behavior of self-registration when account is used as the registration entity
+             */
+            self_registration_account_setting?: "ALLOW_WITH_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY";
+            /**
+             * Entity type used as the primary identifier for self-registration
+             */
+            self_registration_entity?: "contact" | "account";
             /**
              * Enable or disable user account self management
              * example:
@@ -5541,6 +5708,12 @@ export declare namespace Components {
                 [name: string]: Page;
             };
             /**
+             * Portal-level blocks shared across all pages (e.g. footer). Keyed by block id.
+             */
+            global_blocks?: {
+                [name: string]: Block;
+            };
+            /**
              * ID of the organization
              * example:
              * 12345
@@ -5648,6 +5821,13 @@ export declare namespace Components {
              * Mark true if the domain is an Epilot domain
              */
             is_epilot_domain?: boolean;
+            /**
+             * The Epilot domain on which the portal is accessible
+             * example:
+             * example-portal-1.ecp.epilot.io
+             */
+            epilot_domain?: string;
+            domain_settings?: /* Domain settings for the portal */ DomainSettings;
             design_id?: /**
              * Entity ID
              * example:
@@ -5664,6 +5844,14 @@ export declare namespace Components {
              */
             allowed_portal_entities?: string[];
             self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY" | "BLOCK_IF_PORTAL_USER_EXISTS";
+            /**
+             * Controls behavior of self-registration when account is used as the registration entity
+             */
+            self_registration_account_setting?: "ALLOW_WITH_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY";
+            /**
+             * Entity type used as the primary identifier for self-registration
+             */
+            self_registration_entity?: "contact" | "account";
             /**
              * Enable or disable user account self management
              * example:
@@ -6042,6 +6230,12 @@ export declare namespace Components {
             portal_sk_v3?: string;
             origin?: /* Origin of the portal */ Origin;
             /**
+             * Portal-level blocks shared across all pages (e.g. footer). Keyed by block id.
+             */
+            global_blocks?: {
+                [name: string]: Block;
+            };
+            /**
              * ID of the organization
              * example:
              * 12345
@@ -6253,6 +6447,20 @@ export declare namespace Components {
              */
             campaign_id?: string;
         }
+        /**
+         * SSO identity provider configuration.
+         *
+         * Env var interpolation: only string fields under `oidc_config` and
+         * `mobile_oidc_config` (incl. their nested `metadata`) are passed through
+         * Liquid templating, so they may contain `{{ env.VAR }}` placeholders that
+         * get resolved at runtime against the organization's environment.
+         *
+         * The following fields are used as literal values and MUST NOT contain
+         * template syntax: `slug`, `display_name`, `provider_type`, all keys and
+         * values under `attribute_mappings` (used as JSONPath-like accessors into
+         * token claims), and all keys and values under `entity_matching`.
+         *
+         */
         export interface ProviderConfig {
             slug?: /**
              * URL-friendly slug to use as organization-unique identifier for Provider
@@ -6269,8 +6477,18 @@ export declare namespace Components {
             provider_type: "OIDC";
             attribute_mappings?: /* Dictionary of epilot user attributes to claims */ AttributeMappingConfig;
             entity_matching?: /* Configuration for matching existing entities during SSO login using token claims */ EntityMatchingConfig;
-            oidc_config?: OIDCProviderConfig;
-            mobile_oidc_config?: MoblieOIDCConfig;
+            oidc_config?: /**
+             * OIDC provider configuration. All string fields support env var interpolation
+             * (incl. secrets) via mustache-like templates, e.g. `{{ env.MY_PROVIDER_CLIENT_SECRET }}`.
+             *
+             */
+            OIDCProviderConfig;
+            mobile_oidc_config?: /**
+             * Mobile OIDC configuration. All string fields support env var interpolation
+             * (incl. secrets) via mustache-like templates, e.g. `{{ env.MOBILE_CLIENT_SECRET }}`.
+             *
+             */
+            MoblieOIDCConfig;
         }
         /**
          * Human-readable display name for identity provider shown in login
@@ -6291,8 +6509,20 @@ export declare namespace Components {
              * Office 365 Login
              */
             ProviderDisplayName;
-            oidc_config?: OIDCProviderConfig;
-            mobile_oidc_config?: MoblieOIDCConfig;
+            oidc_config?: /**
+             * Public OIDC provider configuration. Same as OIDCProviderConfig but never includes
+             * the `client_secret` field — it is kept server-side and only used to exchange the
+             * authorization code at the SSO callback. String fields are returned with env var
+             * placeholders already resolved when fetched via `GET /v2/portal/public/sso/providers/{provider_slug}`.
+             *
+             */
+            OIDCProviderPublicConfig;
+            mobile_oidc_config?: /**
+             * Mobile OIDC configuration. All string fields support env var interpolation
+             * (incl. secrets) via mustache-like templates, e.g. `{{ env.MOBILE_CLIENT_SECRET }}`.
+             *
+             */
+            MoblieOIDCConfig;
         }
         /**
          * URL-friendly slug to use as organization-unique identifier for Provider
@@ -6888,6 +7118,13 @@ export declare namespace Components {
              * Mark true if the domain is an Epilot domain
              */
             is_epilot_domain?: boolean;
+            /**
+             * The URL on which the portal is accessible
+             * example:
+             * example-portal-12345.ecp.epilot.cloud
+             */
+            epilot_domain?: string;
+            domain_settings?: /* Domain settings for the portal */ DomainSettings;
             design_id?: /**
              * Entity ID
              * example:
@@ -6904,6 +7141,14 @@ export declare namespace Components {
              */
             allowed_portal_entities?: string[];
             self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY" | "BLOCK_IF_PORTAL_USER_EXISTS";
+            /**
+             * Controls behavior of self-registration when account is used as the registration entity
+             */
+            self_registration_account_setting?: "ALLOW_WITH_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY";
+            /**
+             * Entity type used as the primary identifier for self-registration
+             */
+            self_registration_entity?: "contact" | "account";
             /**
              * Enable or disable user account self management
              * example:
@@ -7284,6 +7529,12 @@ export declare namespace Components {
             pages?: {
                 [name: string]: Page;
             };
+            /**
+             * Portal-level blocks shared across all pages (e.g. footer). Keyed by block id.
+             */
+            global_blocks?: {
+                [name: string]: Block;
+            };
         }
         export interface UpsertPortalConfigV3 {
             /**
@@ -7346,6 +7597,13 @@ export declare namespace Components {
              * Mark true if the domain is an Epilot domain
              */
             is_epilot_domain?: boolean;
+            /**
+             * The Epilot domain on which the portal is accessible
+             * example:
+             * example-portal-1.ecp.epilot.io
+             */
+            epilot_domain?: string;
+            domain_settings?: /* Domain settings for the portal */ DomainSettings;
             design_id?: /**
              * Entity ID
              * example:
@@ -7362,6 +7620,14 @@ export declare namespace Components {
              */
             allowed_portal_entities?: string[];
             self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY" | "BLOCK_IF_PORTAL_USER_EXISTS";
+            /**
+             * Controls behavior of self-registration when account is used as the registration entity
+             */
+            self_registration_account_setting?: "ALLOW_WITH_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY";
+            /**
+             * Entity type used as the primary identifier for self-registration
+             */
+            self_registration_entity?: "contact" | "account";
             /**
              * Enable or disable user account self management
              * example:
@@ -7739,6 +8005,12 @@ export declare namespace Components {
              */
             portal_sk_v3?: string;
             origin?: /* Origin of the portal */ Origin;
+            /**
+             * Portal-level blocks shared across all pages (e.g. footer). Keyed by block id.
+             */
+            global_blocks?: {
+                [name: string]: Block;
+            };
             pages?: PageRequest[];
         }
         export interface UpsertPortalWidget {
@@ -8031,6 +8303,44 @@ export declare namespace Paths {
             }
         }
     }
+    namespace CheckAccountExists {
+        namespace Parameters {
+            export type Domain = string;
+            export type PortalId = /**
+             * ID of the portal
+             * example:
+             * 453ad7bf-86d5-46c8-8252-bcc868df5e3c
+             */
+            Components.Schemas.PortalId;
+        }
+        export interface QueryParameters {
+            portal_id?: Parameters.PortalId;
+            domain?: Parameters.Domain;
+        }
+        export type RequestBody = Components.Schemas.AccountExistsRequest;
+        namespace Responses {
+            export interface $200 {
+                /**
+                 * Whether the account exists with the given identifier values
+                 * example:
+                 * true
+                 */
+                exists?: boolean;
+                /**
+                 * ID of the account if exists
+                 */
+                accountId?: /**
+                 * Entity ID
+                 * example:
+                 * 5da0a718-c822-403d-9f5d-20d4584e0528
+                 */
+                Components.Schemas.EntityId /* uuid */;
+            }
+            export type $400 = Components.Responses.InvalidRequest;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace CheckContactExists {
         namespace Parameters {
             export type Origin = /* Origin of the portal */ Components.Schemas.Origin;
@@ -8089,6 +8399,15 @@ export declare namespace Paths {
                  * ID of the contact if exists
                  */
                 contactId?: /**
+                 * Entity ID
+                 * example:
+                 * 5da0a718-c822-403d-9f5d-20d4584e0528
+                 */
+                Components.Schemas.EntityId /* uuid */;
+                /**
+                 * ID of the resolved account when the portal is configured for account-based registration
+                 */
+                accountId?: /**
                  * Entity ID
                  * example:
                  * 5da0a718-c822-403d-9f5d-20d4584e0528
@@ -10131,6 +10450,13 @@ export declare namespace Paths {
                  * Mark true if the domain is an Epilot domain
                  */
                 is_epilot_domain?: boolean;
+                /**
+                 * The URL on which the portal is accessible
+                 * example:
+                 * example-portal-12345.ecp.epilot.cloud
+                 */
+                epilot_domain?: string;
+                domain_settings?: /* Domain settings for the portal */ Components.Schemas.DomainSettings;
                 design_id?: /**
                  * Entity ID
                  * example:
@@ -10147,6 +10473,14 @@ export declare namespace Paths {
                  */
                 allowed_portal_entities?: string[];
                 self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY" | "BLOCK_IF_PORTAL_USER_EXISTS";
+                /**
+                 * Controls behavior of self-registration when account is used as the registration entity
+                 */
+                self_registration_account_setting?: "ALLOW_WITH_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY";
+                /**
+                 * Entity type used as the primary identifier for self-registration
+                 */
+                self_registration_entity?: "contact" | "account";
                 /**
                  * Enable or disable user account self management
                  * example:
@@ -10526,6 +10860,12 @@ export declare namespace Paths {
                 origin?: /* Origin of the portal */ Components.Schemas.Origin;
                 pages?: {
                     [name: string]: Components.Schemas.Page;
+                };
+                /**
+                 * Portal-level blocks shared across all pages (e.g. footer). Keyed by block id.
+                 */
+                global_blocks?: {
+                    [name: string]: Components.Schemas.Block;
                 };
                 /**
                  * ID of the organization
@@ -10625,6 +10965,13 @@ export declare namespace Paths {
                  * Mark true if the domain is an Epilot domain
                  */
                 is_epilot_domain?: boolean;
+                /**
+                 * The URL on which the portal is accessible
+                 * example:
+                 * example-portal-12345.ecp.epilot.cloud
+                 */
+                epilot_domain?: string;
+                domain_settings?: /* Domain settings for the portal */ Components.Schemas.DomainSettings;
                 design_id?: /**
                  * Entity ID
                  * example:
@@ -10641,6 +10988,14 @@ export declare namespace Paths {
                  */
                 allowed_portal_entities?: string[];
                 self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY" | "BLOCK_IF_PORTAL_USER_EXISTS";
+                /**
+                 * Controls behavior of self-registration when account is used as the registration entity
+                 */
+                self_registration_account_setting?: "ALLOW_WITH_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY";
+                /**
+                 * Entity type used as the primary identifier for self-registration
+                 */
+                self_registration_entity?: "contact" | "account";
                 /**
                  * Enable or disable user account self management
                  * example:
@@ -11020,6 +11375,12 @@ export declare namespace Paths {
                 origin?: /* Origin of the portal */ Components.Schemas.Origin;
                 pages?: {
                     [name: string]: Components.Schemas.Page;
+                };
+                /**
+                 * Portal-level blocks shared across all pages (e.g. footer). Keyed by block id.
+                 */
+                global_blocks?: {
+                    [name: string]: Components.Schemas.Block;
                 };
                 /**
                  * ID of the organization
@@ -11929,6 +12290,48 @@ export declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace GetSSOProvider {
+        namespace Parameters {
+            export type Domain = string;
+            /**
+             * example:
+             * 123
+             */
+            export type OrgId = string;
+            export type Origin = "END_CUSTOMER_PORTAL" | "INSTALLER_PORTAL";
+            export type PortalId = /**
+             * ID of the portal
+             * example:
+             * 453ad7bf-86d5-46c8-8252-bcc868df5e3c
+             */
+            Components.Schemas.PortalId;
+            export type ProviderSlug = /**
+             * URL-friendly slug to use as organization-unique identifier for Provider
+             * example:
+             * office-365-login
+             */
+            Components.Schemas.ProviderSlug /* [0-9a-z-]+ */;
+        }
+        export interface PathParameters {
+            provider_slug: Parameters.ProviderSlug;
+        }
+        export interface QueryParameters {
+            org_id?: /**
+             * example:
+             * 123
+             */
+            Parameters.OrgId;
+            origin?: Parameters.Origin;
+            portal_id?: Parameters.PortalId;
+            domain?: Parameters.Domain;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.ProviderPublicConfig;
+            export type $400 = Components.Responses.InvalidRequest;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace GetSchemas {
         namespace Responses {
             export interface $200 {
@@ -12340,6 +12743,42 @@ export declare namespace Paths {
             export interface $200 {
             }
             export type $401 = Components.Responses.Unauthorized;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace PortalProxyExecute {
+        export interface RequestBody {
+            /**
+             * Integration ID containing the managed-call use case
+             */
+            integration_id: string; // uuid
+            /**
+             * Use case slug (acts as the RPC method name)
+             */
+            use_case_slug: string;
+            /**
+             * Input data for the managed-call operation
+             */
+            payload?: {
+                [name: string]: any;
+            };
+        }
+        namespace Responses {
+            export interface $200 {
+                success: boolean;
+                /**
+                 * Managed-call response payload. Shape is defined by the use
+                 * case's JSONata response_mapping; if no mapping is
+                 * configured the raw external API response is returned.
+                 *
+                 */
+                data?: {
+                    [name: string]: any;
+                };
+            }
+            export type $400 = Components.Responses.InvalidRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -13701,6 +14140,34 @@ export declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace VerifyDns {
+        namespace Parameters {
+            export type PortalId = /**
+             * ID of the portal
+             * example:
+             * 453ad7bf-86d5-46c8-8252-bcc868df5e3c
+             */
+            Components.Schemas.PortalId;
+        }
+        export interface QueryParameters {
+            portal_id: Parameters.PortalId;
+        }
+        namespace Responses {
+            export interface $200 {
+                /**
+                 * The status of the custom domain verification
+                 */
+                domain_status?: "PENDING" | "SUCCEED";
+                /**
+                 * A message describing the result
+                 */
+                message?: string;
+            }
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
 }
 
 
@@ -14247,6 +14714,20 @@ export interface OperationMethods {
     data?: Paths.CheckContactExistsV3.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CheckContactExistsV3.Responses.$200>
+  /**
+   * checkAccountExists - checkAccountExists
+   * 
+   * True if account with given identifiers exists.
+   * Supports two identification methods:
+   * 1. Using portal_id
+   * 2. Using domain
+   * 
+   */
+  'checkAccountExists'(
+    parameters?: Parameters<Paths.CheckAccountExists.QueryParameters> | null,
+    data?: Paths.CheckAccountExists.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CheckAccountExists.Responses.$200>
   /**
    * getValidSecondaryAttributes - getValidSecondaryAttributes
    * 
@@ -14840,6 +15321,28 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetMeterReadings.Responses.$200>
   /**
+   * getSSOProvider - getSSOProvider
+   * 
+   * Returns the public configuration of a single SSO identity provider with env var
+   * placeholders (incl. secrets) already resolved against the organization's environment.
+   * 
+   * Use this endpoint at SSO initiation time (i.e. when the end user clicks "Sign in with X")
+   * to obtain the resolved OIDC settings needed to construct the authorization URL.
+   * The web `client_secret` is intentionally never returned — it is used server-side by
+   * the SSO callback to exchange the authorization code for tokens.
+   * 
+   * Supports three identification methods:
+   * 1. `org_id` + `origin`
+   * 2. `org_id` + `portal_id`
+   * 3. `domain`
+   * 
+   */
+  'getSSOProvider'(
+    parameters?: Parameters<Paths.GetSSOProvider.QueryParameters & Paths.GetSSOProvider.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetSSOProvider.Responses.$200>
+  /**
    * ssoLogin - ssoLogin
    * 
    * Initiate login using external SSO identity.
@@ -15207,6 +15710,28 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.EnablePartner.Responses.$200>
+  /**
+   * verifyDns - verifyDns
+   * 
+   * Manually triggers DNS verification for a portal's domain setup. Runs the same verification logic as the scheduled processAllPendingNetworks lambda.
+   */
+  'verifyDns'(
+    parameters?: Parameters<Paths.VerifyDns.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.VerifyDns.Responses.$200>
+  /**
+   * portalProxyExecute - portalProxyExecute
+   * 
+   * Execute an Integration Hub managed-call use case on behalf of a portal user.
+   * Bridges PortalAuth to the Integration API by generating an internal token.
+   * 
+   */
+  'portalProxyExecute'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.PortalProxyExecute.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.PortalProxyExecute.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -15843,6 +16368,22 @@ export interface PathsDictionary {
       data?: Paths.CheckContactExistsV3.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.CheckContactExistsV3.Responses.$200>
+  }
+  ['/v3/portal/public/account/exists']: {
+    /**
+     * checkAccountExists - checkAccountExists
+     * 
+     * True if account with given identifiers exists.
+     * Supports two identification methods:
+     * 1. Using portal_id
+     * 2. Using domain
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.CheckAccountExists.QueryParameters> | null,
+      data?: Paths.CheckAccountExists.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CheckAccountExists.Responses.$200>
   }
   ['/v2/portal/contact/valid/secondary/attributes']: {
     /**
@@ -16538,6 +17079,30 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetMeterReadings.Responses.$200>
   }
+  ['/v2/portal/public/sso/providers/{provider_slug}']: {
+    /**
+     * getSSOProvider - getSSOProvider
+     * 
+     * Returns the public configuration of a single SSO identity provider with env var
+     * placeholders (incl. secrets) already resolved against the organization's environment.
+     * 
+     * Use this endpoint at SSO initiation time (i.e. when the end user clicks "Sign in with X")
+     * to obtain the resolved OIDC settings needed to construct the authorization URL.
+     * The web `client_secret` is intentionally never returned — it is used server-side by
+     * the SSO callback to exchange the authorization code for tokens.
+     * 
+     * Supports three identification methods:
+     * 1. `org_id` + `origin`
+     * 2. `org_id` + `portal_id`
+     * 3. `domain`
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetSSOProvider.QueryParameters & Paths.GetSSOProvider.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetSSOProvider.Responses.$200>
+  }
   ['/v2/portal/public/sso/login']: {
     /**
      * ssoLogin - ssoLogin
@@ -16960,12 +17525,39 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.EnablePartner.Responses.$200>
   }
+  ['/v3/portal/verify-dns']: {
+    /**
+     * verifyDns - verifyDns
+     * 
+     * Manually triggers DNS verification for a portal's domain setup. Runs the same verification logic as the scheduled processAllPendingNetworks lambda.
+     */
+    'post'(
+      parameters?: Parameters<Paths.VerifyDns.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.VerifyDns.Responses.$200>
+  }
+  ['/v2/portal/proxy/execute']: {
+    /**
+     * portalProxyExecute - portalProxyExecute
+     * 
+     * Execute an Integration Hub managed-call use case on behalf of a portal user.
+     * Bridges PortalAuth to the Integration API by generating an internal token.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.PortalProxyExecute.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.PortalProxyExecute.Responses.$200>
+  }
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
 
 export type AcceptanceDecision = Components.Schemas.AcceptanceDecision;
+export type AccountExistsRequest = Components.Schemas.AccountExistsRequest;
 export type ActionLabel = Components.Schemas.ActionLabel;
 export type ActionWidget = Components.Schemas.ActionWidget;
 export type Activity = Components.Schemas.Activity;
@@ -17004,6 +17596,7 @@ export type DataRetrievalItem = Components.Schemas.DataRetrievalItem;
 export type DeleteEntityFile = Components.Schemas.DeleteEntityFile;
 export type Direction = Components.Schemas.Direction;
 export type DocumentWidget = Components.Schemas.DocumentWidget;
+export type DomainSettings = Components.Schemas.DomainSettings;
 export type EmailTemplates = Components.Schemas.EmailTemplates;
 export type Entity = Components.Schemas.Entity;
 export type EntityEditRule = Components.Schemas.EntityEditRule;
@@ -17055,6 +17648,7 @@ export type MeterReadingWidget = Components.Schemas.MeterReadingWidget;
 export type MoblieOIDCConfig = Components.Schemas.MoblieOIDCConfig;
 export type OIDCProviderConfig = Components.Schemas.OIDCProviderConfig;
 export type OIDCProviderMetadata = Components.Schemas.OIDCProviderMetadata;
+export type OIDCProviderPublicConfig = Components.Schemas.OIDCProviderPublicConfig;
 export type Opportunity = Components.Schemas.Opportunity;
 export type Order = Components.Schemas.Order;
 export type OrganizationSettings = Components.Schemas.OrganizationSettings;

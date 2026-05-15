@@ -71,9 +71,11 @@ const { data } = await emailSettingsClient.provisionEpilotEmailAddress(...)
 - [`deleteDomain`](#deletedomain)
 - [`getDomains`](#getdomains)
 - [`verifyNameServers`](#verifynameservers)
+- [`verifyDnsRecords`](#verifydnsrecords)
 - [`verifyDomain`](#verifydomain)
 
 **Schemas**
+- [`ConnectOutlookRequest`](#connectoutlookrequest)
 - [`MailboxSyncStatus`](#mailboxsyncstatus)
 - [`MailboxSyncStatuses`](#mailboxsyncstatuses)
 - [`MailboxSyncFolderStatuses`](#mailboxsyncfolderstatuses)
@@ -562,12 +564,18 @@ const { data } = await client.listInboxBuckets()
 
 ### `connectOutlook`
 
-Returns Microsoft authorization URL for Outlook OAuth.
+Returns the Microsoft authorization URL for Outlook OAuth.
 
-`GET /v2/outlook/connect`
+`POST /v2/outlook/connect`
 
 ```ts
-const { data } = await client.connectOutlook()
+const { data } = await client.connectOutlook(
+  null,
+  {
+    mail: true,
+    calendar: true
+  },
+)
 ```
 
 <details>
@@ -603,6 +611,7 @@ const { data } = await client.getOutlookConnectionStatus()
     {
       "status": "connected",
       "action": "connect",
+      "action_reason": "expired",
       "connected_by_display_name": "string",
       "connected_by_email": "user@example.com",
       "connected_by_user_id": "string",
@@ -1240,6 +1249,46 @@ const { data } = await client.verifyNameServers(
 
 ---
 
+### `verifyDnsRecords`
+
+Verifies that the domain's DNS records (MX, TXT, CNAME) are correctly configured
+in the customer's DNS provider.
+
+`POST /v1/email-settings/domain/dns-records:verify`
+
+```ts
+const { data } = await client.verifyDnsRecords(
+  null,
+  {
+    domain: 'mail.yourcompany.com'
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+[
+  {
+    "id": "a10bd0ff-4391-4cfc-88ee-b19d718a9bf7",
+    "name": "Default Signature",
+    "org_id": "org-123",
+    "type": "signature",
+    "value": "Best regards, The Team",
+    "html": "<p>Best regards,<br/><strong>The Team</strong></p>",
+    "created_at": "2024-01-15T10:30:00Z",
+    "updated_at": "2024-01-20T14:45:00Z",
+    "created_by": "user-123",
+    "updated_by": "user-456"
+  }
+]
+```
+
+</details>
+
+---
+
 ### `verifyDomain`
 
 Verifies ownership and configuration of a custom email domain.
@@ -1280,6 +1329,20 @@ const { data } = await client.verifyDomain(
 ---
 
 ## Schemas
+
+### `ConnectOutlookRequest`
+
+Feature flags selecting which Microsoft Graph scopes to request.
+At least one flag must be true. Passing a superset of previously
+granted features triggers incremental consent for the delta only.
+
+
+```ts
+type ConnectOutlookRequest = {
+  mail?: boolean
+  calendar?: boolean
+}
+```
 
 ### `MailboxSyncStatus`
 
@@ -1542,6 +1605,7 @@ type OutlookConnectionError = {
 type OutlookConnectionStatus = {
   status: "connected" | "expired" | "pending_auth" | "not_connected"
   action: "connect" | "authorize" | "reconnect" | "none"
+  action_reason?: "expired" | "permission_update"
   connected_by_display_name?: string
   connected_by_email?: string // email
   connected_by_user_id?: string
