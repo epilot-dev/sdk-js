@@ -192,6 +192,30 @@
         "responses": {}
       }
     },
+    "/v1/files:zipJob": {
+      "post": {
+        "operationId": "createZipJob",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/files:zipJob/{job_id}": {
+      "get": {
+        "operationId": "getZipJob",
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v1/files/{id}/preview": {
       "get": {
         "operationId": "previewFile",
