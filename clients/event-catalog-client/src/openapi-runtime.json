@@ -85,6 +85,42 @@
         "responses": {}
       }
     },
+    "/v2/events/{event_name}:history": {
+      "post": {
+        "operationId": "searchEventHistoryV2",
+        "parameters": [
+          {
+            "name": "event_name",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/events/{event_name}/history/{event_id}": {
+      "get": {
+        "operationId": "getHistoricalEvent",
+        "parameters": [
+          {
+            "name": "event_name",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "event_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v1/events/{event_name}:trigger": {
       "post": {
         "operationId": "triggerEvent",
