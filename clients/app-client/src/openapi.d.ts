@@ -1744,9 +1744,23 @@ declare namespace Components {
                     [key: string]: any;
                 };
                 /**
-                 * Contract or Contact ID usually retrieved from the response body, e.g. `{{CallResponse.data.contact_id}}`. If no result is passed and the request suceeds, we attempt to resolve the Contact ID automatically. Supports variable interpolation.
+                 * Deprecated. Use `resolved.result` instead. Contract or Contact ID usually retrieved from the response body, e.g. `{{CallResponse.data.contact_id}}`. If no result is passed and the request suceeds, we attempt to resolve the Contact ID automatically. Supports variable interpolation.
                  */
                 result?: string;
+            };
+            resolved?: {
+                /**
+                 * Contract or Contact ID usually retrieved from the response body, e.g. `{{CallResponse.data.contact_id}}`. If no result is passed and the request suceeds, we attempt to resolve the Contact ID automatically. Supports variable interpolation. Supersedes the deprecated `call.result`.
+                 */
+                result?: string;
+                /**
+                 * Optional path to a human-readable error message in the third-party response body, used when the call fails (non-2xx status).
+                 * If specified and the path resolves to a string, that message is forwarded to the end user instead of a generic error.
+                 *
+                 * example:
+                 * error.message
+                 */
+                errorMessagePath?: string;
             };
             /**
              * Mode of contract assignment. See hook description for mode details.
@@ -2129,9 +2143,23 @@ declare namespace Components {
                     [key: string]: any;
                 };
                 /**
-                 * Contact ID usually retrieved from the response body, e.g. `{{CallResponse.data.contact_id}}`. If no result is passed and the request suceeds, we attempt to resolve the Contact ID automatically. Supports variable interpolation.
+                 * Deprecated. Use `resolved.result` instead. Contact ID usually retrieved from the response body, e.g. `{{CallResponse.data.contact_id}}`. If no result is passed and the request suceeds, we attempt to resolve the Contact ID automatically. Supports variable interpolation.
                  */
                 result: string;
+            };
+            resolved?: {
+                /**
+                 * Contact ID usually retrieved from the response body, e.g. `{{CallResponse.data.contact_id}}`. If no result is passed and the request suceeds, we attempt to resolve the Contact ID automatically. Supports variable interpolation. Supersedes the deprecated `call.result`.
+                 */
+                result?: string;
+                /**
+                 * Optional path to a human-readable error message in the third-party response body, used when the call fails (non-2xx status).
+                 * If specified and the path resolves to a string, that message is forwarded to the end user instead of a generic error.
+                 *
+                 * example:
+                 * error.message
+                 */
+                errorMessagePath?: string;
             };
             /**
              * Deprecated. Prefer `secure_proxy` instead.
