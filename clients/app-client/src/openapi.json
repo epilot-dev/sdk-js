@@ -67,7 +67,9 @@
         "summary": "getPublicFacingComponent",
         "description": "Retrieve public facing components for an installed app",
         "operationId": "getPublicFacingComponent",
-        "tags": ["App Installation"],
+        "tags": [
+          "App Installation"
+        ],
         "responses": {
           "200": {
             "description": "Successful response with public app component details",
@@ -95,7 +97,9 @@
         "summary": "listConfigurations",
         "description": "List all app configuration metadata owned by an organization. To get full app configuration details, use the /v1/app-configurations/{appId} endpoint.",
         "operationId": "listConfigurations",
-        "tags": ["App Configuration"],
+        "tags": [
+          "App Configuration"
+        ],
         "parameters": [
           {
             "name": "page",
@@ -155,7 +159,9 @@
         "summary": "createConfiguration",
         "description": "Create a new private app configuration. To make it public a verification process needs to be triggered",
         "operationId": "createConfiguration",
-        "tags": ["App Configuration"],
+        "tags": [
+          "App Configuration"
+        ],
         "requestBody": {
           "$ref": "#/components/requestBodies/CreateConfigRequest"
         },
@@ -166,7 +172,9 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "required": ["app_id"],
+                  "required": [
+                    "app_id"
+                  ],
                   "properties": {
                     "app_id": {
                       "type": "string"
@@ -184,7 +192,9 @@
         "summary": "listPublicConfigurations",
         "description": "List all publicly available app configurations that can be installed. This endpoint returns apps that have at least one public version.",
         "operationId": "listPublicConfigurations",
-        "tags": ["App Configuration"],
+        "tags": [
+          "App Configuration"
+        ],
         "parameters": [
           {
             "name": "page",
@@ -257,7 +267,9 @@
         "summary": "getPublicConfiguration",
         "description": "Retrieve the public configuration of an app to install in your tenant",
         "operationId": "getPublicConfiguration",
-        "tags": ["App Configuration"],
+        "tags": [
+          "App Configuration"
+        ],
         "parameters": [
           {
             "name": "version",
@@ -301,7 +313,9 @@
         "summary": "getConfiguration",
         "description": "Retrieve a specific app configuration",
         "operationId": "getConfiguration",
-        "tags": ["App Configuration"],
+        "tags": [
+          "App Configuration"
+        ],
         "parameters": [
           {
             "name": "version",
@@ -332,7 +346,9 @@
         "summary": "patchMetadata",
         "description": "Patch non-versioned configuration metadata of a given app configuration.",
         "operationId": "patchMetadata",
-        "tags": ["App Configuration"],
+        "tags": [
+          "App Configuration"
+        ],
         "requestBody": {
           "$ref": "#/components/requestBodies/PatchConfigMetadataRequest"
         },
@@ -349,7 +365,9 @@
         "summary": "Delete app configuration",
         "description": "Delete an app configuration and all its versions and components.",
         "operationId": "deleteConfiguration",
-        "tags": ["App Configuration"],
+        "tags": [
+          "App Configuration"
+        ],
         "responses": {
           "204": {
             "description": "App configuration deleted successfully"
@@ -365,7 +383,9 @@
         "summary": "queryEvents",
         "description": "Query analytics events for a specific app with flexible filtering",
         "operationId": "queryEvents",
-        "tags": ["App Analytics"],
+        "tags": [
+          "App Analytics"
+        ],
         "parameters": [
           {
             "name": "appId",
@@ -412,7 +432,9 @@
         "summary": "createBundleUploadUrl",
         "description": "Generate a presigned URL for uploading app bundle to /<app-id>/bundle.js path",
         "operationId": "createBundleUploadUrl",
-        "tags": ["App Configuration"],
+        "tags": [
+          "App Configuration"
+        ],
         "parameters": [
           {
             "name": "appId",
@@ -434,7 +456,9 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "required": ["upload_url"],
+                  "required": [
+                    "upload_url"
+                  ],
                   "properties": {
                     "component_id": {
                       "type": "string",
@@ -472,7 +496,9 @@
         "summary": "createZipUploadUrl",
         "operationId": "createZipUploadUrl",
         "description": "Generate a presigned URL to upload a zip file with artifacts that will be unpacked in a new directory under the /<app-id>/ path\n",
-        "tags": ["App Configuration"],
+        "tags": [
+          "App Configuration"
+        ],
         "parameters": [
           {
             "name": "appId",
@@ -516,7 +542,10 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "required": ["upload_url", "artifact_url"],
+                  "required": [
+                    "upload_url",
+                    "artifact_url"
+                  ],
                   "properties": {
                     "component_id": {
                       "type": "string",
@@ -565,7 +594,9 @@
         "summary": "createLogoUploadUrl",
         "description": "Generate a presigned URL for uploading app logo to /<app-id>/logo.png path",
         "operationId": "createLogoUploadUrl",
-        "tags": ["App Configuration"],
+        "tags": [
+          "App Configuration"
+        ],
         "requestBody": {
           "$ref": "#/components/requestBodies/CreateLogoPresignedRequest"
         },
@@ -576,7 +607,9 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "required": ["upload_url"],
+                  "required": [
+                    "upload_url"
+                  ],
                   "properties": {
                     "upload_url": {
                       "type": "string",
@@ -604,7 +637,9 @@
         "summary": "deleteLogo",
         "description": "Delete the app logo from /<app-id>/logo.png path",
         "operationId": "deleteLogo",
-        "tags": ["App Configuration"],
+        "tags": [
+          "App Configuration"
+        ],
         "responses": {
           "204": {
             "description": "Logo deleted successfully"
@@ -620,7 +655,9 @@
         "summary": "listVersions",
         "description": "Retrieve a list of versions for an app configuration",
         "operationId": "listVersions",
-        "tags": ["App Configuration"],
+        "tags": [
+          "App Configuration"
+        ],
         "parameters": [
           {
             "name": "appId",
@@ -694,7 +731,9 @@
         "summary": "getVersion",
         "description": "Retrieve a specific version of an app configuration",
         "operationId": "getVersion",
-        "tags": ["App Configuration"],
+        "tags": [
+          "App Configuration"
+        ],
         "parameters": [
           {
             "name": "appId",
@@ -735,7 +774,9 @@
         "summary": "deleteVersion",
         "description": "Delete a specific version of an app configuration",
         "operationId": "deleteVersion",
-        "tags": ["App Configuration"],
+        "tags": [
+          "App Configuration"
+        ],
         "parameters": [
           {
             "name": "appId",
@@ -775,7 +816,9 @@
         "summary": "patchVersion",
         "description": "Patch an existing app version",
         "operationId": "patchVersion",
-        "tags": ["App Configuration"],
+        "tags": [
+          "App Configuration"
+        ],
         "parameters": [
           {
             "name": "appId",
@@ -817,7 +860,9 @@
         "summary": "getReview",
         "description": "Retrieve the review status of a specific app version",
         "operationId": "getReview",
-        "tags": ["App Configuration"],
+        "tags": [
+          "App Configuration"
+        ],
         "parameters": [
           {
             "name": "appId",
@@ -863,7 +908,9 @@
         "summary": "createReview",
         "description": "Submit an app version for review to make it public",
         "operationId": "createReview",
-        "tags": ["App Configuration"],
+        "tags": [
+          "App Configuration"
+        ],
         "parameters": [
           {
             "name": "appId",
@@ -917,7 +964,9 @@
         "summary": "createComponent",
         "description": "Patch an existing app version to create/add a component",
         "operationId": "createComponent",
-        "tags": ["App Configuration"],
+        "tags": [
+          "App Configuration"
+        ],
         "parameters": [
           {
             "name": "appId",
@@ -971,7 +1020,9 @@
         "summary": "patchComponent",
         "description": "Patch an existing app version to update its components",
         "operationId": "patchComponent",
-        "tags": ["App Configuration"],
+        "tags": [
+          "App Configuration"
+        ],
         "parameters": [
           {
             "name": "appId",
@@ -1020,7 +1071,9 @@
         "summary": "deleteComponent",
         "description": "Delete a specific component from an app version",
         "operationId": "deleteComponent",
-        "tags": ["App Configuration"],
+        "tags": [
+          "App Configuration"
+        ],
         "parameters": [
           {
             "name": "appId",
@@ -1065,7 +1118,9 @@
         "summary": "cloneVersion",
         "description": "Clone an existing app version to create a new version",
         "operationId": "cloneVersion",
-        "tags": ["App Configuration"],
+        "tags": [
+          "App Configuration"
+        ],
         "parameters": [
           {
             "name": "appId",
@@ -1111,7 +1166,10 @@
                     },
                     "status": {
                       "type": "string",
-                      "enum": ["pending", "published"]
+                      "enum": [
+                        "pending",
+                        "published"
+                      ]
                     }
                   }
                 }
@@ -1132,7 +1190,9 @@
         "summary": "listInstallations",
         "description": "Retrieve a list of installed apps for the organization.",
         "operationId": "listInstallations",
-        "tags": ["App Installation"],
+        "tags": [
+          "App Installation"
+        ],
         "parameters": [
           {
             "name": "componentType",
@@ -1211,7 +1271,9 @@
         "summary": "getInstallation",
         "description": "Retrieve details of an installed app by its ID.",
         "operationId": "getInstallation",
-        "tags": ["App Installation"],
+        "tags": [
+          "App Installation"
+        ],
         "parameters": [
           {
             "name": "appId",
@@ -1242,7 +1304,9 @@
         "summary": "install",
         "description": "Upsert app installation by its ID.",
         "operationId": "install",
-        "tags": ["App Installation"],
+        "tags": [
+          "App Installation"
+        ],
         "parameters": [
           {
             "name": "appId",
@@ -1276,7 +1340,9 @@
         "summary": "patchInstallation",
         "description": "Patch an installed app by its ID.",
         "operationId": "patchInstallation",
-        "tags": ["App Installation"],
+        "tags": [
+          "App Installation"
+        ],
         "parameters": [
           {
             "name": "appId",
@@ -1303,7 +1369,9 @@
         "summary": "uninstall",
         "description": "Uninstall an app by its ID.",
         "operationId": "uninstall",
-        "tags": ["App Installation"],
+        "tags": [
+          "App Installation"
+        ],
         "parameters": [
           {
             "name": "appId",
@@ -1329,7 +1397,9 @@
         "summary": "promoteVersion",
         "description": "Update an installed app to a new version",
         "operationId": "promoteVersion",
-        "tags": ["App Installation"],
+        "tags": [
+          "App Installation"
+        ],
         "parameters": [
           {
             "name": "appId",
@@ -1373,7 +1443,9 @@
         "summary": "ingestEvent",
         "operationId": "ingestEvent",
         "description": "Internal endpoint for services to submit app events for analytic purposes",
-        "tags": ["App Analytics"],
+        "tags": [
+          "App Analytics"
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -1435,7 +1507,9 @@
         "summary": "publicProxyGet",
         "operationId": "publicProxyGet",
         "description": "Forward a GET request to a registered proxy target from a public-facing component (e.g. journey blocks)",
-        "tags": ["App Proxy"],
+        "tags": [
+          "App Proxy"
+        ],
         "security": [
           {
             "EpilotAuth": []
@@ -1460,7 +1534,9 @@
         "summary": "publicProxyPost",
         "operationId": "publicProxyPost",
         "description": "Forward a POST request to a registered proxy target from a public-facing component (e.g. journey blocks)",
-        "tags": ["App Proxy"],
+        "tags": [
+          "App Proxy"
+        ],
         "security": [
           {
             "EpilotAuth": []
@@ -1500,7 +1576,10 @@
           "application/json": {
             "schema": {
               "type": "object",
-              "required": ["technical_contact", "marketing_contact"],
+              "required": [
+                "technical_contact",
+                "marketing_contact"
+              ],
               "properties": {
                 "technical_contact": {
                   "type": "string",
@@ -1525,7 +1604,10 @@
           "application/json": {
             "schema": {
               "type": "object",
-              "required": ["filename", "mime_type"],
+              "required": [
+                "filename",
+                "mime_type"
+              ],
               "properties": {
                 "filename": {
                   "type": "string",
@@ -1535,7 +1617,11 @@
                 "mime_type": {
                   "type": "string",
                   "description": "MIME type of the logo file",
-                  "enum": ["image/png", "image/jpeg", "image/jpg"],
+                  "enum": [
+                    "image/png",
+                    "image/jpeg",
+                    "image/jpg"
+                  ],
                   "example": "image/png"
                 }
               }
@@ -1549,7 +1635,9 @@
           "application/json": {
             "schema": {
               "type": "object",
-              "required": ["version"],
+              "required": [
+                "version"
+              ],
               "properties": {
                 "version": {
                   "type": "string",
@@ -1647,7 +1735,10 @@
           "application/json": {
             "schema": {
               "type": "object",
-              "required": ["name", "description"],
+              "required": [
+                "name",
+                "description"
+              ],
               "properties": {
                 "name": {
                   "type": "string",
@@ -1730,7 +1821,10 @@
       "Options": {
         "type": "object",
         "description": "Options for the component configuration",
-        "required": ["key", "type"],
+        "required": [
+          "key",
+          "type"
+        ],
         "properties": {
           "key": {
             "type": "string",
@@ -1764,7 +1858,13 @@
           },
           "type": {
             "type": "string",
-            "enum": ["text", "number", "boolean", "secret", "object"],
+            "enum": [
+              "text",
+              "number",
+              "boolean",
+              "secret",
+              "object"
+            ],
             "description": "The type of this option. `object` declares a structured value whose fields are listed\nunder `fields`. Combine with `repeatable: true` to express a list of these objects.\n"
           }
         }
@@ -1772,7 +1872,10 @@
       "ObjectField": {
         "type": "object",
         "description": "One declared field inside a `type: object` option. Fields are primitives — object nesting\nis not supported.\n",
-        "required": ["key", "type"],
+        "required": [
+          "key",
+          "type"
+        ],
         "properties": {
           "key": {
             "type": "string",
@@ -1792,14 +1895,22 @@
           },
           "type": {
             "type": "string",
-            "enum": ["text", "number", "boolean", "secret"],
+            "enum": [
+              "text",
+              "number",
+              "boolean",
+              "secret"
+            ],
             "description": "Primitive type of this field."
           }
         }
       },
       "Option": {
         "type": "object",
-        "required": ["key", "value"],
+        "required": [
+          "key",
+          "value"
+        ],
         "properties": {
           "key": {
             "type": "string",
@@ -1812,7 +1923,10 @@
       },
       "OptionsRef": {
         "type": "object",
-        "required": ["component_id", "options"],
+        "required": [
+          "component_id",
+          "options"
+        ],
         "properties": {
           "component_id": {
             "type": "string",
@@ -1840,7 +1954,10 @@
             "example": "manifest.json"
           }
         },
-        "required": ["bucket", "key"]
+        "required": [
+          "bucket",
+          "key"
+        ]
       },
       "ComponentType": {
         "type": "string",
@@ -1859,7 +1976,9 @@
       },
       "Author": {
         "type": "object",
-        "required": ["company"],
+        "required": [
+          "company"
+        ],
         "properties": {
           "name": {
             "type": "string",
@@ -1899,11 +2018,16 @@
       },
       "NotificationEvent": {
         "type": "string",
-        "enum": ["app.installed", "app.uninstalled"]
+        "enum": [
+          "app.installed",
+          "app.uninstalled"
+        ]
       },
       "BaseComponentCommon": {
         "type": "object",
-        "required": ["id"],
+        "required": [
+          "id"
+        ],
         "properties": {
           "id": {
             "type": "string",
@@ -1996,11 +2120,16 @@
       },
       "ApiProxyComponent": {
         "type": "object",
-        "required": ["component_type", "configuration"],
+        "required": [
+          "component_type",
+          "configuration"
+        ],
         "properties": {
           "component_type": {
             "type": "string",
-            "enum": ["API_PROXY"]
+            "enum": [
+              "API_PROXY"
+            ]
           },
           "configuration": {
             "$ref": "#/components/schemas/ApiProxyConfig"
@@ -2009,11 +2138,16 @@
       },
       "CustomCapabilityComponent": {
         "type": "object",
-        "required": ["component_type", "configuration"],
+        "required": [
+          "component_type",
+          "configuration"
+        ],
         "properties": {
           "component_type": {
             "type": "string",
-            "enum": ["CUSTOM_CAPABILITY"]
+            "enum": [
+              "CUSTOM_CAPABILITY"
+            ]
           },
           "configuration": {
             "type": "object",
@@ -2021,7 +2155,10 @@
               "type": {
                 "description": "Define what type of capability this is",
                 "type": "string",
-                "enum": ["tab", "group"]
+                "enum": [
+                  "tab",
+                  "group"
+                ]
               },
               "allowed_schemas": {
                 "description": "Which schemas are supported by the capability. If empty, all schemas are supported.",
@@ -2046,11 +2183,16 @@
       },
       "CustomPageComponent": {
         "type": "object",
-        "required": ["component_type", "configuration"],
+        "required": [
+          "component_type",
+          "configuration"
+        ],
         "properties": {
           "component_type": {
             "type": "string",
-            "enum": ["CUSTOM_PAGE"]
+            "enum": [
+              "CUSTOM_PAGE"
+            ]
           },
           "configuration": {
             "$ref": "#/components/schemas/CustomPageConfig"
@@ -2067,7 +2209,9 @@
       },
       "CustomPageConfig": {
         "type": "object",
-        "required": ["slug"],
+        "required": [
+          "slug"
+        ],
         "properties": {
           "slug": {
             "type": "string",
@@ -2093,11 +2237,16 @@
       },
       "JourneyBlockComponent": {
         "type": "object",
-        "required": ["component_type", "configuration"],
+        "required": [
+          "component_type",
+          "configuration"
+        ],
         "properties": {
           "component_type": {
             "type": "string",
-            "enum": ["CUSTOM_JOURNEY_BLOCK"]
+            "enum": [
+              "CUSTOM_JOURNEY_BLOCK"
+            ]
           },
           "configuration": {
             "$ref": "#/components/schemas/JourneyBlockConfig"
@@ -2106,11 +2255,16 @@
       },
       "PortalBlockComponent": {
         "type": "object",
-        "required": ["component_type", "configuration"],
+        "required": [
+          "component_type",
+          "configuration"
+        ],
         "properties": {
           "component_type": {
             "type": "string",
-            "enum": ["CUSTOM_PORTAL_BLOCK"]
+            "enum": [
+              "CUSTOM_PORTAL_BLOCK"
+            ]
           },
           "configuration": {
             "$ref": "#/components/schemas/PortalBlockConfig"
@@ -2127,19 +2281,29 @@
       },
       "ErpInformToolkitComponent": {
         "type": "object",
-        "required": ["component_type", "configuration"],
+        "required": [
+          "component_type",
+          "configuration"
+        ],
         "properties": {
           "component_type": {
             "type": "string",
-            "enum": ["ERP_INFORM_TOOLKIT"]
+            "enum": [
+              "ERP_INFORM_TOOLKIT"
+            ]
           },
           "configuration": {
             "type": "object",
-            "required": ["type"],
+            "required": [
+              "type"
+            ],
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["inbound", "outbound"]
+                "enum": [
+                  "inbound",
+                  "outbound"
+                ]
               }
             }
           }
@@ -2147,11 +2311,16 @@
       },
       "CustomFlowActionComponent": {
         "type": "object",
-        "required": ["component_type", "configuration"],
+        "required": [
+          "component_type",
+          "configuration"
+        ],
         "properties": {
           "component_type": {
             "type": "string",
-            "enum": ["CUSTOM_FLOW_ACTION"]
+            "enum": [
+              "CUSTOM_FLOW_ACTION"
+            ]
           },
           "configuration": {
             "$ref": "#/components/schemas/CustomFlowConfig"
@@ -2193,7 +2362,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["external_integration"]
+                "enum": [
+                  "external_integration"
+                ]
               },
               "external_integration_settings": {
                 "type": "object",
@@ -2209,7 +2380,9 @@
                 }
               }
             },
-            "required": ["type"]
+            "required": [
+              "type"
+            ]
           }
         ]
       },
@@ -2223,7 +2396,9 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": ["sandbox"]
+                "enum": [
+                  "sandbox"
+                ]
               },
               "sandbox_settings": {
                 "type": "object",
@@ -2236,7 +2411,9 @@
                 }
               }
             },
-            "required": ["type"]
+            "required": [
+              "type"
+            ]
           }
         ]
       },
@@ -2260,11 +2437,16 @@
       },
       "ExternalProductCatalogComponent": {
         "type": "object",
-        "required": ["component_type", "configuration"],
+        "required": [
+          "component_type",
+          "configuration"
+        ],
         "properties": {
           "component_type": {
             "type": "string",
-            "enum": ["EXTERNAL_PRODUCT_CATALOG"]
+            "enum": [
+              "EXTERNAL_PRODUCT_CATALOG"
+            ]
           },
           "configuration": {
             "$ref": "#/components/schemas/ExternalProductCatalogConfig"
@@ -2312,7 +2494,9 @@
           },
           "type": {
             "type": "string",
-            "enum": ["products"]
+            "enum": [
+              "products"
+            ]
           },
           "auth": {
             "$ref": "#/components/schemas/ExternalProductCatalogAuthBlock"
@@ -2351,11 +2535,17 @@
                 "additionalProperties": true
               }
             },
-            "required": ["url"],
+            "required": [
+              "url"
+            ],
             "additionalProperties": false
           }
         },
-        "required": ["type", "call", "id"],
+        "required": [
+          "type",
+          "call",
+          "id"
+        ],
         "additionalProperties": false
       },
       "ExternalProductCatalogHookProductRecommendations": {
@@ -2372,7 +2562,9 @@
           },
           "type": {
             "type": "string",
-            "enum": ["product-recommendations"]
+            "enum": [
+              "product-recommendations"
+            ]
           },
           "auth": {
             "$ref": "#/components/schemas/ExternalProductCatalogAuthBlock"
@@ -2411,20 +2603,31 @@
                 "additionalProperties": true
               }
             },
-            "required": ["url"],
+            "required": [
+              "url"
+            ],
             "additionalProperties": false
           }
         },
-        "required": ["type", "call", "id"],
+        "required": [
+          "type",
+          "call",
+          "id"
+        ],
         "additionalProperties": false
       },
       "PortalExtensionComponent": {
         "type": "object",
-        "required": ["component_type", "configuration"],
+        "required": [
+          "component_type",
+          "configuration"
+        ],
         "properties": {
           "component_type": {
             "type": "string",
-            "enum": ["PORTAL_EXTENSION"]
+            "enum": [
+              "PORTAL_EXTENSION"
+            ]
           },
           "configuration": {
             "$ref": "#/components/schemas/PortalExtensionConfig"
@@ -2506,7 +2709,9 @@
           },
           "type": {
             "type": "string",
-            "enum": ["registrationIdentifiersCheck"]
+            "enum": [
+              "registrationIdentifiersCheck"
+            ]
           },
           "auth": {
             "$ref": "#/components/schemas/PortalExtensionAuthBlock"
@@ -2549,7 +2754,11 @@
                 "description": "Deprecated. Use `resolved.result` instead. Contact ID usually retrieved from the response body, e.g. `{{CallResponse.data.contact_id}}`. If no result is passed and the request suceeds, we attempt to resolve the Contact ID automatically. Supports variable interpolation."
               }
             },
-            "required": ["url", "headers", "result"],
+            "required": [
+              "url",
+              "headers",
+              "result"
+            ],
             "additionalProperties": false
           },
           "resolved": {
@@ -2559,7 +2768,7 @@
                 "type": "string",
                 "description": "Contact ID usually retrieved from the response body, e.g. `{{CallResponse.data.contact_id}}`. If no result is passed and the request suceeds, we attempt to resolve the Contact ID automatically. Supports variable interpolation. Supersedes the deprecated `call.result`."
               },
-              "errorMessagePath": {
+              "error_message_path": {
                 "type": "string",
                 "description": "Optional path to a human-readable error message in the third-party response body, used when the call fails (non-2xx status).\nIf specified and the path resolves to a string, that message is forwarded to the end user instead of a generic error.\n",
                 "example": "error.message"
@@ -2577,7 +2786,11 @@
             "$ref": "#/components/schemas/PortalExtensionSecureProxy"
           }
         },
-        "required": ["id", "type", "call"],
+        "required": [
+          "id",
+          "type",
+          "call"
+        ],
         "additionalProperties": false
       },
       "PortalExtensionHookContractIdentification": {
@@ -2594,7 +2807,9 @@
           },
           "type": {
             "type": "string",
-            "enum": ["contractIdentification"]
+            "enum": [
+              "contractIdentification"
+            ]
           },
           "auth": {
             "$ref": "#/components/schemas/PortalExtensionAuthBlock"
@@ -2637,7 +2852,10 @@
                 "description": "Deprecated. Use `resolved.result` instead. Contract or Contact ID usually retrieved from the response body, e.g. `{{CallResponse.data.contact_id}}`. If no result is passed and the request suceeds, we attempt to resolve the Contact ID automatically. Supports variable interpolation."
               }
             },
-            "required": ["url", "headers"],
+            "required": [
+              "url",
+              "headers"
+            ],
             "additionalProperties": false
           },
           "resolved": {
@@ -2647,7 +2865,7 @@
                 "type": "string",
                 "description": "Contract or Contact ID usually retrieved from the response body, e.g. `{{CallResponse.data.contact_id}}`. If no result is passed and the request suceeds, we attempt to resolve the Contact ID automatically. Supports variable interpolation. Supersedes the deprecated `call.result`."
               },
-              "errorMessagePath": {
+              "error_message_path": {
                 "type": "string",
                 "description": "Optional path to a human-readable error message in the third-party response body, used when the call fails (non-2xx status).\nIf specified and the path resolves to a string, that message is forwarded to the end user instead of a generic error.\n",
                 "example": "error.message"
@@ -2683,7 +2901,9 @@
               "type": "string",
               "description": "Explanation of the functionality in language denoted by ISO 3166-1 alpha-2 code."
             },
-            "required": ["en"],
+            "required": [
+              "en"
+            ],
             "description": "Explanation of the hook."
           },
           "use_static_ips": {
@@ -2696,7 +2916,11 @@
             "$ref": "#/components/schemas/PortalExtensionSecureProxy"
           }
         },
-        "required": ["id", "type", "call"],
+        "required": [
+          "id",
+          "type",
+          "call"
+        ],
         "additionalProperties": false
       },
       "PortalExtensionHookMeterReadingPlausibilityCheck": {
@@ -2713,11 +2937,16 @@
           },
           "type": {
             "type": "string",
-            "enum": ["meterReadingPlausibilityCheck"]
+            "enum": [
+              "meterReadingPlausibilityCheck"
+            ]
           },
           "plausibility_mode": {
             "type": "string",
-            "enum": ["check", "range"],
+            "enum": [
+              "check",
+              "range"
+            ],
             "default": "check",
             "description": "Mode for plausibility check:\n- \"check\": Validates meter reading and returns valid: boolean (used during submission)\n- \"range\": Returns min/max allowed values for each counter for validation before submission\n"
           },
@@ -2745,17 +2974,26 @@
                 "default": {}
               }
             },
-            "required": ["url", "headers", "body"],
+            "required": [
+              "url",
+              "headers",
+              "body"
+            ],
             "additionalProperties": false
           },
           "resolved": {
             "type": "object",
             "description": "Response to the call",
             "properties": {
-              "dataPath": {
+              "data_path": {
                 "type": "string",
                 "description": "Optional path to an array in the response. If specified and the path points to an array,\nthe hook will map over each item using 'Item' variable for interpolation.\nRelevant only if plausibility_mode is \"range\".\n",
                 "example": "data.results"
+              },
+              "dataPath": {
+                "type": "string",
+                "deprecated": true,
+                "description": "Deprecated. Use `data_path` instead."
               },
               "counter_identifiers": {
                 "description": "Counter identifier(s) used to match against the meter's counters.\nCan be a string (counter ID) or an object with counter properties.\nThe backend resolves this to meter_counter_id in the final response.\nRelevant only if plausibility_mode is \"range\".\n",
@@ -2782,7 +3020,7 @@
                 "description": "Lower allowed limit of the meter reading",
                 "example": "{{CallResponse.data.lower_limit}}"
               },
-              "errorMessagePath": {
+              "error_message_path": {
                 "type": "string",
                 "description": "Optional path to a human-readable error message in the third-party response body, used when the call fails (non-2xx status).\nIf specified and the path resolves to a string, that message is forwarded to the end user instead of a generic error.\n",
                 "example": "error.message"
@@ -2800,7 +3038,12 @@
             "$ref": "#/components/schemas/PortalExtensionSecureProxy"
           }
         },
-        "required": ["id", "type", "call", "resolved"],
+        "required": [
+          "id",
+          "type",
+          "call",
+          "resolved"
+        ],
         "additionalProperties": false
       },
       "PortalExtensionHookPriceDataRetrieval": {
@@ -2817,7 +3060,9 @@
           },
           "type": {
             "type": "string",
-            "enum": ["priceDataRetrieval"]
+            "enum": [
+              "priceDataRetrieval"
+            ]
           },
           "intervals": {
             "type": "array",
@@ -2825,7 +3070,12 @@
             "description": "Deprecated. Prefer declaring a sibling `visualizationMetadata` hook on the same extension and returning `intervals` from its response — that way the supported intervals can vary per meter/contract.\nIntervals supported by the API. If omitted, it is assumed that all intervals are supported.\n",
             "items": {
               "type": "string",
-              "enum": ["PT15M", "PT1H", "P1D", "P1M"]
+              "enum": [
+                "PT15M",
+                "PT1H",
+                "P1D",
+                "P1M"
+              ]
             }
           },
           "auth": {
@@ -2865,17 +3115,24 @@
                 "additionalProperties": true
               }
             },
-            "required": ["url"],
+            "required": [
+              "url"
+            ],
             "additionalProperties": false
           },
           "resolved": {
             "type": "object",
             "properties": {
-              "dataPath": {
+              "data_path": {
                 "type": "string",
                 "description": "Optional path to the data (array) in the response. If omitted, the data is assumed to be on the top level."
               },
-              "errorMessagePath": {
+              "dataPath": {
+                "type": "string",
+                "deprecated": true,
+                "description": "Deprecated. Use `data_path` instead."
+              },
+              "error_message_path": {
                 "type": "string",
                 "description": "Optional path to a human-readable error message in the third-party response body, used when the call fails (non-2xx status).\nIf specified and the path resolves to a string, that message is forwarded to the end user instead of a generic error.\n",
                 "example": "error.message"
@@ -2893,7 +3150,11 @@
             "$ref": "#/components/schemas/PortalExtensionSecureProxy"
           }
         },
-        "required": ["id", "type", "call"],
+        "required": [
+          "id",
+          "type",
+          "call"
+        ],
         "additionalProperties": false
       },
       "PortalExtensionHookConsumptionDataRetrieval": {
@@ -2910,7 +3171,9 @@
           },
           "type": {
             "type": "string",
-            "enum": ["consumptionDataRetrieval"]
+            "enum": [
+              "consumptionDataRetrieval"
+            ]
           },
           "intervals": {
             "type": "array",
@@ -2918,7 +3181,12 @@
             "description": "Deprecated. Prefer declaring a sibling `visualizationMetadata` hook on the same extension and returning `intervals` from its response — that way the supported intervals can vary per meter/contract.\nIntervals supported by the API. If omitted, it is assumed that all intervals are supported.\n",
             "items": {
               "type": "string",
-              "enum": ["PT15M", "PT1H", "P1D", "P1M"]
+              "enum": [
+                "PT15M",
+                "PT1H",
+                "P1D",
+                "P1M"
+              ]
             }
           },
           "auth": {
@@ -2958,17 +3226,24 @@
                 "additionalProperties": true
               }
             },
-            "required": ["url"],
+            "required": [
+              "url"
+            ],
             "additionalProperties": false
           },
           "resolved": {
             "type": "object",
             "properties": {
-              "dataPath": {
+              "data_path": {
                 "type": "string",
                 "description": "Optional path to the data (array) in the response. If omitted, the data is assumed to be on the top level."
               },
-              "errorMessagePath": {
+              "dataPath": {
+                "type": "string",
+                "deprecated": true,
+                "description": "Deprecated. Use `data_path` instead."
+              },
+              "error_message_path": {
                 "type": "string",
                 "description": "Optional path to a human-readable error message in the third-party response body, used when the call fails (non-2xx status).\nIf specified and the path resolves to a string, that message is forwarded to the end user instead of a generic error.\n",
                 "example": "error.message"
@@ -2986,7 +3261,11 @@
             "$ref": "#/components/schemas/PortalExtensionSecureProxy"
           }
         },
-        "required": ["id", "type", "call"],
+        "required": [
+          "id",
+          "type",
+          "call"
+        ],
         "additionalProperties": false
       },
       "PortalExtensionHookDataExport": {
@@ -3003,7 +3282,9 @@
           },
           "type": {
             "type": "string",
-            "enum": ["dataExport"]
+            "enum": [
+              "dataExport"
+            ]
           },
           "block_types": {
             "type": "array",
@@ -3049,13 +3330,15 @@
                 "additionalProperties": true
               }
             },
-            "required": ["url"],
+            "required": [
+              "url"
+            ],
             "additionalProperties": false
           },
           "resolved": {
             "type": "object",
             "properties": {
-              "errorMessagePath": {
+              "error_message_path": {
                 "type": "string",
                 "description": "Optional path to a human-readable error message in the third-party response body, used when the call fails (non-2xx status).\nIf specified and the path resolves to a string, that message is forwarded to the end user instead of a generic error.\n",
                 "example": "error.message"
@@ -3073,7 +3356,11 @@
             "$ref": "#/components/schemas/PortalExtensionSecureProxy"
           }
         },
-        "required": ["id", "type", "call"],
+        "required": [
+          "id",
+          "type",
+          "call"
+        ],
         "additionalProperties": false
       },
       "PortalExtensionHookVisualizationMetadata": {
@@ -3090,7 +3377,9 @@
           },
           "type": {
             "type": "string",
-            "enum": ["visualizationMetadata"]
+            "enum": [
+              "visualizationMetadata"
+            ]
           },
           "auth": {
             "$ref": "#/components/schemas/PortalExtensionAuthBlock"
@@ -3129,17 +3418,24 @@
                 "additionalProperties": true
               }
             },
-            "required": ["url"],
+            "required": [
+              "url"
+            ],
             "additionalProperties": false
           },
           "resolved": {
             "type": "object",
             "properties": {
-              "dataPath": {
+              "data_path": {
                 "type": "string",
                 "description": "Optional path to the metadata object in the response. If omitted, the metadata is assumed to be on the top level."
               },
-              "errorMessagePath": {
+              "dataPath": {
+                "type": "string",
+                "deprecated": true,
+                "description": "Deprecated. Use `data_path` instead."
+              },
+              "error_message_path": {
                 "type": "string",
                 "description": "Optional path to a human-readable error message in the third-party response body, used when the call fails (non-2xx status).\nIf specified and the path resolves to a string, that message is forwarded to the end user instead of a generic error.\n",
                 "example": "error.message"
@@ -3157,7 +3453,11 @@
             "$ref": "#/components/schemas/PortalExtensionSecureProxy"
           }
         },
-        "required": ["id", "type", "call"],
+        "required": [
+          "id",
+          "type",
+          "call"
+        ],
         "additionalProperties": false
       },
       "PortalExtensionHookCostDataRetrieval": {
@@ -3174,7 +3474,9 @@
           },
           "type": {
             "type": "string",
-            "enum": ["costDataRetrieval"]
+            "enum": [
+              "costDataRetrieval"
+            ]
           },
           "intervals": {
             "type": "array",
@@ -3182,7 +3484,12 @@
             "description": "Deprecated. Prefer declaring a sibling `visualizationMetadata` hook on the same extension and returning `intervals` from its response — that way the supported intervals can vary per meter/contract.\nIntervals supported by the API. If omitted, it is assumed that all intervals are supported.\n",
             "items": {
               "type": "string",
-              "enum": ["PT15M", "PT1H", "P1D", "P1M"]
+              "enum": [
+                "PT15M",
+                "PT1H",
+                "P1D",
+                "P1M"
+              ]
             }
           },
           "auth": {
@@ -3222,17 +3529,24 @@
                 "additionalProperties": true
               }
             },
-            "required": ["url"],
+            "required": [
+              "url"
+            ],
             "additionalProperties": false
           },
           "resolved": {
             "type": "object",
             "properties": {
-              "dataPath": {
+              "data_path": {
                 "type": "string",
                 "description": "Optional path to the data (array) in the response. If omitted, the data is assumed to be on the top level."
               },
-              "errorMessagePath": {
+              "dataPath": {
+                "type": "string",
+                "deprecated": true,
+                "description": "Deprecated. Use `data_path` instead."
+              },
+              "error_message_path": {
                 "type": "string",
                 "description": "Optional path to a human-readable error message in the third-party response body, used when the call fails (non-2xx status).\nIf specified and the path resolves to a string, that message is forwarded to the end user instead of a generic error.\n",
                 "example": "error.message"
@@ -3250,7 +3564,11 @@
             "$ref": "#/components/schemas/PortalExtensionSecureProxy"
           }
         },
-        "required": ["id", "type", "call"],
+        "required": [
+          "id",
+          "type",
+          "call"
+        ],
         "additionalProperties": false
       },
       "PortalExtensionSeamlessLink": {
@@ -3269,7 +3587,9 @@
           },
           "type": {
             "type": "string",
-            "enum": ["seamless"]
+            "enum": [
+              "seamless"
+            ]
           },
           "condition": {
             "type": "string",
@@ -3298,7 +3618,12 @@
             "additionalProperties": false
           }
         },
-        "required": ["id", "name", "type", "redirect"],
+        "required": [
+          "id",
+          "name",
+          "type",
+          "redirect"
+        ],
         "additionalProperties": false
       },
       "PortalExtensionAuthBlock": {
@@ -3348,11 +3673,16 @@
                 "example": "{{AuthResponse.data.expires_in}}"
               }
             },
-            "required": ["key", "ttl"],
+            "required": [
+              "key",
+              "ttl"
+            ],
             "additionalProperties": false
           }
         },
-        "required": ["url"],
+        "required": [
+          "url"
+        ],
         "additionalProperties": false
       },
       "PortalExtensionSecureProxy": {
@@ -3369,7 +3699,10 @@
             "description": "Use case slug for the secure proxy use case."
           }
         },
-        "required": ["integration_id", "use_case_slug"],
+        "required": [
+          "integration_id",
+          "use_case_slug"
+        ],
         "additionalProperties": false
       },
       "ExternalProductCatalogAuthBlock": {
@@ -3406,7 +3739,9 @@
             "additionalProperties": true
           }
         },
-        "required": ["url"],
+        "required": [
+          "url"
+        ],
         "additionalProperties": false
       },
       "OverrideDevMode": {
@@ -3422,7 +3757,10 @@
       },
       "JourneyBlockConfig": {
         "type": "object",
-        "required": ["component_url", "component_tag"],
+        "required": [
+          "component_url",
+          "component_tag"
+        ],
         "properties": {
           "override_dev_mode": {
             "$ref": "#/components/schemas/OverrideDevMode"
@@ -3506,7 +3844,9 @@
                     "footer_right_absolute"
                   ]
                 },
-                "default": ["main"]
+                "default": [
+                  "main"
+                ]
               }
             }
           }
@@ -3516,7 +3856,11 @@
         "allOf": [
           {
             "type": "object",
-            "required": ["key", "label", "type"],
+            "required": [
+              "key",
+              "label",
+              "type"
+            ],
             "properties": {
               "key": {
                 "type": "string",
@@ -3524,7 +3868,12 @@
               },
               "type": {
                 "type": "string",
-                "enum": ["text", "boolean", "enum", "block_reference"]
+                "enum": [
+                  "text",
+                  "boolean",
+                  "enum",
+                  "block_reference"
+                ]
               },
               "required": {
                 "type": "boolean",
@@ -3586,7 +3935,9 @@
         "properties": {
           "type": {
             "type": "string",
-            "enum": ["text"]
+            "enum": [
+              "text"
+            ]
           }
         }
       },
@@ -3595,7 +3946,9 @@
         "properties": {
           "type": {
             "type": "string",
-            "enum": ["boolean"]
+            "enum": [
+              "boolean"
+            ]
           }
         }
       },
@@ -3605,7 +3958,9 @@
         "properties": {
           "type": {
             "type": "string",
-            "enum": ["block_reference"]
+            "enum": [
+              "block_reference"
+            ]
           },
           "allowed_types": {
             "type": "array",
@@ -3618,11 +3973,15 @@
       },
       "EnumArg": {
         "type": "object",
-        "required": ["options"],
+        "required": [
+          "options"
+        ],
         "properties": {
           "type": {
             "type": "string",
-            "enum": ["enum"]
+            "enum": [
+              "enum"
+            ]
           },
           "isMulti": {
             "type": "boolean",
@@ -3635,7 +3994,10 @@
             "minItems": 1,
             "items": {
               "type": "object",
-              "required": ["id", "label"],
+              "required": [
+                "id",
+                "label"
+              ],
               "properties": {
                 "id": {
                   "type": "string",
@@ -3658,7 +4020,12 @@
       },
       "BillingFrequency": {
         "type": "string",
-        "enum": ["MONTHLY", "QUARTERLY", "YEARLY", "CUSTOM"],
+        "enum": [
+          "MONTHLY",
+          "QUARTERLY",
+          "YEARLY",
+          "CUSTOM"
+        ],
         "description": "How often the subscription is billed"
       },
       "Pricing": {
@@ -3715,7 +4082,11 @@
           },
           "review_status": {
             "type": "string",
-            "enum": ["approved", "rejected", "pending"],
+            "enum": [
+              "approved",
+              "rejected",
+              "pending"
+            ],
             "description": "Status of the review"
           },
           "requested_at": {
@@ -3889,7 +4260,10 @@
           },
           "visibility": {
             "type": "string",
-            "enum": ["public", "private"],
+            "enum": [
+              "public",
+              "private"
+            ],
             "description": "Visibility of the app version",
             "default": "private",
             "readOnly": true
@@ -3929,7 +4303,11 @@
           },
           "review_status": {
             "type": "string",
-            "enum": ["approved", "rejected", "pending"],
+            "enum": [
+              "approved",
+              "rejected",
+              "pending"
+            ],
             "description": "Status of the review process"
           },
           "role": {
@@ -3966,7 +4344,11 @@
       "ApiProxyConfig": {
         "type": "object",
         "description": "Configuration for an API proxy component",
-        "required": ["name", "target", "auth_type"],
+        "required": [
+          "name",
+          "target",
+          "auth_type"
+        ],
         "properties": {
           "name": {
             "type": "string",
@@ -3982,7 +4364,12 @@
           },
           "auth_type": {
             "type": "string",
-            "enum": ["header", "bearer", "oauth2", "none"],
+            "enum": [
+              "header",
+              "bearer",
+              "oauth2",
+              "none"
+            ],
             "description": "Authentication strategy"
           },
           "auth_header": {
@@ -4002,7 +4389,9 @@
         "description": "Required grants for the app in order to call APIs for the installing tenant",
         "items": {
           "type": "object",
-          "required": ["action"],
+          "required": [
+            "action"
+          ],
           "properties": {
             "action": {
               "type": "string",
@@ -4123,7 +4512,13 @@
       "PublicConfiguration": {
         "description": "Public configuration of the published app",
         "type": "object",
-        "required": ["version", "components", "owner_org_id", "app_id", "name"],
+        "required": [
+          "version",
+          "components",
+          "owner_org_id",
+          "app_id",
+          "name"
+        ],
         "properties": {
           "app_id": {
             "type": "string",
@@ -4239,7 +4634,9 @@
       },
       "TranslatedString": {
         "type": "object",
-        "required": ["de"],
+        "required": [
+          "de"
+        ],
         "properties": {
           "en": {
             "type": "string",
@@ -4275,11 +4672,15 @@
             "example": "api_5ZugdRXasLfWBypHi93Fk"
           }
         },
-        "required": ["org_id"]
+        "required": [
+          "org_id"
+        ]
       },
       "BatchEventRequest": {
         "type": "object",
-        "required": ["events"],
+        "required": [
+          "events"
+        ],
         "properties": {
           "events": {
             "type": "array",
@@ -4293,7 +4694,9 @@
       "Actor": {
         "type": "object",
         "readOnly": true,
-        "required": ["type"],
+        "required": [
+          "type"
+        ],
         "properties": {
           "org_id": {
             "type": "string",
@@ -4306,7 +4709,10 @@
           "type": {
             "type": "string",
             "description": "Type of the actor (e.g., user, system)",
-            "enum": ["user", "system"]
+            "enum": [
+              "user",
+              "system"
+            ]
           }
         }
       },
@@ -4345,7 +4751,11 @@
           },
           "event_type": {
             "type": "string",
-            "enum": ["ERROR", "WARNING", "INFO"]
+            "enum": [
+              "ERROR",
+              "WARNING",
+              "INFO"
+            ]
           },
           "source": {
             "$ref": "#/components/schemas/ComponentType"
@@ -4378,7 +4788,13 @@
               },
               "preset": {
                 "type": "string",
-                "enum": ["1h", "6h", "24h", "7d", "30d"],
+                "enum": [
+                  "1h",
+                  "6h",
+                  "24h",
+                  "7d",
+                  "30d"
+                ],
                 "description": "Predefined time range (alternative to start/end)"
               }
             },
@@ -4405,7 +4821,11 @@
                 "type": "array",
                 "items": {
                   "type": "string",
-                  "enum": ["ERROR", "WARNING", "INFO"]
+                  "enum": [
+                    "ERROR",
+                    "WARNING",
+                    "INFO"
+                  ]
                 },
                 "description": "Filter by event types"
               },
@@ -4436,9 +4856,15 @@
                 "type": "array",
                 "items": {
                   "type": "string",
-                  "enum": ["count", "error_rate", "unique_users"]
+                  "enum": [
+                    "count",
+                    "error_rate",
+                    "unique_users"
+                  ]
                 },
-                "default": ["count"],
+                "default": [
+                  "count"
+                ],
                 "description": "Metrics to calculate"
               }
             }
@@ -4464,12 +4890,19 @@
             "properties": {
               "field": {
                 "type": "string",
-                "enum": ["timestamp", "event_type", "component_id"],
+                "enum": [
+                  "timestamp",
+                  "event_type",
+                  "component_id"
+                ],
                 "default": "timestamp"
               },
               "order": {
                 "type": "string",
-                "enum": ["asc", "desc"],
+                "enum": [
+                  "asc",
+                  "desc"
+                ],
                 "default": "desc"
               }
             }
@@ -4516,7 +4949,9 @@
         "properties": {
           "type": {
             "type": "string",
-            "enum": ["raw"]
+            "enum": [
+              "raw"
+            ]
           },
           "events": {
             "type": "array",
@@ -4531,7 +4966,9 @@
         "properties": {
           "type": {
             "type": "string",
-            "enum": ["aggregated"]
+            "enum": [
+              "aggregated"
+            ]
           },
           "groups": {
             "type": "array",

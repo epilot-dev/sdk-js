@@ -1676,6 +1676,10 @@ declare namespace Components {
                 /**
                  * Optional path to the data (array) in the response. If omitted, the data is assumed to be on the top level.
                  */
+                data_path?: string;
+                /**
+                 * Deprecated. Use `data_path` instead.
+                 */
                 dataPath?: string;
                 /**
                  * Optional path to a human-readable error message in the third-party response body, used when the call fails (non-2xx status).
@@ -1684,7 +1688,7 @@ declare namespace Components {
                  * example:
                  * error.message
                  */
-                errorMessagePath?: string;
+                error_message_path?: string;
             };
             /**
              * Deprecated. Prefer `secure_proxy` instead.
@@ -1760,7 +1764,7 @@ declare namespace Components {
                  * example:
                  * error.message
                  */
-                errorMessagePath?: string;
+                error_message_path?: string;
             };
             /**
              * Mode of contract assignment. See hook description for mode details.
@@ -1843,6 +1847,10 @@ declare namespace Components {
                 /**
                  * Optional path to the data (array) in the response. If omitted, the data is assumed to be on the top level.
                  */
+                data_path?: string;
+                /**
+                 * Deprecated. Use `data_path` instead.
+                 */
                 dataPath?: string;
                 /**
                  * Optional path to a human-readable error message in the third-party response body, used when the call fails (non-2xx status).
@@ -1851,7 +1859,7 @@ declare namespace Components {
                  * example:
                  * error.message
                  */
-                errorMessagePath?: string;
+                error_message_path?: string;
             };
             /**
              * Deprecated. Prefer `secure_proxy` instead.
@@ -1918,7 +1926,7 @@ declare namespace Components {
                  * example:
                  * error.message
                  */
-                errorMessagePath?: string;
+                error_message_path?: string;
             };
             /**
              * Deprecated. Prefer `secure_proxy` instead.
@@ -1982,6 +1990,10 @@ declare namespace Components {
                  * example:
                  * data.results
                  */
+                data_path?: string;
+                /**
+                 * Deprecated. Use `data_path` instead.
+                 */
                 dataPath?: string;
                 /**
                  * Counter identifier(s) used to match against the meter's counters.
@@ -2022,7 +2034,7 @@ declare namespace Components {
                  * example:
                  * error.message
                  */
-                errorMessagePath?: string;
+                error_message_path?: string;
             };
             /**
              * Deprecated. Prefer `secure_proxy` instead.
@@ -2083,6 +2095,10 @@ declare namespace Components {
                 /**
                  * Optional path to the data (array) in the response. If omitted, the data is assumed to be on the top level.
                  */
+                data_path?: string;
+                /**
+                 * Deprecated. Use `data_path` instead.
+                 */
                 dataPath?: string;
                 /**
                  * Optional path to a human-readable error message in the third-party response body, used when the call fails (non-2xx status).
@@ -2091,7 +2107,7 @@ declare namespace Components {
                  * example:
                  * error.message
                  */
-                errorMessagePath?: string;
+                error_message_path?: string;
             };
             /**
              * Deprecated. Prefer `secure_proxy` instead.
@@ -2159,7 +2175,7 @@ declare namespace Components {
                  * example:
                  * error.message
                  */
-                errorMessagePath?: string;
+                error_message_path?: string;
             };
             /**
              * Deprecated. Prefer `secure_proxy` instead.
@@ -2229,6 +2245,10 @@ declare namespace Components {
                 /**
                  * Optional path to the metadata object in the response. If omitted, the metadata is assumed to be on the top level.
                  */
+                data_path?: string;
+                /**
+                 * Deprecated. Use `data_path` instead.
+                 */
                 dataPath?: string;
                 /**
                  * Optional path to a human-readable error message in the third-party response body, used when the call fails (non-2xx status).
@@ -2237,7 +2257,7 @@ declare namespace Components {
                  * example:
                  * error.message
                  */
-                errorMessagePath?: string;
+                error_message_path?: string;
             };
             /**
              * Deprecated. Prefer `secure_proxy` instead.
