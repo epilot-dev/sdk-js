@@ -23,6 +23,10 @@
     {
       "name": "Configs",
       "description": "Configuration tree index"
+    },
+    {
+      "name": "Sync",
+      "description": "Cross-org configuration sync jobs"
     }
   ],
   "paths": {
@@ -263,6 +267,219 @@
         }
       }
     },
+    "/v1/configs/sync-jobs": {
+      "post": {
+        "operationId": "createSyncJob",
+        "summary": "createSyncJob",
+        "description": "Create a new cross-org sync job. The job is enqueued for asynchronous execution\nby the worker Lambda; the response returns the persisted job header with status\n`pending`.\n\nSee `docs/sync/INTERFACES.md` for the locked request/response contract.\n",
+        "tags": [
+          "Sync"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SyncJobRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Sync job accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SyncJob"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request body",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "operationId": "listSyncJobs",
+        "summary": "listSyncJobs",
+        "description": "List sync jobs scoped to the caller's organization, paginated with an opaque\ncursor. Defaults to most-recent first.\n",
+        "tags": [
+          "Sync"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CursorParam"
+          },
+          {
+            "$ref": "#/components/parameters/SizeParam"
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Filter jobs by status",
+            "schema": {
+              "$ref": "#/components/schemas/SyncJobStatus"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated sync jobs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SyncJobListResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/configs/sync-jobs/{id}": {
+      "get": {
+        "operationId": "getSyncJob",
+        "summary": "getSyncJob",
+        "description": "Fetch a single sync job by ID. Returns the job header, counts summary,\ncurrent phase pointer, and the latest activity events. Frontend polls this\nendpoint with a ramping interval.\n",
+        "tags": [
+          "Sync"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SyncJobId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sync job detail",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SyncJob"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Sync job not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/configs/sync-jobs/{id}/retry": {
+      "post": {
+        "operationId": "retrySyncJob",
+        "summary": "retrySyncJob",
+        "description": "Retry the failed resources from a prior sync job. Creates a new job whose\nscope is the failed `(type, source_id)` set of the original job and enqueues\nit for execution. Optionally accepts inline payload overrides.\n",
+        "tags": [
+          "Sync"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SyncJobId"
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SyncJobRetryRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Retry job accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SyncJob"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Sync job not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/configs/sync-jobs/{id}/resources": {
+      "get": {
+        "operationId": "listSyncJobResources",
+        "summary": "listSyncJobResources",
+        "description": "List the per-resource rows for a sync job. Supports filtering by status\n(e.g. `failed`) and cursor pagination. Used by the failures table and the\ndry-run plan view in the frontend.\n",
+        "tags": [
+          "Sync"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SyncJobId"
+          },
+          {
+            "$ref": "#/components/parameters/CursorParam"
+          },
+          {
+            "$ref": "#/components/parameters/SizeParam"
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Filter resources by status",
+            "schema": {
+              "$ref": "#/components/schemas/SyncJobResourceStatus"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated sync job resources",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SyncJobResourceListResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Sync job not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/configs/index:rebuild": {
       "post": {
         "operationId": "rebuildIndex",
@@ -330,6 +547,15 @@
           "default": 25,
           "minimum": 1,
           "maximum": 100
+        }
+      },
+      "SyncJobId": {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "description": "Sync job ID",
+        "schema": {
+          "type": "string"
         }
       }
     },
@@ -458,6 +684,29 @@
             "type": "string",
             "format": "uri",
             "description": "Direct link to open this config in epilot"
+          },
+          "active": {
+            "type": "boolean",
+            "description": "Whether this config is currently active/enabled (omitted when not applicable)"
+          },
+          "blueprints": {
+            "type": "array",
+            "description": "Installed blueprints that produced this config (tagged during the rebuild lineage pass)",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "title"
+              ]
+            }
           },
           "metadata": {
             "type": "object",
@@ -604,6 +853,380 @@
         "required": [
           "status",
           "error"
+        ]
+      },
+      "SyncJobStatus": {
+        "type": "string",
+        "description": "Lifecycle status of a sync job. See `docs/sync/INTERFACES.md` for state\ntransitions.\n",
+        "enum": [
+          "pending",
+          "in_progress",
+          "succeeded",
+          "partial",
+          "failed",
+          "cancelled"
+        ]
+      },
+      "SyncDirection": {
+        "type": "string",
+        "description": "Direction of the sync, derived from the source/target pane selection in the\nconfiguration hub UI.\n",
+        "enum": [
+          "push",
+          "pull"
+        ]
+      },
+      "SyncPhase": {
+        "type": "string",
+        "description": "Three-phase orchestrator phase. `phase_0` fetches source payloads,\n`phase_a` creates/matches with topological batches, `phase_a5` resolves\nderived references, `phase_b` patches with the full ID map, `finalize`\nruns cycle-breaking finalizers.\n",
+        "enum": [
+          "phase_0",
+          "phase_a",
+          "phase_a5",
+          "phase_b",
+          "finalize"
+        ]
+      },
+      "SyncJobResourceStatus": {
+        "type": "string",
+        "description": "Per-resource status. `would_*` values are produced by dry-run jobs.\n",
+        "enum": [
+          "pending",
+          "in_progress",
+          "created",
+          "patched",
+          "skipped",
+          "would_create",
+          "would_patch",
+          "would_skip_unchanged",
+          "would_match_heuristic",
+          "failed"
+        ]
+      },
+      "SyncJobRequest": {
+        "type": "object",
+        "description": "Request body for `createSyncJob`. `target_auth_token` is the destination\norg's auth token and MUST NOT be persisted or logged — it is `writeOnly`.\n",
+        "required": [
+          "source_org_id",
+          "target_org_id",
+          "target_auth_token",
+          "resources"
+        ],
+        "properties": {
+          "source_org_id": {
+            "type": "string",
+            "description": "Org ID the resources are sourced from."
+          },
+          "target_org_id": {
+            "type": "string",
+            "description": "Org ID the resources are written into."
+          },
+          "target_auth_token": {
+            "type": "string",
+            "writeOnly": true,
+            "description": "Destination-org auth token forwarded to adapter writes. Never returned\nin responses and never logged.\n"
+          },
+          "name": {
+            "type": "string",
+            "description": "Optional human-friendly job name shown in the history list."
+          },
+          "dry_run": {
+            "type": "boolean",
+            "default": false,
+            "description": "If true, the orchestrator runs Phase 0 + a planning pass and writes\n`would_*` resource rows but performs no destination writes.\n"
+          },
+          "include_dependencies": {
+            "type": "boolean",
+            "default": true,
+            "description": "If true, the orchestrator expands the resource set by following\ndependency edges discovered during Phase 0.\n"
+          },
+          "resources": {
+            "type": "array",
+            "description": "Initial resource selection. Dependencies may be added.",
+            "items": {
+              "type": "object",
+              "required": [
+                "type",
+                "id"
+              ],
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "description": "Resource type identifier"
+                },
+                "id": {
+                  "type": "string",
+                  "description": "Source-org resource ID"
+                }
+              }
+            }
+          }
+        }
+      },
+      "SyncJobRetryRequest": {
+        "type": "object",
+        "description": "Optional body for `retrySyncJob`. Defaults to retrying every failed\nresource of the original job.\n",
+        "properties": {
+          "payload_overrides": {
+            "type": "object",
+            "description": "Map of `<type>:<source_id>` → partial payload patch. Applied on top of\nthe originally fetched payload before re-running Phase A.\n",
+            "additionalProperties": true
+          }
+        }
+      },
+      "SyncJobCounts": {
+        "type": "object",
+        "description": "Aggregate counters by resource status.",
+        "properties": {
+          "total": {
+            "type": "integer"
+          },
+          "pending": {
+            "type": "integer"
+          },
+          "in_progress": {
+            "type": "integer"
+          },
+          "succeeded": {
+            "type": "integer"
+          },
+          "failed": {
+            "type": "integer"
+          },
+          "skipped_unchanged": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "total",
+          "pending",
+          "in_progress",
+          "succeeded",
+          "failed",
+          "skipped_unchanged"
+        ]
+      },
+      "SyncJobEvent": {
+        "type": "object",
+        "description": "Activity-log entry surfaced to the frontend. Backed by the op-log rows in\nthe index table (`SYNC#<jobId>#OP#<seq>`).\n",
+        "properties": {
+          "seq": {
+            "type": "integer",
+            "description": "Monotonic sequence number assigned at write time."
+          },
+          "ts": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "phase": {
+            "$ref": "#/components/schemas/SyncPhase"
+          },
+          "type": {
+            "type": "string",
+            "description": "Resource type"
+          },
+          "source_id": {
+            "type": "string"
+          },
+          "target_id": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/SyncJobResourceStatus"
+          },
+          "message": {
+            "type": "string"
+          },
+          "error": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "seq",
+          "ts",
+          "status"
+        ]
+      },
+      "SyncJobBatch": {
+        "type": "object",
+        "description": "Position within the current topological batch for the active phase.",
+        "properties": {
+          "index": {
+            "type": "integer",
+            "description": "Zero-based index of the batch currently executing."
+          },
+          "of": {
+            "type": "integer",
+            "description": "Total number of batches in the current phase."
+          },
+          "level": {
+            "type": "integer",
+            "description": "Dependency level (matches `dependencyLevel` from the topological sort)."
+          }
+        },
+        "required": [
+          "index",
+          "of",
+          "level"
+        ]
+      },
+      "SyncJob": {
+        "type": "object",
+        "description": "Sync job header as surfaced by `getSyncJob` and the create response. The\ncanonical persistence shape is described in `docs/sync/INTERFACES.md`.\n",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/SyncJobStatus"
+          },
+          "direction": {
+            "$ref": "#/components/schemas/SyncDirection"
+          },
+          "source_org_id": {
+            "type": "string"
+          },
+          "target_org_id": {
+            "type": "string"
+          },
+          "dry_run": {
+            "type": "boolean"
+          },
+          "counts": {
+            "$ref": "#/components/schemas/SyncJobCounts"
+          },
+          "current_phase": {
+            "$ref": "#/components/schemas/SyncPhase"
+          },
+          "current_batch": {
+            "$ref": "#/components/schemas/SyncJobBatch"
+          },
+          "started_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "finished_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "events": {
+            "type": "array",
+            "description": "Most recent events (capped server-side, typically last 10).",
+            "items": {
+              "$ref": "#/components/schemas/SyncJobEvent"
+            }
+          },
+          "errors_sample": {
+            "type": "array",
+            "description": "Up to 20 sample error messages from failed resources.",
+            "maxItems": 20,
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string"
+                },
+                "source_id": {
+                  "type": "string"
+                },
+                "error": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "type",
+                "source_id",
+                "error"
+              ]
+            }
+          }
+        },
+        "required": [
+          "id",
+          "status",
+          "direction",
+          "source_org_id",
+          "target_org_id",
+          "dry_run",
+          "counts",
+          "started_at"
+        ]
+      },
+      "SyncJobListResponse": {
+        "type": "object",
+        "description": "Cursor-paginated list of sync jobs.",
+        "properties": {
+          "next_cursor": {
+            "type": "string"
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SyncJob"
+            }
+          }
+        },
+        "required": [
+          "results"
+        ]
+      },
+      "SyncJobResource": {
+        "type": "object",
+        "description": "Per-resource row backed by `SyncResourcesTable`. See\n`docs/sync/INTERFACES.md` for the DDB shape.\n",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "source_id": {
+            "type": "string"
+          },
+          "target_id": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/SyncJobResourceStatus"
+          },
+          "phase": {
+            "$ref": "#/components/schemas/SyncPhase"
+          },
+          "attempt": {
+            "type": "integer"
+          },
+          "error": {
+            "type": "string"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "type",
+          "source_id",
+          "status",
+          "phase",
+          "attempt",
+          "updated_at"
+        ]
+      },
+      "SyncJobResourceListResponse": {
+        "type": "object",
+        "description": "Cursor-paginated list of sync job resources.",
+        "properties": {
+          "next_cursor": {
+            "type": "string"
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SyncJobResource"
+            }
+          }
+        },
+        "required": [
+          "results"
         ]
       }
     }

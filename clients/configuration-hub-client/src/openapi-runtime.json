@@ -101,6 +101,83 @@
         "responses": {}
       }
     },
+    "/v1/configs/sync-jobs": {
+      "post": {
+        "operationId": "createSyncJob",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "get": {
+        "operationId": "listSyncJobs",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CursorParam"
+          },
+          {
+            "$ref": "#/components/parameters/SizeParam"
+          },
+          {
+            "name": "status",
+            "in": "query"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/configs/sync-jobs/{id}": {
+      "get": {
+        "operationId": "getSyncJob",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SyncJobId"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/configs/sync-jobs/{id}/retry": {
+      "post": {
+        "operationId": "retrySyncJob",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SyncJobId"
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/configs/sync-jobs/{id}/resources": {
+      "get": {
+        "operationId": "listSyncJobResources",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SyncJobId"
+          },
+          {
+            "$ref": "#/components/parameters/CursorParam"
+          },
+          {
+            "$ref": "#/components/parameters/SizeParam"
+          },
+          {
+            "name": "status",
+            "in": "query"
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v1/configs/index:rebuild": {
       "post": {
         "operationId": "rebuildIndex",
@@ -127,6 +204,11 @@
       "SizeParam": {
         "name": "size",
         "in": "query"
+      },
+      "SyncJobId": {
+        "name": "id",
+        "in": "path",
+        "required": true
       }
     }
   }
