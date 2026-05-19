@@ -33,6 +33,11 @@
             "required": true
           },
           {
+            "name": "version",
+            "in": "query",
+            "required": false
+          },
+          {
             "name": "source",
             "in": "query",
             "required": false
@@ -202,6 +207,11 @@
             "name": "id",
             "in": "path",
             "required": true
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "required": false
           }
         ],
         "responses": {}

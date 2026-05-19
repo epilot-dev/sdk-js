@@ -1298,6 +1298,7 @@ declare namespace Paths {
             export type Id = string; // uuid
             export type OrgId = string;
             export type Source = string;
+            export type Version = number;
         }
         export interface PathParameters {
             id: /**
@@ -1307,6 +1308,7 @@ declare namespace Paths {
             Parameters.Id /* uuid */;
         }
         export interface QueryParameters {
+            version?: Parameters.Version;
             source?: Parameters.Source;
             orgId?: Parameters.OrgId;
         }
@@ -1352,6 +1354,7 @@ declare namespace Paths {
              * 509cdffe-424f-457a-95c2-9708c304ce77
              */
             export type Id = string; // uuid
+            export type Version = number;
         }
         export interface PathParameters {
             id: /**
@@ -1359,6 +1362,9 @@ declare namespace Paths {
              * 509cdffe-424f-457a-95c2-9708c304ce77
              */
             Parameters.Id /* uuid */;
+        }
+        export interface QueryParameters {
+            version?: Parameters.Version;
         }
         namespace Responses {
             export type $200 = Components.Schemas.JourneyCreationRequestV2;
@@ -1672,13 +1678,13 @@ export interface OperationMethods {
   ): OperationResponse<Paths.PatchUpdateJourneyV2.Responses.$200>
   /**
    * getJourneyV2 - getJourneyV2
-   * 
+   *
    * Get journey by id
    */
   'getJourneyV2'(
-    parameters?: Parameters<Paths.GetJourneyV2.PathParameters> | null,
+    parameters?: Parameters<Paths.GetJourneyV2.QueryParameters & Paths.GetJourneyV2.PathParameters> | null,
     data?: any,
-    config?: AxiosRequestConfig  
+    config?: AxiosRequestConfig
   ): OperationResponse<Paths.GetJourneyV2.Responses.$200>
   /**
    * removeJourneyV2 - removeJourneyV2
