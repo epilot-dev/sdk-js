@@ -780,6 +780,101 @@
         }
       }
     },
+    "/v1/files:zipJob": {
+      "post": {
+        "operationId": "createZipJob",
+        "summary": "createZipJob",
+        "description": "Create a background job to ZIP multiple files and send a download link via email.\n\nFor bulk downloads of more than 50 files, use this async endpoint instead of client-side zipping.\nThe job will:\n1. Download all requested files from S3\n2. Create a ZIP archive\n3. Upload the ZIP to temporary storage\n4. Send an email notification with the download link\n\nThe ZIP file will be available for 7 days.\n",
+        "tags": [
+          "File"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateZipJobPayload"
+              },
+              "examples": {
+                "Zip multiple files": {
+                  "value": {
+                    "file_entity_ids": [
+                      "ef7d985c-2385-44f4-9c71-ae06a52264f8",
+                      "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                    ],
+                    "zip_filename": "Documents.zip",
+                    "notify_email": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Job created, processing in background",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ZipJob"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/files:zipJob/{job_id}": {
+      "get": {
+        "operationId": "getZipJob",
+        "summary": "getZipJob",
+        "description": "Get the status of a ZIP job",
+        "tags": [
+          "File"
+        ],
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "description": "The UUID of the ZIP job",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ZIP job status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ZipJob"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/v1/files/{id}/preview": {
       "get": {
         "operationId": "previewFile",
@@ -1199,8 +1294,7 @@
       "get": {
         "operationId": "listPublicLinksForFile",
         "summary": "listPublicLinksForFile",
-        "description": "**Not yet implemented.**\n\nThis endpoint will fetch all public links previously generated for a file.\n",
-        "x-not-implemented": true,
+        "description": "Fetches all public links previously generated for a file",
         "parameters": [
           {
             "name": "id",
@@ -1340,8 +1434,7 @@
       "delete": {
         "operationId": "revokePublicLink",
         "summary": "revokePublicLink",
-        "description": "**Not yet implemented.**\n\nThis endpoint will revoke a public link, making the file inaccessible via that link.\n",
-        "x-not-implemented": true,
+        "description": "Revokes a given public link by ID",
         "parameters": [
           {
             "name": "id",
@@ -2376,6 +2469,171 @@
           "required": [
             "id"
           ]
+        }
+      },
+      "CreateZipJobPayload": {
+        "type": "object",
+        "description": "Request payload to create a ZIP job for bulk file download.\nProvide either an explicit list of `file_entity_ids` (up to 1000) or an\n`entity_query` that resolves to file entities (up to 10000).\n",
+        "properties": {
+          "file_entity_ids": {
+            "type": "array",
+            "description": "List of file entity IDs to include in the ZIP",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "minItems": 1,
+            "maxItems": 1000,
+            "example": [
+              "ef7d985c-2385-44f4-9c71-ae06a52264f8",
+              "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+            ]
+          },
+          "entity_query": {
+            "type": "object",
+            "description": "Entity search query used to resolve files to include in the ZIP",
+            "properties": {
+              "q": {
+                "type": "string",
+                "description": "Lucene-style search query (same syntax as entity search)",
+                "example": "_schema:file AND _tags:invoice"
+              },
+              "sort": {
+                "type": "string",
+                "description": "Sort expression forwarded to the entity search",
+                "example": "_created_at:desc"
+              }
+            },
+            "required": [
+              "q"
+            ]
+          },
+          "zip_filename": {
+            "type": "string",
+            "description": "Name of the generated ZIP file",
+            "default": "Files.zip",
+            "example": "Documents.zip"
+          },
+          "notify_email": {
+            "type": "boolean",
+            "description": "Send email notification when ZIP is ready",
+            "default": true
+          }
+        },
+        "oneOf": [
+          {
+            "required": [
+              "file_entity_ids"
+            ]
+          },
+          {
+            "required": [
+              "entity_query"
+            ]
+          }
+        ]
+      },
+      "ZipJob": {
+        "type": "object",
+        "description": "ZIP job status and result",
+        "properties": {
+          "job_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Unique identifier for the ZIP job",
+            "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+          },
+          "status": {
+            "type": "string",
+            "description": "Current status of the ZIP job",
+            "enum": [
+              "queued",
+              "downloading",
+              "zipping",
+              "uploading",
+              "sending_notification",
+              "completed",
+              "failed"
+            ],
+            "example": "completed"
+          },
+          "progress": {
+            "type": "object",
+            "description": "Progress information for the job",
+            "properties": {
+              "total_files": {
+                "type": "integer",
+                "description": "Total number of files to process",
+                "example": 100
+              },
+              "downloaded_files": {
+                "type": "integer",
+                "description": "Number of files successfully downloaded",
+                "example": 75
+              },
+              "failed_files": {
+                "type": "integer",
+                "description": "Number of files that failed to download",
+                "example": 2
+              }
+            }
+          },
+          "result": {
+            "type": "object",
+            "description": "Result of the completed ZIP job",
+            "properties": {
+              "file_entity_id": {
+                "type": "string",
+                "format": "uuid",
+                "description": "File entity ID of the generated ZIP",
+                "example": "ef7d985c-2385-44f4-9c71-ae06a52264f8"
+              },
+              "download_url": {
+                "type": "string",
+                "format": "uri",
+                "description": "Presigned download URL (expires in 24 hours)",
+                "example": "https://epilot-prod-user-content.s3.eu-central-1.amazonaws.com/123/files.zip?X-Amz-..."
+              },
+              "expires_at": {
+                "type": "string",
+                "format": "date-time",
+                "description": "When the download URL expires",
+                "example": "2024-01-02T12:00:00Z"
+              },
+              "zip_size_bytes": {
+                "type": "integer",
+                "description": "Size of the generated ZIP file in bytes",
+                "example": 104857600
+              }
+            }
+          },
+          "error": {
+            "type": "string",
+            "description": "Error message if job failed",
+            "example": "Failed to download file: access denied"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the job was created",
+            "example": "2024-01-01T12:00:00Z"
+          },
+          "created_by": {
+            "type": "string",
+            "description": "User ID who created the job",
+            "example": "10234"
+          },
+          "org_id": {
+            "type": "string",
+            "description": "Organization ID",
+            "example": "123"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the job was last updated",
+            "example": "2024-01-01T12:05:00Z"
+          }
         }
       },
       "VerifyCustomDownloadUrlPayload": {

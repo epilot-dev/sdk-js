@@ -109,6 +109,7 @@ Get journey by id. Private journeys requires valid private token to be passed
 | Name | In | Type | Required | Description |
 | ---- | -- | ---- | -------- | ----------- |
 | `id` | path | string (uuid) | Yes | Journey ID |
+| `version` | query | number | No | DynamoDB version to fetch. `0` (default) is the live row; positive integers are historical snapshots created on each save. Note: this is distinct from the `revisions` counter on the row body. |
 | `source` | query | string | No | What source ID. Journey or Entity ID |
 | `orgId` | query | string | No | Organization ID |
 
@@ -1610,6 +1611,7 @@ Get journey by id
 | Name | In | Type | Required | Description |
 | ---- | -- | ---- | -------- | ----------- |
 | `id` | path | string (uuid) | Yes | Journey ID |
+| `version` | query | number | No | DynamoDB version to fetch. `0` (default) is the live row; positive integers are historical snapshots created on each save. Note: this is distinct from the `revisions` counter on the row body. |
 
 **Sample Call**
 

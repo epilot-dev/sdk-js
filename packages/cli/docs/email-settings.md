@@ -55,7 +55,7 @@ epilot email-settings provisionEpilotEmailAddress
 - [`listInboxBuckets`](#listinboxbuckets) — Retrieves all inbox buckets for the organization.
 
 **O365 Outlook Connection**
-- [`connectOutlook`](#connectoutlook) — Returns Microsoft authorization URL for Outlook OAuth.
+- [`connectOutlook`](#connectoutlook) — Returns the Microsoft authorization URL for Outlook OAuth.
 - [`getOutlookConnectionStatus`](#getoutlookconnectionstatus) — Returns all Microsoft 365 / Outlook connections for the organization.
 - [`disconnectOutlook`](#disconnectoutlook) — Removes the Microsoft 365 / Outlook connection for a specific tenant.
 - [`connectOutlookMailbox`](#connectoutlookmailbox) — Connects an Outlook mailbox:
@@ -82,6 +82,7 @@ epilot email-settings provisionEpilotEmailAddress
 - [`addDomain`](#adddomain) — Adds a custom email domain to the organization.
 - [`deleteDomain`](#deletedomain) — Removes a custom email domain from the organization.
 - [`verifyNameServers`](#verifynameservers) — Verifies that the domain's name server (NS) records are correctly configured.
+- [`verifyDnsRecords`](#verifydnsrecords) — Verifies that the domain's DNS records (MX, TXT, CNAME) are correctly configured
 - [`verifyDomain`](#verifydomain) — Verifies ownership and configuration of a custom email domain.
 
 ### `provisionEpilotEmailAddress`
@@ -786,14 +787,23 @@ epilot email-settings listInboxBuckets --jsonata '$'
 
 ### `connectOutlook`
 
-Returns Microsoft authorization URL for Outlook OAuth.
+Returns the Microsoft authorization URL for Outlook OAuth.
 
-`GET /v2/outlook/connect`
+`POST /v2/outlook/connect`
+
+**Request Body** (required)
 
 **Sample Call**
 
 ```bash
-epilot email-settings connectOutlook
+epilot email-settings connectOutlook \
+  -d '{"mail":true,"calendar":true}'
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot email-settings connectOutlook
 ```
 
 With JSONata filter:
@@ -842,6 +852,7 @@ epilot email-settings getOutlookConnectionStatus --jsonata 'connections'
     {
       "status": "connected",
       "action": "connect",
+      "action_reason": "expired",
       "connected_by_display_name": "string",
       "connected_by_email": "user@example.com",
       "connected_by_user_id": "string",
@@ -1721,6 +1732,57 @@ With JSONata filter:
 
 ```bash
 epilot email-settings verifyNameServers --jsonata '$'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+[
+  {
+    "id": "a10bd0ff-4391-4cfc-88ee-b19d718a9bf7",
+    "name": "Default Signature",
+    "org_id": "org-123",
+    "type": "signature",
+    "value": "Best regards, The Team",
+    "html": "<p>Best regards,<br/><strong>The Team</strong></p>",
+    "created_at": "2024-01-15T10:30:00Z",
+    "updated_at": "2024-01-20T14:45:00Z",
+    "created_by": "user-123",
+    "updated_by": "user-456"
+  }
+]
+```
+
+</details>
+
+---
+
+### `verifyDnsRecords`
+
+Verifies that the domain's DNS records (MX, TXT, CNAME) are correctly configured
+
+`POST /v1/email-settings/domain/dns-records:verify`
+
+**Request Body** (required)
+
+**Sample Call**
+
+```bash
+epilot email-settings verifyDnsRecords \
+  -d '{"domain":"mail.yourcompany.com"}'
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot email-settings verifyDnsRecords
+```
+
+With JSONata filter:
+
+```bash
+epilot email-settings verifyDnsRecords --jsonata '$'
 ```
 
 <details>

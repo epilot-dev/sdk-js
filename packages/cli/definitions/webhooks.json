@@ -355,6 +355,70 @@
         }
       }
     },
+    "/v1/webhooks/configs/{configId}/test-oauth": {
+      "post": {
+        "operationId": "testOAuth",
+        "summary": "Test OAuth connection",
+        "description": "Tests the OAuth client credentials configuration for a saved webhook by attempting\na token exchange against the configured OAuth endpoint. Returns success with token\nmetadata (e.g. expires_in, token_type) or an error describing why the exchange failed.\nDoes not send the actual webhook.\n",
+        "tags": [
+          "webhooks"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "configId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Short uuid to identify the webhook configuration.",
+            "example": "7hj28aasgag2gha2"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OAuth token exchange succeeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TestOAuthResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Webhook does not use OAuth or configuration is invalid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No config found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "OAuth token exchange failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/webhooks/configs/{configId}/trigger": {
       "post": {
         "operationId": "triggerWebhook",
@@ -1118,7 +1182,9 @@
             "type": "string"
           },
           "password": {
-            "type": "string"
+            "type": "string",
+            "nullable": true,
+            "description": "On update: omit to preserve existing, pass null to explicitly clear, pass string to set new value.\n"
           },
           "passwordIsEnvVar": {
             "type": "boolean",
@@ -1137,7 +1203,9 @@
             "type": "string"
           },
           "clientSecret": {
-            "type": "string"
+            "type": "string",
+            "nullable": true,
+            "description": "On update: omit to preserve existing, pass null to explicitly clear, pass string to set new value.\n"
           },
           "clientSecretIsEnvVar": {
             "type": "boolean",
@@ -1171,7 +1239,9 @@
             "type": "string"
           },
           "keyValue": {
-            "type": "string"
+            "type": "string",
+            "nullable": true,
+            "description": "On update: omit to preserve existing, pass null to explicitly clear, pass string to set new value.\n"
           },
           "keyValueIsEnvVar": {
             "type": "boolean",
@@ -1200,7 +1270,12 @@
           },
           "creationTime": {
             "type": "string",
-            "description": "creation timestamp",
+            "description": "Timestamp the webhook was first created. Immutable after creation.",
+            "example": "2021-04-27T12:01:13.000Z"
+          },
+          "updatedTime": {
+            "type": "string",
+            "description": "Timestamp of the most recent update to the webhook. Equals creationTime for never-edited webhooks. May be absent on legacy records written before this field was introduced.",
             "example": "2021-04-27T12:01:13.000Z"
           },
           "httpMethod": {
@@ -1253,6 +1328,43 @@
           "jsonataExpression": {
             "type": "string",
             "description": "JSONata expression to transform the payload"
+          },
+          "deliveryMode": {
+            "type": "string",
+            "enum": [
+              "json_base64",
+              "binary_multipart"
+            ],
+            "description": "Controls how file data is delivered to the endpoint. Only relevant when the webhook is triggered by a file event. Absent for non-file-event webhooks."
+          },
+          "multipartConfig": {
+            "type": "object",
+            "description": "Configuration for `binary_multipart` delivery mode. Describes the\nshape of the multipart/form-data body the receiver expects — pick\nthe attachment(s) via a JSONata expression and add scalar form\nparts on the side.\n",
+            "properties": {
+              "fileFieldName": {
+                "type": "string",
+                "description": "Name of the binary form part(s). Default `\"file\"`. The same\nname is reused when `fileFieldStrategy=\"multi\"` produces\nmultiple file parts.\n"
+              },
+              "fileFieldStrategy": {
+                "type": "string",
+                "enum": [
+                  "single",
+                  "multi"
+                ],
+                "description": "Assertion on the picker result. `single` (default) fails the\ndelivery when `fileSource` resolves to more than one\nattachment. `multi` accepts any non-empty count.\n"
+              },
+              "fileSource": {
+                "type": "string",
+                "description": "JSONata expression evaluated against the event payload that\npicks the attachment(s) to send. Default `\"event_attachments\"`\n(all attachments). When the result is `undefined`, `null`, or\nan empty array, the event is silently skipped (no HTTP\nrequest, no error notification). Validated for syntax at\nconfig-save time.\n"
+              },
+              "extraFields": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "Map of `formFieldName → JSONata expression`. Each value is\nevaluated against the event payload, then passed through\nenv-resolution (same as `custom_headers`). Static literals\nmust be JSONata-quoted: a bare `\"business_partner\"` is\ntreated as a path lookup and yields `undefined`; for a\nliteral value, single-quote inside the JSON string:\n`\"'business_partner'\"`. Expressions yielding `undefined` or\n`null` silently omit the field. Object/array results are\nJSON-stringified before being appended. Values are not part\nof the signed payload.\n"
+              }
+            }
           },
           "filterConditions": {
             "$ref": "#/components/schemas/WebhookConditionGroup"
@@ -1382,6 +1494,10 @@
           },
           "include_changed_attributes": {
             "type": "boolean"
+          },
+          "apply_changesets": {
+            "type": "boolean",
+            "description": "When true, entity fields show proposed changeset values instead of current values"
           },
           "custom_headers": {
             "$ref": "#/components/schemas/CustomHeader"
@@ -1589,6 +1705,35 @@
           }
         },
         "additionalProperties": true
+      },
+      "TestOAuthResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "Whether the OAuth token exchange succeeded",
+            "example": true
+          },
+          "expires_in": {
+            "type": "number",
+            "description": "Token validity in seconds as reported by the OAuth provider",
+            "example": 3600
+          },
+          "token_type": {
+            "type": "string",
+            "description": "Token type returned by the OAuth provider",
+            "example": "Bearer"
+          },
+          "message": {
+            "type": "string",
+            "description": "Human-readable result message",
+            "example": "OAuth token exchange successful"
+          }
+        },
+        "required": [
+          "success",
+          "message"
+        ]
       },
       "BatchReplayRequest": {
         "type": "object",

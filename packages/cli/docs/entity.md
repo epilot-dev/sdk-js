@@ -83,6 +83,9 @@ epilot entity listSchemas
 - [`deleteEntity`](#deleteentity) — Deletes an Entity
 - [`autocomplete`](#autocomplete) — Autocomplete entity attributes
 - [`wipeAllEntities`](#wipeallentities) — Creates a request to queue the deletion of all entities in the system. This is a destructive operation and should only b
+- [`applyChangeset`](#applychangeset) — Applies the proposed value from a pending changeset to the entity attribute
+- [`dismissChangeset`](#dismisschangeset) — Removes a pending changeset without applying it. The attribute value remains unchanged.
+- [`listChangesets`](#listchangesets) — Returns all pending changesets for an entity.
 
 **Activity**
 - [`createActivity`](#createactivity) — Create an activity that can be displayed in activity feeds.
@@ -1863,7 +1866,8 @@ epilot entity queryEntityGraph \
       }
     ]
   },
-  "hydrate": false
+  "hydrate": false,
+  "apply_changesets": false
 }'
 ```
 
@@ -2330,6 +2334,9 @@ Gets Entity by id.
 | `slug` | path | string | Yes | Entity Type |
 | `hydrate` | query | boolean | No | When true, enables entity hydration to resolve nested $relation & $relation_ref references in-place. |
 | `fields` | query | string[] | No | List of entity fields to include in results |
+| `apply_changesets` | query | boolean | No | When true, applies pending changeset proposed values in-place on the response entity.
+The response includes both the hydrated values and the raw _changesets field.
+Does not mutate stored data — pure r |
 
 **Sample Call**
 
@@ -2632,6 +2639,9 @@ Pending state on activity is automatically ended when activity is filled.
  |
 | `async` | query | boolean | No | Don't wait for updated entity to become available in Search API. Useful for large migrations |
 | `validate` | query | boolean | No | When true, enables entity validation against the entity schema. |
+| `direct` | query | boolean | No | When true, bypasses changeset interception: attribute values in the payload
+are written directly to the entity regardless of each attribute's `edit_mode`.
+The write always lands, independently of any  |
 
 **Request Body**
 
@@ -2738,6 +2748,9 @@ Pending state on activity is automatically ended when activity is filled.
 | `dry_run` | query | boolean | No | Dry Run mode = return results but does not perform the operation. |
 | `async` | query | boolean | No | Don't wait for updated entity to become available in Search API. Useful for large migrations |
 | `validate` | query | boolean | No | When true, enables entity validation against the entity schema. |
+| `direct` | query | boolean | No | When true, bypasses changeset interception: attribute values in the payload
+are written directly to the entity regardless of each attribute's `edit_mode`.
+The write always lands, independently of any  |
 
 **Request Body** (required)
 
@@ -3177,6 +3190,189 @@ epilot entity attachActivity -p id=01F130Q52Q6MWSNS8N2AVXV4JN --jsonata '$'
     }
   }
 }
+```
+
+</details>
+
+---
+
+### `applyChangeset`
+
+Applies the proposed value from a pending changeset to the entity attribute
+
+`POST /v1/entity/{slug}/{id}/changesets/{attribute}:apply`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `slug` | path | string | Yes | Entity Type |
+| `id` | path | string (uuid) | Yes | Entity id |
+| `attribute` | path | string | Yes | Attribute name of the changeset to apply |
+
+**Sample Call**
+
+```bash
+epilot entity applyChangeset \
+  -p slug=contact \
+  -p id=123e4567-e89b-12d3-a456-426614174000 \
+  -p attribute=example
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot entity applyChangeset contact 123e4567-e89b-12d3-a456-426614174000 example
+```
+
+With JSONata filter:
+
+```bash
+epilot entity applyChangeset -p slug=contact -p id=123e4567-e89b-12d3-a456-426614174000 -p attribute=example --jsonata '$'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "_org": "123",
+  "_owners": [
+    {
+      "org_id": "123",
+      "user_id": "123"
+    }
+  ],
+  "_schema": "contact",
+  "_tags": ["example", "mock"],
+  "_created_at": "2021-02-09T12:41:43.662Z",
+  "_updated_at": "2021-02-09T12:41:43.662Z",
+  "_acl": {
+    "view": ["org:456", "org:789"],
+    "edit": ["org:456"],
+    "delete": ["org:456"]
+  },
+  "_manifest": ["123e4567-e89b-12d3-a456-426614174000"]
+}
+```
+
+</details>
+
+---
+
+### `dismissChangeset`
+
+Removes a pending changeset without applying it. The attribute value remains unchanged.
+
+`POST /v1/entity/{slug}/{id}/changesets/{attribute}:dismiss`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `slug` | path | string | Yes | Entity Type |
+| `id` | path | string (uuid) | Yes | Entity id |
+| `attribute` | path | string | Yes | Attribute name of the changeset to dismiss |
+
+**Request Body**
+
+**Sample Call**
+
+```bash
+epilot entity dismissChangeset \
+  -p slug=contact \
+  -p id=123e4567-e89b-12d3-a456-426614174000 \
+  -p attribute=example \
+  -d '{"reason":"string"}'
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot entity dismissChangeset contact 123e4567-e89b-12d3-a456-426614174000 example
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot entity dismissChangeset -p slug=contact -p id=123e4567-e89b-12d3-a456-426614174000 -p attribute=example
+```
+
+With JSONata filter:
+
+```bash
+epilot entity dismissChangeset -p slug=contact -p id=123e4567-e89b-12d3-a456-426614174000 -p attribute=example --jsonata '$'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "_org": "123",
+  "_owners": [
+    {
+      "org_id": "123",
+      "user_id": "123"
+    }
+  ],
+  "_schema": "contact",
+  "_tags": ["example", "mock"],
+  "_created_at": "2021-02-09T12:41:43.662Z",
+  "_updated_at": "2021-02-09T12:41:43.662Z",
+  "_acl": {
+    "view": ["org:456", "org:789"],
+    "edit": ["org:456"],
+    "delete": ["org:456"]
+  },
+  "_manifest": ["123e4567-e89b-12d3-a456-426614174000"]
+}
+```
+
+</details>
+
+---
+
+### `listChangesets`
+
+Returns all pending changesets for an entity.
+
+`GET /v1/entity/{slug}/{id}/changesets`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `slug` | path | string | Yes | Entity Type |
+| `id` | path | string (uuid) | Yes | Entity id |
+
+**Sample Call**
+
+```bash
+epilot entity listChangesets \
+  -p slug=contact \
+  -p id=123e4567-e89b-12d3-a456-426614174000
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot entity listChangesets contact 123e4567-e89b-12d3-a456-426614174000
+```
+
+With JSONata filter:
+
+```bash
+epilot entity listChangesets -p slug=contact -p id=123e4567-e89b-12d3-a456-426614174000 --jsonata '$'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{}
 ```
 
 </details>
@@ -5674,6 +5870,23 @@ epilot entity createSchemaAttribute \
   "exclude_from_search": false,
   "repeatable": true,
   "has_primary": true,
+  "edit_mode": "direct",
+  "edit_mode_config": {
+    "match_strategy": "exact",
+    "fuzzy_config": {
+      "type": "suffix",
+      "suffix_length": 0,
+      "fields_to_ignore": ["string"],
+      "regex_flags": "string",
+      "country_code": "string",
+      "match_on": "string",
+      "key": "string",
+      "mode": "subset",
+      "ordered": true,
+      "require_tags_match": true,
+      "pattern": "string"
+    }
+  },
   "type": "string",
   "multiline": true,
   "rich_text": true,
@@ -5741,6 +5954,23 @@ epilot entity createSchemaAttribute --jsonata '$'
   "exclude_from_search": false,
   "repeatable": true,
   "has_primary": true,
+  "edit_mode": "direct",
+  "edit_mode_config": {
+    "match_strategy": "exact",
+    "fuzzy_config": {
+      "type": "suffix",
+      "suffix_length": 0,
+      "fields_to_ignore": ["string"],
+      "regex_flags": "string",
+      "country_code": "string",
+      "match_on": "string",
+      "key": "string",
+      "mode": "subset",
+      "ordered": true,
+      "require_tags_match": true,
+      "pattern": "string"
+    }
+  },
   "type": "string",
   "multiline": true,
   "rich_text": true,
@@ -5831,6 +6061,23 @@ epilot entity getSchemaAttribute -p composite_id=contact:97644baa-083f-4e49-9188
   "exclude_from_search": false,
   "repeatable": true,
   "has_primary": true,
+  "edit_mode": "direct",
+  "edit_mode_config": {
+    "match_strategy": "exact",
+    "fuzzy_config": {
+      "type": "suffix",
+      "suffix_length": 0,
+      "fields_to_ignore": ["string"],
+      "regex_flags": "string",
+      "country_code": "string",
+      "match_on": "string",
+      "key": "string",
+      "mode": "subset",
+      "ordered": true,
+      "require_tags_match": true,
+      "pattern": "string"
+    }
+  },
   "type": "string",
   "multiline": true,
   "rich_text": true,
@@ -5912,6 +6159,23 @@ epilot entity putSchemaAttribute \
   "exclude_from_search": false,
   "repeatable": true,
   "has_primary": true,
+  "edit_mode": "direct",
+  "edit_mode_config": {
+    "match_strategy": "exact",
+    "fuzzy_config": {
+      "type": "suffix",
+      "suffix_length": 0,
+      "fields_to_ignore": ["string"],
+      "regex_flags": "string",
+      "country_code": "string",
+      "match_on": "string",
+      "key": "string",
+      "mode": "subset",
+      "ordered": true,
+      "require_tags_match": true,
+      "pattern": "string"
+    }
+  },
   "type": "string",
   "multiline": true,
   "rich_text": true,
@@ -5985,6 +6249,23 @@ epilot entity putSchemaAttribute -p composite_id=contact:97644baa-083f-4e49-9188
   "exclude_from_search": false,
   "repeatable": true,
   "has_primary": true,
+  "edit_mode": "direct",
+  "edit_mode_config": {
+    "match_strategy": "exact",
+    "fuzzy_config": {
+      "type": "suffix",
+      "suffix_length": 0,
+      "fields_to_ignore": ["string"],
+      "regex_flags": "string",
+      "country_code": "string",
+      "match_on": "string",
+      "key": "string",
+      "mode": "subset",
+      "ordered": true,
+      "require_tags_match": true,
+      "pattern": "string"
+    }
+  },
   "type": "string",
   "multiline": true,
   "rich_text": true,
@@ -6075,6 +6356,23 @@ epilot entity deleteSchemaAttribute -p composite_id=contact:97644baa-083f-4e49-9
   "exclude_from_search": false,
   "repeatable": true,
   "has_primary": true,
+  "edit_mode": "direct",
+  "edit_mode_config": {
+    "match_strategy": "exact",
+    "fuzzy_config": {
+      "type": "suffix",
+      "suffix_length": 0,
+      "fields_to_ignore": ["string"],
+      "regex_flags": "string",
+      "country_code": "string",
+      "match_on": "string",
+      "key": "string",
+      "mode": "subset",
+      "ordered": true,
+      "require_tags_match": true,
+      "pattern": "string"
+    }
+  },
   "type": "string",
   "multiline": true,
   "rich_text": true,
@@ -6141,6 +6439,8 @@ epilot entity createSchemaCapability \
       "exclude_from_search": false,
       "repeatable": true,
       "has_primary": true,
+      "edit_mode": "direct",
+      "edit_mode_config": {},
       "type": "string",
       "multiline": true,
       "rich_text": true,
@@ -6178,6 +6478,8 @@ epilot entity createSchemaCapability \
       "exclude_from_search": false,
       "repeatable": true,
       "has_primary": true,
+      "edit_mode": "direct",
+      "edit_mode_config": {},
       "type": "link"
     }
   ],
@@ -6273,6 +6575,8 @@ epilot entity createSchemaCapability --jsonata '$'
       "exclude_from_search": false,
       "repeatable": true,
       "has_primary": true,
+      "edit_mode": "direct",
+      "edit_mode_config": {},
       "type": "string",
       "multiline": true,
       "rich_text": true,
@@ -6310,6 +6614,8 @@ epilot entity createSchemaCapability --jsonata '$'
       "exclude_from_search": false,
       "repeatable": true,
       "has_primary": true,
+      "edit_mode": "direct",
+      "edit_mode_config": {},
       "type": "link"
     }
   ],
@@ -6428,6 +6734,8 @@ epilot entity getSchemaCapability -p composite_id=contact:97644baa-083f-4e49-918
       "exclude_from_search": false,
       "repeatable": true,
       "has_primary": true,
+      "edit_mode": "direct",
+      "edit_mode_config": {},
       "type": "string",
       "multiline": true,
       "rich_text": true,
@@ -6465,6 +6773,8 @@ epilot entity getSchemaCapability -p composite_id=contact:97644baa-083f-4e49-918
       "exclude_from_search": false,
       "repeatable": true,
       "has_primary": true,
+      "edit_mode": "direct",
+      "edit_mode_config": {},
       "type": "link"
     }
   ],
@@ -6574,6 +6884,8 @@ epilot entity putSchemaCapability \
       "exclude_from_search": false,
       "repeatable": true,
       "has_primary": true,
+      "edit_mode": "direct",
+      "edit_mode_config": {},
       "type": "string",
       "multiline": true,
       "rich_text": true,
@@ -6611,6 +6923,8 @@ epilot entity putSchemaCapability \
       "exclude_from_search": false,
       "repeatable": true,
       "has_primary": true,
+      "edit_mode": "direct",
+      "edit_mode_config": {},
       "type": "link"
     }
   ],
@@ -6712,6 +7026,8 @@ epilot entity putSchemaCapability -p composite_id=contact:97644baa-083f-4e49-918
       "exclude_from_search": false,
       "repeatable": true,
       "has_primary": true,
+      "edit_mode": "direct",
+      "edit_mode_config": {},
       "type": "string",
       "multiline": true,
       "rich_text": true,
@@ -6749,6 +7065,8 @@ epilot entity putSchemaCapability -p composite_id=contact:97644baa-083f-4e49-918
       "exclude_from_search": false,
       "repeatable": true,
       "has_primary": true,
+      "edit_mode": "direct",
+      "edit_mode_config": {},
       "type": "link"
     }
   ],
@@ -6867,6 +7185,8 @@ epilot entity deleteSchemaCapability -p composite_id=contact:97644baa-083f-4e49-
       "exclude_from_search": false,
       "repeatable": true,
       "has_primary": true,
+      "edit_mode": "direct",
+      "edit_mode_config": {},
       "type": "string",
       "multiline": true,
       "rich_text": true,
@@ -6904,6 +7224,8 @@ epilot entity deleteSchemaCapability -p composite_id=contact:97644baa-083f-4e49-
       "exclude_from_search": false,
       "repeatable": true,
       "has_primary": true,
+      "edit_mode": "direct",
+      "edit_mode_config": {},
       "type": "link"
     }
   ],

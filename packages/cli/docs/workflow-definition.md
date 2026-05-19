@@ -446,6 +446,7 @@ epilot workflow-definition createFlowTemplate \
       "id": "string",
       "type": "automation",
       "automation_id": "string",
+      "input_entity": "thread",
       "trigger_config": []
     }
   ],
@@ -577,6 +578,7 @@ epilot workflow-definition createFlowTemplate --jsonata '$'
       "id": "string",
       "type": "automation",
       "automation_id": "string",
+      "input_entity": "thread",
       "trigger_config": []
     }
   ],
@@ -812,6 +814,7 @@ epilot workflow-definition getFlowTemplate -p flowId=7hj28akg --jsonata '$'
       "id": "string",
       "type": "automation",
       "automation_id": "string",
+      "input_entity": "thread",
       "trigger_config": []
     }
   ],
@@ -957,6 +960,7 @@ epilot workflow-definition updateFlowTemplate \
       "id": "string",
       "type": "automation",
       "automation_id": "string",
+      "input_entity": "thread",
       "trigger_config": []
     }
   ],
@@ -1094,6 +1098,7 @@ epilot workflow-definition updateFlowTemplate -p flowId=7hj28akg --jsonata '$'
       "id": "string",
       "type": "automation",
       "automation_id": "string",
+      "input_entity": "thread",
       "trigger_config": []
     }
   ],
@@ -1281,6 +1286,7 @@ epilot workflow-definition duplicateFlowTemplate -p flowId=7hj28akg --jsonata '$
       "id": "string",
       "type": "automation",
       "automation_id": "string",
+      "input_entity": "thread",
       "trigger_config": []
     }
   ],

@@ -1763,6 +1763,12 @@ Returns the list of available external catalog products with computed prices bas
 
 `POST /v1/public/external-catalog/products`
 
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `x-epilot-org-id` | header | string | No | Organization ID (required when not using EpilotPublicAuth token) |
+
 **Request Body** (required)
 
 **Sample Call**
@@ -1848,6 +1854,12 @@ epilot pricing $getExternalCatalogProducts --jsonata 'results[0]'
 Returns the list of available external catalog products recommendations based on a given context
 
 `POST /v1/public/external-catalog/product-recommendations`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `x-epilot-org-id` | header | string | No | Organization ID (required when not using EpilotPublicAuth token) |
 
 **Request Body** (required)
 

@@ -1,7 +1,8 @@
 # Metering API
 
-- **Base URL:** `https://metering.sls.epilot.io`
 - **API Docs:** [https://docs.epilot.io/api/metering](https://docs.epilot.io/api/metering)
+
+The Metering API manages smart meter data, meter counters, and meter readings for epilot customers and administrators.
 
 ## Quick Start
 
@@ -34,30 +35,42 @@ epilot metering getCustomerMeters
 ## Operations
 
 **ECP**
-- [`getCustomerMeters`](#getcustomermeters) — Retrieves all meters related to a customer.
-- [`getMetersByContractId`](#getmetersbycontractid) — Retrieves all meters related to a contract.
-- [`getMeter`](#getmeter) — Retrieves the details of a meter.
-- [`updateMeter`](#updatemeter) — Updates the details of a meter.
-- [`getMeterCounters`](#getmetercounters) — Retrieves all counters for a given meter.
-- [`getCounterDetails`](#getcounterdetails) — Retrieves the details of a meter counter.
-- [`createPortalMeterReadings`](#createportalmeterreadings) — Inserts multiple meter readings at once for a given meter. Limited to 2 readings per request.
+- [`getCustomerMeters`](#getcustomermeters) — Retrieves all meters associated with the authenticated portal customer.
+- [`getMetersByContractId`](#getmetersbycontractid) — Retrieves all meters associated with a given contract entity.
+- [`getMeter`](#getmeter) — Retrieves the full details of a specific meter by ID, including related entities and available journey actions.
+- [`updateMeter`](#updatemeter) — Partially updates the details of a meter entity by ID.
+- [`getMeterCounters`](#getmetercounters) — Retrieves all meter counters associated with a given meter.
+- [`getCounterDetails`](#getcounterdetails) — Retrieves the full details of a single meter counter by its ID.
+- [`createPortalMeterReadings`](#createportalmeterreadings) — Inserts multiple meter readings at once for a given meter via the end customer portal.
 
 **ECP Admin**
 - [`createMeterReading`](#createmeterreading) — Inserts a new meter reading.
 - [`createMeterReadings`](#createmeterreadings) — Inserts multiple meter readings at once. Limited to 100 readings per request.
-- [`batchWriteMeterReadings`](#batchwritemeterreadings) — Upserts/Deletes multiple meter readings at once. Limited to 100 readings per request.
-- [`createMeterReadingFromSubmission`](#createmeterreadingfromsubmission) — Creates a reading from a journey submission.
-- [`getAllowedReadingForMeter`](#getallowedreadingformeter) — Get allowed reading for the given meter
-- [`createReadingWithMeter`](#createreadingwithmeter) — Creates a reading along with a meter.
+- [`batchWriteMeterReadings`](#batchwritemeterreadings) — Upserts or deletes multiple meter readings at once. Limited to 100 readings per request.
+- [`createMeterReadingFromSubmission`](#createmeterreadingfromsubmission) — Creates meter readings from a journey submission payload.
+- [`getAllowedReadingForMeter`](#getallowedreadingformeter) — Returns the allowed min/max reading range for each counter of the given meter.
+- [`createReadingWithMeter`](#createreadingwithmeter) — Creates a meter reading along with meter lookup or creation by MA-LO ID and OBIS number.
 - [`getReadingsByInterval`](#getreadingsbyinterval) — Retrieves all readings specified in an interval.
-- [`updateMeterReading`](#updatemeterreading) — Updates a meter reading.
-- [`deleteMeterReading`](#deletemeterreading) — Deletes a meter reading.
+- [`updateMeterReading`](#updatemeterreading) — Updates an existing meter reading identified by meter ID, counter ID, and timestamp.
+- [`deleteMeterReading`](#deletemeterreading) — Permanently deletes a meter reading identified by meter ID, counter ID, and timestamp.
+
+**Metering**
+- [`getReadingChangesets`](#getreadingchangesets) — GET /v1/metering/reading/{meter_id}/{counter_id}/changesets
+- [`applyReadingChangeset`](#applyreadingchangeset) — Applies the proposed reading value to ClickHouse and removes the pending changeset.
+- [`dismissReadingChangeset`](#dismissreadingchangeset) — Removes the pending changeset without applying it. The reading value remains unchanged.
+- [`updateReadingChangeset`](#updatereadingchangeset) — Updates the proposed value of a pending changeset without going through the normal write path.
 
 ### `getCustomerMeters`
 
-Retrieves all meters related to a customer.
+Retrieves all meters associated with the authenticated portal customer.
 
 `GET /v1/metering/meter`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `include_pending_changesets` | query | boolean | No | When true, the response includes a `pending_changesets` field with the list of pending reading changesets alongside the confirmed readings. |
 
 **Sample Call**
 
@@ -104,7 +117,7 @@ epilot metering getCustomerMeters --jsonata 'data'
       ],
       "used_for": "Domestic Usage",
       "manufacturer": "Energy One",
-      "calibration_date": "2022-10-10T00:00:00.000Z",
+      "calibration_date": "2022-10-10",
       "contract": {
         "$relation": [
           {
@@ -136,7 +149,7 @@ epilot metering getCustomerMeters --jsonata 'data'
           }
         ]
       },
-      "last_reading": "2022-10-10T00:00:00.000Z",
+      "last_reading": "2022-10-10",
       "current_consumption": 100.5
     }
   ]
@@ -149,7 +162,7 @@ epilot metering getCustomerMeters --jsonata 'data'
 
 ### `getMetersByContractId`
 
-Retrieves all meters related to a contract.
+Retrieves all meters associated with a given contract entity.
 
 `GET /v1/metering/contract/meters/{contract_id}`
 
@@ -211,7 +224,7 @@ epilot metering getMetersByContractId -p contract_id=123e4567-e89b-12d3-a456-426
       ],
       "used_for": "Domestic Usage",
       "manufacturer": "Energy One",
-      "calibration_date": "2022-10-10T00:00:00.000Z",
+      "calibration_date": "2022-10-10",
       "contract": {
         "$relation": [
           {
@@ -239,7 +252,7 @@ epilot metering getMetersByContractId -p contract_id=123e4567-e89b-12d3-a456-426
 
 ### `getMeter`
 
-Retrieves the details of a meter.
+Retrieves the full details of a specific meter by ID, including related entities and available journey actions.
 
 `GET /v1/metering/meter/{id}`
 
@@ -301,7 +314,7 @@ epilot metering getMeter -p id=123e4567-e89b-12d3-a456-426614174000 --jsonata 'd
       ],
       "used_for": "Domestic Usage",
       "manufacturer": "Energy One",
-      "calibration_date": "2022-10-10T00:00:00.000Z",
+      "calibration_date": "2022-10-10",
       "contract": {
         "$relation": [
           {
@@ -354,7 +367,7 @@ epilot metering getMeter -p id=123e4567-e89b-12d3-a456-426614174000 --jsonata 'd
 
 ### `updateMeter`
 
-Updates the details of a meter.
+Partially updates the details of a meter entity by ID.
 
 `PATCH /v1/metering/meter/{id}`
 
@@ -424,7 +437,7 @@ epilot metering updateMeter -p id=123e4567-e89b-12d3-a456-426614174000 --jsonata
     ],
     "used_for": "Domestic Usage",
     "manufacturer": "Energy One",
-    "calibration_date": "2022-10-10T00:00:00.000Z",
+    "calibration_date": "2022-10-10",
     "contract": {
       "$relation": [
         {
@@ -451,7 +464,7 @@ epilot metering updateMeter -p id=123e4567-e89b-12d3-a456-426614174000 --jsonata
 
 ### `getMeterCounters`
 
-Retrieves all counters for a given meter.
+Retrieves all meter counters associated with a given meter.
 
 `GET /v1/metering/counter`
 
@@ -493,9 +506,9 @@ epilot metering getMeterCounters -p meter_id=123e4567-e89b-12d3-a456-42661417400
       "transformer_ratio": 70,
       "unit": "string",
       "forecast_reading_value": 270,
-      "forecast_as_of": "2022-12-10T00:00:00.000Z",
+      "forecast_as_of": "2022-12-10",
       "current_consumption": 240,
-      "last_reading": "2022-10-10T00:00:00.000Z",
+      "last_reading": "2022-10-10",
       "conversion_factor": 3,
       "tariff_type": "ht"
     }
@@ -509,7 +522,7 @@ epilot metering getMeterCounters -p meter_id=123e4567-e89b-12d3-a456-42661417400
 
 ### `getCounterDetails`
 
-Retrieves the details of a meter counter.
+Retrieves the full details of a single meter counter by its ID.
 
 `GET /v1/metering/counter/{counter_id}`
 
@@ -556,9 +569,9 @@ epilot metering getCounterDetails -p counter_id=123e4567-e89b-12d3-a456-42661417
     "transformer_ratio": 70,
     "unit": "string",
     "forecast_reading_value": 270,
-    "forecast_as_of": "2022-12-10T00:00:00.000Z",
+    "forecast_as_of": "2022-12-10",
     "current_consumption": 240,
-    "last_reading": "2022-10-10T00:00:00.000Z",
+    "last_reading": "2022-10-10",
     "conversion_factor": 3,
     "tariff_type": "ht"
   }
@@ -574,6 +587,12 @@ epilot metering getCounterDetails -p counter_id=123e4567-e89b-12d3-a456-42661417
 Inserts a new meter reading.
 
 `POST /v1/metering/reading`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `direct` | query | boolean | No | When true, bypasses changeset interception and writes directly to ClickHouse. Used by trusted integrations (e.g., ERP sync) to confirm changes and auto-clear matching pending changesets. |
 
 **Request Body** (required)
 
@@ -594,7 +613,7 @@ epilot metering createMeterReading \
   "meter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
   "counter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
   "direction": "feed-in",
-  "timestamp": "2022-10-10T00:00:00.000Z",
+  "timestamp": "2022-10-10",
   "source": "ECP",
   "status": "valid",
   "external_id": "string",
@@ -632,7 +651,7 @@ epilot metering createMeterReading --jsonata 'data'
     "meter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
     "counter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
     "direction": "feed-in",
-    "timestamp": "2022-10-10T00:00:00.000Z",
+    "timestamp": "2022-10-10",
     "source": "ECP",
     "status": "valid",
     "external_id": "string",
@@ -666,6 +685,7 @@ Inserts multiple meter readings at once. Limited to 100 readings per request.
 | `skip_validation` | query | boolean | No | When set to true, all validations will be skipped and the system will allow the reading to be created.
 If set to false or not provided, the system performs the following validations:
   Validation Rule |
+| `direct` | query | boolean | No | When true, bypasses changeset interception and writes directly to ClickHouse. Used by trusted integrations (e.g., ERP sync) to confirm changes and auto-clear matching pending changesets. |
 
 **Request Body** (required)
 
@@ -688,7 +708,7 @@ epilot metering createMeterReadings \
       "meter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
       "counter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
       "direction": "feed-in",
-      "timestamp": "2022-10-10T00:00:00.000Z",
+      "timestamp": "2022-10-10",
       "source": "ECP",
       "status": "valid",
       "external_id": "string",
@@ -729,7 +749,7 @@ epilot metering createMeterReadings --jsonata 'data'
       "meter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
       "counter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
       "direction": "feed-in",
-      "timestamp": "2022-10-10T00:00:00.000Z",
+      "timestamp": "2022-10-10",
       "source": "ECP",
       "status": "valid",
       "external_id": "string",
@@ -751,7 +771,7 @@ epilot metering createMeterReadings --jsonata 'data'
 
 ### `createPortalMeterReadings`
 
-Inserts multiple meter readings at once for a given meter. Limited to 2 readings per request.
+Inserts multiple meter readings at once for a given meter via the end customer portal.
 
 `POST /v1/metering/readings/{meter_id}`
 
@@ -760,6 +780,7 @@ Inserts multiple meter readings at once for a given meter. Limited to 2 readings
 | Name | In | Type | Required | Description |
 | ---- | -- | ---- | -------- | ----------- |
 | `meter_id` | path | string | Yes | The ID of the meter. |
+| `direct` | query | boolean | No | When true, bypasses changeset interception and writes directly to ClickHouse. Used by trusted integrations (e.g., ERP sync) to confirm changes and auto-clear matching pending changesets. |
 
 **Request Body** (required)
 
@@ -784,7 +805,7 @@ epilot metering createPortalMeterReadings \
       "meter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
       "counter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
       "direction": "feed-in",
-      "timestamp": "2022-10-10T00:00:00.000Z",
+      "timestamp": "2022-10-10",
       "source": "ECP",
       "status": "valid",
       "external_id": "string",
@@ -831,7 +852,7 @@ epilot metering createPortalMeterReadings -p meter_id=123e4567-e89b-12d3-a456-42
       "meter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
       "counter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
       "direction": "feed-in",
-      "timestamp": "2022-10-10T00:00:00.000Z",
+      "timestamp": "2022-10-10",
       "source": "ECP",
       "status": "valid",
       "external_id": "string",
@@ -853,7 +874,7 @@ epilot metering createPortalMeterReadings -p meter_id=123e4567-e89b-12d3-a456-42
 
 ### `batchWriteMeterReadings`
 
-Upserts/Deletes multiple meter readings at once. Limited to 100 readings per request.
+Upserts or deletes multiple meter readings at once. Limited to 100 readings per request.
 
 `POST /v2/metering/readings`
 
@@ -866,6 +887,7 @@ Upserts/Deletes multiple meter readings at once. Limited to 100 readings per req
 If set to false or not provided, the system performs the following validations:
   Validation Rule |
 | `activity_id` | query | string (ulid) | No | Activity to include in event feed |
+| `direct` | query | boolean | No | When true, bypasses changeset interception and writes directly to ClickHouse. Used by trusted integrations (e.g., ERP sync) to confirm changes and auto-clear matching pending changesets. |
 
 **Request Body** (required)
 
@@ -883,24 +905,24 @@ epilot metering batchWriteMeterReadings \
   "identifiers": ["string"],
   "readings": [
     {
-      "value": 240,
-      "read_by": "John Doe",
-      "reason": "",
       "meter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
       "counter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
       "direction": "feed-in",
-      "timestamp": "2022-10-10T00:00:00.000Z",
-      "source": "ECP",
-      "status": "valid",
+      "timestamp": "2022-10-10T10:00:00Z",
       "external_id": "string",
-      "remark": "Customer reported unusual consumption",
       "metadata": {
         "registration_id": "1234567890",
         "business_unit": "ABC"
       },
+      "operation": "create",
+      "value": 240,
+      "source": "ECP",
+      "read_by": "John Doe",
+      "reason": "",
+      "status": "valid",
+      "remark": "Customer reported unusual consumption",
       "note": "string",
-      "unit": "string",
-      "operation": "create"
+      "unit": "string"
     }
   ]
 }'
@@ -931,7 +953,7 @@ epilot metering batchWriteMeterReadings --jsonata 'data'
       "meter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
       "counter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
       "direction": "feed-in",
-      "timestamp": "2022-10-10T00:00:00.000Z",
+      "timestamp": "2022-10-10",
       "source": "ECP",
       "status": "valid",
       "external_id": "string",
@@ -953,7 +975,7 @@ epilot metering batchWriteMeterReadings --jsonata 'data'
 
 ### `createMeterReadingFromSubmission`
 
-Creates a reading from a journey submission.
+Creates meter readings from a journey submission payload.
 
 `POST /v1/metering/reading/submission`
 
@@ -1029,7 +1051,7 @@ epilot metering createMeterReadingFromSubmission --jsonata 'message'
 
 ### `getAllowedReadingForMeter`
 
-Get allowed reading for the given meter
+Returns the allowed min/max reading range for each counter of the given meter.
 
 `GET /v1/metering/allowed/reading/{meter_id}`
 
@@ -1080,7 +1102,7 @@ epilot metering getAllowedReadingForMeter -p meter_id=123e4567-e89b-12d3-a456-42
 
 ### `createReadingWithMeter`
 
-Creates a reading along with a meter.
+Creates a meter reading along with meter lookup or creation by MA-LO ID and OBIS number.
 
 `POST /v1/metering/reading/with-meter`
 
@@ -1135,7 +1157,7 @@ epilot metering createReadingWithMeter --jsonata 'data'
     "meter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
     "counter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
     "direction": "feed-in",
-    "timestamp": "2022-10-10T00:00:00.000Z",
+    "timestamp": "2022-10-10",
     "source": "ECP",
     "status": "valid",
     "external_id": "string",
@@ -1177,6 +1199,7 @@ If this value is provided as -1, then it returns all results at once.
 If this value is provided as "cumulative", then actual re |
 | `sort` | query | "asc" \| "desc" | No | If this value is provided as "asc", then the results will be sorted by the timestamp field in ascending order.
 If this value is provided as "desc", then the results will be sorted by the timestamp fie |
+| `include_pending_changesets` | query | boolean | No | When true, the response includes a `pending_changesets` field with the list of pending reading changesets alongside the confirmed readings. |
 
 **Sample Call**
 
@@ -1212,7 +1235,7 @@ epilot metering getReadingsByInterval -p meter_id=123e4567-e89b-12d3-a456-426614
       "meter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
       "counter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
       "direction": "feed-in",
-      "timestamp": "2022-10-10T00:00:00.000Z",
+      "timestamp": "2022-10-10",
       "source": "ECP",
       "status": "valid",
       "external_id": "string",
@@ -1236,7 +1259,7 @@ epilot metering getReadingsByInterval -p meter_id=123e4567-e89b-12d3-a456-426614
 
 ### `updateMeterReading`
 
-Updates a meter reading.
+Updates an existing meter reading identified by meter ID, counter ID, and timestamp.
 
 `PUT /v1/metering/reading/{meter_id}/{counter_id}`
 
@@ -1273,7 +1296,7 @@ epilot metering updateMeterReading \
   "meter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
   "counter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
   "direction": "feed-in",
-  "timestamp": "2022-10-10T00:00:00.000Z",
+  "timestamp": "2022-10-10",
   "source": "ECP",
   "status": "valid",
   "external_id": "string",
@@ -1315,7 +1338,7 @@ epilot metering updateMeterReading -p meter_id=123e4567-e89b-12d3-a456-426614174
     "meter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
     "counter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
     "direction": "feed-in",
-    "timestamp": "2022-10-10T00:00:00.000Z",
+    "timestamp": "2022-10-10",
     "source": "ECP",
     "status": "valid",
     "external_id": "string",
@@ -1336,7 +1359,7 @@ epilot metering updateMeterReading -p meter_id=123e4567-e89b-12d3-a456-426614174
 
 ### `deleteMeterReading`
 
-Deletes a meter reading.
+Permanently deletes a meter reading identified by meter ID, counter ID, and timestamp.
 
 `DELETE /v1/metering/reading/{meter_id}/{counter_id}`
 
@@ -1379,6 +1402,405 @@ epilot metering deleteMeterReading -p meter_id=123e4567-e89b-12d3-a456-426614174
     "counterId": "string",
     "timestamp": "2022-10-01T20:00:00.000Z"
   }
+}
+```
+
+</details>
+
+---
+
+### `getReadingChangesets`
+
+`GET /v1/metering/reading/{meter_id}/{counter_id}/changesets`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `meter_id` | path | string | Yes | The ID of the meter. |
+| `counter_id` | path | string | Yes | The ID of the counter. |
+
+**Sample Call**
+
+```bash
+epilot metering getReadingChangesets \
+  -p meter_id=123e4567-e89b-12d3-a456-426614174000 \
+  -p counter_id=123e4567-e89b-12d3-a456-426614174000
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot metering getReadingChangesets 123e4567-e89b-12d3-a456-426614174000 123e4567-e89b-12d3-a456-426614174000
+```
+
+With JSONata filter:
+
+```bash
+epilot metering getReadingChangesets -p meter_id=123e4567-e89b-12d3-a456-426614174000 -p counter_id=123e4567-e89b-12d3-a456-426614174000 --jsonata 'changesets'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "changesets": [
+    {
+      "changeset_id": "string",
+      "meter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "counter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "proposed": {
+        "value": 0,
+        "direction": "feed-in",
+        "timestamp": "1970-01-01T00:00:00.000Z",
+        "reason": "string",
+        "remark": "string",
+        "read_by": "string",
+        "status": "valid",
+        "external_id": "string"
+      },
+      "previous": {
+        "value": 0,
+        "direction": "feed-in",
+        "timestamp": "1970-01-01T00:00:00.000Z",
+        "reason": "string",
+        "remark": "string",
+        "read_by": "string",
+        "status": "valid",
+        "external_id": "string"
+      },
+      "edit_mode": "external",
+      "match_strategy": "exact",
+      "timestamp_tolerance": "exact",
+      "created_at": "1970-01-01T00:00:00.000Z",
+      "created_by": {
+        "type": "user",
+        "id": "string"
+      },
+      "source": "360",
+      "fuzzy_config": {
+        "percentage_threshold": 0.01,
+        "absolute_threshold": 0
+      },
+      "dismissed_reason": "string",
+      "dismissed_at": "1970-01-01T00:00:00.000Z"
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `applyReadingChangeset`
+
+Applies the proposed reading value to ClickHouse and removes the pending changeset.
+
+`POST /v1/metering/reading/{meter_id}/{counter_id}/changesets/{changeset_id}:apply`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `meter_id` | path | string | Yes | The ID of the meter. |
+| `counter_id` | path | string | Yes | The ID of the counter. |
+| `changeset_id` | path | string | Yes |  |
+
+**Sample Call**
+
+```bash
+epilot metering applyReadingChangeset \
+  -p meter_id=123e4567-e89b-12d3-a456-426614174000 \
+  -p counter_id=123e4567-e89b-12d3-a456-426614174000 \
+  -p changeset_id=123e4567-e89b-12d3-a456-426614174000
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot metering applyReadingChangeset 123e4567-e89b-12d3-a456-426614174000 123e4567-e89b-12d3-a456-426614174000 123e4567-e89b-12d3-a456-426614174000
+```
+
+With JSONata filter:
+
+```bash
+epilot metering applyReadingChangeset -p meter_id=123e4567-e89b-12d3-a456-426614174000 -p counter_id=123e4567-e89b-12d3-a456-426614174000 -p changeset_id=123e4567-e89b-12d3-a456-426614174000 --jsonata 'reading'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "reading": {
+    "value": 240,
+    "read_by": "John Doe",
+    "reason": "",
+    "meter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "counter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "direction": "feed-in",
+    "timestamp": "2022-10-10",
+    "source": "ECP",
+    "status": "valid",
+    "external_id": "string",
+    "remark": "Customer reported unusual consumption",
+    "metadata": {
+      "registration_id": "1234567890",
+      "business_unit": "ABC"
+    },
+    "note": "string",
+    "unit": "string"
+  },
+  "changeset": {
+    "changeset_id": "string",
+    "meter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "counter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "proposed": {
+      "value": 0,
+      "direction": "feed-in",
+      "timestamp": "1970-01-01T00:00:00.000Z",
+      "reason": "string",
+      "remark": "string",
+      "read_by": "string",
+      "status": "valid",
+      "external_id": "string"
+    },
+    "previous": {
+      "value": 0,
+      "direction": "feed-in",
+      "timestamp": "1970-01-01T00:00:00.000Z",
+      "reason": "string",
+      "remark": "string",
+      "read_by": "string",
+      "status": "valid",
+      "external_id": "string"
+    },
+    "edit_mode": "external",
+    "match_strategy": "exact",
+    "timestamp_tolerance": "exact",
+    "created_at": "1970-01-01T00:00:00.000Z",
+    "created_by": {
+      "type": "user",
+      "id": "string"
+    },
+    "source": "360",
+    "fuzzy_config": {
+      "percentage_threshold": 0.01,
+      "absolute_threshold": 0
+    },
+    "dismissed_reason": "string",
+    "dismissed_at": "1970-01-01T00:00:00.000Z"
+  }
+}
+```
+
+</details>
+
+---
+
+### `dismissReadingChangeset`
+
+Removes the pending changeset without applying it. The reading value remains unchanged.
+
+`POST /v1/metering/reading/{meter_id}/{counter_id}/changesets/{changeset_id}:dismiss`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `meter_id` | path | string | Yes | The ID of the meter. |
+| `counter_id` | path | string | Yes | The ID of the counter. |
+| `changeset_id` | path | string | Yes |  |
+
+**Request Body**
+
+**Sample Call**
+
+```bash
+epilot metering dismissReadingChangeset \
+  -p meter_id=123e4567-e89b-12d3-a456-426614174000 \
+  -p counter_id=123e4567-e89b-12d3-a456-426614174000 \
+  -p changeset_id=123e4567-e89b-12d3-a456-426614174000 \
+  -d '{"reason":"string"}'
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot metering dismissReadingChangeset 123e4567-e89b-12d3-a456-426614174000 123e4567-e89b-12d3-a456-426614174000 123e4567-e89b-12d3-a456-426614174000
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot metering dismissReadingChangeset -p meter_id=123e4567-e89b-12d3-a456-426614174000 -p counter_id=123e4567-e89b-12d3-a456-426614174000 -p changeset_id=123e4567-e89b-12d3-a456-426614174000
+```
+
+With JSONata filter:
+
+```bash
+epilot metering dismissReadingChangeset -p meter_id=123e4567-e89b-12d3-a456-426614174000 -p counter_id=123e4567-e89b-12d3-a456-426614174000 -p changeset_id=123e4567-e89b-12d3-a456-426614174000 --jsonata 'changeset_id'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "changeset_id": "string",
+  "meter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "counter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "proposed": {
+    "value": 0,
+    "direction": "feed-in",
+    "timestamp": "1970-01-01T00:00:00.000Z",
+    "reason": "string",
+    "remark": "string",
+    "read_by": "string",
+    "status": "valid",
+    "external_id": "string"
+  },
+  "previous": {
+    "value": 0,
+    "direction": "feed-in",
+    "timestamp": "1970-01-01T00:00:00.000Z",
+    "reason": "string",
+    "remark": "string",
+    "read_by": "string",
+    "status": "valid",
+    "external_id": "string"
+  },
+  "edit_mode": "external",
+  "match_strategy": "exact",
+  "timestamp_tolerance": "exact",
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "created_by": {
+    "type": "user",
+    "id": "string"
+  },
+  "source": "360",
+  "fuzzy_config": {
+    "percentage_threshold": 0.01,
+    "absolute_threshold": 0
+  },
+  "dismissed_reason": "string",
+  "dismissed_at": "1970-01-01T00:00:00.000Z"
+}
+```
+
+</details>
+
+---
+
+### `updateReadingChangeset`
+
+Updates the proposed value of a pending changeset without going through the normal write path.
+
+`PATCH /v1/metering/reading/{meter_id}/{counter_id}/changesets/{changeset_id}`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `meter_id` | path | string | Yes | The ID of the meter. |
+| `counter_id` | path | string | Yes | The ID of the counter. |
+| `changeset_id` | path | string | Yes |  |
+
+**Request Body**
+
+**Sample Call**
+
+```bash
+epilot metering updateReadingChangeset \
+  -p meter_id=123e4567-e89b-12d3-a456-426614174000 \
+  -p counter_id=123e4567-e89b-12d3-a456-426614174000 \
+  -p changeset_id=123e4567-e89b-12d3-a456-426614174000
+```
+
+With request body:
+
+```bash
+epilot metering updateReadingChangeset \
+  -p meter_id=123e4567-e89b-12d3-a456-426614174000 \
+  -p counter_id=123e4567-e89b-12d3-a456-426614174000 \
+  -p changeset_id=123e4567-e89b-12d3-a456-426614174000 \
+  -d '{
+  "proposed": {
+    "value": 0,
+    "direction": "feed-in",
+    "timestamp": "1970-01-01T00:00:00.000Z",
+    "reason": "string",
+    "remark": "string",
+    "read_by": "string",
+    "status": "valid",
+    "external_id": "string"
+  }
+}'
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot metering updateReadingChangeset 123e4567-e89b-12d3-a456-426614174000 123e4567-e89b-12d3-a456-426614174000 123e4567-e89b-12d3-a456-426614174000
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot metering updateReadingChangeset -p meter_id=123e4567-e89b-12d3-a456-426614174000 -p counter_id=123e4567-e89b-12d3-a456-426614174000 -p changeset_id=123e4567-e89b-12d3-a456-426614174000
+```
+
+With JSONata filter:
+
+```bash
+epilot metering updateReadingChangeset -p meter_id=123e4567-e89b-12d3-a456-426614174000 -p counter_id=123e4567-e89b-12d3-a456-426614174000 -p changeset_id=123e4567-e89b-12d3-a456-426614174000 --jsonata 'changeset_id'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "changeset_id": "string",
+  "meter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "counter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "proposed": {
+    "value": 0,
+    "direction": "feed-in",
+    "timestamp": "1970-01-01T00:00:00.000Z",
+    "reason": "string",
+    "remark": "string",
+    "read_by": "string",
+    "status": "valid",
+    "external_id": "string"
+  },
+  "previous": {
+    "value": 0,
+    "direction": "feed-in",
+    "timestamp": "1970-01-01T00:00:00.000Z",
+    "reason": "string",
+    "remark": "string",
+    "read_by": "string",
+    "status": "valid",
+    "external_id": "string"
+  },
+  "edit_mode": "external",
+  "match_strategy": "exact",
+  "timestamp_tolerance": "exact",
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "created_by": {
+    "type": "user",
+    "id": "string"
+  },
+  "source": "360",
+  "fuzzy_config": {
+    "percentage_threshold": 0.01,
+    "absolute_threshold": 0
+  },
+  "dismissed_reason": "string",
+  "dismissed_at": "1970-01-01T00:00:00.000Z"
 }
 ```
 

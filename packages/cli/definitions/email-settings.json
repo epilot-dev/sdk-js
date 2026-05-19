@@ -516,13 +516,23 @@
       }
     },
     "/v2/outlook/connect": {
-      "get": {
+      "post": {
         "operationId": "connectOutlook",
         "summary": "connectOutlook",
-        "description": "Returns Microsoft authorization URL for Outlook OAuth.",
+        "description": "Returns the Microsoft authorization URL for Outlook OAuth.\n\nThe request body selects which features to request scopes for. Feature\nflags are additive; Microsoft OAuth scopes are cumulative. Calling this\nendpoint again with a superset of features (e.g. `mail` already connected,\nand `calendar` added) triggers Microsoft's incremental-consent flow —\nthe user only sees a consent prompt for the new scopes.\n",
         "tags": [
           "O365 Outlook Connection"
         ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConnectOutlookRequest"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "Authorization URL",
@@ -530,6 +540,9 @@
               "application/json": {
                 "schema": {
                   "type": "object",
+                  "required": [
+                    "authorization_url"
+                  ],
                   "properties": {
                     "authorization_url": {
                       "type": "string"
@@ -538,6 +551,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/OutlookErrorResponse"
           },
           "403": {
             "$ref": "#/components/responses/OutlookErrorResponse"
@@ -1655,7 +1671,7 @@
       "post": {
         "operationId": "verifyNameServers",
         "summary": "verifyNameServers",
-        "description": "Verifies that the domain's name server (NS) records are correctly configured.\n\nThis check ensures that DNS resolution is properly set up for the domain\nbefore proceeding with full domain verification.\n\nRun this verification after configuring NS records in your DNS provider.\n",
+        "description": "Verifies that the domain's name server (NS) records are correctly configured.\n\nThis check ensures that DNS resolution is properly set up for the domain\nbefore proceeding with full domain verification.\n\nRun this verification after configuring NS records in your DNS provider.\n\n**Deprecated**: Use `/domain/dns-records:verify` for new integrations.\n",
         "tags": [
           "Domains"
         ],
@@ -1676,6 +1692,48 @@
         "responses": {
           "200": {
             "description": "Name server verification result. Check the response to see if\nverification passed or if additional DNS configuration is needed.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SettingsResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/v1/email-settings/domain/dns-records:verify": {
+      "post": {
+        "operationId": "verifyDnsRecords",
+        "summary": "verifyDnsRecords",
+        "description": "Verifies that the domain's DNS records (MX, TXT, CNAME) are correctly configured\nin the customer's DNS provider.\n\nThis check performs DNS lookups to confirm each required record is present\nbefore proceeding with full domain identity verification.\n\nRun this verification after configuring all DNS records in your DNS provider.\n",
+        "tags": [
+          "Domains"
+        ],
+        "requestBody": {
+          "description": "The domain to verify DNS records for",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Domain"
+              },
+              "example": {
+                "domain": "mail.yourcompany.com"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "DNS record verification result. Check the response to see if all records\nare verified or if additional DNS configuration is needed.\n",
             "content": {
               "application/json": {
                 "schema": {
@@ -2007,6 +2065,22 @@
       }
     },
     "schemas": {
+      "ConnectOutlookRequest": {
+        "type": "object",
+        "description": "Feature flags selecting which Microsoft Graph scopes to request.\nAt least one flag must be true. Passing a superset of previously\ngranted features triggers incremental consent for the delta only.\n",
+        "additionalProperties": false,
+        "minProperties": 1,
+        "properties": {
+          "mail": {
+            "type": "boolean",
+            "description": "Request 'mail' specific scopes."
+          },
+          "calendar": {
+            "type": "boolean",
+            "description": "Request 'calendar' specific scopes."
+          }
+        }
+      },
       "MailboxSyncStatus": {
         "type": "object",
         "required": [
@@ -2597,7 +2671,15 @@
               "reconnect",
               "none"
             ],
-            "description": "Action for UI to take (all call GET /outlook/connect):\n- connect: No connection, initiate OAuth\n- authorize: Admin consent done, complete OAuth\n- reconnect: Re-authenticate expired session\n- none: Fully connected, no action needed\n"
+            "description": "Action for UI to take (all call POST /outlook/connect):\n- connect: No connection, initiate OAuth\n- authorize: Admin consent done, complete OAuth\n- reconnect: Re-authenticate expired session or approve updated permissions\n- none: Fully connected, no action needed\n"
+          },
+          "action_reason": {
+            "type": "string",
+            "enum": [
+              "expired",
+              "permission_update"
+            ],
+            "description": "Discriminates the cause when `action` is `reconnect`:\n- expired: Stored tokens are no longer valid; user must re-authenticate\n- permission_update: Token is valid, but the granted scopes do not cover the\n  scopes required by the configured Outlook integrations (currently `mail`).\n  The user must reconnect to grant the additional permissions; Microsoft's\n  incremental-consent flow will only prompt for the delta.\n"
           },
           "connected_by_display_name": {
             "type": "string",

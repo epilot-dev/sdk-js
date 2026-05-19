@@ -43,6 +43,7 @@ epilot webhooks getPublicKey -p orgId=123e4567-e89b-12d3-a456-426614174000
 - [`getConfig`](#getconfig) — Get webhook config by id
 - [`updateConfig`](#updateconfig) — Update Webhook Client Config
 - [`deleteConfig`](#deleteconfig) — Delete Webhook Client Config
+- [`testOAuth`](#testoauth) — Tests the OAuth client credentials configuration for a saved webhook by attempting
 - [`triggerWebhook`](#triggerwebhook) — Trigger a webhook
 - [`batchReplayEvents`](#batchreplayevents) — Replay a batch of webhook events
 - [`getEventById`](#geteventbyid) — Get a webhook event by its id
@@ -433,6 +434,53 @@ With JSONata filter:
 ```bash
 epilot webhooks deleteConfig -p configId=CustomerRequest --jsonata '$'
 ```
+
+---
+
+### `testOAuth`
+
+Tests the OAuth client credentials configuration for a saved webhook by attempting
+
+`POST /v1/webhooks/configs/{configId}/test-oauth`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `configId` | path | string | Yes | Short uuid to identify the webhook configuration. |
+
+**Sample Call**
+
+```bash
+epilot webhooks testOAuth \
+  -p configId=7hj28aasgag2gha2
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot webhooks testOAuth 7hj28aasgag2gha2
+```
+
+With JSONata filter:
+
+```bash
+epilot webhooks testOAuth -p configId=7hj28aasgag2gha2 --jsonata 'success'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "success": true,
+  "expires_in": 3600,
+  "token_type": "Bearer",
+  "message": "OAuth token exchange successful"
+}
+```
+
+</details>
 
 ---
 

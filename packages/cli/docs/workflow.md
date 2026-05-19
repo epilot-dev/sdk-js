@@ -852,7 +852,11 @@ epilot workflow startFlowExecution \
       "flow_id": "string",
       "execution_id": "string",
       "execution_status": "string",
-      "error_reason": "string"
+      "error_reason": "string",
+      "input_context": {
+        "source": "trigger",
+        "task_id": "string"
+      }
     }
   },
   "contexts": [
@@ -997,7 +1001,8 @@ epilot workflow startFlowExecution --jsonata 'id'
       "flow_id": "string",
       "execution_id": "string",
       "execution_status": "string",
-      "error_reason": "string"
+      "error_reason": "string",
+      "input_context": {}
     }
   },
   "singleClosingReasonSelection": true
@@ -1158,7 +1163,8 @@ epilot workflow getFlowExecution -p execution_id=wd561 --jsonata 'id'
       "flow_id": "string",
       "execution_id": "string",
       "execution_status": "string",
-      "error_reason": "string"
+      "error_reason": "string",
+      "input_context": {}
     }
   },
   "singleClosingReasonSelection": true
@@ -1368,7 +1374,8 @@ epilot workflow patchFlowExecution -p execution_id=wd561 --jsonata 'id'
       "flow_id": "string",
       "execution_id": "string",
       "execution_status": "string",
-      "error_reason": "string"
+      "error_reason": "string",
+      "input_context": {}
     }
   },
   "singleClosingReasonSelection": true
@@ -1525,7 +1532,11 @@ epilot workflow patchTask \
     "flow_id": "string",
     "execution_id": "string",
     "execution_status": "string",
-    "error_reason": "string"
+    "error_reason": "string",
+    "input_context": {
+      "source": "trigger",
+      "task_id": "string"
+    }
   },
   "description": {
     "enabled": true,
@@ -1787,7 +1798,11 @@ epilot workflow runTaskAutomation -p execution_id=wd561 -p task_id=7hj28a --json
     "flow_id": "string",
     "execution_id": "string",
     "execution_status": "string",
-    "error_reason": "string"
+    "error_reason": "string",
+    "input_context": {
+      "source": "trigger",
+      "task_id": "string"
+    }
   },
   "automation_execution_id": "string",
   "trigger_mode": "manual",
@@ -2077,7 +2092,11 @@ epilot workflow addTask \
       "flow_id": "string",
       "execution_id": "string",
       "execution_status": "string",
-      "error_reason": "string"
+      "error_reason": "string",
+      "input_context": {
+        "source": "trigger",
+        "task_id": "string"
+      }
     },
     "phase_id": "string",
     "task_type": "MANUAL"

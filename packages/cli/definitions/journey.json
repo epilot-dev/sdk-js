@@ -3,7 +3,7 @@
   "info": {
     "title": "Journey API",
     "description": "API to configure journeys",
-    "version": "1.4.1"
+    "version": "1.4.2"
   },
   "security": [
     {
@@ -112,6 +112,16 @@
               "type": "string",
               "format": "uuid",
               "example": "509cdffe-424f-457a-95c2-9708c304ce77"
+            }
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "description": "DynamoDB version to fetch. `0` (default) is the live row; positive integers are historical snapshots created on each save. Note: this is distinct from the `revisions` counter on the row body.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 0
             }
           },
           {
@@ -707,6 +717,16 @@
               "type": "string",
               "format": "uuid",
               "example": "509cdffe-424f-457a-95c2-9708c304ce77"
+            }
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "description": "DynamoDB version to fetch. `0` (default) is the live row; positive integers are historical snapshots created on each save. Note: this is distinct from the `revisions` counter on the row body.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 0
             }
           }
         ],

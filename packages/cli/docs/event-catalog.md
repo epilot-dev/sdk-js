@@ -42,6 +42,8 @@ epilot event-catalog listEvents
 - [`getEventJSONSchema`](#geteventjsonschema) — Retrieve the JSON Schema of a specific business event
 - [`getEventExample`](#geteventexample) — Generate a sample event payload based on the event's JSON Schema
 - [`searchEventHistory`](#searcheventhistory) — Paginated history of events
+- [`searchEventHistoryV2`](#searcheventhistoryv2) — Paginated history of events with projected/lightweight payload (v2).
+- [`getHistoricalEvent`](#gethistoricalevent) — Fetch a single historical event by id with full hydration
 - [`triggerEvent`](#triggerevent) — Explicitly trigger an event by providing input field values and an optional entity seed
 
 ### `listEvents`
@@ -584,6 +586,160 @@ epilot event-catalog searchEventHistory -p event_name=example --jsonata 'results
     "event_time": "2025-10-31T12:34:56Z",
     "event_id": "evt_1234567890abcdef"
   }
+}
+```
+
+</details>
+
+---
+
+### `searchEventHistoryV2`
+
+Paginated history of events with projected/lightweight payload (v2).
+
+`POST /v2/events/{event_name}:history`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `event_name` | path | string | Yes | Unique human readable name of the event |
+
+**Request Body**
+
+**Sample Call**
+
+```bash
+epilot event-catalog searchEventHistoryV2 \
+  -p event_name=example
+```
+
+With request body:
+
+```bash
+epilot event-catalog searchEventHistoryV2 \
+  -p event_name=example \
+  -d '{
+  "limit": 10,
+  "cursor": {
+    "event_time": "2025-10-31 12:34:56",
+    "event_id": "evt_1234567890abcdef"
+  },
+  "timestamp": {
+    "from": "2025-10-01T00:00:00Z",
+    "to": "2025-10-31T23:59:59Z"
+  },
+  "event_id": "evt_1234567890abcdef",
+  "fields": ["_id", "_title", "first_name", "account", "!account.*._files", "**._product"]
+}'
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot event-catalog searchEventHistoryV2 example
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot event-catalog searchEventHistoryV2 -p event_name=example
+```
+
+With JSONata filter:
+
+```bash
+epilot event-catalog searchEventHistoryV2 -p event_name=example --jsonata 'results[0]'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "results": [
+    {
+      "_org_id": "string",
+      "_event_time": "1970-01-01T00:00:00.000Z",
+      "_event_id": "string",
+      "_event_name": "string",
+      "_event_version": "1.0.0",
+      "_event_source": "string",
+      "_trigger_source_type": "api",
+      "_trigger_source": "string",
+      "_ack_id": "string"
+    }
+  ],
+  "next_cursor": {
+    "event_time": "2025-10-31T12:34:56Z",
+    "event_id": "evt_1234567890abcdef"
+  }
+}
+```
+
+</details>
+
+---
+
+### `getHistoricalEvent`
+
+Fetch a single historical event by id with full hydration
+
+`GET /v2/events/{event_name}/history/{event_id}`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `event_name` | path | string | Yes | Unique human readable name of the event |
+| `event_id` | path | string | Yes | Unique event identifier (ULID) |
+
+**Sample Call**
+
+```bash
+epilot event-catalog getHistoricalEvent \
+  -p event_name=example \
+  -p event_id=123e4567-e89b-12d3-a456-426614174000
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot event-catalog getHistoricalEvent example 123e4567-e89b-12d3-a456-426614174000
+```
+
+With JSONata filter:
+
+```bash
+epilot event-catalog getHistoricalEvent -p event_name=example -p event_id=123e4567-e89b-12d3-a456-426614174000 --jsonata '_org_id'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "_org_id": "org_123456",
+  "_event_time": "2024-01-01T12:00:00Z",
+  "_event_id": "01FZ4Z5FZ5FZ5FZ5FZ5FZ5FZ5F",
+  "_event_name": "MeterReading",
+  "_event_version": "1.0.0",
+  "_event_source": "api",
+  "_trigger_source_type": "api",
+  "_trigger_source": "user_123456",
+  "reading_value": 123.45,
+  "reading_date": "2024-01-01T11:59:00Z",
+  "read_by": "John Doe",
+  "reason": "regular",
+  "direction": "feed-out",
+  "source": "portal",
+  "meter_id": "550e8400-e29b-41d4-a716-446655440000",
+  "counter_id": "660e8400-e29b-41d4-a716-446655440000",
+  "meter_number": "MT123456789",
+  "obis_number": "1-0:1.8.0",
+  "unit": "kWh",
+  "customer_id": "770e8400-e29b-41d4-a716-446655440000",
+  "contract_id": "880e8400-e29b-41d4-a716-446655440000"
 }
 ```
 

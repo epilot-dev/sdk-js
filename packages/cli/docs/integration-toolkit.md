@@ -61,6 +61,9 @@ epilot integration-toolkit acknowledgeTracking
 - [`getIntegrationV2`](#getintegrationv2) — Retrieve a specific integration with all its embedded use cases
 - [`updateIntegrationV2`](#updateintegrationv2) — Update an existing integration with embedded use cases.
 - [`deleteIntegrationV2`](#deleteintegrationv2) — Delete an integration and all its use cases
+- [`getSecureProxyWhitelist`](#getsecureproxywhitelist) — Returns the current allowed_domains, allowed_ips, and vpc_mode for a secure_proxy use case.
+- [`updateSecureProxyWhitelist`](#updatesecureproxywhitelist) — Replaces allowed_domains and/or allowed_ips on a secure_proxy use case.
+- [`listSecureProxyWhitelistHistory`](#listsecureproxywhitelisthistory) — Returns the most recent USECASE_HISTORY entries for a secure_proxy use case,
 - [`setIntegrationAppMapping`](#setintegrationappmapping) — Creates or updates a mapping from an app/component to an integration.
 - [`deleteIntegrationAppMapping`](#deleteintegrationappmapping) — Removes a mapping from an app/component to an integration.
 - [`getOutboundStatus`](#getoutboundstatus) — Get the status of all outbound use cases for a specific integration.
@@ -201,8 +204,22 @@ Handles updates from ERP systems using integration_id directly.
 **Sample Call**
 
 ```bash
+epilot integration-toolkit processErpUpdatesEventsV3
+```
+
+With request body:
+
+```bash
 epilot integration-toolkit processErpUpdatesEventsV3 \
-  -d '{"integration_id":"3fa85f64-5717-4562-b3fc-2c963f66afa6","correlation_id":"string","events":[{},{}]}'
+  -d '{
+  "integration_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "correlation_id": "string",
+  "group_id": "customer-42",
+  "events": [
+    {},
+    {}
+  ]
+}'
 ```
 
 Using stdin pipe:
@@ -1427,6 +1444,7 @@ epilot integration-toolkit listUseCaseHistory -p integrationId=123e4567-e89b-12d
       "slug": "string",
       "enabled": true,
       "change_description": "string",
+      "changed_by": "string",
       "created_at": "1970-01-01T00:00:00.000Z",
       "updated_at": "1970-01-01T00:00:00.000Z",
       "history_created_at": "1970-01-01T00:00:00.000Z",
@@ -1983,6 +2001,181 @@ epilot integration-toolkit deleteIntegrationV2 -p integrationId=123e4567-e89b-12
 ```json
 {
   "message": "string"
+}
+```
+
+</details>
+
+---
+
+### `getSecureProxyWhitelist`
+
+Returns the current allowed_domains, allowed_ips, and vpc_mode for a secure_proxy use case.
+
+`GET /v2/integrations/{integrationId}/use-cases/{useCaseId}/secure-proxy-whitelist`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `integrationId` | path | string (uuid) | Yes | The integration ID |
+| `useCaseId` | path | string (uuid) | Yes | The use case ID |
+
+**Sample Call**
+
+```bash
+epilot integration-toolkit getSecureProxyWhitelist \
+  -p integrationId=123e4567-e89b-12d3-a456-426614174000 \
+  -p useCaseId=123e4567-e89b-12d3-a456-426614174000
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot integration-toolkit getSecureProxyWhitelist 123e4567-e89b-12d3-a456-426614174000 123e4567-e89b-12d3-a456-426614174000
+```
+
+With JSONata filter:
+
+```bash
+epilot integration-toolkit getSecureProxyWhitelist -p integrationId=123e4567-e89b-12d3-a456-426614174000 -p useCaseId=123e4567-e89b-12d3-a456-426614174000 --jsonata 'vpc_mode'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "vpc_mode": "static_ip",
+  "allowed_domains": ["string"],
+  "allowed_ips": ["string"]
+}
+```
+
+</details>
+
+---
+
+### `updateSecureProxyWhitelist`
+
+Replaces allowed_domains and/or allowed_ips on a secure_proxy use case.
+
+`PUT /v2/integrations/{integrationId}/use-cases/{useCaseId}/secure-proxy-whitelist`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `integrationId` | path | string (uuid) | Yes | The integration ID |
+| `useCaseId` | path | string (uuid) | Yes | The use case ID |
+
+**Request Body** (required)
+
+**Sample Call**
+
+```bash
+epilot integration-toolkit updateSecureProxyWhitelist \
+  -p integrationId=123e4567-e89b-12d3-a456-426614174000 \
+  -p useCaseId=123e4567-e89b-12d3-a456-426614174000 \
+  -d '{"allowed_domains":["string"],"allowed_ips":["string"]}'
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot integration-toolkit updateSecureProxyWhitelist 123e4567-e89b-12d3-a456-426614174000 123e4567-e89b-12d3-a456-426614174000
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot integration-toolkit updateSecureProxyWhitelist -p integrationId=123e4567-e89b-12d3-a456-426614174000 -p useCaseId=123e4567-e89b-12d3-a456-426614174000
+```
+
+With JSONata filter:
+
+```bash
+epilot integration-toolkit updateSecureProxyWhitelist -p integrationId=123e4567-e89b-12d3-a456-426614174000 -p useCaseId=123e4567-e89b-12d3-a456-426614174000 --jsonata 'vpc_mode'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "vpc_mode": "static_ip",
+  "allowed_domains": ["string"],
+  "allowed_ips": ["string"]
+}
+```
+
+</details>
+
+---
+
+### `listSecureProxyWhitelistHistory`
+
+Returns the most recent USECASE_HISTORY entries for a secure_proxy use case,
+
+`GET /v2/integrations/{integrationId}/use-cases/{useCaseId}/secure-proxy-whitelist/history`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `integrationId` | path | string (uuid) | Yes | The integration ID |
+| `useCaseId` | path | string (uuid) | Yes | The use case ID (must be of type secure_proxy) |
+| `limit` | query | number | No | Maximum number of history entries to return. Default 10, max 50.
+Capped at the service-layer page size (20) so `limit > 20` is silently
+clamped to 20. UI-08 requests 5-10 for the panel view.
+ |
+
+**Sample Call**
+
+```bash
+epilot integration-toolkit listSecureProxyWhitelistHistory \
+  -p integrationId=123e4567-e89b-12d3-a456-426614174000 \
+  -p useCaseId=123e4567-e89b-12d3-a456-426614174000
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot integration-toolkit listSecureProxyWhitelistHistory 123e4567-e89b-12d3-a456-426614174000 123e4567-e89b-12d3-a456-426614174000
+```
+
+With JSONata filter:
+
+```bash
+epilot integration-toolkit listSecureProxyWhitelistHistory -p integrationId=123e4567-e89b-12d3-a456-426614174000 -p useCaseId=123e4567-e89b-12d3-a456-426614174000 --jsonata 'history'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "history": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "useCaseId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "integrationId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "name": "string",
+      "slug": "string",
+      "enabled": true,
+      "change_description": "string",
+      "changed_by": "string",
+      "created_at": "1970-01-01T00:00:00.000Z",
+      "updated_at": "1970-01-01T00:00:00.000Z",
+      "history_created_at": "1970-01-01T00:00:00.000Z",
+      "type": "secure_proxy",
+      "configuration": {
+        "vpc_mode": "static_ip",
+        "allowed_domains": ["string"],
+        "allowed_ips": ["string"]
+      }
+    }
+  ]
 }
 ```
 

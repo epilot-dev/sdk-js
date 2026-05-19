@@ -71,6 +71,7 @@ Search available automation flows
 | `size` | query | number | No | Pagination: max number of results to return |
 | `from` | query | number | No | Pagination: starting for results |
 | `trigger_source_id` | query | string | No | Trigger source identifier |
+| `target_workflow` | query | string | No | Filter by target workflow ID. Returns only automations that have a trigger-workflow action targeting this workflow. |
 | `include_flows` | query | boolean | No | Include flow automations in the response |
 
 **Sample Call**
@@ -343,7 +344,14 @@ epilot automation startExecution \
       "parent_execution_id": "string",
       "parent_task_id": "string",
       "depth": 0
-    }
+    },
+    "entity_contexts": [
+      {
+        "entity_id": "string",
+        "entity_schema": "string",
+        "is_primary": true
+      }
+    ]
   },
   "flow_execution_id": "string",
   "flow_automation_task_id": "string"
@@ -465,7 +473,10 @@ epilot automation startExecution --jsonata 'id'
       "parent_execution_id": "string",
       "parent_task_id": "string",
       "depth": 0
-    }
+    },
+    "entity_contexts": [
+      {}
+    ]
   }
 }
 ```
@@ -829,7 +840,10 @@ epilot automation getExecution -p execution_id=9baf184f-bc81-4128-bca3-d974c90a1
       "parent_execution_id": "string",
       "parent_task_id": "string",
       "depth": 0
-    }
+    },
+    "entity_contexts": [
+      {}
+    ]
   }
 }
 ```
@@ -972,7 +986,10 @@ epilot automation cancelExecution -p execution_id=9baf184f-bc81-4128-bca3-d974c9
       "parent_execution_id": "string",
       "parent_task_id": "string",
       "depth": 0
-    }
+    },
+    "entity_contexts": [
+      {}
+    ]
   }
 }
 ```
@@ -1102,7 +1119,8 @@ epilot automation resumeExecutionWithToken --jsonata 'execution'
       "workflow_exec_id": "string",
       "workflow_exec_task_id": "string",
       "workflow_role": "trigger_workflow",
-      "_execution_chain": {}
+      "_execution_chain": {},
+      "entity_contexts": []
     }
   },
   "resumedAction": {

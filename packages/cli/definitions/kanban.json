@@ -1257,7 +1257,8 @@
             "type": "string",
             "enum": [
               "context_entity",
-              "phase"
+              "phase",
+              "task"
             ],
             "description": "Property to group tasks by within each swimlane"
           }

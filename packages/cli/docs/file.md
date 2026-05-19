@@ -43,6 +43,8 @@ epilot file uploadFileV2
 - [`downloadFile`](#downloadfile) — Generate a pre-signed download URL for a file.
 - [`downloadS3File`](#downloads3file) — Generate a pre-signed download URL for a file using its S3 reference.
 - [`downloadFiles`](#downloadfiles) — Bulk generate pre-signed download URLs for multiple files in a single request.
+- [`createZipJob`](#createzipjob) — Create a background job to ZIP multiple files and send a download link via email.
+- [`getZipJob`](#getzipjob) — Get the status of a ZIP job
 - [`verifyCustomDownloadUrl`](#verifycustomdownloadurl) — Verify that a custom download URL is valid and has not expired.
 - [`uploadFilePublic`](#uploadfilepublic) — Create a pre-signed S3 URL for uploading a file without authentication.
 
@@ -57,10 +59,10 @@ epilot file uploadFileV2
 - [`deleteSession`](#deletesession) — End a browser session by deleting the token cookie.
 
 **Public Links**
-- [`listPublicLinksForFile`](#listpubliclinksforfile) — **Not yet implemented.**
+- [`listPublicLinksForFile`](#listpubliclinksforfile) — Fetches all public links previously generated for a file
 - [`generatePublicLink`](#generatepubliclink) — Generate a public link to share a private file externally.
 - [`accessPublicLink`](#accesspubliclink) — Access a file via its public link.
-- [`revokePublicLink`](#revokepubliclink) — **Not yet implemented.**
+- [`revokePublicLink`](#revokepubliclink) — Revokes a given public link by ID
 
 **File Collections**
 - [`getUserSchemaFileCollections`](#getuserschemafilecollections) — Get all file collections for the current user within a specific schema.
@@ -548,6 +550,96 @@ epilot file downloadFiles --jsonata '$'
 
 ---
 
+### `createZipJob`
+
+Create a background job to ZIP multiple files and send a download link via email.
+
+`POST /v1/files:zipJob`
+
+**Request Body**
+
+**Sample Call**
+
+```bash
+epilot file createZipJob \
+  -d '{}'
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot file createZipJob
+```
+
+With JSONata filter:
+
+```bash
+epilot file createZipJob --jsonata '$'
+```
+
+---
+
+### `getZipJob`
+
+Get the status of a ZIP job
+
+`GET /v1/files:zipJob/{job_id}`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `job_id` | path | string (uuid) | Yes | The UUID of the ZIP job |
+
+**Sample Call**
+
+```bash
+epilot file getZipJob \
+  -p job_id=123e4567-e89b-12d3-a456-426614174000
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot file getZipJob 123e4567-e89b-12d3-a456-426614174000
+```
+
+With JSONata filter:
+
+```bash
+epilot file getZipJob -p job_id=123e4567-e89b-12d3-a456-426614174000 --jsonata 'job_id'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "job_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "status": "completed",
+  "progress": {
+    "total_files": 100,
+    "downloaded_files": 75,
+    "failed_files": 2
+  },
+  "result": {
+    "file_entity_id": "ef7d985c-2385-44f4-9c71-ae06a52264f8",
+    "download_url": "https://epilot-prod-user-content.s3.eu-central-1.amazonaws.com/123/files.zip?X-Amz-...",
+    "expires_at": "2024-01-02T12:00:00Z",
+    "zip_size_bytes": 104857600
+  },
+  "error": "Failed to download file: access denied",
+  "created_at": "2024-01-01T12:00:00Z",
+  "created_by": "10234",
+  "org_id": "123",
+  "updated_at": "2024-01-01T12:05:00Z"
+}
+```
+
+</details>
+
+---
+
 ### `previewFile`
 
 Generate a thumbnail preview for a file entity.
@@ -730,7 +822,7 @@ epilot file deleteSession --jsonata '$'
 
 ### `listPublicLinksForFile`
 
-**Not yet implemented.**
+Fetches all public links previously generated for a file
 
 `GET /v1/files/{id}/public/links`
 
@@ -858,7 +950,7 @@ epilot file accessPublicLink -p id=13d22918-36bd-4227-9ad4-2cb978788c8d -p filen
 
 ### `revokePublicLink`
 
-**Not yet implemented.**
+Revokes a given public link by ID
 
 `DELETE /v1/files/public/links/{id}`
 

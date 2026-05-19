@@ -2,16 +2,21 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Metering API",
-    "version": "1.0.0"
+    "version": "1.0.0",
+    "description": "The Metering API manages smart meter data, meter counters, and meter readings for epilot customers and administrators.\n\nIt supports two audiences:\n- **ECP (End Customer Portal)**: Portal users can view their meters, counters, and submit readings via the customer portal.\n- **ECP Admin**: Internal epilot users and ERP integrations can create, update, and bulk-manage meter readings.\n\nKey capabilities:\n- Retrieve meters and counters associated with a customer or contract\n- Submit individual or bulk meter readings (with optional validation skip)\n- Batch upsert/delete readings using the v2 endpoint\n- Query historical readings by date interval with cumulative or relative consumption modes\n- Retrieve allowed reading ranges to guide end customers entering readings\n"
   },
   "tags": [
     {
       "name": "ECP",
-      "description": "APIs defined for a portal user"
+      "description": "APIs available to authenticated end customers via the Customer Portal (ECP).\nCustomers can view their meters, retrieve meter counters, and submit meter readings.\n"
     },
     {
       "name": "ECP Admin",
-      "description": "APIs defined for a ECP Admin"
+      "description": "APIs available to epilot internal users and ERP integrations.\nAdministrators can create, update, delete, and bulk-manage meter readings, as well as trigger readings from journey submissions.\n"
+    },
+    {
+      "name": "Metering",
+      "description": "APIs for managing meter reading changesets. Changesets represent pending reading changes that require\napproval before being applied to ClickHouse.\n"
     },
     {
       "name": "meter_schema",
@@ -29,7 +34,8 @@
       "name": "APIs",
       "tags": [
         "ECP",
-        "ECP Admin"
+        "ECP Admin",
+        "Metering"
       ]
     },
     {
@@ -55,14 +61,19 @@
     "/v1/metering/meter": {
       "get": {
         "operationId": "getCustomerMeters",
-        "summary": "Get Customer Meters",
-        "description": "Retrieves all meters related to a customer.",
+        "summary": "getCustomerMeters",
+        "description": "Retrieves all meters associated with the authenticated portal customer.\n\nReturns meter details along with any configured journey actions and the last meter reading timestamp and current consumption.\n",
         "tags": [
           "ECP"
         ],
         "security": [
           {
             "PortalAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IncludePendingChangesetsQueryParam"
           }
         ],
         "responses": {
@@ -93,7 +104,7 @@
                             "properties": {
                               "last_reading": {
                                 "type": "string",
-                                "example": "2022-10-10T00:00:00.000Z",
+                                "example": "2022-10-10",
                                 "description": "The timestamp of the last reading"
                               },
                               "current_consumption": {
@@ -130,7 +141,7 @@
       "get": {
         "operationId": "getMetersByContractId",
         "summary": "getMetersByContractId",
-        "description": "Retrieves all meters related to a contract.",
+        "description": "Retrieves all meters associated with a given contract entity.\n\nUse this endpoint to display all meters linked to a customer's contract in the portal.\n",
         "tags": [
           "ECP"
         ],
@@ -187,8 +198,8 @@
     "/v1/metering/meter/{id}": {
       "patch": {
         "operationId": "updateMeter",
-        "summary": "Update Meter",
-        "description": "Updates the details of a meter.",
+        "summary": "updateMeter",
+        "description": "Partially updates the details of a meter entity by ID.",
         "tags": [
           "ECP"
         ],
@@ -249,8 +260,8 @@
       },
       "get": {
         "operationId": "getMeter",
-        "summary": "Get Meter",
-        "description": "Retrieves the details of a meter.",
+        "summary": "getMeter",
+        "description": "Retrieves the full details of a specific meter by ID, including related entities and available journey actions.\n\nThe response includes the meter entity, any configured journey action (e.g. a reading submission journey), and related entities such as contracts and contacts.\n",
         "tags": [
           "ECP"
         ],
@@ -318,8 +329,8 @@
     "/v1/metering/counter": {
       "get": {
         "operationId": "getMeterCounters",
-        "summary": "Get Meter Counters",
-        "description": "Retrieves all counters for a given meter.",
+        "summary": "getMeterCounters",
+        "description": "Retrieves all meter counters associated with a given meter.\n\nMeter counters represent individual measurement channels on a meter (e.g. HT/NT tariff channels, feed-in/feed-out directions).\n",
         "tags": [
           "ECP"
         ],
@@ -375,8 +386,8 @@
     "/v1/metering/counter/{counter_id}": {
       "get": {
         "operationId": "getCounterDetails",
-        "summary": "Get Counter Details",
-        "description": "Retrieves the details of a meter counter.",
+        "summary": "getCounterDetails",
+        "description": "Retrieves the full details of a single meter counter by its ID.\n\nCounter details include the OBIS number, direction, tariff type, transformer ratio, conversion factor, unit, and the last reading value and timestamp.\n",
         "tags": [
           "ECP"
         ],
@@ -430,8 +441,8 @@
     "/v1/metering/reading": {
       "post": {
         "operationId": "createMeterReading",
-        "summary": "Create Meter Reading",
-        "description": "Inserts a new meter reading.",
+        "summary": "createMeterReading",
+        "description": "Inserts a new meter reading.\n\nWhen `source: 'ERP'` is set in the request body, the write is treated as a direct confirmation (same as `?direct=true`). This triggers auto-clear of matching pending changesets.\n",
         "tags": [
           "ECP Admin",
           "ECP"
@@ -441,6 +452,11 @@
             "EitherAuth": []
           }
         ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/DirectQueryParam"
+          }
+        ],
         "requestBody": {
           "description": "Meter reading payload.",
           "required": true,
@@ -448,6 +464,16 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/MeterReading"
+              },
+              "example": {
+                "meter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                "counter_id": "a1b2c3d4-5717-4562-b3fc-2c963f66afa6",
+                "direction": "feed-out",
+                "value": 1250.5,
+                "source": "360",
+                "timestamp": "2023-06-15T10:00:00.000Z",
+                "reason": "regular",
+                "read_by": "John Smith"
               }
             }
           }
@@ -463,6 +489,19 @@
                     "data": {
                       "$ref": "#/components/schemas/MeterReading"
                     }
+                  }
+                },
+                "example": {
+                  "data": {
+                    "meter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                    "counter_id": "a1b2c3d4-5717-4562-b3fc-2c963f66afa6",
+                    "direction": "feed-out",
+                    "value": 1250.5,
+                    "source": "360",
+                    "timestamp": "2023-06-15T10:00:00.000Z",
+                    "reason": "regular",
+                    "read_by": "John Smith",
+                    "status": "valid"
                   }
                 }
               }
@@ -486,8 +525,8 @@
     "/v1/metering/readings": {
       "post": {
         "operationId": "createMeterReadings",
-        "summary": "Create Meter Readings",
-        "description": "Inserts multiple meter readings at once. Limited to 100 readings per request.",
+        "summary": "createMeterReadings",
+        "description": "Inserts multiple meter readings at once. Limited to 100 readings per request.\n\nWhen `source: 'ERP'` is set in the request body, the write is treated as a direct confirmation (same as `?direct=true`). This triggers auto-clear of matching pending changesets.\n",
         "tags": [
           "ECP Admin"
         ],
@@ -512,6 +551,9 @@
           },
           {
             "$ref": "#/components/parameters/SkipValidationQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/DirectQueryParam"
           }
         ],
         "requestBody": {
@@ -571,7 +613,7 @@
       "post": {
         "operationId": "createPortalMeterReadings",
         "summary": "createPortalMeterReadings",
-        "description": "Inserts multiple meter readings at once for a given meter. Limited to 2 readings per request.",
+        "description": "Inserts multiple meter readings at once for a given meter via the end customer portal.\nLimited to 100 readings per request.\n\nThis endpoint is designed for portal users submitting readings for a specific meter identified by path parameter.\n\nWhen `source: 'ERP'` is set in the request body, the write is treated as a direct confirmation (same as `?direct=true`). This triggers auto-clear of matching pending changesets.\n",
         "tags": [
           "ECP"
         ],
@@ -589,10 +631,13 @@
             },
             "required": true,
             "description": "The ID of the meter."
+          },
+          {
+            "$ref": "#/components/parameters/DirectQueryParam"
           }
         ],
         "requestBody": {
-          "description": "Meter readings payload. Limited to 2 readings per request.",
+          "description": "Meter readings payload. Limited to 100 readings per request.",
           "required": true,
           "content": {
             "application/json": {
@@ -603,7 +648,8 @@
                     "type": "array",
                     "items": {
                       "$ref": "#/components/schemas/PortalMeterReading"
-                    }
+                    },
+                    "minItems": 1
                   }
                 }
               }
@@ -647,8 +693,8 @@
     "/v2/metering/readings": {
       "post": {
         "operationId": "batchWriteMeterReadings",
-        "summary": "Batch Write Readings",
-        "description": "Upserts/Deletes multiple meter readings at once. Limited to 100 readings per request.",
+        "summary": "batchWriteMeterReadings",
+        "description": "Upserts or deletes multiple meter readings at once. Limited to 100 readings per request.\n\nUse the `operation` field on each reading to specify `create`, `update`, or `delete`.\nCustom `identifiers` can be provided to control how unique readings are matched (e.g. by `external_id` or `metadata` fields).\n\nWhen `source: 'ERP'` is set in the request body, the write is treated as a direct confirmation (same as `?direct=true`). This triggers auto-clear of matching pending changesets.\n",
         "tags": [
           "ECP Admin"
         ],
@@ -673,6 +719,9 @@
           },
           {
             "$ref": "#/components/parameters/ActivityIdQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/DirectQueryParam"
           }
         ],
         "requestBody": {
@@ -694,24 +743,7 @@
                   "readings": {
                     "type": "array",
                     "items": {
-                      "allOf": [
-                        {
-                          "$ref": "#/components/schemas/MeterReading"
-                        },
-                        {
-                          "properties": {
-                            "operation": {
-                              "type": "string",
-                              "enum": [
-                                "create",
-                                "update",
-                                "delete"
-                              ],
-                              "default": "create"
-                            }
-                          }
-                        }
-                      ]
+                      "$ref": "#/components/schemas/BatchReading"
                     }
                   }
                 }
@@ -756,8 +788,8 @@
     "/v1/metering/reading/submission": {
       "post": {
         "operationId": "createMeterReadingFromSubmission",
-        "summary": "Create Meter Reading from Submission",
-        "description": "Creates a reading from a journey submission.",
+        "summary": "createMeterReadingFromSubmission",
+        "description": "Creates meter readings from a journey submission payload.\n\nThis endpoint is called internally by the journey automation engine when a customer submits meter readings through a journey. It parses the submission payload and stores the readings for the relevant meters.\n",
         "tags": [
           "ECP Admin"
         ],
@@ -840,7 +872,7 @@
       "get": {
         "operationId": "getAllowedReadingForMeter",
         "summary": "getAllowedReadingForMeter",
-        "description": "Get allowed reading for the given meter",
+        "description": "Returns the allowed min/max reading range for each counter of the given meter.\n\nUse this endpoint to validate end-customer input before submitting a new reading.\nIf no timestamp is provided, the system defaults to the current time.\n",
         "tags": [
           "ECP Admin",
           "ECP"
@@ -921,8 +953,8 @@
     "/v1/metering/reading/with-meter": {
       "post": {
         "operationId": "createReadingWithMeter",
-        "summary": "Create Reading with Meter",
-        "description": "Creates a reading along with a meter.",
+        "summary": "createReadingWithMeter",
+        "description": "Creates a meter reading along with meter lookup or creation by MA-LO ID and OBIS number.\n\nIf a meter matching the provided `ma_lo_id` and `obis_number` already exists, the reading is added to it. Otherwise, a new meter counter is created as needed.\n",
         "tags": [
           "ECP Admin"
         ],
@@ -976,7 +1008,7 @@
     "/v1/metering/reading/{meter_id}/{counter_id}": {
       "get": {
         "operationId": "getReadingsByInterval",
-        "summary": "Get Readings by Interval",
+        "summary": "getReadingsByInterval",
         "description": "Retrieves all readings specified in an interval.\nIf the start_date and end_date are equal, then it returns the readings of the specified date.\nThe start_date should be less than or equal to the end_date.\n",
         "tags": [
           "ECP Admin",
@@ -1082,6 +1114,9 @@
               ]
             },
             "description": "If this value is provided as \"asc\", then the results will be sorted by the timestamp field in ascending order.\nIf this value is provided as \"desc\", then the results will be sorted by the timestamp field in descending order.\n"
+          },
+          {
+            "$ref": "#/components/parameters/IncludePendingChangesetsQueryParam"
           }
         ],
         "responses": {
@@ -1127,8 +1162,8 @@
       },
       "put": {
         "operationId": "updateMeterReading",
-        "summary": "Update Meter Reading",
-        "description": "Updates a meter reading.",
+        "summary": "updateMeterReading",
+        "description": "Updates an existing meter reading identified by meter ID, counter ID, and timestamp.",
         "tags": [
           "ECP Admin"
         ],
@@ -1210,8 +1245,8 @@
       },
       "delete": {
         "operationId": "deleteMeterReading",
-        "summary": "Delete Meter Reading",
-        "description": "Deletes a meter reading.",
+        "summary": "deleteMeterReading",
+        "description": "Permanently deletes a meter reading identified by meter ID, counter ID, and timestamp.",
         "tags": [
           "ECP Admin"
         ],
@@ -1286,6 +1321,262 @@
           },
           "403": {
             "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/metering/reading/{meter_id}/{counter_id}/changesets": {
+      "get": {
+        "operationId": "getReadingChangesets",
+        "summary": "List pending reading changesets for a counter",
+        "tags": [
+          "Metering"
+        ],
+        "security": [
+          {
+            "EitherAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/MeterIdParam"
+          },
+          {
+            "$ref": "#/components/parameters/CounterIdParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Pending changesets for the counter",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "changesets": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/MeterReadingChangeset"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/metering/reading/{meter_id}/{counter_id}/changesets/{changeset_id}:apply": {
+      "post": {
+        "operationId": "applyReadingChangeset",
+        "summary": "Apply (approve) a pending reading changeset",
+        "description": "Applies the proposed reading value to ClickHouse and removes the pending changeset.\n\nRequires `meter_reading:edit` permission (approval workflow action on the reading's approval state).\n",
+        "tags": [
+          "Metering"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/MeterIdParam"
+          },
+          {
+            "$ref": "#/components/parameters/CounterIdParam"
+          },
+          {
+            "name": "changeset_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Changeset applied successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "reading": {
+                      "$ref": "#/components/schemas/Reading"
+                    },
+                    "changeset": {
+                      "$ref": "#/components/schemas/MeterReadingChangeset"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "description": "Changeset not found"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/metering/reading/{meter_id}/{counter_id}/changesets/{changeset_id}:dismiss": {
+      "post": {
+        "operationId": "dismissReadingChangeset",
+        "summary": "Dismiss (reject) a pending reading changeset",
+        "description": "Removes the pending changeset without applying it. The reading value remains unchanged.\n\nRequires `meter_reading:edit` permission (approval workflow action on the reading's approval state).\n",
+        "tags": [
+          "Metering"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/MeterIdParam"
+          },
+          {
+            "$ref": "#/components/parameters/CounterIdParam"
+          },
+          {
+            "name": "changeset_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "reason": {
+                    "type": "string",
+                    "description": "Optional reason for dismissing the changeset"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Changeset dismissed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MeterReadingChangeset"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "description": "Changeset not found"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/metering/reading/{meter_id}/{counter_id}/changesets/{changeset_id}": {
+      "patch": {
+        "operationId": "updateReadingChangeset",
+        "summary": "Edit a pending reading changeset",
+        "description": "Updates the proposed value of a pending changeset without going through the normal write path.\n",
+        "tags": [
+          "Metering"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/MeterIdParam"
+          },
+          {
+            "$ref": "#/components/parameters/CounterIdParam"
+          },
+          {
+            "name": "changeset_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "proposed": {
+                    "$ref": "#/components/schemas/ProposedReading"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Changeset updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MeterReadingChangeset"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "description": "Changeset not found"
           },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
@@ -1738,7 +2029,7 @@
               },
               "calibration_date": {
                 "type": "string",
-                "example": "2022-10-10T00:00:00.000Z",
+                "example": "2022-10-10",
                 "description": "The calibration date of the meter"
               },
               "contract": {
@@ -1854,7 +2145,7 @@
           "timestamp": {
             "type": "string",
             "description": "If the value is not provided, the system will be set with the time the request is processed.",
-            "example": "2022-10-10T00:00:00.000Z",
+            "example": "2022-10-10",
             "format": "date-time"
           },
           "source": {
@@ -1920,6 +2211,142 @@
           }
         ]
       },
+      "BatchReadingBase": {
+        "type": "object",
+        "description": "Base properties shared by all batch reading operations",
+        "properties": {
+          "meter_id": {
+            "$ref": "#/components/schemas/EntityId",
+            "description": "The ID of the associated meter"
+          },
+          "counter_id": {
+            "$ref": "#/components/schemas/EntityId",
+            "description": "The ID of the associated meter counter"
+          },
+          "direction": {
+            "$ref": "#/components/schemas/Direction",
+            "description": "The direction of the reading (feed-in or feed-out)"
+          },
+          "timestamp": {
+            "type": "string",
+            "description": "The timestamp of the reading. If not provided, the system will use the current time.",
+            "example": "2022-10-10T10:00:00Z",
+            "format": "date-time"
+          },
+          "external_id": {
+            "type": "string",
+            "description": "The external ID of the reading"
+          },
+          "metadata": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Additional metadata for the reading",
+            "example": {
+              "registration_id": "1234567890",
+              "business_unit": "ABC"
+            }
+          }
+        }
+      },
+      "CreateOrUpdateBatchReading": {
+        "description": "Schema for create or update operations - requires value, source, and meter_id",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BatchReadingBase"
+          },
+          {
+            "type": "object",
+            "required": [
+              "value",
+              "source",
+              "meter_id"
+            ],
+            "properties": {
+              "operation": {
+                "type": "string",
+                "enum": [
+                  "create",
+                  "update"
+                ],
+                "default": "create",
+                "description": "The operation to perform. Defaults to \"create\" if omitted."
+              },
+              "value": {
+                "type": "number",
+                "example": 240,
+                "description": "The reading value of the meter"
+              },
+              "source": {
+                "$ref": "#/components/schemas/Source",
+                "description": "The source of the reading"
+              },
+              "read_by": {
+                "$ref": "#/components/schemas/ReadBy"
+              },
+              "reason": {
+                "$ref": "#/components/schemas/Reason"
+              },
+              "status": {
+                "$ref": "#/components/schemas/ReadingStatus",
+                "description": "The status of the reading"
+              },
+              "remark": {
+                "type": "string",
+                "nullable": true,
+                "description": "A remark or comment for the reading",
+                "example": "Customer reported unusual consumption"
+              },
+              "note": {
+                "type": "string",
+                "description": "Notes to record a meter reading"
+              },
+              "unit": {
+                "$ref": "#/components/schemas/Unit",
+                "description": "The unit of measurement for the reading"
+              }
+            }
+          }
+        ]
+      },
+      "DeleteBatchReading": {
+        "description": "Schema for delete operations - only requires identifier fields specified in the identifiers parameter",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BatchReadingBase"
+          },
+          {
+            "type": "object",
+            "required": [
+              "operation"
+            ],
+            "properties": {
+              "operation": {
+                "type": "string",
+                "enum": [
+                  "delete"
+                ],
+                "description": "The operation to perform (must be \"delete\")"
+              }
+            }
+          }
+        ]
+      },
+      "BatchReading": {
+        "description": "A meter reading for batch operations. The required fields depend on the operation:\n- create/update: requires value, source, and meter_id\n- delete: only requires the fields specified in the identifiers parameter\n",
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/CreateOrUpdateBatchReading"
+          },
+          {
+            "$ref": "#/components/schemas/DeleteBatchReading"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "operation"
+        }
+      },
       "UpdateMeterReading": {
         "type": "object",
         "required": [
@@ -1954,7 +2381,7 @@
           "timestamp": {
             "type": "string",
             "description": "If the value is not provided, the system will be set with the time the request is processed.",
-            "example": "2022-10-10T00:00:00.000Z",
+            "example": "2022-10-10",
             "format": "date-time"
           },
           "source": {
@@ -2033,7 +2460,7 @@
               },
               "forecast_as_of": {
                 "type": "string",
-                "example": "2022-12-10T00:00:00.000Z",
+                "example": "2022-12-10",
                 "description": "The date as of which the forecast reading value is applicable"
               },
               "current_consumption": {
@@ -2043,7 +2470,7 @@
               },
               "last_reading": {
                 "type": "string",
-                "example": "2022-10-10T00:00:00.000Z",
+                "example": "2022-10-10",
                 "description": "The timestamp of the last reading"
               },
               "conversion_factor": {
@@ -2167,7 +2594,8 @@
         }
       },
       "Unit": {
-        "type": "string"
+        "type": "string",
+        "deprecated": true
       },
       "Source": {
         "type": "string",
@@ -2284,6 +2712,208 @@
           }
         }
       },
+      "MeterReadingChangeset": {
+        "type": "object",
+        "required": [
+          "changeset_id",
+          "proposed",
+          "edit_mode",
+          "created_at"
+        ],
+        "properties": {
+          "changeset_id": {
+            "type": "string",
+            "description": "Unique changeset identifier (UUID v4)"
+          },
+          "meter_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "counter_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "proposed": {
+            "$ref": "#/components/schemas/ProposedReading"
+          },
+          "previous": {
+            "$ref": "#/components/schemas/ProposedReading",
+            "description": "Snapshot of the reading at changeset creation time"
+          },
+          "edit_mode": {
+            "type": "string",
+            "enum": [
+              "external",
+              "approval"
+            ]
+          },
+          "match_strategy": {
+            "type": "string",
+            "enum": [
+              "exact",
+              "fuzzy"
+            ],
+            "default": "exact"
+          },
+          "timestamp_tolerance": {
+            "$ref": "#/components/schemas/TimestampTolerance"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "created_by": {
+            "$ref": "#/components/schemas/ChangesetCreator"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "360",
+              "ECP",
+              "ERP",
+              "journey-submission"
+            ]
+          },
+          "fuzzy_config": {
+            "$ref": "#/components/schemas/FuzzyConfig"
+          },
+          "dismissed_reason": {
+            "type": "string",
+            "description": "Reason for dismissing the changeset. Only present in the dismiss HTTP response\nand on the unified `MeterReadings` EventBridge event payload (when the\n`activity_type` discriminator is `ChangesetDismissed`). Not persisted —\nthe event stream is the authoritative audit trail (aligned with entity-api's\napproach where dismissal context lives in the activity record).\n"
+          },
+          "dismissed_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO 8601 timestamp of when the changeset was dismissed. Like dismissed_reason,\nthis is only present in the dismiss response and EventBridge event, not persisted.\n"
+          }
+        }
+      },
+      "FuzzyConfig": {
+        "type": "object",
+        "description": "Numeric-threshold fuzzy matching for meter reading auto-clear.\n\nNOTE: This is intentionally different from entity-api's FuzzyConfig. Entity-api's\nfuzzy strategies (suffix, digits_only, normalize_phone, ignore_fields,\ncontains_entry, regex) are designed for strings and structured objects (IBAN, phone\nnumbers, arrays of relations). Meter readings are purely numeric, so numeric\ntolerance (percentage + absolute) is the right primitive. Do not try to unify\nthese two types — they serve different domains.\n\nWhen match_strategy is 'fuzzy', the auto-clear logic uses these thresholds to\ndecide whether an incoming ERP value is \"close enough\" to the proposed value.\nIf both percentage_threshold and absolute_threshold are provided, a match\nsucceeds if either threshold is satisfied (logical OR).\n",
+        "properties": {
+          "percentage_threshold": {
+            "type": "number",
+            "description": "Percentage threshold (0-1). 0.01 = 1%. Default 0.01.",
+            "minimum": 0,
+            "maximum": 1,
+            "default": 0.01
+          },
+          "absolute_threshold": {
+            "type": "number",
+            "description": "Absolute threshold in the reading's unit.",
+            "minimum": 0
+          }
+        }
+      },
+      "ProposedReading": {
+        "type": "object",
+        "required": [
+          "value"
+        ],
+        "properties": {
+          "value": {
+            "type": "number"
+          },
+          "direction": {
+            "type": "string",
+            "enum": [
+              "feed-in",
+              "feed-out"
+            ]
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "remark": {
+            "type": "string"
+          },
+          "read_by": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "valid",
+              "in-validation",
+              "implausible"
+            ]
+          },
+          "external_id": {
+            "type": "string"
+          }
+        }
+      },
+      "ChangesetCreator": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "user",
+              "portal_user",
+              "api_client",
+              "automation"
+            ]
+          },
+          "id": {
+            "type": "string"
+          }
+        }
+      },
+      "TimestampTolerance": {
+        "description": "Slack on `reading.timestamp` when auto-clear matches an incoming reading\nagainst a pending changeset. Both sides reference the SAME physical\nmeter-read event — one as stored when the user submitted, the other as\nechoed back by the ERP. The tolerance accommodates round-trip format\ndrift between the two writes.\n\nVariants:\n- `'exact'`: strict millisecond equality. Right when both sides\n  round-trip the timestamp cleanly.\n- `{ type: 'same-day', timezone? }`: strip the time component and\n  compare year-month-day. Use this when the ERP emits date-only\n  readings (the inbound pipeline promotes those to midnight UTC).\n  Optional `timezone` is an IANA name (e.g. `'Europe/Berlin'`); the\n  day is bucketed in that zone. Defaults to UTC when omitted. Set\n  a local zone for tenants whose readings are taken near midnight\n  in non-UTC timezones — UTC bucketing would otherwise split such\n  readings across two day-buckets and miss matches.\n- `{ type: 'within-seconds', seconds }`: symmetric ±N-second\n  window. Use for sub-minute normalization drift (`seconds: 60`).\n",
+        "oneOf": [
+          {
+            "type": "string",
+            "enum": [
+              "exact"
+            ]
+          },
+          {
+            "type": "object",
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "same-day"
+                ]
+              },
+              "timezone": {
+                "type": "string",
+                "description": "IANA timezone identifier (e.g. `'Europe/Berlin'`, `'UTC'`).\nWhen omitted, the day is bucketed in UTC.\n"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "type",
+              "seconds"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "within-seconds"
+                ]
+              },
+              "seconds": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "Tolerance in seconds. e.g. 60 = ±1 minute, 3600 = ±1 hour."
+              }
+            }
+          }
+        ]
+      },
       "ActivityId": {
         "type": "string",
         "format": "ulid",
@@ -2292,6 +2922,44 @@
       }
     },
     "parameters": {
+      "MeterIdParam": {
+        "name": "meter_id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "$ref": "#/components/schemas/Id"
+        },
+        "description": "The ID of the meter."
+      },
+      "CounterIdParam": {
+        "name": "counter_id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "$ref": "#/components/schemas/Id"
+        },
+        "description": "The ID of the counter."
+      },
+      "DirectQueryParam": {
+        "name": "direct",
+        "in": "query",
+        "required": false,
+        "description": "When true, bypasses changeset interception and writes directly to ClickHouse. Used by trusted integrations (e.g., ERP sync) to confirm changes and auto-clear matching pending changesets.",
+        "schema": {
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "IncludePendingChangesetsQueryParam": {
+        "name": "include_pending_changesets",
+        "in": "query",
+        "required": false,
+        "description": "When true, the response includes a `pending_changesets` field with the list of pending reading changesets alongside the confirmed readings.",
+        "schema": {
+          "type": "boolean",
+          "default": false
+        }
+      },
       "ActivityIdQueryParam": {
         "name": "activity_id",
         "description": "Activity to include in event feed",
@@ -2313,9 +2981,5 @@
       }
     }
   },
-  "servers": [
-    {
-      "url": "https://metering.sls.epilot.io"
-    }
-  ]
+  "servers": []
 }

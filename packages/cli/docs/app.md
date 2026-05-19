@@ -71,6 +71,10 @@ epilot app getPublicFacingComponent -p appId=123e4567-e89b-12d3-a456-42661417400
 - [`queryEvents`](#queryevents) — Query analytics events for a specific app with flexible filtering
 - [`ingestEvent`](#ingestevent) — Internal endpoint for services to submit app events for analytic purposes
 
+**App Proxy**
+- [`publicProxyGet`](#publicproxyget) — Forward a GET request to a registered proxy target from a public-facing component (e.g. journey blocks)
+- [`publicProxyPost`](#publicproxypost) — Forward a POST request to a registered proxy target from a public-facing component (e.g. journey blocks)
+
 ### `getPublicFacingComponent`
 
 Retrieve public facing components for an installed app
@@ -1676,7 +1680,7 @@ Retrieve a list of installed apps for the organization.
 
 | Name | In | Type | Required | Description |
 | ---- | -- | ---- | -------- | ----------- |
-| `componentType` | query | "CUSTOM_JOURNEY_BLOCK" \| "CUSTOM_PORTAL_BLOCK" \| "PORTAL_EXTENSION" \| "CUSTOM_FLOW_ACTION" \| "ERP_INFORM_TOOLKIT" \| "CUSTOM_CAPABILITY" \| "EXTERNAL_PRODUCT_CATALOG" \| "CUSTOM_PAGE" | No | Filter apps by specific component type |
+| `componentType` | query | "CUSTOM_JOURNEY_BLOCK" \| "CUSTOM_PORTAL_BLOCK" \| "PORTAL_EXTENSION" \| "CUSTOM_FLOW_ACTION" \| "ERP_INFORM_TOOLKIT" \| "CUSTOM_CAPABILITY" \| "EXTERNAL_PRODUCT_CATALOG" \| "CUSTOM_PAGE" \| "API_PROXY" | No | Filter apps by specific component type |
 | `enabled` | query | boolean | No | Filter apps by enabled status |
 | `page` | query | number | No | Page number for pagination |
 | `pageSize` | query | number | No | Number of items per page |
@@ -2213,6 +2217,89 @@ With JSONata filter:
 
 ```bash
 epilot app ingestEvent --jsonata '$'
+```
+
+---
+
+### `publicProxyGet`
+
+Forward a GET request to a registered proxy target from a public-facing component (e.g. journey blocks)
+
+`GET /v1/public/app/{appId}/proxy/{proxyName}/{path}`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `appId` | path | string | Yes | ID of the installed app |
+| `proxyName` | path | string | Yes | Name of the proxy target as defined in the app manifest |
+| `path` | path | string | Yes | Path to forward to the proxy target |
+
+**Sample Call**
+
+```bash
+epilot app publicProxyGet \
+  -p appId=123e4567-e89b-12d3-a456-426614174000 \
+  -p proxyName=example \
+  -p path=example
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot app publicProxyGet 123e4567-e89b-12d3-a456-426614174000 example example
+```
+
+With JSONata filter:
+
+```bash
+epilot app publicProxyGet -p appId=123e4567-e89b-12d3-a456-426614174000 -p proxyName=example -p path=example --jsonata '$'
+```
+
+---
+
+### `publicProxyPost`
+
+Forward a POST request to a registered proxy target from a public-facing component (e.g. journey blocks)
+
+`POST /v1/public/app/{appId}/proxy/{proxyName}/{path}`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `appId` | path | string | Yes | ID of the installed app |
+| `proxyName` | path | string | Yes | Name of the proxy target as defined in the app manifest |
+| `path` | path | string | Yes | Path to forward to the proxy target |
+
+**Request Body**
+
+**Sample Call**
+
+```bash
+epilot app publicProxyPost \
+  -p appId=123e4567-e89b-12d3-a456-426614174000 \
+  -p proxyName=example \
+  -p path=example \
+  -d '{}'
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot app publicProxyPost 123e4567-e89b-12d3-a456-426614174000 example example
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot app publicProxyPost -p appId=123e4567-e89b-12d3-a456-426614174000 -p proxyName=example -p path=example
+```
+
+With JSONata filter:
+
+```bash
+epilot app publicProxyPost -p appId=123e4567-e89b-12d3-a456-426614174000 -p proxyName=example -p path=example --jsonata '$'
 ```
 
 ---

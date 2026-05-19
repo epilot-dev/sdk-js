@@ -84,6 +84,7 @@ epilot customer-portal upsertPortal -p origin=example
 - [`listAllPortalConfigs`](#listallportalconfigs) — Retrieves all portal configurations.
 - [`swapPortalConfig`](#swapportalconfig) — Swaps the portal configuration of two portals.
 - [`clonePortalConfig`](#cloneportalconfig) — Creates a new portal by cloning configuration and pages from an existing portal. The new portal gets its own domain, use
+- [`verifyDns`](#verifydns) — Manually triggers DNS verification for a portal's domain setup. Runs the same verification logic as the scheduled proces
 
 **Public**
 - [`createUserV3`](#createuserv3) — Registers a portal user.
@@ -98,10 +99,12 @@ epilot customer-portal upsertPortal -p origin=example
 - [`getOrganizationSettingsByDomain`](#getorganizationsettingsbydomain) — Retrieves organization settings by domain. Only public organization settings are returned.
 - [`checkContactExists`](#checkcontactexists) — True if contact with given identifiers exists.
 - [`checkContactExistsV3`](#checkcontactexistsv3) — True if contact with given identifiers exists.
+- [`checkAccountExists`](#checkaccountexists) — True if account with given identifiers exists.
 - [`confirmUser`](#confirmuser) — Confirm a portal user
 - [`confirmUserWithUserId`](#confirmuserwithuserid) — Confirm a portal user
 - [`userExists`](#userexists) — Checks whether a user exists in the portal
 - [`userExistsV3`](#userexistsv3) — Checks whether a user exists in the portal.
+- [`getSSOProvider`](#getssoprovider) — Returns the public configuration of a single SSO identity provider with env var
 - [`ssoRedirect`](#ssoredirect) — Handles the redirect from the external SSO provider. Validates the authorization `code` and `state` received from the pr
 - [`ssoCallback`](#ssocallback) — Handles the callback from the external SSO provider, validates the authorization `code`
 - [`getPublicPages`](#getpublicpages) — Fetch all public portal pages
@@ -113,6 +116,8 @@ epilot customer-portal upsertPortal -p origin=example
 - [`validateToken`](#validatetoken) — Validates Portal Token is valid. Pass the token via Authorization Header.
 - [`revokeToken`](#revoketoken) — Revokes all of the access tokens for the given Refresh Token.
 - [`getConsumption`](#getconsumption) — Get energy consumption data between a given time period.
+- [`prepareVisualizationExport`](#preparevisualizationexport) — Asks an installed App to prepare a downloadable export of a visualization (consumption chart, dynamic tariff chart, etc.
+- [`getVisualizationMetadata`](#getvisualizationmetadata) — Returns runtime metadata describing how a visualization (consumption / price / cost chart) should be rendered for a give
 - [`getCosts`](#getcosts) — Get energy cost data between a given time period.
 - [`getPrices`](#getprices) — Get energy prices data between a given time period.
 - [`getResolvedSeamlessLink`](#getresolvedseamlesslink) — Retrieves a resolved seamless portal link.
@@ -154,6 +159,7 @@ epilot customer-portal upsertPortal -p origin=example
 - [`revokePartner`](#revokepartner) — Revokes a partner from a portal
 - [`disablePartner`](#disablepartner) — Disables a partner from a portal
 - [`enablePartner`](#enablepartner) — Enables a partner from a portal
+- [`portalProxyExecute`](#portalproxyexecute) — Execute an Integration Hub managed-call use case on behalf of a portal user.
 
 **Activity**
 - [`getEntityActivityFeed`](#getentityactivityfeed) — Get activity feed for an entity
@@ -216,181 +222,32 @@ epilot customer-portal upsertPortal \
       {}
     ]
   },
+  "identity_providers": [
+    {
+      "slug": "office-365-login",
+      "display_name": "Office 365 Login",
+      "provider_type": "OIDC",
+      "attribute_mappings": {},
+      "entity_matching": {},
+      "oidc_config": {},
+      "mobile_oidc_config": {}
+    }
+  ],
   "enabled": true,
   "name": "Installer Portal",
   "domain": "abc.com",
   "is_epilot_domain": true,
+  "epilot_domain": "example-portal-12345.ecp.epilot.cloud",
+  "domain_settings": {
+    "is_custom_domain_enabled": true,
+    "is_epilot_domain_enabled": true,
+    "is_redirection_enabled": true
+  },
   "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
   "allowed_portal_entities": ["contact", "contract"],
   "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
-  "user_account_self_management": false,
-  "feature_settings": {
-    "start_page": true,
-    "billing": true,
-    "change_due_date": true,
-    "new_design": true
-  },
-  "accessToken": "string",
-  "advanced_mfa": {
-    "enabled": true
-  },
-  "auth_settings": {
-    "passwordless_login": {
-      "enabled": true
-    },
-    "entry_point": "PASSWORD",
-    "preferred_sso_providers": ["office-365-login"],
-    "auto_redirect_to_sso": true
-  },
-  "cognito_details": {
-    "cognito_user_pool_client_id": "6bsd0jkgoie74k2i8mrhc1vest",
-    "cognito_user_pool_arn": "arn:aws:cognito-idp:us-east-1:123412341234:userpool/us-east-1_123412341",
-    "cognito_user_pool_id": "eu-central-1_CUEQRNbUb",
-    "timeouts": {
-      "refresh_token": 300,
-      "access_token": 300,
-      "id_token": 300
-    },
-    "advanced_authentication": {
-      "user_activity_logging": true,
-      "adaptive_authentication": true,
-      "compromised_credentials_detection": true
-    },
-    "password_policy": {
-      "minimum_length": 8,
-      "maximum_length": 256,
-      "require_lowercase": true,
-      "require_uppercase": true,
-      "require_numbers": true,
-      "require_symbols": true
-    }
-  },
-  "config": "string",
-  "contact_identifiers": ["email", "last_name"],
-  "approval_state_attributes": {
-    "contact": ["name", "address"],
-    "contract": ["installment_amount"]
-  },
-  "email_templates": {
-    "confirmAccount": "5da0a718-c822-403d-9f5d-20d4584e0528",
-    "advancedAuth": "5da0a718-c822-403d-9f5d-20d4584e0528",
-    "advancedMFA": "5da0a718-c822-403d-9f5d-20d4584e0528",
-    "journeySignUp": "5da0a718-c822-403d-9f5d-20d4584e0528",
-    "journeySignInOneTimePassword": "5da0a718-c822-403d-9f5d-20d4584e0528",
-    "journeyLoginOTP": "5da0a718-c822-403d-9f5d-20d4584e0528",
-    "forgotPassword": "5da0a718-c822-403d-9f5d-20d4584e0528",
-    "invitation": "5da0a718-c822-403d-9f5d-20d4584e0528",
-    "partnerInvitation": "5da0a718-c822-403d-9f5d-20d4584e0528",
-    "onNewQuote": "5da0a718-c822-403d-9f5d-20d4584e0528",
-    "onMapAPendingUser": "5da0a718-c822-403d-9f5d-20d4584e0528",
-    "onDocUpload": "5da0a718-c822-403d-9f5d-20d4584e0528",
-    "onWorkflowStepAssigned": "5da0a718-c822-403d-9f5d-20d4584e0528",
-    "confirmEmailUpdate": "5da0a718-c822-403d-9f5d-20d4584e0528",
-    "verifyCodeToSetPassword": "5da0a718-c822-403d-9f5d-20d4584e0528"
-  },
-  "images": {
-    "orderLeftTeaser": "https://epilot-bucket.s3.eu-central-1.amazonaws.com/12344/6538fddb-f0e9-4f0f-af51-6e57891ff20a/order-left-teaser.jpeg",
-    "orderRightTeaser": "https://epilot-bucket.s3.eu-central-1.amazonaws.com/12344/6538fddb-f0e9-4f0f-af51-6e57891ff20a/order-right-teaser.jpeg",
-    "welcomeBanner": "https://epilot-bucket.s3.eu-central-1.amazonaws.com/12344/6538fddb-f0e9-4f0f-af51-6e57891ff20a/welcome-banner.jpeg"
-  },
-  "entity_identifiers": {
-    "type": {
-      "isEnabled": true,
-      "attributes": ["contract_number"]
-    }
-  },
-  "contract_identifiers": [
-    {
-      "name": "email",
-      "schema": "contact"
-    },
-    {
-      "name": "last_name",
-      "schema": "contact"
-    }
-  ],
-  "contract_selector_config": {
-    "show_inactive": true,
-    "title_path": "string"
-  },
-  "registration_identifiers": [
-    {
-      "name": "last_name",
-      "schema": "contact"
-    },
-    {
-      "name": "contract_number",
-      "schema": "contract"
-    }
-  ],
-  "triggered_journeys": [
-    {
-      "trigger_name": "FIRST_LOGIN",
-      "journey_id": "5da0a718-c822-403d-9f5d-20d4584e0528"
-    }
-  ],
-  "entity_edit_rules": [
-    {
-      "slug": "contact",
-      "attribute": "first_name",
-      "rule_type": "cadence",
-      "cadence_period_type": "days",
-      "cadence_period": 1,
-      "changes_allowed": 1,
-      "grace_period": 1,
-      "allowed_increment": "10%",
-      "allowed_decrement": "10%",
-      "number_of_days_before_restriction": 10
-    }
-  ],
-  "allowed_file_extensions": {
-    "document": ["pdf"],
-    "image": ["jpg"],
-    "spreadsheet": ["xls"],
-    "presentation": ["ppt"],
-    "audioVideo": ["mp4"],
-    "email": ["eml"],
-    "archive": ["zip"],
-    "cad": ["cad"],
-    "calendar": ["ics"],
-    "other": ["txt"]
-  },
-  "prevent_search_engine_indexing": true,
-  "meter_reading_grace_period": 0,
-  "inactive_contract_cutoff_years": 0,
-  "is_dummy": true,
-  "is_v3_item": true,
-  "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
-  "portal_sk_v3": "PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c",
-  "origin": "string",
-  "pages": {}
-}'
-```
-
-Using stdin pipe:
-
-```bash
-cat body.json | epilot customer-portal upsertPortal -p origin=example
-```
-
-With JSONata filter:
-
-```bash
-epilot customer-portal upsertPortal -p origin=example --jsonata '$'
-```
-
-<details>
-<summary>Sample Response</summary>
-
-```json
-{
-  "enabled": true,
-  "name": "Installer Portal",
-  "domain": "abc.com",
-  "is_epilot_domain": true,
-  "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
-  "allowed_portal_entities": ["contact", "contract"],
-  "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
+  "self_registration_account_setting": "ALLOW_WITH_CONTACT_CREATION",
+  "self_registration_entity": "contact",
   "user_account_self_management": false,
   "feature_settings": {
     "start_page": true,
@@ -532,6 +389,184 @@ epilot customer-portal upsertPortal -p origin=example --jsonata '$'
   "portal_sk_v3": "PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c",
   "origin": "string",
   "pages": {},
+  "global_blocks": {}
+}'
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot customer-portal upsertPortal -p origin=example
+```
+
+With JSONata filter:
+
+```bash
+epilot customer-portal upsertPortal -p origin=example --jsonata '$'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "enabled": true,
+  "name": "Installer Portal",
+  "domain": "abc.com",
+  "is_epilot_domain": true,
+  "epilot_domain": "example-portal-12345.ecp.epilot.cloud",
+  "domain_settings": {
+    "is_custom_domain_enabled": true,
+    "is_epilot_domain_enabled": true,
+    "is_redirection_enabled": true
+  },
+  "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+  "allowed_portal_entities": ["contact", "contract"],
+  "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
+  "self_registration_account_setting": "ALLOW_WITH_CONTACT_CREATION",
+  "self_registration_entity": "contact",
+  "user_account_self_management": false,
+  "feature_settings": {
+    "start_page": true,
+    "billing": true,
+    "change_due_date": true,
+    "new_design": true
+  },
+  "accessToken": "string",
+  "advanced_mfa": {
+    "enabled": true
+  },
+  "auth_settings": {
+    "passwordless_login": {
+      "enabled": true
+    },
+    "entry_point": "PASSWORD",
+    "preferred_sso_providers": ["office-365-login"],
+    "auto_redirect_to_sso": true
+  },
+  "cognito_details": {
+    "cognito_user_pool_client_id": "6bsd0jkgoie74k2i8mrhc1vest",
+    "cognito_user_pool_arn": "arn:aws:cognito-idp:us-east-1:123412341234:userpool/us-east-1_123412341",
+    "cognito_user_pool_id": "eu-central-1_CUEQRNbUb",
+    "timeouts": {
+      "refresh_token": 300,
+      "access_token": 300,
+      "id_token": 300
+    },
+    "advanced_authentication": {
+      "user_activity_logging": true,
+      "adaptive_authentication": true,
+      "compromised_credentials_detection": true
+    },
+    "password_policy": {
+      "minimum_length": 8,
+      "maximum_length": 256,
+      "require_lowercase": true,
+      "require_uppercase": true,
+      "require_numbers": true,
+      "require_symbols": true
+    }
+  },
+  "config": "string",
+  "contact_identifiers": ["email", "last_name"],
+  "approval_state_attributes": {
+    "contact": ["name", "address"],
+    "contract": ["installment_amount"]
+  },
+  "email_templates": {
+    "confirmAccount": "5da0a718-c822-403d-9f5d-20d4584e0528",
+    "advancedAuth": "5da0a718-c822-403d-9f5d-20d4584e0528",
+    "advancedMFA": "5da0a718-c822-403d-9f5d-20d4584e0528",
+    "journeySignUp": "5da0a718-c822-403d-9f5d-20d4584e0528",
+    "journeySignInOneTimePassword": "5da0a718-c822-403d-9f5d-20d4584e0528",
+    "journeyLoginOTP": "5da0a718-c822-403d-9f5d-20d4584e0528",
+    "forgotPassword": "5da0a718-c822-403d-9f5d-20d4584e0528",
+    "invitation": "5da0a718-c822-403d-9f5d-20d4584e0528",
+    "partnerInvitation": "5da0a718-c822-403d-9f5d-20d4584e0528",
+    "onNewQuote": "5da0a718-c822-403d-9f5d-20d4584e0528",
+    "onMapAPendingUser": "5da0a718-c822-403d-9f5d-20d4584e0528",
+    "onDocUpload": "5da0a718-c822-403d-9f5d-20d4584e0528",
+    "onWorkflowStepAssigned": "5da0a718-c822-403d-9f5d-20d4584e0528",
+    "confirmEmailUpdate": "5da0a718-c822-403d-9f5d-20d4584e0528",
+    "verifyCodeToSetPassword": "5da0a718-c822-403d-9f5d-20d4584e0528"
+  },
+  "images": {
+    "orderLeftTeaser": "https://epilot-bucket.s3.eu-central-1.amazonaws.com/12344/6538fddb-f0e9-4f0f-af51-6e57891ff20a/order-left-teaser.jpeg",
+    "orderRightTeaser": "https://epilot-bucket.s3.eu-central-1.amazonaws.com/12344/6538fddb-f0e9-4f0f-af51-6e57891ff20a/order-right-teaser.jpeg",
+    "welcomeBanner": "https://epilot-bucket.s3.eu-central-1.amazonaws.com/12344/6538fddb-f0e9-4f0f-af51-6e57891ff20a/welcome-banner.jpeg"
+  },
+  "entity_identifiers": {
+    "type": {
+      "isEnabled": true,
+      "attributes": ["contract_number"]
+    }
+  },
+  "contract_identifiers": [
+    {
+      "name": "email",
+      "schema": "contact"
+    },
+    {
+      "name": "last_name",
+      "schema": "contact"
+    }
+  ],
+  "contract_selector_config": {
+    "show_inactive": true,
+    "title_path": "string"
+  },
+  "registration_identifiers": [
+    {
+      "name": "last_name",
+      "schema": "contact"
+    },
+    {
+      "name": "contract_number",
+      "schema": "contract"
+    }
+  ],
+  "triggered_journeys": [
+    {
+      "trigger_name": "FIRST_LOGIN",
+      "journey_id": "5da0a718-c822-403d-9f5d-20d4584e0528"
+    }
+  ],
+  "entity_edit_rules": [
+    {
+      "slug": "contact",
+      "attribute": "first_name",
+      "rule_type": "cadence",
+      "cadence_period_type": "days",
+      "cadence_period": 1,
+      "changes_allowed": 1,
+      "grace_period": 1,
+      "allowed_increment": "10%",
+      "allowed_decrement": "10%",
+      "number_of_days_before_restriction": 10
+    }
+  ],
+  "allowed_file_extensions": {
+    "document": ["pdf"],
+    "image": ["jpg"],
+    "spreadsheet": ["xls"],
+    "presentation": ["ppt"],
+    "audioVideo": ["mp4"],
+    "email": ["eml"],
+    "archive": ["zip"],
+    "cad": ["cad"],
+    "calendar": ["ics"],
+    "other": ["txt"]
+  },
+  "prevent_search_engine_indexing": true,
+  "meter_reading_grace_period": 0,
+  "inactive_contract_cutoff_years": 0,
+  "is_dummy": true,
+  "is_v3_item": true,
+  "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
+  "portal_sk_v3": "PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c",
+  "origin": "string",
+  "pages": {},
+  "global_blocks": {},
   "id": 12345,
   "organization_id": 12345,
   "org_settings": {
@@ -737,9 +772,17 @@ epilot customer-portal getPortalConfigByDomain -p domain=example.com --jsonata '
   "name": "Installer Portal",
   "domain": "abc.com",
   "is_epilot_domain": true,
+  "epilot_domain": "example-portal-12345.ecp.epilot.cloud",
+  "domain_settings": {
+    "is_custom_domain_enabled": true,
+    "is_epilot_domain_enabled": true,
+    "is_redirection_enabled": true
+  },
   "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
   "allowed_portal_entities": ["contact", "contract"],
   "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
+  "self_registration_account_setting": "ALLOW_WITH_CONTACT_CREATION",
+  "self_registration_entity": "contact",
   "user_account_self_management": false,
   "feature_settings": {
     "start_page": true,
@@ -881,6 +924,7 @@ epilot customer-portal getPortalConfigByDomain -p domain=example.com --jsonata '
   "portal_sk_v3": "PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c",
   "origin": "string",
   "pages": {},
+  "global_blocks": {},
   "id": 12345,
   "organization_id": 12345,
   "org_settings": {
@@ -947,9 +991,17 @@ epilot customer-portal getPortalConfig --jsonata '$'
   "name": "Installer Portal",
   "domain": "abc.com",
   "is_epilot_domain": true,
+  "epilot_domain": "example-portal-12345.ecp.epilot.cloud",
+  "domain_settings": {
+    "is_custom_domain_enabled": true,
+    "is_epilot_domain_enabled": true,
+    "is_redirection_enabled": true
+  },
   "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
   "allowed_portal_entities": ["contact", "contract"],
   "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
+  "self_registration_account_setting": "ALLOW_WITH_CONTACT_CREATION",
+  "self_registration_entity": "contact",
   "user_account_self_management": false,
   "feature_settings": {
     "start_page": true,
@@ -1091,6 +1143,7 @@ epilot customer-portal getPortalConfig --jsonata '$'
   "portal_sk_v3": "PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c",
   "origin": "string",
   "pages": {},
+  "global_blocks": {},
   "id": 12345,
   "organization_id": 12345,
   "org_settings": {
@@ -1242,74 +1295,45 @@ epilot customer-portal getPublicPortalExtensionDetails -p org_id=12324 -p origin
 {
   "consumptionDataRetrieval": [
     {
-      "extension": {
-        "id": "string",
-        "name": {
-          "en": "string"
-        }
-      },
-      "hook": {
-        "id": "string",
-        "name": {
-          "en": "string"
-        },
-        "intervals": ["string"]
-      }
+      "app": {},
+      "extension": {},
+      "hook": {}
+    }
+  ],
+  "dataExport": [
+    {
+      "app": {},
+      "extension": {},
+      "hook": {}
     }
   ],
   "priceDataRetrieval": [
     {
-      "extension": {
-        "id": "string",
-        "name": {
-          "en": "string"
-        }
-      },
-      "hook": {
-        "id": "string",
-        "name": {
-          "en": "string"
-        },
-        "intervals": ["string"]
-      }
+      "app": {},
+      "extension": {},
+      "hook": {}
     }
   ],
   "costDataRetrieval": [
     {
-      "extension": {
-        "id": "string",
-        "name": {
-          "en": "string"
-        }
-      },
-      "hook": {
-        "id": "string",
-        "name": {
-          "en": "string"
-        },
-        "intervals": ["string"]
-      }
+      "app": {},
+      "extension": {},
+      "hook": {}
     }
   ],
   "contractIdentification": {
     "extension": {
       "id": "string",
-      "name": {
-        "en": "string"
-      }
+      "name": {}
     },
     "hook": {
-      "explanation": {
-        "en": "This process will give you access to all Contracts kept"
-      }
+      "explanation": {}
     }
   },
   "meterReadingPlausibilityCheck": {
     "extension": {
       "id": "string",
-      "name": {
-        "en": "string"
-      }
+      "name": {}
     },
     "hook": {
       "plausibility_mode": "check"
@@ -1413,74 +1437,45 @@ epilot customer-portal getPublicPortalExtensionDetailsV3 --jsonata 'consumptionD
 {
   "consumptionDataRetrieval": [
     {
-      "extension": {
-        "id": "string",
-        "name": {
-          "en": "string"
-        }
-      },
-      "hook": {
-        "id": "string",
-        "name": {
-          "en": "string"
-        },
-        "intervals": ["string"]
-      }
+      "app": {},
+      "extension": {},
+      "hook": {}
+    }
+  ],
+  "dataExport": [
+    {
+      "app": {},
+      "extension": {},
+      "hook": {}
     }
   ],
   "priceDataRetrieval": [
     {
-      "extension": {
-        "id": "string",
-        "name": {
-          "en": "string"
-        }
-      },
-      "hook": {
-        "id": "string",
-        "name": {
-          "en": "string"
-        },
-        "intervals": ["string"]
-      }
+      "app": {},
+      "extension": {},
+      "hook": {}
     }
   ],
   "costDataRetrieval": [
     {
-      "extension": {
-        "id": "string",
-        "name": {
-          "en": "string"
-        }
-      },
-      "hook": {
-        "id": "string",
-        "name": {
-          "en": "string"
-        },
-        "intervals": ["string"]
-      }
+      "app": {},
+      "extension": {},
+      "hook": {}
     }
   ],
   "contractIdentification": {
     "extension": {
       "id": "string",
-      "name": {
-        "en": "string"
-      }
+      "name": {}
     },
     "hook": {
-      "explanation": {
-        "en": "This process will give you access to all Contracts kept"
-      }
+      "explanation": {}
     }
   },
   "meterReadingPlausibilityCheck": {
     "extension": {
       "id": "string",
-      "name": {
-        "en": "string"
-      }
+      "name": {}
     },
     "hook": {
       "plausibility_mode": "check"
@@ -1505,7 +1500,7 @@ Get energy consumption data between a given time period.
 | ---- | -- | ---- | -------- | ----------- |
 | `app_id` | query | string | No | App ID for consumption data. |
 | `extensionId` | query | string | Yes | Extension ID for consumption data. |
-| `hookId` | query | string | Yes | Hook ID for consumption data. |
+| `hookId` | query | string | No | Optional Hook ID. If omitted, the only matching hook on the extension is used; if the extension has multiple hooks of the relevant type, this becomes required. |
 | `meter_id` | query | string | No | Meter ID for consumption data. Deprecated - use context_entities instead. |
 | `from` | query | string (date-time) | Yes | Start date for consumption data (ISO 8601 format). |
 | `to` | query | string (date-time) | Yes | End date for consumption data (ISO 8601 format). |
@@ -1517,7 +1512,6 @@ Get energy consumption data between a given time period.
 ```bash
 epilot customer-portal getConsumption \
   -p extensionId=123e4567-e89b-12d3-a456-426614174000 \
-  -p hookId=123e4567-e89b-12d3-a456-426614174000 \
   -p from=example \
   -p to=example \
   -p interval=example
@@ -1526,7 +1520,7 @@ epilot customer-portal getConsumption \
 With JSONata filter:
 
 ```bash
-epilot customer-portal getConsumption -p extensionId=123e4567-e89b-12d3-a456-426614174000 -p hookId=123e4567-e89b-12d3-a456-426614174000 -p from=example -p to=example -p interval=example --jsonata 'consumptions'
+epilot customer-portal getConsumption -p extensionId=123e4567-e89b-12d3-a456-426614174000 -p from=example -p to=example -p interval=example --jsonata 'consumptions'
 ```
 
 <details>
@@ -1539,9 +1533,126 @@ epilot customer-portal getConsumption -p extensionId=123e4567-e89b-12d3-a456-426
       "timestamp": "1970-01-01T00:00:00.000Z",
       "value": 0,
       "type": "nt",
-      "aggregation_method": "sum"
+      "unit": "kWh"
     }
   ]
+}
+```
+
+</details>
+
+---
+
+### `prepareVisualizationExport`
+
+Asks an installed App to prepare a downloadable export of a visualization (consumption chart, dynamic tariff chart, etc.
+
+`POST /v2/portal/visualization:export`
+
+**Request Body** (required)
+
+**Sample Call**
+
+```bash
+epilot customer-portal prepareVisualizationExport
+```
+
+With request body:
+
+```bash
+epilot customer-portal prepareVisualizationExport \
+  -d '{
+  "app_id": "string",
+  "extension_id": "string",
+  "hook_id": "string",
+  "from": "1970-01-01T00:00:00.000Z",
+  "to": "1970-01-01T00:00:00.000Z",
+  "context_entities": [
+    {
+      "entity_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+      "entity_schema": "contract"
+    }
+  ]
+}'
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot customer-portal prepareVisualizationExport
+```
+
+With JSONata filter:
+
+```bash
+epilot customer-portal prepareVisualizationExport --jsonata 'download_url'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "download_url": "string",
+  "filename": "string",
+  "content_type": "text/csv",
+  "expires_at": "1970-01-01T00:00:00.000Z"
+}
+```
+
+</details>
+
+---
+
+### `getVisualizationMetadata`
+
+Returns runtime metadata describing how a visualization (consumption / price / cost chart) should be rendered for a give
+
+`GET /v2/portal/visualization/metadata`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `app_id` | query | string | Yes | App ID providing the visualizationMetadata hook. |
+| `extensionId` | query | string | Yes | Extension ID providing the visualizationMetadata hook. |
+| `context_entities` | query | object[] | No | Entities to include in the context for variable interpolation in the hook (typically the meter and any other entities that scope the visualization). |
+
+**Sample Call**
+
+```bash
+epilot customer-portal getVisualizationMetadata \
+  -p app_id=123e4567-e89b-12d3-a456-426614174000 \
+  -p extensionId=123e4567-e89b-12d3-a456-426614174000
+```
+
+With JSONata filter:
+
+```bash
+epilot customer-portal getVisualizationMetadata -p app_id=123e4567-e89b-12d3-a456-426614174000 -p extensionId=123e4567-e89b-12d3-a456-426614174000 --jsonata 'type_options'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "type_options": [
+    {
+      "id": "string",
+      "label": {},
+      "aggregation_group": "string",
+      "statistical_method": "sum",
+      "unit": "string",
+      "color": "primary",
+      "precision": 0
+    }
+  ],
+  "intervals": ["PT15M"],
+  "data_range": {
+    "from": "1970-01-01T00:00:00.000Z",
+    "to": "1970-01-01T00:00:00.000Z"
+  }
 }
 ```
 
@@ -1561,7 +1672,7 @@ Get energy cost data between a given time period.
 | ---- | -- | ---- | -------- | ----------- |
 | `app_id` | query | string | No | App ID for consumption data. |
 | `extensionId` | query | string | Yes | Extension ID for cost data. |
-| `hookId` | query | string | Yes | Hook ID for cost data. |
+| `hookId` | query | string | No | Optional Hook ID. If omitted, the only matching hook on the extension is used; if the extension has multiple hooks of the relevant type, this becomes required. |
 | `meter_id` | query | string | No | Meter ID for cost data. Deprecated - use context_entities instead. |
 | `from` | query | string (date-time) | Yes | Start date for cost data (ISO 8601 format). |
 | `to` | query | string (date-time) | Yes | End date for cost data (ISO 8601 format). |
@@ -1573,7 +1684,6 @@ Get energy cost data between a given time period.
 ```bash
 epilot customer-portal getCosts \
   -p extensionId=123e4567-e89b-12d3-a456-426614174000 \
-  -p hookId=123e4567-e89b-12d3-a456-426614174000 \
   -p from=example \
   -p to=example \
   -p interval=example
@@ -1582,7 +1692,7 @@ epilot customer-portal getCosts \
 With JSONata filter:
 
 ```bash
-epilot customer-portal getCosts -p extensionId=123e4567-e89b-12d3-a456-426614174000 -p hookId=123e4567-e89b-12d3-a456-426614174000 -p from=example -p to=example -p interval=example --jsonata 'costs'
+epilot customer-portal getCosts -p extensionId=123e4567-e89b-12d3-a456-426614174000 -p from=example -p to=example -p interval=example --jsonata 'costs'
 ```
 
 <details>
@@ -1619,7 +1729,7 @@ Get energy prices data between a given time period.
 | ---- | -- | ---- | -------- | ----------- |
 | `app_id` | query | string | No | App ID for consumption data. |
 | `extensionId` | query | string | Yes | Extension ID for price data. |
-| `hookId` | query | string | Yes | Hook ID for price data. |
+| `hookId` | query | string | No | Optional Hook ID. If omitted, the only matching hook on the extension is used; if the extension has multiple hooks of the relevant type, this becomes required. |
 | `meter_id` | query | string | No | Meter ID for price data. Deprecated - use context_entities instead. |
 | `from` | query | string (date-time) | Yes | Start date for price data (ISO 8601 format). |
 | `to` | query | string (date-time) | Yes | End date for price data (ISO 8601 format). |
@@ -1631,7 +1741,6 @@ Get energy prices data between a given time period.
 ```bash
 epilot customer-portal getPrices \
   -p extensionId=123e4567-e89b-12d3-a456-426614174000 \
-  -p hookId=123e4567-e89b-12d3-a456-426614174000 \
   -p from=example \
   -p to=example \
   -p interval=example
@@ -1640,7 +1749,7 @@ epilot customer-portal getPrices \
 With JSONata filter:
 
 ```bash
-epilot customer-portal getPrices -p extensionId=123e4567-e89b-12d3-a456-426614174000 -p hookId=123e4567-e89b-12d3-a456-426614174000 -p from=example -p to=example -p interval=example --jsonata 'prices'
+epilot customer-portal getPrices -p extensionId=123e4567-e89b-12d3-a456-426614174000 -p from=example -p to=example -p interval=example --jsonata 'prices'
 ```
 
 <details>
@@ -1865,9 +1974,17 @@ epilot customer-portal getPublicPortalConfig -p org_id=12324 -p origin=example -
   "name": "Installer Portal",
   "domain": "abc.com",
   "is_epilot_domain": true,
+  "epilot_domain": "example-portal-12345.ecp.epilot.cloud",
+  "domain_settings": {
+    "is_custom_domain_enabled": true,
+    "is_epilot_domain_enabled": true,
+    "is_redirection_enabled": true
+  },
   "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
   "allowed_portal_entities": ["contact", "contract"],
   "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
+  "self_registration_account_setting": "ALLOW_WITH_CONTACT_CREATION",
+  "self_registration_entity": "contact",
   "user_account_self_management": false,
   "feature_settings": {
     "start_page": true,
@@ -2009,6 +2126,7 @@ epilot customer-portal getPublicPortalConfig -p org_id=12324 -p origin=example -
   "portal_sk_v3": "PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c",
   "origin": "string",
   "pages": {},
+  "global_blocks": {},
   "id": 12345,
   "organization_id": 12345,
   "org_settings": {
@@ -2076,9 +2194,17 @@ epilot customer-portal getOrgPortalConfig -p origin=example --jsonata '$'
   "name": "Installer Portal",
   "domain": "abc.com",
   "is_epilot_domain": true,
+  "epilot_domain": "example-portal-12345.ecp.epilot.cloud",
+  "domain_settings": {
+    "is_custom_domain_enabled": true,
+    "is_epilot_domain_enabled": true,
+    "is_redirection_enabled": true
+  },
   "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
   "allowed_portal_entities": ["contact", "contract"],
   "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
+  "self_registration_account_setting": "ALLOW_WITH_CONTACT_CREATION",
+  "self_registration_entity": "contact",
   "user_account_self_management": false,
   "feature_settings": {
     "start_page": true,
@@ -2220,6 +2346,7 @@ epilot customer-portal getOrgPortalConfig -p origin=example --jsonata '$'
   "portal_sk_v3": "PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c",
   "origin": "string",
   "pages": {},
+  "global_blocks": {},
   "id": 12345,
   "organization_id": 12345,
   "org_settings": {
@@ -2243,7 +2370,10 @@ epilot customer-portal getOrgPortalConfig -p origin=example --jsonata '$'
       "slug": "office-365-login",
       "display_name": "Office 365 Login",
       "oidc_config": {},
-      "mobile_oidc_config": {}
+      "mobile_oidc_config": {},
+      "provider_type": "OIDC",
+      "attribute_mappings": {},
+      "entity_matching": {}
     }
   ],
   "certificate_details": {
@@ -2293,9 +2423,17 @@ epilot customer-portal getPublicPortalConfigV3 -p org_id=12324 -p portal_id=453a
   "name": "Installer Portal",
   "domain": "abc.com",
   "is_epilot_domain": true,
+  "epilot_domain": "example-portal-12345.ecp.epilot.cloud",
+  "domain_settings": {
+    "is_custom_domain_enabled": true,
+    "is_epilot_domain_enabled": true,
+    "is_redirection_enabled": true
+  },
   "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
   "allowed_portal_entities": ["contact", "contract"],
   "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
+  "self_registration_account_setting": "ALLOW_WITH_CONTACT_CREATION",
+  "self_registration_entity": "contact",
   "user_account_self_management": false,
   "feature_settings": {
     "start_page": true,
@@ -2437,6 +2575,7 @@ epilot customer-portal getPublicPortalConfigV3 -p org_id=12324 -p portal_id=453a
   "portal_sk_v3": "PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c",
   "origin": "string",
   "pages": {},
+  "global_blocks": {},
   "id": 12345,
   "organization_id": 12345,
   "org_settings": {
@@ -2504,9 +2643,17 @@ epilot customer-portal getOrgPortalConfigV3 -p portal_id=453ad7bf-86d5-46c8-8252
   "name": "Installer Portal",
   "domain": "abc.com",
   "is_epilot_domain": true,
+  "epilot_domain": "example-portal-12345.ecp.epilot.cloud",
+  "domain_settings": {
+    "is_custom_domain_enabled": true,
+    "is_epilot_domain_enabled": true,
+    "is_redirection_enabled": true
+  },
   "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
   "allowed_portal_entities": ["contact", "contract"],
   "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
+  "self_registration_account_setting": "ALLOW_WITH_CONTACT_CREATION",
+  "self_registration_entity": "contact",
   "user_account_self_management": false,
   "feature_settings": {
     "start_page": true,
@@ -2648,6 +2795,7 @@ epilot customer-portal getOrgPortalConfigV3 -p portal_id=453ad7bf-86d5-46c8-8252
   "portal_sk_v3": "PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c",
   "origin": "string",
   "pages": {},
+  "global_blocks": {},
   "id": 12345,
   "organization_id": 12345,
   "org_settings": {
@@ -2671,7 +2819,10 @@ epilot customer-portal getOrgPortalConfigV3 -p portal_id=453ad7bf-86d5-46c8-8252
       "slug": "office-365-login",
       "display_name": "Office 365 Login",
       "oidc_config": {},
-      "mobile_oidc_config": {}
+      "mobile_oidc_config": {},
+      "provider_type": "OIDC",
+      "attribute_mappings": {},
+      "entity_matching": {}
     }
   ],
   "certificate_details": {
@@ -2714,9 +2865,13 @@ epilot customer-portal getAllPortalConfigs --jsonata 'data'
       "name": "Installer Portal",
       "domain": "abc.com",
       "is_epilot_domain": true,
+      "epilot_domain": "example-portal-12345.ecp.epilot.cloud",
+      "domain_settings": {},
       "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
       "allowed_portal_entities": ["contact", "contract"],
       "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
+      "self_registration_account_setting": "ALLOW_WITH_CONTACT_CREATION",
+      "self_registration_entity": "contact",
       "user_account_self_management": false,
       "feature_settings": {},
       "accessToken": "string",
@@ -2744,6 +2899,7 @@ epilot customer-portal getAllPortalConfigs --jsonata 'data'
       "portal_sk_v3": "PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c",
       "origin": "string",
       "pages": {},
+      "global_blocks": {},
       "id": 12345,
       "organization_id": 12345,
       "org_settings": {},
@@ -3072,7 +3228,7 @@ epilot customer-portal getPublicPortalWidgetsV3
 With JSONata filter:
 
 ```bash
-epilot customer-portal getPublicPortalWidgetsV3 --jsonata 'widgets'
+epilot customer-portal getPublicPortalWidgetsV3 --jsonata 'portal_sk_v3'
 ```
 
 <details>
@@ -3080,6 +3236,8 @@ epilot customer-portal getPublicPortalWidgetsV3 --jsonata 'widgets'
 
 ```json
 {
+  "portal_sk_v3": "string",
+  "is_v3_item": true,
   "widgets": [
     {
       "id": "string",
@@ -3140,7 +3298,7 @@ epilot customer-portal getPortalWidgetsV3 \
 With JSONata filter:
 
 ```bash
-epilot customer-portal getPortalWidgetsV3 -p portal_id=453ad7bf-86d5-46c8-8252-bcc868df5e3c --jsonata 'widgets'
+epilot customer-portal getPortalWidgetsV3 -p portal_id=453ad7bf-86d5-46c8-8252-bcc868df5e3c --jsonata 'portal_sk_v3'
 ```
 
 <details>
@@ -3148,6 +3306,8 @@ epilot customer-portal getPortalWidgetsV3 -p portal_id=453ad7bf-86d5-46c8-8252-b
 
 ```json
 {
+  "portal_sk_v3": "string",
+  "is_v3_item": true,
   "widgets": [
     {
       "id": "string",
@@ -3212,6 +3372,8 @@ With request body:
 epilot customer-portal upsertPortalWidgetV3 \
   -p portal_id=453ad7bf-86d5-46c8-8252-bcc868df5e3c \
   -d '{
+  "portal_sk_v3": "string",
+  "is_v3_item": true,
   "widgets": [
     {
       "id": "string",
@@ -3254,7 +3416,7 @@ cat body.json | epilot customer-portal upsertPortalWidgetV3 -p portal_id=453ad7b
 With JSONata filter:
 
 ```bash
-epilot customer-portal upsertPortalWidgetV3 -p portal_id=453ad7bf-86d5-46c8-8252-bcc868df5e3c --jsonata 'widgets'
+epilot customer-portal upsertPortalWidgetV3 -p portal_id=453ad7bf-86d5-46c8-8252-bcc868df5e3c --jsonata 'portal_sk_v3'
 ```
 
 <details>
@@ -3262,6 +3424,8 @@ epilot customer-portal upsertPortalWidgetV3 -p portal_id=453ad7bf-86d5-46c8-8252
 
 ```json
 {
+  "portal_sk_v3": "string",
+  "is_v3_item": true,
   "widgets": [
     {
       "id": "string",
@@ -4092,7 +4256,72 @@ epilot customer-portal checkContactExistsV3 --jsonata 'exists'
 ```json
 {
   "exists": true,
-  "contactId": "5da0a718-c822-403d-9f5d-20d4584e0528"
+  "contactId": "5da0a718-c822-403d-9f5d-20d4584e0528",
+  "accountId": "5da0a718-c822-403d-9f5d-20d4584e0528"
+}
+```
+
+</details>
+
+---
+
+### `checkAccountExists`
+
+True if account with given identifiers exists.
+
+`POST /v3/portal/public/account/exists`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `portal_id` | query | string | No | PortalId of the portal (required if domain is not provided) |
+| `domain` | query | string | No | Portal domain for identification (alternative to portal_id) |
+
+**Request Body** (required)
+
+**Sample Call**
+
+```bash
+epilot customer-portal checkAccountExists
+```
+
+With request body:
+
+```bash
+epilot customer-portal checkAccountExists \
+  -d '{
+  "org_id": 728,
+  "registration_identifiers": {
+    "account": {
+      "customer_number": "ACC-123456"
+    },
+    "contract": {
+      "contract_number": "123456"
+    }
+  }
+}'
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot customer-portal checkAccountExists
+```
+
+With JSONata filter:
+
+```bash
+epilot customer-portal checkAccountExists --jsonata 'exists'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "exists": true,
+  "accountId": "5da0a718-c822-403d-9f5d-20d4584e0528"
 }
 ```
 
@@ -6326,7 +6555,8 @@ epilot customer-portal uploadMeterReadingPhoto --jsonata 'data'
     },
     "reading": "000123.45",
     "sector": "water",
-    "meter_numbers": ["00123456"]
+    "meter_numbers": ["00123456"],
+    "file_id": "abc123def456"
   }
 }
 ```
@@ -6511,6 +6741,81 @@ epilot customer-portal getMeterReadings --jsonata 'results[0]'
   ],
   "hits": 0,
   "counter_templates_output": {}
+}
+```
+
+</details>
+
+---
+
+### `getSSOProvider`
+
+Returns the public configuration of a single SSO identity provider with env var
+
+`GET /v2/portal/public/sso/providers/{provider_slug}`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `provider_slug` | path | string | Yes | Provider slug (organization-unique) |
+| `org_id` | query | string | No | epilot organization id (required with `origin` or `portal_id`) |
+| `origin` | query | "END_CUSTOMER_PORTAL" \| "INSTALLER_PORTAL" | No | Origin of the Portal |
+| `portal_id` | query | string | No | ID of the Portal |
+| `domain` | query | string | No | Portal domain for identification (alternative to org_id + origin/portal_id) |
+
+**Sample Call**
+
+```bash
+epilot customer-portal getSSOProvider \
+  -p provider_slug=office-365-login
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot customer-portal getSSOProvider office-365-login
+```
+
+With JSONata filter:
+
+```bash
+epilot customer-portal getSSOProvider -p provider_slug=office-365-login --jsonata 'slug'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "slug": "office-365-login",
+  "display_name": "Office 365 Login",
+  "oidc_config": {
+    "type": "implicit",
+    "oidc_issuer": "https://login.microsoftonline.com/33d4f3e5-3df2-421e-b92e-a63cfa680a88/v2.0",
+    "redirect_uri": "https://customer-portal.com/login",
+    "client_id": "ab81daf8-8b1f-42d6-94ca-c51621054c75",
+    "client_secret": "7BIUnn~6shh.7fNtXb..3k1Mp3s6k6WK3B",
+    "has_client_secret": true,
+    "scope": "openid email",
+    "metadata": {
+      "response_modes_supported": ["form_post"],
+      "authorization_endpoint": "https://www.facebook.com/v12.0/dialog/oauth",
+      "token_endpoint": "https://graph.facebook.com/v12.0/oauth/access_token",
+      "userinfo_endpoint": "https://graph.facebook.com/me",
+      "logout_uri": "https://login.microsoftonline.com/common/oauth2/v2.0/logout",
+      "logout_redirect_uri": "https://customer-portal.com/login",
+      "skip_login_as_logout": false,
+      "mobile_redirect_uri": "msauth.io.epilot.ecp://auth",
+      "test_auth_username": "test@epilot.io",
+      "test_auth_password": "string"
+    },
+    "prompt": "login"
+  },
+  "mobile_oidc_config": {
+    "client_id": 123456,
+    "client_secret": 123456
+  }
 }
 ```
 
@@ -6774,7 +7079,8 @@ epilot customer-portal getPortalPage -p id=5da0a718-c822-403d-9f5d-20d4584e0528 
   "is_deleted": false,
   "id": "c495fef9-eeca-4019-a989-8390dcd9825b",
   "last_modified_at": "2021-02-09T12:41:43.662Z",
-  "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c"
+  "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
+  "past_routes": ["old-dashboard", "home"]
 }
 ```
 
@@ -6887,7 +7193,8 @@ epilot customer-portal updatePortalPage -p id=5da0a718-c822-403d-9f5d-20d4584e05
   "is_deleted": false,
   "id": "c495fef9-eeca-4019-a989-8390dcd9825b",
   "last_modified_at": "2021-02-09T12:41:43.662Z",
-  "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c"
+  "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
+  "past_routes": ["old-dashboard", "home"]
 }
 ```
 
@@ -6990,7 +7297,8 @@ epilot customer-portal getPortalPages -p domain=customer-portal.epilot.io --json
     "is_deleted": false,
     "id": "c495fef9-eeca-4019-a989-8390dcd9825b",
     "last_modified_at": "2021-02-09T12:41:43.662Z",
-    "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c"
+    "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
+    "past_routes": ["old-dashboard", "home"]
   }
 ]
 ```
@@ -7098,7 +7406,8 @@ epilot customer-portal createPortalPage -p domain=customer-portal.epilot.io --js
   "is_deleted": false,
   "id": "c495fef9-eeca-4019-a989-8390dcd9825b",
   "last_modified_at": "2021-02-09T12:41:43.662Z",
-  "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c"
+  "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
+  "past_routes": ["old-dashboard", "home"]
 }
 ```
 
@@ -7166,7 +7475,8 @@ epilot customer-portal getPublicPages -p domain=customer-portal.epilot.io --json
     "is_deleted": false,
     "id": "c495fef9-eeca-4019-a989-8390dcd9825b",
     "last_modified_at": "2021-02-09T12:41:43.662Z",
-    "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c"
+    "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
+    "past_routes": ["old-dashboard", "home"]
   }
 ]
 ```
@@ -7223,7 +7533,8 @@ epilot customer-portal interpolatePortalPages \
       "is_deleted": false,
       "id": "c495fef9-eeca-4019-a989-8390dcd9825b",
       "last_modified_at": "2021-02-09T12:41:43.662Z",
-      "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c"
+      "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
+      "past_routes": ["old-dashboard", "home"]
     }
   ],
   "context_entities": [
@@ -7281,7 +7592,8 @@ epilot customer-portal interpolatePortalPages --jsonata '$'
     "is_deleted": false,
     "id": "c495fef9-eeca-4019-a989-8390dcd9825b",
     "last_modified_at": "2021-02-09T12:41:43.662Z",
-    "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c"
+    "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
+    "past_routes": ["old-dashboard", "home"]
   }
 ]
 ```
@@ -7341,7 +7653,8 @@ epilot customer-portal getDefaultPages --jsonata '$'
     "is_deleted": false,
     "id": "c495fef9-eeca-4019-a989-8390dcd9825b",
     "last_modified_at": "2021-02-09T12:41:43.662Z",
-    "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c"
+    "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
+    "past_routes": ["old-dashboard", "home"]
   }
 ]
 ```
@@ -7992,13 +8305,32 @@ epilot customer-portal createPortalConfig \
       {}
     ]
   },
+  "identity_providers": [
+    {
+      "slug": "office-365-login",
+      "display_name": "Office 365 Login",
+      "provider_type": "OIDC",
+      "attribute_mappings": {},
+      "entity_matching": {},
+      "oidc_config": {},
+      "mobile_oidc_config": {}
+    }
+  ],
   "enabled": true,
   "name": "Installer Portal",
   "domain": "abc.com",
   "is_epilot_domain": true,
+  "epilot_domain": "example-portal-1.ecp.epilot.io",
+  "domain_settings": {
+    "is_custom_domain_enabled": true,
+    "is_epilot_domain_enabled": true,
+    "is_redirection_enabled": true
+  },
   "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
   "allowed_portal_entities": ["contact", "contract"],
   "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
+  "self_registration_account_setting": "ALLOW_WITH_CONTACT_CREATION",
+  "self_registration_entity": "contact",
   "user_account_self_management": false,
   "feature_settings": {
     "start_page": true,
@@ -8139,6 +8471,7 @@ epilot customer-portal createPortalConfig \
   "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
   "portal_sk_v3": "PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c",
   "origin": "string",
+  "global_blocks": {},
   "pages": [
     {
       "slug": "dashboard",
@@ -8199,13 +8532,32 @@ epilot customer-portal createPortalConfig --jsonata '$'
       {}
     ]
   },
+  "identity_providers": [
+    {
+      "slug": "office-365-login",
+      "display_name": "Office 365 Login",
+      "provider_type": "OIDC",
+      "attribute_mappings": {},
+      "entity_matching": {},
+      "oidc_config": {},
+      "mobile_oidc_config": {}
+    }
+  ],
   "enabled": true,
   "name": "Installer Portal",
   "domain": "abc.com",
   "is_epilot_domain": true,
+  "epilot_domain": "example-portal-1.ecp.epilot.io",
+  "domain_settings": {
+    "is_custom_domain_enabled": true,
+    "is_epilot_domain_enabled": true,
+    "is_redirection_enabled": true
+  },
   "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
   "allowed_portal_entities": ["contact", "contract"],
   "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
+  "self_registration_account_setting": "ALLOW_WITH_CONTACT_CREATION",
+  "self_registration_entity": "contact",
   "user_account_self_management": false,
   "feature_settings": {
     "start_page": true,
@@ -8346,6 +8698,7 @@ epilot customer-portal createPortalConfig --jsonata '$'
   "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
   "portal_sk_v3": "PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c",
   "origin": "string",
+  "global_blocks": {},
   "organization_id": 12345,
   "org_settings": {
     "canary": {
@@ -8361,14 +8714,6 @@ epilot customer-portal createPortalConfig --jsonata '$'
       "action": "entity-read",
       "resource": "entity:123:contact:f7c22299-ca72-4bca-8538-0a88eeefc947",
       "effect": "allow"
-    }
-  ],
-  "identity_providers": [
-    {
-      "slug": "office-365-login",
-      "display_name": "Office 365 Login",
-      "oidc_config": {},
-      "mobile_oidc_config": {}
     }
   ],
   "pages": [
@@ -8391,7 +8736,8 @@ epilot customer-portal createPortalConfig --jsonata '$'
       "is_deleted": false,
       "id": "c495fef9-eeca-4019-a989-8390dcd9825b",
       "last_modified_at": "2021-02-09T12:41:43.662Z",
-      "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c"
+      "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
+      "past_routes": ["old-dashboard", "home"]
     }
   ]
 }
@@ -8457,13 +8803,32 @@ epilot customer-portal getPortalConfigV3 -p portal_id=5da0a718-c822-403d-9f5d-20
       {}
     ]
   },
+  "identity_providers": [
+    {
+      "slug": "office-365-login",
+      "display_name": "Office 365 Login",
+      "provider_type": "OIDC",
+      "attribute_mappings": {},
+      "entity_matching": {},
+      "oidc_config": {},
+      "mobile_oidc_config": {}
+    }
+  ],
   "enabled": true,
   "name": "Installer Portal",
   "domain": "abc.com",
   "is_epilot_domain": true,
+  "epilot_domain": "example-portal-1.ecp.epilot.io",
+  "domain_settings": {
+    "is_custom_domain_enabled": true,
+    "is_epilot_domain_enabled": true,
+    "is_redirection_enabled": true
+  },
   "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
   "allowed_portal_entities": ["contact", "contract"],
   "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
+  "self_registration_account_setting": "ALLOW_WITH_CONTACT_CREATION",
+  "self_registration_entity": "contact",
   "user_account_self_management": false,
   "feature_settings": {
     "start_page": true,
@@ -8604,6 +8969,7 @@ epilot customer-portal getPortalConfigV3 -p portal_id=5da0a718-c822-403d-9f5d-20
   "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
   "portal_sk_v3": "PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c",
   "origin": "string",
+  "global_blocks": {},
   "organization_id": 12345,
   "org_settings": {
     "canary": {
@@ -8619,14 +8985,6 @@ epilot customer-portal getPortalConfigV3 -p portal_id=5da0a718-c822-403d-9f5d-20
       "action": "entity-read",
       "resource": "entity:123:contact:f7c22299-ca72-4bca-8538-0a88eeefc947",
       "effect": "allow"
-    }
-  ],
-  "identity_providers": [
-    {
-      "slug": "office-365-login",
-      "display_name": "Office 365 Login",
-      "oidc_config": {},
-      "mobile_oidc_config": {}
     }
   ],
   "pages": [
@@ -8649,7 +9007,8 @@ epilot customer-portal getPortalConfigV3 -p portal_id=5da0a718-c822-403d-9f5d-20
       "is_deleted": false,
       "id": "c495fef9-eeca-4019-a989-8390dcd9825b",
       "last_modified_at": "2021-02-09T12:41:43.662Z",
-      "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c"
+      "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
+      "past_routes": ["old-dashboard", "home"]
     }
   ]
 }
@@ -8706,13 +9065,32 @@ epilot customer-portal putPortalConfig \
       {}
     ]
   },
+  "identity_providers": [
+    {
+      "slug": "office-365-login",
+      "display_name": "Office 365 Login",
+      "provider_type": "OIDC",
+      "attribute_mappings": {},
+      "entity_matching": {},
+      "oidc_config": {},
+      "mobile_oidc_config": {}
+    }
+  ],
   "enabled": true,
   "name": "Installer Portal",
   "domain": "abc.com",
   "is_epilot_domain": true,
+  "epilot_domain": "example-portal-1.ecp.epilot.io",
+  "domain_settings": {
+    "is_custom_domain_enabled": true,
+    "is_epilot_domain_enabled": true,
+    "is_redirection_enabled": true
+  },
   "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
   "allowed_portal_entities": ["contact", "contract"],
   "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
+  "self_registration_account_setting": "ALLOW_WITH_CONTACT_CREATION",
+  "self_registration_entity": "contact",
   "user_account_self_management": false,
   "feature_settings": {
     "start_page": true,
@@ -8853,6 +9231,7 @@ epilot customer-portal putPortalConfig \
   "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
   "portal_sk_v3": "PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c",
   "origin": "string",
+  "global_blocks": {},
   "organization_id": 12345,
   "org_settings": {
     "canary": {
@@ -8868,14 +9247,6 @@ epilot customer-portal putPortalConfig \
       "action": "entity-read",
       "resource": "entity:123:contact:f7c22299-ca72-4bca-8538-0a88eeefc947",
       "effect": "allow"
-    }
-  ],
-  "identity_providers": [
-    {
-      "slug": "office-365-login",
-      "display_name": "Office 365 Login",
-      "oidc_config": {},
-      "mobile_oidc_config": {}
     }
   ],
   "pages": [
@@ -8898,7 +9269,8 @@ epilot customer-portal putPortalConfig \
       "is_deleted": false,
       "id": "c495fef9-eeca-4019-a989-8390dcd9825b",
       "last_modified_at": "2021-02-09T12:41:43.662Z",
-      "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c"
+      "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
+      "past_routes": ["old-dashboard", "home"]
     }
   ]
 }'
@@ -8947,13 +9319,32 @@ epilot customer-portal putPortalConfig -p portal_id=5da0a718-c822-403d-9f5d-20d4
       {}
     ]
   },
+  "identity_providers": [
+    {
+      "slug": "office-365-login",
+      "display_name": "Office 365 Login",
+      "provider_type": "OIDC",
+      "attribute_mappings": {},
+      "entity_matching": {},
+      "oidc_config": {},
+      "mobile_oidc_config": {}
+    }
+  ],
   "enabled": true,
   "name": "Installer Portal",
   "domain": "abc.com",
   "is_epilot_domain": true,
+  "epilot_domain": "example-portal-1.ecp.epilot.io",
+  "domain_settings": {
+    "is_custom_domain_enabled": true,
+    "is_epilot_domain_enabled": true,
+    "is_redirection_enabled": true
+  },
   "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
   "allowed_portal_entities": ["contact", "contract"],
   "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
+  "self_registration_account_setting": "ALLOW_WITH_CONTACT_CREATION",
+  "self_registration_entity": "contact",
   "user_account_self_management": false,
   "feature_settings": {
     "start_page": true,
@@ -9094,6 +9485,7 @@ epilot customer-portal putPortalConfig -p portal_id=5da0a718-c822-403d-9f5d-20d4
   "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
   "portal_sk_v3": "PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c",
   "origin": "string",
+  "global_blocks": {},
   "organization_id": 12345,
   "org_settings": {
     "canary": {
@@ -9109,14 +9501,6 @@ epilot customer-portal putPortalConfig -p portal_id=5da0a718-c822-403d-9f5d-20d4
       "action": "entity-read",
       "resource": "entity:123:contact:f7c22299-ca72-4bca-8538-0a88eeefc947",
       "effect": "allow"
-    }
-  ],
-  "identity_providers": [
-    {
-      "slug": "office-365-login",
-      "display_name": "Office 365 Login",
-      "oidc_config": {},
-      "mobile_oidc_config": {}
     }
   ],
   "pages": [
@@ -9139,7 +9523,8 @@ epilot customer-portal putPortalConfig -p portal_id=5da0a718-c822-403d-9f5d-20d4
       "is_deleted": false,
       "id": "c495fef9-eeca-4019-a989-8390dcd9825b",
       "last_modified_at": "2021-02-09T12:41:43.662Z",
-      "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c"
+      "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
+      "past_routes": ["old-dashboard", "home"]
     }
   ]
 }
@@ -9211,13 +9596,18 @@ epilot customer-portal listAllPortalConfigs --jsonata 'data'
       "extensions": [],
       "extension_hooks": {},
       "default_user_to_notify": {},
+      "identity_providers": [],
       "enabled": true,
       "name": "Installer Portal",
       "domain": "abc.com",
       "is_epilot_domain": true,
+      "epilot_domain": "example-portal-1.ecp.epilot.io",
+      "domain_settings": {},
       "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
       "allowed_portal_entities": ["contact", "contract"],
       "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
+      "self_registration_account_setting": "ALLOW_WITH_CONTACT_CREATION",
+      "self_registration_entity": "contact",
       "user_account_self_management": false,
       "feature_settings": {},
       "accessToken": "string",
@@ -9244,11 +9634,11 @@ epilot customer-portal listAllPortalConfigs --jsonata 'data'
       "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
       "portal_sk_v3": "PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c",
       "origin": "string",
+      "global_blocks": {},
       "organization_id": 12345,
       "org_settings": {},
       "feature_flags": {},
       "grants": [],
-      "identity_providers": [],
       "pages": []
     }
   ]
@@ -9361,13 +9751,32 @@ epilot customer-portal clonePortalConfig --jsonata '$'
       {}
     ]
   },
+  "identity_providers": [
+    {
+      "slug": "office-365-login",
+      "display_name": "Office 365 Login",
+      "provider_type": "OIDC",
+      "attribute_mappings": {},
+      "entity_matching": {},
+      "oidc_config": {},
+      "mobile_oidc_config": {}
+    }
+  ],
   "enabled": true,
   "name": "Installer Portal",
   "domain": "abc.com",
   "is_epilot_domain": true,
+  "epilot_domain": "example-portal-1.ecp.epilot.io",
+  "domain_settings": {
+    "is_custom_domain_enabled": true,
+    "is_epilot_domain_enabled": true,
+    "is_redirection_enabled": true
+  },
   "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
   "allowed_portal_entities": ["contact", "contract"],
   "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
+  "self_registration_account_setting": "ALLOW_WITH_CONTACT_CREATION",
+  "self_registration_entity": "contact",
   "user_account_self_management": false,
   "feature_settings": {
     "start_page": true,
@@ -9508,6 +9917,7 @@ epilot customer-portal clonePortalConfig --jsonata '$'
   "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
   "portal_sk_v3": "PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c",
   "origin": "string",
+  "global_blocks": {},
   "organization_id": 12345,
   "org_settings": {
     "canary": {
@@ -9523,14 +9933,6 @@ epilot customer-portal clonePortalConfig --jsonata '$'
       "action": "entity-read",
       "resource": "entity:123:contact:f7c22299-ca72-4bca-8538-0a88eeefc947",
       "effect": "allow"
-    }
-  ],
-  "identity_providers": [
-    {
-      "slug": "office-365-login",
-      "display_name": "Office 365 Login",
-      "oidc_config": {},
-      "mobile_oidc_config": {}
     }
   ],
   "pages": [
@@ -9553,7 +9955,8 @@ epilot customer-portal clonePortalConfig --jsonata '$'
       "is_deleted": false,
       "id": "c495fef9-eeca-4019-a989-8390dcd9825b",
       "last_modified_at": "2021-02-09T12:41:43.662Z",
-      "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c"
+      "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
+      "past_routes": ["old-dashboard", "home"]
     }
   ]
 }
@@ -9825,6 +10228,86 @@ epilot customer-portal enablePartner -p partner_id=123e4567-e89b-12d3-a456-42661
 ```json
 {
   "message": "Partner enabled from portal successfully"
+}
+```
+
+</details>
+
+---
+
+### `verifyDns`
+
+Manually triggers DNS verification for a portal's domain setup. Runs the same verification logic as the scheduled proces
+
+`POST /v3/portal/verify-dns`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `portal_id` | query | string | Yes | PortalId of the portal |
+
+**Sample Call**
+
+```bash
+epilot customer-portal verifyDns \
+  -p portal_id=453ad7bf-86d5-46c8-8252-bcc868df5e3c
+```
+
+With JSONata filter:
+
+```bash
+epilot customer-portal verifyDns -p portal_id=453ad7bf-86d5-46c8-8252-bcc868df5e3c --jsonata 'domain_status'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "domain_status": "PENDING",
+  "message": "string"
+}
+```
+
+</details>
+
+---
+
+### `portalProxyExecute`
+
+Execute an Integration Hub managed-call use case on behalf of a portal user.
+
+`POST /v2/portal/proxy/execute`
+
+**Request Body** (required)
+
+**Sample Call**
+
+```bash
+epilot customer-portal portalProxyExecute \
+  -d '{"integration_id":"3fa85f64-5717-4562-b3fc-2c963f66afa6","use_case_slug":"string","payload":{}}'
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot customer-portal portalProxyExecute
+```
+
+With JSONata filter:
+
+```bash
+epilot customer-portal portalProxyExecute --jsonata 'data'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "success": true,
+  "data": {}
 }
 ```
 

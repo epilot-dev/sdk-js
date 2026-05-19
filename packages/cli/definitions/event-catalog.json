@@ -261,6 +261,118 @@
         }
       }
     },
+    "/v2/events/{event_name}:history": {
+      "post": {
+        "operationId": "searchEventHistoryV2",
+        "summary": "searchEventHistoryV2",
+        "description": "Paginated history of events with projected/lightweight payload (v2).\n\nReturns `EventSummary` objects instead of fully hydrated `Event` objects:\nnested entity graphs (objects/arrays-of-objects carrying `_schema`/`_id`)\nare stripped. Use GET /v2/events/{event_name}/history/{event_id} to fetch\nthe full hydrated event for a single result.\n",
+        "tags": [
+          "Event Catalog"
+        ],
+        "parameters": [
+          {
+            "name": "event_name",
+            "in": "path",
+            "required": true,
+            "description": "Unique human readable name of the event",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchOptionsV2"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "List of event summaries in the event history",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/EventSummary"
+                      }
+                    },
+                    "next_cursor": {
+                      "type": "object",
+                      "description": "Cursor for pagination. Use this to get the next page of results.",
+                      "nullable": true,
+                      "properties": {
+                        "event_time": {
+                          "type": "string",
+                          "description": "Timestamp from the last event in the current page",
+                          "example": "2025-10-31T12:34:56Z"
+                        },
+                        "event_id": {
+                          "type": "string",
+                          "description": "Event ID from the last event in the current page",
+                          "example": "evt_1234567890abcdef"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/events/{event_name}/history/{event_id}": {
+      "get": {
+        "operationId": "getHistoricalEvent",
+        "summary": "getHistoricalEvent",
+        "description": "Fetch a single historical event by id with full hydration",
+        "tags": [
+          "Event Catalog"
+        ],
+        "parameters": [
+          {
+            "name": "event_name",
+            "in": "path",
+            "required": true,
+            "description": "Unique human readable name of the event",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "description": "Unique event identifier (ULID)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The fully hydrated historical event",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Event"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Event not found"
+          }
+        }
+      }
+    },
     "/v1/events/{event_name}:trigger": {
       "post": {
         "operationId": "triggerEvent",
@@ -441,7 +553,7 @@
         ]
       },
       "UpdateEventPayload": {
-        "description": "Payload for updating an event configuration.\nAccepts the same fields as EventConfig (all optional for PATCH).\nCurrently only `enabled` and `auto_trigger` fields are processed, other fields are ignored.\n",
+        "description": "Payload for updating an event configuration.\nAccepts the same fields as EventConfig (all optional for PATCH).\nCurrently `enabled` and `auto_trigger` fields are processed.\n",
         "allOf": [
           {
             "$ref": "#/components/schemas/EventConfigBase"
@@ -495,6 +607,22 @@
           "entity_schema"
         ]
       },
+      "AttachmentField": {
+        "type": "object",
+        "description": "A schema field representing file attachments associated with the event.\nPresent in schema_fields for events tagged with \"attachment\".\n",
+        "properties": {
+          "items": {
+            "$ref": "#/components/schemas/EventAttachment"
+          },
+          "required": {
+            "type": "boolean",
+            "description": "Whether this field is required in the event payload"
+          }
+        },
+        "required": [
+          "items"
+        ]
+      },
       "SchemaField": {
         "oneOf": [
           {
@@ -502,6 +630,9 @@
           },
           {
             "$ref": "#/components/schemas/ContextEntity"
+          },
+          {
+            "$ref": "#/components/schemas/AttachmentField"
           }
         ]
       },
@@ -764,6 +895,60 @@
           "contract_id": "880e8400-e29b-41d4-a716-446655440000"
         }
       },
+      "EventSummary": {
+        "type": "object",
+        "description": "A lightweight event summary returned by the v2 history endpoint.\n\nIncludes the standard `_*` metadata fields plus a projected subset of the\nevent payload. Hydrated entity objects (values carrying `_schema` or `_id`\nand arrays of such objects) are stripped — fetch via\n`GET /v2/events/{event_name}/history/{event_id}` for full hydration.\n\nProjected scalar payload fields appear as additional top-level properties.\n",
+        "properties": {
+          "_org_id": {
+            "type": "string",
+            "description": "epilot tenant/organization ID"
+          },
+          "_event_time": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO 8601 timestamp when event occurred"
+          },
+          "_event_id": {
+            "type": "string",
+            "description": "Unique event identifier (ULID)"
+          },
+          "_event_name": {
+            "type": "string",
+            "description": "Event name from catalog"
+          },
+          "_event_version": {
+            "type": "string",
+            "description": "Event version (semver)",
+            "example": "1.0.0"
+          },
+          "_event_source": {
+            "type": "string",
+            "description": "Source that triggered the event"
+          },
+          "_trigger_source_type": {
+            "type": "string",
+            "description": "The type of system that triggered the event.\nCommon values: api, automation, operation, portal_user\n",
+            "example": "api"
+          },
+          "_trigger_source": {
+            "type": "string",
+            "description": "Identifier of the specific trigger source.\n"
+          },
+          "_ack_id": {
+            "type": "string",
+            "description": "Unique acknowledgment tracking ID for the event.\n"
+          }
+        },
+        "required": [
+          "_org_id",
+          "_event_time",
+          "_event_id",
+          "_event_name",
+          "_event_version",
+          "_event_source"
+        ],
+        "additionalProperties": true
+      },
       "GraphDefinition": {
         "type": "object",
         "description": "Entity graph definition for resolving related entities",
@@ -959,6 +1144,22 @@
           }
         }
       },
+      "SearchOptionsV2": {
+        "description": "Search options for the v2 history endpoint.\n\nExtends `SearchOptions` with an optional `fields` projection. When `fields`\nis omitted, the response includes all `_*` metadata plus all scalar payload\nfields (and primitive arrays / empty objects/arrays) after entity stripping.\nWhen `fields` is provided, glob/exclusion semantics from `FieldsParam` apply\nagainst `payload.*` paths; `_*` metadata is always included. Entity stripping\nruns AFTER selection.\n",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/SearchOptions"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "fields": {
+                "$ref": "#/components/schemas/FieldsParam"
+              }
+            }
+          }
+        ]
+      },
       "FieldsParam": {
         "type": "array",
         "description": "List of entity fields to include or exclude in the response\n\nUse ! to exclude fields, e.g. `!_id` to exclude the `_id` field.\n\nGlobbing and globstart (**) is supported for nested fields.\n",
@@ -1039,6 +1240,60 @@
         "required": [
           "success",
           "event_id"
+        ]
+      },
+      "EventAttachment": {
+        "type": "object",
+        "description": "A file attachment associated with an event",
+        "properties": {
+          "entity_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Entity ID of the file"
+          },
+          "filename": {
+            "type": "string",
+            "description": "Name of the file"
+          },
+          "mime_type": {
+            "type": "string",
+            "description": "MIME type of the file (e.g., application/pdf)"
+          },
+          "size_bytes": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "File size in bytes"
+          },
+          "s3ref": {
+            "type": "object",
+            "description": "S3 reference for the file content",
+            "properties": {
+              "bucket": {
+                "type": "string",
+                "description": "S3 bucket name"
+              },
+              "key": {
+                "type": "string",
+                "description": "S3 object key"
+              }
+            },
+            "required": [
+              "bucket",
+              "key"
+            ]
+          },
+          "version_index": {
+            "type": "integer",
+            "description": "File version index (always 0 for newly created files)"
+          },
+          "readable_size": {
+            "type": "string",
+            "description": "Human-readable file size (e.g., \"200 KB\")"
+          }
+        },
+        "required": [
+          "entity_id",
+          "version_index"
         ]
       }
     }

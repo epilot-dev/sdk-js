@@ -212,14 +212,17 @@ epilot notes updateNote \
     }
   ],
   "pinned_at": "1970-01-01T00:00:00.000Z",
-  "created_by": {
-    "type": "user",
-    "user_id": "string",
-    "display_name": "string",
-    "org_id": "string",
-    "email": "string",
-    "phone": "string"
-  },
+  "edited_at": "1970-01-01T00:00:00.000Z",
+  "created_by": [
+    {
+      "type": "user",
+      "user_id": "string",
+      "display_name": "string",
+      "org_id": "string",
+      "email": "string",
+      "phone": "string"
+    }
+  ],
   "read_by": ["string"],
   "reactions": {}
 }'
@@ -331,7 +334,7 @@ Search for a paginated list of Notes based on one or more contexts
 
 ```bash
 epilot notes searchNotesByContext \
-  -d '{"contexts":[{"type":"workflow_execution","id":"string"}],"from":0,"size":10}'
+  -d '{"contexts":[{"type":"workflow_execution","id":"string"}],"include_related_schemas":["string"],"from":0,"size":10}'
 ```
 
 Using stdin pipe:
