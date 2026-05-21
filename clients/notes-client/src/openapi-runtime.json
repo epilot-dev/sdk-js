@@ -108,6 +108,10 @@
           },
           {
             "in": "query",
+            "name": "filter"
+          },
+          {
+            "in": "query",
             "name": "from"
           },
           {
@@ -121,6 +125,32 @@
     "/v1/note/{id}/pin": {
       "post": {
         "operationId": "pinNote",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/note/{id}/archive": {
+      "post": {
+        "operationId": "archiveNote",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/note/{id}/unarchive": {
+      "post": {
+        "operationId": "unarchiveNote",
         "parameters": [
           {
             "in": "path",

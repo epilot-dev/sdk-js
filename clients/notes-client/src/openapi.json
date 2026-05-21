@@ -1,7 +1,7 @@
 {
   "openapi": "3.0.2",
   "info": {
-    "version": "2.4.0",
+    "version": "2.6.0",
     "title": "Notes API",
     "description": "Facade API Backend for Epilot Notes feature",
     "contact": {
@@ -23,6 +23,9 @@
     },
     {
       "name": "Reactions"
+    },
+    {
+      "name": "Archive"
     }
   ],
   "security": [
@@ -287,6 +290,14 @@
           },
           {
             "in": "query",
+            "name": "filter",
+            "description": "Archive-state filter. 'active' (default) returns non-archived notes only, 'archived' returns only archived notes, 'all' returns both.",
+            "schema": {
+              "$ref": "#/components/schemas/NotesListFilter"
+            }
+          },
+          {
+            "in": "query",
             "name": "from",
             "description": "The index of the first Note to return in this query",
             "schema": {
@@ -343,6 +354,74 @@
         "responses": {
           "200": {
             "description": "Successful response with the pinned Note entity"
+          }
+        }
+      }
+    },
+    "/v1/note/{id}/archive": {
+      "post": {
+        "operationId": "archiveNote",
+        "summary": "archiveNote",
+        "description": "Archives a root Note entry by setting its `_archived_at` timestamp to the current server time. The same timestamp is cascaded to every comment under the note so the entire thread is hidden from default listings. Returns 400 if the supplied id is a comment.",
+        "tags": [
+          "Archive"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "The Entity ID of the Note entry to archive",
+            "schema": {
+              "type": "string",
+              "description": "The Entity ID of the Note entry to archive"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response with the archived Note entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NoteEntity"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/note/{id}/unarchive": {
+      "post": {
+        "operationId": "unarchiveNote",
+        "summary": "unarchiveNote",
+        "description": "Unarchives a root Note entry by clearing its `_archived_at` value. The clear cascades to every comment under the note so the entire thread returns to the active view. Returns 400 if the supplied id is a comment.",
+        "tags": [
+          "Archive"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "The Entity ID of the Note entry to unarchive",
+            "schema": {
+              "type": "string",
+              "description": "The Entity ID of the Note entry to unarchive"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response with the unarchived Note entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NoteEntity"
+                }
+              }
+            }
           }
         }
       }
@@ -726,6 +805,12 @@
               }
             },
             "description": "Reactions to the note, keyed by reaction type, with an array of user IDs for each type"
+          },
+          "_archived_at": {
+            "type": "string",
+            "nullable": true,
+            "description": "The timestamp of when this Note was archived. Absent or null means the Note is active.",
+            "format": "date-time"
           }
         },
         "description": "A note Entity object cotaining Entity metadata and content. Relational attributes are hydrated in place."
@@ -927,6 +1012,12 @@
               }
             },
             "description": "Reactions to the note, keyed by reaction type, with an array of user IDs for each type"
+          },
+          "_archived_at": {
+            "type": "string",
+            "nullable": true,
+            "description": "The timestamp of when this Note was archived. Absent or null means the Note is active.",
+            "format": "date-time"
           }
         }
       },
@@ -1051,6 +1142,12 @@
               }
             },
             "description": "Reactions to the note, keyed by reaction type, with an array of user IDs for each type"
+          },
+          "_archived_at": {
+            "type": "string",
+            "nullable": true,
+            "description": "The timestamp of when this Note was archived. Absent or null means the Note is active.",
+            "format": "date-time"
           }
         }
       },
@@ -1194,6 +1291,12 @@
               }
             },
             "description": "Reactions to the note, keyed by reaction type, with an array of user IDs for each type"
+          },
+          "_archived_at": {
+            "type": "string",
+            "nullable": true,
+            "description": "The timestamp of when this Note was archived. Absent or null means the Note is active.",
+            "format": "date-time"
           }
         },
         "required": [
@@ -1422,6 +1525,12 @@
               }
             },
             "description": "Reactions to the note, keyed by reaction type, with an array of user IDs for each type"
+          },
+          "_archived_at": {
+            "type": "string",
+            "nullable": true,
+            "description": "The timestamp of when this Note was archived. Absent or null means the Note is active.",
+            "format": "date-time"
           }
         }
       },
@@ -1454,6 +1563,9 @@
             },
             "description": "When set, the API resolves related entities of these schemas for the primary entity context and includes their notes in the results."
           },
+          "filter": {
+            "$ref": "#/components/schemas/NotesListFilter"
+          },
           "from": {
             "type": "number",
             "default": 0,
@@ -1468,6 +1580,16 @@
         "required": [
           "contexts"
         ]
+      },
+      "NotesListFilter": {
+        "type": "string",
+        "enum": [
+          "all",
+          "active",
+          "archived"
+        ],
+        "default": "active",
+        "description": "Archive-state filter. 'active' (default) returns non-archived notes only, 'archived' returns only archived notes, 'all' returns both."
       },
       "NotesSearchRequestResponse": {
         "type": "object",
