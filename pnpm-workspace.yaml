@@ -2,3 +2,12 @@ packages:
   - 'packages/*'
   - 'clients/*'
 shamefullyHoist: true
+overrides:
+  '@types/node': 24.2.0
+minimumReleaseAgeExclude:
+  - '@epilot/cli@0.1.28'
+allowBuilds:
+  '@scarf/scarf': false
+  esbuild: true
+  msw: true
+  yarn: false
