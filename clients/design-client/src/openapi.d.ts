@@ -644,6 +644,10 @@ declare namespace Components {
             file_type?: "LOGO" | "FONT" | "IMAGE";
             s3_object_key: string;
             url: string;
+            /**
+             * ID of the source file entity in the epilot file-entity system. Set when the file was picked from the File Manager (rather than uploaded directly to the design-builder bucket). Consumers resolve the live `public_url` via this reference. The org id is derived from the journey's owning org at render time (same convention as journey image blocks), so blueprint cross-org installs work without any extra remapping.
+             */
+            file_id?: string;
         }
         export interface FontData {
             font_id: string;
@@ -1223,6 +1227,10 @@ declare namespace Components {
             file_type?: "LOGO" | "FONT" | "IMAGE";
             s3_object_key: string;
             url: string;
+            /**
+             * ID of the source file entity in the epilot file-entity system. Set when the file was picked from the File Manager (rather than uploaded directly to the design-builder bucket). Consumers resolve the live `public_url` via this reference. The org id is derived from the journey's owning org at render time (same convention as journey image blocks), so blueprint cross-org installs work without any extra remapping.
+             */
+            file_id?: string;
         }[];
         export interface ItemMetada {
             id?: string;
@@ -1485,6 +1493,32 @@ declare namespace Components {
             paper: string;
             navbar: string;
             portal_login_background?: string;
+        }
+        export interface ParseThemeFromDesignResp {
+            theme?: /**
+             * Type of theme to be parsed and returned
+             * example:
+             * NEW
+             */
+            Theme;
+            design?: {
+                id?: string;
+                last_modified_at?: string;
+                style_name?: string;
+                style?: {
+                    logo?: LogoData;
+                    palette?: PaletteData;
+                    typography?: TypographyData;
+                };
+                custom_theme?: string;
+                use_custom_theme?: boolean;
+                /**
+                 * Design tokens for journey customization (renamed from design_tokens)
+                 */
+                journey_design_tokens?: {
+                    [key: string]: any;
+                };
+            };
         }
         export interface RemoveConsumerReq {
             consumer_id: /**
@@ -1784,6 +1818,10 @@ declare namespace Components {
             file_type?: "LOGO" | "FONT" | "IMAGE";
             s3_object_key: string;
             url: string;
+            /**
+             * ID of the source file entity in the epilot file-entity system. Set when the file was picked from the File Manager (rather than uploaded directly to the design-builder bucket). Consumers resolve the live `public_url` via this reference. The org id is derived from the journey's owning org at render time (same convention as journey image blocks), so blueprint cross-org installs work without any extra remapping.
+             */
+            file_id?: string;
         }
         export interface WidgetData {
             id: string;
@@ -1957,8 +1995,7 @@ declare namespace Paths {
             theme: Parameters.Theme;
         }
         namespace Responses {
-            export interface $200 {
-            }
+            export type $200 = Components.Schemas.ParseThemeFromDesignResp;
             export type $400 = Components.Schemas.ErrorResp;
             export type $401 = Components.Schemas.ErrorResp;
             export interface $404 {
@@ -2336,6 +2373,7 @@ export type ItemMetada = Components.Schemas.ItemMetada;
 export type Journey = Components.Schemas.Journey;
 export type LogoData = Components.Schemas.LogoData;
 export type PaletteData = Components.Schemas.PaletteData;
+export type ParseThemeFromDesignResp = Components.Schemas.ParseThemeFromDesignResp;
 export type RemoveConsumerReq = Components.Schemas.RemoveConsumerReq;
 export type ShapeData = Components.Schemas.ShapeData;
 export type Theme = Components.Schemas.Theme;
