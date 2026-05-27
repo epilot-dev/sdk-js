@@ -81,6 +81,7 @@ const { data } = await pricingClient.$calculatePricingDetails(...)
 - [`PriceInputMapping`](#priceinputmapping)
 - [`PriceConditions`](#priceconditions)
 - [`ExternalFeeMetadata`](#externalfeemetadata)
+- [`ExternalLocationMetadata`](#externallocationmetadata)
 - [`ExternalPriceMetadata`](#externalpricemetadata)
 - [`ExternalFeeMappings`](#externalfeemappings)
 - [`ExternalFeeMapping`](#externalfeemapping)
@@ -122,6 +123,10 @@ const { data } = await pricingClient.$calculatePricingDetails(...)
 - [`SearchStreetsResult`](#searchstreetsresult)
 - [`SearchProvidersResult`](#searchprovidersresult)
 - [`Provider`](#provider)
+- [`AdditionalProviderData`](#additionalproviderdata)
+- [`MarketParticipant`](#marketparticipant)
+- [`GasMarketAreaDetails`](#gasmarketareadetails)
+- [`PowerMarketAreaDetails`](#powermarketareadetails)
 - [`Street`](#street)
 - [`ValidateAvailabilityFileResult`](#validateavailabilityfileresult)
 - [`CartDto`](#cartdto)
@@ -299,6 +304,7 @@ const { data } = await client.createOrder(
       {
         external_fees_mappings: [ /* ... */ ],
         external_fees_metadata: { /* ... */ },
+        external_location_metadata: { /* ... */ },
         external_price_metadata: { /* ... */ },
         _immutable_pricing_details: { /* ... */ },
         coupon_ids: ['string'],
@@ -328,6 +334,7 @@ const { data } = await client.createOrder(
       {
         external_fees_mappings: [ /* ... */ ],
         external_fees_metadata: { /* ... */ },
+        external_location_metadata: { /* ... */ },
         external_price_metadata: { /* ... */ },
         _immutable_pricing_details: { /* ... */ },
         coupon_ids: ['string'],
@@ -530,6 +537,7 @@ const { data } = await client.putOrder(
       {
         external_fees_mappings: [ /* ... */ ],
         external_fees_metadata: { /* ... */ },
+        external_location_metadata: { /* ... */ },
         external_price_metadata: { /* ... */ },
         _immutable_pricing_details: { /* ... */ },
         coupon_ids: ['string'],
@@ -559,6 +567,7 @@ const { data } = await client.putOrder(
       {
         external_fees_mappings: [ /* ... */ ],
         external_fees_metadata: { /* ... */ },
+        external_location_metadata: { /* ... */ },
         external_price_metadata: { /* ... */ },
         _immutable_pricing_details: { /* ... */ },
         coupon_ids: ['string'],
@@ -1305,7 +1314,35 @@ const { data } = await client.$searchProviders(
 [
   {
     "name": "string",
-    "code": "string"
+    "code": "string",
+    "type": "gas",
+    "additionalData": {
+      "gridOperators": [
+        {
+          "name": "string",
+          "codeNumber": "string",
+          "validFrom": "1970-01-01",
+          "validUntil": "1970-01-01"
+        }
+      ],
+      "defaultSuppliers": [
+        {
+          "name": "string",
+          "codeNumber": "string",
+          "validFrom": "1970-01-01",
+          "validUntil": "1970-01-01"
+        }
+      ],
+      "marketAreaDetails": {
+        "gasType": "L-Gas",
+        "marketArea": "string",
+        "virtualTradingPoint": "string"
+      }
+    },
+    "_meta": {
+      "signature": "string",
+      "timestamp": 0
+    }
   }
 ]
 ```
@@ -2237,6 +2274,42 @@ type ExternalFeeMetadata = {
 }
 ```
 
+### `ExternalLocationMetadata`
+
+```ts
+type ExternalLocationMetadata = {
+  name: string
+  code: string
+  type: "gas" | "power"
+  additionalData: {
+    gridOperators: Array<{
+      name: { ... }
+      codeNumber: { ... }
+      validFrom?: { ... }
+      validUntil?: { ... }
+    }>
+    defaultSuppliers: Array<{
+      name: { ... }
+      codeNumber: { ... }
+      validFrom?: { ... }
+      validUntil?: { ... }
+    }>
+    marketAreaDetails: {
+      gasType?: { ... }
+      marketArea?: { ... }
+      virtualTradingPoint?: { ... }
+    } | {
+      controlZone?: { ... }
+      balancingZone?: { ... }
+    }
+  }
+  _meta?: {
+    signature: string
+    timestamp: number
+  }
+}
+```
+
 ### `ExternalPriceMetadata`
 
 ```ts
@@ -2950,6 +3023,33 @@ The search providers payload
 type SearchProvidersResult = Array<{
   name: string
   code: string
+  type: "gas" | "power"
+  additionalData: {
+    gridOperators: Array<{
+      name: { ... }
+      codeNumber: { ... }
+      validFrom?: { ... }
+      validUntil?: { ... }
+    }>
+    defaultSuppliers: Array<{
+      name: { ... }
+      codeNumber: { ... }
+      validFrom?: { ... }
+      validUntil?: { ... }
+    }>
+    marketAreaDetails: {
+      gasType?: { ... }
+      marketArea?: { ... }
+      virtualTradingPoint?: { ... }
+    } | {
+      controlZone?: { ... }
+      balancingZone?: { ... }
+    }
+  }
+  _meta?: {
+    signature: string
+    timestamp: number
+  }
 }>
 ```
 
@@ -2961,6 +3061,98 @@ The provider entity
 type Provider = {
   name: string
   code: string
+  type: "gas" | "power"
+  additionalData: {
+    gridOperators: Array<{
+      name: { ... }
+      codeNumber: { ... }
+      validFrom?: { ... }
+      validUntil?: { ... }
+    }>
+    defaultSuppliers: Array<{
+      name: { ... }
+      codeNumber: { ... }
+      validFrom?: { ... }
+      validUntil?: { ... }
+    }>
+    marketAreaDetails: {
+      gasType?: { ... }
+      marketArea?: { ... }
+      virtualTradingPoint?: { ... }
+    } | {
+      controlZone?: { ... }
+      balancingZone?: { ... }
+    }
+  }
+  _meta?: {
+    signature: string
+    timestamp: number
+  }
+}
+```
+
+### `AdditionalProviderData`
+
+Additional data included in the provider entity
+
+```ts
+type AdditionalProviderData = {
+  gridOperators: Array<{
+    name: string
+    codeNumber: string
+    validFrom?: string // date
+    validUntil?: string // date
+  }>
+  defaultSuppliers: Array<{
+    name: string
+    codeNumber: string
+    validFrom?: string // date
+    validUntil?: string // date
+  }>
+  marketAreaDetails: {
+    gasType?: "L-Gas" | "H-Gas"
+    marketArea?: string
+    virtualTradingPoint?: string
+  } | {
+    controlZone?: string
+    balancingZone?: string
+  }
+}
+```
+
+### `MarketParticipant`
+
+Market participant data
+
+```ts
+type MarketParticipant = {
+  name: string
+  codeNumber: string
+  validFrom?: string // date
+  validUntil?: string // date
+}
+```
+
+### `GasMarketAreaDetails`
+
+Market area details for gas
+
+```ts
+type GasMarketAreaDetails = {
+  gasType?: "L-Gas" | "H-Gas"
+  marketArea?: string
+  virtualTradingPoint?: string
+}
+```
+
+### `PowerMarketAreaDetails`
+
+Market area details for power
+
+```ts
+type PowerMarketAreaDetails = {
+  controlZone?: string
+  balancingZone?: string
 }
 ```
 
@@ -3085,16 +3277,16 @@ type CartDto = {
       breakdown: { ... }
       _meta?: { ... }
     }
+    external_location_metadata?: {
+      name: { ... }
+      code: { ... }
+      type: { ... }
+      additionalData: { ... }
+      _meta?: { ... }
+    }
     external_price_metadata?: {
       market: { ... }
       bidding_zone: { ... }
-      price: { ... }
-      _meta?: { ... }
-    }
-    _immutable_pricing_details?: {
-      items?: { ... }
-      amount_subtotal?: { ... }
-      amount_total?: { ... }
   // ...
 }
 ```
@@ -3173,6 +3365,7 @@ type CheckoutCart = {
     line_items: Array<{
       external_fees_mappings?: { ... }
       external_fees_metadata?: { ... }
+      external_location_metadata?: { ... }
       external_price_metadata?: { ... }
       _immutable_pricing_details?: { ... }
       coupon_ids?: { ... }
@@ -3191,6 +3384,7 @@ type CheckoutCart = {
     } | {
       external_fees_mappings?: { ... }
       external_fees_metadata?: { ... }
+      external_location_metadata?: { ... }
       external_price_metadata?: { ... }
       _immutable_pricing_details?: { ... }
       coupon_ids?: { ... }
@@ -3202,8 +3396,6 @@ type CheckoutCart = {
       selected_price_component_ids?: { ... }
       price_component_coupon_ids?: { ... }
       _price?: { ... }
-    }>
-    files?: string[]
   // ...
 }
 ```
@@ -3463,6 +3655,20 @@ type PriceItemDtoUnion = {
       timestamp: { ... }
     }
   }
+  external_location_metadata?: {
+    name: string
+    code: string
+    type: "gas" | "power"
+    additionalData: {
+      gridOperators: { ... }
+      defaultSuppliers: { ... }
+      marketAreaDetails: { ... }
+    }
+    _meta?: {
+      signature: { ... }
+      timestamp: { ... }
+    }
+  }
   external_price_metadata?: {
     market: "day_ahead"
     bidding_zone: "AT" | "DE-LU"
@@ -3516,20 +3722,6 @@ type PriceItemDtoUnion = {
       code: { ... }
       coupons: { ... }
     }>
-  }
-  coupon_ids?: string[]
-  taxes?: Array<{
-    rate?: string
-    tax?: {
-      _id: { ... }
-      _title: { ... }
-      _org: { ... }
-      _schema: { ... }
-      _tags?: { ... }
-      _created_at: { ... }
-      _updated_at: { ... }
-      type: { ... }
-      description?: { ... }
   // ...
 }
 ```
@@ -3572,6 +3764,20 @@ type PriceItemsDto = Array<{
       timestamp: { ... }
     }
   }
+  external_location_metadata?: {
+    name: string
+    code: string
+    type: "gas" | "power"
+    additionalData: {
+      gridOperators: { ... }
+      defaultSuppliers: { ... }
+      marketAreaDetails: { ... }
+    }
+    _meta?: {
+      signature: { ... }
+      timestamp: { ... }
+    }
+  }
   external_price_metadata?: {
     market: "day_ahead"
     bidding_zone: "AT" | "DE-LU"
@@ -3625,20 +3831,6 @@ type PriceItemsDto = Array<{
       code: { ... }
       coupons: { ... }
     }>
-  }
-  coupon_ids?: string[]
-  taxes?: Array<{
-    rate?: string
-    tax?: {
-      _id: { ... }
-      _title: { ... }
-      _org: { ... }
-      _schema: { ... }
-      _tags?: { ... }
-      _created_at: { ... }
-      _updated_at: { ... }
-      type: { ... }
-      description?: { ... }
   // ...
 }
 ```
@@ -3770,6 +3962,20 @@ type PriceItemDto = {
       timestamp: { ... }
     }
   }
+  external_location_metadata?: {
+    name: string
+    code: string
+    type: "gas" | "power"
+    additionalData: {
+      gridOperators: { ... }
+      defaultSuppliers: { ... }
+      marketAreaDetails: { ... }
+    }
+    _meta?: {
+      signature: { ... }
+      timestamp: { ... }
+    }
+  }
   external_price_metadata?: {
     market: "day_ahead"
     bidding_zone: "AT" | "DE-LU"
@@ -3823,20 +4029,6 @@ type PriceItemDto = {
       code: { ... }
       coupons: { ... }
     }>
-  }
-  coupon_ids?: string[]
-  taxes?: Array<{
-    rate?: string
-    tax?: {
-      _id: { ... }
-      _title: { ... }
-      _org: { ... }
-      _schema: { ... }
-      _tags?: { ... }
-      _created_at: { ... }
-      _updated_at: { ... }
-      type: { ... }
-      description?: { ... }
   // ...
 }
 ```
@@ -3879,6 +4071,20 @@ type CompositePriceItemDto = {
       timestamp: { ... }
     }
   }
+  external_location_metadata?: {
+    name: string
+    code: string
+    type: "gas" | "power"
+    additionalData: {
+      gridOperators: { ... }
+      defaultSuppliers: { ... }
+      marketAreaDetails: { ... }
+    }
+    _meta?: {
+      signature: { ... }
+      timestamp: { ... }
+    }
+  }
   external_price_metadata?: {
     market: "day_ahead"
     bidding_zone: "AT" | "DE-LU"
@@ -3932,20 +4138,6 @@ type CompositePriceItemDto = {
       code: { ... }
       coupons: { ... }
     }>
-  }
-  coupon_ids?: string[]
-  taxes?: Array<{
-    rate?: string
-    tax?: {
-      _id: { ... }
-      _title: { ... }
-      _org: { ... }
-      _schema: { ... }
-      _tags?: { ... }
-      _created_at: { ... }
-      _updated_at: { ... }
-      type: { ... }
-      description?: { ... }
   // ...
 }
 ```
@@ -4075,6 +4267,13 @@ type OrderPayload = {
       breakdown: { ... }
       _meta?: { ... }
     }
+    external_location_metadata?: {
+      name: { ... }
+      code: { ... }
+      type: { ... }
+      additionalData: { ... }
+      _meta?: { ... }
+    }
     external_price_metadata?: {
       market: { ... }
       bidding_zone: { ... }
@@ -4141,13 +4340,6 @@ type OrderPayload = {
     unit_amount_gross?: number
     unit_amount_currency?: string
     unit_amount_decimal?: string
-    is_composite_price?: false
-    pricing_model?: "per_unit" | "tiered_graduated" | "tiered_volume" | "tiered_flatfee" | "dynamic_tariff" | "external_getag"
-    _price?: {
-      billing_duration_amount?: { ... }
-      billing_duration_unit?: { ... }
-      notice_time_amount?: { ... }
-      notice_time_unit?: { ... }
   // ...
 }
 ```
@@ -5539,71 +5731,8 @@ The request payload for the external catalog service with a portal context.
 type ExternalCatalogPortalRequest = {
   origin: "portal"
   context: {
-    contract: {
-      _id?: { ... }
-      contract_name?: { ... }
-      contract_number?: { ... }
-      assignee?: { ... }
-      status?: { ... }
-      description?: { ... }
-      billing_account?: { ... }
-      account_number?: { ... }
-      branch?: { ... }
-      move_in_date?: { ... }
-      move_out_date?: { ... }
-      billing_address?: { ... }
-      delivery_address?: { ... }
-      additional_addresses?: { ... }
-      termination_date?: { ... }
-      termination_reason?: { ... }
-      start_date?: { ... }
-      end_date?: { ... }
-      customer?: { ... }
-      order?: { ... }
-      type?: { ... }
-      billing_period?: { ... }
-      billing_duration_amount?: { ... }
-      billing_duration_unit?: { ... }
-      notice_time_amount?: { ... }
-      notice_time_unit?: { ... }
-      termination_time_amount?: { ... }
-      termination_time_unit?: { ... }
-      renewal_duration_amount?: { ... }
-      renewal_duration_unit?: { ... }
-      billing_due_day?: { ... }
-      installment_amount?: { ... }
-      balance?: { ... }
-      meters?: { ... }
-      payment?: { ... }
-      last_sync_at?: { ... }
-      external_id?: { ... }
-    }
-    contact: {
-      _id?: { ... }
-      salutation?: { ... }
-      title?: { ... }
-      first_name?: { ... }
-      last_name?: { ... }
-      customer_number?: { ... }
-      birthdate?: { ... }
-      email?: { ... }
-      phone?: { ... }
-      communication_preference?: { ... }
-      address?: { ... }
-      payment?: { ... }
-      account?: { ... }
-      marketing_permission?: { ... }
-      contact_owner?: { ... }
-      consent_email_marketing?: { ... }
-      consent_sms_marketing?: { ... }
-      consent_phone_call?: { ... }
-      consent_print_marketing?: { ... }
-      portal_users?: { ... }
-      opportunities?: { ... }
-      orders?: { ... }
-      contracts?: { ... }
-      external_id?: { ... }
-    }
+    contract: Record<string, unknown>
+    contact: Record<string, unknown>
     availability_address?: {
       postal_code?: { ... }
       city?: { ... }
@@ -5663,86 +5792,8 @@ type JourneyContext = {
 
 ```ts
 type PortalContext = {
-  contract: {
-    _id?: string
-    contract_name?: string
-    contract_number?: string
-    assignee?: string
-    status?: "draft" | "in_approval_process" | "approved" | "active" | "deactivated" | "revoked" | "terminated" | "expired"
-    description?: string
-    billing_account?: object
-    account_number?: string
-    branch?: string
-    move_in_date?: string // date
-    move_out_date?: string // date
-    billing_address?: object
-    delivery_address?: object[]
-    additional_addresses?: object[]
-    termination_date?: string // date
-    termination_reason?: string
-    start_date?: string // date
-    end_date?: string // date
-    customer?: object
-    order?: string
-    type?: "one_time" | "recurring"
-    billing_period?: "weekly" | "monthly" | "every_quarter" | "every_6_months" | "yearly"
-    billing_duration_amount?: number
-    billing_duration_unit?: "weeks" | "months" | "years"
-    notice_time_amount?: number
-    notice_time_unit?: "weeks" | "months" | "years"
-    termination_time_amount?: number
-    termination_time_unit?: "weeks" | "months" | "years"
-    renewal_duration_amount?: number
-    renewal_duration_unit?: "weeks" | "months" | "years"
-    billing_due_day?: number
-    installment_amount?: number
-    balance?: number
-    meters?: string[]
-    payment?: object
-    last_sync_at?: string // date
-    external_id?: string
-  }
-  contact: {
-    _id?: string
-    salutation?: "Mr." | "Ms. / Mrs." | "Company" | "Contact Person" | "Company/Contact Person" | "Spouse" | "Family" | "Ownership" | "Assembly" | "Other"
-    title?: "Dr." | "Prof." | "Prof. Dr."
-    first_name?: string
-    last_name?: string
-    customer_number?: string
-    birthdate?: string // date
-    email?: Array<{
-      email?: { ... }
-      _primary?: { ... }
-    }>
-    phone?: Array<{
-      phone?: { ... }
-      _primary?: { ... }
-    }>
-    communication_preference?: "postal" | "portal"
-    address?: Array<{
-      _primary?: { ... }
-      postal_code?: { ... }
-      city?: { ... }
-      street?: { ... }
-      street_number?: { ... }
-      country?: { ... }
-    }>
-    payment?: Array<{
-      _primary?: { ... }
-    }>
-    account?: string[]
-    marketing_permission?: boolean
-    contact_owner?: string
-    consent_email_marketing?: object
-    consent_sms_marketing?: object
-    consent_phone_call?: object
-    consent_print_marketing?: object
-    portal_users?: string[]
-    opportunities?: string[]
-    orders?: string[]
-    contracts?: string[]
-    external_id?: string
-  }
+  contract: Record<string, unknown>
+  contact: Record<string, unknown>
   availability_address?: {
     postal_code?: string
     city?: string

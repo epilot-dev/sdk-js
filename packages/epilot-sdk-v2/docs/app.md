@@ -2253,6 +2253,7 @@ type PortalExtensionComponent = {
       type: { ... }
       auth?: { ... }
       call: { ... }
+      resolved?: { ... }
       use_static_ips?: { ... }
       secure_proxy?: { ... }
     } | {
@@ -2261,6 +2262,7 @@ type PortalExtensionComponent = {
       type: { ... }
       auth?: { ... }
       call: { ... }
+      resolved?: { ... }
       assignment_mode?: { ... }
       contact_relation_attribute?: { ... }
       explanation?: { ... }
@@ -2293,6 +2295,7 @@ type PortalExtensionComponent = {
       block_types?: { ... }
       auth?: { ... }
       call: { ... }
+      resolved?: { ... }
       use_static_ips?: { ... }
       secure_proxy?: { ... }
     } | {
@@ -2365,6 +2368,10 @@ type PortalExtensionConfig = {
       body?: { ... }
       result: { ... }
     }
+    resolved?: {
+      result?: { ... }
+      error_message_path?: { ... }
+    }
     use_static_ips?: boolean
     secure_proxy?: {
       integration_id: { ... }
@@ -2392,6 +2399,10 @@ type PortalExtensionConfig = {
       headers: { ... }
       body?: { ... }
       result?: { ... }
+    }
+    resolved?: {
+      result?: { ... }
+      error_message_path?: { ... }
     }
     assignment_mode?: "contracts" | "contact_to_contracts" | "contact_to_portal_user"
     contact_relation_attribute?: string
@@ -2427,20 +2438,12 @@ type PortalExtensionConfig = {
       body?: { ... }
     }
     resolved?: {
+      data_path?: { ... }
       dataPath?: { ... }
+      error_message_path?: { ... }
     }
     use_static_ips?: boolean
     secure_proxy?: {
-      integration_id: { ... }
-      use_case_slug: { ... }
-    }
-  } | {
-    id: string
-    name?: {
-      en?: { ... }
-      de: { ... }
-    }
-    type: "consumptionDataRetrieval"
   // ...
 }
 ```
@@ -2477,6 +2480,10 @@ type PortalExtensionHookRegistrationIdentifiersCheck = {
     headers: Record<string, string>
     body?: object
     result: string
+  }
+  resolved?: {
+    result?: string
+    error_message_path?: string
   }
   use_static_ips?: boolean
   secure_proxy?: {
@@ -2521,6 +2528,10 @@ type PortalExtensionHookContractIdentification = {
     headers: Record<string, string>
     body?: object
     result?: string
+  }
+  resolved?: {
+    result?: string
+    error_message_path?: string
   }
   assignment_mode?: "contracts" | "contact_to_contracts" | "contact_to_portal_user"
   contact_relation_attribute?: string
@@ -2569,11 +2580,13 @@ type PortalExtensionHookMeterReadingPlausibilityCheck = {
     headers: Record<string, string>
   }
   resolved: {
+    data_path?: string
     dataPath?: string
     counter_identifiers?: Record<string, string>
     valid?: string
     upper_limit?: string
     lower_limit?: string
+    error_message_path?: string
   }
   use_static_ips?: boolean
   secure_proxy?: {
@@ -2617,7 +2630,9 @@ type PortalExtensionHookPriceDataRetrieval = {
     body?: Record<string, unknown>
   }
   resolved?: {
+    data_path?: string
     dataPath?: string
+    error_message_path?: string
   }
   use_static_ips?: boolean
   secure_proxy?: {
@@ -2661,7 +2676,9 @@ type PortalExtensionHookConsumptionDataRetrieval = {
     body?: Record<string, unknown>
   }
   resolved?: {
+    data_path?: string
     dataPath?: string
+    error_message_path?: string
   }
   use_static_ips?: boolean
   secure_proxy?: {
@@ -2702,6 +2719,9 @@ type PortalExtensionHookDataExport = {
     headers?: Record<string, string>
     body?: Record<string, unknown>
   }
+  resolved?: {
+    error_message_path?: string
+  }
   use_static_ips?: boolean
   secure_proxy?: {
     integration_id: string // uuid
@@ -2741,7 +2761,9 @@ type PortalExtensionHookVisualizationMetadata = {
     body?: Record<string, unknown>
   }
   resolved?: {
+    data_path?: string
     dataPath?: string
+    error_message_path?: string
   }
   use_static_ips?: boolean
   secure_proxy?: {
@@ -2785,7 +2807,9 @@ type PortalExtensionHookCostDataRetrieval = {
     body?: Record<string, unknown>
   }
   resolved?: {
+    data_path?: string
     dataPath?: string
+    error_message_path?: string
   }
   use_static_ips?: boolean
   secure_proxy?: {

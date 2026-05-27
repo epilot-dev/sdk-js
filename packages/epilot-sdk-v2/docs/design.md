@@ -1,6 +1,6 @@
 # Design Builder API v2
 
-- **Base URL:** `https://design-builder-api.{environment}.epilot.io`
+- **Base URL:** `https://design-builder-api.sls.epilot.io`
 - **Full API Docs:** [https://docs.epilot.io/api/design](https://docs.epilot.io/api/design)
 
 ## Usage
@@ -70,6 +70,7 @@ const { data } = await designClient.getAllDesigns(...)
 - [`Theme`](#theme)
 - [`Application`](#application)
 - [`DesignParameters`](#designparameters)
+- [`ParseThemeFromDesignResp`](#parsethemefromdesignresp)
 
 ### `getAllDesigns`
 
@@ -558,7 +559,56 @@ const { data } = await client.getThemeFromDesign({
 <summary>Response</summary>
 
 ```json
-{}
+{
+  "theme": "NEW",
+  "design": {
+    "id": "string",
+    "last_modified_at": "string",
+    "style_name": "string",
+    "style": {
+      "logo": {
+        "main": {
+          "name": "string",
+          "display_name": "string",
+          "file_type": "LOGO",
+          "s3_object_key": "string",
+          "url": "string",
+          "file_id": "string"
+        }
+      },
+      "palette": {
+        "primary": "string",
+        "secondary": "string",
+        "error": "string",
+        "background": "string",
+        "paper": "string",
+        "navbar": "string",
+        "portal_login_background": "string"
+      },
+      "typography": {
+        "font": {
+          "font_id": "string",
+          "font_name": "string",
+          "font_family": "string",
+          "font_weight_regular": "string",
+          "font_weight_medium": "string",
+          "font_weight_bold": "string",
+          "urls": [
+            {
+              "type": "WOFF2",
+              "url": "string"
+            }
+          ]
+        },
+        "primary": "string",
+        "secondary": "string"
+      }
+    },
+    "custom_theme": "string",
+    "use_custom_theme": true,
+    "journey_design_tokens": {}
+  }
+}
 ```
 
 </details>
@@ -584,7 +634,8 @@ const { data } = await client.uploadFile()
   "display_name": "string",
   "file_type": "LOGO",
   "s3_object_key": "string",
-  "url": "string"
+  "url": "string",
+  "file_id": "string"
 }
 ```
 
@@ -614,7 +665,8 @@ const { data } = await client.getFiles({
     "display_name": "string",
     "file_type": "LOGO",
     "s3_object_key": "string",
-    "url": "string"
+    "url": "string",
+    "file_id": "string"
   }
 ]
 ```
@@ -802,6 +854,7 @@ type UploadFileRes = {
   file_type?: "LOGO" | "FONT" | "IMAGE"
   s3_object_key: string
   url: string
+  file_id?: string
 }
 ```
 
@@ -814,6 +867,7 @@ type GetFilesRes = Array<{
   file_type?: "LOGO" | "FONT" | "IMAGE"
   s3_object_key: string
   url: string
+  file_id?: string
 }>
 ```
 
@@ -1517,6 +1571,7 @@ type LogoData = {
     file_type?: "LOGO" | "FONT" | "IMAGE"
     s3_object_key: string
     url: string
+    file_id?: string
   }
 }
 ```
@@ -1617,6 +1672,7 @@ type FileData = {
   file_type?: "LOGO" | "FONT" | "IMAGE"
   s3_object_key: string
   url: string
+  file_id?: string
 }
 ```
 
@@ -1651,5 +1707,26 @@ type DesignParameters = {
   designId?: string
   theme?: "NEW" | "OLD"
   application?: string
+}
+```
+
+### `ParseThemeFromDesignResp`
+
+```ts
+type ParseThemeFromDesignResp = {
+  theme?: "NEW" | "OLD"
+  design?: {
+    id?: string
+    last_modified_at?: string
+    style_name?: string
+    style?: {
+      logo?: { ... }
+      palette?: { ... }
+      typography?: { ... }
+    }
+    custom_theme?: string
+    use_custom_theme?: boolean
+    journey_design_tokens?: object
+  }
 }
 ```

@@ -3388,6 +3388,14 @@ export declare namespace Components {
                  * Optional path to the data (array) in the response. If omitted, the data is assumed to be on the top level.
                  */
                 dataPath?: string;
+                /**
+                 * Optional path to a human-readable error message in the third-party response body, used when the call fails (non-2xx status).
+                 * If specified and the path resolves to a string, that message is forwarded to the end user instead of a generic error.
+                 *
+                 * example:
+                 * error.message
+                 */
+                errorMessagePath?: string;
             };
             /**
              * Deprecated. Prefer `secure_proxy` instead.
@@ -3517,6 +3525,14 @@ export declare namespace Components {
                  * Optional path to the data (array) in the response. If omitted, the data is assumed to be on the top level.
                  */
                 dataPath?: string;
+                /**
+                 * Optional path to a human-readable error message in the third-party response body, used when the call fails (non-2xx status).
+                 * If specified and the path resolves to a string, that message is forwarded to the end user instead of a generic error.
+                 *
+                 * example:
+                 * error.message
+                 */
+                errorMessagePath?: string;
             };
             /**
              * Deprecated. Prefer `secure_proxy` instead.
@@ -3569,6 +3585,16 @@ export declare namespace Components {
                 body?: {
                     [name: string]: string;
                 };
+            };
+            resolved?: {
+                /**
+                 * Optional path to a human-readable error message in the third-party response body, used when the call fails (non-2xx status).
+                 * If specified and the path resolves to a string, that message is forwarded to the end user instead of a generic error.
+                 *
+                 * example:
+                 * error.message
+                 */
+                errorMessagePath?: string;
             };
             /**
              * Deprecated. Prefer `secure_proxy` instead.
@@ -3663,6 +3689,14 @@ export declare namespace Components {
                  * {{CallResponse.data.lower_limit}}
                  */
                 lower_limit?: string;
+                /**
+                 * Optional path to a human-readable error message in the third-party response body, used when the call fails (non-2xx status).
+                 * If specified and the path resolves to a string, that message is forwarded to the end user instead of a generic error.
+                 *
+                 * example:
+                 * error.message
+                 */
+                errorMessagePath?: string;
             };
             /**
              * Deprecated. Prefer `secure_proxy` instead.
@@ -3713,6 +3747,14 @@ export declare namespace Components {
                  * Optional path to the data (array) in the response. If omitted, the data is assumed to be on the top level.
                  */
                 dataPath?: string;
+                /**
+                 * Optional path to a human-readable error message in the third-party response body, used when the call fails (non-2xx status).
+                 * If specified and the path resolves to a string, that message is forwarded to the end user instead of a generic error.
+                 *
+                 * example:
+                 * error.message
+                 */
+                errorMessagePath?: string;
             };
             /**
              * Deprecated. Prefer `secure_proxy` instead.
@@ -3825,6 +3867,14 @@ export declare namespace Components {
                  * Optional path to the metadata object in the response. If omitted, the metadata is assumed to be on the top level.
                  */
                 dataPath?: string;
+                /**
+                 * Optional path to a human-readable error message in the third-party response body, used when the call fails (non-2xx status).
+                 * If specified and the path resolves to a string, that message is forwarded to the end user instead of a generic error.
+                 *
+                 * example:
+                 * error.message
+                 */
+                errorMessagePath?: string;
             };
             /**
              * Deprecated. Prefer `secure_proxy` instead.
@@ -4565,8 +4615,9 @@ export declare namespace Components {
             schema?: string;
         }
         /**
-         * Mobile OIDC configuration. All string fields support env var interpolation
-         * (incl. secrets) via mustache-like templates, e.g. `{{ env.MOBILE_CLIENT_SECRET }}`.
+         * Mobile OIDC configuration. Values are resolved at SSO invocation time, so the
+         * fields below may reference org env vars via mustache-like templates, e.g.
+         * `{{ env.MOBILE_CLIENT_SECRET }}`.
          *
          */
         export interface MoblieOIDCConfig {
@@ -4586,8 +4637,12 @@ export declare namespace Components {
             client_secret?: string;
         }
         /**
-         * OIDC provider configuration. All string fields support env var interpolation
-         * (incl. secrets) via mustache-like templates, e.g. `{{ env.MY_PROVIDER_CLIENT_SECRET }}`.
+         * OIDC provider configuration. Values are resolved at SSO invocation time
+         * (login / callback), so the fields below may reference org env vars via
+         * mustache-like templates, e.g. `{{ env.MY_PROVIDER_CLIENT_SECRET }}`.
+         *
+         * Fields used to render the SSO buttons up-front (`ProviderConfig.slug`,
+         * `ProviderConfig.display_name`) are NOT interpolated and must be literal.
          *
          */
         export interface OIDCProviderConfig {
@@ -4635,6 +4690,10 @@ export declare namespace Components {
             prompt?: "login" | "select_account" | "consent";
         }
         export interface OIDCProviderMetadata {
+            /**
+             * Response modes the provider accepts (e.g. `form_post` for Apple)
+             */
+            response_modes_supported?: ("form_post" | "fragment" | "query")[];
             /**
              * URL of the authorization endpoint
              * example:
@@ -4689,47 +4748,6 @@ export declare namespace Components {
              *
              */
             test_auth_password?: string;
-        }
-        /**
-         * Public OIDC provider configuration. Same as OIDCProviderConfig but never includes
-         * the `client_secret` field — it is kept server-side and only used to exchange the
-         * authorization code at the SSO callback. String fields are returned with env var
-         * placeholders already resolved when fetched via `GET /v2/portal/public/sso/providers/{provider_slug}`.
-         *
-         */
-        export interface OIDCProviderPublicConfig {
-            type?: "authorization_code" | "implicit";
-            /**
-             * Issuing Authority URL
-             * example:
-             * https://login.microsoftonline.com/33d4f3e5-3df2-421e-b92e-a63cfa680a88/v2.0
-             */
-            oidc_issuer: string;
-            /**
-             * Redirect URI for the OIDC flow
-             * example:
-             * https://customer-portal.com/login
-             */
-            redirect_uri?: string;
-            /**
-             * example:
-             * ab81daf8-8b1f-42d6-94ca-c51621054c75
-             */
-            client_id: string;
-            /**
-             * Whether the client secret is present (the value itself is kept server-side)
-             * example:
-             * true
-             */
-            has_client_secret?: boolean;
-            /**
-             * Space-separated list of OAuth 2.0 scopes to request from OpenID Connect
-             * example:
-             * openid email
-             */
-            scope: string;
-            metadata?: OIDCProviderMetadata;
-            prompt?: "login" | "select_account" | "consent";
         }
         /**
          * The opportunity entity
@@ -5802,6 +5820,18 @@ export declare namespace Components {
                 onPendingUser?: AdminUser[];
             };
             /**
+             * SSO identity providers for the portal. When sent on a portal save (PUT/POST),
+             * the list is fully synced — incoming providers are upserted and any existing
+             * providers not in the list are deleted. Omit the field to leave SSO
+             * configuration unchanged; send an empty array to remove all providers.
+             *
+             * Each provider is persisted verbatim — `oidc_config.client_secret` is stored
+             * as sent. Customers are encouraged to reference an org env secret via
+             * `{{ env.VAR }}` rather than embed raw values.
+             *
+             */
+            identity_providers?: ProviderPublicConfig[];
+            /**
              * Enable/Disable the portal access
              */
             enabled?: boolean;
@@ -6274,7 +6304,6 @@ export declare namespace Components {
              * Permissions granted to a portal user while accessing entities
              */
             grants?: Grant[];
-            identity_providers?: ProviderPublicConfig[];
             pages?: Page[];
         }
         /**
@@ -6478,14 +6507,19 @@ export declare namespace Components {
             attribute_mappings?: /* Dictionary of epilot user attributes to claims */ AttributeMappingConfig;
             entity_matching?: /* Configuration for matching existing entities during SSO login using token claims */ EntityMatchingConfig;
             oidc_config?: /**
-             * OIDC provider configuration. All string fields support env var interpolation
-             * (incl. secrets) via mustache-like templates, e.g. `{{ env.MY_PROVIDER_CLIENT_SECRET }}`.
+             * OIDC provider configuration. Values are resolved at SSO invocation time
+             * (login / callback), so the fields below may reference org env vars via
+             * mustache-like templates, e.g. `{{ env.MY_PROVIDER_CLIENT_SECRET }}`.
+             *
+             * Fields used to render the SSO buttons up-front (`ProviderConfig.slug`,
+             * `ProviderConfig.display_name`) are NOT interpolated and must be literal.
              *
              */
             OIDCProviderConfig;
             mobile_oidc_config?: /**
-             * Mobile OIDC configuration. All string fields support env var interpolation
-             * (incl. secrets) via mustache-like templates, e.g. `{{ env.MOBILE_CLIENT_SECRET }}`.
+             * Mobile OIDC configuration. Values are resolved at SSO invocation time, so the
+             * fields below may reference org env vars via mustache-like templates, e.g.
+             * `{{ env.MOBILE_CLIENT_SECRET }}`.
              *
              */
             MoblieOIDCConfig;
@@ -6510,16 +6544,19 @@ export declare namespace Components {
              */
             ProviderDisplayName;
             oidc_config?: /**
-             * Public OIDC provider configuration. Same as OIDCProviderConfig but never includes
-             * the `client_secret` field — it is kept server-side and only used to exchange the
-             * authorization code at the SSO callback. String fields are returned with env var
-             * placeholders already resolved when fetched via `GET /v2/portal/public/sso/providers/{provider_slug}`.
+             * OIDC provider configuration. Values are resolved at SSO invocation time
+             * (login / callback), so the fields below may reference org env vars via
+             * mustache-like templates, e.g. `{{ env.MY_PROVIDER_CLIENT_SECRET }}`.
+             *
+             * Fields used to render the SSO buttons up-front (`ProviderConfig.slug`,
+             * `ProviderConfig.display_name`) are NOT interpolated and must be literal.
              *
              */
-            OIDCProviderPublicConfig;
+            OIDCProviderConfig;
             mobile_oidc_config?: /**
-             * Mobile OIDC configuration. All string fields support env var interpolation
-             * (incl. secrets) via mustache-like templates, e.g. `{{ env.MOBILE_CLIENT_SECRET }}`.
+             * Mobile OIDC configuration. Values are resolved at SSO invocation time, so the
+             * fields below may reference org env vars via mustache-like templates, e.g.
+             * `{{ env.MOBILE_CLIENT_SECRET }}`.
              *
              */
             MoblieOIDCConfig;
@@ -7056,6 +7093,32 @@ export declare namespace Components {
                  */
                 onPendingUser?: AdminUser[];
             };
+            /**
+             * SSO identity providers for the portal. When sent on a portal save (PUT/POST),
+             * the list is fully synced — incoming providers are upserted and any existing
+             * providers not in the list are deleted. Omit the field to leave SSO
+             * configuration unchanged; send an empty array to remove all providers.
+             *
+             * Each provider is persisted verbatim — `oidc_config.client_secret` is stored
+             * as sent. Customers are encouraged to reference an org env secret via
+             * `{{ env.VAR }}` rather than embed raw values.
+             *
+             */
+            identity_providers?: /**
+             * SSO identity provider configuration.
+             *
+             * Env var interpolation: only string fields under `oidc_config` and
+             * `mobile_oidc_config` (incl. their nested `metadata`) are passed through
+             * Liquid templating, so they may contain `{{ env.VAR }}` placeholders that
+             * get resolved at runtime against the organization's environment.
+             *
+             * The following fields are used as literal values and MUST NOT contain
+             * template syntax: `slug`, `display_name`, `provider_type`, all keys and
+             * values under `attribute_mappings` (used as JSONPath-like accessors into
+             * token claims), and all keys and values under `entity_matching`.
+             *
+             */
+            ProviderConfig[];
         }
         export interface UpsertPortalConfig {
             /**
@@ -7098,6 +7161,32 @@ export declare namespace Components {
                  */
                 onPendingUser?: AdminUser[];
             };
+            /**
+             * SSO identity providers for the portal. When sent on a portal save (PUT/POST),
+             * the list is fully synced — incoming providers are upserted and any existing
+             * providers not in the list are deleted. Omit the field to leave SSO
+             * configuration unchanged; send an empty array to remove all providers.
+             *
+             * Each provider is persisted verbatim — `oidc_config.client_secret` is stored
+             * as sent. Customers are encouraged to reference an org env secret via
+             * `{{ env.VAR }}` rather than embed raw values.
+             *
+             */
+            identity_providers?: /**
+             * SSO identity provider configuration.
+             *
+             * Env var interpolation: only string fields under `oidc_config` and
+             * `mobile_oidc_config` (incl. their nested `metadata`) are passed through
+             * Liquid templating, so they may contain `{{ env.VAR }}` placeholders that
+             * get resolved at runtime against the organization's environment.
+             *
+             * The following fields are used as literal values and MUST NOT contain
+             * template syntax: `slug`, `display_name`, `provider_type`, all keys and
+             * values under `attribute_mappings` (used as JSONPath-like accessors into
+             * token claims), and all keys and values under `entity_matching`.
+             *
+             */
+            ProviderConfig[];
             /**
              * Enable/Disable the portal access
              */
@@ -7577,6 +7666,32 @@ export declare namespace Components {
                  */
                 onPendingUser?: AdminUser[];
             };
+            /**
+             * SSO identity providers for the portal. When sent on a portal save (PUT/POST),
+             * the list is fully synced — incoming providers are upserted and any existing
+             * providers not in the list are deleted. Omit the field to leave SSO
+             * configuration unchanged; send an empty array to remove all providers.
+             *
+             * Each provider is persisted verbatim — `oidc_config.client_secret` is stored
+             * as sent. Customers are encouraged to reference an org env secret via
+             * `{{ env.VAR }}` rather than embed raw values.
+             *
+             */
+            identity_providers?: /**
+             * SSO identity provider configuration.
+             *
+             * Env var interpolation: only string fields under `oidc_config` and
+             * `mobile_oidc_config` (incl. their nested `metadata`) are passed through
+             * Liquid templating, so they may contain `{{ env.VAR }}` placeholders that
+             * get resolved at runtime against the organization's environment.
+             *
+             * The following fields are used as literal values and MUST NOT contain
+             * template syntax: `slug`, `display_name`, `provider_type`, all keys and
+             * values under `attribute_mappings` (used as JSONPath-like accessors into
+             * token claims), and all keys and values under `entity_matching`.
+             *
+             */
+            ProviderConfig[];
             /**
              * Enable/Disable the portal access
              */
@@ -10912,7 +11027,28 @@ export declare namespace Paths {
                  * Permissions granted to a portal user while accessing entities
                  */
                 grants?: Components.Schemas.Grant[];
-                identity_providers?: Components.Schemas.ProviderPublicConfig[];
+                /**
+                 * SSO identity providers configured for the portal. Includes raw
+                 * `oidc_config.client_secret` values so the admin UI can round-trip
+                 * them. Customers are encouraged to reference secrets via env
+                 * templates (`{{ env.VAR }}`) rather than embed raw values.
+                 *
+                 */
+                identity_providers?: /**
+                 * SSO identity provider configuration.
+                 *
+                 * Env var interpolation: only string fields under `oidc_config` and
+                 * `mobile_oidc_config` (incl. their nested `metadata`) are passed through
+                 * Liquid templating, so they may contain `{{ env.VAR }}` placeholders that
+                 * get resolved at runtime against the organization's environment.
+                 *
+                 * The following fields are used as literal values and MUST NOT contain
+                 * template syntax: `slug`, `display_name`, `provider_type`, all keys and
+                 * values under `attribute_mappings` (used as JSONPath-like accessors into
+                 * token claims), and all keys and values under `entity_matching`.
+                 *
+                 */
+                Components.Schemas.ProviderConfig[];
                 certificate_details?: {
                     /**
                      * Status of the certificate
@@ -11427,7 +11563,28 @@ export declare namespace Paths {
                  * Permissions granted to a portal user while accessing entities
                  */
                 grants?: Components.Schemas.Grant[];
-                identity_providers?: Components.Schemas.ProviderPublicConfig[];
+                /**
+                 * SSO identity providers configured for the portal. Includes raw
+                 * `oidc_config.client_secret` values so the admin UI can round-trip
+                 * them. Customers are encouraged to reference secrets via env
+                 * templates (`{{ env.VAR }}`) rather than embed raw values.
+                 *
+                 */
+                identity_providers?: /**
+                 * SSO identity provider configuration.
+                 *
+                 * Env var interpolation: only string fields under `oidc_config` and
+                 * `mobile_oidc_config` (incl. their nested `metadata`) are passed through
+                 * Liquid templating, so they may contain `{{ env.VAR }}` placeholders that
+                 * get resolved at runtime against the organization's environment.
+                 *
+                 * The following fields are used as literal values and MUST NOT contain
+                 * template syntax: `slug`, `display_name`, `provider_type`, all keys and
+                 * values under `attribute_mappings` (used as JSONPath-like accessors into
+                 * token claims), and all keys and values under `entity_matching`.
+                 *
+                 */
+                Components.Schemas.ProviderConfig[];
                 certificate_details?: {
                     /**
                      * Status of the certificate
@@ -17648,7 +17805,6 @@ export type MeterReadingWidget = Components.Schemas.MeterReadingWidget;
 export type MoblieOIDCConfig = Components.Schemas.MoblieOIDCConfig;
 export type OIDCProviderConfig = Components.Schemas.OIDCProviderConfig;
 export type OIDCProviderMetadata = Components.Schemas.OIDCProviderMetadata;
-export type OIDCProviderPublicConfig = Components.Schemas.OIDCProviderPublicConfig;
 export type Opportunity = Components.Schemas.Opportunity;
 export type Order = Components.Schemas.Order;
 export type OrganizationSettings = Components.Schemas.OrganizationSettings;

@@ -9,6 +9,48 @@ import type {
 
 export declare namespace Components {
     namespace Schemas {
+        /**
+         * Additional data included in the provider entity
+         */
+        export interface AdditionalProviderData {
+            gridOperators: {
+                /**
+                 * The name of the participant
+                 */
+                name: string;
+                /**
+                 * The BDEW/DVGW code number of the participant
+                 */
+                codeNumber: string;
+                /**
+                 * The date from which this data is valid from
+                 */
+                validFrom?: string; // date
+                /**
+                 * The date until which this data is valid to
+                 */
+                validUntil?: string; // date
+            }[];
+            defaultSuppliers: {
+                /**
+                 * The name of the participant
+                 */
+                name: string;
+                /**
+                 * The BDEW/DVGW code number of the participant
+                 */
+                codeNumber: string;
+                /**
+                 * The date from which this data is valid from
+                 */
+                validFrom?: string; // date
+                /**
+                 * The date until which this data is valid to
+                 */
+                validUntil?: string; // date
+            }[];
+            marketAreaDetails: /* Market area details for gas */ GasMarketAreaDetails | /* Market area details for power */ PowerMarketAreaDetails;
+        }
         export interface Address {
             [name: string]: any;
             /**
@@ -1452,6 +1494,7 @@ export declare namespace Components {
              */
             ExternalFeeMappings;
             external_fees_metadata?: ExternalFeeMetadata;
+            external_location_metadata?: /* The provider entity */ ExternalLocationMetadata;
             external_price_metadata?: ExternalPriceMetadata;
             _immutable_pricing_details?: /* The result from the calculation of a set of price items. */ PricingDetails;
             /**
@@ -1560,9 +1603,13 @@ export declare namespace Components {
             };
         }
         /**
-         * An amount associated with a specific cashback period.
+         * A detail associated with a specific cashback.
          */
         export interface CashbackAmount {
+            /**
+             * The name of the cashback.
+             */
+            cashback_name?: string;
             cashback_period: /* The cashback period, for now it's limited to either 0 months or 12 months */ CashbackPeriod;
             /**
              * The sum of all cashbacks for a specific cashback period
@@ -3693,6 +3740,7 @@ export declare namespace Components {
              */
             ExternalFeeMappings;
             external_fees_metadata?: ExternalFeeMetadata;
+            external_location_metadata?: /* The provider entity */ ExternalLocationMetadata;
             external_price_metadata?: ExternalPriceMetadata;
             _immutable_pricing_details?: /* The result from the calculation of a set of price items. */ PricingDetails;
             /**
@@ -4842,6 +4890,28 @@ export declare namespace Components {
                 [name: string]: any;
             };
         }
+        /**
+         * The provider entity
+         */
+        export interface ExternalLocationMetadata {
+            /**
+             * The provider name
+             */
+            name: string;
+            /**
+             * The provider code
+             */
+            code: string;
+            /**
+             * The type of product
+             */
+            type: "gas" | "power";
+            additionalData: /* Additional data included in the provider entity */ AdditionalProviderData;
+            _meta?: /* Signature meta data payload */ SignatureMeta;
+            inputs?: {
+                [name: string]: any;
+            };
+        }
         export interface ExternalPriceMetadata {
             market: /* The market for a spot market price. */ SpotMarketType;
             bidding_zone: /* The bidding zone for a spot market price. */ SpotMarketBiddingZone;
@@ -4874,6 +4944,23 @@ export declare namespace Components {
          * The concession type for gas
          */
         export type GasConcessionType = "standard" | "special";
+        /**
+         * Market area details for gas
+         */
+        export interface GasMarketAreaDetails {
+            /**
+             * The type of gas used
+             */
+            gasType?: "L-Gas" | "H-Gas";
+            /**
+             * The name of the market area
+             */
+            marketArea?: string;
+            /**
+             * The vritual trading point identifier
+             */
+            virtualTradingPoint?: string;
+        }
         /**
          * A market price at a given point in time.
          */
@@ -5217,6 +5304,27 @@ export declare namespace Components {
                     [name: string]: any;
                 };
             }[];
+        }
+        /**
+         * Market participant data
+         */
+        export interface MarketParticipant {
+            /**
+             * The name of the participant
+             */
+            name: string;
+            /**
+             * The BDEW/DVGW code number of the participant
+             */
+            codeNumber: string;
+            /**
+             * The date from which this data is valid from
+             */
+            validFrom?: string; // date
+            /**
+             * The date until which this data is valid to
+             */
+            validUntil?: string; // date
         }
         /**
          * Describes how to compute the markup per period. Either `per_unit`, `tiered_volume` or `tiered_flatfee`.
@@ -6576,291 +6684,18 @@ export declare namespace Components {
             };
         }
         export interface PortalContext {
+            [name: string]: any;
             /**
              * The contract information.
              */
             contract: {
-                /**
-                 * The unique identifier of the contract.
-                 */
-                _id?: string;
-                /**
-                 * Contract Name
-                 */
-                contract_name?: string;
-                /**
-                 * Contract Number
-                 */
-                contract_number?: string;
-                /**
-                 * Assignee user ID
-                 */
-                assignee?: string;
-                /**
-                 * Contract status
-                 */
-                status?: "draft" | "in_approval_process" | "approved" | "active" | "deactivated" | "revoked" | "terminated" | "expired";
-                /**
-                 * Description of the contract
-                 */
-                description?: string;
-                /**
-                 * Billing Account relation
-                 */
-                billing_account?: {
-                    [key: string]: any;
-                };
-                /**
-                 * Account Number
-                 */
-                account_number?: string;
-                /**
-                 * Branch/commodity type (e.g. power, gas, water, waste_water, district_heating, or any custom value)
-                 */
-                branch?: string;
-                /**
-                 * Move In Date
-                 */
-                move_in_date?: string; // date
-                /**
-                 * Move Out Date
-                 */
-                move_out_date?: string; // date
-                /**
-                 * Billing Address
-                 */
-                billing_address?: {
-                    [key: string]: any;
-                };
-                /**
-                 * Delivery Address
-                 */
-                delivery_address?: {
-                    [key: string]: any;
-                }[];
-                /**
-                 * Additional Addresses
-                 */
-                additional_addresses?: {
-                    [key: string]: any;
-                }[];
-                /**
-                 * Date of Termination
-                 */
-                termination_date?: string; // date
-                /**
-                 * Reason For Termination
-                 */
-                termination_reason?: string;
-                /**
-                 * Start Date
-                 */
-                start_date?: string; // date
-                /**
-                 * End Date
-                 */
-                end_date?: string; // date
-                /**
-                 * Customer relation (contact or account)
-                 */
-                customer?: {
-                    [key: string]: any;
-                };
-                /**
-                 * Order relation ID
-                 */
-                order?: string;
-                /**
-                 * Contract type
-                 */
-                type?: "one_time" | "recurring";
-                /**
-                 * Billing Period
-                 */
-                billing_period?: "weekly" | "monthly" | "every_quarter" | "every_6_months" | "yearly";
-                /**
-                 * Billing Duration amount
-                 */
-                billing_duration_amount?: number;
-                /**
-                 * Billing Duration Unit
-                 */
-                billing_duration_unit?: "weeks" | "months" | "years";
-                /**
-                 * Notice Time amount
-                 */
-                notice_time_amount?: number;
-                /**
-                 * Notice Time Unit
-                 */
-                notice_time_unit?: "weeks" | "months" | "years";
-                /**
-                 * Termination Time amount
-                 */
-                termination_time_amount?: number;
-                /**
-                 * Termination Time Unit
-                 */
-                termination_time_unit?: "weeks" | "months" | "years";
-                /**
-                 * Renewal Duration amount
-                 */
-                renewal_duration_amount?: number;
-                /**
-                 * Renewal Duration Unit
-                 */
-                renewal_duration_unit?: "weeks" | "months" | "years";
-                /**
-                 * Billing Due Day
-                 */
-                billing_due_day?: number;
-                installment_amount?: number;
-                /**
-                 * Balance
-                 */
-                balance?: number;
-                /**
-                 * Meters relation
-                 */
-                meters?: string[];
-                /**
-                 * Payment Details relation
-                 */
-                payment?: {
-                    [key: string]: any;
-                };
-                /**
-                 * Last Sync At
-                 */
-                last_sync_at?: string; // date
-                /**
-                 * External ID
-                 */
-                external_id?: string;
+                [name: string]: any;
             };
             /**
              * The contact information.
              */
             contact: {
-                /**
-                 * The unique identifier of the contact.
-                 */
-                _id?: string;
-                /**
-                 * Salutation
-                 */
-                salutation?: "Mr." | "Ms. / Mrs." | "Company" | "Contact Person" | "Company/Contact Person" | "Spouse" | "Family" | "Ownership" | "Assembly" | "Other";
-                /**
-                 * Title
-                 */
-                title?: "Dr." | "Prof." | "Prof. Dr.";
-                /**
-                 * First Name
-                 */
-                first_name?: string;
-                /**
-                 * Last Name
-                 */
-                last_name?: string;
-                /**
-                 * Customer Number
-                 */
-                customer_number?: string;
-                /**
-                 * Date of Birth
-                 */
-                birthdate?: string; // date
-                /**
-                 * Email addresses
-                 */
-                email?: {
-                    email?: string; // email
-                    _primary?: boolean;
-                }[];
-                /**
-                 * Phone numbers
-                 */
-                phone?: {
-                    phone?: string;
-                    _primary?: boolean;
-                }[];
-                /**
-                 * Standard communication method
-                 */
-                communication_preference?: "postal" | "portal";
-                /**
-                 * Addresses
-                 */
-                address?: {
-                    _primary?: boolean;
-                    postal_code?: string;
-                    city?: string;
-                    street?: string;
-                    street_number?: string;
-                    country?: string;
-                }[];
-                /**
-                 * Payment methods
-                 */
-                payment?: {
-                    _primary?: boolean;
-                }[];
-                /**
-                 * Account relations
-                 */
-                account?: string[];
-                /**
-                 * Marketing Permission (deprecated)
-                 */
-                marketing_permission?: boolean;
-                /**
-                 * Contact Owner user ID
-                 */
-                contact_owner?: string;
-                /**
-                 * Email Marketing consent
-                 */
-                consent_email_marketing?: {
-                    [key: string]: any;
-                };
-                /**
-                 * SMS Marketing consent
-                 */
-                consent_sms_marketing?: {
-                    [key: string]: any;
-                };
-                /**
-                 * Direct Phone Marketing consent
-                 */
-                consent_phone_call?: {
-                    [key: string]: any;
-                };
-                /**
-                 * Print Marketing consent
-                 */
-                consent_print_marketing?: {
-                    [key: string]: any;
-                };
-                /**
-                 * Portal Users relation
-                 */
-                portal_users?: string[];
-                /**
-                 * Opportunities relation
-                 */
-                opportunities?: string[];
-                /**
-                 * Orders relation
-                 */
-                orders?: string[];
-                /**
-                 * Contracts relation
-                 */
-                contracts?: string[];
-                /**
-                 * External ID
-                 */
-                external_id?: string;
+                [name: string]: any;
             };
             /**
              * Address to use for product availability checks. Include when the catalog should filter products by serviceable area (e.g. postal code coverage).
@@ -6910,6 +6745,19 @@ export declare namespace Components {
                  */
                 journey_target_block?: string;
             }[];
+        }
+        /**
+         * Market area details for power
+         */
+        export interface PowerMarketAreaDetails {
+            /**
+             * The EIC of the control zone
+             */
+            controlZone?: string;
+            /**
+             * The EIC of the balancing zone
+             */
+            balancingZone?: string;
         }
         /**
          * The meter type for power
@@ -8108,6 +7956,7 @@ export declare namespace Components {
              */
             ExternalFeeMappings;
             external_fees_metadata?: ExternalFeeMetadata;
+            external_location_metadata?: /* The provider entity */ ExternalLocationMetadata;
             external_price_metadata?: ExternalPriceMetadata;
             _immutable_pricing_details?: /* The result from the calculation of a set of price items. */ PricingDetails;
             /**
@@ -9406,6 +9255,12 @@ export declare namespace Components {
              * The provider code
              */
             code: string;
+            /**
+             * The type of product
+             */
+            type: "gas" | "power";
+            additionalData: /* Additional data included in the provider entity */ AdditionalProviderData;
+            _meta?: /* Signature meta data payload */ SignatureMeta;
         }
         /**
          * An amount associated with a specific recurrence.
@@ -9938,9 +9793,9 @@ export declare namespace Components {
                  */
                 recurrences?: (/* An amount associated with a specific recurrence. */ RecurrenceAmount)[];
                 /**
-                 * The list of cashback sums for each cashback period.
+                 * The list of cashbacks applied.
                  */
-                cashbacks?: (/* An amount associated with a specific cashback period. */ CashbackAmount)[];
+                cashbacks?: (/* A detail associated with a specific cashback. */ CashbackAmount)[];
                 /**
                  * The aggregated price items recurrences by tax rate
                  */
@@ -12114,6 +11969,7 @@ export interface PathsDictionary {
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
 
+export type AdditionalProviderData = Components.Schemas.AdditionalProviderData;
 export type Address = Components.Schemas.Address;
 export type Amounts = Components.Schemas.Amounts;
 export type AvailabilityCheckParams = Components.Schemas.AvailabilityCheckParams;
@@ -12174,9 +12030,11 @@ export type ExternalCatalogRequest = Components.Schemas.ExternalCatalogRequest;
 export type ExternalFeeMapping = Components.Schemas.ExternalFeeMapping;
 export type ExternalFeeMappings = Components.Schemas.ExternalFeeMappings;
 export type ExternalFeeMetadata = Components.Schemas.ExternalFeeMetadata;
+export type ExternalLocationMetadata = Components.Schemas.ExternalLocationMetadata;
 export type ExternalPriceMetadata = Components.Schemas.ExternalPriceMetadata;
 export type File = Components.Schemas.File;
 export type GasConcessionType = Components.Schemas.GasConcessionType;
+export type GasMarketAreaDetails = Components.Schemas.GasMarketAreaDetails;
 export type HistoricMarketPriceRecord = Components.Schemas.HistoricMarketPriceRecord;
 export type HistoricMarketPricesResult = Components.Schemas.HistoricMarketPricesResult;
 export type HydratedCompositePrice = Components.Schemas.HydratedCompositePrice;
@@ -12184,6 +12042,7 @@ export type IntegrationAuthCredentials = Components.Schemas.IntegrationAuthCrede
 export type IntegrationCredentialsResult = Components.Schemas.IntegrationCredentialsResult;
 export type IntegrationId = Components.Schemas.IntegrationId;
 export type JourneyContext = Components.Schemas.JourneyContext;
+export type MarketParticipant = Components.Schemas.MarketParticipant;
 export type MarkupPricingModel = Components.Schemas.MarkupPricingModel;
 export type MetaData = Components.Schemas.MetaData;
 export type NonHydratedCompositePrice = Components.Schemas.NonHydratedCompositePrice;
@@ -12199,6 +12058,7 @@ export type OrderSource = Components.Schemas.OrderSource;
 export type OrderStatus = Components.Schemas.OrderStatus;
 export type PaymentMethod = Components.Schemas.PaymentMethod;
 export type PortalContext = Components.Schemas.PortalContext;
+export type PowerMarketAreaDetails = Components.Schemas.PowerMarketAreaDetails;
 export type PowerMeterType = Components.Schemas.PowerMeterType;
 export type Price = Components.Schemas.Price;
 export type PriceAmounts = Components.Schemas.PriceAmounts;

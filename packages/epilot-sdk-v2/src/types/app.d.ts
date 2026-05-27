@@ -1581,13 +1581,14 @@ export declare namespace Components {
              *   - 200 with a JSON body of shape:
              *     {
              *       "type_options": [
-             *         { "id": "ht", "label": { "en": "High tariff" }, "aggregation_group": "consumption", "statistical_method": "sum", "unit": "kWh" },
+             *         { "id": "ht", "label": { "en": "High tariff" }, "aggregation_group": "consumption", "statistical_method": "sum", "unit": "kWh", "color": "primary", "precision": 2 },
              *         ...
              *       ],
              *       "intervals": ["PT15M", "PT1H", "P1D", "P1M"],
              *       "data_range": { "from": "2024-01-01T00:00:00Z", "to": "2026-05-01T00:00:00Z" }
              *     }
              *   Each type option carries its own `statistical_method`, which describes the method already applied to that type's data and dictates the chart shape: `sum` is rendered as a bar chart; `min`, `average`, and `max` are rendered as a line chart. A single visualization can therefore mix bar-shaped types with line-shaped types. Defaults to `sum` when omitted.
+             *   Each type option may also customize its rendering: `color` picks a Spark palette color (`primary`, `slate`, `mauve`, `orange`, `red`, `tomato`, `amber`, `green`, `blue`) used to draw the type's series; `precision` sets the number of decimal places to show for that type's values (axis labels, tooltips, summaries). Both are optional — the consumer falls back to its own defaults when they are omitted.
              *   `aggregation_group` controls how types within a group are visually combined (depends on the per-type `statistical_method`):
              *     - bar chart (`sum`): same-group types are stacked into a single bar (e.g. ht/nt summed into total consumption); different-group types render side-by-side.
              *     - line chart (`min` / `average` / `max`): same-group types are rendered as an area chart; different-group types render as separate lines.
@@ -1676,7 +1677,19 @@ export declare namespace Components {
                 /**
                  * Optional path to the data (array) in the response. If omitted, the data is assumed to be on the top level.
                  */
+                data_path?: string;
+                /**
+                 * Deprecated. Use `data_path` instead.
+                 */
                 dataPath?: string;
+                /**
+                 * Optional path to a human-readable error message in the third-party response body, used when the call fails (non-2xx status).
+                 * If specified and the path resolves to a string, that message is forwarded to the end user instead of a generic error.
+                 *
+                 * example:
+                 * error.message
+                 */
+                error_message_path?: string;
             };
             /**
              * Deprecated. Prefer `secure_proxy` instead.
@@ -1736,9 +1749,23 @@ export declare namespace Components {
                     [key: string]: any;
                 };
                 /**
-                 * Contract or Contact ID usually retrieved from the response body, e.g. `{{CallResponse.data.contact_id}}`. If no result is passed and the request suceeds, we attempt to resolve the Contact ID automatically. Supports variable interpolation.
+                 * Deprecated. Use `resolved.result` instead. Contract or Contact ID usually retrieved from the response body, e.g. `{{CallResponse.data.contact_id}}`. If no result is passed and the request suceeds, we attempt to resolve the Contact ID automatically. Supports variable interpolation.
                  */
                 result?: string;
+            };
+            resolved?: {
+                /**
+                 * Contract or Contact ID usually retrieved from the response body, e.g. `{{CallResponse.data.contact_id}}`. If no result is passed and the request suceeds, we attempt to resolve the Contact ID automatically. Supports variable interpolation. Supersedes the deprecated `call.result`.
+                 */
+                result?: string;
+                /**
+                 * Optional path to a human-readable error message in the third-party response body, used when the call fails (non-2xx status).
+                 * If specified and the path resolves to a string, that message is forwarded to the end user instead of a generic error.
+                 *
+                 * example:
+                 * error.message
+                 */
+                error_message_path?: string;
             };
             /**
              * Mode of contract assignment. See hook description for mode details.
@@ -1821,7 +1848,19 @@ export declare namespace Components {
                 /**
                  * Optional path to the data (array) in the response. If omitted, the data is assumed to be on the top level.
                  */
+                data_path?: string;
+                /**
+                 * Deprecated. Use `data_path` instead.
+                 */
                 dataPath?: string;
+                /**
+                 * Optional path to a human-readable error message in the third-party response body, used when the call fails (non-2xx status).
+                 * If specified and the path resolves to a string, that message is forwarded to the end user instead of a generic error.
+                 *
+                 * example:
+                 * error.message
+                 */
+                error_message_path?: string;
             };
             /**
              * Deprecated. Prefer `secure_proxy` instead.
@@ -1879,6 +1918,16 @@ export declare namespace Components {
                 body?: {
                     [name: string]: any;
                 };
+            };
+            resolved?: {
+                /**
+                 * Optional path to a human-readable error message in the third-party response body, used when the call fails (non-2xx status).
+                 * If specified and the path resolves to a string, that message is forwarded to the end user instead of a generic error.
+                 *
+                 * example:
+                 * error.message
+                 */
+                error_message_path?: string;
             };
             /**
              * Deprecated. Prefer `secure_proxy` instead.
@@ -1942,6 +1991,10 @@ export declare namespace Components {
                  * example:
                  * data.results
                  */
+                data_path?: string;
+                /**
+                 * Deprecated. Use `data_path` instead.
+                 */
                 dataPath?: string;
                 /**
                  * Counter identifier(s) used to match against the meter's counters.
@@ -1975,6 +2028,14 @@ export declare namespace Components {
                  * {{CallResponse.data.lower_limit}}
                  */
                 lower_limit?: string;
+                /**
+                 * Optional path to a human-readable error message in the third-party response body, used when the call fails (non-2xx status).
+                 * If specified and the path resolves to a string, that message is forwarded to the end user instead of a generic error.
+                 *
+                 * example:
+                 * error.message
+                 */
+                error_message_path?: string;
             };
             /**
              * Deprecated. Prefer `secure_proxy` instead.
@@ -2035,7 +2096,19 @@ export declare namespace Components {
                 /**
                  * Optional path to the data (array) in the response. If omitted, the data is assumed to be on the top level.
                  */
+                data_path?: string;
+                /**
+                 * Deprecated. Use `data_path` instead.
+                 */
                 dataPath?: string;
+                /**
+                 * Optional path to a human-readable error message in the third-party response body, used when the call fails (non-2xx status).
+                 * If specified and the path resolves to a string, that message is forwarded to the end user instead of a generic error.
+                 *
+                 * example:
+                 * error.message
+                 */
+                error_message_path?: string;
             };
             /**
              * Deprecated. Prefer `secure_proxy` instead.
@@ -2087,9 +2160,23 @@ export declare namespace Components {
                     [key: string]: any;
                 };
                 /**
-                 * Contact ID usually retrieved from the response body, e.g. `{{CallResponse.data.contact_id}}`. If no result is passed and the request suceeds, we attempt to resolve the Contact ID automatically. Supports variable interpolation.
+                 * Deprecated. Use `resolved.result` instead. Contact ID usually retrieved from the response body, e.g. `{{CallResponse.data.contact_id}}`. If no result is passed and the request suceeds, we attempt to resolve the Contact ID automatically. Supports variable interpolation.
                  */
                 result: string;
+            };
+            resolved?: {
+                /**
+                 * Contact ID usually retrieved from the response body, e.g. `{{CallResponse.data.contact_id}}`. If no result is passed and the request suceeds, we attempt to resolve the Contact ID automatically. Supports variable interpolation. Supersedes the deprecated `call.result`.
+                 */
+                result?: string;
+                /**
+                 * Optional path to a human-readable error message in the third-party response body, used when the call fails (non-2xx status).
+                 * If specified and the path resolves to a string, that message is forwarded to the end user instead of a generic error.
+                 *
+                 * example:
+                 * error.message
+                 */
+                error_message_path?: string;
             };
             /**
              * Deprecated. Prefer `secure_proxy` instead.
@@ -2104,13 +2191,14 @@ export declare namespace Components {
          *   - 200 with a JSON body of shape:
          *     {
          *       "type_options": [
-         *         { "id": "ht", "label": { "en": "High tariff" }, "aggregation_group": "consumption", "statistical_method": "sum", "unit": "kWh" },
+         *         { "id": "ht", "label": { "en": "High tariff" }, "aggregation_group": "consumption", "statistical_method": "sum", "unit": "kWh", "color": "primary", "precision": 2 },
          *         ...
          *       ],
          *       "intervals": ["PT15M", "PT1H", "P1D", "P1M"],
          *       "data_range": { "from": "2024-01-01T00:00:00Z", "to": "2026-05-01T00:00:00Z" }
          *     }
          *   Each type option carries its own `statistical_method`, which describes the method already applied to that type's data and dictates the chart shape: `sum` is rendered as a bar chart; `min`, `average`, and `max` are rendered as a line chart. A single visualization can therefore mix bar-shaped types with line-shaped types. Defaults to `sum` when omitted.
+         *   Each type option may also customize its rendering: `color` picks a Spark palette color (`primary`, `slate`, `mauve`, `orange`, `red`, `tomato`, `amber`, `green`, `blue`) used to draw the type's series; `precision` sets the number of decimal places to show for that type's values (axis labels, tooltips, summaries). Both are optional — the consumer falls back to its own defaults when they are omitted.
          *   `aggregation_group` controls how types within a group are visually combined (depends on the per-type `statistical_method`):
          *     - bar chart (`sum`): same-group types are stacked into a single bar (e.g. ht/nt summed into total consumption); different-group types render side-by-side.
          *     - line chart (`min` / `average` / `max`): same-group types are rendered as an area chart; different-group types render as separate lines.
@@ -2158,7 +2246,19 @@ export declare namespace Components {
                 /**
                  * Optional path to the metadata object in the response. If omitted, the metadata is assumed to be on the top level.
                  */
+                data_path?: string;
+                /**
+                 * Deprecated. Use `data_path` instead.
+                 */
                 dataPath?: string;
+                /**
+                 * Optional path to a human-readable error message in the third-party response body, used when the call fails (non-2xx status).
+                 * If specified and the path resolves to a string, that message is forwarded to the end user instead of a generic error.
+                 *
+                 * example:
+                 * error.message
+                 */
+                error_message_path?: string;
             };
             /**
              * Deprecated. Prefer `secure_proxy` instead.

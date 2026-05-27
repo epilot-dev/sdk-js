@@ -294,7 +294,6 @@ const { data } = await customerPortalClient.upsertPortal(...)
 - [`AttributeMappingConfig`](#attributemappingconfig)
 - [`EntityMatchingConfig`](#entitymatchingconfig)
 - [`OIDCProviderConfig`](#oidcproviderconfig)
-- [`OIDCProviderPublicConfig`](#oidcproviderpublicconfig)
 - [`MoblieOIDCConfig`](#moblieoidcconfig)
 - [`OIDCProviderMetadata`](#oidcprovidermetadata)
 - [`SAMLProviderConfig`](#samlproviderconfig)
@@ -349,6 +348,17 @@ const { data } = await client.upsertPortal(
         { /* ... */ }
       ]
     },
+    identity_providers: [
+      {
+        slug: 'office-365-login',
+        display_name: 'Office 365 Login',
+        provider_type: 'OIDC',
+        attribute_mappings: { /* ... */ },
+        entity_matching: { /* ... */ },
+        oidc_config: { /* ... */ },
+        mobile_oidc_config: { /* ... */ }
+      }
+    ],
     enabled: true,
     name: 'Installer Portal',
     domain: 'abc.com',
@@ -2318,7 +2328,10 @@ const { data } = await client.getOrgPortalConfig({
       "slug": "office-365-login",
       "display_name": "Office 365 Login",
       "oidc_config": {},
-      "mobile_oidc_config": {}
+      "mobile_oidc_config": {},
+      "provider_type": "OIDC",
+      "attribute_mappings": {},
+      "entity_matching": {}
     }
   ],
   "certificate_details": {
@@ -2737,7 +2750,10 @@ const { data } = await client.getOrgPortalConfigV3({
       "slug": "office-365-login",
       "display_name": "Office 365 Login",
       "oidc_config": {},
-      "mobile_oidc_config": {}
+      "mobile_oidc_config": {},
+      "provider_type": "OIDC",
+      "attribute_mappings": {},
+      "entity_matching": {}
     }
   ],
   "certificate_details": {
@@ -5682,9 +5698,11 @@ const { data } = await client.getSSOProvider({
     "oidc_issuer": "https://login.microsoftonline.com/33d4f3e5-3df2-421e-b92e-a63cfa680a88/v2.0",
     "redirect_uri": "https://customer-portal.com/login",
     "client_id": "ab81daf8-8b1f-42d6-94ca-c51621054c75",
+    "client_secret": "7BIUnn~6shh.7fNtXb..3k1Mp3s6k6WK3B",
     "has_client_secret": true,
     "scope": "openid email",
     "metadata": {
+      "response_modes_supported": ["form_post"],
       "authorization_endpoint": "https://www.facebook.com/v12.0/dialog/oauth",
       "token_endpoint": "https://graph.facebook.com/v12.0/oauth/access_token",
       "userinfo_endpoint": "https://graph.facebook.com/me",
@@ -6745,6 +6763,17 @@ const { data } = await client.createPortalConfig(
         { /* ... */ }
       ]
     },
+    identity_providers: [
+      {
+        slug: 'office-365-login',
+        display_name: 'Office 365 Login',
+        provider_type: 'OIDC',
+        attribute_mappings: { /* ... */ },
+        entity_matching: { /* ... */ },
+        oidc_config: { /* ... */ },
+        mobile_oidc_config: { /* ... */ }
+      }
+    ],
     enabled: true,
     name: 'Installer Portal',
     domain: 'abc.com',
@@ -6951,6 +6980,17 @@ const { data } = await client.createPortalConfig(
       {}
     ]
   },
+  "identity_providers": [
+    {
+      "slug": "office-365-login",
+      "display_name": "Office 365 Login",
+      "provider_type": "OIDC",
+      "attribute_mappings": {},
+      "entity_matching": {},
+      "oidc_config": {},
+      "mobile_oidc_config": {}
+    }
+  ],
   "enabled": true,
   "name": "Installer Portal",
   "domain": "abc.com",
@@ -7122,14 +7162,6 @@ const { data } = await client.createPortalConfig(
       "action": "entity-read",
       "resource": "entity:123:contact:f7c22299-ca72-4bca-8538-0a88eeefc947",
       "effect": "allow"
-    }
-  ],
-  "identity_providers": [
-    {
-      "slug": "office-365-login",
-      "display_name": "Office 365 Login",
-      "oidc_config": {},
-      "mobile_oidc_config": {}
     }
   ],
   "pages": [
@@ -7200,6 +7232,17 @@ const { data } = await client.getPortalConfigV3({
       {}
     ]
   },
+  "identity_providers": [
+    {
+      "slug": "office-365-login",
+      "display_name": "Office 365 Login",
+      "provider_type": "OIDC",
+      "attribute_mappings": {},
+      "entity_matching": {},
+      "oidc_config": {},
+      "mobile_oidc_config": {}
+    }
+  ],
   "enabled": true,
   "name": "Installer Portal",
   "domain": "abc.com",
@@ -7373,14 +7416,6 @@ const { data } = await client.getPortalConfigV3({
       "effect": "allow"
     }
   ],
-  "identity_providers": [
-    {
-      "slug": "office-365-login",
-      "display_name": "Office 365 Login",
-      "oidc_config": {},
-      "mobile_oidc_config": {}
-    }
-  ],
   "pages": [
     {
       "slug": "dashboard",
@@ -7444,6 +7479,17 @@ const { data } = await client.putPortalConfig(
         { /* ... */ }
       ]
     },
+    identity_providers: [
+      {
+        slug: 'office-365-login',
+        display_name: 'Office 365 Login',
+        provider_type: 'OIDC',
+        attribute_mappings: { /* ... */ },
+        entity_matching: { /* ... */ },
+        oidc_config: { /* ... */ },
+        mobile_oidc_config: { /* ... */ }
+      }
+    ],
     enabled: true,
     name: 'Installer Portal',
     domain: 'abc.com',
@@ -7618,14 +7664,6 @@ const { data } = await client.putPortalConfig(
         effect: 'allow'
       }
     ],
-    identity_providers: [
-      {
-        slug: 'office-365-login',
-        display_name: 'Office 365 Login',
-        oidc_config: { /* ... */ },
-        mobile_oidc_config: { /* ... */ }
-      }
-    ],
     pages: [
       {
         slug: 'dashboard',
@@ -7679,6 +7717,17 @@ const { data } = await client.putPortalConfig(
       {}
     ]
   },
+  "identity_providers": [
+    {
+      "slug": "office-365-login",
+      "display_name": "Office 365 Login",
+      "provider_type": "OIDC",
+      "attribute_mappings": {},
+      "entity_matching": {},
+      "oidc_config": {},
+      "mobile_oidc_config": {}
+    }
+  ],
   "enabled": true,
   "name": "Installer Portal",
   "domain": "abc.com",
@@ -7852,14 +7901,6 @@ const { data } = await client.putPortalConfig(
       "effect": "allow"
     }
   ],
-  "identity_providers": [
-    {
-      "slug": "office-365-login",
-      "display_name": "Office 365 Login",
-      "oidc_config": {},
-      "mobile_oidc_config": {}
-    }
-  ],
   "pages": [
     {
       "slug": "dashboard",
@@ -7926,6 +7967,7 @@ const { data } = await client.listAllPortalConfigs()
       "extensions": [],
       "extension_hooks": {},
       "default_user_to_notify": {},
+      "identity_providers": [],
       "enabled": true,
       "name": "Installer Portal",
       "domain": "abc.com",
@@ -7968,7 +8010,6 @@ const { data } = await client.listAllPortalConfigs()
       "org_settings": {},
       "feature_flags": {},
       "grants": [],
-      "identity_providers": [],
       "pages": []
     }
   ]
@@ -8050,6 +8091,17 @@ const { data } = await client.clonePortalConfig(
       {}
     ]
   },
+  "identity_providers": [
+    {
+      "slug": "office-365-login",
+      "display_name": "Office 365 Login",
+      "provider_type": "OIDC",
+      "attribute_mappings": {},
+      "entity_matching": {},
+      "oidc_config": {},
+      "mobile_oidc_config": {}
+    }
+  ],
   "enabled": true,
   "name": "Installer Portal",
   "domain": "abc.com",
@@ -8221,14 +8273,6 @@ const { data } = await client.clonePortalConfig(
       "action": "entity-read",
       "resource": "entity:123:contact:f7c22299-ca72-4bca-8538-0a88eeefc947",
       "effect": "allow"
-    }
-  ],
-  "identity_providers": [
-    {
-      "slug": "office-365-login",
-      "display_name": "Office 365 Login",
-      "oidc_config": {},
-      "mobile_oidc_config": {}
     }
   ],
   "pages": [
@@ -8664,6 +8708,37 @@ type UpdateOnlyPortalConfigAttributes = {
       phone?: { ... }
     }>
   }
+  identity_providers?: Array<{
+    slug?: string
+    display_name: string
+    provider_type: "OIDC"
+    attribute_mappings?: {
+      contact: { ... }
+      account?: { ... }
+      portal_user?: { ... }
+      concession_attributes?: { ... }
+    }
+    entity_matching?: {
+      portal_user?: { ... }
+      contact?: { ... }
+      auto_create_cognito_user?: { ... }
+    }
+    oidc_config?: {
+      type?: { ... }
+      oidc_issuer: { ... }
+      redirect_uri?: { ... }
+      client_id: { ... }
+      client_secret?: { ... }
+      has_client_secret?: { ... }
+      scope: { ... }
+      metadata?: { ... }
+      prompt?: { ... }
+    }
+    mobile_oidc_config?: {
+      client_id?: { ... }
+      client_secret?: { ... }
+    }
+  }>
 }
 ```
 
@@ -8807,6 +8882,37 @@ type UpsertPortalConfig = {
       phone?: { ... }
     }>
   }
+  identity_providers?: Array<{
+    slug?: string
+    display_name: string
+    provider_type: "OIDC"
+    attribute_mappings?: {
+      contact: { ... }
+      account?: { ... }
+      portal_user?: { ... }
+      concession_attributes?: { ... }
+    }
+    entity_matching?: {
+      portal_user?: { ... }
+      contact?: { ... }
+      auto_create_cognito_user?: { ... }
+    }
+    oidc_config?: {
+      type?: { ... }
+      oidc_issuer: { ... }
+      redirect_uri?: { ... }
+      client_id: { ... }
+      client_secret?: { ... }
+      has_client_secret?: { ... }
+      scope: { ... }
+      metadata?: { ... }
+      prompt?: { ... }
+    }
+    mobile_oidc_config?: {
+      client_id?: { ... }
+      client_secret?: { ... }
+    }
+  }>
   enabled?: boolean
   name?: string
   domain: string
@@ -8846,37 +8952,6 @@ type UpsertPortalConfig = {
     cognito_user_pool_arn?: string
     cognito_user_pool_id?: string
     timeouts?: {
-      refresh_token?: { ... }
-      access_token?: { ... }
-      id_token?: { ... }
-    }
-    advanced_authentication?: {
-      user_activity_logging?: { ... }
-      adaptive_authentication?: { ... }
-      compromised_credentials_detection?: { ... }
-    }
-    password_policy?: {
-      minimum_length?: { ... }
-      maximum_length?: { ... }
-      require_lowercase?: { ... }
-      require_uppercase?: { ... }
-      require_numbers?: { ... }
-      require_symbols?: { ... }
-    }
-  }
-  config?: string
-  contact_identifiers?: string[]
-  approval_state_attributes?: Record<string, string[]>
-  email_templates?: {
-    confirmAccount?: string // uuid
-    advancedAuth?: string // uuid
-    advancedMFA?: string // uuid
-    journeySignUp?: string // uuid
-    journeySignInOneTimePassword?: string // uuid
-    journeyLoginOTP?: string // uuid
-    forgotPassword?: string // uuid
-    invitation?: string // uuid
-    partnerInvitation?: string // uuid
   // ...
 }
 ```
@@ -10849,6 +10924,7 @@ type ExtensionHookMeterReadingPlausibilityCheck = {
     valid?: string
     upper_limit?: string
     lower_limit?: string
+    errorMessagePath?: string
   }
   use_static_ips?: boolean
   secure_proxy?: {
@@ -10887,6 +10963,7 @@ type ExtensionHookPriceDataRetrieval = {
   }
   resolved?: {
     dataPath?: string
+    errorMessagePath?: string
   }
   use_static_ips?: boolean
   secure_proxy?: {
@@ -10925,6 +11002,7 @@ type ExtensionHookConsumptionDataRetrieval = {
   }
   resolved?: {
     dataPath?: string
+    errorMessagePath?: string
   }
   use_static_ips?: boolean
   secure_proxy?: {
@@ -10959,6 +11037,9 @@ type ExtensionHookDataExport = {
     params?: Record<string, string>
     headers?: Record<string, string>
     body?: Record<string, string>
+  }
+  resolved?: {
+    errorMessagePath?: string
   }
   use_static_ips?: boolean
   secure_proxy?: {
@@ -10996,6 +11077,7 @@ type ExtensionHookVisualizationMetadata = {
   }
   resolved?: {
     dataPath?: string
+    errorMessagePath?: string
   }
   use_static_ips?: boolean
   secure_proxy?: {
@@ -11034,6 +11116,7 @@ type ExtensionHookCostDataRetrieval = {
   }
   resolved?: {
     dataPath?: string
+    errorMessagePath?: string
   }
   use_static_ips?: boolean
   secure_proxy?: {
@@ -11235,6 +11318,7 @@ type ProviderConfig = {
     has_client_secret?: boolean
     scope: string
     metadata?: {
+      response_modes_supported?: { ... }
       authorization_endpoint?: { ... }
       token_endpoint?: { ... }
       userinfo_endpoint?: { ... }
@@ -11265,9 +11349,11 @@ type ProviderPublicConfig = {
     oidc_issuer: string
     redirect_uri?: string
     client_id: string
+    client_secret?: string
     has_client_secret?: boolean
     scope: string
     metadata?: {
+      response_modes_supported?: { ... }
       authorization_endpoint?: { ... }
       token_endpoint?: { ... }
       userinfo_endpoint?: { ... }
@@ -11335,9 +11421,12 @@ type EntityMatchingConfig = {
 
 ### `OIDCProviderConfig`
 
-OIDC provider configuration. All string fields support env var interpolation
-(incl. secrets) via mustache-like templates, e.g. `{{ env.MY_PROVIDER_CLIENT_SECRET }}`.
+OIDC provider configuration. Values are resolved at SSO invocation time
+(login / callback), so the fields below may reference org env vars via
+mustache-like templates, e.g. `{{ env.MY_PROVIDER_CLIENT_SECRET }}`.
 
+Fields used to render the SSO buttons up-front (`ProviderConfig.slug`,
+`ProviderConfig.
 
 ```ts
 type OIDCProviderConfig = {
@@ -11349,36 +11438,7 @@ type OIDCProviderConfig = {
   has_client_secret?: boolean
   scope: string
   metadata?: {
-    authorization_endpoint?: string
-    token_endpoint?: string
-    userinfo_endpoint?: string
-    logout_uri?: string
-    logout_redirect_uri?: string
-    skip_login_as_logout?: boolean
-    mobile_redirect_uri?: string
-    test_auth_username?: string
-    test_auth_password?: string
-  }
-  prompt?: "login" | "select_account" | "consent"
-}
-```
-
-### `OIDCProviderPublicConfig`
-
-Public OIDC provider configuration. Same as OIDCProviderConfig but never includes
-the `client_secret` field — it is kept server-side and only used to exchange the
-authorization code at the SSO callback. String fields are returned with env var
-placeholders already resolved when fetched via `GET /v2/p
-
-```ts
-type OIDCProviderPublicConfig = {
-  type?: "authorization_code" | "implicit"
-  oidc_issuer: string
-  redirect_uri?: string
-  client_id: string
-  has_client_secret?: boolean
-  scope: string
-  metadata?: {
+    response_modes_supported?: "form_post" | "fragment" | "query"[]
     authorization_endpoint?: string
     token_endpoint?: string
     userinfo_endpoint?: string
@@ -11395,8 +11455,9 @@ type OIDCProviderPublicConfig = {
 
 ### `MoblieOIDCConfig`
 
-Mobile OIDC configuration. All string fields support env var interpolation
-(incl. secrets) via mustache-like templates, e.g. `{{ env.MOBILE_CLIENT_SECRET }}`.
+Mobile OIDC configuration. Values are resolved at SSO invocation time, so the
+fields below may reference org env vars via mustache-like templates, e.g.
+`{{ env.MOBILE_CLIENT_SECRET }}`.
 
 
 ```ts
@@ -11410,6 +11471,7 @@ type MoblieOIDCConfig = {
 
 ```ts
 type OIDCProviderMetadata = {
+  response_modes_supported?: "form_post" | "fragment" | "query"[]
   authorization_endpoint?: string
   token_endpoint?: string
   userinfo_endpoint?: string
@@ -11781,6 +11843,37 @@ type UpsertPortalConfigV3 = {
       phone?: { ... }
     }>
   }
+  identity_providers?: Array<{
+    slug?: string
+    display_name: string
+    provider_type: "OIDC"
+    attribute_mappings?: {
+      contact: { ... }
+      account?: { ... }
+      portal_user?: { ... }
+      concession_attributes?: { ... }
+    }
+    entity_matching?: {
+      portal_user?: { ... }
+      contact?: { ... }
+      auto_create_cognito_user?: { ... }
+    }
+    oidc_config?: {
+      type?: { ... }
+      oidc_issuer: { ... }
+      redirect_uri?: { ... }
+      client_id: { ... }
+      client_secret?: { ... }
+      has_client_secret?: { ... }
+      scope: { ... }
+      metadata?: { ... }
+      prompt?: { ... }
+    }
+    mobile_oidc_config?: {
+      client_id?: { ... }
+      client_secret?: { ... }
+    }
+  }>
   enabled?: boolean
   name?: string
   domain?: string
@@ -11820,37 +11913,6 @@ type UpsertPortalConfigV3 = {
     cognito_user_pool_arn?: string
     cognito_user_pool_id?: string
     timeouts?: {
-      refresh_token?: { ... }
-      access_token?: { ... }
-      id_token?: { ... }
-    }
-    advanced_authentication?: {
-      user_activity_logging?: { ... }
-      adaptive_authentication?: { ... }
-      compromised_credentials_detection?: { ... }
-    }
-    password_policy?: {
-      minimum_length?: { ... }
-      maximum_length?: { ... }
-      require_lowercase?: { ... }
-      require_uppercase?: { ... }
-      require_numbers?: { ... }
-      require_symbols?: { ... }
-    }
-  }
-  config?: string
-  contact_identifiers?: string[]
-  approval_state_attributes?: Record<string, string[]>
-  email_templates?: {
-    confirmAccount?: string // uuid
-    advancedAuth?: string // uuid
-    advancedMFA?: string // uuid
-    journeySignUp?: string // uuid
-    journeySignInOneTimePassword?: string // uuid
-    journeyLoginOTP?: string // uuid
-    forgotPassword?: string // uuid
-    invitation?: string // uuid
-    partnerInvitation?: string // uuid
   // ...
 }
 ```
@@ -11888,6 +11950,25 @@ type PortalConfigV3 = {
       phone?: { ... }
     }>
   }
+  identity_providers?: Array<{
+    slug: string
+    display_name: string
+    oidc_config?: {
+      type?: { ... }
+      oidc_issuer: { ... }
+      redirect_uri?: { ... }
+      client_id: { ... }
+      client_secret?: { ... }
+      has_client_secret?: { ... }
+      scope: { ... }
+      metadata?: { ... }
+      prompt?: { ... }
+    }
+    mobile_oidc_config?: {
+      client_id?: { ... }
+      client_secret?: { ... }
+    }
+  }>
   enabled?: boolean
   name?: string
   domain?: string
@@ -11939,25 +12020,6 @@ type PortalConfigV3 = {
     password_policy?: {
       minimum_length?: { ... }
       maximum_length?: { ... }
-      require_lowercase?: { ... }
-      require_uppercase?: { ... }
-      require_numbers?: { ... }
-      require_symbols?: { ... }
-    }
-  }
-  config?: string
-  contact_identifiers?: string[]
-  approval_state_attributes?: Record<string, string[]>
-  email_templates?: {
-    confirmAccount?: string // uuid
-    advancedAuth?: string // uuid
-    advancedMFA?: string // uuid
-    journeySignUp?: string // uuid
-    journeySignInOneTimePassword?: string // uuid
-    journeyLoginOTP?: string // uuid
-    forgotPassword?: string // uuid
-    invitation?: string // uuid
-    partnerInvitation?: string // uuid
   // ...
 }
 ```

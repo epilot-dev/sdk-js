@@ -18,10 +18,12 @@ export declare namespace Components {
         Schemas.ResourceType;
         export type CursorParam = string;
         export type SizeParam = number;
+        export type SyncJobId = string;
     }
     export interface PathParameters {
         ConfigType?: Parameters.ConfigType;
         ConfigId?: Parameters.ConfigId;
+        SyncJobId?: Parameters.SyncJobId;
     }
     export interface QueryParameters {
         CursorParam?: Parameters.CursorParam;
@@ -107,6 +109,17 @@ export declare namespace Components {
              */
             link?: string; // uri
             /**
+             * Whether this config is currently active/enabled (omitted when not applicable)
+             */
+            active?: boolean;
+            /**
+             * Installed blueprints that produced this config (tagged during the rebuild lineage pass)
+             */
+            blueprints?: {
+                id: string;
+                title: string;
+            }[];
+            /**
              * Type-specific metadata (e.g., submission count for journeys)
              */
             metadata?: {
@@ -179,9 +192,377 @@ export declare namespace Components {
          *
          */
         export type ResourceType = "journey" | "automation_flow" | "workflow_definition" | "closing_reason" | "flow_template" | "schema" | "emailtemplate" | "product" | "price" | "tax" | "coupon" | "file" | "document_template" | "webhook" | "saved_view" | "dashboard" | "kanban" | "role" | "usergroup" | "validation_rule" | "integration" | "app" | "designbuilder" | "notification_template" | "custom_variable" | "environment_variable" | "taxonomy" | "taxonomy_classification" | "entity_mapping" | "portal_config" | "target" | "product_recommendation" | "access_token";
+        /**
+         * Direction of the sync, derived from the source/target pane selection in the
+         * configuration hub UI.
+         *
+         */
+        export type SyncDirection = "push" | "pull";
+        /**
+         * Sync job header as surfaced by `getSyncJob` and the create response. The
+         * canonical persistence shape is described in `docs/sync/INTERFACES.md`.
+         *
+         */
+        export interface SyncJob {
+            id: string;
+            name?: string;
+            status: /**
+             * Lifecycle status of a sync job. See `docs/sync/INTERFACES.md` for state
+             * transitions.
+             *
+             */
+            SyncJobStatus;
+            direction: /**
+             * Direction of the sync, derived from the source/target pane selection in the
+             * configuration hub UI.
+             *
+             */
+            SyncDirection;
+            source_org_id: string;
+            target_org_id: string;
+            dry_run: boolean;
+            counts: /* Aggregate counters by resource status. */ SyncJobCounts;
+            current_phase?: /**
+             * Three-phase orchestrator phase. `phase_0` fetches source payloads,
+             * `phase_a` creates/matches with topological batches, `phase_a5` resolves
+             * derived references, `phase_b` patches with the full ID map, `finalize`
+             * runs cycle-breaking finalizers.
+             *
+             */
+            SyncPhase;
+            current_batch?: /* Position within the current topological batch for the active phase. */ SyncJobBatch;
+            started_at: string; // date-time
+            finished_at?: string; // date-time
+            /**
+             * Most recent events (capped server-side, typically last 10).
+             */
+            events?: /**
+             * Activity-log entry surfaced to the frontend. Backed by the op-log rows in
+             * the index table (`SYNC#<jobId>#OP#<seq>`).
+             *
+             */
+            SyncJobEvent[];
+            /**
+             * Up to 20 sample error messages from failed resources.
+             */
+            errors_sample?: [
+                {
+                    type: string;
+                    source_id: string;
+                    error: string;
+                }?,
+                {
+                    type: string;
+                    source_id: string;
+                    error: string;
+                }?,
+                {
+                    type: string;
+                    source_id: string;
+                    error: string;
+                }?,
+                {
+                    type: string;
+                    source_id: string;
+                    error: string;
+                }?,
+                {
+                    type: string;
+                    source_id: string;
+                    error: string;
+                }?,
+                {
+                    type: string;
+                    source_id: string;
+                    error: string;
+                }?,
+                {
+                    type: string;
+                    source_id: string;
+                    error: string;
+                }?,
+                {
+                    type: string;
+                    source_id: string;
+                    error: string;
+                }?,
+                {
+                    type: string;
+                    source_id: string;
+                    error: string;
+                }?,
+                {
+                    type: string;
+                    source_id: string;
+                    error: string;
+                }?,
+                {
+                    type: string;
+                    source_id: string;
+                    error: string;
+                }?,
+                {
+                    type: string;
+                    source_id: string;
+                    error: string;
+                }?,
+                {
+                    type: string;
+                    source_id: string;
+                    error: string;
+                }?,
+                {
+                    type: string;
+                    source_id: string;
+                    error: string;
+                }?,
+                {
+                    type: string;
+                    source_id: string;
+                    error: string;
+                }?,
+                {
+                    type: string;
+                    source_id: string;
+                    error: string;
+                }?,
+                {
+                    type: string;
+                    source_id: string;
+                    error: string;
+                }?,
+                {
+                    type: string;
+                    source_id: string;
+                    error: string;
+                }?,
+                {
+                    type: string;
+                    source_id: string;
+                    error: string;
+                }?,
+                {
+                    type: string;
+                    source_id: string;
+                    error: string;
+                }?
+            ];
+        }
+        /**
+         * Position within the current topological batch for the active phase.
+         */
+        export interface SyncJobBatch {
+            /**
+             * Zero-based index of the batch currently executing.
+             */
+            index: number;
+            /**
+             * Total number of batches in the current phase.
+             */
+            of: number;
+            /**
+             * Dependency level (matches `dependencyLevel` from the topological sort).
+             */
+            level: number;
+        }
+        /**
+         * Aggregate counters by resource status.
+         */
+        export interface SyncJobCounts {
+            total: number;
+            pending: number;
+            in_progress: number;
+            succeeded: number;
+            failed: number;
+            skipped_unchanged: number;
+        }
+        /**
+         * Activity-log entry surfaced to the frontend. Backed by the op-log rows in
+         * the index table (`SYNC#<jobId>#OP#<seq>`).
+         *
+         */
+        export interface SyncJobEvent {
+            /**
+             * Monotonic sequence number assigned at write time.
+             */
+            seq: number;
+            ts: string; // date-time
+            phase?: /**
+             * Three-phase orchestrator phase. `phase_0` fetches source payloads,
+             * `phase_a` creates/matches with topological batches, `phase_a5` resolves
+             * derived references, `phase_b` patches with the full ID map, `finalize`
+             * runs cycle-breaking finalizers.
+             *
+             */
+            SyncPhase;
+            /**
+             * Resource type
+             */
+            type?: string;
+            source_id?: string;
+            target_id?: string;
+            status: /**
+             * Per-resource status. `would_*` values are produced by dry-run jobs.
+             *
+             */
+            SyncJobResourceStatus;
+            message?: string;
+            error?: string;
+        }
+        /**
+         * Cursor-paginated list of sync jobs.
+         */
+        export interface SyncJobListResponse {
+            next_cursor?: string;
+            results: /**
+             * Sync job header as surfaced by `getSyncJob` and the create response. The
+             * canonical persistence shape is described in `docs/sync/INTERFACES.md`.
+             *
+             */
+            SyncJob[];
+        }
+        /**
+         * Request body for `createSyncJob`. `target_auth_token` is the destination
+         * org's auth token and MUST NOT be persisted or logged — it is `writeOnly`.
+         *
+         */
+        export interface SyncJobRequest {
+            /**
+             * Org ID the resources are sourced from.
+             */
+            source_org_id: string;
+            /**
+             * Org ID the resources are written into.
+             */
+            target_org_id: string;
+            /**
+             * Destination-org auth token forwarded to adapter writes. Never returned
+             * in responses and never logged.
+             *
+             */
+            target_auth_token: string;
+            /**
+             * Optional human-friendly job name shown in the history list.
+             */
+            name?: string;
+            /**
+             * If true, the orchestrator runs Phase 0 + a planning pass and writes
+             * `would_*` resource rows but performs no destination writes.
+             *
+             */
+            dry_run?: boolean;
+            /**
+             * If true, the orchestrator expands the resource set by following
+             * dependency edges discovered during Phase 0.
+             *
+             */
+            include_dependencies?: boolean;
+            /**
+             * Initial resource selection. Dependencies may be added.
+             */
+            resources: {
+                /**
+                 * Resource type identifier
+                 */
+                type: string;
+                /**
+                 * Source-org resource ID
+                 */
+                id: string;
+            }[];
+        }
+        /**
+         * Per-resource row backed by `SyncResourcesTable`. See
+         * `docs/sync/INTERFACES.md` for the DDB shape.
+         *
+         */
+        export interface SyncJobResource {
+            type: string;
+            source_id: string;
+            target_id?: string;
+            status: /**
+             * Per-resource status. `would_*` values are produced by dry-run jobs.
+             *
+             */
+            SyncJobResourceStatus;
+            phase: /**
+             * Three-phase orchestrator phase. `phase_0` fetches source payloads,
+             * `phase_a` creates/matches with topological batches, `phase_a5` resolves
+             * derived references, `phase_b` patches with the full ID map, `finalize`
+             * runs cycle-breaking finalizers.
+             *
+             */
+            SyncPhase;
+            attempt: number;
+            error?: string;
+            updated_at: string; // date-time
+        }
+        /**
+         * Cursor-paginated list of sync job resources.
+         */
+        export interface SyncJobResourceListResponse {
+            next_cursor?: string;
+            results: /**
+             * Per-resource row backed by `SyncResourcesTable`. See
+             * `docs/sync/INTERFACES.md` for the DDB shape.
+             *
+             */
+            SyncJobResource[];
+        }
+        /**
+         * Per-resource status. `would_*` values are produced by dry-run jobs.
+         *
+         */
+        export type SyncJobResourceStatus = "pending" | "in_progress" | "created" | "patched" | "skipped" | "would_create" | "would_patch" | "would_skip_unchanged" | "would_match_heuristic" | "failed";
+        /**
+         * Optional body for `retrySyncJob`. Defaults to retrying every failed
+         * resource of the original job.
+         *
+         */
+        export interface SyncJobRetryRequest {
+            /**
+             * Map of `<type>:<source_id>` → partial payload patch. Applied on top of
+             * the originally fetched payload before re-running Phase A.
+             *
+             */
+            payload_overrides?: {
+                [name: string]: any;
+            };
+        }
+        /**
+         * Lifecycle status of a sync job. See `docs/sync/INTERFACES.md` for state
+         * transitions.
+         *
+         */
+        export type SyncJobStatus = "pending" | "in_progress" | "succeeded" | "partial" | "failed" | "cancelled";
+        /**
+         * Three-phase orchestrator phase. `phase_0` fetches source payloads,
+         * `phase_a` creates/matches with topological batches, `phase_a5` resolves
+         * derived references, `phase_b` patches with the full ID map, `finalize`
+         * runs cycle-breaking finalizers.
+         *
+         */
+        export type SyncPhase = "phase_0" | "phase_a" | "phase_a5" | "phase_b" | "finalize";
     }
 }
 export declare namespace Paths {
+    namespace CreateSyncJob {
+        export type RequestBody = /**
+         * Request body for `createSyncJob`. `target_auth_token` is the destination
+         * org's auth token and MUST NOT be persisted or logged — it is `writeOnly`.
+         *
+         */
+        Components.Schemas.SyncJobRequest;
+        namespace Responses {
+            export type $201 = /**
+             * Sync job header as surfaced by `getSyncJob` and the create response. The
+             * canonical persistence shape is described in `docs/sync/INTERFACES.md`.
+             *
+             */
+            Components.Schemas.SyncJob;
+            export type $400 = Components.Schemas.ErrorResponse;
+        }
+    }
     namespace GetConfigDependencies {
         namespace Parameters {
             export type Cursor = string;
@@ -228,6 +609,23 @@ export declare namespace Paths {
     namespace GetIndex {
         namespace Responses {
             export type $200 = /* Current index build state */ Components.Schemas.IndexStatusResponse;
+        }
+    }
+    namespace GetSyncJob {
+        namespace Parameters {
+            export type Id = string;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        namespace Responses {
+            export type $200 = /**
+             * Sync job header as surfaced by `getSyncJob` and the create response. The
+             * canonical persistence shape is described in `docs/sync/INTERFACES.md`.
+             *
+             */
+            Components.Schemas.SyncJob;
+            export type $404 = Components.Schemas.ErrorResponse;
         }
     }
     namespace ListConfigTypes {
@@ -279,9 +677,76 @@ export declare namespace Paths {
             export type $400 = Components.Schemas.ErrorResponse;
         }
     }
+    namespace ListSyncJobResources {
+        namespace Parameters {
+            export type Cursor = string;
+            export type Id = string;
+            export type Size = number;
+            export type Status = /**
+             * Per-resource status. `would_*` values are produced by dry-run jobs.
+             *
+             */
+            Components.Schemas.SyncJobResourceStatus;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        export interface QueryParameters {
+            cursor?: Parameters.Cursor;
+            size?: Parameters.Size;
+            status?: Parameters.Status;
+        }
+        namespace Responses {
+            export type $200 = /* Cursor-paginated list of sync job resources. */ Components.Schemas.SyncJobResourceListResponse;
+            export type $404 = Components.Schemas.ErrorResponse;
+        }
+    }
+    namespace ListSyncJobs {
+        namespace Parameters {
+            export type Cursor = string;
+            export type Size = number;
+            export type Status = /**
+             * Lifecycle status of a sync job. See `docs/sync/INTERFACES.md` for state
+             * transitions.
+             *
+             */
+            Components.Schemas.SyncJobStatus;
+        }
+        export interface QueryParameters {
+            cursor?: Parameters.Cursor;
+            size?: Parameters.Size;
+            status?: Parameters.Status;
+        }
+        namespace Responses {
+            export type $200 = /* Cursor-paginated list of sync jobs. */ Components.Schemas.SyncJobListResponse;
+        }
+    }
     namespace RebuildIndex {
         namespace Responses {
             export type $200 = /* Result of an index rebuild operation */ Components.Schemas.IndexRebuildResponse;
+        }
+    }
+    namespace RetrySyncJob {
+        namespace Parameters {
+            export type Id = string;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        export type RequestBody = /**
+         * Optional body for `retrySyncJob`. Defaults to retrying every failed
+         * resource of the original job.
+         *
+         */
+        Components.Schemas.SyncJobRetryRequest;
+        namespace Responses {
+            export type $201 = /**
+             * Sync job header as surfaced by `getSyncJob` and the create response. The
+             * canonical persistence shape is described in `docs/sync/INTERFACES.md`.
+             *
+             */
+            Components.Schemas.SyncJob;
+            export type $404 = Components.Schemas.ErrorResponse;
         }
     }
 }
@@ -356,6 +821,72 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetIndex.Responses.$200>
+  /**
+   * listSyncJobs - listSyncJobs
+   * 
+   * List sync jobs scoped to the caller's organization, paginated with an opaque
+   * cursor. Defaults to most-recent first.
+   * 
+   */
+  'listSyncJobs'(
+    parameters?: Parameters<Paths.ListSyncJobs.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ListSyncJobs.Responses.$200>
+  /**
+   * createSyncJob - createSyncJob
+   * 
+   * Create a new cross-org sync job. The job is enqueued for asynchronous execution
+   * by the worker Lambda; the response returns the persisted job header with status
+   * `pending`.
+   * 
+   * See `docs/sync/INTERFACES.md` for the locked request/response contract.
+   * 
+   */
+  'createSyncJob'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.CreateSyncJob.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CreateSyncJob.Responses.$201>
+  /**
+   * getSyncJob - getSyncJob
+   * 
+   * Fetch a single sync job by ID. Returns the job header, counts summary,
+   * current phase pointer, and the latest activity events. Frontend polls this
+   * endpoint with a ramping interval.
+   * 
+   */
+  'getSyncJob'(
+    parameters?: Parameters<Paths.GetSyncJob.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetSyncJob.Responses.$200>
+  /**
+   * retrySyncJob - retrySyncJob
+   * 
+   * Retry the failed resources from a prior sync job. Creates a new job whose
+   * scope is the failed `(type, source_id)` set of the original job and enqueues
+   * it for execution. Optionally accepts inline payload overrides.
+   * 
+   */
+  'retrySyncJob'(
+    parameters?: Parameters<Paths.RetrySyncJob.PathParameters> | null,
+    data?: Paths.RetrySyncJob.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.RetrySyncJob.Responses.$201>
+  /**
+   * listSyncJobResources - listSyncJobResources
+   * 
+   * List the per-resource rows for a sync job. Supports filtering by status
+   * (e.g. `failed`) and cursor pagination. Used by the failures table and the
+   * dry-run plan view in the frontend.
+   * 
+   */
+  'listSyncJobResources'(
+    parameters?: Parameters<Paths.ListSyncJobResources.QueryParameters & Paths.ListSyncJobResources.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ListSyncJobResources.Responses.$200>
   /**
    * rebuildIndex - rebuildIndex
    * 
@@ -450,6 +981,80 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetIndex.Responses.$200>
   }
+  ['/v1/configs/sync-jobs']: {
+    /**
+     * createSyncJob - createSyncJob
+     * 
+     * Create a new cross-org sync job. The job is enqueued for asynchronous execution
+     * by the worker Lambda; the response returns the persisted job header with status
+     * `pending`.
+     * 
+     * See `docs/sync/INTERFACES.md` for the locked request/response contract.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.CreateSyncJob.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CreateSyncJob.Responses.$201>
+    /**
+     * listSyncJobs - listSyncJobs
+     * 
+     * List sync jobs scoped to the caller's organization, paginated with an opaque
+     * cursor. Defaults to most-recent first.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.ListSyncJobs.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ListSyncJobs.Responses.$200>
+  }
+  ['/v1/configs/sync-jobs/{id}']: {
+    /**
+     * getSyncJob - getSyncJob
+     * 
+     * Fetch a single sync job by ID. Returns the job header, counts summary,
+     * current phase pointer, and the latest activity events. Frontend polls this
+     * endpoint with a ramping interval.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetSyncJob.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetSyncJob.Responses.$200>
+  }
+  ['/v1/configs/sync-jobs/{id}/retry']: {
+    /**
+     * retrySyncJob - retrySyncJob
+     * 
+     * Retry the failed resources from a prior sync job. Creates a new job whose
+     * scope is the failed `(type, source_id)` set of the original job and enqueues
+     * it for execution. Optionally accepts inline payload overrides.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.RetrySyncJob.PathParameters> | null,
+      data?: Paths.RetrySyncJob.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.RetrySyncJob.Responses.$201>
+  }
+  ['/v1/configs/sync-jobs/{id}/resources']: {
+    /**
+     * listSyncJobResources - listSyncJobResources
+     * 
+     * List the per-resource rows for a sync job. Supports filtering by status
+     * (e.g. `failed`) and cursor pagination. Used by the failures table and the
+     * dry-run plan view in the frontend.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.ListSyncJobResources.QueryParameters & Paths.ListSyncJobResources.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ListSyncJobResources.Responses.$200>
+  }
   ['/v1/configs/index:rebuild']: {
     /**
      * rebuildIndex - rebuildIndex
@@ -478,3 +1083,16 @@ export type ErrorResponse = Components.Schemas.ErrorResponse;
 export type IndexRebuildResponse = Components.Schemas.IndexRebuildResponse;
 export type IndexStatusResponse = Components.Schemas.IndexStatusResponse;
 export type ResourceType = Components.Schemas.ResourceType;
+export type SyncDirection = Components.Schemas.SyncDirection;
+export type SyncJob = Components.Schemas.SyncJob;
+export type SyncJobBatch = Components.Schemas.SyncJobBatch;
+export type SyncJobCounts = Components.Schemas.SyncJobCounts;
+export type SyncJobEvent = Components.Schemas.SyncJobEvent;
+export type SyncJobListResponse = Components.Schemas.SyncJobListResponse;
+export type SyncJobRequest = Components.Schemas.SyncJobRequest;
+export type SyncJobResource = Components.Schemas.SyncJobResource;
+export type SyncJobResourceListResponse = Components.Schemas.SyncJobResourceListResponse;
+export type SyncJobResourceStatus = Components.Schemas.SyncJobResourceStatus;
+export type SyncJobRetryRequest = Components.Schemas.SyncJobRetryRequest;
+export type SyncJobStatus = Components.Schemas.SyncJobStatus;
+export type SyncPhase = Components.Schemas.SyncPhase;

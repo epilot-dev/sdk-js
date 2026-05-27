@@ -153,6 +153,10 @@ export declare namespace Components {
             reactions?: {
                 [name: string]: string[];
             };
+            /**
+             * The timestamp of when this Note was archived. Absent or null means the Note is active.
+             */
+            _archived_at?: string | null; // date-time
         }
         /**
          * List of resolved Entity and non-Entity contexts attached to a given Note.
@@ -245,6 +249,10 @@ export declare namespace Components {
             reactions?: {
                 [name: string]: string[];
             };
+            /**
+             * The timestamp of when this Note was archived. Absent or null means the Note is active.
+             */
+            _archived_at?: string | null; // date-time
         }
         /**
          * The Note's parent Note
@@ -338,6 +346,10 @@ export declare namespace Components {
             reactions?: {
                 [name: string]: string[];
             };
+            /**
+             * The timestamp of when this Note was archived. Absent or null means the Note is active.
+             */
+            _archived_at?: string | null; // date-time
         }
         export interface NotePatchRequestBody {
             /**
@@ -391,6 +403,10 @@ export declare namespace Components {
             reactions?: {
                 [name: string]: string[];
             };
+            /**
+             * The timestamp of when this Note was archived. Absent or null means the Note is active.
+             */
+            _archived_at?: string | null; // date-time
         }
         export interface NotePostRequestBody {
             /**
@@ -527,6 +543,10 @@ export declare namespace Components {
             reactions?: {
                 [name: string]: string[];
             };
+            /**
+             * The timestamp of when this Note was archived. Absent or null means the Note is active.
+             */
+            _archived_at?: string | null; // date-time
         }
         export interface NoteSearchByContextRequestBody {
             contexts: [
@@ -543,6 +563,7 @@ export declare namespace Components {
              * When set, the API resolves related entities of these schemas for the primary entity context and includes their notes in the results.
              */
             include_related_schemas?: string[];
+            filter?: /* Archive-state filter. 'active' (default) returns non-archived notes only, 'archived' returns only archived notes, 'all' returns both. */ NotesListFilter;
             /**
              * The index of the first Note to return in this query
              */
@@ -552,6 +573,10 @@ export declare namespace Components {
              */
             size?: number;
         }
+        /**
+         * Archive-state filter. 'active' (default) returns non-archived notes only, 'archived' returns only archived notes, 'all' returns both.
+         */
+        export type NotesListFilter = "all" | "active" | "archived";
         export interface NotesSearchRequestResponse {
             /**
              * The number of Note entries returned in this query
@@ -604,6 +629,20 @@ export declare namespace Paths {
             id: /* The Entity ID of the Note entry to add reaction to */ Parameters.Id;
         }
         export type RequestBody = Components.Schemas.ReactionRequest;
+        namespace Responses {
+            export type $200 = /* A note Entity object cotaining Entity metadata and content. Relational attributes are hydrated in place. */ Components.Schemas.NoteEntity;
+        }
+    }
+    namespace ArchiveNote {
+        namespace Parameters {
+            /**
+             * The Entity ID of the Note entry to archive
+             */
+            export type Id = string;
+        }
+        export interface PathParameters {
+            id: /* The Entity ID of the Note entry to archive */ Parameters.Id;
+        }
         namespace Responses {
             export type $200 = /* A note Entity object cotaining Entity metadata and content. Relational attributes are hydrated in place. */ Components.Schemas.NoteEntity;
         }
@@ -674,6 +713,7 @@ export declare namespace Paths {
              * The ID of the Contextual Entity from where to retrieve Notes
              */
             export type EntityId = string;
+            export type Filter = /* Archive-state filter. 'active' (default) returns non-archived notes only, 'archived' returns only archived notes, 'all' returns both. */ Components.Schemas.NotesListFilter;
             /**
              * The index of the first Note to return in this query
              */
@@ -688,6 +728,7 @@ export declare namespace Paths {
         }
         export interface QueryParameters {
             contexts?: Parameters.Contexts;
+            filter?: Parameters.Filter;
             from?: /* The index of the first Note to return in this query */ Parameters.From;
             size?: /* The number of Note entries to return in this query */ Parameters.Size;
         }
@@ -765,6 +806,20 @@ export declare namespace Paths {
             export type $200 = /* A note Entity object cotaining Entity metadata and content. Relational attributes are hydrated in place. */ Components.Schemas.NoteEntity;
         }
     }
+    namespace UnarchiveNote {
+        namespace Parameters {
+            /**
+             * The Entity ID of the Note entry to unarchive
+             */
+            export type Id = string;
+        }
+        export interface PathParameters {
+            id: /* The Entity ID of the Note entry to unarchive */ Parameters.Id;
+        }
+        namespace Responses {
+            export type $200 = /* A note Entity object cotaining Entity metadata and content. Relational attributes are hydrated in place. */ Components.Schemas.NoteEntity;
+        }
+    }
     namespace UpdateNote {
         namespace Parameters {
             /**
@@ -781,7 +836,6 @@ export declare namespace Paths {
         }
     }
 }
-
 
 export interface OperationMethods {
   /**
@@ -865,6 +919,26 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.PinNote.Responses.$200>
+  /**
+   * archiveNote - archiveNote
+   * 
+   * Archives a root Note entry by setting its `_archived_at` timestamp to the current server time. The same timestamp is cascaded to every comment under the note so the entire thread is hidden from default listings. Returns 400 if the supplied id is a comment.
+   */
+  'archiveNote'(
+    parameters?: Parameters<Paths.ArchiveNote.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ArchiveNote.Responses.$200>
+  /**
+   * unarchiveNote - unarchiveNote
+   * 
+   * Unarchives a root Note entry by clearing its `_archived_at` value. The clear cascades to every comment under the note so the entire thread returns to the active view. Returns 400 if the supplied id is a comment.
+   */
+  'unarchiveNote'(
+    parameters?: Parameters<Paths.UnarchiveNote.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.UnarchiveNote.Responses.$200>
   /**
    * getNoteContexts - getNoteContexts
    * 
@@ -999,6 +1073,30 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.PinNote.Responses.$200>
   }
+  ['/v1/note/{id}/archive']: {
+    /**
+     * archiveNote - archiveNote
+     * 
+     * Archives a root Note entry by setting its `_archived_at` timestamp to the current server time. The same timestamp is cascaded to every comment under the note so the entire thread is hidden from default listings. Returns 400 if the supplied id is a comment.
+     */
+    'post'(
+      parameters?: Parameters<Paths.ArchiveNote.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ArchiveNote.Responses.$200>
+  }
+  ['/v1/note/{id}/unarchive']: {
+    /**
+     * unarchiveNote - unarchiveNote
+     * 
+     * Unarchives a root Note entry by clearing its `_archived_at` value. The clear cascades to every comment under the note so the entire thread returns to the active view. Returns 400 if the supplied id is a comment.
+     */
+    'post'(
+      parameters?: Parameters<Paths.UnarchiveNote.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.UnarchiveNote.Responses.$200>
+  }
   ['/v1/note/{id}/context']: {
     /**
      * getNoteContexts - getNoteContexts
@@ -1051,7 +1149,6 @@ export interface PathsDictionary {
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
-
 export type ContextType = Components.Schemas.ContextType;
 export type CreatedByType = Components.Schemas.CreatedByType;
 export type Entity = Components.Schemas.Entity;
@@ -1064,6 +1161,7 @@ export type NotePatchRequestBody = Components.Schemas.NotePatchRequestBody;
 export type NotePostRequestBody = Components.Schemas.NotePostRequestBody;
 export type NotePutRequestBody = Components.Schemas.NotePutRequestBody;
 export type NoteSearchByContextRequestBody = Components.Schemas.NoteSearchByContextRequestBody;
+export type NotesListFilter = Components.Schemas.NotesListFilter;
 export type NotesSearchRequestResponse = Components.Schemas.NotesSearchRequestResponse;
 export type ReactionRequest = Components.Schemas.ReactionRequest;
 export type ToggleReactionsRequest = Components.Schemas.ToggleReactionsRequest;
