@@ -452,7 +452,7 @@ export const API_LIST: ApiInfo[] = [
     apiName: 'design',
     kebabName: 'design',
     title: 'Design Builder API v2',
-    serverUrl: 'https://design-builder-api.{environment}.epilot.io',
+    serverUrl: 'https://design-builder-api.sls.epilot.io',
     operationCount: 13,
     operationIds: [
       'getAllDesigns',
@@ -931,7 +931,7 @@ export const API_LIST: ApiInfo[] = [
     kebabName: 'notes',
     title: 'Notes API',
     serverUrl: 'https://notes.sls.epilot.io',
-    operationCount: 12,
+    operationCount: 14,
     operationIds: [
       'createNote',
       'getNote',
@@ -941,6 +941,8 @@ export const API_LIST: ApiInfo[] = [
       'searchNotesByContext',
       'getNotesByContext',
       'pinNote',
+      'archiveNote',
+      'unarchiveNote',
       'getNoteContexts',
       'addNoteReaction',
       'removeNoteReaction',

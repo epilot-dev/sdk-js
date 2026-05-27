@@ -43,7 +43,7 @@ npx epilot auth login
 | Kanban API | `epilot kanban` | 10 | [kanban.md](./kanban.md) |
 | Message API | `epilot message` | 52 | [message.md](./message.md) |
 | Metering API | `epilot metering` | 20 | [metering.md](./metering.md) |
-| Notes API | `epilot notes` | 12 | [notes.md](./notes.md) |
+| Notes API | `epilot notes` | 14 | [notes.md](./notes.md) |
 | Notification API | `epilot notification` | 14 | [notification.md](./notification.md) |
 | Organization API | `epilot organization` | 8 | [organization.md](./organization.md) |
 | Partner Directory API | `epilot partner-directory` | 17 | [partner-directory.md](./partner-directory.md) |

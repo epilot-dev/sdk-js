@@ -190,6 +190,7 @@ epilot pricing createOrder \
     {
       "external_fees_mappings": [],
       "external_fees_metadata": {},
+      "external_location_metadata": {},
       "external_price_metadata": {},
       "_immutable_pricing_details": {},
       "coupon_ids": ["string"],
@@ -219,6 +220,7 @@ epilot pricing createOrder \
     {
       "external_fees_mappings": [],
       "external_fees_metadata": {},
+      "external_location_metadata": {},
       "external_price_metadata": {},
       "_immutable_pricing_details": {},
       "coupon_ids": ["string"],
@@ -447,6 +449,7 @@ epilot pricing putOrder \
     {
       "external_fees_mappings": [],
       "external_fees_metadata": {},
+      "external_location_metadata": {},
       "external_price_metadata": {},
       "_immutable_pricing_details": {},
       "coupon_ids": ["string"],
@@ -476,6 +479,7 @@ epilot pricing putOrder \
     {
       "external_fees_mappings": [],
       "external_fees_metadata": {},
+      "external_location_metadata": {},
       "external_price_metadata": {},
       "_immutable_pricing_details": {},
       "coupon_ids": ["string"],
@@ -1477,7 +1481,35 @@ epilot pricing $searchProviders -p X-Epilot-Org-ID=739224 -p integrationId=getag
 [
   {
     "name": "string",
-    "code": "string"
+    "code": "string",
+    "type": "gas",
+    "additionalData": {
+      "gridOperators": [
+        {
+          "name": "string",
+          "codeNumber": "string",
+          "validFrom": "1970-01-01",
+          "validUntil": "1970-01-01"
+        }
+      ],
+      "defaultSuppliers": [
+        {
+          "name": "string",
+          "codeNumber": "string",
+          "validFrom": "1970-01-01",
+          "validUntil": "1970-01-01"
+        }
+      ],
+      "marketAreaDetails": {
+        "gasType": "L-Gas",
+        "marketArea": "string",
+        "virtualTradingPoint": "string"
+      }
+    },
+    "_meta": {
+      "signature": "string",
+      "timestamp": 0
+    }
   }
 ]
 ```

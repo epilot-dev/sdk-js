@@ -12,17 +12,7 @@
   ],
   "servers": [
     {
-      "url": "https://design-builder-api.{environment}.epilot.io",
-      "variables": {
-        "environment": {
-          "default": "sls",
-          "enum": [
-            "sls",
-            "dev.sls",
-            "staging.sls"
-          ]
-        }
-      }
+      "url": "https://design-builder-api.sls.epilot.io"
     }
   ],
   "security": [
@@ -354,7 +344,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object"
+                  "$ref": "#/components/schemas/ParseThemeFromDesignResp"
                 }
               }
             }
@@ -1674,6 +1664,10 @@
           },
           "url": {
             "type": "string"
+          },
+          "file_id": {
+            "type": "string",
+            "description": "ID of the source file entity in the epilot file-entity system. Set when the file was picked from the File Manager (rather than uploaded directly to the design-builder bucket). Consumers resolve the live `public_url` via this reference. The org id is derived from the journey's owning org at render time (same convention as journey image blocks), so blueprint cross-org installs work without any extra remapping."
           }
         },
         "required": [
@@ -1714,6 +1708,52 @@
           },
           "application": {
             "$ref": "#/components/schemas/Application"
+          }
+        }
+      },
+      "ParseThemeFromDesignResp": {
+        "type": "object",
+        "properties": {
+          "theme": {
+            "$ref": "#/components/schemas/Theme"
+          },
+          "design": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "last_modified_at": {
+                "type": "string"
+              },
+              "style_name": {
+                "type": "string"
+              },
+              "style": {
+                "type": "object",
+                "properties": {
+                  "logo": {
+                    "$ref": "#/components/schemas/LogoData"
+                  },
+                  "palette": {
+                    "$ref": "#/components/schemas/PaletteData"
+                  },
+                  "typography": {
+                    "$ref": "#/components/schemas/TypographyData"
+                  }
+                }
+              },
+              "custom_theme": {
+                "type": "string"
+              },
+              "use_custom_theme": {
+                "type": "boolean"
+              },
+              "journey_design_tokens": {
+                "type": "object",
+                "description": "Design tokens for journey customization (renamed from design_tokens)"
+              }
+            }
           }
         }
       }

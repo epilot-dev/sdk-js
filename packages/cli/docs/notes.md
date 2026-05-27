@@ -47,6 +47,10 @@ epilot notes createNote
 **Pinning**
 - [`pinNote`](#pinnote) — Pins a single Note entry based on it's Entity ID
 
+**Archive**
+- [`archiveNote`](#archivenote) — Archives a root Note entry by setting its `_archived_at` timestamp to the current server time. The same timestamp is cas
+- [`unarchiveNote`](#unarchivenote) — Unarchives a root Note entry by clearing its `_archived_at` value. The clear cascades to every comment under the note so
+
 **Reactions**
 - [`addNoteReaction`](#addnotereaction) — Adds an emoji reaction to a note
 - [`removeNoteReaction`](#removenotereaction) — Removes an emoji reaction from a note
@@ -224,7 +228,8 @@ epilot notes updateNote \
     }
   ],
   "read_by": ["string"],
-  "reactions": {}
+  "reactions": {},
+  "_archived_at": "1970-01-01T00:00:00.000Z"
 }'
 ```
 
@@ -333,8 +338,25 @@ Search for a paginated list of Notes based on one or more contexts
 **Sample Call**
 
 ```bash
+epilot notes searchNotesByContext
+```
+
+With request body:
+
+```bash
 epilot notes searchNotesByContext \
-  -d '{"contexts":[{"type":"workflow_execution","id":"string"}],"include_related_schemas":["string"],"from":0,"size":10}'
+  -d '{
+  "contexts": [
+    {
+      "type": "workflow_execution",
+      "id": "string"
+    }
+  ],
+  "include_related_schemas": ["string"],
+  "filter": "active",
+  "from": 0,
+  "size": 10
+}'
 ```
 
 Using stdin pipe:
@@ -380,6 +402,72 @@ With JSONata filter:
 
 ```bash
 epilot notes pinNote -p id=123e4567-e89b-12d3-a456-426614174000 --jsonata '$'
+```
+
+---
+
+### `archiveNote`
+
+Archives a root Note entry by setting its `_archived_at` timestamp to the current server time. The same timestamp is cas
+
+`POST /v1/note/{id}/archive`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `id` | path | string | Yes | The Entity ID of the Note entry to archive |
+
+**Sample Call**
+
+```bash
+epilot notes archiveNote \
+  -p id=123e4567-e89b-12d3-a456-426614174000
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot notes archiveNote 123e4567-e89b-12d3-a456-426614174000
+```
+
+With JSONata filter:
+
+```bash
+epilot notes archiveNote -p id=123e4567-e89b-12d3-a456-426614174000 --jsonata 'context_entities'
+```
+
+---
+
+### `unarchiveNote`
+
+Unarchives a root Note entry by clearing its `_archived_at` value. The clear cascades to every comment under the note so
+
+`POST /v1/note/{id}/unarchive`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `id` | path | string | Yes | The Entity ID of the Note entry to unarchive |
+
+**Sample Call**
+
+```bash
+epilot notes unarchiveNote \
+  -p id=123e4567-e89b-12d3-a456-426614174000
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot notes unarchiveNote 123e4567-e89b-12d3-a456-426614174000
+```
+
+With JSONata filter:
+
+```bash
+epilot notes unarchiveNote -p id=123e4567-e89b-12d3-a456-426614174000 --jsonata 'context_entities'
 ```
 
 ---

@@ -1,6 +1,6 @@
 # Design Builder API v2
 
-- **Base URL:** `https://design-builder-api.{environment}.epilot.io`
+- **Base URL:** `https://design-builder-api.sls.epilot.io`
 - **API Docs:** [https://docs.epilot.io/api/design](https://docs.epilot.io/api/design)
 
 ## Quick Start
@@ -644,14 +644,63 @@ epilot design getThemeFromDesign 4a062990-a6a3-11eb-9828-4f3da7d4935a
 With JSONata filter:
 
 ```bash
-epilot design getThemeFromDesign -p designId=4a062990-a6a3-11eb-9828-4f3da7d4935a -p theme=NEW --jsonata '$'
+epilot design getThemeFromDesign -p designId=4a062990-a6a3-11eb-9828-4f3da7d4935a -p theme=NEW --jsonata 'theme'
 ```
 
 <details>
 <summary>Sample Response</summary>
 
 ```json
-{}
+{
+  "theme": "NEW",
+  "design": {
+    "id": "string",
+    "last_modified_at": "string",
+    "style_name": "string",
+    "style": {
+      "logo": {
+        "main": {
+          "name": "string",
+          "display_name": "string",
+          "file_type": "LOGO",
+          "s3_object_key": "string",
+          "url": "string",
+          "file_id": "string"
+        }
+      },
+      "palette": {
+        "primary": "string",
+        "secondary": "string",
+        "error": "string",
+        "background": "string",
+        "paper": "string",
+        "navbar": "string",
+        "portal_login_background": "string"
+      },
+      "typography": {
+        "font": {
+          "font_id": "string",
+          "font_name": "string",
+          "font_family": "string",
+          "font_weight_regular": "string",
+          "font_weight_medium": "string",
+          "font_weight_bold": "string",
+          "urls": [
+            {
+              "type": "WOFF2",
+              "url": "string"
+            }
+          ]
+        },
+        "primary": "string",
+        "secondary": "string"
+      }
+    },
+    "custom_theme": "string",
+    "use_custom_theme": true,
+    "journey_design_tokens": {}
+  }
+}
 ```
 
 </details>
@@ -692,7 +741,8 @@ epilot design getFiles --jsonata '$'
     "display_name": "string",
     "file_type": "LOGO",
     "s3_object_key": "string",
-    "url": "string"
+    "url": "string",
+    "file_id": "string"
   }
 ]
 ```
@@ -728,7 +778,8 @@ epilot design uploadFile --jsonata '$'
   "display_name": "string",
   "file_type": "LOGO",
   "s3_object_key": "string",
-  "url": "string"
+  "url": "string",
+  "file_id": "string"
 }
 ```
 
