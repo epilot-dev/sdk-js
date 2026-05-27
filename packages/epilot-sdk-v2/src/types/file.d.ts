@@ -1283,9 +1283,11 @@ export declare namespace Components {
              */
             zip_filename?: string;
             /**
-             * Send email notification when ZIP is ready
+             * Email address to notify when the ZIP is ready. Omit to skip the email notification.
+             * example:
+             * user@example.com
              */
-            notify_email?: boolean;
+            notify_email?: string; // email
         } | {
             /**
              * List of file entity IDs to include in the ZIP
@@ -2321,9 +2323,11 @@ export declare namespace Components {
              */
             zip_filename?: string;
             /**
-             * Send email notification when ZIP is ready
+             * Email address to notify when the ZIP is ready. Omit to skip the email notification.
+             * example:
+             * user@example.com
              */
-            notify_email?: boolean;
+            notify_email?: string; // email
         };
         /**
          * Custom external download url used for the file
@@ -2430,6 +2434,15 @@ export declare namespace Components {
              * https://some-api-url.com/download?file_id=123
              */
             CustomDownloadUrl /* uri */;
+            /**
+             * AI-generated compact summary for hover and list preview surfaces.
+             */
+            preview_summary?: string;
+            /**
+             * AI-generated short paragraph summary for file preview surfaces.
+             */
+            short_summary?: string;
+            summary_status?: /* Current AI summary generation state for the file. */ FileSummaryStatus;
         }
         export interface FileCollectionAttributes {
             /**
@@ -2630,6 +2643,15 @@ export declare namespace Components {
              */
             CustomDownloadUrl /* uri */;
             /**
+             * AI-generated compact summary for hover and list preview surfaces.
+             */
+            preview_summary?: string;
+            /**
+             * AI-generated short paragraph summary for file preview surfaces.
+             */
+            short_summary?: string;
+            summary_status?: /* Current AI summary generation state for the file. */ FileSummaryStatus;
+            /**
              * Source URL for the file. Included if the entity was created from source_url, or when ?source_url=true
              * example:
              * https://productengineer-content.s3.eu-west-1.amazonaws.com/product-engineer-checklist.pdf
@@ -2700,6 +2722,13 @@ export declare namespace Components {
             EntitySlug;
             _tags?: string[];
         }
+        export interface FileSummaryGenerationStatus {
+            status: /* Current AI summary generation state for the file. */ FileSummaryStatus;
+        }
+        /**
+         * Current AI summary generation state for the file.
+         */
+        export type FileSummaryStatus = "processing" | "completed" | "failed" | "unsupported";
         export type FileType = "document" | "document_template" | "text" | "image" | "video" | "audio" | "spreadsheet" | "presentation" | "font" | "archive" | "application" | "unknown";
         export interface FileUpload {
             s3ref?: S3Reference;
@@ -2824,6 +2853,15 @@ export declare namespace Components {
              * https://some-api-url.com/download?file_id=123
              */
             CustomDownloadUrl /* uri */;
+            /**
+             * AI-generated compact summary for hover and list preview surfaces.
+             */
+            preview_summary?: string;
+            /**
+             * AI-generated short paragraph summary for file preview surfaces.
+             */
+            short_summary?: string;
+            summary_status?: /* Current AI summary generation state for the file. */ FileSummaryStatus;
         }
         export interface SaveFileFromSourceURLPayload {
             [name: string]: any;
@@ -2903,6 +2941,15 @@ export declare namespace Components {
              * https://some-api-url.com/download?file_id=123
              */
             CustomDownloadUrl /* uri */;
+            /**
+             * AI-generated compact summary for hover and list preview surfaces.
+             */
+            preview_summary?: string;
+            /**
+             * AI-generated short paragraph summary for file preview surfaces.
+             */
+            short_summary?: string;
+            summary_status?: /* Current AI summary generation state for the file. */ FileSummaryStatus;
             source_url?: /**
              * Custom external download url used for the file
              * example:
@@ -2990,6 +3037,15 @@ export declare namespace Components {
              * https://some-api-url.com/download?file_id=123
              */
             CustomDownloadUrl /* uri */;
+            /**
+             * AI-generated compact summary for hover and list preview surfaces.
+             */
+            preview_summary?: string;
+            /**
+             * AI-generated short paragraph summary for file preview surfaces.
+             */
+            short_summary?: string;
+            summary_status?: /* Current AI summary generation state for the file. */ FileSummaryStatus;
             s3ref?: S3Ref;
         }
         export interface UploadFilePayload {
@@ -3497,6 +3553,66 @@ export declare namespace Paths {
              * }
              */
             Components.Responses.UnauthorizedError;
+            export type $404 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 404,
+             *   "error": "Not Found: File entity not found"
+             * }
+             */
+            Components.Responses.NotFoundError;
+            export type $500 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 500,
+             *   "error": "Internal Server Error"
+             * }
+             */
+            Components.Responses.InternalServerError;
+        }
+    }
+    namespace GenerateFileSummary {
+        namespace Parameters {
+            export type Id = /**
+             * example:
+             * ef7d985c-2385-44f4-9c71-ae06a52264f8
+             */
+            Components.Schemas.FileEntityId;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        namespace Responses {
+            export type $202 = Components.Schemas.FileSummaryGenerationStatus;
+            export type $400 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 400,
+             *   "error": "Bad Request: filename is required"
+             * }
+             */
+            Components.Responses.BadRequestError;
+            export type $401 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 401,
+             *   "error": "Unauthorized: Invalid or expired token"
+             * }
+             */
+            Components.Responses.UnauthorizedError;
+            export type $403 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 403,
+             *   "error": "Forbidden: You do not have permission to access this file"
+             * }
+             */
+            Components.Responses.ForbiddenError;
             export type $404 = /**
              * A generic error returned by the API
              * example:
@@ -4538,6 +4654,16 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetZipJob.Responses.$200>
   /**
+   * generateFileSummary - generateFileSummary
+   * 
+   * Request AI generation of preview and short summaries for a file entity.
+   */
+  'generateFileSummary'(
+    parameters?: Parameters<Paths.GenerateFileSummary.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GenerateFileSummary.Responses.$202>
+  /**
    * previewFile - previewFile
    * 
    * Generate a thumbnail preview for a file entity.
@@ -4988,6 +5114,18 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetZipJob.Responses.$200>
   }
+  ['/v1/files/{id}/summary:generate']: {
+    /**
+     * generateFileSummary - generateFileSummary
+     * 
+     * Request AI generation of preview and short summaries for a file entity.
+     */
+    'post'(
+      parameters?: Parameters<Paths.GenerateFileSummary.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GenerateFileSummary.Responses.$202>
+  }
   ['/v1/files/{id}/preview']: {
     /**
      * previewFile - previewFile
@@ -5296,6 +5434,8 @@ export type FileEntity = Components.Schemas.FileEntity;
 export type FileEntityId = Components.Schemas.FileEntityId;
 export type FileItem = Components.Schemas.FileItem;
 export type FileRelationItem = Components.Schemas.FileRelationItem;
+export type FileSummaryGenerationStatus = Components.Schemas.FileSummaryGenerationStatus;
+export type FileSummaryStatus = Components.Schemas.FileSummaryStatus;
 export type FileType = Components.Schemas.FileType;
 export type FileUpload = Components.Schemas.FileUpload;
 export type PublicLink = Components.Schemas.PublicLink;
