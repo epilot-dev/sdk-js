@@ -216,6 +216,19 @@
         "responses": {}
       }
     },
+    "/v1/files/{id}/summary:generate": {
+      "post": {
+        "operationId": "generateFileSummary",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v1/files/{id}/preview": {
       "get": {
         "operationId": "previewFile",

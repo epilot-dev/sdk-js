@@ -802,7 +802,7 @@
                       "3fa85f64-5717-4562-b3fc-2c963f66afa6"
                     ],
                     "zip_filename": "Documents.zip",
-                    "notify_email": true
+                    "notify_email": "user@example.com"
                   }
                 }
               }
@@ -865,6 +865,54 @@
           },
           "401": {
             "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/files/{id}/summary:generate": {
+      "post": {
+        "operationId": "generateFileSummary",
+        "summary": "generateFileSummary",
+        "description": "Request AI generation of preview and short summaries for a file entity.",
+        "tags": [
+          "File"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "The UUID of the file entity",
+            "schema": {
+              "$ref": "#/components/schemas/FileEntityId"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Summary generation accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FileSummaryGenerationStatus"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
           },
           "404": {
             "$ref": "#/components/responses/NotFoundError"
@@ -2113,6 +2161,19 @@
           },
           "custom_download_url": {
             "$ref": "#/components/schemas/CustomDownloadUrl"
+          },
+          "preview_summary": {
+            "type": "string",
+            "description": "AI-generated compact summary for hover and list preview surfaces.",
+            "readOnly": true
+          },
+          "short_summary": {
+            "type": "string",
+            "description": "AI-generated short paragraph summary for file preview surfaces.",
+            "readOnly": true
+          },
+          "summary_status": {
+            "$ref": "#/components/schemas/FileSummaryStatus"
           }
         }
       },
@@ -2131,6 +2192,28 @@
           "archive",
           "application",
           "unknown"
+        ]
+      },
+      "FileSummaryStatus": {
+        "type": "string",
+        "description": "Current AI summary generation state for the file.",
+        "enum": [
+          "processing",
+          "completed",
+          "failed",
+          "unsupported"
+        ],
+        "readOnly": true
+      },
+      "FileSummaryGenerationStatus": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/FileSummaryStatus"
+          }
+        },
+        "required": [
+          "status"
         ]
       },
       "CustomDownloadUrl": {
@@ -2515,9 +2598,10 @@
             "example": "Documents.zip"
           },
           "notify_email": {
-            "type": "boolean",
-            "description": "Send email notification when ZIP is ready",
-            "default": true
+            "type": "string",
+            "format": "email",
+            "description": "Email address to notify when the ZIP is ready. Omit to skip the email notification.",
+            "example": "user@example.com"
           }
         },
         "oneOf": [
