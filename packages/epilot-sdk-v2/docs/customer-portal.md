@@ -138,6 +138,7 @@ const { data } = await customerPortalClient.upsertPortal(...)
 - [`getMeterReadings`](#getmeterreadings)
 - [`getPortalPage`](#getportalpage)
 - [`getPortalPages`](#getportalpages)
+- [`getTriggeredJourney`](#gettriggeredjourney)
 - [`getPortalPageBlocks`](#getportalpageblocks)
 - [`getPortalPageBlock`](#getportalpageblock)
 - [`updateCampaignPortalBlockStatus`](#updatecampaignportalblockstatus)
@@ -249,6 +250,7 @@ const { data } = await customerPortalClient.upsertPortal(...)
 - [`EntitySearchParams`](#entitysearchparams)
 - [`IdentifierAttribute`](#identifierattribute)
 - [`RegistrationIdentifier`](#registrationidentifier)
+- [`AdditionalContactAttribute`](#additionalcontactattribute)
 - [`ContractIdentifier`](#contractidentifier)
 - [`AcceptanceDecision`](#acceptancedecision)
 - [`TriggerPortalFlow`](#triggerportalflow)
@@ -372,7 +374,8 @@ const { data } = await client.upsertPortal(
     design_id: '5da0a718-c822-403d-9f5d-20d4584e0528',
     allowed_portal_entities: ['contact', 'contract'],
     self_registration_setting: 'ALLOW_WITH_CONTACT_CREATION',
-    self_registration_account_setting: 'ALLOW_WITH_CONTACT_CREATION',
+    self_registration_account_setting: 'ALLOW_WITH_CREATION',
+    block_registration_if_portal_user_exists: true,
     self_registration_entity: 'contact',
     user_account_self_management: false,
     feature_settings: {
@@ -475,10 +478,31 @@ const { data } = await client.upsertPortal(
         schema: 'contract'
       }
     ],
+    contact_identifiers_for_account: [
+      {
+        name: 'first_name',
+        schema: 'contact'
+      },
+      {
+        name: 'last_name',
+        schema: 'contact'
+      }
+    ],
+    additional_contact_attributes: [
+      {
+        name: 'first_name',
+        required: true
+      },
+      {
+        name: 'last_name',
+        required: true
+      }
+    ],
     triggered_journeys: [
       {
         trigger_name: 'FIRST_LOGIN',
-        journey_id: '5da0a718-c822-403d-9f5d-20d4584e0528'
+        journey_id: '5da0a718-c822-403d-9f5d-20d4584e0528',
+        context_params: [ /* ... */ ]
       }
     ],
     entity_edit_rules: [
@@ -539,7 +563,8 @@ const { data } = await client.upsertPortal(
   "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
   "allowed_portal_entities": ["contact", "contract"],
   "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
-  "self_registration_account_setting": "ALLOW_WITH_CONTACT_CREATION",
+  "self_registration_account_setting": "ALLOW_WITH_CREATION",
+  "block_registration_if_portal_user_exists": true,
   "self_registration_entity": "contact",
   "user_account_self_management": false,
   "feature_settings": {
@@ -641,10 +666,31 @@ const { data } = await client.upsertPortal(
       "schema": "contract"
     }
   ],
+  "contact_identifiers_for_account": [
+    {
+      "name": "first_name",
+      "schema": "contact"
+    },
+    {
+      "name": "last_name",
+      "schema": "contact"
+    }
+  ],
+  "additional_contact_attributes": [
+    {
+      "name": "first_name",
+      "required": true
+    },
+    {
+      "name": "last_name",
+      "required": true
+    }
+  ],
   "triggered_journeys": [
     {
       "trigger_name": "FIRST_LOGIN",
-      "journey_id": "5da0a718-c822-403d-9f5d-20d4584e0528"
+      "journey_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+      "context_params": []
     }
   ],
   "entity_edit_rules": [
@@ -747,6 +793,14 @@ const { data } = await client.createUserV3(
         contract_number: '123456'
       }
     },
+    contact_identifiers_for_account: {
+      first_name: 'John',
+      last_name: 'Doe'
+    },
+    additional_contact_attributes: {
+      first_name: 'John',
+      last_name: 'Doe'
+    },
     account_id: 'string'
   },
 )
@@ -835,7 +889,8 @@ const { data } = await client.getPortalConfigByDomain({
   "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
   "allowed_portal_entities": ["contact", "contract"],
   "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
-  "self_registration_account_setting": "ALLOW_WITH_CONTACT_CREATION",
+  "self_registration_account_setting": "ALLOW_WITH_CREATION",
+  "block_registration_if_portal_user_exists": true,
   "self_registration_entity": "contact",
   "user_account_self_management": false,
   "feature_settings": {
@@ -937,10 +992,31 @@ const { data } = await client.getPortalConfigByDomain({
       "schema": "contract"
     }
   ],
+  "contact_identifiers_for_account": [
+    {
+      "name": "first_name",
+      "schema": "contact"
+    },
+    {
+      "name": "last_name",
+      "schema": "contact"
+    }
+  ],
+  "additional_contact_attributes": [
+    {
+      "name": "first_name",
+      "required": true
+    },
+    {
+      "name": "last_name",
+      "required": true
+    }
+  ],
   "triggered_journeys": [
     {
       "trigger_name": "FIRST_LOGIN",
-      "journey_id": "5da0a718-c822-403d-9f5d-20d4584e0528"
+      "journey_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+      "context_params": []
     }
   ],
   "entity_edit_rules": [
@@ -1042,7 +1118,8 @@ const { data } = await client.getPortalConfig({
   "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
   "allowed_portal_entities": ["contact", "contract"],
   "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
-  "self_registration_account_setting": "ALLOW_WITH_CONTACT_CREATION",
+  "self_registration_account_setting": "ALLOW_WITH_CREATION",
+  "block_registration_if_portal_user_exists": true,
   "self_registration_entity": "contact",
   "user_account_self_management": false,
   "feature_settings": {
@@ -1144,10 +1221,31 @@ const { data } = await client.getPortalConfig({
       "schema": "contract"
     }
   ],
+  "contact_identifiers_for_account": [
+    {
+      "name": "first_name",
+      "schema": "contact"
+    },
+    {
+      "name": "last_name",
+      "schema": "contact"
+    }
+  ],
+  "additional_contact_attributes": [
+    {
+      "name": "first_name",
+      "required": true
+    },
+    {
+      "name": "last_name",
+      "required": true
+    }
+  ],
   "triggered_journeys": [
     {
       "trigger_name": "FIRST_LOGIN",
-      "journey_id": "5da0a718-c822-403d-9f5d-20d4584e0528"
+      "journey_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+      "context_params": []
     }
   ],
   "entity_edit_rules": [
@@ -1325,6 +1423,10 @@ const { data } = await client.getPortalExtensions({
           "body": {},
           "result": "string"
         },
+        "resolved": {
+          "result": "string",
+          "error_message_path": "error.message"
+        },
         "use_static_ips": false,
         "secure_proxy": {
           "integration_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
@@ -1387,6 +1489,10 @@ const { data } = await client.getPublicPortalExtensionDetails({
     }
   ],
   "contractIdentification": {
+    "app": {
+      "app_id": "string",
+      "name": {}
+    },
     "extension": {
       "id": "string",
       "name": {}
@@ -1503,6 +1609,10 @@ const { data } = await client.getPortalExtensionsV3({
           "body": {},
           "result": "string"
         },
+        "resolved": {
+          "result": "string",
+          "error_message_path": "error.message"
+        },
         "use_static_ips": false,
         "secure_proxy": {
           "integration_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
@@ -1569,6 +1679,10 @@ const { data } = await client.getPublicPortalExtensionDetailsV3({
     }
   ],
   "contractIdentification": {
+    "app": {
+      "app_id": "string",
+      "name": {}
+    },
     "extension": {
       "id": "string",
       "name": {}
@@ -1954,7 +2068,8 @@ const { data } = await client.getPublicPortalConfig({
   "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
   "allowed_portal_entities": ["contact", "contract"],
   "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
-  "self_registration_account_setting": "ALLOW_WITH_CONTACT_CREATION",
+  "self_registration_account_setting": "ALLOW_WITH_CREATION",
+  "block_registration_if_portal_user_exists": true,
   "self_registration_entity": "contact",
   "user_account_self_management": false,
   "feature_settings": {
@@ -2056,10 +2171,31 @@ const { data } = await client.getPublicPortalConfig({
       "schema": "contract"
     }
   ],
+  "contact_identifiers_for_account": [
+    {
+      "name": "first_name",
+      "schema": "contact"
+    },
+    {
+      "name": "last_name",
+      "schema": "contact"
+    }
+  ],
+  "additional_contact_attributes": [
+    {
+      "name": "first_name",
+      "required": true
+    },
+    {
+      "name": "last_name",
+      "required": true
+    }
+  ],
   "triggered_journeys": [
     {
       "trigger_name": "FIRST_LOGIN",
-      "journey_id": "5da0a718-c822-403d-9f5d-20d4584e0528"
+      "journey_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+      "context_params": []
     }
   ],
   "entity_edit_rules": [
@@ -2161,7 +2297,8 @@ const { data } = await client.getOrgPortalConfig({
   "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
   "allowed_portal_entities": ["contact", "contract"],
   "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
-  "self_registration_account_setting": "ALLOW_WITH_CONTACT_CREATION",
+  "self_registration_account_setting": "ALLOW_WITH_CREATION",
+  "block_registration_if_portal_user_exists": true,
   "self_registration_entity": "contact",
   "user_account_self_management": false,
   "feature_settings": {
@@ -2263,10 +2400,31 @@ const { data } = await client.getOrgPortalConfig({
       "schema": "contract"
     }
   ],
+  "contact_identifiers_for_account": [
+    {
+      "name": "first_name",
+      "schema": "contact"
+    },
+    {
+      "name": "last_name",
+      "schema": "contact"
+    }
+  ],
+  "additional_contact_attributes": [
+    {
+      "name": "first_name",
+      "required": true
+    },
+    {
+      "name": "last_name",
+      "required": true
+    }
+  ],
   "triggered_journeys": [
     {
       "trigger_name": "FIRST_LOGIN",
-      "journey_id": "5da0a718-c822-403d-9f5d-20d4584e0528"
+      "journey_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+      "context_params": []
     }
   ],
   "entity_edit_rules": [
@@ -2376,7 +2534,8 @@ const { data } = await client.getPublicPortalConfigV3({
   "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
   "allowed_portal_entities": ["contact", "contract"],
   "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
-  "self_registration_account_setting": "ALLOW_WITH_CONTACT_CREATION",
+  "self_registration_account_setting": "ALLOW_WITH_CREATION",
+  "block_registration_if_portal_user_exists": true,
   "self_registration_entity": "contact",
   "user_account_self_management": false,
   "feature_settings": {
@@ -2478,10 +2637,31 @@ const { data } = await client.getPublicPortalConfigV3({
       "schema": "contract"
     }
   ],
+  "contact_identifiers_for_account": [
+    {
+      "name": "first_name",
+      "schema": "contact"
+    },
+    {
+      "name": "last_name",
+      "schema": "contact"
+    }
+  ],
+  "additional_contact_attributes": [
+    {
+      "name": "first_name",
+      "required": true
+    },
+    {
+      "name": "last_name",
+      "required": true
+    }
+  ],
   "triggered_journeys": [
     {
       "trigger_name": "FIRST_LOGIN",
-      "journey_id": "5da0a718-c822-403d-9f5d-20d4584e0528"
+      "journey_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+      "context_params": []
     }
   ],
   "entity_edit_rules": [
@@ -2583,7 +2763,8 @@ const { data } = await client.getOrgPortalConfigV3({
   "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
   "allowed_portal_entities": ["contact", "contract"],
   "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
-  "self_registration_account_setting": "ALLOW_WITH_CONTACT_CREATION",
+  "self_registration_account_setting": "ALLOW_WITH_CREATION",
+  "block_registration_if_portal_user_exists": true,
   "self_registration_entity": "contact",
   "user_account_self_management": false,
   "feature_settings": {
@@ -2685,10 +2866,31 @@ const { data } = await client.getOrgPortalConfigV3({
       "schema": "contract"
     }
   ],
+  "contact_identifiers_for_account": [
+    {
+      "name": "first_name",
+      "schema": "contact"
+    },
+    {
+      "name": "last_name",
+      "schema": "contact"
+    }
+  ],
+  "additional_contact_attributes": [
+    {
+      "name": "first_name",
+      "required": true
+    },
+    {
+      "name": "last_name",
+      "required": true
+    }
+  ],
   "triggered_journeys": [
     {
       "trigger_name": "FIRST_LOGIN",
-      "journey_id": "5da0a718-c822-403d-9f5d-20d4584e0528"
+      "journey_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+      "context_params": []
     }
   ],
   "entity_edit_rules": [
@@ -2793,7 +2995,8 @@ const { data } = await client.getAllPortalConfigs()
       "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
       "allowed_portal_entities": ["contact", "contract"],
       "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
-      "self_registration_account_setting": "ALLOW_WITH_CONTACT_CREATION",
+      "self_registration_account_setting": "ALLOW_WITH_CREATION",
+      "block_registration_if_portal_user_exists": true,
       "self_registration_entity": "contact",
       "user_account_self_management": false,
       "feature_settings": {},
@@ -2810,6 +3013,8 @@ const { data } = await client.getAllPortalConfigs()
       "contract_identifiers": [],
       "contract_selector_config": {},
       "registration_identifiers": [],
+      "contact_identifiers_for_account": [],
+      "additional_contact_attributes": [],
       "triggered_journeys": [],
       "entity_edit_rules": [],
       "allowed_file_extensions": {},
@@ -6294,6 +6499,42 @@ const { data } = await client.interpolatePortalPages(
 
 ---
 
+### `getTriggeredJourney`
+
+Returns the auto-triggered journey configured for the given trigger
+with handlebars templates in `context_params` already resolved.
+Uses the caller's auth context (contact, portal user) plus any
+`cont
+
+`GET /v2/portal/config/triggered-journeys/{trigger_name}`
+
+```ts
+const { data } = await client.getTriggeredJourney({
+  trigger_name: 'example',
+  context_entities: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "trigger_name": "FIRST_LOGIN",
+  "journey_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+  "context_params": [
+    {
+      "key": "string",
+      "value": "string"
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
 ### `getDefaultPages`
 
 Fetch all default portal pages
@@ -6787,7 +7028,8 @@ const { data } = await client.createPortalConfig(
     design_id: '5da0a718-c822-403d-9f5d-20d4584e0528',
     allowed_portal_entities: ['contact', 'contract'],
     self_registration_setting: 'ALLOW_WITH_CONTACT_CREATION',
-    self_registration_account_setting: 'ALLOW_WITH_CONTACT_CREATION',
+    self_registration_account_setting: 'ALLOW_WITH_CREATION',
+    block_registration_if_portal_user_exists: true,
     self_registration_entity: 'contact',
     user_account_self_management: false,
     feature_settings: {
@@ -6890,10 +7132,31 @@ const { data } = await client.createPortalConfig(
         schema: 'contract'
       }
     ],
+    contact_identifiers_for_account: [
+      {
+        name: 'first_name',
+        schema: 'contact'
+      },
+      {
+        name: 'last_name',
+        schema: 'contact'
+      }
+    ],
+    additional_contact_attributes: [
+      {
+        name: 'first_name',
+        required: true
+      },
+      {
+        name: 'last_name',
+        required: true
+      }
+    ],
     triggered_journeys: [
       {
         trigger_name: 'FIRST_LOGIN',
-        journey_id: '5da0a718-c822-403d-9f5d-20d4584e0528'
+        journey_id: '5da0a718-c822-403d-9f5d-20d4584e0528',
+        context_params: [ /* ... */ ]
       }
     ],
     entity_edit_rules: [
@@ -7004,7 +7267,8 @@ const { data } = await client.createPortalConfig(
   "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
   "allowed_portal_entities": ["contact", "contract"],
   "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
-  "self_registration_account_setting": "ALLOW_WITH_CONTACT_CREATION",
+  "self_registration_account_setting": "ALLOW_WITH_CREATION",
+  "block_registration_if_portal_user_exists": true,
   "self_registration_entity": "contact",
   "user_account_self_management": false,
   "feature_settings": {
@@ -7106,10 +7370,31 @@ const { data } = await client.createPortalConfig(
       "schema": "contract"
     }
   ],
+  "contact_identifiers_for_account": [
+    {
+      "name": "first_name",
+      "schema": "contact"
+    },
+    {
+      "name": "last_name",
+      "schema": "contact"
+    }
+  ],
+  "additional_contact_attributes": [
+    {
+      "name": "first_name",
+      "required": true
+    },
+    {
+      "name": "last_name",
+      "required": true
+    }
+  ],
   "triggered_journeys": [
     {
       "trigger_name": "FIRST_LOGIN",
-      "journey_id": "5da0a718-c822-403d-9f5d-20d4584e0528"
+      "journey_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+      "context_params": []
     }
   ],
   "entity_edit_rules": [
@@ -7256,7 +7541,8 @@ const { data } = await client.getPortalConfigV3({
   "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
   "allowed_portal_entities": ["contact", "contract"],
   "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
-  "self_registration_account_setting": "ALLOW_WITH_CONTACT_CREATION",
+  "self_registration_account_setting": "ALLOW_WITH_CREATION",
+  "block_registration_if_portal_user_exists": true,
   "self_registration_entity": "contact",
   "user_account_self_management": false,
   "feature_settings": {
@@ -7358,10 +7644,31 @@ const { data } = await client.getPortalConfigV3({
       "schema": "contract"
     }
   ],
+  "contact_identifiers_for_account": [
+    {
+      "name": "first_name",
+      "schema": "contact"
+    },
+    {
+      "name": "last_name",
+      "schema": "contact"
+    }
+  ],
+  "additional_contact_attributes": [
+    {
+      "name": "first_name",
+      "required": true
+    },
+    {
+      "name": "last_name",
+      "required": true
+    }
+  ],
   "triggered_journeys": [
     {
       "trigger_name": "FIRST_LOGIN",
-      "journey_id": "5da0a718-c822-403d-9f5d-20d4584e0528"
+      "journey_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+      "context_params": []
     }
   ],
   "entity_edit_rules": [
@@ -7503,7 +7810,8 @@ const { data } = await client.putPortalConfig(
     design_id: '5da0a718-c822-403d-9f5d-20d4584e0528',
     allowed_portal_entities: ['contact', 'contract'],
     self_registration_setting: 'ALLOW_WITH_CONTACT_CREATION',
-    self_registration_account_setting: 'ALLOW_WITH_CONTACT_CREATION',
+    self_registration_account_setting: 'ALLOW_WITH_CREATION',
+    block_registration_if_portal_user_exists: true,
     self_registration_entity: 'contact',
     user_account_self_management: false,
     feature_settings: {
@@ -7606,10 +7914,31 @@ const { data } = await client.putPortalConfig(
         schema: 'contract'
       }
     ],
+    contact_identifiers_for_account: [
+      {
+        name: 'first_name',
+        schema: 'contact'
+      },
+      {
+        name: 'last_name',
+        schema: 'contact'
+      }
+    ],
+    additional_contact_attributes: [
+      {
+        name: 'first_name',
+        required: true
+      },
+      {
+        name: 'last_name',
+        required: true
+      }
+    ],
     triggered_journeys: [
       {
         trigger_name: 'FIRST_LOGIN',
-        journey_id: '5da0a718-c822-403d-9f5d-20d4584e0528'
+        journey_id: '5da0a718-c822-403d-9f5d-20d4584e0528',
+        context_params: [ /* ... */ ]
       }
     ],
     entity_edit_rules: [
@@ -7741,7 +8070,8 @@ const { data } = await client.putPortalConfig(
   "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
   "allowed_portal_entities": ["contact", "contract"],
   "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
-  "self_registration_account_setting": "ALLOW_WITH_CONTACT_CREATION",
+  "self_registration_account_setting": "ALLOW_WITH_CREATION",
+  "block_registration_if_portal_user_exists": true,
   "self_registration_entity": "contact",
   "user_account_self_management": false,
   "feature_settings": {
@@ -7843,10 +8173,31 @@ const { data } = await client.putPortalConfig(
       "schema": "contract"
     }
   ],
+  "contact_identifiers_for_account": [
+    {
+      "name": "first_name",
+      "schema": "contact"
+    },
+    {
+      "name": "last_name",
+      "schema": "contact"
+    }
+  ],
+  "additional_contact_attributes": [
+    {
+      "name": "first_name",
+      "required": true
+    },
+    {
+      "name": "last_name",
+      "required": true
+    }
+  ],
   "triggered_journeys": [
     {
       "trigger_name": "FIRST_LOGIN",
-      "journey_id": "5da0a718-c822-403d-9f5d-20d4584e0528"
+      "journey_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+      "context_params": []
     }
   ],
   "entity_edit_rules": [
@@ -7977,7 +8328,8 @@ const { data } = await client.listAllPortalConfigs()
       "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
       "allowed_portal_entities": ["contact", "contract"],
       "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
-      "self_registration_account_setting": "ALLOW_WITH_CONTACT_CREATION",
+      "self_registration_account_setting": "ALLOW_WITH_CREATION",
+      "block_registration_if_portal_user_exists": true,
       "self_registration_entity": "contact",
       "user_account_self_management": false,
       "feature_settings": {},
@@ -7994,6 +8346,8 @@ const { data } = await client.listAllPortalConfigs()
       "contract_identifiers": [],
       "contract_selector_config": {},
       "registration_identifiers": [],
+      "contact_identifiers_for_account": [],
+      "additional_contact_attributes": [],
       "triggered_journeys": [],
       "entity_edit_rules": [],
       "allowed_file_extensions": {},
@@ -8115,7 +8469,8 @@ const { data } = await client.clonePortalConfig(
   "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
   "allowed_portal_entities": ["contact", "contract"],
   "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
-  "self_registration_account_setting": "ALLOW_WITH_CONTACT_CREATION",
+  "self_registration_account_setting": "ALLOW_WITH_CREATION",
+  "block_registration_if_portal_user_exists": true,
   "self_registration_entity": "contact",
   "user_account_self_management": false,
   "feature_settings": {
@@ -8217,10 +8572,31 @@ const { data } = await client.clonePortalConfig(
       "schema": "contract"
     }
   ],
+  "contact_identifiers_for_account": [
+    {
+      "name": "first_name",
+      "schema": "contact"
+    },
+    {
+      "name": "last_name",
+      "schema": "contact"
+    }
+  ],
+  "additional_contact_attributes": [
+    {
+      "name": "first_name",
+      "required": true
+    },
+    {
+      "name": "last_name",
+      "required": true
+    }
+  ],
   "triggered_journeys": [
     {
       "trigger_name": "FIRST_LOGIN",
-      "journey_id": "5da0a718-c822-403d-9f5d-20d4584e0528"
+      "journey_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+      "context_params": []
     }
   ],
   "entity_edit_rules": [
@@ -8748,7 +9124,7 @@ type UpdateOnlyPortalConfigAttributes = {
 type CommonConfigAttributes = {
   enabled?: boolean
   name?: string
-  domain: string
+  domain?: string
   is_epilot_domain?: boolean
   epilot_domain?: string
   domain_settings?: {
@@ -8759,7 +9135,8 @@ type CommonConfigAttributes = {
   design_id?: string // uuid
   allowed_portal_entities?: string[]
   self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY" | "BLOCK_IF_PORTAL_USER_EXISTS"
-  self_registration_account_setting?: "ALLOW_WITH_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY"
+  self_registration_account_setting?: "ALLOW_WITH_CREATION" | "DENY" | "ALWAYS_CREATE" | "BLOCK_IF_PORTAL_USER_EXISTS" | "DISALLOW_COMPLETELY"
+  block_registration_if_portal_user_exists?: boolean
   self_registration_entity?: "contact" | "account"
   user_account_self_management?: boolean
   feature_settings?: {
@@ -8844,7 +9221,6 @@ type CommonConfigAttributes = {
   }
   registration_identifiers?: Array<{
     name?: string
-    schema?: string
   // ...
 }
 ```
@@ -8915,7 +9291,7 @@ type UpsertPortalConfig = {
   }>
   enabled?: boolean
   name?: string
-  domain: string
+  domain?: string
   is_epilot_domain?: boolean
   epilot_domain?: string
   domain_settings?: {
@@ -8926,7 +9302,8 @@ type UpsertPortalConfig = {
   design_id?: string // uuid
   allowed_portal_entities?: string[]
   self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY" | "BLOCK_IF_PORTAL_USER_EXISTS"
-  self_registration_account_setting?: "ALLOW_WITH_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY"
+  self_registration_account_setting?: "ALLOW_WITH_CREATION" | "DENY" | "ALWAYS_CREATE" | "BLOCK_IF_PORTAL_USER_EXISTS" | "DISALLOW_COMPLETELY"
+  block_registration_if_portal_user_exists?: boolean
   self_registration_entity?: "contact" | "account"
   user_account_self_management?: boolean
   feature_settings?: {
@@ -8951,7 +9328,6 @@ type UpsertPortalConfig = {
     cognito_user_pool_client_id?: string
     cognito_user_pool_arn?: string
     cognito_user_pool_id?: string
-    timeouts?: {
   // ...
 }
 ```
@@ -8962,7 +9338,7 @@ type UpsertPortalConfig = {
 type PortalConfig = {
   enabled?: boolean
   name?: string
-  domain: string
+  domain?: string
   is_epilot_domain?: boolean
   epilot_domain?: string
   domain_settings?: {
@@ -8973,7 +9349,8 @@ type PortalConfig = {
   design_id?: string // uuid
   allowed_portal_entities?: string[]
   self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY" | "BLOCK_IF_PORTAL_USER_EXISTS"
-  self_registration_account_setting?: "ALLOW_WITH_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY"
+  self_registration_account_setting?: "ALLOW_WITH_CREATION" | "DENY" | "ALWAYS_CREATE" | "BLOCK_IF_PORTAL_USER_EXISTS" | "DISALLOW_COMPLETELY"
+  block_registration_if_portal_user_exists?: boolean
   self_registration_entity?: "contact" | "account"
   user_account_self_management?: boolean
   feature_settings?: {
@@ -9058,7 +9435,6 @@ type PortalConfig = {
   }
   registration_identifiers?: Array<{
     name?: string
-    schema?: string
   // ...
 }
 ```
@@ -9562,6 +9938,8 @@ type CreateUserRequest = {
   password?: string
   contactIdentifiers?: Record<string, string>
   registration_identifiers?: Record<string, Record<string, string>>
+  contact_identifiers_for_account?: Record<string, string>
+  additional_contact_attributes?: Record<string, string>
   account_id?: string
 }
 ```
@@ -10447,6 +10825,20 @@ type RegistrationIdentifier = {
 }
 ```
 
+### `AdditionalContactAttribute`
+
+A contact attribute that is collected from the user during self-registration
+and written onto the newly created contact, but is NOT used to identify
+an existing contact.
+
+
+```ts
+type AdditionalContactAttribute = {
+  name: string
+  required?: boolean
+}
+```
+
 ### `ContractIdentifier`
 
 ```ts
@@ -10567,6 +10959,10 @@ type PublicExtensionCapabilities = {
     }
   }>
   contractIdentification?: {
+    app?: {
+      app_id?: { ... }
+      name?: { ... }
+    }
     extension?: {
       id?: { ... }
       name?: { ... }
@@ -10838,6 +11234,10 @@ type ExtensionHookRegistrationIdentifiersCheck = {
     body?: object
     result?: string
   }
+  resolved?: {
+    result?: string
+    error_message_path?: string
+  }
   use_static_ips?: boolean
   secure_proxy?: {
     integration_id: string // uuid
@@ -10876,6 +11276,10 @@ type ExtensionHookContractIdentification = {
     headers: Record<string, string>
     body?: object
     result?: string
+  }
+  resolved?: {
+    result?: string
+    error_message_path?: string
   }
   assignment_mode?: "contracts" | "contact_to_contracts" | "contact_to_portal_user"
   contact_relation_attribute?: string
@@ -10919,12 +11323,13 @@ type ExtensionHookMeterReadingPlausibilityCheck = {
     headers: Record<string, string>
   }
   resolved: {
+    data_path?: string
     dataPath?: string
     counter_identifiers?: string | Record<string, string>
     valid?: string
     upper_limit?: string
     lower_limit?: string
-    errorMessagePath?: string
+    error_message_path?: string
   }
   use_static_ips?: boolean
   secure_proxy?: {
@@ -10962,8 +11367,9 @@ type ExtensionHookPriceDataRetrieval = {
     body?: Record<string, string>
   }
   resolved?: {
+    data_path?: string
     dataPath?: string
-    errorMessagePath?: string
+    error_message_path?: string
   }
   use_static_ips?: boolean
   secure_proxy?: {
@@ -11001,8 +11407,9 @@ type ExtensionHookConsumptionDataRetrieval = {
     body?: Record<string, string>
   }
   resolved?: {
+    data_path?: string
     dataPath?: string
-    errorMessagePath?: string
+    error_message_path?: string
   }
   use_static_ips?: boolean
   secure_proxy?: {
@@ -11039,7 +11446,7 @@ type ExtensionHookDataExport = {
     body?: Record<string, string>
   }
   resolved?: {
-    errorMessagePath?: string
+    error_message_path?: string
   }
   use_static_ips?: boolean
   secure_proxy?: {
@@ -11076,8 +11483,9 @@ type ExtensionHookVisualizationMetadata = {
     body?: Record<string, string>
   }
   resolved?: {
+    data_path?: string
     dataPath?: string
-    errorMessagePath?: string
+    error_message_path?: string
   }
   use_static_ips?: boolean
   secure_proxy?: {
@@ -11115,8 +11523,9 @@ type ExtensionHookCostDataRetrieval = {
     body?: Record<string, string>
   }
   resolved?: {
+    data_path?: string
     dataPath?: string
-    errorMessagePath?: string
+    error_message_path?: string
   }
   use_static_ips?: boolean
   secure_proxy?: {
@@ -11329,7 +11738,7 @@ type ProviderConfig = {
       test_auth_username?: { ... }
       test_auth_password?: { ... }
     }
-    prompt?: "login" | "select_account" | "consent"
+    prompt?: "login" | "select_account" | "consent" | "signup"
   }
   mobile_oidc_config?: {
     client_id?: string
@@ -11364,7 +11773,7 @@ type ProviderPublicConfig = {
       test_auth_username?: { ... }
       test_auth_password?: { ... }
     }
-    prompt?: "login" | "select_account" | "consent"
+    prompt?: "login" | "select_account" | "consent" | "signup"
   }
   mobile_oidc_config?: {
     client_id?: string
@@ -11449,7 +11858,7 @@ type OIDCProviderConfig = {
     test_auth_username?: string
     test_auth_password?: string
   }
-  prompt?: "login" | "select_account" | "consent"
+  prompt?: "login" | "select_account" | "consent" | "signup"
 }
 ```
 
@@ -11712,7 +12121,8 @@ type CommonConfigAttributesV3 = {
   design_id?: string // uuid
   allowed_portal_entities?: string[]
   self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY" | "BLOCK_IF_PORTAL_USER_EXISTS"
-  self_registration_account_setting?: "ALLOW_WITH_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY"
+  self_registration_account_setting?: "ALLOW_WITH_CREATION" | "DENY" | "ALWAYS_CREATE" | "BLOCK_IF_PORTAL_USER_EXISTS" | "DISALLOW_COMPLETELY"
+  block_registration_if_portal_user_exists?: boolean
   self_registration_entity?: "contact" | "account"
   user_account_self_management?: boolean
   feature_settings?: {
@@ -11797,7 +12207,6 @@ type CommonConfigAttributesV3 = {
   }
   registration_identifiers?: Array<{
     name?: string
-    schema?: string
   // ...
 }
 ```
@@ -11887,7 +12296,8 @@ type UpsertPortalConfigV3 = {
   design_id?: string // uuid
   allowed_portal_entities?: string[]
   self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY" | "BLOCK_IF_PORTAL_USER_EXISTS"
-  self_registration_account_setting?: "ALLOW_WITH_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY"
+  self_registration_account_setting?: "ALLOW_WITH_CREATION" | "DENY" | "ALWAYS_CREATE" | "BLOCK_IF_PORTAL_USER_EXISTS" | "DISALLOW_COMPLETELY"
+  block_registration_if_portal_user_exists?: boolean
   self_registration_entity?: "contact" | "account"
   user_account_self_management?: boolean
   feature_settings?: {
@@ -11912,7 +12322,6 @@ type UpsertPortalConfigV3 = {
     cognito_user_pool_client_id?: string
     cognito_user_pool_arn?: string
     cognito_user_pool_id?: string
-    timeouts?: {
   // ...
 }
 ```
@@ -11982,7 +12391,8 @@ type PortalConfigV3 = {
   design_id?: string // uuid
   allowed_portal_entities?: string[]
   self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY" | "BLOCK_IF_PORTAL_USER_EXISTS"
-  self_registration_account_setting?: "ALLOW_WITH_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY"
+  self_registration_account_setting?: "ALLOW_WITH_CREATION" | "DENY" | "ALWAYS_CREATE" | "BLOCK_IF_PORTAL_USER_EXISTS" | "DISALLOW_COMPLETELY"
+  block_registration_if_portal_user_exists?: boolean
   self_registration_entity?: "contact" | "account"
   user_account_self_management?: boolean
   feature_settings?: {
@@ -12019,7 +12429,6 @@ type PortalConfigV3 = {
     }
     password_policy?: {
       minimum_length?: { ... }
-      maximum_length?: { ... }
   // ...
 }
 ```
