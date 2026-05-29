@@ -2139,6 +2139,27 @@
         "responses": {}
       }
     },
+    "/v2/portal/config/triggered-journeys/{trigger_name}": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "trigger_name",
+          "required": true,
+          "description": "The trigger event for the auto-triggered journey"
+        }
+      ],
+      "get": {
+        "operationId": "getTriggeredJourney",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "context_entities",
+            "required": false
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v2/portal/pages/default": {
       "get": {
         "operationId": "getDefaultPages",

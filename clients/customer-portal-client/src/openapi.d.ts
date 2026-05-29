@@ -229,6 +229,22 @@ declare namespace Components {
                 caller?: ActivityCallerContext;
             };
         }
+        /**
+         * A contact attribute that is collected from the user during self-registration
+         * and written onto the newly created contact, but is NOT used to identify
+         * an existing contact.
+         *
+         */
+        export interface AdditionalContactAttribute {
+            /**
+             * Name of the contact attribute
+             */
+            name: string;
+            /**
+             * Whether the user must provide a value for this attribute
+             */
+            required?: boolean;
+        }
         export interface AdminUser {
             [name: string]: any;
             /**
@@ -927,7 +943,7 @@ declare namespace Components {
              * example:
              * abc.com
              */
-            domain: string;
+            domain?: string;
             /**
              * Mark true if the domain is an Epilot domain
              */
@@ -959,9 +975,21 @@ declare namespace Components {
             allowed_portal_entities?: string[];
             self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY" | "BLOCK_IF_PORTAL_USER_EXISTS";
             /**
-             * Controls behavior of self-registration when account is used as the registration entity
+             * Controls behavior of self-registration when account is the registration
+             * entity. `BLOCK_IF_PORTAL_USER_EXISTS` matches an existing account and
+             * rejects the request when any portal user is already linked to that
+             * account (no creation). Blocking can also be enabled on the other
+             * non-create modes via `block_registration_if_portal_user_exists`.
+             *
              */
-            self_registration_account_setting?: "ALLOW_WITH_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY";
+            self_registration_account_setting?: "ALLOW_WITH_CREATION" | "DENY" | "ALWAYS_CREATE" | "BLOCK_IF_PORTAL_USER_EXISTS" | "DISALLOW_COMPLETELY";
+            /**
+             * Account-mode only. Reject registration when the resolved account already
+             * has any portal user (any portal user whose mapped contact is linked to
+             * the account).
+             *
+             */
+            block_registration_if_portal_user_exists?: boolean;
             /**
              * Entity type used as the primary identifier for self-registration
              */
@@ -1250,6 +1278,49 @@ declare namespace Components {
              */
             registration_identifiers?: ContractIdentifier[];
             /**
+             * Account-mode only. Identifiers on the contact entity of the primarily
+             * identified account. Used to pick an existing related contact within the
+             * resolved account; if none matches, the values are written onto the new
+             * contact that is created and linked to the account.
+             *
+             * example:
+             * [
+             *   {
+             *     "name": "first_name",
+             *     "schema": "contact"
+             *   },
+             *   {
+             *     "name": "last_name",
+             *     "schema": "contact"
+             *   }
+             * ]
+             */
+            contact_identifiers_for_account?: RegistrationIdentifier[];
+            /**
+             * Contact attributes collected from the user during self-registration that are
+             * written onto the newly created contact but are not used to identify an
+             * existing one.
+             *
+             * example:
+             * [
+             *   {
+             *     "name": "first_name",
+             *     "required": true
+             *   },
+             *   {
+             *     "name": "last_name",
+             *     "required": true
+             *   }
+             * ]
+             */
+            additional_contact_attributes?: /**
+             * A contact attribute that is collected from the user during self-registration
+             * and written onto the newly created contact, but is NOT used to identify
+             * an existing contact.
+             *
+             */
+            AdditionalContactAttribute[];
+            /**
              * Journeys automatically opened on a portal user action
              */
             triggered_journeys?: {
@@ -1260,6 +1331,21 @@ declare namespace Components {
                  * 5da0a718-c822-403d-9f5d-20d4584e0528
                  */
                 EntityId /* uuid */;
+                /**
+                 * Context parameters forwarded to the journey when it is
+                 * auto-triggered. Values may contain handlebars templates
+                 * that reference the available context (e.g.
+                 * `{{contact._id}}`, `{{portal_user.email}}`,
+                 * `{{order._id}}`) — these are resolved at trigger time by
+                 * `GET /v2/portal/config/triggered-journeys/{trigger_name}`
+                 * using the caller's auth context plus runtime entities
+                 * supplied via the `context_entities` query param.
+                 *
+                 */
+                context_params?: {
+                    key?: string;
+                    value?: string;
+                }[];
             }[];
             /**
              * Rules for editing an entity by a portal user
@@ -1401,9 +1487,21 @@ declare namespace Components {
             allowed_portal_entities?: string[];
             self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY" | "BLOCK_IF_PORTAL_USER_EXISTS";
             /**
-             * Controls behavior of self-registration when account is used as the registration entity
+             * Controls behavior of self-registration when account is the registration
+             * entity. `BLOCK_IF_PORTAL_USER_EXISTS` matches an existing account and
+             * rejects the request when any portal user is already linked to that
+             * account (no creation). Blocking can also be enabled on the other
+             * non-create modes via `block_registration_if_portal_user_exists`.
+             *
              */
-            self_registration_account_setting?: "ALLOW_WITH_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY";
+            self_registration_account_setting?: "ALLOW_WITH_CREATION" | "DENY" | "ALWAYS_CREATE" | "BLOCK_IF_PORTAL_USER_EXISTS" | "DISALLOW_COMPLETELY";
+            /**
+             * Account-mode only. Reject registration when the resolved account already
+             * has any portal user (any portal user whose mapped contact is linked to
+             * the account).
+             *
+             */
+            block_registration_if_portal_user_exists?: boolean;
             /**
              * Entity type used as the primary identifier for self-registration
              */
@@ -1692,6 +1790,49 @@ declare namespace Components {
              */
             registration_identifiers?: ContractIdentifier[];
             /**
+             * Account-mode only. Identifiers on the contact entity of the primarily
+             * identified account. Used to pick an existing related contact within the
+             * resolved account; if none matches, the values are written onto the new
+             * contact that is created and linked to the account.
+             *
+             * example:
+             * [
+             *   {
+             *     "name": "first_name",
+             *     "schema": "contact"
+             *   },
+             *   {
+             *     "name": "last_name",
+             *     "schema": "contact"
+             *   }
+             * ]
+             */
+            contact_identifiers_for_account?: RegistrationIdentifier[];
+            /**
+             * Contact attributes collected from the user during self-registration that are
+             * written onto the newly created contact but are not used to identify an
+             * existing one.
+             *
+             * example:
+             * [
+             *   {
+             *     "name": "first_name",
+             *     "required": true
+             *   },
+             *   {
+             *     "name": "last_name",
+             *     "required": true
+             *   }
+             * ]
+             */
+            additional_contact_attributes?: /**
+             * A contact attribute that is collected from the user during self-registration
+             * and written onto the newly created contact, but is NOT used to identify
+             * an existing contact.
+             *
+             */
+            AdditionalContactAttribute[];
+            /**
              * Journeys automatically opened on a portal user action
              */
             triggered_journeys?: {
@@ -1702,6 +1843,21 @@ declare namespace Components {
                  * 5da0a718-c822-403d-9f5d-20d4584e0528
                  */
                 EntityId /* uuid */;
+                /**
+                 * Context parameters forwarded to the journey when it is
+                 * auto-triggered. Values may contain handlebars templates
+                 * that reference the available context (e.g.
+                 * `{{contact._id}}`, `{{portal_user.email}}`,
+                 * `{{order._id}}`) — these are resolved at trigger time by
+                 * `GET /v2/portal/config/triggered-journeys/{trigger_name}`
+                 * using the caller's auth context plus runtime entities
+                 * supplied via the `context_entities` query param.
+                 *
+                 */
+                context_params?: {
+                    key?: string;
+                    value?: string;
+                }[];
             }[];
             /**
              * Rules for editing an entity by a portal user
@@ -2212,6 +2368,36 @@ declare namespace Components {
                 [name: string]: {
                     [name: string]: string;
                 };
+            };
+            /**
+             * Account-mode only. Values for the contact identifiers configured
+             * under `contact_identifiers_for_account` on the portal. Used to
+             * find an existing related contact within the resolved account, or
+             * written onto the new contact if none matches.
+             *
+             * example:
+             * {
+             *   "first_name": "John",
+             *   "last_name": "Doe"
+             * }
+             */
+            contact_identifiers_for_account?: {
+                [name: string]: string;
+            };
+            /**
+             * Values for the contact attributes configured under
+             * `additional_contact_attributes` on the portal. These are written
+             * onto the newly created contact but are not used to identify an
+             * existing one.
+             *
+             * example:
+             * {
+             *   "first_name": "John",
+             *   "last_name": "Doe"
+             * }
+             */
+            additional_contact_attributes?: {
+                [name: string]: string;
             };
             /**
              * ID of the account
@@ -3386,6 +3572,10 @@ declare namespace Components {
                 /**
                  * Optional path to the data (array) in the response. If omitted, the data is assumed to be on the top level.
                  */
+                data_path?: string;
+                /**
+                 * Deprecated. Use `data_path` instead.
+                 */
                 dataPath?: string;
                 /**
                  * Optional path to a human-readable error message in the third-party response body, used when the call fails (non-2xx status).
@@ -3394,7 +3584,7 @@ declare namespace Components {
                  * example:
                  * error.message
                  */
-                errorMessagePath?: string;
+                error_message_path?: string;
             };
             /**
              * Deprecated. Prefer `secure_proxy` instead.
@@ -3449,9 +3639,23 @@ declare namespace Components {
                     [key: string]: any;
                 };
                 /**
-                 * Contact ID usually retrieved from the response body, e.g. `{{CallResponse.data.contact_id}}`. If no result is passed and the request suceeds, we attempt to resolve the Contact ID automatically. Supports variable interpolation.
+                 * Deprecated. Use `resolved.result` instead. Contact ID usually retrieved from the response body, e.g. `{{CallResponse.data.contact_id}}`. If no result is passed and the request suceeds, we attempt to resolve the Contact ID automatically. Supports variable interpolation.
                  */
                 result?: string;
+            };
+            resolved?: {
+                /**
+                 * Contract or Contact ID usually retrieved from the response body, e.g. `{{CallResponse.data.contact_id}}`. If no result is passed and the request suceeds, we attempt to resolve the Contact ID automatically. Supports variable interpolation. Supersedes the deprecated `call.result`.
+                 */
+                result?: string;
+                /**
+                 * Optional path to a human-readable error message in the third-party response body, used when the call fails (non-2xx status).
+                 * If specified and the path resolves to a string, that message is forwarded to the end user instead of a generic error.
+                 *
+                 * example:
+                 * error.message
+                 */
+                error_message_path?: string;
             };
             /**
              * Mode of contract assignment. See hook description for mode details.
@@ -3523,6 +3727,10 @@ declare namespace Components {
                 /**
                  * Optional path to the data (array) in the response. If omitted, the data is assumed to be on the top level.
                  */
+                data_path?: string;
+                /**
+                 * Deprecated. Use `data_path` instead.
+                 */
                 dataPath?: string;
                 /**
                  * Optional path to a human-readable error message in the third-party response body, used when the call fails (non-2xx status).
@@ -3531,7 +3739,7 @@ declare namespace Components {
                  * example:
                  * error.message
                  */
-                errorMessagePath?: string;
+                error_message_path?: string;
             };
             /**
              * Deprecated. Prefer `secure_proxy` instead.
@@ -3593,7 +3801,7 @@ declare namespace Components {
                  * example:
                  * error.message
                  */
-                errorMessagePath?: string;
+                error_message_path?: string;
             };
             /**
              * Deprecated. Prefer `secure_proxy` instead.
@@ -3652,6 +3860,10 @@ declare namespace Components {
                  * example:
                  * data.results
                  */
+                data_path?: string;
+                /**
+                 * Deprecated. Use `data_path` instead.
+                 */
                 dataPath?: string;
                 /**
                  * Counter identifier(s) used to match against the meter's counters.
@@ -3695,7 +3907,7 @@ declare namespace Components {
                  * example:
                  * error.message
                  */
-                errorMessagePath?: string;
+                error_message_path?: string;
             };
             /**
              * Deprecated. Prefer `secure_proxy` instead.
@@ -3745,6 +3957,10 @@ declare namespace Components {
                 /**
                  * Optional path to the data (array) in the response. If omitted, the data is assumed to be on the top level.
                  */
+                data_path?: string;
+                /**
+                 * Deprecated. Use `data_path` instead.
+                 */
                 dataPath?: string;
                 /**
                  * Optional path to a human-readable error message in the third-party response body, used when the call fails (non-2xx status).
@@ -3753,7 +3969,7 @@ declare namespace Components {
                  * example:
                  * error.message
                  */
-                errorMessagePath?: string;
+                error_message_path?: string;
             };
             /**
              * Deprecated. Prefer `secure_proxy` instead.
@@ -3800,9 +4016,23 @@ declare namespace Components {
                     [key: string]: any;
                 };
                 /**
-                 * Contact ID usually retrieved from the response body, e.g. `{{CallResponse.data.contact_id}}`. If no result is passed and the request suceeds, we attempt to resolve the Contact ID automatically. Supports variable interpolation.
+                 * Deprecated. Use `resolved.result` instead. Contact ID usually retrieved from the response body, e.g. `{{CallResponse.data.contact_id}}`. If no result is passed and the request suceeds, we attempt to resolve the Contact ID automatically. Supports variable interpolation.
                  */
                 result?: string;
+            };
+            resolved?: {
+                /**
+                 * Contact ID usually retrieved from the response body, e.g. `{{CallResponse.data.contact_id}}`. If no result is passed and the request suceeds, we attempt to resolve the Contact ID automatically. Supports variable interpolation. Supersedes the deprecated `call.result`.
+                 */
+                result?: string;
+                /**
+                 * Optional path to a human-readable error message in the third-party response body, used when the call fails (non-2xx status).
+                 * If specified and the path resolves to a string, that message is forwarded to the end user instead of a generic error.
+                 *
+                 * example:
+                 * error.message
+                 */
+                error_message_path?: string;
             };
             /**
              * Deprecated. Prefer `secure_proxy` instead.
@@ -3865,6 +4095,10 @@ declare namespace Components {
                 /**
                  * Optional path to the metadata object in the response. If omitted, the metadata is assumed to be on the top level.
                  */
+                data_path?: string;
+                /**
+                 * Deprecated. Use `data_path` instead.
+                 */
                 dataPath?: string;
                 /**
                  * Optional path to a human-readable error message in the third-party response body, used when the call fails (non-2xx status).
@@ -3873,7 +4107,7 @@ declare namespace Components {
                  * example:
                  * error.message
                  */
-                errorMessagePath?: string;
+                error_message_path?: string;
             };
             /**
              * Deprecated. Prefer `secure_proxy` instead.
@@ -4686,7 +4920,7 @@ declare namespace Components {
              */
             scope: string;
             metadata?: OIDCProviderMetadata;
-            prompt?: "login" | "select_account" | "consent";
+            prompt?: "login" | "select_account" | "consent" | "signup";
         }
         export interface OIDCProviderMetadata {
             /**
@@ -5308,7 +5542,7 @@ declare namespace Components {
              * example:
              * abc.com
              */
-            domain: string;
+            domain?: string;
             /**
              * Mark true if the domain is an Epilot domain
              */
@@ -5337,9 +5571,21 @@ declare namespace Components {
             allowed_portal_entities?: string[];
             self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY" | "BLOCK_IF_PORTAL_USER_EXISTS";
             /**
-             * Controls behavior of self-registration when account is used as the registration entity
+             * Controls behavior of self-registration when account is the registration
+             * entity. `BLOCK_IF_PORTAL_USER_EXISTS` matches an existing account and
+             * rejects the request when any portal user is already linked to that
+             * account (no creation). Blocking can also be enabled on the other
+             * non-create modes via `block_registration_if_portal_user_exists`.
+             *
              */
-            self_registration_account_setting?: "ALLOW_WITH_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY";
+            self_registration_account_setting?: "ALLOW_WITH_CREATION" | "DENY" | "ALWAYS_CREATE" | "BLOCK_IF_PORTAL_USER_EXISTS" | "DISALLOW_COMPLETELY";
+            /**
+             * Account-mode only. Reject registration when the resolved account already
+             * has any portal user (any portal user whose mapped contact is linked to
+             * the account).
+             *
+             */
+            block_registration_if_portal_user_exists?: boolean;
             /**
              * Entity type used as the primary identifier for self-registration
              */
@@ -5628,6 +5874,49 @@ declare namespace Components {
              */
             registration_identifiers?: ContractIdentifier[];
             /**
+             * Account-mode only. Identifiers on the contact entity of the primarily
+             * identified account. Used to pick an existing related contact within the
+             * resolved account; if none matches, the values are written onto the new
+             * contact that is created and linked to the account.
+             *
+             * example:
+             * [
+             *   {
+             *     "name": "first_name",
+             *     "schema": "contact"
+             *   },
+             *   {
+             *     "name": "last_name",
+             *     "schema": "contact"
+             *   }
+             * ]
+             */
+            contact_identifiers_for_account?: RegistrationIdentifier[];
+            /**
+             * Contact attributes collected from the user during self-registration that are
+             * written onto the newly created contact but are not used to identify an
+             * existing one.
+             *
+             * example:
+             * [
+             *   {
+             *     "name": "first_name",
+             *     "required": true
+             *   },
+             *   {
+             *     "name": "last_name",
+             *     "required": true
+             *   }
+             * ]
+             */
+            additional_contact_attributes?: /**
+             * A contact attribute that is collected from the user during self-registration
+             * and written onto the newly created contact, but is NOT used to identify
+             * an existing contact.
+             *
+             */
+            AdditionalContactAttribute[];
+            /**
              * Journeys automatically opened on a portal user action
              */
             triggered_journeys?: {
@@ -5638,6 +5927,21 @@ declare namespace Components {
                  * 5da0a718-c822-403d-9f5d-20d4584e0528
                  */
                 EntityId /* uuid */;
+                /**
+                 * Context parameters forwarded to the journey when it is
+                 * auto-triggered. Values may contain handlebars templates
+                 * that reference the available context (e.g.
+                 * `{{contact._id}}`, `{{portal_user.email}}`,
+                 * `{{order._id}}`) — these are resolved at trigger time by
+                 * `GET /v2/portal/config/triggered-journeys/{trigger_name}`
+                 * using the caller's auth context plus runtime entities
+                 * supplied via the `context_entities` query param.
+                 *
+                 */
+                context_params?: {
+                    key?: string;
+                    value?: string;
+                }[];
             }[];
             /**
              * Rules for editing an entity by a portal user
@@ -5874,9 +6178,21 @@ declare namespace Components {
             allowed_portal_entities?: string[];
             self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY" | "BLOCK_IF_PORTAL_USER_EXISTS";
             /**
-             * Controls behavior of self-registration when account is used as the registration entity
+             * Controls behavior of self-registration when account is the registration
+             * entity. `BLOCK_IF_PORTAL_USER_EXISTS` matches an existing account and
+             * rejects the request when any portal user is already linked to that
+             * account (no creation). Blocking can also be enabled on the other
+             * non-create modes via `block_registration_if_portal_user_exists`.
+             *
              */
-            self_registration_account_setting?: "ALLOW_WITH_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY";
+            self_registration_account_setting?: "ALLOW_WITH_CREATION" | "DENY" | "ALWAYS_CREATE" | "BLOCK_IF_PORTAL_USER_EXISTS" | "DISALLOW_COMPLETELY";
+            /**
+             * Account-mode only. Reject registration when the resolved account already
+             * has any portal user (any portal user whose mapped contact is linked to
+             * the account).
+             *
+             */
+            block_registration_if_portal_user_exists?: boolean;
             /**
              * Entity type used as the primary identifier for self-registration
              */
@@ -6165,6 +6481,49 @@ declare namespace Components {
              */
             registration_identifiers?: ContractIdentifier[];
             /**
+             * Account-mode only. Identifiers on the contact entity of the primarily
+             * identified account. Used to pick an existing related contact within the
+             * resolved account; if none matches, the values are written onto the new
+             * contact that is created and linked to the account.
+             *
+             * example:
+             * [
+             *   {
+             *     "name": "first_name",
+             *     "schema": "contact"
+             *   },
+             *   {
+             *     "name": "last_name",
+             *     "schema": "contact"
+             *   }
+             * ]
+             */
+            contact_identifiers_for_account?: RegistrationIdentifier[];
+            /**
+             * Contact attributes collected from the user during self-registration that are
+             * written onto the newly created contact but are not used to identify an
+             * existing one.
+             *
+             * example:
+             * [
+             *   {
+             *     "name": "first_name",
+             *     "required": true
+             *   },
+             *   {
+             *     "name": "last_name",
+             *     "required": true
+             *   }
+             * ]
+             */
+            additional_contact_attributes?: /**
+             * A contact attribute that is collected from the user during self-registration
+             * and written onto the newly created contact, but is NOT used to identify
+             * an existing contact.
+             *
+             */
+            AdditionalContactAttribute[];
+            /**
              * Journeys automatically opened on a portal user action
              */
             triggered_journeys?: {
@@ -6175,6 +6534,21 @@ declare namespace Components {
                  * 5da0a718-c822-403d-9f5d-20d4584e0528
                  */
                 EntityId /* uuid */;
+                /**
+                 * Context parameters forwarded to the journey when it is
+                 * auto-triggered. Values may contain handlebars templates
+                 * that reference the available context (e.g.
+                 * `{{contact._id}}`, `{{portal_user.email}}`,
+                 * `{{order._id}}`) — these are resolved at trigger time by
+                 * `GET /v2/portal/config/triggered-journeys/{trigger_name}`
+                 * using the caller's auth context plus runtime entities
+                 * supplied via the `context_entities` query param.
+                 *
+                 */
+                context_params?: {
+                    key?: string;
+                    value?: string;
+                }[];
             }[];
             /**
              * Rules for editing an entity by a portal user
@@ -6623,6 +6997,7 @@ declare namespace Components {
             priceDataRetrieval?: DataRetrievalItem[];
             costDataRetrieval?: DataRetrievalItem[];
             contractIdentification?: {
+                app?: PublicAppDetails;
                 extension?: PublicExtensionDetails;
                 hook?: PublicContractIdentificationDetails;
             };
@@ -7201,7 +7576,7 @@ declare namespace Components {
              * example:
              * abc.com
              */
-            domain: string;
+            domain?: string;
             /**
              * Mark true if the domain is an Epilot domain
              */
@@ -7230,9 +7605,21 @@ declare namespace Components {
             allowed_portal_entities?: string[];
             self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY" | "BLOCK_IF_PORTAL_USER_EXISTS";
             /**
-             * Controls behavior of self-registration when account is used as the registration entity
+             * Controls behavior of self-registration when account is the registration
+             * entity. `BLOCK_IF_PORTAL_USER_EXISTS` matches an existing account and
+             * rejects the request when any portal user is already linked to that
+             * account (no creation). Blocking can also be enabled on the other
+             * non-create modes via `block_registration_if_portal_user_exists`.
+             *
              */
-            self_registration_account_setting?: "ALLOW_WITH_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY";
+            self_registration_account_setting?: "ALLOW_WITH_CREATION" | "DENY" | "ALWAYS_CREATE" | "BLOCK_IF_PORTAL_USER_EXISTS" | "DISALLOW_COMPLETELY";
+            /**
+             * Account-mode only. Reject registration when the resolved account already
+             * has any portal user (any portal user whose mapped contact is linked to
+             * the account).
+             *
+             */
+            block_registration_if_portal_user_exists?: boolean;
             /**
              * Entity type used as the primary identifier for self-registration
              */
@@ -7521,6 +7908,49 @@ declare namespace Components {
              */
             registration_identifiers?: ContractIdentifier[];
             /**
+             * Account-mode only. Identifiers on the contact entity of the primarily
+             * identified account. Used to pick an existing related contact within the
+             * resolved account; if none matches, the values are written onto the new
+             * contact that is created and linked to the account.
+             *
+             * example:
+             * [
+             *   {
+             *     "name": "first_name",
+             *     "schema": "contact"
+             *   },
+             *   {
+             *     "name": "last_name",
+             *     "schema": "contact"
+             *   }
+             * ]
+             */
+            contact_identifiers_for_account?: RegistrationIdentifier[];
+            /**
+             * Contact attributes collected from the user during self-registration that are
+             * written onto the newly created contact but are not used to identify an
+             * existing one.
+             *
+             * example:
+             * [
+             *   {
+             *     "name": "first_name",
+             *     "required": true
+             *   },
+             *   {
+             *     "name": "last_name",
+             *     "required": true
+             *   }
+             * ]
+             */
+            additional_contact_attributes?: /**
+             * A contact attribute that is collected from the user during self-registration
+             * and written onto the newly created contact, but is NOT used to identify
+             * an existing contact.
+             *
+             */
+            AdditionalContactAttribute[];
+            /**
              * Journeys automatically opened on a portal user action
              */
             triggered_journeys?: {
@@ -7531,6 +7961,21 @@ declare namespace Components {
                  * 5da0a718-c822-403d-9f5d-20d4584e0528
                  */
                 EntityId /* uuid */;
+                /**
+                 * Context parameters forwarded to the journey when it is
+                 * auto-triggered. Values may contain handlebars templates
+                 * that reference the available context (e.g.
+                 * `{{contact._id}}`, `{{portal_user.email}}`,
+                 * `{{order._id}}`) — these are resolved at trigger time by
+                 * `GET /v2/portal/config/triggered-journeys/{trigger_name}`
+                 * using the caller's auth context plus runtime entities
+                 * supplied via the `context_entities` query param.
+                 *
+                 */
+                context_params?: {
+                    key?: string;
+                    value?: string;
+                }[];
             }[];
             /**
              * Rules for editing an entity by a portal user
@@ -7735,9 +8180,21 @@ declare namespace Components {
             allowed_portal_entities?: string[];
             self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY" | "BLOCK_IF_PORTAL_USER_EXISTS";
             /**
-             * Controls behavior of self-registration when account is used as the registration entity
+             * Controls behavior of self-registration when account is the registration
+             * entity. `BLOCK_IF_PORTAL_USER_EXISTS` matches an existing account and
+             * rejects the request when any portal user is already linked to that
+             * account (no creation). Blocking can also be enabled on the other
+             * non-create modes via `block_registration_if_portal_user_exists`.
+             *
              */
-            self_registration_account_setting?: "ALLOW_WITH_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY";
+            self_registration_account_setting?: "ALLOW_WITH_CREATION" | "DENY" | "ALWAYS_CREATE" | "BLOCK_IF_PORTAL_USER_EXISTS" | "DISALLOW_COMPLETELY";
+            /**
+             * Account-mode only. Reject registration when the resolved account already
+             * has any portal user (any portal user whose mapped contact is linked to
+             * the account).
+             *
+             */
+            block_registration_if_portal_user_exists?: boolean;
             /**
              * Entity type used as the primary identifier for self-registration
              */
@@ -8026,6 +8483,49 @@ declare namespace Components {
              */
             registration_identifiers?: ContractIdentifier[];
             /**
+             * Account-mode only. Identifiers on the contact entity of the primarily
+             * identified account. Used to pick an existing related contact within the
+             * resolved account; if none matches, the values are written onto the new
+             * contact that is created and linked to the account.
+             *
+             * example:
+             * [
+             *   {
+             *     "name": "first_name",
+             *     "schema": "contact"
+             *   },
+             *   {
+             *     "name": "last_name",
+             *     "schema": "contact"
+             *   }
+             * ]
+             */
+            contact_identifiers_for_account?: RegistrationIdentifier[];
+            /**
+             * Contact attributes collected from the user during self-registration that are
+             * written onto the newly created contact but are not used to identify an
+             * existing one.
+             *
+             * example:
+             * [
+             *   {
+             *     "name": "first_name",
+             *     "required": true
+             *   },
+             *   {
+             *     "name": "last_name",
+             *     "required": true
+             *   }
+             * ]
+             */
+            additional_contact_attributes?: /**
+             * A contact attribute that is collected from the user during self-registration
+             * and written onto the newly created contact, but is NOT used to identify
+             * an existing contact.
+             *
+             */
+            AdditionalContactAttribute[];
+            /**
              * Journeys automatically opened on a portal user action
              */
             triggered_journeys?: {
@@ -8036,6 +8536,21 @@ declare namespace Components {
                  * 5da0a718-c822-403d-9f5d-20d4584e0528
                  */
                 EntityId /* uuid */;
+                /**
+                 * Context parameters forwarded to the journey when it is
+                 * auto-triggered. Values may contain handlebars templates
+                 * that reference the available context (e.g.
+                 * `{{contact._id}}`, `{{portal_user.email}}`,
+                 * `{{order._id}}`) — these are resolved at trigger time by
+                 * `GET /v2/portal/config/triggered-journeys/{trigger_name}`
+                 * using the caller's auth context plus runtime entities
+                 * supplied via the `context_entities` query param.
+                 *
+                 */
+                context_params?: {
+                    key?: string;
+                    value?: string;
+                }[];
             }[];
             /**
              * Rules for editing an entity by a portal user
@@ -10559,7 +11074,7 @@ declare namespace Paths {
                  * example:
                  * abc.com
                  */
-                domain: string;
+                domain?: string;
                 /**
                  * Mark true if the domain is an Epilot domain
                  */
@@ -10588,9 +11103,21 @@ declare namespace Paths {
                 allowed_portal_entities?: string[];
                 self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY" | "BLOCK_IF_PORTAL_USER_EXISTS";
                 /**
-                 * Controls behavior of self-registration when account is used as the registration entity
+                 * Controls behavior of self-registration when account is the registration
+                 * entity. `BLOCK_IF_PORTAL_USER_EXISTS` matches an existing account and
+                 * rejects the request when any portal user is already linked to that
+                 * account (no creation). Blocking can also be enabled on the other
+                 * non-create modes via `block_registration_if_portal_user_exists`.
+                 *
                  */
-                self_registration_account_setting?: "ALLOW_WITH_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY";
+                self_registration_account_setting?: "ALLOW_WITH_CREATION" | "DENY" | "ALWAYS_CREATE" | "BLOCK_IF_PORTAL_USER_EXISTS" | "DISALLOW_COMPLETELY";
+                /**
+                 * Account-mode only. Reject registration when the resolved account already
+                 * has any portal user (any portal user whose mapped contact is linked to
+                 * the account).
+                 *
+                 */
+                block_registration_if_portal_user_exists?: boolean;
                 /**
                  * Entity type used as the primary identifier for self-registration
                  */
@@ -10879,6 +11406,49 @@ declare namespace Paths {
                  */
                 registration_identifiers?: Components.Schemas.ContractIdentifier[];
                 /**
+                 * Account-mode only. Identifiers on the contact entity of the primarily
+                 * identified account. Used to pick an existing related contact within the
+                 * resolved account; if none matches, the values are written onto the new
+                 * contact that is created and linked to the account.
+                 *
+                 * example:
+                 * [
+                 *   {
+                 *     "name": "first_name",
+                 *     "schema": "contact"
+                 *   },
+                 *   {
+                 *     "name": "last_name",
+                 *     "schema": "contact"
+                 *   }
+                 * ]
+                 */
+                contact_identifiers_for_account?: Components.Schemas.RegistrationIdentifier[];
+                /**
+                 * Contact attributes collected from the user during self-registration that are
+                 * written onto the newly created contact but are not used to identify an
+                 * existing one.
+                 *
+                 * example:
+                 * [
+                 *   {
+                 *     "name": "first_name",
+                 *     "required": true
+                 *   },
+                 *   {
+                 *     "name": "last_name",
+                 *     "required": true
+                 *   }
+                 * ]
+                 */
+                additional_contact_attributes?: /**
+                 * A contact attribute that is collected from the user during self-registration
+                 * and written onto the newly created contact, but is NOT used to identify
+                 * an existing contact.
+                 *
+                 */
+                Components.Schemas.AdditionalContactAttribute[];
+                /**
                  * Journeys automatically opened on a portal user action
                  */
                 triggered_journeys?: {
@@ -10889,6 +11459,21 @@ declare namespace Paths {
                      * 5da0a718-c822-403d-9f5d-20d4584e0528
                      */
                     Components.Schemas.EntityId /* uuid */;
+                    /**
+                     * Context parameters forwarded to the journey when it is
+                     * auto-triggered. Values may contain handlebars templates
+                     * that reference the available context (e.g.
+                     * `{{contact._id}}`, `{{portal_user.email}}`,
+                     * `{{order._id}}`) — these are resolved at trigger time by
+                     * `GET /v2/portal/config/triggered-journeys/{trigger_name}`
+                     * using the caller's auth context plus runtime entities
+                     * supplied via the `context_entities` query param.
+                     *
+                     */
+                    context_params?: {
+                        key?: string;
+                        value?: string;
+                    }[];
                 }[];
                 /**
                  * Rules for editing an entity by a portal user
@@ -11095,7 +11680,7 @@ declare namespace Paths {
                  * example:
                  * abc.com
                  */
-                domain: string;
+                domain?: string;
                 /**
                  * Mark true if the domain is an Epilot domain
                  */
@@ -11124,9 +11709,21 @@ declare namespace Paths {
                 allowed_portal_entities?: string[];
                 self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY" | "BLOCK_IF_PORTAL_USER_EXISTS";
                 /**
-                 * Controls behavior of self-registration when account is used as the registration entity
+                 * Controls behavior of self-registration when account is the registration
+                 * entity. `BLOCK_IF_PORTAL_USER_EXISTS` matches an existing account and
+                 * rejects the request when any portal user is already linked to that
+                 * account (no creation). Blocking can also be enabled on the other
+                 * non-create modes via `block_registration_if_portal_user_exists`.
+                 *
                  */
-                self_registration_account_setting?: "ALLOW_WITH_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY";
+                self_registration_account_setting?: "ALLOW_WITH_CREATION" | "DENY" | "ALWAYS_CREATE" | "BLOCK_IF_PORTAL_USER_EXISTS" | "DISALLOW_COMPLETELY";
+                /**
+                 * Account-mode only. Reject registration when the resolved account already
+                 * has any portal user (any portal user whose mapped contact is linked to
+                 * the account).
+                 *
+                 */
+                block_registration_if_portal_user_exists?: boolean;
                 /**
                  * Entity type used as the primary identifier for self-registration
                  */
@@ -11415,6 +12012,49 @@ declare namespace Paths {
                  */
                 registration_identifiers?: Components.Schemas.ContractIdentifier[];
                 /**
+                 * Account-mode only. Identifiers on the contact entity of the primarily
+                 * identified account. Used to pick an existing related contact within the
+                 * resolved account; if none matches, the values are written onto the new
+                 * contact that is created and linked to the account.
+                 *
+                 * example:
+                 * [
+                 *   {
+                 *     "name": "first_name",
+                 *     "schema": "contact"
+                 *   },
+                 *   {
+                 *     "name": "last_name",
+                 *     "schema": "contact"
+                 *   }
+                 * ]
+                 */
+                contact_identifiers_for_account?: Components.Schemas.RegistrationIdentifier[];
+                /**
+                 * Contact attributes collected from the user during self-registration that are
+                 * written onto the newly created contact but are not used to identify an
+                 * existing one.
+                 *
+                 * example:
+                 * [
+                 *   {
+                 *     "name": "first_name",
+                 *     "required": true
+                 *   },
+                 *   {
+                 *     "name": "last_name",
+                 *     "required": true
+                 *   }
+                 * ]
+                 */
+                additional_contact_attributes?: /**
+                 * A contact attribute that is collected from the user during self-registration
+                 * and written onto the newly created contact, but is NOT used to identify
+                 * an existing contact.
+                 *
+                 */
+                Components.Schemas.AdditionalContactAttribute[];
+                /**
                  * Journeys automatically opened on a portal user action
                  */
                 triggered_journeys?: {
@@ -11425,6 +12065,21 @@ declare namespace Paths {
                      * 5da0a718-c822-403d-9f5d-20d4584e0528
                      */
                     Components.Schemas.EntityId /* uuid */;
+                    /**
+                     * Context parameters forwarded to the journey when it is
+                     * auto-triggered. Values may contain handlebars templates
+                     * that reference the available context (e.g.
+                     * `{{contact._id}}`, `{{portal_user.email}}`,
+                     * `{{order._id}}`) — these are resolved at trigger time by
+                     * `GET /v2/portal/config/triggered-journeys/{trigger_name}`
+                     * using the caller's auth context plus runtime entities
+                     * supplied via the `context_entities` query param.
+                     *
+                     */
+                    context_params?: {
+                        key?: string;
+                        value?: string;
+                    }[];
                 }[];
                 /**
                  * Rules for editing an entity by a portal user
@@ -12606,6 +13261,42 @@ declare namespace Paths {
             }
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace GetTriggeredJourney {
+        namespace Parameters {
+            export type ContextEntities = /**
+             * Additional entities to include in the context for variable interpolation. Portal User and Contact entities are automatically part of the context.
+             * example:
+             * [
+             *   {
+             *     "entity_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+             *     "entity_schema": "contract"
+             *   }
+             * ]
+             */
+            Components.Schemas.ContextEntities;
+        }
+        export interface QueryParameters {
+            context_entities?: Parameters.ContextEntities;
+        }
+        namespace Responses {
+            export interface $200 {
+                trigger_name?: "FIRST_LOGIN" | "ACCEPT_ORDER" | "DECLINE_ORDER";
+                journey_id?: /**
+                 * Entity ID
+                 * example:
+                 * 5da0a718-c822-403d-9f5d-20d4584e0528
+                 */
+                Components.Schemas.EntityId /* uuid */;
+                context_params?: {
+                    key?: string;
+                    value?: string;
+                }[];
+            }
+            export type $401 = Components.Responses.Unauthorized;
             export type $404 = Components.Responses.NotFound;
             export type $500 = Components.Responses.InternalServerError;
         }
@@ -14121,6 +14812,14 @@ declare namespace Paths {
             Parameters.Id /* uuid */;
         }
     }
+    namespace V2PortalConfigTriggeredJourneys$TriggerName {
+        namespace Parameters {
+            export type TriggerName = "FIRST_LOGIN" | "ACCEPT_ORDER" | "DECLINE_ORDER";
+        }
+        export interface PathParameters {
+            trigger_name: Parameters.TriggerName;
+        }
+    }
     namespace V2PortalPages {
         namespace Parameters {
             /**
@@ -15626,6 +16325,21 @@ export interface OperationMethods {
     data?: Paths.InterpolatePortalPages.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.InterpolatePortalPages.Responses.$200>
+  /**
+   * getTriggeredJourney - getTriggeredJourney
+   * 
+   * Returns the auto-triggered journey configured for the given trigger
+   * with handlebars templates in `context_params` already resolved.
+   * Uses the caller's auth context (contact, portal user) plus any
+   * `context_entities` supplied at trigger time (e.g. the order being
+   * accepted) — same resolver as `getPortalPages`.
+   * 
+   */
+  'getTriggeredJourney'(
+    parameters?: Parameters<Paths.GetTriggeredJourney.QueryParameters & Paths.V2PortalConfigTriggeredJourneys$TriggerName.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetTriggeredJourney.Responses.$200>
   /**
    * getDefaultPages - getDefaultPages
    * 
@@ -17403,6 +18117,23 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.InterpolatePortalPages.Responses.$200>
   }
+  ['/v2/portal/config/triggered-journeys/{trigger_name}']: {
+    /**
+     * getTriggeredJourney - getTriggeredJourney
+     * 
+     * Returns the auto-triggered journey configured for the given trigger
+     * with handlebars templates in `context_params` already resolved.
+     * Uses the caller's auth context (contact, portal user) plus any
+     * `context_entities` supplied at trigger time (e.g. the order being
+     * accepted) — same resolver as `getPortalPages`.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetTriggeredJourney.QueryParameters & Paths.V2PortalConfigTriggeredJourneys$TriggerName.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetTriggeredJourney.Responses.$200>
+  }
   ['/v2/portal/pages/default']: {
     /**
      * getDefaultPages - getDefaultPages
@@ -17720,6 +18451,7 @@ export type Activity = Components.Schemas.Activity;
 export type ActivityCallerContext = Components.Schemas.ActivityCallerContext;
 export type ActivityId = Components.Schemas.ActivityId;
 export type ActivityItem = Components.Schemas.ActivityItem;
+export type AdditionalContactAttribute = Components.Schemas.AdditionalContactAttribute;
 export type AdminUser = Components.Schemas.AdminUser;
 export type AllowedFileExtensions = Components.Schemas.AllowedFileExtensions;
 export type AttributeMappingConfig = Components.Schemas.AttributeMappingConfig;
