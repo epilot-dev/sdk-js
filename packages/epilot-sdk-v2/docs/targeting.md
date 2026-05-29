@@ -28,6 +28,7 @@ const { data } = await targetingClient.changeCampaignStatus(...)
 - [`changeCampaignStatus`](#changecampaignstatus)
 - [`getCampaignJobStatus`](#getcampaignjobstatus)
 - [`getCampaignPortals`](#getcampaignportals)
+- [`setupCampaign`](#setupcampaign)
 - [`matchCampaigns`](#matchcampaigns)
 
 **Campaign Delivery**
@@ -76,6 +77,9 @@ const { data } = await targetingClient.changeCampaignStatus(...)
 - [`RetriggerAutomationsRequest`](#retriggerautomationsrequest)
 - [`RetriggerAutomationsResult`](#retriggerautomationsresult)
 - [`UpdatePortalStatusRequest`](#updateportalstatusrequest)
+- [`SetupCampaignRequest`](#setupcampaignrequest)
+- [`SetupTariffChangeCampaignRequest`](#setuptariffchangecampaignrequest)
+- [`SetupTariffChangeCampaignResponse`](#setuptariffchangecampaignresponse)
 
 ### `changeCampaignStatus`
 
@@ -238,6 +242,58 @@ const { data } = await client.retriggerCampaignAutomations(
       "error": "string"
     }
   ]
+}
+```
+
+</details>
+
+---
+
+### `setupCampaign`
+
+Set up a campaign with related entities and configurations
+
+`POST /v1/campaign:setup`
+
+```ts
+const { data } = await client.setupCampaign(
+  null,
+  {
+    type: 'tariff_change',
+    product_recommendation: {
+      name: 'string',
+      source_product_id: 'b8c01433-5556-4e2b-aad4-6f5348d1df84',
+      source_price_id: 'b8c01433-5556-4e2b-aad4-6f5348d1df84',
+      offers: [
+        {
+          target_id: 'b8c01433-5556-4e2b-aad4-6f5348d1df84',
+          items: [
+            {
+              product_id: 'b8c01433-5556-4e2b-aad4-6f5348d1df84',
+              price_id: 'b8c01433-5556-4e2b-aad4-6f5348d1df84',
+              highlight_config: {}
+            }
+          ]
+        }
+      ]
+    },
+    campaign: {
+      name: 'string',
+      goal: 'string',
+      target_ids: ['b8c01433-5556-4e2b-aad4-6f5348d1df84']
+    }
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "type": "tariff_change",
+  "product_recommendation_id": "b8c01433-5556-4e2b-aad4-6f5348d1df84",
+  "campaign_id": "b8c01433-5556-4e2b-aad4-6f5348d1df84"
 }
 ```
 
@@ -955,5 +1011,63 @@ type RetriggerAutomationsResult = {
 ```ts
 type UpdatePortalStatusRequest = {
   status: "sent" | "seen" | "dismissed" | "clicked"
+}
+```
+
+### `SetupCampaignRequest`
+
+Discriminated by `type`. Each campaign variant has its own request shape;
+new variants are added by introducing a new schema and extending the `oneOf` list.
+
+
+```ts
+type SetupCampaignRequest = {
+  type: "tariff_change"
+  product_recommendation: {
+    name?: string
+    source_product_id?: string // uuid
+    source_price_id?: string // uuid
+    offers?: Array<{
+      target_id?: { ... }
+      items: { ... }
+    }>
+  }
+  campaign: {
+    name: string
+    goal?: string
+    target_ids: string // uuid[]
+  }
+}
+```
+
+### `SetupTariffChangeCampaignRequest`
+
+```ts
+type SetupTariffChangeCampaignRequest = {
+  type: "tariff_change"
+  product_recommendation: {
+    name?: string
+    source_product_id?: string // uuid
+    source_price_id?: string // uuid
+    offers?: Array<{
+      target_id?: { ... }
+      items: { ... }
+    }>
+  }
+  campaign: {
+    name: string
+    goal?: string
+    target_ids: string // uuid[]
+  }
+}
+```
+
+### `SetupTariffChangeCampaignResponse`
+
+```ts
+type SetupTariffChangeCampaignResponse = {
+  type: "tariff_change"
+  product_recommendation_id: string // uuid
+  campaign_id: string // uuid
 }
 ```
