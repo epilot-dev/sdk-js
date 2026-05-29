@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.54.1
+
+### Patch Changes
+
+- Small fixes to OpenAPI spec
+
 ## 3.51.0
 
 ### Minor Changes
