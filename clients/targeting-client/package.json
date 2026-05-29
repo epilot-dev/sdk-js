@@ -1,6 +1,6 @@
 {
   "name": "@epilot/targeting-client",
-  "version": "0.15.1",
+  "version": "0.15.2",
   "description": "JavaScript client library for the epilot Targeting API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -21,11 +21,15 @@
     "sdk",
     "targeting"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "test": "vitest",
     "typescript": "tsc",
     "bundle-definition": "webpack",
     "openapi": "node ../../scripts/update-openapi.js https://docs.api.epilot.io/targeting.yaml",
+    "openapi:local": "node ../../scripts/update-openapi.js ../../../targeting-api/lambda/ApiHandlerFunction/openapi.yml",
     "typegen": "openapi typegen src/openapi.json --client > src/openapi.d.ts",
     "build": "tsc && npm run build:patch && npm run bundle-definition",
     "build:patch": "sed -i'' -e '/^__exportStar.*openapi.*$/d' dist/index.js",

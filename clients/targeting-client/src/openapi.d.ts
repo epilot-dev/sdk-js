@@ -1,5 +1,3 @@
-/* eslint-disable */
-
 import type {
   OpenAPIClient,
   Parameters,
@@ -124,6 +122,7 @@ declare namespace Components {
             results: Schemas.RetriggerAutomationsResult[];
         }
         export type ServerErrorResponse = Schemas.ServerError;
+        export type SetupCampaignResponse = Schemas.SetupTariffChangeCampaignResponse;
     }
     namespace Schemas {
         export interface AutomationRecipientPayload {
@@ -1468,6 +1467,100 @@ declare namespace Components {
             error?: string;
         }
         export type ServerError = BaseError;
+        /**
+         * Discriminated by `type`. Each campaign variant has its own request shape;
+         * new variants are added by introducing a new schema and extending the `oneOf` list.
+         *
+         */
+        export type SetupCampaignRequest = /**
+         * Discriminated by `type`. Each campaign variant has its own request shape;
+         * new variants are added by introducing a new schema and extending the `oneOf` list.
+         *
+         */
+        SetupTariffChangeCampaignRequest;
+        export interface SetupTariffChangeCampaignRequest {
+            type: "tariff_change";
+            product_recommendation: {
+                /**
+                 * Optional name of the product recommendation. Defaults to the campaign name.
+                 */
+                name?: string;
+                /**
+                 * Optional source product entity ID for the recommendation.
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                source_product_id?: string; // uuid
+                /**
+                 * Optional source price entity ID for the recommendation.
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                source_price_id?: string; // uuid
+                /**
+                 * Offer blocks for the product_recommendation entity.
+                 */
+                offers?: {
+                    /**
+                     * Optional per-offer target entity ID.
+                     */
+                    target_id?: /**
+                     * example:
+                     * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                     */
+                    BaseUUID /* uuid */;
+                    /**
+                     * Product/price pairs within this offer.
+                     */
+                    items: {
+                        product_id: /**
+                         * example:
+                         * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                         */
+                        BaseUUID /* uuid */;
+                        price_id: /**
+                         * example:
+                         * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                         */
+                        BaseUUID /* uuid */;
+                        /**
+                         * Opaque per-item highlight/comparison config persisted as-is on the entity.
+                         */
+                        highlight_config?: {
+                            [name: string]: any;
+                        };
+                    }[];
+                }[];
+            };
+            campaign: {
+                name: string;
+                goal?: string;
+                /**
+                 * List of target entity IDs to attach to the campaign. Today only a single
+                 * entry is supported (campaign.target is has_one) but the array shape is kept
+                 * for forward-compatibility — only `target_ids[0]` is used.
+                 *
+                 */
+                target_ids: /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */[];
+            };
+        }
+        export interface SetupTariffChangeCampaignResponse {
+            type: "tariff_change";
+            product_recommendation_id: /**
+             * example:
+             * b8c01433-5556-4e2b-aad4-6f5348d1df84
+             */
+            BaseUUID /* uuid */;
+            campaign_id: /**
+             * example:
+             * b8c01433-5556-4e2b-aad4-6f5348d1df84
+             */
+            BaseUUID /* uuid */;
+        }
         export interface Target {
             _id?: /**
              * example:
@@ -1668,6 +1761,19 @@ declare namespace Paths {
             export type $500 = Components.Responses.ServerErrorResponse;
         }
     }
+    namespace SetupCampaign {
+        export type RequestBody = /**
+         * Discriminated by `type`. Each campaign variant has its own request shape;
+         * new variants are added by introducing a new schema and extending the `oneOf` list.
+         *
+         */
+        Components.Schemas.SetupCampaignRequest;
+        namespace Responses {
+            export type $201 = Components.Responses.SetupCampaignResponse;
+            export type $400 = Components.Responses.ClientErrorResponse;
+            export type $500 = Components.Responses.ServerErrorResponse;
+        }
+    }
     namespace UpdateRecipient {
         namespace Parameters {
             export type CampaignId = /**
@@ -1775,6 +1881,18 @@ export interface OperationMethods {
     data?: Paths.RetriggerCampaignAutomations.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.RetriggerCampaignAutomations.Responses.$200>
+  /**
+   * setupCampaign - Set up a campaign with related entities and configurations
+   * 
+   * Creates a `campaign` entity together with its related entities and configurations in a single call.
+   * Used by the campaign wizard UI, but not restricted to it.
+   * 
+   */
+  'setupCampaign'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.SetupCampaign.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.SetupCampaign.Responses.$201>
   /**
    * matchCampaigns - Match campaigns
    * 
@@ -1922,6 +2040,20 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.RetriggerCampaignAutomations.Responses.$200>
   }
+  ['/v1/campaign:setup']: {
+    /**
+     * setupCampaign - Set up a campaign with related entities and configurations
+     * 
+     * Creates a `campaign` entity together with its related entities and configurations in a single call.
+     * Used by the campaign wizard UI, but not restricted to it.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.SetupCampaign.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.SetupCampaign.Responses.$201>
+  }
   ['/v1/campaign:match']: {
     /**
      * matchCampaigns - Match campaigns
@@ -2052,6 +2184,9 @@ export type Recipient = Components.Schemas.Recipient;
 export type RetriggerAutomationsRequest = Components.Schemas.RetriggerAutomationsRequest;
 export type RetriggerAutomationsResult = Components.Schemas.RetriggerAutomationsResult;
 export type ServerError = Components.Schemas.ServerError;
+export type SetupCampaignRequest = Components.Schemas.SetupCampaignRequest;
+export type SetupTariffChangeCampaignRequest = Components.Schemas.SetupTariffChangeCampaignRequest;
+export type SetupTariffChangeCampaignResponse = Components.Schemas.SetupTariffChangeCampaignResponse;
 export type Target = Components.Schemas.Target;
 export type TargetQueryResult = Components.Schemas.TargetQueryResult;
 export type UpdatePortalStatusRequest = Components.Schemas.UpdatePortalStatusRequest;

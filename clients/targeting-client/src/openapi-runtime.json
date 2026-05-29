@@ -60,6 +60,18 @@
         "responses": {}
       }
     },
+    "/v1/campaign:setup": {
+      "post": {
+        "operationId": "setupCampaign",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v1/campaign:match": {
       "post": {
         "operationId": "matchCampaigns",
@@ -245,6 +257,11 @@
         }
       },
       "CampaignPortalsResponse": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "SetupCampaignResponse": {
         "content": {
           "application/json": {}
         }
