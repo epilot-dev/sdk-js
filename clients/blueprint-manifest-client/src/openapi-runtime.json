@@ -277,6 +277,124 @@
         "responses": {}
       }
     },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}/patches:detect": {
+      "post": {
+        "operationId": "detectPatchChanges",
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}/patches": {
+      "post": {
+        "operationId": "createPatch",
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "get": {
+        "operationId": "listPatches",
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}/patches/{patch_id}": {
+      "get": {
+        "operationId": "getPatch",
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id"
+          },
+          {
+            "in": "path",
+            "required": true,
+            "name": "patch_id"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}/patches/{patch_id}:apply": {
+      "post": {
+        "operationId": "applyPatch",
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id"
+          },
+          {
+            "in": "path",
+            "required": true,
+            "name": "patch_id"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}/patches/{patch_id}/orgs/{org_id}:retry": {
+      "post": {
+        "operationId": "retryPatchOrg",
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id"
+          },
+          {
+            "in": "path",
+            "required": true,
+            "name": "patch_id"
+          },
+          {
+            "in": "path",
+            "required": true,
+            "name": "org_id"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v2/blueprint-manifest/blueprints/{blueprint_id}:export": {
       "post": {
         "operationId": "exportBlueprint",
@@ -324,6 +442,18 @@
             "name": "blueprint_id"
           }
         ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/blueprint-manifest/blueprints:suggest-resources": {
+      "post": {
+        "operationId": "suggestBlueprintResources",
         "requestBody": {
           "required": true,
           "content": {

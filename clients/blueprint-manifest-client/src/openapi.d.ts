@@ -50,11 +50,19 @@ declare namespace Components {
                 source_blueprint_id?: string;
                 destination_org_id?: string;
                 destination_blueprint_id?: string;
+                /**
+                 * Blueprint installation job that created or updated this deployment record
+                 */
+                job_id?: string;
                 triggered_at?: string; // date-time
                 /**
                  * User-provided note about this synchronization
                  */
                 note?: string;
+                /**
+                 * Outcome of this deployment
+                 */
+                status?: "IN_PROGRESS" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED";
             }[];
             /**
              * Whether the blueprint is verified by epilot
@@ -189,6 +197,14 @@ declare namespace Components {
              * Blueprint slug for marketplace blueprints
              */
             slug?: string;
+            /**
+             * Engine used for this install job
+             */
+            sync_engine?: "terraform" | "v3";
+            /**
+             * Per-resource live status. Populated only for V3 installs.
+             */
+            resource_progress?: V3ResourceProgressEntry[];
             status?: "IN_PROGRESS" | "WAITING_USER_ACTION" | "CANCELED" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED";
         }
         export interface BlueprintInstallationJobOptions {
@@ -225,6 +241,47 @@ declare namespace Components {
          * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
          */
         export type BlueprintJobID = string;
+        export interface BlueprintPatch {
+            patch_id?: string;
+            version?: number;
+            blueprint_id?: /**
+             * ID of a blueprint
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            BlueprintID;
+            rollout_id?: string;
+            source_org_id?: string;
+            name?: string;
+            description?: string;
+            status?: "draft" | "ready" | "applying" | "applied" | "partial";
+            resources?: PatchResourceDiff[];
+            changelog?: string;
+            created_by?: string;
+            created_at?: string; // date-time
+            applied_at?: string; // date-time
+        }
+        export interface BlueprintPatchWithResults {
+            patch_id?: string;
+            version?: number;
+            blueprint_id?: /**
+             * ID of a blueprint
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            BlueprintID;
+            rollout_id?: string;
+            source_org_id?: string;
+            name?: string;
+            description?: string;
+            status?: "draft" | "ready" | "applying" | "applied" | "partial";
+            resources?: PatchResourceDiff[];
+            changelog?: string;
+            created_by?: string;
+            created_at?: string; // date-time
+            applied_at?: string; // date-time
+            org_results?: OrgPatchExecution[];
+        }
         /**
          * Preview data for a blueprint before installation. Stored temporarily with TTL.
          */
@@ -430,11 +487,19 @@ declare namespace Components {
                 source_blueprint_id?: string;
                 destination_org_id?: string;
                 destination_blueprint_id?: string;
+                /**
+                 * Blueprint installation job that created or updated this deployment record
+                 */
+                job_id?: string;
                 triggered_at?: string; // date-time
                 /**
                  * User-provided note about this synchronization
                  */
                 note?: string;
+                /**
+                 * Outcome of this deployment
+                 */
+                status?: "IN_PROGRESS" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED";
             }[];
             /**
              * Whether the blueprint is verified by epilot
@@ -709,11 +774,19 @@ declare namespace Components {
                 source_blueprint_id?: string;
                 destination_org_id?: string;
                 destination_blueprint_id?: string;
+                /**
+                 * Blueprint installation job that created or updated this deployment record
+                 */
+                job_id?: string;
                 triggered_at?: string; // date-time
                 /**
                  * User-provided note about this synchronization
                  */
                 note?: string;
+                /**
+                 * Outcome of this deployment
+                 */
+                status?: "IN_PROGRESS" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED";
             }[];
             /**
              * Whether the blueprint is verified by epilot
@@ -804,11 +877,19 @@ declare namespace Components {
                 source_blueprint_id?: string;
                 destination_org_id?: string;
                 destination_blueprint_id?: string;
+                /**
+                 * Blueprint installation job that created or updated this deployment record
+                 */
+                job_id?: string;
                 triggered_at?: string; // date-time
                 /**
                  * User-provided note about this synchronization
                  */
                 note?: string;
+                /**
+                 * Outcome of this deployment
+                 */
+                status?: "IN_PROGRESS" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED";
             }[];
             /**
              * Whether the blueprint is verified by epilot
@@ -868,6 +949,9 @@ declare namespace Components {
             source_type: "deploy";
             resources?: BlueprintResource[];
         }
+        export interface DetectChangesResult {
+            resources?: PatchResourceDiff[];
+        }
         export interface FieldDiff {
             /**
              * JSON path to the differing field (e.g. "steps[2].name")
@@ -908,11 +992,19 @@ declare namespace Components {
                 source_blueprint_id?: string;
                 destination_org_id?: string;
                 destination_blueprint_id?: string;
+                /**
+                 * Blueprint installation job that created or updated this deployment record
+                 */
+                job_id?: string;
                 triggered_at?: string; // date-time
                 /**
                  * User-provided note about this synchronization
                  */
                 note?: string;
+                /**
+                 * Outcome of this deployment
+                 */
+                status?: "IN_PROGRESS" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED";
             }[];
             /**
              * Whether the blueprint is verified by epilot
@@ -1611,11 +1703,19 @@ declare namespace Components {
                 source_blueprint_id?: string;
                 destination_org_id?: string;
                 destination_blueprint_id?: string;
+                /**
+                 * Blueprint installation job that created or updated this deployment record
+                 */
+                job_id?: string;
                 triggered_at?: string; // date-time
                 /**
                  * User-provided note about this synchronization
                  */
                 note?: string;
+                /**
+                 * Outcome of this deployment
+                 */
+                status?: "IN_PROGRESS" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED";
             }[];
             /**
              * Whether the blueprint is verified by epilot
@@ -1781,6 +1881,31 @@ declare namespace Components {
             created_at: string; // date-time
             published_at?: string | null; // date-time
         }
+        export interface OrgPatchExecution {
+            patch_id?: string;
+            version?: number;
+            org_id?: string;
+            org_name?: string;
+            dest_blueprint_id?: string;
+            status?: "pending" | "in_progress" | "success" | "failed";
+            error?: string;
+            applied_at?: string; // date-time
+            retries?: number;
+            changes_applied?: PatchFieldDiff[];
+        }
+        export interface PatchFieldDiff {
+            path?: string;
+            op?: "changed" | "added" | "removed";
+            baseline_value?: any;
+            current_value?: any;
+        }
+        export interface PatchResourceDiff {
+            type?: string;
+            source_id?: string;
+            address?: string;
+            name?: string;
+            changes?: PatchFieldDiff[];
+        }
         export type PlanChanges = ("create" | "update" | "internal-update" | "no-op" | "delete" | "ignored")[];
         /**
          * List of feature settings that must be enabled before installing the blueprint
@@ -1857,7 +1982,7 @@ declare namespace Components {
         /**
          * Type of the resource
          */
-        export type ResourceNodeType = "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable";
+        export type ResourceNodeType = "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission";
         export interface ResourceReplacement {
             /**
              * Original resource ID to be replaced
@@ -1940,12 +2065,63 @@ declare namespace Components {
              */
             pipeline_id?: string;
         }
+        export interface SuggestBlueprintResourcesRequest {
+            /**
+             * Natural-language description of what to include.
+             * example:
+             * everything for the hausanschluss use case
+             */
+            prompt: string;
+            /**
+             * When provided, suggestions are scoped as additions to this existing
+             * blueprint — resources already in it are excluded from the response.
+             *
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            blueprint_id?: string;
+        }
+        export interface SuggestBlueprintResourcesResponse {
+            /**
+             * Suggested resources to add. All marked is_root so the caller can request transitive dependency resolution.
+             */
+            resources: BlueprintResource[];
+            /**
+             * Short title derived from the prompt. Useful when the caller is
+             * creating a new blueprint as a result of the suggestion — saves the
+             * user from naming it themselves.
+             *
+             * example:
+             * Hausanschluss
+             */
+            suggested_blueprint_name?: string;
+            /**
+             * Short human-readable summary of what was matched and why.
+             */
+            explanation?: string;
+            /**
+             * Hint to the caller: persist via bulkAddBlueprintResources with
+             * ?add_dependencies=true so anchor resources (journeys, workflows)
+             * pull their transitive dependencies.
+             *
+             */
+            add_dependencies_recommended?: boolean;
+        }
         export interface UploadFilePayload {
             /**
              * example:
              * example.manifest.zip
              */
             filename: string;
+        }
+        export interface V3ResourceProgressEntry {
+            lineage_id: string;
+            type: string;
+            address: string;
+            name?: string;
+            status: "pending" | "in_progress" | "done" | "failed" | "skipped";
+            target_id?: string;
+            error_message?: string;
         }
         export interface VerificationSummary {
             total_resources?: number;
@@ -2001,6 +2177,34 @@ declare namespace Paths {
             export interface $200 {
                 resources?: Components.Schemas.BlueprintResource[];
             }
+        }
+    }
+    namespace ApplyPatch {
+        namespace Parameters {
+            export type BlueprintId = /**
+             * ID of a blueprint
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            Components.Schemas.BlueprintID;
+            export type PatchId = string;
+        }
+        export interface PathParameters {
+            blueprint_id: Parameters.BlueprintId;
+            patch_id: Parameters.PatchId;
+        }
+        export interface RequestBody {
+            org_id: string;
+            org_name: string;
+            dest_blueprint_id: string;
+            dest_org_id?: string;
+            /**
+             * Auth token with access to the destination org (e.g. pipeline token)
+             */
+            destination_auth_token?: string;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.OrgPatchExecution;
         }
     }
     namespace ApplyPlan {
@@ -2216,6 +2420,36 @@ declare namespace Paths {
             }
         }
     }
+    namespace CreatePatch {
+        namespace Parameters {
+            export type BlueprintId = /**
+             * ID of a blueprint
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            Components.Schemas.BlueprintID;
+        }
+        export interface PathParameters {
+            blueprint_id: Parameters.BlueprintId;
+        }
+        export interface RequestBody {
+            blueprint_id: /**
+             * ID of a blueprint
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            Components.Schemas.BlueprintID;
+            rollout_id: string;
+            source_org_id: string;
+            name: string;
+            description?: string;
+            resources: Components.Schemas.PatchResourceDiff[];
+            changelog?: string;
+        }
+        namespace Responses {
+            export type $201 = Components.Schemas.BlueprintPatch;
+        }
+    }
     namespace CreatePlan {
         export type RequestBody = {
             /**
@@ -2376,6 +2610,40 @@ declare namespace Paths {
             }
             export interface $404 {
             }
+        }
+    }
+    namespace DetectPatchChanges {
+        namespace Parameters {
+            export type BlueprintId = /**
+             * ID of a blueprint
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            Components.Schemas.BlueprintID;
+        }
+        export interface PathParameters {
+            blueprint_id: Parameters.BlueprintId;
+        }
+        export interface RequestBody {
+            /**
+             * Organization ID of the source org where changes were made
+             */
+            source_org_id?: string;
+            /**
+             * Organization ID of a destination org (used to load tfstate baseline)
+             */
+            dest_org_id?: string;
+            /**
+             * Blueprint ID in the destination org (used to locate tfstate in S3)
+             */
+            dest_blueprint_id?: string;
+            /**
+             * ID of the mass rollout
+             */
+            rollout_id?: string;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.DetectChangesResult;
         }
     }
     namespace ExportBlueprint {
@@ -2693,6 +2961,26 @@ declare namespace Paths {
             }
         }
     }
+    namespace GetPatch {
+        namespace Parameters {
+            export type BlueprintId = /**
+             * ID of a blueprint
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            Components.Schemas.BlueprintID;
+            export type PatchId = string;
+        }
+        export interface PathParameters {
+            blueprint_id: Parameters.BlueprintId;
+            patch_id: Parameters.PatchId;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.BlueprintPatchWithResults;
+            export interface $404 {
+            }
+        }
+    }
     namespace InstallBlueprint {
         export interface RequestBody {
             source_org_id?: string;
@@ -2713,6 +3001,14 @@ declare namespace Paths {
              * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
              */
             Components.Schemas.BlueprintID;
+            /**
+             * Auth token with access to the source org. Required for cross-org auto-verification when the caller's bearer token belongs to the destination org.
+             */
+            source_auth_token?: string;
+            /**
+             * Auth token with access to the destination org. Defaults to the caller's bearer token.
+             */
+            destination_auth_token?: string;
             options?: Components.Schemas.BlueprintInstallationJobOptions;
             /**
              * Installation mode
@@ -2746,9 +3042,9 @@ declare namespace Paths {
         }
     }
     namespace InstallBlueprintV3 {
-        export interface RequestBody {
-            source_org_id?: string;
-            source_blueprint_id?: /**
+        export type RequestBody = {
+            source_org_id: string;
+            source_blueprint_id: /**
              * ID of a blueprint
              * example:
              * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
@@ -2758,7 +3054,7 @@ declare namespace Paths {
              * S3 key to the blueprint zip file
              */
             source_blueprint_file?: string;
-            destination_org_id?: string;
+            destination_org_id: string;
             destination_blueprint_id?: /**
              * ID of a blueprint
              * example:
@@ -2774,7 +3070,35 @@ declare namespace Paths {
              * Slug for marketplace blueprint consistency
              */
             slug?: string;
-        }
+        } | {
+            source_org_id?: string;
+            source_blueprint_id?: /**
+             * ID of a blueprint
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            Components.Schemas.BlueprintID;
+            /**
+             * S3 key to the blueprint zip file
+             */
+            source_blueprint_file: string;
+            destination_org_id: string;
+            destination_blueprint_id?: /**
+             * ID of a blueprint
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            Components.Schemas.BlueprintID;
+            /**
+             * Auth token for the destination org. Required for cross-org installs where the caller's token belongs to the source org. Defaults to the caller's bearer token.
+             */
+            destination_auth_token?: string;
+            options?: Components.Schemas.BlueprintInstallationJobOptions;
+            /**
+             * Slug for marketplace blueprint consistency
+             */
+            slug?: string;
+        };
         namespace Responses {
             export interface $202 {
                 job_id?: /**
@@ -2789,6 +3113,9 @@ declare namespace Paths {
                  * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
                  */
                 Components.Schemas.BlueprintID;
+            }
+            export interface $400 {
+                message?: string;
             }
         }
     }
@@ -2901,6 +3228,25 @@ declare namespace Paths {
             }
         }
     }
+    namespace ListPatches {
+        namespace Parameters {
+            export type BlueprintId = /**
+             * ID of a blueprint
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            Components.Schemas.BlueprintID;
+        }
+        export interface PathParameters {
+            blueprint_id: Parameters.BlueprintId;
+        }
+        namespace Responses {
+            export interface $200 {
+                total?: number;
+                results?: Components.Schemas.BlueprintPatch[];
+            }
+        }
+    }
     namespace PreInstallBlueprint {
         export interface RequestBody {
             /**
@@ -2968,6 +3314,37 @@ declare namespace Paths {
             }
             export interface $404 {
             }
+        }
+    }
+    namespace RetryPatchOrg {
+        namespace Parameters {
+            export type BlueprintId = /**
+             * ID of a blueprint
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            Components.Schemas.BlueprintID;
+            export type OrgId = string;
+            export type PatchId = string;
+        }
+        export interface PathParameters {
+            blueprint_id: Parameters.BlueprintId;
+            patch_id: Parameters.PatchId;
+            org_id: Parameters.OrgId;
+        }
+        export interface RequestBody {
+            org_name?: string;
+            dest_blueprint_id?: string;
+            destination_auth_token?: string;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.OrgPatchExecution;
+        }
+    }
+    namespace SuggestBlueprintResources {
+        export type RequestBody = Components.Schemas.SuggestBlueprintResourcesRequest;
+        namespace Responses {
+            export type $200 = Components.Schemas.SuggestBlueprintResourcesResponse;
         }
     }
     namespace SyncDependencies {
@@ -3416,6 +3793,68 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.VerifyBlueprint.Responses.$202>
   /**
+   * detectPatchChanges - detectPatchChanges
+   * 
+   * Detect changes between the current state of a blueprint's resources and its tfstate baseline.
+   * Returns field-level diffs for resources that have been modified since the blueprint was last installed/exported.
+   * 
+   */
+  'detectPatchChanges'(
+    parameters?: Parameters<Paths.DetectPatchChanges.PathParameters> | null,
+    data?: Paths.DetectPatchChanges.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.DetectPatchChanges.Responses.$200>
+  /**
+   * listPatches - listPatches
+   * 
+   * List all patches for a blueprint.
+   */
+  'listPatches'(
+    parameters?: Parameters<Paths.ListPatches.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ListPatches.Responses.$200>
+  /**
+   * createPatch - createPatch
+   * 
+   * Create a new patch for a blueprint.
+   */
+  'createPatch'(
+    parameters?: Parameters<Paths.CreatePatch.PathParameters> | null,
+    data?: Paths.CreatePatch.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CreatePatch.Responses.$201>
+  /**
+   * getPatch - getPatch
+   * 
+   * Get a patch by ID, including per-org execution results.
+   */
+  'getPatch'(
+    parameters?: Parameters<Paths.GetPatch.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetPatch.Responses.$200>
+  /**
+   * applyPatch - applyPatch
+   * 
+   * Apply a patch to a single destination org.
+   */
+  'applyPatch'(
+    parameters?: Parameters<Paths.ApplyPatch.PathParameters> | null,
+    data?: Paths.ApplyPatch.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ApplyPatch.Responses.$200>
+  /**
+   * retryPatchOrg - retryPatchOrg
+   * 
+   * Retry a failed patch execution for a specific org.
+   */
+  'retryPatchOrg'(
+    parameters?: Parameters<Paths.RetryPatchOrg.PathParameters> | null,
+    data?: Paths.RetryPatchOrg.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.RetryPatchOrg.Responses.$200>
+  /**
    * exportBlueprint - exportBlueprint
    * 
    * Kick off a new blueprint export job. Returns 202 Accepted with Location header pointing to the job resource.
@@ -3460,6 +3899,28 @@ export interface OperationMethods {
     data?: Paths.FormatBlueprintDescription.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.FormatBlueprintDescription.Responses.$200>
+  /**
+   * suggestBlueprintResources - suggestBlueprintResources
+   * 
+   * Suggest resources to add to a blueprint based on a natural-language prompt.
+   * 
+   * Walks anchor resource types in priority order (journey > workflow_definition >
+   * automation_flow > schema > entity-backed types) and returns matches per
+   * anchor using each upstream API's text search. Suggestions are marked
+   * `is_root: true` so callers can pass `add_dependencies=true` to
+   * bulkAddBlueprintResources and have transitive dependencies resolved
+   * server-side — which means a single matched journey can stand in for its
+   * full product/schema/template bundle.
+   * 
+   * No side effects on the blueprint — the caller persists the chosen resources
+   * via the existing create/bulk-add endpoints.
+   * 
+   */
+  'suggestBlueprintResources'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.SuggestBlueprintResources.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.SuggestBlueprintResources.Responses.$200>
   /**
    * addBlueprintResource - addBlueprintResource
    * 
@@ -3959,6 +4420,78 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.VerifyBlueprint.Responses.$202>
   }
+  ['/v2/blueprint-manifest/blueprints/{blueprint_id}/patches:detect']: {
+    /**
+     * detectPatchChanges - detectPatchChanges
+     * 
+     * Detect changes between the current state of a blueprint's resources and its tfstate baseline.
+     * Returns field-level diffs for resources that have been modified since the blueprint was last installed/exported.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.DetectPatchChanges.PathParameters> | null,
+      data?: Paths.DetectPatchChanges.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.DetectPatchChanges.Responses.$200>
+  }
+  ['/v2/blueprint-manifest/blueprints/{blueprint_id}/patches']: {
+    /**
+     * createPatch - createPatch
+     * 
+     * Create a new patch for a blueprint.
+     */
+    'post'(
+      parameters?: Parameters<Paths.CreatePatch.PathParameters> | null,
+      data?: Paths.CreatePatch.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CreatePatch.Responses.$201>
+    /**
+     * listPatches - listPatches
+     * 
+     * List all patches for a blueprint.
+     */
+    'get'(
+      parameters?: Parameters<Paths.ListPatches.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ListPatches.Responses.$200>
+  }
+  ['/v2/blueprint-manifest/blueprints/{blueprint_id}/patches/{patch_id}']: {
+    /**
+     * getPatch - getPatch
+     * 
+     * Get a patch by ID, including per-org execution results.
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetPatch.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetPatch.Responses.$200>
+  }
+  ['/v2/blueprint-manifest/blueprints/{blueprint_id}/patches/{patch_id}:apply']: {
+    /**
+     * applyPatch - applyPatch
+     * 
+     * Apply a patch to a single destination org.
+     */
+    'post'(
+      parameters?: Parameters<Paths.ApplyPatch.PathParameters> | null,
+      data?: Paths.ApplyPatch.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ApplyPatch.Responses.$200>
+  }
+  ['/v2/blueprint-manifest/blueprints/{blueprint_id}/patches/{patch_id}/orgs/{org_id}:retry']: {
+    /**
+     * retryPatchOrg - retryPatchOrg
+     * 
+     * Retry a failed patch execution for a specific org.
+     */
+    'post'(
+      parameters?: Parameters<Paths.RetryPatchOrg.PathParameters> | null,
+      data?: Paths.RetryPatchOrg.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.RetryPatchOrg.Responses.$200>
+  }
   ['/v2/blueprint-manifest/blueprints/{blueprint_id}:export']: {
     /**
      * exportBlueprint - exportBlueprint
@@ -4011,6 +4544,30 @@ export interface PathsDictionary {
       data?: Paths.FormatBlueprintDescription.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.FormatBlueprintDescription.Responses.$200>
+  }
+  ['/v2/blueprint-manifest/blueprints:suggest-resources']: {
+    /**
+     * suggestBlueprintResources - suggestBlueprintResources
+     * 
+     * Suggest resources to add to a blueprint based on a natural-language prompt.
+     * 
+     * Walks anchor resource types in priority order (journey > workflow_definition >
+     * automation_flow > schema > entity-backed types) and returns matches per
+     * anchor using each upstream API's text search. Suggestions are marked
+     * `is_root: true` so callers can pass `add_dependencies=true` to
+     * bulkAddBlueprintResources and have transitive dependencies resolved
+     * server-side — which means a single matched journey can stand in for its
+     * full product/schema/template bundle.
+     * 
+     * No side effects on the blueprint — the caller persists the chosen resources
+     * via the existing create/bulk-add endpoints.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.SuggestBlueprintResources.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.SuggestBlueprintResources.Responses.$200>
   }
   ['/v2/blueprint-manifest/blueprints/{blueprint_id}/resources']: {
     /**
@@ -4295,6 +4852,8 @@ export type BlueprintInstallationJobOptions = Components.Schemas.BlueprintInstal
 export type BlueprintJob = Components.Schemas.BlueprintJob;
 export type BlueprintJobEvent = Components.Schemas.BlueprintJobEvent;
 export type BlueprintJobID = Components.Schemas.BlueprintJobID;
+export type BlueprintPatch = Components.Schemas.BlueprintPatch;
+export type BlueprintPatchWithResults = Components.Schemas.BlueprintPatchWithResults;
 export type BlueprintPreview = Components.Schemas.BlueprintPreview;
 export type BlueprintResource = Components.Schemas.BlueprintResource;
 export type BlueprintResourceID = Components.Schemas.BlueprintResourceID;
@@ -4309,6 +4868,7 @@ export type CommonMarkdownFields = Components.Schemas.CommonMarkdownFields;
 export type CommonResourceNode = Components.Schemas.CommonResourceNode;
 export type CustomBlueprint = Components.Schemas.CustomBlueprint;
 export type DeployedBlueprint = Components.Schemas.DeployedBlueprint;
+export type DetectChangesResult = Components.Schemas.DetectChangesResult;
 export type FieldDiff = Components.Schemas.FieldDiff;
 export type FileBlueprint = Components.Schemas.FileBlueprint;
 export type FormattedError = Components.Schemas.FormattedError;
@@ -4329,6 +4889,9 @@ export type MarketplaceBlueprint = Components.Schemas.MarketplaceBlueprint;
 export type MarketplaceListing = Components.Schemas.MarketplaceListing;
 export type MarketplaceListingUpdate = Components.Schemas.MarketplaceListingUpdate;
 export type MarketplaceListingVersion = Components.Schemas.MarketplaceListingVersion;
+export type OrgPatchExecution = Components.Schemas.OrgPatchExecution;
+export type PatchFieldDiff = Components.Schemas.PatchFieldDiff;
+export type PatchResourceDiff = Components.Schemas.PatchResourceDiff;
 export type PlanChanges = Components.Schemas.PlanChanges;
 export type PreInstallRequirements = Components.Schemas.PreInstallRequirements;
 export type PutManifestPayload = Components.Schemas.PutManifestPayload;
@@ -4339,6 +4902,9 @@ export type ResourceVerificationResult = Components.Schemas.ResourceVerification
 export type RootResourceNode = Components.Schemas.RootResourceNode;
 export type S3Reference = Components.Schemas.S3Reference;
 export type SelectedResources = Components.Schemas.SelectedResources;
+export type SuggestBlueprintResourcesRequest = Components.Schemas.SuggestBlueprintResourcesRequest;
+export type SuggestBlueprintResourcesResponse = Components.Schemas.SuggestBlueprintResourcesResponse;
 export type UploadFilePayload = Components.Schemas.UploadFilePayload;
+export type V3ResourceProgressEntry = Components.Schemas.V3ResourceProgressEntry;
 export type VerificationSummary = Components.Schemas.VerificationSummary;
 export type VirtualResourceNodeGroup = Components.Schemas.VirtualResourceNodeGroup;

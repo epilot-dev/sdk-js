@@ -2,7 +2,7 @@
   "openapi": "3.0.2",
   "info": {
     "title": "Blueprint Manifest API",
-    "version": "4.6.4",
+    "version": "4.7.0",
     "description": "Service to create and install Blueprint Manifest files"
   },
   "tags": [
@@ -37,6 +37,10 @@
     {
       "name": "Marketplace Listing Versions",
       "description": "Manage versions for marketplace listings"
+    },
+    {
+      "name": "Patches",
+      "description": "Manage blueprint patches for mass rollouts"
     }
   ],
   "security": [
@@ -924,6 +928,14 @@
                   "destination_blueprint_id": {
                     "$ref": "#/components/schemas/BlueprintID"
                   },
+                  "source_auth_token": {
+                    "type": "string",
+                    "description": "Auth token with access to the source org. Required for cross-org auto-verification when the caller's bearer token belongs to the destination org."
+                  },
+                  "destination_auth_token": {
+                    "type": "string",
+                    "description": "Auth token with access to the destination org. Defaults to the caller's bearer token."
+                  },
                   "options": {
                     "$ref": "#/components/schemas/BlueprintInstallationJobOptions"
                   },
@@ -1224,6 +1236,365 @@
         }
       }
     },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}/patches:detect": {
+      "post": {
+        "operationId": "detectPatchChanges",
+        "summary": "detectPatchChanges",
+        "description": "Detect changes between the current state of a blueprint's resources and its tfstate baseline.\nReturns field-level diffs for resources that have been modified since the blueprint was last installed/exported.\n",
+        "tags": [
+          "Patches"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id",
+            "schema": {
+              "$ref": "#/components/schemas/BlueprintID"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "source_org_id": {
+                    "type": "string",
+                    "description": "Organization ID of the source org where changes were made"
+                  },
+                  "dest_org_id": {
+                    "type": "string",
+                    "description": "Organization ID of a destination org (used to load tfstate baseline)"
+                  },
+                  "dest_blueprint_id": {
+                    "type": "string",
+                    "description": "Blueprint ID in the destination org (used to locate tfstate in S3)"
+                  },
+                  "rollout_id": {
+                    "type": "string",
+                    "description": "ID of the mass rollout"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Detected changes",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DetectChangesResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}/patches": {
+      "post": {
+        "operationId": "createPatch",
+        "summary": "createPatch",
+        "description": "Create a new patch for a blueprint.",
+        "tags": [
+          "Patches"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id",
+            "schema": {
+              "$ref": "#/components/schemas/BlueprintID"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "blueprint_id",
+                  "rollout_id",
+                  "source_org_id",
+                  "name",
+                  "resources"
+                ],
+                "properties": {
+                  "blueprint_id": {
+                    "$ref": "#/components/schemas/BlueprintID"
+                  },
+                  "rollout_id": {
+                    "type": "string"
+                  },
+                  "source_org_id": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "resources": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/PatchResourceDiff"
+                    }
+                  },
+                  "changelog": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Patch created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintPatch"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "operationId": "listPatches",
+        "summary": "listPatches",
+        "description": "List all patches for a blueprint.",
+        "tags": [
+          "Patches"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id",
+            "schema": {
+              "$ref": "#/components/schemas/BlueprintID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of patches",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "total": {
+                      "type": "integer"
+                    },
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/BlueprintPatch"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}/patches/{patch_id}": {
+      "get": {
+        "operationId": "getPatch",
+        "summary": "getPatch",
+        "description": "Get a patch by ID, including per-org execution results.",
+        "tags": [
+          "Patches"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id",
+            "schema": {
+              "$ref": "#/components/schemas/BlueprintID"
+            }
+          },
+          {
+            "in": "path",
+            "required": true,
+            "name": "patch_id",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Patch details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintPatchWithResults"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Patch not found"
+          }
+        }
+      }
+    },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}/patches/{patch_id}:apply": {
+      "post": {
+        "operationId": "applyPatch",
+        "summary": "applyPatch",
+        "description": "Apply a patch to a single destination org.",
+        "tags": [
+          "Patches"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id",
+            "schema": {
+              "$ref": "#/components/schemas/BlueprintID"
+            }
+          },
+          {
+            "in": "path",
+            "required": true,
+            "name": "patch_id",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "org_id",
+                  "org_name",
+                  "dest_blueprint_id"
+                ],
+                "properties": {
+                  "org_id": {
+                    "type": "string"
+                  },
+                  "org_name": {
+                    "type": "string"
+                  },
+                  "dest_blueprint_id": {
+                    "type": "string"
+                  },
+                  "dest_org_id": {
+                    "type": "string"
+                  },
+                  "destination_auth_token": {
+                    "type": "string",
+                    "description": "Auth token with access to the destination org (e.g. pipeline token)"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Patch execution result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrgPatchExecution"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}/patches/{patch_id}/orgs/{org_id}:retry": {
+      "post": {
+        "operationId": "retryPatchOrg",
+        "summary": "retryPatchOrg",
+        "description": "Retry a failed patch execution for a specific org.",
+        "tags": [
+          "Patches"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id",
+            "schema": {
+              "$ref": "#/components/schemas/BlueprintID"
+            }
+          },
+          {
+            "in": "path",
+            "required": true,
+            "name": "patch_id",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "required": true,
+            "name": "org_id",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "org_name": {
+                    "type": "string"
+                  },
+                  "dest_blueprint_id": {
+                    "type": "string"
+                  },
+                  "destination_auth_token": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Retry execution result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrgPatchExecution"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v2/blueprint-manifest/blueprints/{blueprint_id}:export": {
       "post": {
         "operationId": "exportBlueprint",
@@ -1461,6 +1832,38 @@
                       "description": "AI-formatted markdown content"
                     }
                   }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/blueprint-manifest/blueprints:suggest-resources": {
+      "post": {
+        "operationId": "suggestBlueprintResources",
+        "summary": "suggestBlueprintResources",
+        "description": "Suggest resources to add to a blueprint based on a natural-language prompt.\n\nWalks anchor resource types in priority order (journey > workflow_definition >\nautomation_flow > schema > entity-backed types) and returns matches per\nanchor using each upstream API's text search. Suggestions are marked\n`is_root: true` so callers can pass `add_dependencies=true` to\nbulkAddBlueprintResources and have transitive dependencies resolved\nserver-side — which means a single matched journey can stand in for its\nfull product/schema/template bundle.\n\nNo side effects on the blueprint — the caller persists the chosen resources\nvia the existing create/bulk-add endpoints.\n",
+        "tags": [
+          "Blueprints"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SuggestBlueprintResourcesRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Suggested resources",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuggestBlueprintResourcesResponse"
                 }
               }
             }
@@ -2468,6 +2871,21 @@
             "application/json": {
               "schema": {
                 "type": "object",
+                "oneOf": [
+                  {
+                    "required": [
+                      "source_org_id",
+                      "source_blueprint_id",
+                      "destination_org_id"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "source_blueprint_file",
+                      "destination_org_id"
+                    ]
+                  }
+                ],
                 "properties": {
                   "source_org_id": {
                     "type": "string"
@@ -2522,6 +2940,21 @@
                     },
                     "destination_blueprint_id": {
                       "$ref": "#/components/schemas/BlueprintID"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing required source or destination fields",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
                     }
                   }
                 }
@@ -2610,6 +3043,177 @@
           }
         }
       },
+      "PatchFieldDiff": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "op": {
+            "type": "string",
+            "enum": [
+              "changed",
+              "added",
+              "removed"
+            ]
+          },
+          "baseline_value": {},
+          "current_value": {}
+        }
+      },
+      "PatchResourceDiff": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "source_id": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "changes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PatchFieldDiff"
+            }
+          }
+        }
+      },
+      "DetectChangesResult": {
+        "type": "object",
+        "properties": {
+          "resources": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PatchResourceDiff"
+            }
+          }
+        }
+      },
+      "BlueprintPatch": {
+        "type": "object",
+        "properties": {
+          "patch_id": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer"
+          },
+          "blueprint_id": {
+            "$ref": "#/components/schemas/BlueprintID"
+          },
+          "rollout_id": {
+            "type": "string"
+          },
+          "source_org_id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "ready",
+              "applying",
+              "applied",
+              "partial"
+            ]
+          },
+          "resources": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PatchResourceDiff"
+            }
+          },
+          "changelog": {
+            "type": "string"
+          },
+          "created_by": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "applied_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "OrgPatchExecution": {
+        "type": "object",
+        "properties": {
+          "patch_id": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer"
+          },
+          "org_id": {
+            "type": "string"
+          },
+          "org_name": {
+            "type": "string"
+          },
+          "dest_blueprint_id": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "in_progress",
+              "success",
+              "failed"
+            ]
+          },
+          "error": {
+            "type": "string"
+          },
+          "applied_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "retries": {
+            "type": "integer"
+          },
+          "changes_applied": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PatchFieldDiff"
+            }
+          }
+        }
+      },
+      "BlueprintPatchWithResults": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BlueprintPatch"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "org_results": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/OrgPatchExecution"
+                }
+              }
+            }
+          }
+        ]
+      },
       "BlueprintID": {
         "type": "string",
         "description": "ID of a blueprint",
@@ -2667,6 +3271,10 @@
                 "destination_blueprint_id": {
                   "type": "string"
                 },
+                "job_id": {
+                  "type": "string",
+                  "description": "Blueprint installation job that created or updated this deployment record"
+                },
                 "triggered_at": {
                   "type": "string",
                   "format": "date-time"
@@ -2674,6 +3282,16 @@
                 "note": {
                   "type": "string",
                   "description": "User-provided note about this synchronization"
+                },
+                "status": {
+                  "type": "string",
+                  "description": "Outcome of this deployment",
+                  "enum": [
+                    "IN_PROGRESS",
+                    "SUCCESS",
+                    "PARTIAL_SUCCESS",
+                    "FAILED"
+                  ]
                 }
               }
             }
@@ -2774,6 +3392,55 @@
         "required": [
           "title"
         ]
+      },
+      "SuggestBlueprintResourcesRequest": {
+        "type": "object",
+        "required": [
+          "prompt"
+        ],
+        "properties": {
+          "prompt": {
+            "type": "string",
+            "description": "Natural-language description of what to include.",
+            "example": "everything for the hausanschluss use case"
+          },
+          "blueprint_id": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/BlueprintID"
+              }
+            ],
+            "description": "When provided, suggestions are scoped as additions to this existing\nblueprint — resources already in it are excluded from the response.\n"
+          }
+        }
+      },
+      "SuggestBlueprintResourcesResponse": {
+        "type": "object",
+        "required": [
+          "resources"
+        ],
+        "properties": {
+          "resources": {
+            "type": "array",
+            "description": "Suggested resources to add. All marked is_root so the caller can request transitive dependency resolution.",
+            "items": {
+              "$ref": "#/components/schemas/BlueprintResource"
+            }
+          },
+          "suggested_blueprint_name": {
+            "type": "string",
+            "description": "Short title derived from the prompt. Useful when the caller is\ncreating a new blueprint as a result of the suggestion — saves the\nuser from naming it themselves.\n",
+            "example": "Hausanschluss"
+          },
+          "explanation": {
+            "type": "string",
+            "description": "Short human-readable summary of what was matched and why."
+          },
+          "add_dependencies_recommended": {
+            "type": "boolean",
+            "description": "Hint to the caller: persist via bulkAddBlueprintResources with\n?add_dependencies=true so anchor resources (journeys, workflows)\npull their transitive dependencies.\n"
+          }
+        }
       },
       "BlueprintResource": {
         "type": "object",
@@ -3273,6 +3940,21 @@
                 "type": "string",
                 "description": "Blueprint slug for marketplace blueprints"
               },
+              "sync_engine": {
+                "type": "string",
+                "enum": [
+                  "terraform",
+                  "v3"
+                ],
+                "description": "Engine used for this install job"
+              },
+              "resource_progress": {
+                "type": "array",
+                "description": "Per-resource live status. Populated only for V3 installs.",
+                "items": {
+                  "$ref": "#/components/schemas/V3ResourceProgressEntry"
+                }
+              },
               "status": {
                 "type": "string",
                 "enum": [
@@ -3287,6 +3969,45 @@
             }
           }
         ]
+      },
+      "V3ResourceProgressEntry": {
+        "type": "object",
+        "required": [
+          "lineage_id",
+          "type",
+          "address",
+          "status"
+        ],
+        "properties": {
+          "lineage_id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "in_progress",
+              "done",
+              "failed",
+              "skipped"
+            ]
+          },
+          "target_id": {
+            "type": "string"
+          },
+          "error_message": {
+            "type": "string"
+          }
+        }
       },
       "BlueprintJob": {
         "oneOf": [
@@ -3689,7 +4410,10 @@
           "flow_template",
           "taxonomy",
           "notification_template",
-          "environment_variable"
+          "environment_variable",
+          "datasource",
+          "family",
+          "permission"
         ]
       },
       "PlanChanges": {

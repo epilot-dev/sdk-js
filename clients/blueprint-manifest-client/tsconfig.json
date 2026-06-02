@@ -16,7 +16,8 @@
     "rootDir": "src",
     "outDir": "dist",
     "sourceMap": true,
-    "declaration": true
+    "declaration": true,
+    "types": ["node"]
   },
   "include": ["src/**/*"],
   "exclude": ["**/*.test.ts"]
