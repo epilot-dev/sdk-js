@@ -63,7 +63,7 @@ jobs:
           else
             echo "sdk=false" >> "$GITHUB_OUTPUT"
           fi
-          if echo "$CHANGED_FILES" | grep -qE '^(packages/cli/|clients/.*/openapi\.json$)'; then
+          if echo "$CHANGED_FILES" | grep -qE '^(packages/cli/|packages/cli-wrapper/|clients/.*/openapi\.json$)'; then
             echo "cli=true" >> "$GITHUB_OUTPUT"
           else
             echo "cli=false" >> "$GITHUB_OUTPUT"
@@ -173,17 +173,17 @@ jobs:
 
       - name: Publish @epilot/sdk
         if: steps.check.outputs.sdk == 'true'
-        run: npm publish --ignore-scripts
+        run: pnpm publish --ignore-scripts --no-git-checks
         working-directory: packages/epilot-sdk-v2
 
       - name: Publish @epilot/cli
         if: steps.check.outputs.cli == 'true'
-        run: npm publish --ignore-scripts
+        run: pnpm publish --ignore-scripts --no-git-checks
         working-directory: packages/cli
 
       - name: Publish epilot wrapper
         if: steps.check.outputs.cli == 'true'
-        run: npm publish --ignore-scripts
+        run: pnpm publish --ignore-scripts --no-git-checks
         working-directory: packages/cli-wrapper
 
   publish-sdk:
@@ -207,7 +207,7 @@ jobs:
       - run: pnpm build
 
       - name: Publish @epilot/sdk
-        run: npm publish --ignore-scripts
+        run: pnpm publish --ignore-scripts --no-git-checks
         working-directory: packages/epilot-sdk-v2
 
   publish-cli:
@@ -231,9 +231,9 @@ jobs:
       - run: pnpm --filter @epilot/cli build
 
       - name: Publish @epilot/cli
-        run: npm publish --ignore-scripts || true
+        run: pnpm publish --ignore-scripts --no-git-checks || true
         working-directory: packages/cli
 
       - name: Publish epilot wrapper
-        run: npm publish --ignore-scripts
+        run: pnpm publish --ignore-scripts --no-git-checks
         working-directory: packages/cli-wrapper
