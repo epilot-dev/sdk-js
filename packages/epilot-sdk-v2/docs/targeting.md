@@ -281,6 +281,17 @@ const { data } = await client.setupCampaign(
       name: 'string',
       goal: 'string',
       target_ids: ['b8c01433-5556-4e2b-aad4-6f5348d1df84']
+    },
+    journey: {
+      journey_id: 'b8c01433-5556-4e2b-aad4-6f5348d1df84',
+      design_id: 'b8c01433-5556-4e2b-aad4-6f5348d1df84'
+    },
+    channels: {
+      portal_widget: {
+        portal_id: 'b8c01433-5556-4e2b-aad4-6f5348d1df84',
+        block_id: 'b8c01433-5556-4e2b-aad4-6f5348d1df84',
+        design_id: 'b8c01433-5556-4e2b-aad4-6f5348d1df84'
+      }
     }
   },
 )
@@ -293,7 +304,9 @@ const { data } = await client.setupCampaign(
 {
   "type": "tariff_change",
   "product_recommendation_id": "b8c01433-5556-4e2b-aad4-6f5348d1df84",
-  "campaign_id": "b8c01433-5556-4e2b-aad4-6f5348d1df84"
+  "campaign_id": "b8c01433-5556-4e2b-aad4-6f5348d1df84",
+  "journey_id": "b8c01433-5556-4e2b-aad4-6f5348d1df84",
+  "portal_widget_id": "b8c01433-5556-4e2b-aad4-6f5348d1df84"
 }
 ```
 
@@ -1037,6 +1050,17 @@ type SetupCampaignRequest = {
     goal?: string
     target_ids: string // uuid[]
   }
+  journey?: {
+    journey_id: string // uuid
+    design_id?: string // uuid
+  }
+  channels?: {
+    portal_widget?: {
+      portal_id: { ... }
+      block_id: { ... }
+      design_id?: { ... }
+    }
+  }
 }
 ```
 
@@ -1059,6 +1083,17 @@ type SetupTariffChangeCampaignRequest = {
     goal?: string
     target_ids: string // uuid[]
   }
+  journey?: {
+    journey_id: string // uuid
+    design_id?: string // uuid
+  }
+  channels?: {
+    portal_widget?: {
+      portal_id: { ... }
+      block_id: { ... }
+      design_id?: { ... }
+    }
+  }
 }
 ```
 
@@ -1069,5 +1104,7 @@ type SetupTariffChangeCampaignResponse = {
   type: "tariff_change"
   product_recommendation_id: string // uuid
   campaign_id: string // uuid
+  journey_id?: string // uuid
+  portal_widget_id?: string // uuid
 }
 ```

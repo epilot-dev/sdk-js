@@ -1548,6 +1548,52 @@ export declare namespace Components {
                  */
                 BaseUUID /* uuid */[];
             };
+            /**
+             * Optional journey configuration selected in the wizard. Only sent by the
+             * consumer once a journey has been chosen.
+             *
+             */
+            journey?: {
+                journey_id: /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */;
+                design_id?: /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */;
+            };
+            /**
+             * Optional delivery channel configuration. The email channel is intentionally
+             * excluded for now and is not part of this contract yet.
+             *
+             */
+            channels?: {
+                /**
+                 * Portal widget placement for the product recommendation block. Only sent by
+                 * the consumer once both a portal and a block have been selected.
+                 *
+                 */
+                portal_widget?: {
+                    portal_id: /**
+                     * example:
+                     * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                     */
+                    BaseUUID /* uuid */;
+                    block_id: /**
+                     * example:
+                     * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                     */
+                    BaseUUID /* uuid */;
+                    design_id?: /**
+                     * example:
+                     * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                     */
+                    BaseUUID /* uuid */;
+                };
+            };
         }
         export interface SetupTariffChangeCampaignResponse {
             type: "tariff_change";
@@ -1557,6 +1603,16 @@ export declare namespace Components {
              */
             BaseUUID /* uuid */;
             campaign_id: /**
+             * example:
+             * b8c01433-5556-4e2b-aad4-6f5348d1df84
+             */
+            BaseUUID /* uuid */;
+            journey_id?: /**
+             * example:
+             * b8c01433-5556-4e2b-aad4-6f5348d1df84
+             */
+            BaseUUID /* uuid */;
+            portal_widget_id?: /**
              * example:
              * b8c01433-5556-4e2b-aad4-6f5348d1df84
              */
