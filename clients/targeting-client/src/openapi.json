@@ -1324,6 +1324,49 @@
               "target_ids"
             ],
             "additionalProperties": false
+          },
+          "journey": {
+            "type": "object",
+            "description": "Optional journey configuration selected in the wizard. Only sent by the\nconsumer once a journey has been chosen.\n",
+            "properties": {
+              "journey_id": {
+                "$ref": "#/components/schemas/BaseUUID"
+              },
+              "design_id": {
+                "$ref": "#/components/schemas/BaseUUID"
+              }
+            },
+            "required": [
+              "journey_id"
+            ],
+            "additionalProperties": false
+          },
+          "channels": {
+            "type": "object",
+            "description": "Optional delivery channel configuration. The email channel is intentionally\nexcluded for now and is not part of this contract yet.\n",
+            "properties": {
+              "portal_widget": {
+                "type": "object",
+                "description": "Portal widget placement for the product recommendation block. Only sent by\nthe consumer once both a portal and a block have been selected.\n",
+                "properties": {
+                  "portal_id": {
+                    "$ref": "#/components/schemas/BaseUUID"
+                  },
+                  "block_id": {
+                    "$ref": "#/components/schemas/BaseUUID"
+                  },
+                  "design_id": {
+                    "$ref": "#/components/schemas/BaseUUID"
+                  }
+                },
+                "required": [
+                  "portal_id",
+                  "block_id"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "additionalProperties": false
           }
         },
         "required": [
@@ -1346,6 +1389,12 @@
             "$ref": "#/components/schemas/BaseUUID"
           },
           "campaign_id": {
+            "$ref": "#/components/schemas/BaseUUID"
+          },
+          "journey_id": {
+            "$ref": "#/components/schemas/BaseUUID"
+          },
+          "portal_widget_id": {
             "$ref": "#/components/schemas/BaseUUID"
           }
         },
