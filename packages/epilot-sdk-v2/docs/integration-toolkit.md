@@ -2276,7 +2276,8 @@ const { data } = await client.getMonitoringStatsV2(
     from_date: '2025-01-01T00:00:00Z',
     to_date: '2025-01-31T23:59:59Z',
     use_case_type: 'inbound',
-    group_by: 'use_case_id'
+    group_by: 'use_case_id',
+    source: 'monitoring'
   },
 )
 ```
@@ -6300,6 +6301,7 @@ type GetMonitoringStatsV2Request = {
   to_date?: string // date-time
   use_case_type?: "inbound" | "outbound" | "file_proxy" | "managed_call" | "secure_proxy"
   group_by?: "use_case_id" | "use_case_type" | "level" | "code" | "date"
+  source?: "monitoring" | "incoming"
 }
 ```
 

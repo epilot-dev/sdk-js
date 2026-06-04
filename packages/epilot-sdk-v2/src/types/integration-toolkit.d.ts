@@ -1387,6 +1387,11 @@ export declare namespace Components {
              * Field to group the breakdown by
              */
             group_by?: "use_case_id" | "use_case_type" | "level" | "code" | "date";
+            /**
+             * Data source for the stats. "monitoring" (default) aggregates processed events from erp_monitoring_v2 — this counts every event produced throughout the processing tree (fan-out children, post-actions, relation resolutions, etc.). "incoming" counts only the initial inbound events actually received (distinct event_id from erp_incoming_events); only group_by=use_case_id is supported and status/level breakdown is not available for this source (success/error/warning/skipped counts are returned as 0).
+             *
+             */
+            source?: "monitoring" | "incoming";
         }
         export interface GetMonitoringTimeSeriesRequest {
             /**
