@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Integration Toolkit API",
-    "version": "1.0.11",
+    "version": "1.0.12",
     "description": "API for integrating with external systems in a standardised way."
   },
   "tags": [
@@ -3144,6 +3144,12 @@
             "maxLength": 255,
             "description": "Optional unique identifier for idempotency - prevents duplicate processing of the same event within 24 hours in context of the same integration. Must contain only alphanumeric characters, hyphens, and underscores.\n",
             "example": "evt-2025-05-01-12345-create-bp"
+          },
+          "use_case_id": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true,
+            "description": "Resolved use case ID for the inbound event. Null when no use case matched or for events ingested before this field was introduced. Server-populated only — ignored if supplied on inbound requests.\n"
           }
         }
       },
@@ -6869,6 +6875,11 @@
           "event_name": {
             "type": "string",
             "description": "Filter by event name (alias for object_type)"
+          },
+          "use_case_id": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Filter by use case ID"
           },
           "limit": {
             "type": "integer",
