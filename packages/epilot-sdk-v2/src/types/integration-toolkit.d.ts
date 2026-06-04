@@ -798,6 +798,11 @@ export declare namespace Components {
              * evt-2025-05-01-12345-create-bp
              */
             deduplication_id?: string; // ^[a-zA-Z0-9_-]+$
+            /**
+             * Resolved use case ID for the inbound event. Null when no use case matched or for events ingested before this field was introduced. Server-populated only — ignored if supplied on inbound requests.
+             *
+             */
+            use_case_id?: string | null;
         }
         export type ErpEventV3 = {
             /**
@@ -2930,6 +2935,10 @@ export declare namespace Components {
              * Filter by event name (alias for object_type)
              */
             event_name?: string;
+            /**
+             * Filter by use case ID
+             */
+            use_case_id?: string;
             /**
              * Maximum number of results to return
              * example:

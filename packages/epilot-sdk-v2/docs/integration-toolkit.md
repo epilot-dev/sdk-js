@@ -874,6 +874,7 @@ const { data } = await client.queryEvents(
     correlation_id: 'string',
     object_type: 'string',
     event_name: 'string',
+    use_case_id: 'string',
     limit: 25,
     cursor: {
       event_time: '2025-10-31T12:34:56Z',
@@ -895,7 +896,8 @@ const { data } = await client.queryEvents(
       "timestamp": "1970-01-01T00:00:00.000Z",
       "format": "json",
       "payload": "string",
-      "deduplication_id": "evt-2025-05-01-12345-create-bp"
+      "deduplication_id": "evt-2025-05-01-12345-create-bp",
+      "use_case_id": "string"
     }
   ],
   "next_cursor": {
@@ -2612,6 +2614,7 @@ type ErpEvent = {
   format: "json" | "xml"
   payload: string | Record<string, unknown>
   deduplication_id?: string
+  use_case_id?: string
 }
 ```
 
@@ -2628,6 +2631,7 @@ type ErpUpdatesEventsV2Request = {
     format: "json" | "xml"
     payload: string | Record<string, unknown>
     deduplication_id?: string
+    use_case_id?: string
   }>
 }
 ```
@@ -6049,6 +6053,7 @@ type QueryEventsRequest = {
   correlation_id?: string
   object_type?: string
   event_name?: string
+  use_case_id?: string
   limit?: number
   cursor?: {
     event_time?: string // date-time
