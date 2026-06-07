@@ -49,6 +49,11 @@
             "name": "event_name",
             "in": "path",
             "required": true
+          },
+          {
+            "name": "Epilot-Event-Version",
+            "in": "header",
+            "required": false
           }
         ],
         "responses": {}
@@ -57,6 +62,24 @@
     "/v1/events/{event_name}/example": {
       "get": {
         "operationId": "getEventExample",
+        "parameters": [
+          {
+            "name": "event_name",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "Epilot-Event-Version",
+            "in": "header",
+            "required": false
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/events/{event_name}/versions": {
+      "get": {
+        "operationId": "listEventVersions",
         "parameters": [
           {
             "name": "event_name",
