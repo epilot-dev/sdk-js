@@ -475,7 +475,8 @@ const { data } = await client.getEventById({
   },
   "status": "succeeded",
   "http_method": "GET",
-  "payload": "string"
+  "payload": "string",
+  "retry_attempt": 0
 }
 ```
 
@@ -605,7 +606,8 @@ const { data } = await client.getWebhookEventsV2(
       },
       "status": "succeeded",
       "http_method": "GET",
-      "payload": "string"
+      "payload": "string",
+      "retry_attempt": 0
     }
   ],
   "next_cursor": {
@@ -683,6 +685,7 @@ type EventListResponse = {
     status?: "succeeded" | "failed" | "in_progress" | "skipped"
     http_method?: "GET" | "POST" | "PUT"
     payload?: string
+    retry_attempt?: number
   }>
   next_cursor?: {
     created_at?: string // date-time
@@ -826,6 +829,7 @@ type WebhookConfig = {
   id?: string
   name: string
   eventName: string
+  eventVersion?: string
   url?: string
   creationTime?: string
   updatedTime?: string
@@ -878,6 +882,10 @@ type WebhookConfig = {
     fileFieldStrategy?: "single" | "multi"
     fileSource?: string
     extraFields?: Record<string, string>
+  }
+  retryPolicy?: {
+    enabled: boolean
+    maxAttempts?: number
   }
   filterConditions?: {
     conditions?: Array<{
@@ -1045,6 +1053,7 @@ type WebhookEvent = {
   status?: "succeeded" | "failed" | "in_progress" | "skipped"
   http_method?: "GET" | "POST" | "PUT"
   payload?: string
+  retry_attempt?: number
 }
 ```
 
