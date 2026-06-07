@@ -135,7 +135,7 @@ declare namespace Components {
          *   "_event_time": "2024-01-01T12:00:00Z",
          *   "_event_id": "01FZ4Z5FZ5FZ5FZ5FZ5FZ5FZ5F",
          *   "_event_name": "MeterReading",
-         *   "_event_version": "1.0.0",
+         *   "_event_version": "1.0",
          *   "_event_source": "api",
          *   "_trigger_source_type": "api",
          *   "_trigger_source": "user_123456",
@@ -173,9 +173,9 @@ declare namespace Components {
              */
             _event_name: string;
             /**
-             * Event version (semver)
+             * Event payload version (MAJOR.MINOR)
              * example:
-             * 1.0.0
+             * 1.0
              */
             _event_version: string;
             /**
@@ -271,9 +271,9 @@ declare namespace Components {
              */
             event_description?: string;
             /**
-             * Event version (semver)
+             * Event payload version (MAJOR.MINOR)
              * example:
-             * 1.0.0
+             * 1.0
              */
             event_version: string;
             /**
@@ -421,9 +421,9 @@ declare namespace Components {
              */
             event_description?: string;
             /**
-             * Event version (semver)
+             * Event payload version (MAJOR.MINOR)
              * example:
-             * 1.0.0
+             * 1.0
              */
             event_version?: string;
             /**
@@ -573,7 +573,7 @@ declare namespace Components {
          *     },
          *     "_event_version": {
          *       "type": "string",
-         *       "description": "Event version (semver)"
+         *       "description": "Event payload version (MAJOR.MINOR)"
          *     },
          *     "_event_source": {
          *       "type": "string",
@@ -693,9 +693,11 @@ declare namespace Components {
          * A lightweight event summary returned by the v2 history endpoint.
          *
          * Includes the standard `_*` metadata fields plus a projected subset of the
-         * event payload. Hydrated entity objects (values carrying `_schema` or `_id`
-         * and arrays of such objects) are stripped — fetch via
-         * `GET /v2/events/{event_name}/history/{event_id}` for full hydration.
+         * event payload. Hydrated entity objects (values carrying `_schema` or `_id`)
+         * — and arrays of such objects — are reduced to reference stubs
+         * `{_schema, _id, _title}` so consumers can identify and follow up on each
+         * entity without paying the cost of the full hydrated graph. Fetch
+         * `GET /v2/events/{event_name}/history/{event_id}` for the full hydration.
          *
          * Projected scalar payload fields appear as additional top-level properties.
          *
@@ -719,9 +721,9 @@ declare namespace Components {
              */
             _event_name: string;
             /**
-             * Event version (semver)
+             * Event payload version (MAJOR.MINOR)
              * example:
-             * 1.0.0
+             * 1.0
              */
             _event_version: string;
             /**
@@ -746,6 +748,56 @@ declare namespace Components {
              *
              */
             _ack_id?: string;
+        }
+        /**
+         * Summary of an event's version timeline returned by
+         * `GET /v1/events/{event_name}/versions`.
+         *
+         */
+        export interface EventVersionRegistrySummary {
+            /**
+             * example:
+             * MeterReadingAdded
+             */
+            event_name: string;
+            /**
+             * The newest registered version.
+             * example:
+             * 1.0
+             */
+            latest: string;
+            /**
+             * Full version timeline, ordered oldest → newest.
+             */
+            versions: /* One entry of an event's version timeline. */ VersionMeta[];
+        }
+        /**
+         * A field-level change descriptor. Powers the declarative half of the
+         * version DSL.
+         *
+         */
+        export interface FieldChange {
+            /**
+             * Name of the field affected by this change.
+             * example:
+             * reading
+             */
+            field: string;
+            /**
+             * Kind of change. Renames are NOT a first-class op — represent them
+             * as a `removed` + `added` pair (semantic intent goes into
+             * `change_summary` / `change_notes`).
+             *
+             */
+            op: "added" | "removed" | "type-changed";
+            /**
+             * Type label for the previous shape (for `removed` and `type-changed`).
+             */
+            type_old?: string;
+            /**
+             * Type label for the new shape (for `added` and `type-changed`).
+             */
+            type_new?: string;
         }
         /**
          * List of entity fields to include or exclude in the response
@@ -1096,9 +1148,9 @@ declare namespace Components {
              */
             event_description?: string;
             /**
-             * Event version (semver)
+             * Event payload version (MAJOR.MINOR)
              * example:
-             * 1.0.0
+             * 1.0
              */
             event_version?: string;
             /**
@@ -1223,6 +1275,40 @@ declare namespace Components {
              */
             automation_trigger?: boolean;
         }
+        /**
+         * One entry of an event's version timeline.
+         */
+        export interface VersionMeta {
+            /**
+             * MAJOR.MINOR version label.
+             * example:
+             * 1.0
+             */
+            version: string;
+            /**
+             * ISO 8601 release timestamp.
+             * example:
+             * 2025-11-15
+             */
+            released_at: string;
+            /**
+             * Required one-liner describing what changed in this version (≤280 chars).
+             */
+            change_summary: string;
+            /**
+             * Optional longer-form prose (markdown).
+             */
+            change_notes?: string;
+            /**
+             * Hand-authored list of field-level changes from the previous version. Empty for v1.
+             */
+            changes: /**
+             * A field-level change descriptor. Powers the declarative half of the
+             * version DSL.
+             *
+             */
+            FieldChange[];
+        }
     }
 }
 declare namespace Paths {
@@ -1238,7 +1324,11 @@ declare namespace Paths {
         }
     }
     namespace GetEventExample {
+        export interface HeaderParameters {
+            "Epilot-Event-Version"?: Parameters.EpilotEventVersion;
+        }
         namespace Parameters {
+            export type EpilotEventVersion = string;
             export type EventName = string;
         }
         export interface PathParameters {
@@ -1250,10 +1340,16 @@ declare namespace Paths {
              */
             export interface $200 {
             }
+            export interface $404 {
+            }
         }
     }
     namespace GetEventJSONSchema {
+        export interface HeaderParameters {
+            "Epilot-Event-Version"?: Parameters.EpilotEventVersion;
+        }
         namespace Parameters {
+            export type EpilotEventVersion = string;
             export type EventName = string;
         }
         export interface PathParameters {
@@ -1285,7 +1381,7 @@ declare namespace Paths {
              *     },
              *     "_event_version": {
              *       "type": "string",
-             *       "description": "Event version (semver)"
+             *       "description": "Event payload version (MAJOR.MINOR)"
              *     },
              *     "_event_source": {
              *       "type": "string",
@@ -1400,6 +1496,8 @@ declare namespace Paths {
              * }
              */
             Components.Schemas.EventJsonSchema;
+            export interface $404 {
+            }
         }
     }
     namespace GetHistoricalEvent {
@@ -1420,7 +1518,7 @@ declare namespace Paths {
              *   "_event_time": "2024-01-01T12:00:00Z",
              *   "_event_id": "01FZ4Z5FZ5FZ5FZ5FZ5FZ5FZ5F",
              *   "_event_name": "MeterReading",
-             *   "_event_version": "1.0.0",
+             *   "_event_version": "1.0",
              *   "_event_source": "api",
              *   "_trigger_source_type": "api",
              *   "_trigger_source": "user_123456",
@@ -1440,6 +1538,24 @@ declare namespace Paths {
              * }
              */
             Components.Schemas.Event;
+            export interface $404 {
+            }
+        }
+    }
+    namespace ListEventVersions {
+        namespace Parameters {
+            export type EventName = string;
+        }
+        export interface PathParameters {
+            event_name: Parameters.EventName;
+        }
+        namespace Responses {
+            export type $200 = /**
+             * Summary of an event's version timeline returned by
+             * `GET /v1/events/{event_name}/versions`.
+             *
+             */
+            Components.Schemas.EventVersionRegistrySummary;
             export interface $404 {
             }
         }
@@ -1489,7 +1605,7 @@ declare namespace Paths {
                  *   "_event_time": "2024-01-01T12:00:00Z",
                  *   "_event_id": "01FZ4Z5FZ5FZ5FZ5FZ5FZ5FZ5F",
                  *   "_event_name": "MeterReading",
-                 *   "_event_version": "1.0.0",
+                 *   "_event_version": "1.0",
                  *   "_event_source": "api",
                  *   "_trigger_source_type": "api",
                  *   "_trigger_source": "user_123456",
@@ -1554,9 +1670,11 @@ declare namespace Paths {
                  * A lightweight event summary returned by the v2 history endpoint.
                  *
                  * Includes the standard `_*` metadata fields plus a projected subset of the
-                 * event payload. Hydrated entity objects (values carrying `_schema` or `_id`
-                 * and arrays of such objects) are stripped — fetch via
-                 * `GET /v2/events/{event_name}/history/{event_id}` for full hydration.
+                 * event payload. Hydrated entity objects (values carrying `_schema` or `_id`)
+                 * — and arrays of such objects — are reduced to reference stubs
+                 * `{_schema, _id, _title}` so consumers can identify and follow up on each
+                 * entity without paying the cost of the full hydrated graph. Fetch
+                 * `GET /v2/events/{event_name}/history/{event_id}` for the full hydration.
                  *
                  * Projected scalar payload fields appear as additional top-level properties.
                  *
@@ -1637,23 +1755,42 @@ export interface OperationMethods {
   /**
    * getEventJSONSchema - getEventJSONSchema
    * 
-   * Retrieve the JSON Schema of a specific business event
+   * Retrieve the JSON Schema of a specific business event. Pass an optional
+   * `Epilot-Event-Version` header to retrieve a specific version's schema;
+   * when omitted, the event's latest version is returned.
+   * 
    */
   'getEventJSONSchema'(
-    parameters?: Parameters<Paths.GetEventJSONSchema.PathParameters> | null,
+    parameters?: Parameters<Paths.GetEventJSONSchema.HeaderParameters & Paths.GetEventJSONSchema.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetEventJSONSchema.Responses.$200>
   /**
    * getEventExample - getEventExample
    * 
-   * Generate a sample event payload based on the event's JSON Schema
+   * Generate a sample event payload based on the event's JSON Schema. Pass an
+   * optional `Epilot-Event-Version` header to generate the example for a
+   * specific version; when omitted, the event's latest version is used.
+   * 
    */
   'getEventExample'(
-    parameters?: Parameters<Paths.GetEventExample.PathParameters> | null,
+    parameters?: Parameters<Paths.GetEventExample.HeaderParameters & Paths.GetEventExample.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetEventExample.Responses.$200>
+  /**
+   * listEventVersions - listEventVersions
+   * 
+   * List every known version of an event, along with the `latest`
+   * and the set of currently `active` versions. See §3.2 of the
+   * Event Payload Versioning RFC.
+   * 
+   */
+  'listEventVersions'(
+    parameters?: Parameters<Paths.ListEventVersions.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ListEventVersions.Responses.$200>
   /**
    * searchEventHistory - searchEventHistory
    * 
@@ -1670,9 +1807,10 @@ export interface OperationMethods {
    * Paginated history of events with projected/lightweight payload (v2).
    * 
    * Returns `EventSummary` objects instead of fully hydrated `Event` objects:
-   * nested entity graphs (objects/arrays-of-objects carrying `_schema`/`_id`)
-   * are stripped. Use GET /v2/events/{event_name}/history/{event_id} to fetch
-   * the full hydrated event for a single result.
+   * hydrated entity objects (values carrying `_schema`/`_id`) are reduced to
+   * reference stubs `{_schema, _id, _title}` — the full entity is recoverable
+   * via GET /v2/events/{event_name}/history/{event_id} or by hitting
+   * entity-api directly with the `_id`.
    * 
    */
   'searchEventHistoryV2'(
@@ -1748,10 +1886,13 @@ export interface PathsDictionary {
     /**
      * getEventJSONSchema - getEventJSONSchema
      * 
-     * Retrieve the JSON Schema of a specific business event
+     * Retrieve the JSON Schema of a specific business event. Pass an optional
+     * `Epilot-Event-Version` header to retrieve a specific version's schema;
+     * when omitted, the event's latest version is returned.
+     * 
      */
     'get'(
-      parameters?: Parameters<Paths.GetEventJSONSchema.PathParameters> | null,
+      parameters?: Parameters<Paths.GetEventJSONSchema.HeaderParameters & Paths.GetEventJSONSchema.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetEventJSONSchema.Responses.$200>
@@ -1760,13 +1901,31 @@ export interface PathsDictionary {
     /**
      * getEventExample - getEventExample
      * 
-     * Generate a sample event payload based on the event's JSON Schema
+     * Generate a sample event payload based on the event's JSON Schema. Pass an
+     * optional `Epilot-Event-Version` header to generate the example for a
+     * specific version; when omitted, the event's latest version is used.
+     * 
      */
     'get'(
-      parameters?: Parameters<Paths.GetEventExample.PathParameters> | null,
+      parameters?: Parameters<Paths.GetEventExample.HeaderParameters & Paths.GetEventExample.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetEventExample.Responses.$200>
+  }
+  ['/v1/events/{event_name}/versions']: {
+    /**
+     * listEventVersions - listEventVersions
+     * 
+     * List every known version of an event, along with the `latest`
+     * and the set of currently `active` versions. See §3.2 of the
+     * Event Payload Versioning RFC.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.ListEventVersions.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ListEventVersions.Responses.$200>
   }
   ['/v1/events/{event_name}:history']: {
     /**
@@ -1787,9 +1946,10 @@ export interface PathsDictionary {
      * Paginated history of events with projected/lightweight payload (v2).
      * 
      * Returns `EventSummary` objects instead of fully hydrated `Event` objects:
-     * nested entity graphs (objects/arrays-of-objects carrying `_schema`/`_id`)
-     * are stripped. Use GET /v2/events/{event_name}/history/{event_id} to fetch
-     * the full hydrated event for a single result.
+     * hydrated entity objects (values carrying `_schema`/`_id`) are reduced to
+     * reference stubs `{_schema, _id, _title}` — the full entity is recoverable
+     * via GET /v2/events/{event_name}/history/{event_id} or by hitting
+     * entity-api directly with the `_id`.
      * 
      */
     'post'(
@@ -1844,6 +2004,8 @@ export type EventConfig = Components.Schemas.EventConfig;
 export type EventConfigBase = Components.Schemas.EventConfigBase;
 export type EventJsonSchema = Components.Schemas.EventJsonSchema;
 export type EventSummary = Components.Schemas.EventSummary;
+export type EventVersionRegistrySummary = Components.Schemas.EventVersionRegistrySummary;
+export type FieldChange = Components.Schemas.FieldChange;
 export type FieldsParam = Components.Schemas.FieldsParam;
 export type GraphDefinition = Components.Schemas.GraphDefinition;
 export type GraphEdge = Components.Schemas.GraphEdge;
@@ -1855,3 +2017,4 @@ export type SearchOptionsV2 = Components.Schemas.SearchOptionsV2;
 export type TriggerEventPayload = Components.Schemas.TriggerEventPayload;
 export type TriggerEventResponse = Components.Schemas.TriggerEventResponse;
 export type UpdateEventPayload = Components.Schemas.UpdateEventPayload;
+export type VersionMeta = Components.Schemas.VersionMeta;
