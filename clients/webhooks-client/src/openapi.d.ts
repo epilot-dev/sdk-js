@@ -529,6 +529,19 @@ declare namespace Components {
             id?: string;
             name: string;
             eventName: string;
+            /**
+             * Pinned schema version of the Event Catalog event this webhook is subscribed to.
+             * Only applicable when `eventName` refers to an Event Catalog event (prefixed with `event_`).
+             * When omitted on creation, it is backfilled lazily on first delivery to match the
+             * event's own `_event_version` (the latest at that time, stamped on the event itself).
+             * Always MAJOR.MINOR (e.g. "1.0", "2.0"), mirroring exactly what event-catalog-api
+             * stamps as `_event_version` and in its `_downgrades[].to` values. Absent for legacy
+             * configs that have not yet received an event.
+             *
+             * example:
+             * 1.0
+             */
+            eventVersion?: string | null; // ^\d+\.\d+$
             url?: string;
             /**
              * Timestamp the webhook was first created. Immutable after creation.
@@ -617,6 +630,26 @@ declare namespace Components {
                     [name: string]: string;
                 };
             };
+            /**
+             * Automatic-retry policy for transient delivery failures (5xx, 429,
+             * connection-level errors). Newly-created webhooks are materialized
+             * with defaults (`enabled: true`, `maxAttempts: 3`). Webhooks created
+             * before this feature have no policy and are treated as disabled — on
+             * update, omit this field to preserve the existing value. The backoff
+             * curve is a fixed Standard Webhooks schedule (5s, 5m, 30m, 2h, 5h);
+             * only the first `maxAttempts` intervals are used.
+             *
+             */
+            retryPolicy?: {
+                /**
+                 * Master on/off switch for automatic retries.
+                 */
+                enabled: boolean;
+                /**
+                 * Maximum number of automatic retries after the initial delivery attempt.
+                 */
+                maxAttempts?: number;
+            };
             filterConditions?: /* A group of conditions with a logical operator. Multiple conditions are AND-ed by default. */ WebhookConditionGroup;
             /**
              * Manifest ID used to create/update the webhook resource
@@ -659,6 +692,10 @@ declare namespace Components {
              * stringified payload of the webhook request
              */
             payload?: string;
+            /**
+             * Number of automatic delivery retries that preceded this terminal outcome. 0 means the event was delivered (or finally failed) on the first attempt.
+             */
+            retry_attempt?: number;
         }
     }
 }
