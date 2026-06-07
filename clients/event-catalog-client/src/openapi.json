@@ -878,6 +878,24 @@
           ]
         }
       },
+      "InlineDowngradeStep": {
+        "type": "object",
+        "description": "One step of an event's inline `_downgrades` chain. Maps the current-version payload to the previous version via a JSONata expression. Stamped by Event Catalog at publish time; executed by consumers during walk-back, never by EC itself.",
+        "properties": {
+          "to": {
+            "type": "string",
+            "description": "Version label this step downgrades to (the previous version)."
+          },
+          "jsonata": {
+            "type": "string",
+            "description": "JSONata expression mapping the current-shape payload to the previous-shape payload."
+          }
+        },
+        "required": [
+          "to",
+          "jsonata"
+        ]
+      },
       "Event": {
         "type": "object",
         "description": "An event instance in the event history",
@@ -920,6 +938,13 @@
           "_ack_id": {
             "type": "string",
             "description": "Unique acknowledgment tracking ID for the event.\nUsed to track event delivery and processing status.\n"
+          },
+          "_downgrades": {
+            "type": "array",
+            "description": "Inline downgrade chain stamped by Event Catalog at publish time, ordered newest-to-oldest. Present ONLY on multi-version events. Internal versioning transport: consumers (e.g. svc-webhooks) walk the payload back to a pinned version using these JSONata steps, then strip the field before delivery -- end customers never receive it.",
+            "items": {
+              "$ref": "#/components/schemas/InlineDowngradeStep"
+            }
           }
         },
         "required": [
