@@ -273,6 +273,20 @@
         "responses": {}
       }
     },
+    "/v2/flows/executions/{execution_id}/tasks/{task_id}/agent:run": {
+      "post": {
+        "operationId": "runTaskAgent",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ExecutionIdParam"
+          },
+          {
+            "$ref": "#/components/parameters/TaskIdParam"
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v2/flows/executions/{execution_id}/tasks/{task_id}/execute": {
       "post": {
         "operationId": "executeTask",
