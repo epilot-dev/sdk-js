@@ -205,6 +205,10 @@ declare namespace Components {
              *
              */
             _ack_id?: string;
+            /**
+             * Inline downgrade chain stamped by Event Catalog at publish time, ordered newest-to-oldest. Present ONLY on multi-version events. Internal versioning transport: consumers (e.g. svc-webhooks) walk the payload back to a pinned version using these JSONata steps, then strip the field before delivery -- end customers never receive it.
+             */
+            _downgrades?: /* One step of an event's inline `_downgrades` chain. Maps the current-version payload to the previous version via a JSONata expression. Stamped by Event Catalog at publish time; executed by consumers during walk-back, never by EC itself. */ InlineDowngradeStep[];
         }
         /**
          * A file attachment associated with an event
@@ -889,6 +893,19 @@ declare namespace Components {
              * ]
              */
             fields?: string[];
+        }
+        /**
+         * One step of an event's inline `_downgrades` chain. Maps the current-version payload to the previous version via a JSONata expression. Stamped by Event Catalog at publish time; executed by consumers during walk-back, never by EC itself.
+         */
+        export interface InlineDowngradeStep {
+            /**
+             * Version label this step downgrades to (the previous version).
+             */
+            to: string;
+            /**
+             * JSONata expression mapping the current-shape payload to the previous-shape payload.
+             */
+            jsonata: string;
         }
         /**
          * A primitive JSON Schema field definition
@@ -2010,6 +2027,7 @@ export type FieldsParam = Components.Schemas.FieldsParam;
 export type GraphDefinition = Components.Schemas.GraphDefinition;
 export type GraphEdge = Components.Schemas.GraphEdge;
 export type GraphNode = Components.Schemas.GraphNode;
+export type InlineDowngradeStep = Components.Schemas.InlineDowngradeStep;
 export type PrimitiveField = Components.Schemas.PrimitiveField;
 export type SchemaField = Components.Schemas.SchemaField;
 export type SearchOptions = Components.Schemas.SearchOptions;
