@@ -30,6 +30,7 @@ const { data } = await eventCatalogClient.listEvents(...)
 - [`patchEvent`](#patchevent)
 - [`getEventJSONSchema`](#geteventjsonschema)
 - [`getEventExample`](#geteventexample)
+- [`listEventVersions`](#listeventversions)
 - [`searchEventHistory`](#searcheventhistory)
 - [`searchEventHistoryV2`](#searcheventhistoryv2)
 - [`getHistoricalEvent`](#gethistoricalevent)
@@ -57,6 +58,9 @@ const { data } = await eventCatalogClient.listEvents(...)
 - [`TriggerEventPayload`](#triggereventpayload)
 - [`TriggerEventResponse`](#triggereventresponse)
 - [`EventAttachment`](#eventattachment)
+- [`FieldChange`](#fieldchange)
+- [`VersionMeta`](#versionmeta)
+- [`EventVersionRegistrySummary`](#eventversionregistrysummary)
 
 ### `listEvents`
 
@@ -78,7 +82,7 @@ const { data } = await client.listEvents()
       "event_name": "AddMeterReading",
       "event_title": "Add Meter Reading",
       "event_description": "Triggered when a new meter reading is added",
-      "event_version": "1.0.0",
+      "event_version": "1.0",
       "event_status": "active",
       "event_tags": ["builtin", "metering", "erp"],
       "schema_fields": {},
@@ -136,7 +140,7 @@ const { data } = await client.getEvent({
   "event_name": "AddMeterReading",
   "event_title": "Add Meter Reading",
   "event_description": "Triggered when a new meter reading is added",
-  "event_version": "1.0.0",
+  "event_version": "1.0",
   "event_status": "active",
   "event_tags": ["builtin", "metering", "erp"],
   "schema_fields": {},
@@ -187,7 +191,7 @@ const { data } = await client.patchEvent(
     event_name: 'AddMeterReading',
     event_title: 'Add Meter Reading',
     event_description: 'Triggered when a new meter reading is added',
-    event_version: '1.0.0',
+    event_version: '1.0',
     event_status: 'active',
     event_tags: ['builtin', 'metering', 'erp'],
     schema_fields: {},
@@ -228,7 +232,7 @@ const { data } = await client.patchEvent(
   "event_name": "AddMeterReading",
   "event_title": "Add Meter Reading",
   "event_description": "Triggered when a new meter reading is added",
-  "event_version": "1.0.0",
+  "event_version": "1.0",
   "event_status": "active",
   "event_tags": ["builtin", "metering", "erp"],
   "schema_fields": {},
@@ -266,13 +270,16 @@ const { data } = await client.patchEvent(
 
 ### `getEventJSONSchema`
 
-Retrieve the JSON Schema of a specific business event
+Retrieve the JSON Schema of a specific business event. Pass an optional
+`Epilot-Event-Version` header to retrieve a specific version's schema;
+when omitted, the event's latest version is returned.
 
 `GET /v1/events/{event_name}/json_schema`
 
 ```ts
 const { data } = await client.getEventJSONSchema({
   event_name: 'example',
+  Epilot-Event-Version: 'example',
 })
 ```
 
@@ -302,7 +309,7 @@ const { data } = await client.getEventJSONSchema({
     },
     "_event_version": {
       "type": "string",
-      "description": "Event version (semver)"
+      "description": "Event payload version (MAJOR.MINOR)"
     },
     "_event_source": {
       "type": "string",
@@ -388,13 +395,16 @@ const { data } = await client.getEventJSONSchema({
 
 ### `getEventExample`
 
-Generate a sample event payload based on the event's JSON Schema
+Generate a sample event payload based on the event's JSON Schema. Pass an
+optional `Epilot-Event-Version` header to generate the example for a
+specific version; when omitted, the event's latest versio
 
 `GET /v1/events/{event_name}/example`
 
 ```ts
 const { data } = await client.getEventExample({
   event_name: 'example',
+  Epilot-Event-Version: 'example',
 })
 ```
 
@@ -403,6 +413,50 @@ const { data } = await client.getEventExample({
 
 ```json
 {}
+```
+
+</details>
+
+---
+
+### `listEventVersions`
+
+List every known version of an event, along with the `latest`
+and the set of currently `active` versions. See §3.2 of the
+Event Payload Versioning RFC.
+
+`GET /v1/events/{event_name}/versions`
+
+```ts
+const { data } = await client.listEventVersions({
+  event_name: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "event_name": "MeterReadingAdded",
+  "latest": "1.0",
+  "versions": [
+    {
+      "version": "1.0",
+      "released_at": "2025-11-15",
+      "change_summary": "string",
+      "change_notes": "string",
+      "changes": [
+        {
+          "field": "reading",
+          "op": "added",
+          "type_old": "string",
+          "type_new": "string"
+        }
+      ]
+    }
+  ]
+}
 ```
 
 </details>
@@ -446,7 +500,7 @@ const { data } = await client.searchEventHistory(
       "_event_time": "2024-01-01T12:00:00Z",
       "_event_id": "01FZ4Z5FZ5FZ5FZ5FZ5FZ5FZ5F",
       "_event_name": "MeterReading",
-      "_event_version": "1.0.0",
+      "_event_version": "1.0",
       "_event_source": "api",
       "_trigger_source_type": "api",
       "_trigger_source": "user_123456",
@@ -514,7 +568,7 @@ const { data } = await client.searchEventHistoryV2(
       "_event_time": "1970-01-01T00:00:00.000Z",
       "_event_id": "string",
       "_event_name": "string",
-      "_event_version": "1.0.0",
+      "_event_version": "1.0",
       "_event_source": "string",
       "_trigger_source_type": "api",
       "_trigger_source": "string",
@@ -554,7 +608,7 @@ const { data } = await client.getHistoricalEvent({
   "_event_time": "2024-01-01T12:00:00Z",
   "_event_id": "01FZ4Z5FZ5FZ5FZ5FZ5FZ5FZ5F",
   "_event_name": "MeterReading",
-  "_event_version": "1.0.0",
+  "_event_version": "1.0",
   "_event_source": "api",
   "_trigger_source_type": "api",
   "_trigger_source": "user_123456",
@@ -899,9 +953,9 @@ type Event = {
 A lightweight event summary returned by the v2 history endpoint.
 
 Includes the standard `_*` metadata fields plus a projected subset of the
-event payload. Hydrated entity objects (values carrying `_schema` or `_id`
-and arrays of such objects) are stripped — fetch via
-`GET /v2/events/{event_name}/his
+event payload. Hydrated entity objects (values carrying `_schema` or `_id`)
+— and arrays of such objects — are reduced to reference stubs
+`{_schema, _id, _title
 
 ```ts
 type EventSummary = {
@@ -1077,5 +1131,64 @@ type EventAttachment = {
   }
   version_index: number
   readable_size?: string
+}
+```
+
+### `FieldChange`
+
+A field-level change descriptor. Powers the declarative half of the
+version DSL.
+
+
+```ts
+type FieldChange = {
+  field: string
+  op: "added" | "removed" | "type-changed"
+  type_old?: string
+  type_new?: string
+}
+```
+
+### `VersionMeta`
+
+One entry of an event's version timeline.
+
+```ts
+type VersionMeta = {
+  version: string
+  released_at: string
+  change_summary: string
+  change_notes?: string
+  changes: Array<{
+    field: string
+    op: "added" | "removed" | "type-changed"
+    type_old?: string
+    type_new?: string
+  }>
+}
+```
+
+### `EventVersionRegistrySummary`
+
+Summary of an event's version timeline returned by
+`GET /v1/events/{event_name}/versions`.
+
+
+```ts
+type EventVersionRegistrySummary = {
+  event_name: string
+  latest: string
+  versions: Array<{
+    version: string
+    released_at: string
+    change_summary: string
+    change_notes?: string
+    changes: Array<{
+      field: { ... }
+      op: { ... }
+      type_old?: { ... }
+      type_new?: { ... }
+    }>
+  }>
 }
 ```
