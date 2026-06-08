@@ -283,14 +283,15 @@ const { data } = await client.setupCampaign(
       target_ids: ['b8c01433-5556-4e2b-aad4-6f5348d1df84']
     },
     journey: {
-      journey_id: 'b8c01433-5556-4e2b-aad4-6f5348d1df84',
-      design_id: 'b8c01433-5556-4e2b-aad4-6f5348d1df84'
+      journey_id: 'b8c01433-5556-4e2b-aad4-6f5348d1df84'
     },
     channels: {
       portal_widget: {
         portal_id: 'b8c01433-5556-4e2b-aad4-6f5348d1df84',
-        block_id: 'b8c01433-5556-4e2b-aad4-6f5348d1df84',
-        design_id: 'b8c01433-5556-4e2b-aad4-6f5348d1df84'
+        block_id: 'b8c01433-5556-4e2b-aad4-6f5348d1df84'
+      },
+      email: {
+        automation_id: 'b8c01433-5556-4e2b-aad4-6f5348d1df84'
       }
     }
   },
@@ -1052,13 +1053,14 @@ type SetupCampaignRequest = {
   }
   journey?: {
     journey_id: string // uuid
-    design_id?: string // uuid
   }
   channels?: {
     portal_widget?: {
       portal_id: { ... }
       block_id: { ... }
-      design_id?: { ... }
+    }
+    email?: {
+      automation_id: { ... }
     }
   }
 }
@@ -1085,13 +1087,14 @@ type SetupTariffChangeCampaignRequest = {
   }
   journey?: {
     journey_id: string // uuid
-    design_id?: string // uuid
   }
   channels?: {
     portal_widget?: {
       portal_id: { ... }
       block_id: { ... }
-      design_id?: { ... }
+    }
+    email?: {
+      automation_id: { ... }
     }
   }
 }

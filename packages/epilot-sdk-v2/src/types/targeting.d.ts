@@ -1559,15 +1559,10 @@ export declare namespace Components {
                  * b8c01433-5556-4e2b-aad4-6f5348d1df84
                  */
                 BaseUUID /* uuid */;
-                design_id?: /**
-                 * example:
-                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
-                 */
-                BaseUUID /* uuid */;
             };
             /**
-             * Optional delivery channel configuration. The email channel is intentionally
-             * excluded for now and is not part of this contract yet.
+             * Optional delivery channel configuration. Each channel is only sent by the
+             * consumer once it has been enabled and fully configured in the wizard.
              *
              */
             channels?: {
@@ -1587,7 +1582,15 @@ export declare namespace Components {
                      * b8c01433-5556-4e2b-aad4-6f5348d1df84
                      */
                     BaseUUID /* uuid */;
-                    design_id?: /**
+                };
+                /**
+                 * Email campaign delivery. The selected automation flow is persisted as the
+                 * campaign's `flow_id` and is responsible for sending the campaign emails.
+                 * Only sent by the consumer once an automation has been selected.
+                 *
+                 */
+                email?: {
+                    automation_id: /**
                      * example:
                      * b8c01433-5556-4e2b-aad4-6f5348d1df84
                      */
