@@ -1331,9 +1331,6 @@
             "properties": {
               "journey_id": {
                 "$ref": "#/components/schemas/BaseUUID"
-              },
-              "design_id": {
-                "$ref": "#/components/schemas/BaseUUID"
               }
             },
             "required": [
@@ -1343,7 +1340,7 @@
           },
           "channels": {
             "type": "object",
-            "description": "Optional delivery channel configuration. The email channel is intentionally\nexcluded for now and is not part of this contract yet.\n",
+            "description": "Optional delivery channel configuration. Each channel is only sent by the\nconsumer once it has been enabled and fully configured in the wizard.\n",
             "properties": {
               "portal_widget": {
                 "type": "object",
@@ -1354,14 +1351,24 @@
                   },
                   "block_id": {
                     "$ref": "#/components/schemas/BaseUUID"
-                  },
-                  "design_id": {
-                    "$ref": "#/components/schemas/BaseUUID"
                   }
                 },
                 "required": [
                   "portal_id",
                   "block_id"
+                ],
+                "additionalProperties": false
+              },
+              "email": {
+                "type": "object",
+                "description": "Email campaign delivery. The selected automation flow is persisted as the\ncampaign's `flow_id` and is responsible for sending the campaign emails.\nOnly sent by the consumer once an automation has been selected.\n",
+                "properties": {
+                  "automation_id": {
+                    "$ref": "#/components/schemas/BaseUUID"
+                  }
+                },
+                "required": [
+                  "automation_id"
                 ],
                 "additionalProperties": false
               }
