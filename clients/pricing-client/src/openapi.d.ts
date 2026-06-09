@@ -5590,7 +5590,17 @@ declare namespace Components {
             items?: {
                 price_id: string;
                 product_id: string;
+                highlight_config?: OfferHighlightConfig;
             }[];
+        }
+        export interface OfferHighlightConfig {
+            unique_selling_point?: string;
+            unique_selling_point_icon?: string;
+            total?: {
+                enabled?: boolean;
+                format?: "absolute" | "relative";
+                only_if_better?: boolean;
+            };
         }
         /**
          * The opportunity entity
@@ -12048,6 +12058,7 @@ export type NonHydratedCompositePrice = Components.Schemas.NonHydratedCompositeP
 export type OAuthCredentials = Components.Schemas.OAuthCredentials;
 export type OAuthIntegration = Components.Schemas.OAuthIntegration;
 export type Offer = Components.Schemas.Offer;
+export type OfferHighlightConfig = Components.Schemas.OfferHighlightConfig;
 export type Opportunity = Components.Schemas.Opportunity;
 export type OpportunitySource = Components.Schemas.OpportunitySource;
 export type Order = Components.Schemas.Order;
