@@ -9476,6 +9476,35 @@
           "hits"
         ]
       },
+      "OfferHighlightConfig": {
+        "type": "object",
+        "properties": {
+          "unique_selling_point": {
+            "type": "string"
+          },
+          "unique_selling_point_icon": {
+            "type": "string"
+          },
+          "total": {
+            "type": "object",
+            "properties": {
+              "enabled": {
+                "type": "boolean"
+              },
+              "format": {
+                "type": "string",
+                "enum": [
+                  "absolute",
+                  "relative"
+                ]
+              },
+              "only_if_better": {
+                "type": "boolean"
+              }
+            }
+          }
+        }
+      },
       "Offer": {
         "type": "object",
         "properties": {
@@ -9492,6 +9521,9 @@
                 },
                 "product_id": {
                   "type": "string"
+                },
+                "highlight_config": {
+                  "$ref": "#/components/schemas/OfferHighlightConfig"
                 }
               },
               "required": [
