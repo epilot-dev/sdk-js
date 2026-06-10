@@ -209,6 +209,7 @@ const { data } = await pricingClient.$calculatePricingDetails(...)
 - [`ExternalCatalogItem`](#externalcatalogitem)
 - [`ProductRecommendationSearch`](#productrecommendationsearch)
 - [`ProductRecommendationResponse`](#productrecommendationresponse)
+- [`OfferHighlightConfig`](#offerhighlightconfig)
 - [`Offer`](#offer)
 - [`ProductRecommendation`](#productrecommendation)
 
@@ -5973,6 +5974,20 @@ type ProductRecommendationResponse = {
 }
 ```
 
+### `OfferHighlightConfig`
+
+```ts
+type OfferHighlightConfig = {
+  unique_selling_point?: string
+  unique_selling_point_icon?: string
+  total?: {
+    enabled?: boolean
+    format?: "absolute" | "relative"
+    only_if_better?: boolean
+  }
+}
+```
+
 ### `Offer`
 
 ```ts
@@ -5981,6 +5996,11 @@ type Offer = {
   items?: Array<{
     price_id: string
     product_id: string
+    highlight_config?: {
+      unique_selling_point?: { ... }
+      unique_selling_point_icon?: { ... }
+      total?: { ... }
+    }
   }>
 }
 ```

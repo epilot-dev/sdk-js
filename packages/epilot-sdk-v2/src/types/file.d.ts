@@ -64,6 +64,28 @@ export declare namespace Components {
          * A generic error returned by the API
          * example:
          * {
+         *   "status": 409,
+         *   "error": "Extracted file content is still being prepared"
+         * }
+         */
+        export interface ConflictError {
+            /**
+             * The HTTP status code of the error
+             * example:
+             * 400
+             */
+            status?: number;
+            /**
+             * The error message
+             * example:
+             * Bad Request
+             */
+            error?: string;
+        }
+        /**
+         * A generic error returned by the API
+         * example:
+         * {
          *   "status": 403,
          *   "error": "Forbidden: You do not have permission to access this file"
          * }
@@ -2435,13 +2457,21 @@ export declare namespace Components {
              */
             CustomDownloadUrl /* uri */;
             /**
-             * AI-generated compact summary for hover and list preview surfaces.
+             * Compact German summary for hover and list preview surfaces.
              */
-            preview_summary?: string;
+            preview_summary_de?: string;
             /**
-             * AI-generated short paragraph summary for file preview surfaces.
+             * Short German paragraph summary for file preview surfaces.
              */
-            short_summary?: string;
+            short_summary_de?: string;
+            /**
+             * Compact English summary for hover and list preview surfaces.
+             */
+            preview_summary_en?: string;
+            /**
+             * Short English paragraph summary for file preview surfaces.
+             */
+            short_summary_en?: string;
             summary_status?: /* Current AI summary generation state for the file. */ FileSummaryStatus;
         }
         export interface FileCollectionAttributes {
@@ -2643,13 +2673,21 @@ export declare namespace Components {
              */
             CustomDownloadUrl /* uri */;
             /**
-             * AI-generated compact summary for hover and list preview surfaces.
+             * Compact German summary for hover and list preview surfaces.
              */
-            preview_summary?: string;
+            preview_summary_de?: string;
             /**
-             * AI-generated short paragraph summary for file preview surfaces.
+             * Short German paragraph summary for file preview surfaces.
              */
-            short_summary?: string;
+            short_summary_de?: string;
+            /**
+             * Compact English summary for hover and list preview surfaces.
+             */
+            preview_summary_en?: string;
+            /**
+             * Short English paragraph summary for file preview surfaces.
+             */
+            short_summary_en?: string;
             summary_status?: /* Current AI summary generation state for the file. */ FileSummaryStatus;
             /**
              * Source URL for the file. Included if the entity was created from source_url, or when ?source_url=true
@@ -2854,13 +2892,21 @@ export declare namespace Components {
              */
             CustomDownloadUrl /* uri */;
             /**
-             * AI-generated compact summary for hover and list preview surfaces.
+             * Compact German summary for hover and list preview surfaces.
              */
-            preview_summary?: string;
+            preview_summary_de?: string;
             /**
-             * AI-generated short paragraph summary for file preview surfaces.
+             * Short German paragraph summary for file preview surfaces.
              */
-            short_summary?: string;
+            short_summary_de?: string;
+            /**
+             * Compact English summary for hover and list preview surfaces.
+             */
+            preview_summary_en?: string;
+            /**
+             * Short English paragraph summary for file preview surfaces.
+             */
+            short_summary_en?: string;
             summary_status?: /* Current AI summary generation state for the file. */ FileSummaryStatus;
         }
         export interface SaveFileFromSourceURLPayload {
@@ -2942,13 +2988,21 @@ export declare namespace Components {
              */
             CustomDownloadUrl /* uri */;
             /**
-             * AI-generated compact summary for hover and list preview surfaces.
+             * Compact German summary for hover and list preview surfaces.
              */
-            preview_summary?: string;
+            preview_summary_de?: string;
             /**
-             * AI-generated short paragraph summary for file preview surfaces.
+             * Short German paragraph summary for file preview surfaces.
              */
-            short_summary?: string;
+            short_summary_de?: string;
+            /**
+             * Compact English summary for hover and list preview surfaces.
+             */
+            preview_summary_en?: string;
+            /**
+             * Short English paragraph summary for file preview surfaces.
+             */
+            short_summary_en?: string;
             summary_status?: /* Current AI summary generation state for the file. */ FileSummaryStatus;
             source_url?: /**
              * Custom external download url used for the file
@@ -3038,13 +3092,21 @@ export declare namespace Components {
              */
             CustomDownloadUrl /* uri */;
             /**
-             * AI-generated compact summary for hover and list preview surfaces.
+             * Compact German summary for hover and list preview surfaces.
              */
-            preview_summary?: string;
+            preview_summary_de?: string;
             /**
-             * AI-generated short paragraph summary for file preview surfaces.
+             * Short German paragraph summary for file preview surfaces.
              */
-            short_summary?: string;
+            short_summary_de?: string;
+            /**
+             * Compact English summary for hover and list preview surfaces.
+             */
+            preview_summary_en?: string;
+            /**
+             * Short English paragraph summary for file preview surfaces.
+             */
+            short_summary_en?: string;
             summary_status?: /* Current AI summary generation state for the file. */ FileSummaryStatus;
             s3ref?: S3Ref;
         }
@@ -3622,6 +3684,15 @@ export declare namespace Paths {
              * }
              */
             Components.Responses.NotFoundError;
+            export type $409 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 409,
+             *   "error": "Extracted file content is still being prepared"
+             * }
+             */
+            Components.Responses.ConflictError;
             export type $500 = /**
              * A generic error returned by the API
              * example:
@@ -3984,6 +4055,8 @@ export declare namespace Paths {
         }
         namespace Responses {
             export type $200 = string; // binary
+            export interface $304 {
+            }
             export type $403 = /* A generic error returned by the API */ Components.Schemas.ErrorObject;
             export type $404 = /**
              * A generic error returned by the API

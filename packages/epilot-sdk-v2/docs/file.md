@@ -176,8 +176,10 @@ const { data } = await client.saveFileV2(
     access_control: 'private',
     public_url: 'https://epilot-prod-user-content.s3.eu-central-1.amazonaws.com/123/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf',
     custom_download_url: 'https://some-api-url.com/download?file_id=123',
-    preview_summary: 'string',
-    short_summary: 'string',
+    preview_summary_de: 'string',
+    short_summary_de: 'string',
+    preview_summary_en: 'string',
+    short_summary_en: 'string',
     summary_status: 'processing',
     s3ref: {}
   },
@@ -204,8 +206,10 @@ const { data } = await client.saveFileV2(
   "access_control": "private",
   "public_url": "https://epilot-prod-user-content.s3.eu-central-1.amazonaws.com/123/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf",
   "custom_download_url": "https://some-api-url.com/download?file_id=123",
-  "preview_summary": "string",
-  "short_summary": "string",
+  "preview_summary_de": "string",
+  "short_summary_de": "string",
+  "preview_summary_en": "string",
+  "short_summary_en": "string",
   "summary_status": "processing",
   "source_url": "https://productengineer-content.s3.eu-west-1.amazonaws.com/product-engineer-checklist.pdf",
   "s3ref": {},
@@ -274,8 +278,10 @@ const { data } = await client.getFile({
   "access_control": "private",
   "public_url": "https://epilot-prod-user-content.s3.eu-central-1.amazonaws.com/123/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf",
   "custom_download_url": "https://some-api-url.com/download?file_id=123",
-  "preview_summary": "string",
-  "short_summary": "string",
+  "preview_summary_de": "string",
+  "short_summary_de": "string",
+  "preview_summary_en": "string",
+  "short_summary_en": "string",
   "summary_status": "processing",
   "source_url": "https://productengineer-content.s3.eu-west-1.amazonaws.com/product-engineer-checklist.pdf",
   "s3ref": {},
@@ -344,8 +350,10 @@ const { data } = await client.deleteFile({
   "access_control": "private",
   "public_url": "https://epilot-prod-user-content.s3.eu-central-1.amazonaws.com/123/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf",
   "custom_download_url": "https://some-api-url.com/download?file_id=123",
-  "preview_summary": "string",
-  "short_summary": "string",
+  "preview_summary_de": "string",
+  "short_summary_de": "string",
+  "preview_summary_en": "string",
+  "short_summary_en": "string",
   "summary_status": "processing",
   "source_url": "https://productengineer-content.s3.eu-west-1.amazonaws.com/product-engineer-checklist.pdf",
   "s3ref": {},
@@ -954,8 +962,10 @@ const { data } = await client.getFilesInCollection({
     "access_control": "private",
     "public_url": "https://epilot-prod-user-content.s3.eu-central-1.amazonaws.com/123/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf",
     "custom_download_url": "https://some-api-url.com/download?file_id=123",
-    "preview_summary": "string",
-    "short_summary": "string",
+    "preview_summary_de": "string",
+    "short_summary_de": "string",
+    "preview_summary_en": "string",
+    "short_summary_en": "string",
     "summary_status": "processing",
     "source_url": "https://productengineer-content.s3.eu-west-1.amazonaws.com/product-engineer-checklist.pdf",
     "s3ref": {},
@@ -1071,8 +1081,10 @@ type FileAttributes = {
   access_control?: "private" | "public-read"
   public_url?: string // url
   custom_download_url?: string // uri
-  preview_summary?: string
-  short_summary?: string
+  preview_summary_de?: string
+  short_summary_de?: string
+  preview_summary_en?: string
+  short_summary_en?: string
   summary_status?: "processing" | "completed" | "failed" | "unsupported"
 }
 ```
@@ -1126,8 +1138,10 @@ type FileEntity = {
   access_control: "private" | "public-read"
   public_url?: string // url
   custom_download_url?: string // uri
-  preview_summary?: string
-  short_summary?: string
+  preview_summary_de?: string
+  short_summary_de?: string
+  preview_summary_en?: string
+  short_summary_en?: string
   summary_status?: "processing" | "completed" | "failed" | "unsupported"
   source_url?: string
   s3ref?: object
@@ -1189,8 +1203,10 @@ type SaveS3FilePayload = {
   access_control?: "private" | "public-read"
   public_url?: string // url
   custom_download_url?: string // uri
-  preview_summary?: string
-  short_summary?: string
+  preview_summary_de?: string
+  short_summary_de?: string
+  preview_summary_en?: string
+  short_summary_en?: string
   summary_status?: "processing" | "completed" | "failed" | "unsupported"
   s3ref?: unknown
 }
@@ -1218,8 +1234,10 @@ type SaveFileFromSourceURLPayload = {
   access_control?: "private" | "public-read"
   public_url?: string // url
   custom_download_url?: string // uri
-  preview_summary?: string
-  short_summary?: string
+  preview_summary_de?: string
+  short_summary_de?: string
+  preview_summary_en?: string
+  short_summary_en?: string
   summary_status?: "processing" | "completed" | "failed" | "unsupported"
   source_url?: string // uri
 }
@@ -1247,8 +1265,10 @@ type SaveCustomFilePayload = {
   access_control?: "private" | "public-read"
   public_url?: string // url
   custom_download_url?: string // uri
-  preview_summary?: string
-  short_summary?: string
+  preview_summary_de?: string
+  short_summary_de?: string
+  preview_summary_en?: string
+  short_summary_en?: string
   summary_status?: "processing" | "completed" | "failed" | "unsupported"
 }
 ```
@@ -1275,8 +1295,10 @@ type SaveFilePayload = {
   access_control?: "private" | "public-read"
   public_url?: string // url
   custom_download_url?: string // uri
-  preview_summary?: string
-  short_summary?: string
+  preview_summary_de?: string
+  short_summary_de?: string
+  preview_summary_en?: string
+  short_summary_en?: string
   summary_status?: "processing" | "completed" | "failed" | "unsupported"
   s3ref?: unknown
 } | {
@@ -1298,8 +1320,10 @@ type SaveFilePayload = {
   access_control?: "private" | "public-read"
   public_url?: string // url
   custom_download_url?: string // uri
-  preview_summary?: string
-  short_summary?: string
+  preview_summary_de?: string
+  short_summary_de?: string
+  preview_summary_en?: string
+  short_summary_en?: string
   summary_status?: "processing" | "completed" | "failed" | "unsupported"
   source_url?: string // uri
 } | {
@@ -1321,8 +1345,10 @@ type SaveFilePayload = {
   access_control?: "private" | "public-read"
   public_url?: string // url
   custom_download_url?: string // uri
-  preview_summary?: string
-  short_summary?: string
+  preview_summary_de?: string
+  short_summary_de?: string
+  preview_summary_en?: string
+  short_summary_en?: string
   summary_status?: "processing" | "completed" | "failed" | "unsupported"
 }
 ```
@@ -1349,8 +1375,10 @@ type SaveFilePayloadV2 = {
   access_control?: "private" | "public-read"
   public_url?: string // url
   custom_download_url?: string // uri
-  preview_summary?: string
-  short_summary?: string
+  preview_summary_de?: string
+  short_summary_de?: string
+  preview_summary_en?: string
+  short_summary_en?: string
   summary_status?: "processing" | "completed" | "failed" | "unsupported"
   s3ref?: unknown
 } | {
@@ -1372,8 +1400,10 @@ type SaveFilePayloadV2 = {
   access_control?: "private" | "public-read"
   public_url?: string // url
   custom_download_url?: string // uri
-  preview_summary?: string
-  short_summary?: string
+  preview_summary_de?: string
+  short_summary_de?: string
+  preview_summary_en?: string
+  short_summary_en?: string
   summary_status?: "processing" | "completed" | "failed" | "unsupported"
   source_url?: string // uri
 } | {
@@ -1395,8 +1425,10 @@ type SaveFilePayloadV2 = {
   access_control?: "private" | "public-read"
   public_url?: string // url
   custom_download_url?: string // uri
-  preview_summary?: string
-  short_summary?: string
+  preview_summary_de?: string
+  short_summary_de?: string
+  preview_summary_en?: string
+  short_summary_en?: string
   summary_status?: "processing" | "completed" | "failed" | "unsupported"
 }
 ```
