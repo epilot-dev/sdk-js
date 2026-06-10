@@ -917,6 +917,9 @@
           "404": {
             "$ref": "#/components/responses/NotFoundError"
           },
+          "409": {
+            "$ref": "#/components/responses/ConflictError"
+          },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
           }
@@ -1215,6 +1218,20 @@
         "responses": {
           "200": {
             "description": "Generated thumbnail image for a public file",
+            "headers": {
+              "ETag": {
+                "description": "Identifier of the previewed file version, for conditional requests",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Cache-Control": {
+                "description": "Caching policy for the preview",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
             "content": {
               "image/png": {
                 "schema": {
@@ -1226,6 +1243,23 @@
                 "schema": {
                   "type": "string",
                   "format": "binary"
+                }
+              }
+            }
+          },
+          "304": {
+            "description": "The preview is unchanged since the version identified by the `If-None-Match`\nrequest header. No body is returned; the cached copy should be reused.\n",
+            "headers": {
+              "ETag": {
+                "description": "Identifier of the current file version's preview",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Cache-Control": {
+                "description": "Caching policy for the preview",
+                "schema": {
+                  "type": "string"
                 }
               }
             }
@@ -2162,14 +2196,24 @@
           "custom_download_url": {
             "$ref": "#/components/schemas/CustomDownloadUrl"
           },
-          "preview_summary": {
+          "preview_summary_de": {
             "type": "string",
-            "description": "AI-generated compact summary for hover and list preview surfaces.",
+            "description": "Compact German summary for hover and list preview surfaces.",
             "readOnly": true
           },
-          "short_summary": {
+          "short_summary_de": {
             "type": "string",
-            "description": "AI-generated short paragraph summary for file preview surfaces.",
+            "description": "Short German paragraph summary for file preview surfaces.",
+            "readOnly": true
+          },
+          "preview_summary_en": {
+            "type": "string",
+            "description": "Compact English summary for hover and list preview surfaces.",
+            "readOnly": true
+          },
+          "short_summary_en": {
+            "type": "string",
+            "description": "Short English paragraph summary for file preview surfaces.",
             "readOnly": true
           },
           "summary_status": {
@@ -3147,6 +3191,26 @@
                   "example": {
                     "status": 404,
                     "error": "Not Found: File entity not found"
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      "ConflictError": {
+        "description": "The request conflicts with the current resource state",
+        "content": {
+          "application/json": {
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/ErrorObject"
+                },
+                {
+                  "example": {
+                    "status": 409,
+                    "error": "Extracted file content is still being prepared"
                   }
                 }
               ]
