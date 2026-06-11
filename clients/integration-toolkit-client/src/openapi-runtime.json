@@ -522,6 +522,105 @@
         "responses": {}
       }
     },
+    "/v1/integrations/{integrationId}/outbound/messages/poll": {
+      "post": {
+        "operationId": "pollOutboundMessages",
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/integrations/{integrationId}/outbound/messages/ack": {
+      "post": {
+        "operationId": "ackOutboundMessages",
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/integrations/{integrationId}/outbound/messages/dlq": {
+      "get": {
+        "operationId": "listOutboundDlqMessages",
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false
+          },
+          {
+            "name": "next_token",
+            "in": "query",
+            "required": false
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/integrations/{integrationId}/outbound/messages/dlq/redrive": {
+      "post": {
+        "operationId": "redriveOutboundDlqMessages",
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/integrations/{integrationId}/outbound/messages/unblock": {
+      "post": {
+        "operationId": "unblockOutboundStream",
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v1/integrations/{integrationId}/monitoring/access-logs": {
       "post": {
         "operationId": "queryAccessLogs",

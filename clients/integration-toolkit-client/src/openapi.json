@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Integration Toolkit API",
-    "version": "1.0.12",
+    "version": "1.2.0",
     "description": "API for integrating with external systems in a standardised way."
   },
   "tags": [
@@ -2368,6 +2368,337 @@
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/integrations/{integrationId}/outbound/messages/poll": {
+      "post": {
+        "operationId": "pollOutboundMessages",
+        "summary": "pollOutboundMessages",
+        "description": "Poll outbound messages for an integration's poll-mode use cases.\nTakes a lease on the head-of-line batch of the integration's FIFO stream:\nthe returned messages stay invisible to subsequent polls until they are\nacknowledged or the visibility timeout elapses. POST because taking a\nlease mutates server state — auto-retrying middleware must not burn\nleases. One in-flight batch per stream: while a lease is active (or\nanother poll wins the race), the response is an empty batch\n(`messages: []`), not an error. Requires the `integration:consume` grant.\n",
+        "tags": [
+          "integrations"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true,
+            "description": "The integration ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PollOutboundMessagesRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Leased batch of outbound messages (possibly empty)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PollOutboundMessagesResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/integrations/{integrationId}/outbound/messages/ack": {
+      "post": {
+        "operationId": "ackOutboundMessages",
+        "summary": "ackOutboundMessages",
+        "description": "Acknowledge polled outbound messages. Acks are validated against the\nactive lease and committed as a prefix-contiguous cursor advance:\nmessages must be acknowledged in stream order. Out-of-order acks past\nthe first gap are rejected per id (`out_of_order`), acks with an\noutdated lease token are rejected (`stale_lease`), and unknown ids are\nrejected (`not_found`). Acknowledged messages are never delivered\nagain. Requires the `integration:consume` grant.\n",
+        "tags": [
+          "integrations"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true,
+            "description": "The integration ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AckOutboundMessagesRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Per-id acknowledgement results",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AckOutboundMessagesResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/integrations/{integrationId}/outbound/messages/dlq": {
+      "get": {
+        "operationId": "listOutboundDlqMessages",
+        "summary": "listOutboundDlqMessages",
+        "description": "List an integration's dead-lettered outbound queue messages\n(poison_policy enforcement and operator skips move messages here).\nOperator endpoint — requires the `integration:manage` grant. Message\npayloads are NOT included in listings: entries are keyed by the\nopaque message id and carry delivery metadata only. Paginated via an\nopaque `next_token`.\n",
+        "tags": [
+          "integrations"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true,
+            "description": "The integration ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Maximum number of DLQ entries to return",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 25
+            }
+          },
+          {
+            "name": "next_token",
+            "in": "query",
+            "required": false,
+            "description": "Opaque pagination token from a previous response",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Page of dead-lettered messages",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OutboundDlqListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/integrations/{integrationId}/outbound/messages/dlq/redrive": {
+      "post": {
+        "operationId": "redriveOutboundDlqMessages",
+        "summary": "redriveOutboundDlqMessages",
+        "description": "Redrive selected dead-lettered messages back into the live stream.\nOperator endpoint — requires the `integration:manage` grant.\nA redriven message is re-enqueued at the tail with a new id and\nsequence — it is delivered out of its original per-entity order (the\nstream has moved on); this is inherent to redrive and matches SQS DLQ\nsemantics. The redriven copy starts with zero delivery attempts and a\nfresh retention window; the original DLQ entry is removed. Per-id\nresults report `redriven` or `not_found` (unknown ids, or entries\nconcurrently redriven/expired).\n",
+        "tags": [
+          "integrations"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true,
+            "description": "The integration ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RedriveOutboundDlqRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Per-id redrive results",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RedriveOutboundDlqResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/integrations/{integrationId}/outbound/messages/unblock": {
+      "post": {
+        "operationId": "unblockOutboundStream",
+        "summary": "unblockOutboundStream",
+        "description": "Unblock an integration's outbound stream halted by the `block`\npoison policy: skips (dead-letters) the current blocked head message,\nemitting MSG_DEAD_LETTERED and letting the next message become the\nhead. Operator endpoint — requires the `integration:manage` grant.\nReturns `unblocked: false` as a no-op when the stream is not\ncurrently blocked (or the state moved concurrently) — safe to retry.\n",
+        "tags": [
+          "integrations"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true,
+            "description": "The integration ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UnblockOutboundStreamRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Unblock outcome",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnblockOutboundStreamResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
           },
           "404": {
             "$ref": "#/components/responses/NotFound"
@@ -6462,11 +6793,10 @@
         "type": "object",
         "required": [
           "name",
-          "jsonata_expression",
           "enabled",
           "delivery"
         ],
-        "description": "A mapping that transforms an event and delivers it to a webhook",
+        "description": "A mapping that delivers an event to an external system — either pushed to a webhook (with a JSONata payload transformation) or made available on the pull-based poll queue (raw event payload, no transformation)",
         "properties": {
           "id": {
             "type": "string",
@@ -6480,7 +6810,7 @@
           },
           "jsonata_expression": {
             "type": "string",
-            "description": "JSONata expression to transform the event payload",
+            "description": "JSONata expression to transform the event payload. Required for webhook delivery; ignored for poll delivery.",
             "example": "{ \"id\": entity._id, \"customer\": entity.customer_name }"
           },
           "enabled": {
@@ -6504,19 +6834,37 @@
         }
       },
       "DeliveryConfig": {
+        "description": "Configuration for how the event should be delivered. webhook = push delivery via svc-webhooks (JSONata-transformed payload); poll = pull-based queue delivery where the consumer fetches items via the poll API (raw event payload)",
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/WebhookDeliveryConfig"
+          },
+          {
+            "$ref": "#/components/schemas/PollDeliveryConfig"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "webhook": "#/components/schemas/WebhookDeliveryConfig",
+            "poll": "#/components/schemas/PollDeliveryConfig"
+          }
+        }
+      },
+      "WebhookDeliveryConfig": {
         "type": "object",
         "required": [
           "type",
           "webhook_id"
         ],
-        "description": "Configuration for how the transformed event should be delivered",
+        "description": "Push delivery of the transformed event to a webhook via svc-webhooks",
         "properties": {
           "type": {
             "type": "string",
             "enum": [
               "webhook"
             ],
-            "description": "Delivery mechanism type (currently only webhook is supported)"
+            "description": "Delivery mechanism type"
           },
           "webhook_id": {
             "type": "string",
@@ -6529,6 +6877,45 @@
           "webhook_url": {
             "type": "string",
             "description": "Cached webhook URL for display purposes"
+          }
+        }
+      },
+      "PollDeliveryConfig": {
+        "type": "object",
+        "required": [
+          "type"
+        ],
+        "description": "Pull-based queue delivery. Items carry the raw standardized event-catalog payload; no JSONata mapping is applied in poll mode. Consumers fetch and acknowledge items via the poll API.",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "poll"
+            ],
+            "description": "Delivery mechanism type"
+          },
+          "retention_days": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 90,
+            "default": 30,
+            "description": "How long undelivered queue items are retained before expiry"
+          },
+          "poison_policy": {
+            "type": "string",
+            "enum": [
+              "dead_letter",
+              "block"
+            ],
+            "default": "dead_letter",
+            "description": "What happens when an item exhausts max_delivery_attempts: dead_letter routes the exhausted item to the dead-letter queue; block halts the queue until operator/consumer action. Enforcement lands with the queue consumer (Phase 10) — this field defines the contract."
+          },
+          "max_delivery_attempts": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100,
+            "default": 5,
+            "description": "Maximum delivery attempts before the poison_policy is applied"
           }
         }
       },
@@ -6599,6 +6986,52 @@
               "$ref": "#/components/schemas/OutboundConflict"
             },
             "description": "List of detected conflicts, if any"
+          },
+          "poll": {
+            "$ref": "#/components/schemas/OutboundPollStatus"
+          }
+        }
+      },
+      "OutboundPollStatus": {
+        "type": "object",
+        "description": "Queue/consumer health for a poll-mode use case. Present only on use\ncases with a poll delivery mapping — webhook-only use cases are\nunaffected. Depth/age/DLQ numbers are first-page approximations.\n",
+        "required": [
+          "queue_depth",
+          "oldest_unconsumed_age_seconds",
+          "last_poll_at",
+          "last_ack_at",
+          "blocked",
+          "dlq_count"
+        ],
+        "properties": {
+          "queue_depth": {
+            "type": "integer",
+            "description": "Unconsumed messages attributable to this use case (first-page approximation)"
+          },
+          "oldest_unconsumed_age_seconds": {
+            "type": "integer",
+            "nullable": true,
+            "description": "Age of the oldest unconsumed message in seconds — null when the queue is empty"
+          },
+          "last_poll_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "Timestamp of the last successful poll lease — null before the first poll"
+          },
+          "last_ack_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "Timestamp of the last committed acknowledgment — null before the first ack"
+          },
+          "blocked": {
+            "type": "boolean",
+            "description": "Whether the integration's outbound stream is currently halted by a\nblocked head message (poison_policy 'block'). Stream-level flag —\nthe same value is reported on every poll use case of the\nintegration, because the stream spans them.\n"
+          },
+          "dlq_count": {
+            "type": "integer",
+            "description": "Dead-lettered messages of this use case awaiting redrive or expiry (first-page approximation)"
           }
         }
       },
@@ -6636,9 +7069,11 @@
               "event_disabled",
               "all_webhooks_disabled",
               "event_enabled_while_disabled",
-              "webhook_enabled_while_disabled"
+              "webhook_enabled_while_disabled",
+              "stream_blocked",
+              "dlq_items_present"
             ],
-            "description": "Type of conflict:\n- 'event_disabled': Event catalog event is disabled while use case is enabled\n- 'all_webhooks_disabled': All webhooks are disabled while use case is enabled\n- 'event_enabled_while_disabled': Event is enabled while use case is disabled\n- 'webhook_enabled_while_disabled': A webhook is enabled while use case is disabled\n"
+            "description": "Type of conflict:\n- 'event_disabled': Event catalog event is disabled while use case is enabled\n- 'all_webhooks_disabled': All webhooks are disabled while use case is enabled\n- 'event_enabled_while_disabled': Event is enabled while use case is disabled\n- 'webhook_enabled_while_disabled': A webhook is enabled while use case is disabled\n- 'stream_blocked': The outbound stream is halted by a poison message awaiting operator action or consumer ack (poll mode)\n- 'dlq_items_present': Dead-lettered messages await redrive or expiry (poll mode)\n"
           },
           "webhookId": {
             "type": "string",
@@ -6647,6 +7082,320 @@
           "message": {
             "type": "string",
             "description": "Human-readable description of the conflict"
+          }
+        }
+      },
+      "PollOutboundMessagesRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "maximum": 100,
+            "minimum": 1,
+            "default": 10,
+            "description": "Maximum number of messages to lease in this batch. The ~5.5 MB\nresponse cap may truncate the batch earlier when payloads are\nlarge — the leased run shrinks accordingly.\n"
+          }
+        }
+      },
+      "OutboundMessage": {
+        "type": "object",
+        "required": [
+          "id",
+          "lease_token",
+          "use_case_id",
+          "event_name",
+          "event_id",
+          "group",
+          "payload",
+          "enqueued_at"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Opaque message id (msg_…) — stable per message across leases"
+          },
+          "lease_token": {
+            "type": "string",
+            "description": "Opaque lease token (lt_…) — echo back on ack"
+          },
+          "use_case_id": {
+            "type": "string",
+            "description": "The poll-mode use case that produced this message"
+          },
+          "event_name": {
+            "type": "string",
+            "description": "Standardized event name (e.g. contract.updated)"
+          },
+          "event_id": {
+            "type": "string",
+            "description": "Unique id of the originating event"
+          },
+          "group": {
+            "type": "string",
+            "description": "Ordering group — messages sharing a group are strictly ordered,\ndistinct groups are independent. Constant \"0\" in v1.\n"
+          },
+          "payload": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "The raw standardized event-catalog event, always inlined as-is"
+          },
+          "enqueued_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the message was enqueued"
+          }
+        }
+      },
+      "PollOutboundMessagesResponse": {
+        "type": "object",
+        "required": [
+          "messages",
+          "visibility_timeout_seconds",
+          "has_more"
+        ],
+        "properties": {
+          "messages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OutboundMessage"
+            },
+            "description": "The leased batch in strict stream order (empty when contended or drained)"
+          },
+          "visibility_timeout_seconds": {
+            "type": "integer",
+            "description": "Effective visibility timeout for this lease — a per-integration\nserver-side setting (default 300 seconds)\n"
+          },
+          "has_more": {
+            "type": "boolean",
+            "description": "Whether more messages are available beyond this batch"
+          }
+        }
+      },
+      "AckOutboundMessagesRequest": {
+        "type": "object",
+        "required": [
+          "acks"
+        ],
+        "properties": {
+          "acks": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 100,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "id",
+                "lease_token"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "The message id (msg_…) to acknowledge"
+                },
+                "lease_token": {
+                  "type": "string",
+                  "description": "The lease token (lt_…) returned by the poll that leased this message"
+                }
+              }
+            }
+          }
+        }
+      },
+      "AckResult": {
+        "type": "object",
+        "required": [
+          "id",
+          "status"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The acknowledged message id"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "accepted",
+              "rejected"
+            ]
+          },
+          "reason": {
+            "type": "string",
+            "enum": [
+              "stale_lease",
+              "out_of_order",
+              "not_found"
+            ],
+            "description": "Rejection reason — present only when status is rejected"
+          }
+        }
+      },
+      "AckOutboundMessagesResponse": {
+        "type": "object",
+        "required": [
+          "results"
+        ],
+        "properties": {
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AckResult"
+            },
+            "description": "Per-id acknowledgement outcome"
+          }
+        }
+      },
+      "OutboundDlqMessage": {
+        "type": "object",
+        "required": [
+          "id",
+          "use_case_id",
+          "event_name",
+          "event_id",
+          "dead_lettered_at",
+          "delivery_attempts"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Opaque message id (msg_…) of the dead-lettered message"
+          },
+          "use_case_id": {
+            "type": "string",
+            "description": "The poll-mode use case that produced this message"
+          },
+          "event_name": {
+            "type": "string",
+            "description": "Standardized event name (e.g. contract.updated)"
+          },
+          "event_id": {
+            "type": "string",
+            "description": "Unique id of the originating event"
+          },
+          "enqueued_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the message was originally enqueued"
+          },
+          "dead_lettered_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the message was dead-lettered"
+          },
+          "delivery_attempts": {
+            "type": "integer",
+            "description": "Delivery attempts at the moment the message was dead-lettered"
+          },
+          "reason": {
+            "type": "string",
+            "description": "Why the message was dead-lettered (policy or operator reason)"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the DLQ entry expires (retention window re-armed at dead-letter time)"
+          }
+        }
+      },
+      "OutboundDlqListResponse": {
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OutboundDlqMessage"
+            },
+            "description": "Dead-lettered messages, oldest first"
+          },
+          "next_token": {
+            "type": "string",
+            "description": "Opaque pagination token — present when more entries exist"
+          }
+        }
+      },
+      "RedriveOutboundDlqRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "ids"
+        ],
+        "properties": {
+          "ids": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 100,
+            "items": {
+              "type": "string"
+            },
+            "description": "Message ids (msg_…) of the DLQ entries to redrive"
+          }
+        }
+      },
+      "RedriveOutboundDlqResult": {
+        "type": "object",
+        "required": [
+          "id",
+          "status"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The requested message id"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "redriven",
+              "not_found"
+            ],
+            "description": "Outcome — `redriven` re-enqueued at the tail; `not_found` for\nunknown ids or entries concurrently redriven/expired\n"
+          }
+        }
+      },
+      "RedriveOutboundDlqResponse": {
+        "type": "object",
+        "required": [
+          "results"
+        ],
+        "properties": {
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RedriveOutboundDlqResult"
+            },
+            "description": "Per-id redrive outcome, input order preserved"
+          }
+        }
+      },
+      "UnblockOutboundStreamRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "reason": {
+            "type": "string",
+            "maxLength": 500,
+            "description": "Operator reason recorded on the dead-lettered head"
+          }
+        }
+      },
+      "UnblockOutboundStreamResponse": {
+        "type": "object",
+        "required": [
+          "unblocked"
+        ],
+        "properties": {
+          "unblocked": {
+            "type": "boolean",
+            "description": "Whether a blocked head was skipped (false = no-op, stream was not blocked)"
+          },
+          "dead_lettered_id": {
+            "type": "string",
+            "description": "Message id of the skipped head — present only when unblocked is true"
           }
         }
       },
