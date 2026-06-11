@@ -179,18 +179,14 @@ export default defineCommand({
             const zipSize = await uploadDirectoryAsZip(upload_url, zipPath);
             log.success(`Uploaded zip for ${comp.id} (${formatFileSize(zipSize)})`);
 
-            // Inject the artifact URL into surfaces (for app bridge components)
             if (componentPayload.surfaces && typeof componentPayload.surfaces === 'object') {
+              const appUrl = artifact_url.replace(/\/[^/]+$/, '/index.html');
               for (const surface of Object.values(
                 componentPayload.surfaces as Record<string, Record<string, unknown>>,
               )) {
                 if (surface && typeof surface === 'object') {
-                  if ('app_url' in surface) {
-                    surface.app_url = artifact_url;
-                  }
-                  if ('zip_url' in surface) {
-                    surface.zip_url = artifact_url;
-                  }
+                  surface.app_url = appUrl;
+                  surface.zip_url = artifact_url;
                 }
               }
             }
