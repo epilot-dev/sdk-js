@@ -226,6 +226,1027 @@ export declare namespace Components {
              */
             source_ip?: string;
         }
+        export interface AckOutboundMessagesRequest {
+            acks: [
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                },
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?,
+                {
+                    /**
+                     * The message id (msg_…) to acknowledge
+                     */
+                    id: string;
+                    /**
+                     * The lease token (lt_…) returned by the poll that leased this message
+                     */
+                    lease_token: string;
+                }?
+            ];
+        }
+        export interface AckOutboundMessagesResponse {
+            /**
+             * Per-id acknowledgement outcome
+             */
+            results: AckResult[];
+        }
+        export interface AckResult {
+            /**
+             * The acknowledged message id
+             */
+            id: string;
+            status: "accepted" | "rejected";
+            /**
+             * Rejection reason — present only when status is rejected
+             */
+            reason?: "stale_lease" | "out_of_order" | "not_found";
+        }
         /**
          * Auto-refresh settings for keeping integration data fresh
          */
@@ -467,26 +1488,9 @@ export declare namespace Components {
             component_id: string; // uuid
         }
         /**
-         * Configuration for how the transformed event should be delivered
+         * Configuration for how the event should be delivered. webhook = push delivery via svc-webhooks (JSONata-transformed payload); poll = pull-based queue delivery where the consumer fetches items via the poll API (raw event payload)
          */
-        export interface DeliveryConfig {
-            /**
-             * Delivery mechanism type (currently only webhook is supported)
-             */
-            type: "webhook";
-            /**
-             * Reference to the webhook configuration in svc-webhooks
-             */
-            webhook_id: string;
-            /**
-             * Cached webhook name for display purposes
-             */
-            webhook_name?: string;
-            /**
-             * Cached webhook URL for display purposes
-             */
-            webhook_url?: string;
-        }
+        export type DeliveryConfig = /* Configuration for how the event should be delivered. webhook = push delivery via svc-webhooks (JSONata-transformed payload); poll = pull-based queue delivery where the consumer fetches items via the poll API (raw event payload) */ /* Push delivery of the transformed event to a webhook via svc-webhooks */ WebhookDeliveryConfig | /* Pull-based queue delivery. Items carry the raw standardized event-catalog payload; no JSONata mapping is applied in poll mode. Consumers fetch and acknowledge items via the poll API. */ PollDeliveryConfig;
         export interface EmbeddedFileProxyUseCaseRequest {
             /**
              * Optional use case ID for update matching.
@@ -2494,9 +3498,11 @@ export declare namespace Components {
              * - 'all_webhooks_disabled': All webhooks are disabled while use case is enabled
              * - 'event_enabled_while_disabled': Event is enabled while use case is disabled
              * - 'webhook_enabled_while_disabled': A webhook is enabled while use case is disabled
+             * - 'stream_blocked': The outbound stream is halted by a poison message awaiting operator action or consumer ack (poll mode)
+             * - 'dlq_items_present': Dead-lettered messages await redrive or expiry (poll mode)
              *
              */
-            type: "event_disabled" | "all_webhooks_disabled" | "event_enabled_while_disabled" | "webhook_enabled_while_disabled";
+            type: "event_disabled" | "all_webhooks_disabled" | "event_enabled_while_disabled" | "webhook_enabled_while_disabled" | "stream_blocked" | "dlq_items_present";
             /**
              * Webhook ID (only present for webhook_enabled_while_disabled conflicts)
              */
@@ -2505,6 +3511,54 @@ export declare namespace Components {
              * Human-readable description of the conflict
              */
             message: string;
+        }
+        export interface OutboundDlqListResponse {
+            /**
+             * Dead-lettered messages, oldest first
+             */
+            items: OutboundDlqMessage[];
+            /**
+             * Opaque pagination token — present when more entries exist
+             */
+            next_token?: string;
+        }
+        export interface OutboundDlqMessage {
+            /**
+             * Opaque message id (msg_…) of the dead-lettered message
+             */
+            id: string;
+            /**
+             * The poll-mode use case that produced this message
+             */
+            use_case_id: string;
+            /**
+             * Standardized event name (e.g. contract.updated)
+             */
+            event_name: string;
+            /**
+             * Unique id of the originating event
+             */
+            event_id: string;
+            /**
+             * When the message was originally enqueued
+             */
+            enqueued_at?: string; // date-time
+            /**
+             * When the message was dead-lettered
+             */
+            dead_lettered_at: string; // date-time
+            /**
+             * Delivery attempts at the moment the message was dead-lettered
+             */
+            delivery_attempts: number;
+            /**
+             * Why the message was dead-lettered (policy or operator reason)
+             */
+            reason?: string;
+            /**
+             * When the DLQ entry expires (retention window re-armed at dead-letter time)
+             */
+            expires_at?: string; // date-time
         }
         /**
          * Configuration for outbound use cases. Defines the event that triggers the flow and the webhook mappings.
@@ -2520,12 +3574,12 @@ export declare namespace Components {
              * List of mappings that transform and deliver the event
              */
             mappings: [
-                /* A mapping that transforms an event and delivers it to a webhook */ OutboundMapping,
-                .../* A mapping that transforms an event and delivers it to a webhook */ OutboundMapping[]
+                /* A mapping that delivers an event to an external system — either pushed to a webhook (with a JSONata payload transformation) or made available on the pull-based poll queue (raw event payload, no transformation) */ OutboundMapping,
+                .../* A mapping that delivers an event to an external system — either pushed to a webhook (with a JSONata payload transformation) or made available on the pull-based poll queue (raw event payload, no transformation) */ OutboundMapping[]
             ];
         }
         /**
-         * A mapping that transforms an event and delivers it to a webhook
+         * A mapping that delivers an event to an external system — either pushed to a webhook (with a JSONata payload transformation) or made available on the pull-based poll queue (raw event payload, no transformation)
          */
         export interface OutboundMapping {
             /**
@@ -2539,16 +3593,16 @@ export declare namespace Components {
              */
             name: string;
             /**
-             * JSONata expression to transform the event payload
+             * JSONata expression to transform the event payload. Required for webhook delivery; ignored for poll delivery.
              * example:
              * { "id": entity._id, "customer": entity.customer_name }
              */
-            jsonata_expression: string;
+            jsonata_expression?: string;
             /**
              * Whether this mapping is active
              */
             enabled: boolean;
-            delivery: /* Configuration for how the transformed event should be delivered */ DeliveryConfig;
+            delivery: /* Configuration for how the event should be delivered. webhook = push delivery via svc-webhooks (JSONata-transformed payload); poll = pull-based queue delivery where the consumer fetches items via the poll API (raw event payload) */ DeliveryConfig;
             /**
              * Timestamp when the mapping was created
              */
@@ -2557,6 +3611,44 @@ export declare namespace Components {
              * Timestamp when the mapping was last updated
              */
             updated_at?: string; // date-time
+        }
+        export interface OutboundMessage {
+            /**
+             * Opaque message id (msg_…) — stable per message across leases
+             */
+            id: string;
+            /**
+             * Opaque lease token (lt_…) — echo back on ack
+             */
+            lease_token: string;
+            /**
+             * The poll-mode use case that produced this message
+             */
+            use_case_id: string;
+            /**
+             * Standardized event name (e.g. contract.updated)
+             */
+            event_name: string;
+            /**
+             * Unique id of the originating event
+             */
+            event_id: string;
+            /**
+             * Ordering group — messages sharing a group are strictly ordered,
+             * distinct groups are independent. Constant "0" in v1.
+             *
+             */
+            group: string;
+            /**
+             * The raw standardized event-catalog event, always inlined as-is
+             */
+            payload: {
+                [name: string]: any;
+            };
+            /**
+             * When the message was enqueued
+             */
+            enqueued_at: string; // date-time
         }
         export interface OutboundMonitoringEvent {
             /**
@@ -2619,6 +3711,42 @@ export declare namespace Components {
              * When the event was last updated
              */
             updated_at?: string; // date-time
+        }
+        /**
+         * Queue/consumer health for a poll-mode use case. Present only on use
+         * cases with a poll delivery mapping — webhook-only use cases are
+         * unaffected. Depth/age/DLQ numbers are first-page approximations.
+         *
+         */
+        export interface OutboundPollStatus {
+            /**
+             * Unconsumed messages attributable to this use case (first-page approximation)
+             */
+            queue_depth: number;
+            /**
+             * Age of the oldest unconsumed message in seconds — null when the queue is empty
+             */
+            oldest_unconsumed_age_seconds: number | null;
+            /**
+             * Timestamp of the last successful poll lease — null before the first poll
+             */
+            last_poll_at: string | null; // date-time
+            /**
+             * Timestamp of the last committed acknowledgment — null before the first ack
+             */
+            last_ack_at: string | null; // date-time
+            /**
+             * Whether the integration's outbound stream is currently halted by a
+             * blocked head message (poison_policy 'block'). Stream-level flag —
+             * the same value is reported on every poll use case of the
+             * integration, because the stream spans them.
+             *
+             */
+            blocked: boolean;
+            /**
+             * Dead-lettered messages of this use case awaiting redrive or expiry (first-page approximation)
+             */
+            dlq_count: number;
         }
         export interface OutboundStatusResponse {
             useCases: OutboundUseCaseStatus[];
@@ -2747,6 +3875,59 @@ export declare namespace Components {
              * List of detected conflicts, if any
              */
             conflicts?: OutboundConflict[];
+            poll?: /**
+             * Queue/consumer health for a poll-mode use case. Present only on use
+             * cases with a poll delivery mapping — webhook-only use cases are
+             * unaffected. Depth/age/DLQ numbers are first-page approximations.
+             *
+             */
+            OutboundPollStatus;
+        }
+        /**
+         * Pull-based queue delivery. Items carry the raw standardized event-catalog payload; no JSONata mapping is applied in poll mode. Consumers fetch and acknowledge items via the poll API.
+         */
+        export interface PollDeliveryConfig {
+            /**
+             * Delivery mechanism type
+             */
+            type: "poll";
+            /**
+             * How long undelivered queue items are retained before expiry
+             */
+            retention_days?: number;
+            /**
+             * What happens when an item exhausts max_delivery_attempts: dead_letter routes the exhausted item to the dead-letter queue; block halts the queue until operator/consumer action. Enforcement lands with the queue consumer (Phase 10) — this field defines the contract.
+             */
+            poison_policy?: "dead_letter" | "block";
+            /**
+             * Maximum delivery attempts before the poison_policy is applied
+             */
+            max_delivery_attempts?: number;
+        }
+        export interface PollOutboundMessagesRequest {
+            /**
+             * Maximum number of messages to lease in this batch. The ~5.5 MB
+             * response cap may truncate the batch earlier when payloads are
+             * large — the leased run shrinks accordingly.
+             *
+             */
+            limit?: number;
+        }
+        export interface PollOutboundMessagesResponse {
+            /**
+             * The leased batch in strict stream order (empty when contended or drained)
+             */
+            messages: OutboundMessage[];
+            /**
+             * Effective visibility timeout for this lease — a per-integration
+             * server-side setting (default 300 seconds)
+             *
+             */
+            visibility_timeout_seconds: number;
+            /**
+             * Whether more messages are available beyond this batch
+             */
+            has_more: boolean;
         }
         /**
          * Origin/type of an epilot portal configuration.
@@ -3135,6 +4316,131 @@ export declare namespace Components {
                  */
                 event_id?: string;
             };
+        }
+        export interface RedriveOutboundDlqRequest {
+            /**
+             * Message ids (msg_…) of the DLQ entries to redrive
+             */
+            ids: [
+                string,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?
+            ];
+        }
+        export interface RedriveOutboundDlqResponse {
+            /**
+             * Per-id redrive outcome, input order preserved
+             */
+            results: RedriveOutboundDlqResult[];
+        }
+        export interface RedriveOutboundDlqResult {
+            /**
+             * The requested message id
+             */
+            id: string;
+            /**
+             * Outcome — `redriven` re-enqueued at the tail; `not_found` for
+             * unknown ids or entries concurrently redriven/expired
+             *
+             */
+            status: "redriven" | "not_found";
         }
         export interface RelationConfig {
             /**
@@ -3822,6 +5128,22 @@ export declare namespace Components {
              */
             variants?: /* Describes the inferred type shape of a JSONata expression */ TypeDescriptor[];
         }
+        export interface UnblockOutboundStreamRequest {
+            /**
+             * Operator reason recorded on the dead-lettered head
+             */
+            reason?: string;
+        }
+        export interface UnblockOutboundStreamResponse {
+            /**
+             * Whether a blocked head was skipped (false = no-op, stream was not blocked)
+             */
+            unblocked: boolean;
+            /**
+             * Message id of the skipped head — present only when unblocked is true
+             */
+            dead_lettered_id?: string;
+        }
         export interface UpdateFileProxyUseCaseRequest {
             /**
              * Use case name
@@ -4120,6 +5442,27 @@ export declare namespace Components {
             response_shape: /* Describes the inferred type shape of a JSONata expression */ TypeDescriptor;
             existing_annotations?: /* Developer-provided type annotations for a use case's request and response fields */ TypeAnnotations;
         }
+        /**
+         * Push delivery of the transformed event to a webhook via svc-webhooks
+         */
+        export interface WebhookDeliveryConfig {
+            /**
+             * Delivery mechanism type
+             */
+            type: "webhook";
+            /**
+             * Reference to the webhook configuration in svc-webhooks
+             */
+            webhook_id: string;
+            /**
+             * Cached webhook name for display purposes
+             */
+            webhook_name?: string;
+            /**
+             * Cached webhook URL for display purposes
+             */
+            webhook_url?: string;
+        }
         export interface WebhookStatus {
             /**
              * Unique identifier for the webhook
@@ -4137,6 +5480,23 @@ export declare namespace Components {
     }
 }
 export declare namespace Paths {
+    namespace AckOutboundMessages {
+        namespace Parameters {
+            export type IntegrationId = string; // uuid
+        }
+        export interface PathParameters {
+            integrationId: Parameters.IntegrationId /* uuid */;
+        }
+        export type RequestBody = Components.Schemas.AckOutboundMessagesRequest;
+        namespace Responses {
+            export type $200 = Components.Schemas.AckOutboundMessagesResponse;
+            export type $400 = Components.Responses.BadRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace AcknowledgeTracking {
         export interface RequestBody {
             /**
@@ -4499,6 +5859,28 @@ export declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace ListOutboundDlqMessages {
+        namespace Parameters {
+            export type IntegrationId = string; // uuid
+            export type Limit = number;
+            export type NextToken = string;
+        }
+        export interface PathParameters {
+            integrationId: Parameters.IntegrationId /* uuid */;
+        }
+        export interface QueryParameters {
+            limit?: Parameters.Limit;
+            next_token?: Parameters.NextToken;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.OutboundDlqListResponse;
+            export type $400 = Components.Responses.BadRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace ListSecureProxies {
         namespace Responses {
             export interface $200 {
@@ -4608,6 +5990,23 @@ export declare namespace Paths {
             export type $404 = Components.Responses.NotFound;
             export type $500 = Components.Responses.InternalServerError;
             export type $502 = Components.Schemas.ManagedCallErrorResponse;
+        }
+    }
+    namespace PollOutboundMessages {
+        namespace Parameters {
+            export type IntegrationId = string; // uuid
+        }
+        export interface PathParameters {
+            integrationId: Parameters.IntegrationId /* uuid */;
+        }
+        export type RequestBody = Components.Schemas.PollOutboundMessagesRequest;
+        namespace Responses {
+            export type $200 = Components.Schemas.PollOutboundMessagesResponse;
+            export type $400 = Components.Responses.BadRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
         }
     }
     namespace ProcessErpUpdatesEvents {
@@ -4740,6 +6139,23 @@ export declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace RedriveOutboundDlqMessages {
+        namespace Parameters {
+            export type IntegrationId = string; // uuid
+        }
+        export interface PathParameters {
+            integrationId: Parameters.IntegrationId /* uuid */;
+        }
+        export type RequestBody = Components.Schemas.RedriveOutboundDlqRequest;
+        namespace Responses {
+            export type $200 = Components.Schemas.RedriveOutboundDlqResponse;
+            export type $400 = Components.Responses.BadRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace ReplayEvents {
         namespace Parameters {
             export type IntegrationId = string; // uuid
@@ -4821,6 +6237,23 @@ export declare namespace Paths {
             }
             export interface $500 {
             }
+        }
+    }
+    namespace UnblockOutboundStream {
+        namespace Parameters {
+            export type IntegrationId = string; // uuid
+        }
+        export interface PathParameters {
+            integrationId: Parameters.IntegrationId /* uuid */;
+        }
+        export type RequestBody = Components.Schemas.UnblockOutboundStreamRequest;
+        namespace Responses {
+            export type $200 = Components.Schemas.UnblockOutboundStreamResponse;
+            export type $400 = Components.Responses.BadRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
         }
     }
     namespace UpdateIntegration {
@@ -5331,6 +6764,92 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetOutboundStatus.Responses.$200>
+  /**
+   * pollOutboundMessages - pollOutboundMessages
+   * 
+   * Poll outbound messages for an integration's poll-mode use cases.
+   * Takes a lease on the head-of-line batch of the integration's FIFO stream:
+   * the returned messages stay invisible to subsequent polls until they are
+   * acknowledged or the visibility timeout elapses. POST because taking a
+   * lease mutates server state — auto-retrying middleware must not burn
+   * leases. One in-flight batch per stream: while a lease is active (or
+   * another poll wins the race), the response is an empty batch
+   * (`messages: []`), not an error. Requires the `integration:consume` grant.
+   * 
+   */
+  'pollOutboundMessages'(
+    parameters?: Parameters<Paths.PollOutboundMessages.PathParameters> | null,
+    data?: Paths.PollOutboundMessages.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.PollOutboundMessages.Responses.$200>
+  /**
+   * ackOutboundMessages - ackOutboundMessages
+   * 
+   * Acknowledge polled outbound messages. Acks are validated against the
+   * active lease and committed as a prefix-contiguous cursor advance:
+   * messages must be acknowledged in stream order. Out-of-order acks past
+   * the first gap are rejected per id (`out_of_order`), acks with an
+   * outdated lease token are rejected (`stale_lease`), and unknown ids are
+   * rejected (`not_found`). Acknowledged messages are never delivered
+   * again. Requires the `integration:consume` grant.
+   * 
+   */
+  'ackOutboundMessages'(
+    parameters?: Parameters<Paths.AckOutboundMessages.PathParameters> | null,
+    data?: Paths.AckOutboundMessages.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.AckOutboundMessages.Responses.$200>
+  /**
+   * listOutboundDlqMessages - listOutboundDlqMessages
+   * 
+   * List an integration's dead-lettered outbound queue messages
+   * (poison_policy enforcement and operator skips move messages here).
+   * Operator endpoint — requires the `integration:manage` grant. Message
+   * payloads are NOT included in listings: entries are keyed by the
+   * opaque message id and carry delivery metadata only. Paginated via an
+   * opaque `next_token`.
+   * 
+   */
+  'listOutboundDlqMessages'(
+    parameters?: Parameters<Paths.ListOutboundDlqMessages.QueryParameters & Paths.ListOutboundDlqMessages.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ListOutboundDlqMessages.Responses.$200>
+  /**
+   * redriveOutboundDlqMessages - redriveOutboundDlqMessages
+   * 
+   * Redrive selected dead-lettered messages back into the live stream.
+   * Operator endpoint — requires the `integration:manage` grant.
+   * A redriven message is re-enqueued at the tail with a new id and
+   * sequence — it is delivered out of its original per-entity order (the
+   * stream has moved on); this is inherent to redrive and matches SQS DLQ
+   * semantics. The redriven copy starts with zero delivery attempts and a
+   * fresh retention window; the original DLQ entry is removed. Per-id
+   * results report `redriven` or `not_found` (unknown ids, or entries
+   * concurrently redriven/expired).
+   * 
+   */
+  'redriveOutboundDlqMessages'(
+    parameters?: Parameters<Paths.RedriveOutboundDlqMessages.PathParameters> | null,
+    data?: Paths.RedriveOutboundDlqMessages.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.RedriveOutboundDlqMessages.Responses.$200>
+  /**
+   * unblockOutboundStream - unblockOutboundStream
+   * 
+   * Unblock an integration's outbound stream halted by the `block`
+   * poison policy: skips (dead-letters) the current blocked head message,
+   * emitting MSG_DEAD_LETTERED and letting the next message become the
+   * head. Operator endpoint — requires the `integration:manage` grant.
+   * Returns `unblocked: false` as a no-op when the stream is not
+   * currently blocked (or the state moved concurrently) — safe to retry.
+   * 
+   */
+  'unblockOutboundStream'(
+    parameters?: Parameters<Paths.UnblockOutboundStream.PathParameters> | null,
+    data?: Paths.UnblockOutboundStream.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.UnblockOutboundStream.Responses.$200>
   /**
    * queryAccessLogs - queryAccessLogs
    * 
@@ -5937,6 +7456,102 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetOutboundStatus.Responses.$200>
   }
+  ['/v1/integrations/{integrationId}/outbound/messages/poll']: {
+    /**
+     * pollOutboundMessages - pollOutboundMessages
+     * 
+     * Poll outbound messages for an integration's poll-mode use cases.
+     * Takes a lease on the head-of-line batch of the integration's FIFO stream:
+     * the returned messages stay invisible to subsequent polls until they are
+     * acknowledged or the visibility timeout elapses. POST because taking a
+     * lease mutates server state — auto-retrying middleware must not burn
+     * leases. One in-flight batch per stream: while a lease is active (or
+     * another poll wins the race), the response is an empty batch
+     * (`messages: []`), not an error. Requires the `integration:consume` grant.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.PollOutboundMessages.PathParameters> | null,
+      data?: Paths.PollOutboundMessages.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.PollOutboundMessages.Responses.$200>
+  }
+  ['/v1/integrations/{integrationId}/outbound/messages/ack']: {
+    /**
+     * ackOutboundMessages - ackOutboundMessages
+     * 
+     * Acknowledge polled outbound messages. Acks are validated against the
+     * active lease and committed as a prefix-contiguous cursor advance:
+     * messages must be acknowledged in stream order. Out-of-order acks past
+     * the first gap are rejected per id (`out_of_order`), acks with an
+     * outdated lease token are rejected (`stale_lease`), and unknown ids are
+     * rejected (`not_found`). Acknowledged messages are never delivered
+     * again. Requires the `integration:consume` grant.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.AckOutboundMessages.PathParameters> | null,
+      data?: Paths.AckOutboundMessages.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.AckOutboundMessages.Responses.$200>
+  }
+  ['/v1/integrations/{integrationId}/outbound/messages/dlq']: {
+    /**
+     * listOutboundDlqMessages - listOutboundDlqMessages
+     * 
+     * List an integration's dead-lettered outbound queue messages
+     * (poison_policy enforcement and operator skips move messages here).
+     * Operator endpoint — requires the `integration:manage` grant. Message
+     * payloads are NOT included in listings: entries are keyed by the
+     * opaque message id and carry delivery metadata only. Paginated via an
+     * opaque `next_token`.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.ListOutboundDlqMessages.QueryParameters & Paths.ListOutboundDlqMessages.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ListOutboundDlqMessages.Responses.$200>
+  }
+  ['/v1/integrations/{integrationId}/outbound/messages/dlq/redrive']: {
+    /**
+     * redriveOutboundDlqMessages - redriveOutboundDlqMessages
+     * 
+     * Redrive selected dead-lettered messages back into the live stream.
+     * Operator endpoint — requires the `integration:manage` grant.
+     * A redriven message is re-enqueued at the tail with a new id and
+     * sequence — it is delivered out of its original per-entity order (the
+     * stream has moved on); this is inherent to redrive and matches SQS DLQ
+     * semantics. The redriven copy starts with zero delivery attempts and a
+     * fresh retention window; the original DLQ entry is removed. Per-id
+     * results report `redriven` or `not_found` (unknown ids, or entries
+     * concurrently redriven/expired).
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.RedriveOutboundDlqMessages.PathParameters> | null,
+      data?: Paths.RedriveOutboundDlqMessages.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.RedriveOutboundDlqMessages.Responses.$200>
+  }
+  ['/v1/integrations/{integrationId}/outbound/messages/unblock']: {
+    /**
+     * unblockOutboundStream - unblockOutboundStream
+     * 
+     * Unblock an integration's outbound stream halted by the `block`
+     * poison policy: skips (dead-letters) the current blocked head message,
+     * emitting MSG_DEAD_LETTERED and letting the next message become the
+     * head. Operator endpoint — requires the `integration:manage` grant.
+     * Returns `unblocked: false` as a no-op when the stream is not
+     * currently blocked (or the state moved concurrently) — safe to retry.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.UnblockOutboundStream.PathParameters> | null,
+      data?: Paths.UnblockOutboundStream.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.UnblockOutboundStream.Responses.$200>
+  }
   ['/v1/integrations/{integrationId}/monitoring/access-logs']: {
     /**
      * queryAccessLogs - queryAccessLogs
@@ -6113,6 +7728,9 @@ export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
 
 export type AccessLogEntry = Components.Schemas.AccessLogEntry;
+export type AckOutboundMessagesRequest = Components.Schemas.AckOutboundMessagesRequest;
+export type AckOutboundMessagesResponse = Components.Schemas.AckOutboundMessagesResponse;
+export type AckResult = Components.Schemas.AckResult;
 export type AutoRefreshSettings = Components.Schemas.AutoRefreshSettings;
 export type CommitTypesRequest = Components.Schemas.CommitTypesRequest;
 export type CommitTypesResponse = Components.Schemas.CommitTypesResponse;
@@ -6195,13 +7813,20 @@ export type MonitoringEventV2 = Components.Schemas.MonitoringEventV2;
 export type MonitoringStats = Components.Schemas.MonitoringStats;
 export type MonitoringStatsV2 = Components.Schemas.MonitoringStatsV2;
 export type OutboundConflict = Components.Schemas.OutboundConflict;
+export type OutboundDlqListResponse = Components.Schemas.OutboundDlqListResponse;
+export type OutboundDlqMessage = Components.Schemas.OutboundDlqMessage;
 export type OutboundIntegrationEventConfiguration = Components.Schemas.OutboundIntegrationEventConfiguration;
 export type OutboundMapping = Components.Schemas.OutboundMapping;
+export type OutboundMessage = Components.Schemas.OutboundMessage;
 export type OutboundMonitoringEvent = Components.Schemas.OutboundMonitoringEvent;
+export type OutboundPollStatus = Components.Schemas.OutboundPollStatus;
 export type OutboundStatusResponse = Components.Schemas.OutboundStatusResponse;
 export type OutboundUseCase = Components.Schemas.OutboundUseCase;
 export type OutboundUseCaseHistoryEntry = Components.Schemas.OutboundUseCaseHistoryEntry;
 export type OutboundUseCaseStatus = Components.Schemas.OutboundUseCaseStatus;
+export type PollDeliveryConfig = Components.Schemas.PollDeliveryConfig;
+export type PollOutboundMessagesRequest = Components.Schemas.PollOutboundMessagesRequest;
+export type PollOutboundMessagesResponse = Components.Schemas.PollOutboundMessagesResponse;
 export type PortalOrigin = Components.Schemas.PortalOrigin;
 export type PortalRefConfig = Components.Schemas.PortalRefConfig;
 export type PortalRefFilter = Components.Schemas.PortalRefFilter;
@@ -6211,6 +7836,9 @@ export type QueryEventsRequest = Components.Schemas.QueryEventsRequest;
 export type QueryInboundMonitoringEventsRequest = Components.Schemas.QueryInboundMonitoringEventsRequest;
 export type QueryMonitoringEventsV2Request = Components.Schemas.QueryMonitoringEventsV2Request;
 export type QueryOutboundMonitoringEventsRequest = Components.Schemas.QueryOutboundMonitoringEventsRequest;
+export type RedriveOutboundDlqRequest = Components.Schemas.RedriveOutboundDlqRequest;
+export type RedriveOutboundDlqResponse = Components.Schemas.RedriveOutboundDlqResponse;
+export type RedriveOutboundDlqResult = Components.Schemas.RedriveOutboundDlqResult;
 export type RelationConfig = Components.Schemas.RelationConfig;
 export type RelationItemConfig = Components.Schemas.RelationItemConfig;
 export type RelationRefItemConfig = Components.Schemas.RelationRefItemConfig;
@@ -6235,6 +7863,8 @@ export type TriggerErpActionRequest = Components.Schemas.TriggerErpActionRequest
 export type TriggerWebhookResp = Components.Schemas.TriggerWebhookResp;
 export type TypeAnnotations = Components.Schemas.TypeAnnotations;
 export type TypeDescriptor = Components.Schemas.TypeDescriptor;
+export type UnblockOutboundStreamRequest = Components.Schemas.UnblockOutboundStreamRequest;
+export type UnblockOutboundStreamResponse = Components.Schemas.UnblockOutboundStreamResponse;
 export type UpdateFileProxyUseCaseRequest = Components.Schemas.UpdateFileProxyUseCaseRequest;
 export type UpdateInboundUseCaseRequest = Components.Schemas.UpdateInboundUseCaseRequest;
 export type UpdateIntegrationRequest = Components.Schemas.UpdateIntegrationRequest;
@@ -6249,4 +7879,5 @@ export type UseCaseBase = Components.Schemas.UseCaseBase;
 export type UseCaseHistoryEntry = Components.Schemas.UseCaseHistoryEntry;
 export type UseCaseHistoryEntryBase = Components.Schemas.UseCaseHistoryEntryBase;
 export type UseCaseTypePreview = Components.Schemas.UseCaseTypePreview;
+export type WebhookDeliveryConfig = Components.Schemas.WebhookDeliveryConfig;
 export type WebhookStatus = Components.Schemas.WebhookStatus;

@@ -56,6 +56,11 @@ const { data } = await integrationToolkitClient.acknowledgeTracking(...)
 - [`setIntegrationAppMapping`](#setintegrationappmapping)
 - [`deleteIntegrationAppMapping`](#deleteintegrationappmapping)
 - [`getOutboundStatus`](#getoutboundstatus)
+- [`pollOutboundMessages`](#polloutboundmessages)
+- [`ackOutboundMessages`](#ackoutboundmessages)
+- [`listOutboundDlqMessages`](#listoutbounddlqmessages)
+- [`redriveOutboundDlqMessages`](#redriveoutbounddlqmessages)
+- [`unblockOutboundStream`](#unblockoutboundstream)
 - [`listSecureProxies`](#listsecureproxies)
 - [`generateTypesPreview`](#generatetypespreview)
 - [`generateTypes`](#generatetypes)
@@ -187,10 +192,26 @@ const { data } = await integrationToolkitClient.acknowledgeTracking(...)
 - [`IntegrationConfigurationV2`](#integrationconfigurationv2)
 - [`OutboundMapping`](#outboundmapping)
 - [`DeliveryConfig`](#deliveryconfig)
+- [`WebhookDeliveryConfig`](#webhookdeliveryconfig)
+- [`PollDeliveryConfig`](#polldeliveryconfig)
 - [`OutboundStatusResponse`](#outboundstatusresponse)
 - [`OutboundUseCaseStatus`](#outboundusecasestatus)
+- [`OutboundPollStatus`](#outboundpollstatus)
 - [`WebhookStatus`](#webhookstatus)
 - [`OutboundConflict`](#outboundconflict)
+- [`PollOutboundMessagesRequest`](#polloutboundmessagesrequest)
+- [`OutboundMessage`](#outboundmessage)
+- [`PollOutboundMessagesResponse`](#polloutboundmessagesresponse)
+- [`AckOutboundMessagesRequest`](#ackoutboundmessagesrequest)
+- [`AckResult`](#ackresult)
+- [`AckOutboundMessagesResponse`](#ackoutboundmessagesresponse)
+- [`OutboundDlqMessage`](#outbounddlqmessage)
+- [`OutboundDlqListResponse`](#outbounddlqlistresponse)
+- [`RedriveOutboundDlqRequest`](#redriveoutbounddlqrequest)
+- [`RedriveOutboundDlqResult`](#redriveoutbounddlqresult)
+- [`RedriveOutboundDlqResponse`](#redriveoutbounddlqresponse)
+- [`UnblockOutboundStreamRequest`](#unblockoutboundstreamrequest)
+- [`UnblockOutboundStreamResponse`](#unblockoutboundstreamresponse)
 - [`RelationConfig`](#relationconfig)
 - [`RelationItemConfig`](#relationitemconfig)
 - [`RelationUniqueIdField`](#relationuniqueidfield)
@@ -2060,9 +2081,220 @@ const { data } = await client.getOutboundStatus({
           "webhookId": "string",
           "message": "string"
         }
-      ]
+      ],
+      "poll": {
+        "queue_depth": 0,
+        "oldest_unconsumed_age_seconds": 0,
+        "last_poll_at": "1970-01-01T00:00:00.000Z",
+        "last_ack_at": "1970-01-01T00:00:00.000Z",
+        "blocked": true,
+        "dlq_count": 0
+      }
     }
   ]
+}
+```
+
+</details>
+
+---
+
+### `pollOutboundMessages`
+
+Poll outbound messages for an integration's poll-mode use cases.
+Takes a lease on the head-of-line batch of the integration's FIFO stream:
+the returned messages stay invisible to subsequent polls unti
+
+`POST /v1/integrations/{integrationId}/outbound/messages/poll`
+
+```ts
+const { data } = await client.pollOutboundMessages(
+  {
+    integrationId: 'example',
+  },
+  {
+    limit: 10
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "messages": [
+    {
+      "id": "string",
+      "lease_token": "string",
+      "use_case_id": "string",
+      "event_name": "string",
+      "event_id": "string",
+      "group": "string",
+      "payload": {},
+      "enqueued_at": "1970-01-01T00:00:00.000Z"
+    }
+  ],
+  "visibility_timeout_seconds": 0,
+  "has_more": true
+}
+```
+
+</details>
+
+---
+
+### `ackOutboundMessages`
+
+Acknowledge polled outbound messages. Acks are validated against the
+active lease and committed as a prefix-contiguous cursor advance:
+messages must be acknowledged in stream order. Out-of-order acks 
+
+`POST /v1/integrations/{integrationId}/outbound/messages/ack`
+
+```ts
+const { data } = await client.ackOutboundMessages(
+  {
+    integrationId: 'example',
+  },
+  {
+    acks: [
+      {
+        id: 'string',
+        lease_token: 'string'
+      }
+    ]
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "results": [
+    {
+      "id": "string",
+      "status": "accepted",
+      "reason": "stale_lease"
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `listOutboundDlqMessages`
+
+List an integration's dead-lettered outbound queue messages
+(poison_policy enforcement and operator skips move messages here).
+Operator endpoint — requires the `integration:manage` grant. Message
+payl
+
+`GET /v1/integrations/{integrationId}/outbound/messages/dlq`
+
+```ts
+const { data } = await client.listOutboundDlqMessages({
+  integrationId: 'example',
+  limit: 1,
+  next_token: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "items": [
+    {
+      "id": "string",
+      "use_case_id": "string",
+      "event_name": "string",
+      "event_id": "string",
+      "enqueued_at": "1970-01-01T00:00:00.000Z",
+      "dead_lettered_at": "1970-01-01T00:00:00.000Z",
+      "delivery_attempts": 0,
+      "reason": "string",
+      "expires_at": "1970-01-01T00:00:00.000Z"
+    }
+  ],
+  "next_token": "string"
+}
+```
+
+</details>
+
+---
+
+### `redriveOutboundDlqMessages`
+
+Redrive selected dead-lettered messages back into the live stream.
+Operator endpoint — requires the `integration:manage` grant.
+A redriven message is re-enqueued at the tail with a new id and
+sequence
+
+`POST /v1/integrations/{integrationId}/outbound/messages/dlq/redrive`
+
+```ts
+const { data } = await client.redriveOutboundDlqMessages(
+  {
+    integrationId: 'example',
+  },
+  {
+    ids: ['string']
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "results": [
+    {
+      "id": "string",
+      "status": "redriven"
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `unblockOutboundStream`
+
+Unblock an integration's outbound stream halted by the `block`
+poison policy: skips (dead-letters) the current blocked head message,
+emitting MSG_DEAD_LETTERED and letting the next message become the
+
+
+`POST /v1/integrations/{integrationId}/outbound/messages/unblock`
+
+```ts
+const { data } = await client.unblockOutboundStream(
+  {
+    integrationId: 'example',
+  },
+  {
+    reason: 'string'
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "unblocked": true,
+  "dead_lettered_id": "string"
 }
 ```
 
@@ -3299,13 +3531,18 @@ type OutboundIntegrationEventConfiguration = {
   mappings: Array<{
     id?: string // uuid
     name: string
-    jsonata_expression: string
+    jsonata_expression?: string
     enabled: boolean
     delivery: {
       type: { ... }
       webhook_id: { ... }
       webhook_name?: { ... }
       webhook_url?: { ... }
+    } | {
+      type: { ... }
+      retention_days?: { ... }
+      poison_policy?: { ... }
+      max_delivery_attempts?: { ... }
     }
     created_at?: string // date-time
     updated_at?: string // date-time
@@ -3772,7 +4009,7 @@ type EmbeddedUseCaseRequest = {
     mappings: Array<{
       id?: { ... }
       name: { ... }
-      jsonata_expression: { ... }
+      jsonata_expression?: { ... }
       enabled: { ... }
       delivery: { ... }
       created_at?: { ... }
@@ -3897,7 +4134,7 @@ type EmbeddedOutboundUseCaseRequest = {
     mappings: Array<{
       id?: { ... }
       name: { ... }
-      jsonata_expression: { ... }
+      jsonata_expression?: { ... }
       enabled: { ... }
       delivery: { ... }
       created_at?: { ... }
@@ -4070,7 +4307,7 @@ type OutboundUseCase = {
     mappings: Array<{
       id?: { ... }
       name: { ... }
-      jsonata_expression: { ... }
+      jsonata_expression?: { ... }
       enabled: { ... }
       delivery: { ... }
       created_at?: { ... }
@@ -4235,7 +4472,7 @@ type UseCase = {
     mappings: Array<{
       id?: { ... }
       name: { ... }
-      jsonata_expression: { ... }
+      jsonata_expression?: { ... }
       enabled: { ... }
       delivery: { ... }
       created_at?: { ... }
@@ -4332,7 +4569,7 @@ type CreateUseCaseRequest = {
     mappings: Array<{
       id?: { ... }
       name: { ... }
-      jsonata_expression: { ... }
+      jsonata_expression?: { ... }
       enabled: { ... }
       delivery: { ... }
       created_at?: { ... }
@@ -4455,7 +4692,7 @@ type CreateOutboundUseCaseRequest = {
     mappings: Array<{
       id?: { ... }
       name: { ... }
-      jsonata_expression: { ... }
+      jsonata_expression?: { ... }
       enabled: { ... }
       delivery: { ... }
       created_at?: { ... }
@@ -4592,7 +4829,7 @@ type UpdateUseCaseRequest = {
     mappings: Array<{
       id?: { ... }
       name: { ... }
-      jsonata_expression: { ... }
+      jsonata_expression?: { ... }
       enabled: { ... }
       delivery: { ... }
       created_at?: { ... }
@@ -4716,7 +4953,7 @@ type UpdateOutboundUseCaseRequest = {
     mappings: Array<{
       id?: { ... }
       name: { ... }
-      jsonata_expression: { ... }
+      jsonata_expression?: { ... }
       enabled: { ... }
       delivery: { ... }
       created_at?: { ... }
@@ -4874,7 +5111,7 @@ type UseCaseHistoryEntry = {
     mappings: Array<{
       id?: { ... }
       name: { ... }
-      jsonata_expression: { ... }
+      jsonata_expression?: { ... }
       enabled: { ... }
       delivery: { ... }
       created_at?: { ... }
@@ -5005,7 +5242,7 @@ type OutboundUseCaseHistoryEntry = {
     mappings: Array<{
       id?: { ... }
       name: { ... }
-      jsonata_expression: { ... }
+      jsonata_expression?: { ... }
       enabled: { ... }
       delivery: { ... }
       created_at?: { ... }
@@ -5808,19 +6045,24 @@ type IntegrationConfigurationV2 = {
 
 ### `OutboundMapping`
 
-A mapping that transforms an event and delivers it to a webhook
+A mapping that delivers an event to an external system — either pushed to a webhook (with a JSONata payload transformation) or made available on the pull-based poll queue (raw event payload, no transformation)
 
 ```ts
 type OutboundMapping = {
   id?: string // uuid
   name: string
-  jsonata_expression: string
+  jsonata_expression?: string
   enabled: boolean
   delivery: {
     type: "webhook"
     webhook_id: string
     webhook_name?: string
     webhook_url?: string
+  } | {
+    type: "poll"
+    retention_days?: number
+    poison_policy?: "dead_letter" | "block"
+    max_delivery_attempts?: number
   }
   created_at?: string // date-time
   updated_at?: string // date-time
@@ -5829,7 +6071,7 @@ type OutboundMapping = {
 
 ### `DeliveryConfig`
 
-Configuration for how the transformed event should be delivered
+Configuration for how the event should be delivered. webhook = push delivery via svc-webhooks (JSONata-transformed payload); poll = pull-based queue delivery where the consumer fetches items via the poll API (raw event payload)
 
 ```ts
 type DeliveryConfig = {
@@ -5837,6 +6079,37 @@ type DeliveryConfig = {
   webhook_id: string
   webhook_name?: string
   webhook_url?: string
+} | {
+  type: "poll"
+  retention_days?: number
+  poison_policy?: "dead_letter" | "block"
+  max_delivery_attempts?: number
+}
+```
+
+### `WebhookDeliveryConfig`
+
+Push delivery of the transformed event to a webhook via svc-webhooks
+
+```ts
+type WebhookDeliveryConfig = {
+  type: "webhook"
+  webhook_id: string
+  webhook_name?: string
+  webhook_url?: string
+}
+```
+
+### `PollDeliveryConfig`
+
+Pull-based queue delivery. Items carry the raw standardized event-catalog payload; no JSONata mapping is applied in poll mode. Consumers fetch and acknowledge items via the poll API.
+
+```ts
+type PollDeliveryConfig = {
+  type: "poll"
+  retention_days?: number
+  poison_policy?: "dead_letter" | "block"
+  max_delivery_attempts?: number
 }
 ```
 
@@ -5861,6 +6134,14 @@ type OutboundStatusResponse = {
       webhookId?: { ... }
       message: { ... }
     }>
+    poll?: {
+      queue_depth: { ... }
+      oldest_unconsumed_age_seconds: { ... }
+      last_poll_at: { ... }
+      last_ack_at: { ... }
+      blocked: { ... }
+      dlq_count: { ... }
+    }
   }>
 }
 ```
@@ -5881,10 +6162,36 @@ type OutboundUseCaseStatus = {
   }>
   status: "ok" | "conflict" | "disabled"
   conflicts?: Array<{
-    type: "event_disabled" | "all_webhooks_disabled" | "event_enabled_while_disabled" | "webhook_enabled_while_disabled"
+    type: "event_disabled" | "all_webhooks_disabled" | "event_enabled_while_disabled" | "webhook_enabled_while_disabled" | "stream_blocked" | "dlq_items_present"
     webhookId?: string
     message: string
   }>
+  poll?: {
+    queue_depth: number
+    oldest_unconsumed_age_seconds: number
+    last_poll_at: string // date-time
+    last_ack_at: string // date-time
+    blocked: boolean
+    dlq_count: number
+  }
+}
+```
+
+### `OutboundPollStatus`
+
+Queue/consumer health for a poll-mode use case. Present only on use
+cases with a poll delivery mapping — webhook-only use cases are
+unaffected. Depth/age/DLQ numbers are first-page approximations.
+
+
+```ts
+type OutboundPollStatus = {
+  queue_depth: number
+  oldest_unconsumed_age_seconds: number
+  last_poll_at: string // date-time
+  last_ack_at: string // date-time
+  blocked: boolean
+  dlq_count: number
 }
 ```
 
@@ -5902,9 +6209,164 @@ type WebhookStatus = {
 
 ```ts
 type OutboundConflict = {
-  type: "event_disabled" | "all_webhooks_disabled" | "event_enabled_while_disabled" | "webhook_enabled_while_disabled"
+  type: "event_disabled" | "all_webhooks_disabled" | "event_enabled_while_disabled" | "webhook_enabled_while_disabled" | "stream_blocked" | "dlq_items_present"
   webhookId?: string
   message: string
+}
+```
+
+### `PollOutboundMessagesRequest`
+
+```ts
+type PollOutboundMessagesRequest = {
+  limit?: number
+}
+```
+
+### `OutboundMessage`
+
+```ts
+type OutboundMessage = {
+  id: string
+  lease_token: string
+  use_case_id: string
+  event_name: string
+  event_id: string
+  group: string
+  payload: Record<string, unknown>
+  enqueued_at: string // date-time
+}
+```
+
+### `PollOutboundMessagesResponse`
+
+```ts
+type PollOutboundMessagesResponse = {
+  messages: Array<{
+    id: string
+    lease_token: string
+    use_case_id: string
+    event_name: string
+    event_id: string
+    group: string
+    payload: Record<string, unknown>
+    enqueued_at: string // date-time
+  }>
+  visibility_timeout_seconds: number
+  has_more: boolean
+}
+```
+
+### `AckOutboundMessagesRequest`
+
+```ts
+type AckOutboundMessagesRequest = {
+  acks: Array<{
+    id: string
+    lease_token: string
+  }>
+}
+```
+
+### `AckResult`
+
+```ts
+type AckResult = {
+  id: string
+  status: "accepted" | "rejected"
+  reason?: "stale_lease" | "out_of_order" | "not_found"
+}
+```
+
+### `AckOutboundMessagesResponse`
+
+```ts
+type AckOutboundMessagesResponse = {
+  results: Array<{
+    id: string
+    status: "accepted" | "rejected"
+    reason?: "stale_lease" | "out_of_order" | "not_found"
+  }>
+}
+```
+
+### `OutboundDlqMessage`
+
+```ts
+type OutboundDlqMessage = {
+  id: string
+  use_case_id: string
+  event_name: string
+  event_id: string
+  enqueued_at?: string // date-time
+  dead_lettered_at: string // date-time
+  delivery_attempts: number
+  reason?: string
+  expires_at?: string // date-time
+}
+```
+
+### `OutboundDlqListResponse`
+
+```ts
+type OutboundDlqListResponse = {
+  items: Array<{
+    id: string
+    use_case_id: string
+    event_name: string
+    event_id: string
+    enqueued_at?: string // date-time
+    dead_lettered_at: string // date-time
+    delivery_attempts: number
+    reason?: string
+    expires_at?: string // date-time
+  }>
+  next_token?: string
+}
+```
+
+### `RedriveOutboundDlqRequest`
+
+```ts
+type RedriveOutboundDlqRequest = {
+  ids: string[]
+}
+```
+
+### `RedriveOutboundDlqResult`
+
+```ts
+type RedriveOutboundDlqResult = {
+  id: string
+  status: "redriven" | "not_found"
+}
+```
+
+### `RedriveOutboundDlqResponse`
+
+```ts
+type RedriveOutboundDlqResponse = {
+  results: Array<{
+    id: string
+    status: "redriven" | "not_found"
+  }>
+}
+```
+
+### `UnblockOutboundStreamRequest`
+
+```ts
+type UnblockOutboundStreamRequest = {
+  reason?: string
+}
+```
+
+### `UnblockOutboundStreamResponse`
+
+```ts
+type UnblockOutboundStreamResponse = {
+  unblocked: boolean
+  dead_lettered_id?: string
 }
 ```
 
