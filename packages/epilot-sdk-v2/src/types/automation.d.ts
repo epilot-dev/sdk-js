@@ -59,6 +59,7 @@ export declare namespace Components {
              * Result of the condition evaluation
              */
             evaluationResult?: boolean;
+            error_output?: ErrorOutput;
             statements?: /**
              * example:
              * {
@@ -674,6 +675,11 @@ export declare namespace Components {
              * Schedule Id which indicates the schedule of the action
              */
             schedule_id?: string;
+            /**
+             * Id of a loop scope defined on the parent flow. When set, the action runs once per item resolved from the loop's source_path. All actions sharing the same loop_id must be contiguous in the actions array.
+             *
+             */
+            loop_id?: string;
             execution_status?: ExecutionStatus;
             started_at?: string;
             updated_at?: string;
@@ -686,6 +692,11 @@ export declare namespace Components {
             };
             error_output?: ErrorOutput;
             retry_strategy?: /* different behaviors for retrying failed execution actions. */ RetryStrategy;
+            /**
+             * For looped actions, an archive of completed iterations. The action's own execution_status / outputs / error_output always reflect the current (latest) iteration. The previous iteration's state is pushed here before the action is reset for the next pass.
+             *
+             */
+            iterations?: /* A snapshot of a single completed pass through a looped action. */ AutomationActionIteration[];
         }
         export interface AssignThreadConfig {
             /**
@@ -772,6 +783,11 @@ export declare namespace Components {
              * Schedule Id which indicates the schedule of the action
              */
             schedule_id?: string;
+            /**
+             * Id of a loop scope defined on the parent flow. When set, the action runs once per item resolved from the loop's source_path. All actions sharing the same loop_id must be contiguous in the actions array.
+             *
+             */
+            loop_id?: string;
             execution_status?: ExecutionStatus;
             started_at?: string;
             updated_at?: string;
@@ -784,6 +800,11 @@ export declare namespace Components {
             };
             error_output?: ErrorOutput;
             retry_strategy?: /* different behaviors for retrying failed execution actions. */ RetryStrategy;
+            /**
+             * For looped actions, an archive of completed iterations. The action's own execution_status / outputs / error_output always reflect the current (latest) iteration. The previous iteration's state is pushed here before the action is reset for the next pass.
+             *
+             */
+            iterations?: /* A snapshot of a single completed pass through a looped action. */ AutomationActionIteration[];
         }
         export interface AutomationActionConfig {
             id?: /**
@@ -835,6 +856,11 @@ export declare namespace Components {
              * Schedule Id which indicates the schedule of the action
              */
             schedule_id?: string;
+            /**
+             * Id of a loop scope defined on the parent flow. When set, the action runs once per item resolved from the loop's source_path. All actions sharing the same loop_id must be contiguous in the actions array.
+             *
+             */
+            loop_id?: string;
         }
         export interface AutomationActionExecutionState {
             execution_status?: ExecutionStatus;
@@ -849,12 +875,33 @@ export declare namespace Components {
             };
             error_output?: ErrorOutput;
             retry_strategy?: /* different behaviors for retrying failed execution actions. */ RetryStrategy;
+            /**
+             * For looped actions, an archive of completed iterations. The action's own execution_status / outputs / error_output always reflect the current (latest) iteration. The previous iteration's state is pushed here before the action is reset for the next pass.
+             *
+             */
+            iterations?: /* A snapshot of a single completed pass through a looped action. */ AutomationActionIteration[];
         }
         /**
          * example:
          * 9ec3711b-db63-449c-b894-54d5bb622a8f
          */
         export type AutomationActionId = string;
+        /**
+         * A snapshot of a single completed pass through a looped action.
+         */
+        export interface AutomationActionIteration {
+            /**
+             * Zero-based iteration index within the loop scope.
+             */
+            index: number;
+            execution_status: ExecutionStatus;
+            started_at?: string; // date-time
+            ended_at?: string; // date-time
+            outputs?: {
+                [name: string]: any;
+            };
+            error_output?: ErrorOutput;
+        }
         export interface AutomationExecution {
             id: /**
              * example:
@@ -921,6 +968,18 @@ export declare namespace Components {
             version?: number;
             trigger_event?: TriggerEventManual | TriggerEventEntityActivity | TriggerEventEntityOperation | TriggerEventFlowAutomationTask | TriggerEventMessaging;
             workflow_context?: WorkflowExecutionContext;
+            /**
+             * Loop scope definitions propagated from the flow onto the execution record. Each loop has an id and a source_path resolved against the trigger entity at execution time. Actions referencing a loop's id via their loop_id property run once per item in the resolved array.
+             *
+             */
+            loops?: /* A loop scope on an automation flow. */ AutomationLoop[];
+            /**
+             * Runtime iteration state, keyed by loop_id. Tracks the current_index and total for each active loop scope. Entries are removed once a loop exits.
+             *
+             */
+            loop_state?: {
+                [name: string]: AutomationLoopState;
+            };
         }
         /**
          * example:
@@ -975,6 +1034,11 @@ export declare namespace Components {
             entity_schema?: string;
             conditions?: ActionCondition[];
             schedules?: ActionSchedule[];
+            /**
+             * Loop scope definitions. Each loop has an id and a source_path resolved against the trigger entity at execution time. Actions referencing a loop's id via their loop_id property run once per item in the resolved array. Loop members must be contiguous in the actions array.
+             *
+             */
+            loops?: /* A loop scope on an automation flow. */ AutomationLoop[];
             /**
              * The actions (nodes) of the automation flow
              */
@@ -1047,6 +1111,38 @@ export declare namespace Components {
          * 7791b04a-16d2-44a2-9af9-2d59c25c512f
          */
         export type AutomationFlowId = string;
+        /**
+         * A loop scope on an automation flow.
+         */
+        export interface AutomationLoop {
+            /**
+             * Stable identifier referenced by AutomationActionConfig.loop_id
+             * example:
+             * loop_contracts
+             */
+            id: string;
+            /**
+             * Path resolved against the trigger entity to produce the array of iteration items. e.g. submission.steps[0]['Contracts'].
+             *
+             * example:
+             * submission.steps[0]['Contracts']
+             */
+            source_path: string;
+            /**
+             * How source_path is interpreted. 'journey-multi-select' is the v1 source type (journey card block with multi-select). Future source types (e.g. 'previous-action-outputs', 'entity-relation') will be added here.
+             *
+             */
+            source_type?: "journey-multi-select" | "previous-action-outputs" | "entity-relation";
+            /**
+             * Maximum number of iterations. 0 / omitted = iterate the full resolved array.
+             *
+             */
+            length?: number;
+        }
+        export interface AutomationLoopState {
+            current_index: number;
+            total: number;
+        }
         export interface AutomationTrigger {
             /**
              * example:
@@ -1310,6 +1406,11 @@ export declare namespace Components {
              * Schedule Id which indicates the schedule of the action
              */
             schedule_id?: string;
+            /**
+             * Id of a loop scope defined on the parent flow. When set, the action runs once per item resolved from the loop's source_path. All actions sharing the same loop_id must be contiguous in the actions array.
+             *
+             */
+            loop_id?: string;
             execution_status?: ExecutionStatus;
             started_at?: string;
             updated_at?: string;
@@ -1322,6 +1423,11 @@ export declare namespace Components {
             };
             error_output?: ErrorOutput;
             retry_strategy?: /* different behaviors for retrying failed execution actions. */ RetryStrategy;
+            /**
+             * For looped actions, an archive of completed iterations. The action's own execution_status / outputs / error_output always reflect the current (latest) iteration. The previous iteration's state is pushed here before the action is reset for the next pass.
+             *
+             */
+            iterations?: /* A snapshot of a single completed pass through a looped action. */ AutomationActionIteration[];
         }
         /**
          * Creates an order entity with prices from journey
@@ -1374,6 +1480,11 @@ export declare namespace Components {
              * Schedule Id which indicates the schedule of the action
              */
             schedule_id?: string;
+            /**
+             * Id of a loop scope defined on the parent flow. When set, the action runs once per item resolved from the loop's source_path. All actions sharing the same loop_id must be contiguous in the actions array.
+             *
+             */
+            loop_id?: string;
         }
         export interface CartCheckoutConfig {
             /**
@@ -1518,6 +1629,11 @@ export declare namespace Components {
              * Schedule Id which indicates the schedule of the action
              */
             schedule_id?: string;
+            /**
+             * Id of a loop scope defined on the parent flow. When set, the action runs once per item resolved from the loop's source_path. All actions sharing the same loop_id must be contiguous in the actions array.
+             *
+             */
+            loop_id?: string;
             execution_status?: ExecutionStatus;
             started_at?: string;
             updated_at?: string;
@@ -1530,6 +1646,11 @@ export declare namespace Components {
             };
             error_output?: ErrorOutput;
             retry_strategy?: /* different behaviors for retrying failed execution actions. */ RetryStrategy;
+            /**
+             * For looped actions, an archive of completed iterations. The action's own execution_status / outputs / error_output always reflect the current (latest) iteration. The previous iteration's state is pushed here before the action is reset for the next pass.
+             *
+             */
+            iterations?: /* A snapshot of a single completed pass through a looped action. */ AutomationActionIteration[];
         }
         /**
          * example:
@@ -1597,6 +1718,11 @@ export declare namespace Components {
              * Schedule Id which indicates the schedule of the action
              */
             schedule_id?: string;
+            /**
+             * Id of a loop scope defined on the parent flow. When set, the action runs once per item resolved from the loop's source_path. All actions sharing the same loop_id must be contiguous in the actions array.
+             *
+             */
+            loop_id?: string;
         }
         export interface CreateDocumentConfig {
             template_id?: string;
@@ -1680,6 +1806,11 @@ export declare namespace Components {
              * Schedule Id which indicates the schedule of the action
              */
             schedule_id?: string;
+            /**
+             * Id of a loop scope defined on the parent flow. When set, the action runs once per item resolved from the loop's source_path. All actions sharing the same loop_id must be contiguous in the actions array.
+             *
+             */
+            loop_id?: string;
             execution_status?: ExecutionStatus;
             started_at?: string;
             updated_at?: string;
@@ -1692,6 +1823,11 @@ export declare namespace Components {
             };
             error_output?: ErrorOutput;
             retry_strategy?: /* different behaviors for retrying failed execution actions. */ RetryStrategy;
+            /**
+             * For looped actions, an archive of completed iterations. The action's own execution_status / outputs / error_output always reflect the current (latest) iteration. The previous iteration's state is pushed here before the action is reset for the next pass.
+             *
+             */
+            iterations?: /* A snapshot of a single completed pass through a looped action. */ AutomationActionIteration[];
         }
         export type DiffAdded = FilterConditionOnEvent;
         export type DiffDeleted = FilterConditionOnEvent;
@@ -2238,6 +2374,11 @@ export declare namespace Components {
              * Schedule Id which indicates the schedule of the action
              */
             schedule_id?: string;
+            /**
+             * Id of a loop scope defined on the parent flow. When set, the action runs once per item resolved from the loop's source_path. All actions sharing the same loop_id must be contiguous in the actions array.
+             *
+             */
+            loop_id?: string;
             execution_status?: ExecutionStatus;
             started_at?: string;
             updated_at?: string;
@@ -2250,6 +2391,11 @@ export declare namespace Components {
             };
             error_output?: ErrorOutput;
             retry_strategy?: /* different behaviors for retrying failed execution actions. */ RetryStrategy;
+            /**
+             * For looped actions, an archive of completed iterations. The action's own execution_status / outputs / error_output always reflect the current (latest) iteration. The previous iteration's state is pushed here before the action is reset for the next pass.
+             *
+             */
+            iterations?: /* A snapshot of a single completed pass through a looped action. */ AutomationActionIteration[];
         }
         /**
          * example:
@@ -2320,6 +2466,11 @@ export declare namespace Components {
              * Schedule Id which indicates the schedule of the action
              */
             schedule_id?: string;
+            /**
+             * Id of a loop scope defined on the parent flow. When set, the action runs once per item resolved from the loop's source_path. All actions sharing the same loop_id must be contiguous in the actions array.
+             *
+             */
+            loop_id?: string;
         }
         /**
          * Configuration for cancelling a flow execution with selected reasons
@@ -2398,6 +2549,11 @@ export declare namespace Components {
              * Schedule Id which indicates the schedule of the action
              */
             schedule_id?: string;
+            /**
+             * Id of a loop scope defined on the parent flow. When set, the action runs once per item resolved from the loop's source_path. All actions sharing the same loop_id must be contiguous in the actions array.
+             *
+             */
+            loop_id?: string;
             execution_status?: ExecutionStatus;
             started_at?: string;
             updated_at?: string;
@@ -2410,6 +2566,11 @@ export declare namespace Components {
             };
             error_output?: ErrorOutput;
             retry_strategy?: /* different behaviors for retrying failed execution actions. */ RetryStrategy;
+            /**
+             * For looped actions, an archive of completed iterations. The action's own execution_status / outputs / error_output always reflect the current (latest) iteration. The previous iteration's state is pushed here before the action is reset for the next pass.
+             *
+             */
+            iterations?: /* A snapshot of a single completed pass through a looped action. */ AutomationActionIteration[];
         }
         /**
          * example:
@@ -2475,6 +2636,11 @@ export declare namespace Components {
              * Schedule Id which indicates the schedule of the action
              */
             schedule_id?: string;
+            /**
+             * Id of a loop scope defined on the parent flow. When set, the action runs once per item resolved from the loop's source_path. All actions sharing the same loop_id must be contiguous in the actions array.
+             *
+             */
+            loop_id?: string;
         }
         export interface ForwardEmailConfig {
             /**
@@ -2574,6 +2740,11 @@ export declare namespace Components {
              * Schedule Id which indicates the schedule of the action
              */
             schedule_id?: string;
+            /**
+             * Id of a loop scope defined on the parent flow. When set, the action runs once per item resolved from the loop's source_path. All actions sharing the same loop_id must be contiguous in the actions array.
+             *
+             */
+            loop_id?: string;
             execution_status?: ExecutionStatus;
             started_at?: string;
             updated_at?: string;
@@ -2586,6 +2757,11 @@ export declare namespace Components {
             };
             error_output?: ErrorOutput;
             retry_strategy?: /* different behaviors for retrying failed execution actions. */ RetryStrategy;
+            /**
+             * For looped actions, an archive of completed iterations. The action's own execution_status / outputs / error_output always reflect the current (latest) iteration. The previous iteration's state is pushed here before the action is reset for the next pass.
+             *
+             */
+            iterations?: /* A snapshot of a single completed pass through a looped action. */ AutomationActionIteration[];
         }
         /**
          * example:
@@ -2650,6 +2826,11 @@ export declare namespace Components {
              * Schedule Id which indicates the schedule of the action
              */
             schedule_id?: string;
+            /**
+             * Id of a loop scope defined on the parent flow. When set, the action runs once per item resolved from the loop's source_path. All actions sharing the same loop_id must be contiguous in the actions array.
+             *
+             */
+            loop_id?: string;
         }
         export interface InformERPConfig {
             entity_sources?: string[];
@@ -2724,6 +2905,11 @@ export declare namespace Components {
              * Schedule Id which indicates the schedule of the action
              */
             schedule_id?: string;
+            /**
+             * Id of a loop scope defined on the parent flow. When set, the action runs once per item resolved from the loop's source_path. All actions sharing the same loop_id must be contiguous in the actions array.
+             *
+             */
+            loop_id?: string;
             execution_status?: ExecutionStatus;
             started_at?: string;
             updated_at?: string;
@@ -2736,6 +2922,11 @@ export declare namespace Components {
             };
             error_output?: ErrorOutput;
             retry_strategy?: /* different behaviors for retrying failed execution actions. */ RetryStrategy;
+            /**
+             * For looped actions, an archive of completed iterations. The action's own execution_status / outputs / error_output always reflect the current (latest) iteration. The previous iteration's state is pushed here before the action is reset for the next pass.
+             *
+             */
+            iterations?: /* A snapshot of a single completed pass through a looped action. */ AutomationActionIteration[];
         }
         /**
          * example:
@@ -2905,6 +3096,11 @@ export declare namespace Components {
              * Schedule Id which indicates the schedule of the action
              */
             schedule_id?: string;
+            /**
+             * Id of a loop scope defined on the parent flow. When set, the action runs once per item resolved from the loop's source_path. All actions sharing the same loop_id must be contiguous in the actions array.
+             *
+             */
+            loop_id?: string;
         }
         export interface MapEntityConfig {
             mapping_config?: MappingConfigRef;
@@ -3035,6 +3231,11 @@ export declare namespace Components {
              * Schedule Id which indicates the schedule of the action
              */
             schedule_id?: string;
+            /**
+             * Id of a loop scope defined on the parent flow. When set, the action runs once per item resolved from the loop's source_path. All actions sharing the same loop_id must be contiguous in the actions array.
+             *
+             */
+            loop_id?: string;
             execution_status?: ExecutionStatus;
             started_at?: string;
             updated_at?: string;
@@ -3047,6 +3248,11 @@ export declare namespace Components {
             };
             error_output?: ErrorOutput;
             retry_strategy?: /* different behaviors for retrying failed execution actions. */ RetryStrategy;
+            /**
+             * For looped actions, an archive of completed iterations. The action's own execution_status / outputs / error_output always reflect the current (latest) iteration. The previous iteration's state is pushed here before the action is reset for the next pass.
+             *
+             */
+            iterations?: /* A snapshot of a single completed pass through a looped action. */ AutomationActionIteration[];
         }
         export interface MoveThreadConfig {
             /**
@@ -3222,6 +3428,11 @@ export declare namespace Components {
              * Schedule Id which indicates the schedule of the action
              */
             schedule_id?: string;
+            /**
+             * Id of a loop scope defined on the parent flow. When set, the action runs once per item resolved from the loop's source_path. All actions sharing the same loop_id must be contiguous in the actions array.
+             *
+             */
+            loop_id?: string;
             execution_status?: ExecutionStatus;
             started_at?: string;
             updated_at?: string;
@@ -3234,6 +3445,11 @@ export declare namespace Components {
             };
             error_output?: ErrorOutput;
             retry_strategy?: /* different behaviors for retrying failed execution actions. */ RetryStrategy;
+            /**
+             * For looped actions, an archive of completed iterations. The action's own execution_status / outputs / error_output always reflect the current (latest) iteration. The previous iteration's state is pushed here before the action is reset for the next pass.
+             *
+             */
+            iterations?: /* A snapshot of a single completed pass through a looped action. */ AutomationActionIteration[];
         }
         /**
          * example:
@@ -3296,6 +3512,11 @@ export declare namespace Components {
              * Schedule Id which indicates the schedule of the action
              */
             schedule_id?: string;
+            /**
+             * Id of a loop scope defined on the parent flow. When set, the action runs once per item resolved from the loop's source_path. All actions sharing the same loop_id must be contiguous in the actions array.
+             *
+             */
+            loop_id?: string;
         }
         export interface ReplyEmailConfig {
             /**
@@ -3403,6 +3624,11 @@ export declare namespace Components {
              * Schedule Id which indicates the schedule of the action
              */
             schedule_id?: string;
+            /**
+             * Id of a loop scope defined on the parent flow. When set, the action runs once per item resolved from the loop's source_path. All actions sharing the same loop_id must be contiguous in the actions array.
+             *
+             */
+            loop_id?: string;
             execution_status?: ExecutionStatus;
             started_at?: string;
             updated_at?: string;
@@ -3415,6 +3641,11 @@ export declare namespace Components {
             };
             error_output?: ErrorOutput;
             retry_strategy?: /* different behaviors for retrying failed execution actions. */ RetryStrategy;
+            /**
+             * For looped actions, an archive of completed iterations. The action's own execution_status / outputs / error_output always reflect the current (latest) iteration. The previous iteration's state is pushed here before the action is reset for the next pass.
+             *
+             */
+            iterations?: /* A snapshot of a single completed pass through a looped action. */ AutomationActionIteration[];
         }
         /**
          * example:
@@ -3476,6 +3707,11 @@ export declare namespace Components {
              * Schedule Id which indicates the schedule of the action
              */
             schedule_id?: string;
+            /**
+             * Id of a loop scope defined on the parent flow. When set, the action runs once per item resolved from the loop's source_path. All actions sharing the same loop_id must be contiguous in the actions array.
+             *
+             */
+            loop_id?: string;
         }
         export interface SendEmailCondition {
             _equals?: {
@@ -3687,6 +3923,11 @@ export declare namespace Components {
              * Schedule Id which indicates the schedule of the action
              */
             schedule_id?: string;
+            /**
+             * Id of a loop scope defined on the parent flow. When set, the action runs once per item resolved from the loop's source_path. All actions sharing the same loop_id must be contiguous in the actions array.
+             *
+             */
+            loop_id?: string;
             execution_status?: ExecutionStatus;
             started_at?: string;
             updated_at?: string;
@@ -3699,6 +3940,11 @@ export declare namespace Components {
             };
             error_output?: ErrorOutput;
             retry_strategy?: /* different behaviors for retrying failed execution actions. */ RetryStrategy;
+            /**
+             * For looped actions, an archive of completed iterations. The action's own execution_status / outputs / error_output always reflect the current (latest) iteration. The previous iteration's state is pushed here before the action is reset for the next pass.
+             *
+             */
+            iterations?: /* A snapshot of a single completed pass through a looped action. */ AutomationActionIteration[];
         }
         /**
          * example:
@@ -3762,6 +4008,11 @@ export declare namespace Components {
              * Schedule Id which indicates the schedule of the action
              */
             schedule_id?: string;
+            /**
+             * Id of a loop scope defined on the parent flow. When set, the action runs once per item resolved from the loop's source_path. All actions sharing the same loop_id must be contiguous in the actions array.
+             *
+             */
+            loop_id?: string;
         }
         /**
          * Configuration for triggering an event catalog event
@@ -3917,6 +4168,11 @@ export declare namespace Components {
              * Schedule Id which indicates the schedule of the action
              */
             schedule_id?: string;
+            /**
+             * Id of a loop scope defined on the parent flow. When set, the action runs once per item resolved from the loop's source_path. All actions sharing the same loop_id must be contiguous in the actions array.
+             *
+             */
+            loop_id?: string;
             execution_status?: ExecutionStatus;
             started_at?: string;
             updated_at?: string;
@@ -3929,6 +4185,11 @@ export declare namespace Components {
             };
             error_output?: ErrorOutput;
             retry_strategy?: /* different behaviors for retrying failed execution actions. */ RetryStrategy;
+            /**
+             * For looped actions, an archive of completed iterations. The action's own execution_status / outputs / error_output always reflect the current (latest) iteration. The previous iteration's state is pushed here before the action is reset for the next pass.
+             *
+             */
+            iterations?: /* A snapshot of a single completed pass through a looped action. */ AutomationActionIteration[];
         }
         export interface TriggerShareEntityActionConfig {
             id?: /**
@@ -3978,6 +4239,11 @@ export declare namespace Components {
              * Schedule Id which indicates the schedule of the action
              */
             schedule_id?: string;
+            /**
+             * Id of a loop scope defined on the parent flow. When set, the action runs once per item resolved from the loop's source_path. All actions sharing the same loop_id must be contiguous in the actions array.
+             *
+             */
+            loop_id?: string;
         }
         export interface TriggerShareEntityConfig {
             partner_org_ids?: string[];
@@ -4030,6 +4296,11 @@ export declare namespace Components {
              * Schedule Id which indicates the schedule of the action
              */
             schedule_id?: string;
+            /**
+             * Id of a loop scope defined on the parent flow. When set, the action runs once per item resolved from the loop's source_path. All actions sharing the same loop_id must be contiguous in the actions array.
+             *
+             */
+            loop_id?: string;
             execution_status?: ExecutionStatus;
             started_at?: string;
             updated_at?: string;
@@ -4042,6 +4313,11 @@ export declare namespace Components {
             };
             error_output?: ErrorOutput;
             retry_strategy?: /* different behaviors for retrying failed execution actions. */ RetryStrategy;
+            /**
+             * For looped actions, an archive of completed iterations. The action's own execution_status / outputs / error_output always reflect the current (latest) iteration. The previous iteration's state is pushed here before the action is reset for the next pass.
+             *
+             */
+            iterations?: /* A snapshot of a single completed pass through a looped action. */ AutomationActionIteration[];
         }
         /**
          * example:
@@ -4106,6 +4382,11 @@ export declare namespace Components {
              * Schedule Id which indicates the schedule of the action
              */
             schedule_id?: string;
+            /**
+             * Id of a loop scope defined on the parent flow. When set, the action runs once per item resolved from the loop's source_path. All actions sharing the same loop_id must be contiguous in the actions array.
+             *
+             */
+            loop_id?: string;
         }
         export interface TriggerWebhookConfig {
             /**
@@ -4167,6 +4448,11 @@ export declare namespace Components {
              * Schedule Id which indicates the schedule of the action
              */
             schedule_id?: string;
+            /**
+             * Id of a loop scope defined on the parent flow. When set, the action runs once per item resolved from the loop's source_path. All actions sharing the same loop_id must be contiguous in the actions array.
+             *
+             */
+            loop_id?: string;
             execution_status?: ExecutionStatus;
             started_at?: string;
             updated_at?: string;
@@ -4179,6 +4465,11 @@ export declare namespace Components {
             };
             error_output?: ErrorOutput;
             retry_strategy?: /* different behaviors for retrying failed execution actions. */ RetryStrategy;
+            /**
+             * For looped actions, an archive of completed iterations. The action's own execution_status / outputs / error_output always reflect the current (latest) iteration. The previous iteration's state is pushed here before the action is reset for the next pass.
+             *
+             */
+            iterations?: /* A snapshot of a single completed pass through a looped action. */ AutomationActionIteration[];
         }
         /**
          * example:
@@ -4262,6 +4553,11 @@ export declare namespace Components {
              * Schedule Id which indicates the schedule of the action
              */
             schedule_id?: string;
+            /**
+             * Id of a loop scope defined on the parent flow. When set, the action runs once per item resolved from the loop's source_path. All actions sharing the same loop_id must be contiguous in the actions array.
+             *
+             */
+            loop_id?: string;
         }
         /**
          * example:
@@ -5170,10 +5466,13 @@ export type AutomationAction = Components.Schemas.AutomationAction;
 export type AutomationActionConfig = Components.Schemas.AutomationActionConfig;
 export type AutomationActionExecutionState = Components.Schemas.AutomationActionExecutionState;
 export type AutomationActionId = Components.Schemas.AutomationActionId;
+export type AutomationActionIteration = Components.Schemas.AutomationActionIteration;
 export type AutomationExecution = Components.Schemas.AutomationExecution;
 export type AutomationExecutionId = Components.Schemas.AutomationExecutionId;
 export type AutomationFlow = Components.Schemas.AutomationFlow;
 export type AutomationFlowId = Components.Schemas.AutomationFlowId;
+export type AutomationLoop = Components.Schemas.AutomationLoop;
+export type AutomationLoopState = Components.Schemas.AutomationLoopState;
 export type AutomationTrigger = Components.Schemas.AutomationTrigger;
 export type BulkTriggerJob = Components.Schemas.BulkTriggerJob;
 export type BulkTriggerRequest = Components.Schemas.BulkTriggerRequest;

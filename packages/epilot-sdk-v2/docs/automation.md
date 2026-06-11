@@ -56,7 +56,9 @@ const { data } = await automationClient.searchFlows(...)
 - [`AnyAction`](#anyaction)
 - [`AnyActionConfig`](#anyactionconfig)
 - [`AutomationActionConfig`](#automationactionconfig)
+- [`AutomationLoop`](#automationloop)
 - [`AutomationActionExecutionState`](#automationactionexecutionstate)
+- [`AutomationActionIteration`](#automationactioniteration)
 - [`RetryStrategy`](#retrystrategy)
 - [`AutomationAction`](#automationaction)
 - [`ErrorOutput`](#erroroutput)
@@ -124,6 +126,7 @@ const { data } = await automationClient.searchFlows(...)
 - [`ActionSchedule`](#actionschedule)
 - [`AutomationExecutionId`](#automationexecutionid)
 - [`AutomationExecution`](#automationexecution)
+- [`AutomationLoopState`](#automationloopstate)
 - [`WorkflowExecutionContext`](#workflowexecutioncontext)
 - [`ExecutionChain`](#executionchain)
 - [`TriggerEventManual`](#triggereventmanual)
@@ -311,7 +314,9 @@ const { data } = await client.getExecutions({
       "trigger_context": {},
       "version": 2,
       "trigger_event": {},
-      "workflow_context": {}
+      "workflow_context": {},
+      "loops": [],
+      "loop_state": {}
     }
   ]
 }
@@ -385,6 +390,7 @@ const { data } = await client.startExecution(
       "id": "string",
       "schedule_id": "string",
       "evaluationResult": true,
+      "error_output": {},
       "statements": []
     }
   ],
@@ -411,12 +417,14 @@ const { data } = await client.startExecution(
       "reason": {},
       "condition_id": "string",
       "schedule_id": "string",
+      "loop_id": "string",
       "execution_status": "pending",
       "started_at": "string",
       "updated_at": "string",
       "outputs": {},
       "error_output": {},
-      "retry_strategy": "RETRY_AND_RESUME"
+      "retry_strategy": "RETRY_AND_RESUME",
+      "iterations": []
     },
     {
       "id": "9ec3711b-db63-449c-b894-54d5bb622a8f",
@@ -430,12 +438,14 @@ const { data } = await client.startExecution(
       "reason": {},
       "condition_id": "string",
       "schedule_id": "string",
+      "loop_id": "string",
       "execution_status": "pending",
       "started_at": "string",
       "updated_at": "string",
       "outputs": {},
       "error_output": {},
-      "retry_strategy": "RETRY_AND_RESUME"
+      "retry_strategy": "RETRY_AND_RESUME",
+      "iterations": []
     }
   ],
   "resume_token": "eyJraWQiOiJrZXkifQ==",
@@ -463,7 +473,16 @@ const { data } = await client.startExecution(
     "entity_contexts": [
       {}
     ]
-  }
+  },
+  "loops": [
+    {
+      "id": "loop_contracts",
+      "source_path": "submission.steps[0]['Contracts']",
+      "source_type": "journey-multi-select",
+      "length": 0
+    }
+  ],
+  "loop_state": {}
 }
 ```
 
@@ -672,6 +691,7 @@ const { data } = await client.getExecution({
       "id": "string",
       "schedule_id": "string",
       "evaluationResult": true,
+      "error_output": {},
       "statements": []
     }
   ],
@@ -698,12 +718,14 @@ const { data } = await client.getExecution({
       "reason": {},
       "condition_id": "string",
       "schedule_id": "string",
+      "loop_id": "string",
       "execution_status": "pending",
       "started_at": "string",
       "updated_at": "string",
       "outputs": {},
       "error_output": {},
-      "retry_strategy": "RETRY_AND_RESUME"
+      "retry_strategy": "RETRY_AND_RESUME",
+      "iterations": []
     },
     {
       "id": "9ec3711b-db63-449c-b894-54d5bb622a8f",
@@ -717,12 +739,14 @@ const { data } = await client.getExecution({
       "reason": {},
       "condition_id": "string",
       "schedule_id": "string",
+      "loop_id": "string",
       "execution_status": "pending",
       "started_at": "string",
       "updated_at": "string",
       "outputs": {},
       "error_output": {},
-      "retry_strategy": "RETRY_AND_RESUME"
+      "retry_strategy": "RETRY_AND_RESUME",
+      "iterations": []
     }
   ],
   "resume_token": "eyJraWQiOiJrZXkifQ==",
@@ -750,7 +774,16 @@ const { data } = await client.getExecution({
     "entity_contexts": [
       {}
     ]
-  }
+  },
+  "loops": [
+    {
+      "id": "loop_contracts",
+      "source_path": "submission.steps[0]['Contracts']",
+      "source_type": "journey-multi-select",
+      "length": 0
+    }
+  ],
+  "loop_state": {}
 }
 ```
 
@@ -799,6 +832,7 @@ const { data } = await client.cancelExecution({
       "id": "string",
       "schedule_id": "string",
       "evaluationResult": true,
+      "error_output": {},
       "statements": []
     }
   ],
@@ -825,12 +859,14 @@ const { data } = await client.cancelExecution({
       "reason": {},
       "condition_id": "string",
       "schedule_id": "string",
+      "loop_id": "string",
       "execution_status": "pending",
       "started_at": "string",
       "updated_at": "string",
       "outputs": {},
       "error_output": {},
-      "retry_strategy": "RETRY_AND_RESUME"
+      "retry_strategy": "RETRY_AND_RESUME",
+      "iterations": []
     },
     {
       "id": "9ec3711b-db63-449c-b894-54d5bb622a8f",
@@ -844,12 +880,14 @@ const { data } = await client.cancelExecution({
       "reason": {},
       "condition_id": "string",
       "schedule_id": "string",
+      "loop_id": "string",
       "execution_status": "pending",
       "started_at": "string",
       "updated_at": "string",
       "outputs": {},
       "error_output": {},
-      "retry_strategy": "RETRY_AND_RESUME"
+      "retry_strategy": "RETRY_AND_RESUME",
+      "iterations": []
     }
   ],
   "resume_token": "eyJraWQiOiJrZXkifQ==",
@@ -877,7 +915,16 @@ const { data } = await client.cancelExecution({
     "entity_contexts": [
       {}
     ]
-  }
+  },
+  "loops": [
+    {
+      "id": "loop_contracts",
+      "source_path": "submission.steps[0]['Contracts']",
+      "source_type": "journey-multi-select",
+      "length": 0
+    }
+  ],
+  "loop_state": {}
 }
 ```
 
@@ -973,7 +1020,11 @@ const { data } = await client.resumeExecutionWithToken(
       "workflow_role": "trigger_workflow",
       "_execution_chain": {},
       "entity_contexts": []
-    }
+    },
+    "loops": [
+      {}
+    ],
+    "loop_state": {}
   },
   "resumedAction": {
     "id": "9ec3711b-db63-449c-b894-54d5bb622a8f",
@@ -998,6 +1049,7 @@ const { data } = await client.resumeExecutionWithToken(
     },
     "condition_id": "string",
     "schedule_id": "string",
+    "loop_id": "string",
     "execution_status": "pending",
     "started_at": "string",
     "updated_at": "string",
@@ -1007,7 +1059,10 @@ const { data } = await client.resumeExecutionWithToken(
       "error_reason": "string",
       "error_info": {}
     },
-    "retry_strategy": "RETRY_AND_RESUME"
+    "retry_strategy": "RETRY_AND_RESUME",
+    "iterations": [
+      {}
+    ]
   }
 }
 ```
@@ -1152,6 +1207,11 @@ type AutomationFlow = {
     id?: string
     schedule_id?: string
     evaluationResult?: boolean
+    error_output?: {
+      error_code: { ... }
+      error_reason: { ... }
+      error_info?: { ... }
+    }
     statements?: Array<{
       id?: { ... }
       source?: { ... }
@@ -1166,11 +1226,6 @@ type AutomationFlow = {
     timePeriod?: "minutes" | "hours" | "days" | "weeks" | "months"
     timeRelation?: "after" | "before"
     source: {
-      id: { ... }
-      origin: { ... }
-      schema?: { ... }
-      attribute?: { ... }
-    }
   // ...
 }
 ```
@@ -1244,6 +1299,7 @@ type SearchAutomationsResp = {
       id?: { ... }
       schedule_id?: { ... }
       evaluationResult?: { ... }
+      error_output?: { ... }
       statements?: { ... }
     }>
     schedules?: Array<{
@@ -1253,6 +1309,12 @@ type SearchAutomationsResp = {
       timePeriod?: { ... }
       timeRelation?: { ... }
       source: { ... }
+    }>
+    loops?: Array<{
+      id: { ... }
+      source_path: { ... }
+      source_type?: { ... }
+      length?: { ... }
     }>
     actions: Array<{
       type?: { ... }
@@ -1279,13 +1341,6 @@ type SearchAutomationsResp = {
       type?: { ... }
       config?: { ... }
     } | {
-      type?: { ... }
-      config?: { ... }
-    } | {
-      type?: { ... }
-      config?: { ... }
-    } | {
-      id?: { ... }
   // ...
 }
 ```
@@ -1525,6 +1580,7 @@ type AnyActionConfig = {
   }
   condition_id?: string
   schedule_id?: string
+  loop_id?: string
 } | {
   id?: string
   flow_action_id?: string
@@ -1555,6 +1611,7 @@ type AnyActionConfig = {
   }
   condition_id?: string
   schedule_id?: string
+  loop_id?: string
 } | {
   id?: string
   flow_action_id?: string
@@ -1572,8 +1629,6 @@ type AnyActionConfig = {
   }
   condition_id?: string
   schedule_id?: string
-} | {
-  id?: string
   // ...
 }
 ```
@@ -1596,6 +1651,20 @@ type AutomationActionConfig = {
   }
   condition_id?: string
   schedule_id?: string
+  loop_id?: string
+}
+```
+
+### `AutomationLoop`
+
+A loop scope on an automation flow.
+
+```ts
+type AutomationLoop = {
+  id: string
+  source_path: string
+  source_type?: "journey-multi-select" | "previous-action-outputs" | "entity-relation"
+  length?: number
 }
 ```
 
@@ -1615,6 +1684,39 @@ type AutomationActionExecutionState = {
     }
   }
   retry_strategy?: "RETRY_AND_RESUME" | "RETRY_AND_STOP" | "RETRY_ALL_PARENT_CONDITION_ACTIONS"
+  iterations?: Array<{
+    index: number
+    execution_status: "pending" | "starting" | "in_progress" | "paused" | "success" | "failed" | "cancelled" | "skipped" | "scheduled" | "hot"
+    started_at?: string // date-time
+    ended_at?: string // date-time
+    outputs?: Record<string, unknown>
+    error_output?: {
+      error_code: { ... }
+      error_reason: { ... }
+      error_info?: { ... }
+    }
+  }>
+}
+```
+
+### `AutomationActionIteration`
+
+A snapshot of a single completed pass through a looped action.
+
+```ts
+type AutomationActionIteration = {
+  index: number
+  execution_status: "pending" | "starting" | "in_progress" | "paused" | "success" | "failed" | "cancelled" | "skipped" | "scheduled" | "hot"
+  started_at?: string // date-time
+  ended_at?: string // date-time
+  outputs?: Record<string, unknown>
+  error_output?: {
+    error_code: "MAPPING_ERROR" | "REFRESH_RELATIONS_ERROR" | "DUPLICATE_ENTITY_ERROR" | "TRIGGER_WORKFLOW_ERROR" | "TIMEOUT_ERROR" | "BAD_CONFIG" | "INTERNAL_ERROR" | "TRIGGER_WEBHOOK_ERROR" | "TEMPLATE_ERROR" | "INVALID_PAYLOAD" | "INVALID_SCHEDULE_CONFIG" | "CUSTOM_ACTION_ERROR" | "ORDER_CREATION_ERROR" | "DOCUMENT_GENERATION_ERROR" | "BULK_EMAIL_ERROR" | "SHARING_ERROR" | "CANCEL_FLOW_EXECUTION_ERROR" | "METER_READING_NOT_FOUND" | "ENTITY_NOT_FOUND"
+    error_reason: string
+    error_info?: {
+      details?: { ... }
+    }
+  }
 }
 ```
 
@@ -1644,6 +1746,7 @@ type AutomationAction = {
   }
   condition_id?: string
   schedule_id?: string
+  loop_id?: string
   execution_status?: "pending" | "starting" | "in_progress" | "paused" | "success" | "failed" | "cancelled" | "skipped" | "scheduled" | "hot"
   started_at?: string
   updated_at?: string
@@ -1656,6 +1759,18 @@ type AutomationAction = {
     }
   }
   retry_strategy?: "RETRY_AND_RESUME" | "RETRY_AND_STOP" | "RETRY_ALL_PARENT_CONDITION_ACTIONS"
+  iterations?: Array<{
+    index: number
+    execution_status: "pending" | "starting" | "in_progress" | "paused" | "success" | "failed" | "cancelled" | "skipped" | "scheduled" | "hot"
+    started_at?: string // date-time
+    ended_at?: string // date-time
+    outputs?: Record<string, unknown>
+    error_output?: {
+      error_code: { ... }
+      error_reason: { ... }
+      error_info?: { ... }
+    }
+  }>
 }
 ```
 
@@ -1745,6 +1860,7 @@ type CartCheckoutActionConfig = {
   }
   condition_id?: string
   schedule_id?: string
+  loop_id?: string
 }
 ```
 
@@ -1901,6 +2017,7 @@ type MapEntityActionConfig = {
   }
   condition_id?: string
   schedule_id?: string
+  loop_id?: string
 }
 ```
 
@@ -2211,6 +2328,7 @@ type SendEmailActionConfig = {
   }
   condition_id?: string
   schedule_id?: string
+  loop_id?: string
 }
 ```
 
@@ -2266,6 +2384,7 @@ type ForwardEmailActionConfig = {
   }
   condition_id?: string
   schedule_id?: string
+  loop_id?: string
 }
 ```
 
@@ -2326,6 +2445,7 @@ type ReplyEmailActionConfig = {
   }
   condition_id?: string
   schedule_id?: string
+  loop_id?: string
 }
 ```
 
@@ -2421,6 +2541,7 @@ type CreateDocumentActionConfig = {
   }
   condition_id?: string
   schedule_id?: string
+  loop_id?: string
 }
 ```
 
@@ -2478,6 +2599,7 @@ type TriggerWorkflowActionConfig = {
   }
   condition_id?: string
   schedule_id?: string
+  loop_id?: string
 }
 ```
 
@@ -2557,6 +2679,7 @@ type TriggerShareEntityActionConfig = {
   }
   condition_id?: string
   schedule_id?: string
+  loop_id?: string
 }
 ```
 
@@ -2627,6 +2750,7 @@ type TriggerWebhookActionConfig = {
   }
   condition_id?: string
   schedule_id?: string
+  loop_id?: string
 }
 ```
 
@@ -2677,6 +2801,7 @@ type InformERPActionConfig = {
   }
   condition_id?: string
   schedule_id?: string
+  loop_id?: string
 }
 ```
 
@@ -2724,6 +2849,7 @@ type TriggerEventActionConfig = {
   }
   condition_id?: string
   schedule_id?: string
+  loop_id?: string
 }
 ```
 
@@ -2774,6 +2900,7 @@ type FlowExecutionCancelActionConfig = {
   }
   condition_id?: string
   schedule_id?: string
+  loop_id?: string
 }
 ```
 
@@ -2845,6 +2972,13 @@ type ActionCondition = {
   id?: string
   schedule_id?: string
   evaluationResult?: boolean
+  error_output?: {
+    error_code: "MAPPING_ERROR" | "REFRESH_RELATIONS_ERROR" | "DUPLICATE_ENTITY_ERROR" | "TRIGGER_WORKFLOW_ERROR" | "TIMEOUT_ERROR" | "BAD_CONFIG" | "INTERNAL_ERROR" | "TRIGGER_WEBHOOK_ERROR" | "TEMPLATE_ERROR" | "INVALID_PAYLOAD" | "INVALID_SCHEDULE_CONFIG" | "CUSTOM_ACTION_ERROR" | "ORDER_CREATION_ERROR" | "DOCUMENT_GENERATION_ERROR" | "BULK_EMAIL_ERROR" | "SHARING_ERROR" | "CANCEL_FLOW_EXECUTION_ERROR" | "METER_READING_NOT_FOUND" | "ENTITY_NOT_FOUND"
+    error_reason: string
+    error_info?: {
+      details?: { ... }
+    }
+  }
   statements?: Array<{
     id?: string // uuid
     source?: {
@@ -2928,6 +3062,11 @@ type AutomationExecution = {
     id?: string
     schedule_id?: string
     evaluationResult?: boolean
+    error_output?: {
+      error_code: { ... }
+      error_reason: { ... }
+      error_info?: { ... }
+    }
     statements?: Array<{
       id?: { ... }
       source?: { ... }
@@ -2999,12 +3138,16 @@ type AutomationExecution = {
     config?: {
       template_id?: { ... }
       filename?: { ... }
-    }
-  } | {
-    type?: "send-email"
-    config?: {
-      email_template_id?: { ... }
   // ...
+}
+```
+
+### `AutomationLoopState`
+
+```ts
+type AutomationLoopState = {
+  current_index: number
+  total: number
 }
 ```
 
@@ -3168,6 +3311,7 @@ type GetExecutionsResp = {
       id?: { ... }
       schedule_id?: { ... }
       evaluationResult?: { ... }
+      error_output?: { ... }
       statements?: { ... }
     }>
     schedules?: Array<{
@@ -3220,12 +3364,14 @@ type GetExecutionsResp = {
       reason?: { ... }
       condition_id?: { ... }
       schedule_id?: { ... }
+      loop_id?: { ... }
       execution_status?: { ... }
       started_at?: { ... }
       updated_at?: { ... }
       outputs?: { ... }
       error_output?: { ... }
       retry_strategy?: { ... }
+      iterations?: { ... }
     } | {
       type?: { ... }
       config?: { ... }
@@ -3239,9 +3385,6 @@ type GetExecutionsResp = {
     resume_token?: string
     trigger_context?: Record<string, string>
     version?: number
-    trigger_event?: {
-      type?: { ... }
-      org_id: { ... }
   // ...
 }
 ```
@@ -4118,6 +4261,7 @@ type ResumeResp = {
       id?: { ... }
       schedule_id?: { ... }
       evaluationResult?: { ... }
+      error_output?: { ... }
       statements?: { ... }
     }>
     schedules?: Array<{
@@ -4170,12 +4314,14 @@ type ResumeResp = {
       reason?: { ... }
       condition_id?: { ... }
       schedule_id?: { ... }
+      loop_id?: { ... }
       execution_status?: { ... }
       started_at?: { ... }
       updated_at?: { ... }
       outputs?: { ... }
       error_output?: { ... }
       retry_strategy?: { ... }
+      iterations?: { ... }
     } | {
       type?: { ... }
       config?: { ... }
@@ -4190,9 +4336,6 @@ type ResumeResp = {
     trigger_context?: Record<string, string>
     version?: number
     trigger_event?: {
-      type?: { ... }
-      org_id: { ... }
-      entity_id: { ... }
   // ...
 }
 ```
