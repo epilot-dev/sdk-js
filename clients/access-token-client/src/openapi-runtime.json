@@ -57,9 +57,21 @@
         "responses": {}
       }
     },
+    "/v1/access-tokens/portal-preview/.well-known/jwks.json": {
+      "get": {
+        "operationId": "getPortalPreviewTokenJwks",
+        "responses": {}
+      }
+    },
     "/v1/access-tokens/public/.well-known/openid-configuration": {
       "get": {
         "operationId": "getPublicTokenOIDC",
+        "responses": {}
+      }
+    },
+    "/v1/access-tokens/portal-preview/.well-known/openid-configuration": {
+      "get": {
+        "operationId": "getPortalPreviewTokenOIDC",
         "responses": {}
       }
     }
