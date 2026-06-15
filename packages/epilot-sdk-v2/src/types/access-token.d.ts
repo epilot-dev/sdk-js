@@ -1,6 +1,4 @@
 /* Auto-copied from access-token-client */
-/* eslint-disable */
-
 import type {
   OpenAPIClient,
   Parameters,
@@ -43,7 +41,14 @@ export declare namespace Components {
             AccessTokenType;
             journey_id?: /* Journey ID for access token type "journey" */ AccessTokenJourneyId;
             portal_id?: /* Portal ID for access token type "portal" */ PortalId;
+            portal_user_id?: /* Portal User ID for access token type "portal_preview" */ PortalUserId;
             assignments?: /* List of role ids attached to an user */ Assignments;
+            read_only?: /**
+             * When true, the issued token may only perform read-only actions. Any action guarded by permissions that is not read-only (i.e. not a view/export/download action) is denied, regardless of the roles the token carries.
+             * example:
+             * true
+             */
+            ReadOnly;
             /**
              * Last date the token was used (YYYY-MM-DD format, 1 day accuracy)
              * example:
@@ -71,13 +76,19 @@ export declare namespace Components {
             token_type?: "api";
             assignments?: /* List of role ids attached to an user */ Assignments;
             expires_in?: ExpiresIn;
+            read_only?: /**
+             * When true, the issued token may only perform read-only actions. Any action guarded by permissions that is not read-only (i.e. not a view/export/download action) is denied, regardless of the roles the token carries.
+             * example:
+             * true
+             */
+            ReadOnly;
         }
         /**
          * Access token type
          * example:
          * api
          */
-        export type AccessTokenType = "api" | "journey" | "portal" | "assume" | "app";
+        export type AccessTokenType = "api" | "journey" | "portal" | "assume" | "app" | "portal_preview";
         export interface AppTokenParameters {
             name: /**
              * Human readable name for access token
@@ -88,6 +99,12 @@ export declare namespace Components {
             token_type?: "app";
             assignments?: /* List of role ids attached to an user */ Assignments;
             expires_in?: ExpiresIn;
+            read_only?: /**
+             * When true, the issued token may only perform read-only actions. Any action guarded by permissions that is not read-only (i.e. not a view/export/download action) is denied, regardless of the roles the token carries.
+             * example:
+             * true
+             */
+            ReadOnly;
         }
         /**
          * List of role ids attached to an user
@@ -107,6 +124,12 @@ export declare namespace Components {
             AccessTokenName;
             token_type?: "assume";
             assignments?: /* List of role ids attached to an user */ Assignments;
+            read_only?: /**
+             * When true, the issued token may only perform read-only actions. Any action guarded by permissions that is not read-only (i.e. not a view/export/download action) is denied, regardless of the roles the token carries.
+             * example:
+             * true
+             */
+            ReadOnly;
         }
         export type ExpiresIn = number /* int32 */ | string /* ^[0-9]+ ?(ms|milliseconds?|s|seconds?|m|minutes?|h|hours?|d|days?|w|weeks?|y|years?)?$ */;
         export interface JourneyTokenParameters {
@@ -124,6 +147,17 @@ export declare namespace Components {
          * Portal ID for access token type "portal"
          */
         export type PortalId = string;
+        export interface PortalPreviewTokenParameters {
+            name: /**
+             * Human readable name for access token
+             * example:
+             * Postman Access Token
+             */
+            AccessTokenName;
+            token_type?: "portal_preview";
+            portal_id: /* Portal ID for access token type "portal" */ PortalId;
+            portal_user_id: /* Portal User ID for access token type "portal_preview" */ PortalUserId;
+        }
         export interface PortalTokenParameters {
             name: /**
              * Human readable name for access token
@@ -136,12 +170,22 @@ export declare namespace Components {
             expires_in?: ExpiresIn;
         }
         /**
+         * Portal User ID for access token type "portal_preview"
+         */
+        export type PortalUserId = string;
+        /**
+         * When true, the issued token may only perform read-only actions. Any action guarded by permissions that is not read-only (i.e. not a view/export/download action) is denied, regardless of the roles the token carries.
+         * example:
+         * true
+         */
+        export type ReadOnly = boolean;
+        /**
          * Format: <organization_id>:<slug>
          * example:
          * 123:owner
          */
         export type RoleId = string;
-        export type TokenParameters = AccessTokenParameters | JourneyTokenParameters | PortalTokenParameters | AssumeTokenParameters | AppTokenParameters;
+        export type TokenParameters = AccessTokenParameters | JourneyTokenParameters | PortalTokenParameters | AssumeTokenParameters | AppTokenParameters | PortalPreviewTokenParameters;
     }
 }
 export declare namespace Paths {
@@ -175,7 +219,14 @@ export declare namespace Paths {
                 Components.Schemas.AccessTokenType;
                 journey_id?: /* Journey ID for access token type "journey" */ Components.Schemas.AccessTokenJourneyId;
                 portal_id?: /* Portal ID for access token type "portal" */ Components.Schemas.PortalId;
+                portal_user_id?: /* Portal User ID for access token type "portal_preview" */ Components.Schemas.PortalUserId;
                 assignments?: /* List of role ids attached to an user */ Components.Schemas.Assignments;
+                read_only?: /**
+                 * When true, the issued token may only perform read-only actions. Any action guarded by permissions that is not read-only (i.e. not a view/export/download action) is denied, regardless of the roles the token carries.
+                 * example:
+                 * true
+                 */
+                Components.Schemas.ReadOnly;
                 /**
                  * Last date the token was used (YYYY-MM-DD format, 1 day accuracy)
                  * example:
@@ -242,6 +293,60 @@ export declare namespace Paths {
                 /**
                  * example:
                  * https://access-token.sls.epilot.io/v1/access-tokens/.well-known/jwks.json
+                 */
+                jwks_uri?: string; // uri
+            }
+        }
+    }
+    namespace GetPortalPreviewTokenJwks {
+        namespace Responses {
+            export interface $200 {
+                keys?: {
+                    /**
+                     * example:
+                     * RS256
+                     */
+                    alg?: string;
+                    /**
+                     * example:
+                     * AQAB
+                     */
+                    e?: string;
+                    /**
+                     * example:
+                     * tXWU5mPMbRPczpbQwi6vbhLF4GgF3wlMDSyqo7pfeiw=
+                     */
+                    kid?: string;
+                    /**
+                     * example:
+                     * RSA
+                     */
+                    kty?: string;
+                    /**
+                     * example:
+                     * h_QDoCjZ8W_trtYXaP7_S22wf5r5Wd9XBLED78oT44bJjQXn8ddcFV8Hik65_4IYXVX_hTTU4zpxe3H8vx2j7-Zz3O59mYMp5S0MzODNEdf5Y_2o19eis0brmAJniixsNlQ9LlYkdrVamrgaxHu3ZpP_99zkfFybYeuYoQNzb3PyrT8xVnz_USs_nlFMHpGUxvvz7gfKPqxcLvgLJr4cwI9yzaSY9CD4qW181QVcnL_WzpQ8xx6AuhhHZQ1l_3GG4InTk8ahE7U2ZHVu8RrX6d01pMgc3piEcet9RgFLnhbTg3YIiKGoAbN42wJn_x3lgIAC42T9mbmTsHyUdS6nUQ
+                     */
+                    n?: string;
+                    /**
+                     * example:
+                     * sig
+                     */
+                    use?: string;
+                }[];
+            }
+        }
+    }
+    namespace GetPortalPreviewTokenOIDC {
+        namespace Responses {
+            export interface $200 {
+                /**
+                 * example:
+                 * https://access-token.sls.epilot.io/v1/access-tokens/portal-preview
+                 */
+                issuer?: string; // uri
+                /**
+                 * example:
+                 * https://access-token.sls.epilot.io/v1/access-tokens/portal-preview/.well-known/jwks.json
                  */
                 jwks_uri?: string; // uri
             }
@@ -413,6 +518,16 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetPublicTokenJwks.Responses.$200>
   /**
+   * getPortalPreviewTokenJwks - getPortalPreviewTokenJwks
+   * 
+   * Get jwks public key set to verify portal preview tokens generated by this API
+   */
+  'getPortalPreviewTokenJwks'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetPortalPreviewTokenJwks.Responses.$200>
+  /**
    * getPublicTokenOIDC - getPublicTokenOIDC
    * 
    * OpenID Connect configuration for Access Token API a a public identity provider
@@ -426,6 +541,20 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetPublicTokenOIDC.Responses.$200>
+  /**
+   * getPortalPreviewTokenOIDC - getPortalPreviewTokenOIDC
+   * 
+   * OpenID Connect configuration for Access Token API a a portal preview identity provider
+   * 
+   * Note: This API is not a fully compliant OAuth2.0 / OIDC identity provider, but this endpoint is useful to
+   * automate the process of verifying JWT tokens.
+   * 
+   */
+  'getPortalPreviewTokenOIDC'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetPortalPreviewTokenOIDC.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -515,6 +644,18 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetPublicTokenJwks.Responses.$200>
   }
+  ['/v1/access-tokens/portal-preview/.well-known/jwks.json']: {
+    /**
+     * getPortalPreviewTokenJwks - getPortalPreviewTokenJwks
+     * 
+     * Get jwks public key set to verify portal preview tokens generated by this API
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetPortalPreviewTokenJwks.Responses.$200>
+  }
   ['/v1/access-tokens/public/.well-known/openid-configuration']: {
     /**
      * getPublicTokenOIDC - getPublicTokenOIDC
@@ -530,6 +671,22 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetPublicTokenOIDC.Responses.$200>
+  }
+  ['/v1/access-tokens/portal-preview/.well-known/openid-configuration']: {
+    /**
+     * getPortalPreviewTokenOIDC - getPortalPreviewTokenOIDC
+     * 
+     * OpenID Connect configuration for Access Token API a a portal preview identity provider
+     * 
+     * Note: This API is not a fully compliant OAuth2.0 / OIDC identity provider, but this endpoint is useful to
+     * automate the process of verifying JWT tokens.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetPortalPreviewTokenOIDC.Responses.$200>
   }
 }
 
@@ -549,6 +706,9 @@ export type AssumeTokenParameters = Components.Schemas.AssumeTokenParameters;
 export type ExpiresIn = Components.Schemas.ExpiresIn;
 export type JourneyTokenParameters = Components.Schemas.JourneyTokenParameters;
 export type PortalId = Components.Schemas.PortalId;
+export type PortalPreviewTokenParameters = Components.Schemas.PortalPreviewTokenParameters;
 export type PortalTokenParameters = Components.Schemas.PortalTokenParameters;
+export type PortalUserId = Components.Schemas.PortalUserId;
+export type ReadOnly = Components.Schemas.ReadOnly;
 export type RoleId = Components.Schemas.RoleId;
 export type TokenParameters = Components.Schemas.TokenParameters;
