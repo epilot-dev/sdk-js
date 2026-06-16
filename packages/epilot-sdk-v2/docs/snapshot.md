@@ -42,9 +42,11 @@ const { data } = await snapshotClient.createSnapshot(...)
 - [`SnapshotResourceDetail`](#snapshotresourcedetail)
 - [`CreateSnapshotRequest`](#createsnapshotrequest)
 - [`CreateSnapshotResponse`](#createsnapshotresponse)
+- [`RestoreSnapshotRequest`](#restoresnapshotrequest)
 - [`RestoreSnapshotResponse`](#restoresnapshotresponse)
 - [`Snapshot`](#snapshot)
 - [`Operation`](#operation)
+- [`SkippedResource`](#skippedresource)
 - [`CallerIdentity`](#calleridentity)
 
 ### `createSnapshot`
@@ -115,7 +117,13 @@ const { data } = await client.listSnapshots({
           "name": "string",
           "user_id": "string",
           "token_id": "string"
-        }
+        },
+        "skipped": [
+          {
+            "lineage_id": "string",
+            "reason": "modified"
+          }
+        ]
       },
       "restores": [
         {
@@ -128,7 +136,13 @@ const { data } = await client.listSnapshots({
             "name": "string",
             "user_id": "string",
             "token_id": "string"
-          }
+          },
+          "skipped": [
+            {
+              "lineage_id": "string",
+              "reason": "modified"
+            }
+          ]
         }
       ],
       "matched_count": 0
@@ -175,7 +189,13 @@ const { data } = await client.getSnapshot({
       "name": "string",
       "user_id": "string",
       "token_id": "string"
-    }
+    },
+    "skipped": [
+      {
+        "lineage_id": "string",
+        "reason": "modified"
+      }
+    ]
   },
   "restores": [
     {
@@ -188,7 +208,13 @@ const { data } = await client.getSnapshot({
         "name": "string",
         "user_id": "string",
         "token_id": "string"
-      }
+      },
+      "skipped": [
+        {
+          "lineage_id": "string",
+          "reason": "modified"
+        }
+      ]
     }
   ],
   "matched_count": 0
@@ -217,14 +243,19 @@ const { data } = await client.deleteSnapshot({
 
 Restore a snapshot to the org. Async — returns immediately; client polls
 `getSnapshot` until the latest entry in `restores` moves from
-`in_progress` to `completed` or `failed`.
+`in_progress` to one of `completed | partial | failed`.
 
 `POST /v1/snapshots/{id}:restore`
 
 ```ts
-const { data } = await client.restoreSnapshot({
-  id: '123e4567-e89b-12d3-a456-426614174000',
-})
+const { data } = await client.restoreSnapshot(
+  {
+    id: '123e4567-e89b-12d3-a456-426614174000',
+  },
+  {
+    mode: 'overwrite'
+  },
+)
 ```
 
 ---
@@ -425,6 +456,14 @@ type CreateSnapshotResponse = {
 }
 ```
 
+### `RestoreSnapshotRequest`
+
+```ts
+type RestoreSnapshotRequest = {
+  mode?: "overwrite" | "preserve_edits"
+}
+```
+
 ### `RestoreSnapshotResponse`
 
 ```ts
@@ -449,25 +488,33 @@ type Snapshot = {
     type: "create" | "restore"
     started_at: string // date-time
     completed_at?: string // date-time
-    status: "in_progress" | "completed" | "failed"
+    status: "in_progress" | "completed" | "partial" | "failed"
     error?: string
     triggered_by: {
       name: { ... }
       user_id?: { ... }
       token_id?: { ... }
     }
+    skipped?: Array<{
+      lineage_id: { ... }
+      reason: { ... }
+    }>
   }
   restores: Array<{
     type: "create" | "restore"
     started_at: string // date-time
     completed_at?: string // date-time
-    status: "in_progress" | "completed" | "failed"
+    status: "in_progress" | "completed" | "partial" | "failed"
     error?: string
     triggered_by: {
       name: { ... }
       user_id?: { ... }
       token_id?: { ... }
     }
+    skipped?: Array<{
+      lineage_id: { ... }
+      reason: { ... }
+    }>
   }>
   matched_count?: number
 }
@@ -480,13 +527,26 @@ type Operation = {
   type: "create" | "restore"
   started_at: string // date-time
   completed_at?: string // date-time
-  status: "in_progress" | "completed" | "failed"
+  status: "in_progress" | "completed" | "partial" | "failed"
   error?: string
   triggered_by: {
     name: string
     user_id?: string
     token_id?: string
   }
+  skipped?: Array<{
+    lineage_id: string
+    reason: "modified" | "co_owned"
+  }>
+}
+```
+
+### `SkippedResource`
+
+```ts
+type SkippedResource = {
+  lineage_id: string
+  reason: "modified" | "co_owned"
 }
 ```
 

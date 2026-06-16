@@ -52,6 +52,8 @@ const { data } = await blueprintManifestClient.getJob(...)
 - [`updateBlueprintResource`](#updateblueprintresource)
 - [`deleteBlueprintResource`](#deleteblueprintresource)
 - [`installBlueprintV3`](#installblueprintv3)
+- [`restoreBlueprintDeploymentV3`](#restoreblueprintdeploymentv3)
+- [`getRestorePreview`](#getrestorepreview)
 - [`getBlueprintLineageV3`](#getblueprintlineagev3)
 
 **Patches**
@@ -82,7 +84,15 @@ const { data } = await blueprintManifestClient.getJob(...)
 - [`updateMarketplaceListingVersion`](#updatemarketplacelistingversion)
 - [`publishMarketplaceListingVersion`](#publishmarketplacelistingversion)
 
+**Uniqueness Criteria**
+- [`listUniquenessCriteria`](#listuniquenesscriteria)
+- [`getUniquenessCriteria`](#getuniquenesscriteria)
+- [`putUniquenessCriteria`](#putuniquenesscriteria)
+- [`deleteUniquenessCriteria`](#deleteuniquenesscriteria)
+
 **Schemas**
+- [`UniquenessCriteriaResourceType`](#uniquenesscriteriaresourcetype)
+- [`UniquenessCriteria`](#uniquenesscriteria)
 - [`LineageEntry`](#lineageentry)
 - [`PatchFieldDiff`](#patchfielddiff)
 - [`PatchResourceDiff`](#patchresourcediff)
@@ -108,7 +118,10 @@ const { data } = await blueprintManifestClient.getJob(...)
 - [`CommonBlueprintJobFields`](#commonblueprintjobfields)
 - [`BlueprintExportJob`](#blueprintexportjob)
 - [`BlueprintInstallationJob`](#blueprintinstallationjob)
+- [`BlueprintRestoreJob`](#blueprintrestorejob)
 - [`V3ResourceProgressEntry`](#v3resourceprogressentry)
+- [`RestoreOutcomeItem`](#restoreoutcomeitem)
+- [`RestoreOutcome`](#restoreoutcome)
 - [`BlueprintJob`](#blueprintjob)
 - [`BlueprintDependenciesSyncJob`](#blueprintdependenciessyncjob)
 - [`BlueprintValidateJob`](#blueprintvalidatejob)
@@ -206,83 +219,25 @@ const { data } = await client.listBlueprints({
       "id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
       "title": "string",
       "slug": "string",
-      "description": {
-        "preinstall": "This is the content of the preinstall.md file which contains the blueprint description.\n",
-        "postinstall": "This is the content of the postinstall.md file\n"
-      },
+      "description": {},
       "version": "string",
-      "deployments": [
-        {
-          "source_org_id": "string",
-          "source_blueprint_id": "string",
-          "destination_org_id": "string",
-          "destination_blueprint_id": "string",
-          "job_id": "string",
-          "triggered_at": "1970-01-01T00:00:00.000Z",
-          "note": "string",
-          "status": "IN_PROGRESS"
-        }
-      ],
+      "deployments": [],
       "is_verified": true,
-      "latest_verification": {
-        "job_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
-        "status": "IN_PROGRESS",
-        "triggered_at": "1970-01-01T00:00:00.000Z",
-        "source_org_id": "string",
-        "source_blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
-        "destination_org_id": "string",
-        "destination_blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
-        "summary": {
-          "total_resources": 0,
-          "matched": 0,
-          "mismatched": 0,
-          "missing_in_destination": 0,
-          "fetch_errors": 0
-        }
-      },
+      "latest_verification": {},
       "ignored_resource_addresses": ["string"],
       "installation_status": "IN_PROGRESS",
       "created_at": "1970-01-01T00:00:00.000Z",
       "updated_at": "1970-01-01T00:00:00.000Z",
-      "created_by": {
-        "name": "manifest@epilot.cloud",
-        "org_id": "911690",
-        "user_id": "11001045",
-        "token_id": "api_5ZugdRXasLfWBypHi93Fk"
-      },
-      "updated_by": {
-        "name": "manifest@epilot.cloud",
-        "org_id": "911690",
-        "user_id": "11001045",
-        "token_id": "api_5ZugdRXasLfWBypHi93Fk"
-      },
+      "created_by": {},
+      "updated_by": {},
       "installation_job_ids": ["c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341"],
       "source_blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
       "archived": false,
       "docs_url": "string",
       "recommended_apps": ["string"],
-      "required_features": {
-        "enabled": ["string"],
-        "disabled": ["string"]
-      },
+      "required_features": {},
       "zip_file_name": "string",
-      "resources": [
-        {
-          "id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
-          "name": "string",
-          "type": "designbuilder",
-          "address": "string",
-          "is_root": true,
-          "is_ready": true,
-          "is_hidden": true,
-          "is_disabled": false,
-          "hard_dependencies": ["designbuilder"],
-          "parent_resource_ids": ["c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341"],
-          "depends_on_addresses": ["string"],
-          "impact_on_install": ["create"],
-          "impact_on_install_reason": ["string"]
-        }
-      ],
+      "resources": [],
       "source_type": "custom"
     }
   ]
@@ -322,7 +277,11 @@ const { data } = await client.createBlueprint(
         job_id: 'string',
         triggered_at: '1970-01-01T00:00:00.000Z',
         note: 'string',
-        status: 'IN_PROGRESS'
+        status: 'IN_PROGRESS',
+        restore_details: { /* ... */ },
+        has_revertible_changes: true,
+        last_restore_job_id: 'string',
+        restore_status: 'available'
       }
     ],
     is_verified: true,
@@ -412,7 +371,11 @@ const { data } = await client.createBlueprint(
       "job_id": "string",
       "triggered_at": "1970-01-01T00:00:00.000Z",
       "note": "string",
-      "status": "IN_PROGRESS"
+      "status": "IN_PROGRESS",
+      "restore_details": {},
+      "has_revertible_changes": true,
+      "last_restore_job_id": "string",
+      "restore_status": "available"
     }
   ],
   "is_verified": true,
@@ -732,7 +695,11 @@ const { data } = await client.getBlueprint({
       "job_id": "string",
       "triggered_at": "1970-01-01T00:00:00.000Z",
       "note": "string",
-      "status": "IN_PROGRESS"
+      "status": "IN_PROGRESS",
+      "restore_details": {},
+      "has_revertible_changes": true,
+      "last_restore_job_id": "string",
+      "restore_status": "available"
     }
   ],
   "is_verified": true,
@@ -834,7 +801,11 @@ const { data } = await client.updateBlueprint(
         job_id: 'string',
         triggered_at: '1970-01-01T00:00:00.000Z',
         note: 'string',
-        status: 'IN_PROGRESS'
+        status: 'IN_PROGRESS',
+        restore_details: { /* ... */ },
+        has_revertible_changes: true,
+        last_restore_job_id: 'string',
+        restore_status: 'available'
       }
     ],
     is_verified: true,
@@ -924,7 +895,11 @@ const { data } = await client.updateBlueprint(
       "job_id": "string",
       "triggered_at": "1970-01-01T00:00:00.000Z",
       "note": "string",
-      "status": "IN_PROGRESS"
+      "status": "IN_PROGRESS",
+      "restore_details": {},
+      "has_revertible_changes": true,
+      "last_restore_job_id": "string",
+      "restore_status": "available"
     }
   ],
   "is_verified": true,
@@ -1029,7 +1004,11 @@ const { data } = await client.deleteBlueprint({
       "job_id": "string",
       "triggered_at": "1970-01-01T00:00:00.000Z",
       "note": "string",
-      "status": "IN_PROGRESS"
+      "status": "IN_PROGRESS",
+      "restore_details": {},
+      "has_revertible_changes": true,
+      "last_restore_job_id": "string",
+      "restore_status": "available"
     }
   ],
   "is_verified": true,
@@ -2046,6 +2025,7 @@ const { data } = await client.listBlueprintJobs()
         "user_id": "11001045",
         "token_id": "api_5ZugdRXasLfWBypHi93Fk"
       },
+      "job_type": "export",
       "blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
       "status": "IN_PROGRESS",
       "download_file": {
@@ -2116,6 +2096,7 @@ const { data } = await client.getBlueprintJob({
     "user_id": "11001045",
     "token_id": "api_5ZugdRXasLfWBypHi93Fk"
   },
+  "job_type": "export",
   "blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
   "status": "IN_PROGRESS",
   "download_file": {
@@ -2189,6 +2170,7 @@ const { data } = await client.continueInstallationJob(
     "user_id": "11001045",
     "token_id": "api_5ZugdRXasLfWBypHi93Fk"
   },
+  "job_type": "install",
   "source_blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
   "source_blueprint_type": "custom",
   "source_org_id": "string",
@@ -2271,6 +2253,7 @@ const { data } = await client.cancelBlueprintJob({
     "user_id": "11001045",
     "token_id": "api_5ZugdRXasLfWBypHi93Fk"
   },
+  "job_type": "export",
   "blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
   "status": "IN_PROGRESS",
   "download_file": {
@@ -2877,6 +2860,60 @@ const { data } = await client.installBlueprintV3(
 
 ---
 
+### `restoreBlueprintDeploymentV3`
+
+Restore a specific deployment by job_id
+
+`POST /v3/blueprint-manifest/blueprints/{blueprint_id}/deployments/{job_id}:restore`
+
+```ts
+const { data } = await client.restoreBlueprintDeploymentV3({
+  blueprint_id: 'example',
+  job_id: 'example',
+})
+```
+
+---
+
+### `getRestorePreview`
+
+Predicted outcome of reverting a deployment
+
+`GET /v3/blueprint-manifest/blueprints/{blueprint_id}/deployments/{job_id}/restore-preview`
+
+```ts
+const { data } = await client.getRestorePreview({
+  blueprint_id: 'example',
+  job_id: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "snapshot_id": "string",
+  "resources": [
+    {
+      "lineage_id": "string",
+      "type": "string",
+      "name": "string",
+      "target_id": "string",
+      "action": "restore",
+      "reason": "modified",
+      "last_synced_at": "1970-01-01T00:00:00.000Z",
+      "current_updated_at": "1970-01-01T00:00:00.000Z",
+      "error_message": "string"
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
 ### `getBlueprintLineageV3`
 
 Get Blueprint Lineage V3
@@ -2912,7 +2949,139 @@ const { data } = await client.getBlueprintLineageV3({
 
 ---
 
+### `listUniquenessCriteria`
+
+List all custom uniqueness criteria configured for the caller's organization.
+These overrides are applied during install (V2 and V3) when matching incoming
+resources against existing ones in the desti
+
+`GET /v1/blueprint-manifest/uniqueness-criteria`
+
+```ts
+const { data } = await client.listUniquenessCriteria()
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "results": [
+    {
+      "org_id": "string",
+      "resource_type": "emailtemplate",
+      "fields": ["string"],
+      "updated_at": "1970-01-01T00:00:00.000Z",
+      "updated_by": "string"
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `getUniquenessCriteria`
+
+Get the configured uniqueness criteria for a specific resource type, if any.
+
+`GET /v1/blueprint-manifest/uniqueness-criteria/{resource_type}`
+
+```ts
+const { data } = await client.getUniquenessCriteria({
+  resource_type: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "org_id": "string",
+  "resource_type": "emailtemplate",
+  "fields": ["string"],
+  "updated_at": "1970-01-01T00:00:00.000Z",
+  "updated_by": "string"
+}
+```
+
+</details>
+
+---
+
+### `putUniquenessCriteria`
+
+Set or replace the uniqueness criteria for a resource type. The provided fields
+must be valid attributes on the resource's schema (the UI typically loads the
+schema to populate options). All listed fi
+
+`PUT /v1/blueprint-manifest/uniqueness-criteria/{resource_type}`
+
+```ts
+const { data } = await client.putUniquenessCriteria(
+  {
+    resource_type: 'example',
+  },
+  {
+    fields: ['string']
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "org_id": "string",
+  "resource_type": "emailtemplate",
+  "fields": ["string"],
+  "updated_at": "1970-01-01T00:00:00.000Z",
+  "updated_by": "string"
+}
+```
+
+</details>
+
+---
+
+### `deleteUniquenessCriteria`
+
+Remove the custom criteria for a resource type, reverting to the default fields.
+
+`DELETE /v1/blueprint-manifest/uniqueness-criteria/{resource_type}`
+
+```ts
+const { data } = await client.deleteUniquenessCriteria({
+  resource_type: 'example',
+})
+```
+
+---
+
 ## Schemas
+
+### `UniquenessCriteriaResourceType`
+
+Resource type for which custom uniqueness criteria can be configured.
+
+```ts
+type UniquenessCriteriaResourceType = "emailtemplate" | "product" | "price" | "tax" | "coupon" | "product_recommendation" | "file" | "document_template" | "schema" | "taxonomy" | "notification_template" | "family" | "permission" | "journey"
+```
+
+### `UniquenessCriteria`
+
+```ts
+type UniquenessCriteria = {
+  org_id: string
+  resource_type: "emailtemplate" | "product" | "price" | "tax" | "coupon" | "product_recommendation" | "file" | "document_template" | "schema" | "taxonomy" | "notification_template" | "family" | "permission" | "journey"
+  fields: string[]
+  updated_at: string // date-time
+  updated_by?: string
+}
+```
 
 ### `LineageEntry`
 
@@ -3112,11 +3281,22 @@ type CommonBlueprintFields = {
     triggered_at?: string // date-time
     note?: string
     status?: "IN_PROGRESS" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED"
+    restore_details?: {
+      has_revertible_changes?: { ... }
+      resource_impact_summary?: { ... }
+      last_restore_job_id?: { ... }
+      last_restore_at?: { ... }
+      last_restored_by?: { ... }
+      status?: { ... }
+    }
+    has_revertible_changes?: boolean
+    last_restore_job_id?: string
+    restore_status?: "available" | "in_progress" | "restored" | "partially_restored" | "restore_failed" | "unavailable"
   }>
   is_verified?: boolean
   latest_verification?: {
     job_id?: string
-    status?: "IN_PROGRESS" | "SUCCESS" | "FAILED"
+    status?: "IN_PROGRESS" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED"
     triggered_at?: string // date-time
     source_org_id?: string
     source_blueprint_id?: string
@@ -3283,11 +3463,22 @@ type CustomBlueprint = {
     triggered_at?: string // date-time
     note?: string
     status?: "IN_PROGRESS" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED"
+    restore_details?: {
+      has_revertible_changes?: { ... }
+      resource_impact_summary?: { ... }
+      last_restore_job_id?: { ... }
+      last_restore_at?: { ... }
+      last_restored_by?: { ... }
+      status?: { ... }
+    }
+    has_revertible_changes?: boolean
+    last_restore_job_id?: string
+    restore_status?: "available" | "in_progress" | "restored" | "partially_restored" | "restore_failed" | "unavailable"
   }>
   is_verified?: boolean
   latest_verification?: {
     job_id?: string
-    status?: "IN_PROGRESS" | "SUCCESS" | "FAILED"
+    status?: "IN_PROGRESS" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED"
     triggered_at?: string // date-time
     source_org_id?: string
     source_blueprint_id?: string
@@ -3367,11 +3558,22 @@ type FileBlueprint = {
     triggered_at?: string // date-time
     note?: string
     status?: "IN_PROGRESS" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED"
+    restore_details?: {
+      has_revertible_changes?: { ... }
+      resource_impact_summary?: { ... }
+      last_restore_job_id?: { ... }
+      last_restore_at?: { ... }
+      last_restored_by?: { ... }
+      status?: { ... }
+    }
+    has_revertible_changes?: boolean
+    last_restore_job_id?: string
+    restore_status?: "available" | "in_progress" | "restored" | "partially_restored" | "restore_failed" | "unavailable"
   }>
   is_verified?: boolean
   latest_verification?: {
     job_id?: string
-    status?: "IN_PROGRESS" | "SUCCESS" | "FAILED"
+    status?: "IN_PROGRESS" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED"
     triggered_at?: string // date-time
     source_org_id?: string
     source_blueprint_id?: string
@@ -3451,11 +3653,22 @@ type MarketplaceBlueprint = {
     triggered_at?: string // date-time
     note?: string
     status?: "IN_PROGRESS" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED"
+    restore_details?: {
+      has_revertible_changes?: { ... }
+      resource_impact_summary?: { ... }
+      last_restore_job_id?: { ... }
+      last_restore_at?: { ... }
+      last_restored_by?: { ... }
+      status?: { ... }
+    }
+    has_revertible_changes?: boolean
+    last_restore_job_id?: string
+    restore_status?: "available" | "in_progress" | "restored" | "partially_restored" | "restore_failed" | "unavailable"
   }>
   is_verified?: boolean
   latest_verification?: {
     job_id?: string
-    status?: "IN_PROGRESS" | "SUCCESS" | "FAILED"
+    status?: "IN_PROGRESS" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED"
     triggered_at?: string // date-time
     source_org_id?: string
     source_blueprint_id?: string
@@ -3567,11 +3780,22 @@ type DeployedBlueprint = {
     triggered_at?: string // date-time
     note?: string
     status?: "IN_PROGRESS" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED"
+    restore_details?: {
+      has_revertible_changes?: { ... }
+      resource_impact_summary?: { ... }
+      last_restore_job_id?: { ... }
+      last_restore_at?: { ... }
+      last_restored_by?: { ... }
+      status?: { ... }
+    }
+    has_revertible_changes?: boolean
+    last_restore_job_id?: string
+    restore_status?: "available" | "in_progress" | "restored" | "partially_restored" | "restore_failed" | "unavailable"
   }>
   is_verified?: boolean
   latest_verification?: {
     job_id?: string
-    status?: "IN_PROGRESS" | "SUCCESS" | "FAILED"
+    status?: "IN_PROGRESS" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED"
     triggered_at?: string // date-time
     source_org_id?: string
     source_blueprint_id?: string
@@ -3651,11 +3875,22 @@ type AppBlueprint = {
     triggered_at?: string // date-time
     note?: string
     status?: "IN_PROGRESS" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED"
+    restore_details?: {
+      has_revertible_changes?: { ... }
+      resource_impact_summary?: { ... }
+      last_restore_job_id?: { ... }
+      last_restore_at?: { ... }
+      last_restored_by?: { ... }
+      status?: { ... }
+    }
+    has_revertible_changes?: boolean
+    last_restore_job_id?: string
+    restore_status?: "available" | "in_progress" | "restored" | "partially_restored" | "restore_failed" | "unavailable"
   }>
   is_verified?: boolean
   latest_verification?: {
     job_id?: string
-    status?: "IN_PROGRESS" | "SUCCESS" | "FAILED"
+    status?: "IN_PROGRESS" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED"
     triggered_at?: string // date-time
     source_org_id?: string
     source_blueprint_id?: string
@@ -3735,11 +3970,22 @@ type Blueprint = {
     triggered_at?: string // date-time
     note?: string
     status?: "IN_PROGRESS" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED"
+    restore_details?: {
+      has_revertible_changes?: { ... }
+      resource_impact_summary?: { ... }
+      last_restore_job_id?: { ... }
+      last_restore_at?: { ... }
+      last_restored_by?: { ... }
+      status?: { ... }
+    }
+    has_revertible_changes?: boolean
+    last_restore_job_id?: string
+    restore_status?: "available" | "in_progress" | "restored" | "partially_restored" | "restore_failed" | "unavailable"
   }>
   is_verified?: boolean
   latest_verification?: {
     job_id?: string
-    status?: "IN_PROGRESS" | "SUCCESS" | "FAILED"
+    status?: "IN_PROGRESS" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED"
     triggered_at?: string // date-time
     source_org_id?: string
     source_blueprint_id?: string
@@ -3806,17 +4052,6 @@ type Blueprint = {
   version?: string
   deployments?: Array<{
     source_org_id?: string
-    source_blueprint_id?: string
-    destination_org_id?: string
-    destination_blueprint_id?: string
-    job_id?: string
-    triggered_at?: string // date-time
-    note?: string
-    status?: "IN_PROGRESS" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED"
-  }>
-  is_verified?: boolean
-  latest_verification?: {
-    job_id?: string
   // ...
 }
 ```
@@ -3886,6 +4121,7 @@ type BlueprintExportJob = {
     user_id?: string
     token_id?: string
   }
+  job_type?: "export"
   blueprint_id?: string
   status?: "IN_PROGRESS" | "SUCCESS" | "FAILED" | "CANCELED"
   download_file?: {
@@ -3922,6 +4158,7 @@ type BlueprintInstallationJob = {
     user_id?: string
     token_id?: string
   }
+  job_type?: "install"
   source_blueprint_id?: string
   source_blueprint_type?: "custom" | "file" | "marketplace" | "deploy" | "app"
   source_org_id?: string
@@ -3943,6 +4180,57 @@ type BlueprintInstallationJob = {
 }
 ```
 
+### `BlueprintRestoreJob`
+
+```ts
+type BlueprintRestoreJob = {
+  id?: string
+  events?: Array<{
+    timestamp?: string // date-time
+    message?: string
+    errors?: Array<{
+      error?: { ... }
+      code?: { ... }
+      data?: { ... }
+    }>
+    level?: "info" | "warning" | "error"
+    data?: {
+      installed_blueprint_id?: { ... }
+      export_job_id?: { ... }
+      resources?: { ... }
+    }
+  }>
+  triggered_at?: string // date-time
+  created_by?: {
+    name?: unknown
+    org_id: string
+    user_id?: string
+    token_id?: string
+  }
+  job_type?: "restore"
+  destination_blueprint_id?: string
+  destination_org_id?: string
+  install_job_id?: string
+  snapshot_id?: string
+  sync_engine?: "v3"
+  status?: "IN_PROGRESS" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED"
+  restore_result?: {
+    snapshot_id?: string
+    resources?: Array<{
+      lineage_id: { ... }
+      type: { ... }
+      name?: { ... }
+      target_id?: { ... }
+      action: { ... }
+      reason?: { ... }
+      last_synced_at?: { ... }
+      current_updated_at?: { ... }
+      error_message?: { ... }
+    }>
+  }
+}
+```
+
 ### `V3ResourceProgressEntry`
 
 ```ts
@@ -3954,6 +4242,41 @@ type V3ResourceProgressEntry = {
   status: "pending" | "in_progress" | "done" | "failed" | "skipped"
   target_id?: string
   error_message?: string
+}
+```
+
+### `RestoreOutcomeItem`
+
+```ts
+type RestoreOutcomeItem = {
+  lineage_id: string
+  type: string
+  name?: string
+  target_id?: string
+  action: "restore" | "delete" | "skip" | "failed"
+  reason?: "modified" | "co_owned" | "delete_unsupported" | "heuristic_match"
+  last_synced_at?: string // date-time
+  current_updated_at?: string // date-time
+  error_message?: string
+}
+```
+
+### `RestoreOutcome`
+
+```ts
+type RestoreOutcome = {
+  snapshot_id?: string
+  resources?: Array<{
+    lineage_id: string
+    type: string
+    name?: string
+    target_id?: string
+    action: "restore" | "delete" | "skip" | "failed"
+    reason?: "modified" | "co_owned" | "delete_unsupported" | "heuristic_match"
+    last_synced_at?: string // date-time
+    current_updated_at?: string // date-time
+    error_message?: string
+  }>
 }
 ```
 
@@ -3984,6 +4307,7 @@ type BlueprintJob = {
     user_id?: string
     token_id?: string
   }
+  job_type?: "export"
   blueprint_id?: string
   status?: "IN_PROGRESS" | "SUCCESS" | "FAILED" | "CANCELED"
   download_file?: {
@@ -4014,6 +4338,7 @@ type BlueprintJob = {
     user_id?: string
     token_id?: string
   }
+  job_type?: "install"
   source_blueprint_id?: string
   source_blueprint_type?: "custom" | "file" | "marketplace" | "deploy" | "app"
   source_org_id?: string
@@ -4056,10 +4381,8 @@ type BlueprintJob = {
     user_id?: string
     token_id?: string
   }
-  blueprint_id?: string
-  status?: "IN_PROGRESS" | "SUCCESS" | "FAILED" | "CANCELED"
-} | {
-  id?: string
+  job_type?: "restore"
+  destination_blueprint_id?: string
   // ...
 }
 ```
@@ -4091,6 +4414,7 @@ type BlueprintDependenciesSyncJob = {
     user_id?: string
     token_id?: string
   }
+  job_type?: "dependencies_sync"
   blueprint_id?: string
   status?: "IN_PROGRESS" | "SUCCESS" | "FAILED" | "CANCELED"
 }
@@ -4123,6 +4447,7 @@ type BlueprintValidateJob = {
     user_id?: string
     token_id?: string
   }
+  job_type?: "validate"
   blueprint_id?: string
   status?: "IN_PROGRESS" | "SUCCESS" | "FAILED"
   valid?: boolean
@@ -4168,11 +4493,12 @@ type BlueprintVerificationJob = {
     user_id?: string
     token_id?: string
   }
+  job_type?: "verification"
   source_org_id?: string
   source_blueprint_id?: string
   destination_org_id?: string
   destination_blueprint_id?: string
-  status?: "IN_PROGRESS" | "SUCCESS" | "FAILED"
+  status?: "IN_PROGRESS" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED"
   summary?: {
     total_resources?: number
     matched?: number
@@ -4203,7 +4529,7 @@ type BlueprintVerificationJob = {
 ```ts
 type LatestBlueprintVerification = {
   job_id?: string
-  status?: "IN_PROGRESS" | "SUCCESS" | "FAILED"
+  status?: "IN_PROGRESS" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED"
   triggered_at?: string // date-time
   source_org_id?: string
   source_blueprint_id?: string

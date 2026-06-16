@@ -64,6 +64,90 @@ export declare namespace Components {
                  * Outcome of this deployment
                  */
                 status?: "IN_PROGRESS" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED";
+                /**
+                 * Restore lifecycle metadata for this deployment.
+                 */
+                restore_details?: {
+                    /**
+                     * Whether this sync changed destination resources in a way that can
+                     * be reverted. `false` means the sync completed without create,
+                     * update, internal-update, or delete impacts, so there is no revert
+                     * action to offer.
+                     *
+                     */
+                    has_revertible_changes?: boolean;
+                    /**
+                     * Counts of resource impact values from the V3 apply result.
+                     */
+                    resource_impact_summary?: {
+                        create?: number;
+                        update?: number;
+                        internal_update?: number;
+                        delete?: number;
+                        no_op?: number;
+                        ignored?: number;
+                    };
+                    /**
+                     * BlueprintInstallationJob id of the most recent restore that ran
+                     * against this deployment. Used by the FE to keep the restore-status
+                     * badge visible across page reloads. Frontends poll this job to
+                     * render the latest restore outcome.
+                     *
+                     */
+                    last_restore_job_id?: string;
+                    /**
+                     * Timestamp of the most recent restore that ran against this
+                     * deployment. Stamped when the restore sweep finishes. Used by the
+                     * FE to show when a sync was reverted.
+                     *
+                     */
+                    last_restore_at?: string; // date-time
+                    /**
+                     * Identity of the caller who triggered the most recent restore.
+                     * Stamped when the restore sweep finishes. Used by the FE to show
+                     * who reverted a sync.
+                     *
+                     */
+                    last_restored_by?: {
+                        /**
+                         * Display name (email or token name) of the restorer.
+                         */
+                        name?: string;
+                        /**
+                         * User id of the restorer, when triggered by a user.
+                         */
+                        user_id?: string;
+                    };
+                    /**
+                     * Computed server-side from `(job_id, restore_details.last_restore_job_id, installation_status)`.
+                     * `available` when the deployment is restorable but has no prior
+                     * restore (including pure-create deployments without `snapshot_id`,
+                     * reverted via sweep-only);
+                     * `in_progress` while an install or restore is running on this
+                     * blueprint instance;
+                     * `restored` / `partially_restored` / `restore_failed` reflect the
+                     * terminal status of the job referenced by `last_restore_job_id`;
+                     * `unavailable` means there is no revert action, for example
+                     * malformed deployment rows missing `job_id` or no-change syncs.
+                     *
+                     */
+                    status?: "available" | "in_progress" | "restored" | "partially_restored" | "restore_failed" | "unavailable";
+                };
+                /**
+                 * Deprecated. Use `restore_details.has_revertible_changes`.
+                 *
+                 */
+                has_revertible_changes?: boolean;
+                /**
+                 * Deprecated. Use `restore_details.last_restore_job_id`.
+                 *
+                 */
+                last_restore_job_id?: string;
+                /**
+                 * Deprecated. Use `restore_details.status`.
+                 *
+                 */
+                restore_status?: "available" | "in_progress" | "restored" | "partially_restored" | "restore_failed" | "unavailable";
             }[];
             /**
              * Whether the blueprint is verified by epilot
@@ -134,6 +218,7 @@ export declare namespace Components {
             events?: BlueprintJobEvent[];
             triggered_at?: string; // date-time
             created_by?: CallerIdentity;
+            job_type?: "dependencies_sync";
             blueprint_id?: /**
              * ID of a blueprint
              * example:
@@ -152,6 +237,7 @@ export declare namespace Components {
             events?: BlueprintJobEvent[];
             triggered_at?: string; // date-time
             created_by?: CallerIdentity;
+            job_type?: "export";
             blueprint_id?: /**
              * ID of a blueprint
              * example:
@@ -178,6 +264,7 @@ export declare namespace Components {
             events?: BlueprintJobEvent[];
             triggered_at?: string; // date-time
             created_by?: CallerIdentity;
+            job_type?: "install";
             source_blueprint_id?: /**
              * ID of a blueprint
              * example:
@@ -214,7 +301,7 @@ export declare namespace Components {
              */
             resources_to_ignore?: string[];
         }
-        export type BlueprintJob = BlueprintExportJob | BlueprintInstallationJob | BlueprintDependenciesSyncJob | BlueprintValidateJob | BlueprintVerificationJob;
+        export type BlueprintJob = BlueprintExportJob | BlueprintInstallationJob | BlueprintRestoreJob | BlueprintDependenciesSyncJob | BlueprintValidateJob | BlueprintVerificationJob;
         export interface BlueprintJobEvent {
             timestamp?: string; // date-time
             message?: string;
@@ -373,6 +460,52 @@ export declare namespace Components {
          * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
          */
         export type BlueprintResourceID = string;
+        export interface BlueprintRestoreJob {
+            id?: /**
+             * ID of a job
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            BlueprintJobID;
+            events?: BlueprintJobEvent[];
+            triggered_at?: string; // date-time
+            created_by?: CallerIdentity;
+            job_type?: "restore";
+            destination_blueprint_id?: /**
+             * ID of a blueprint
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            BlueprintID;
+            destination_org_id?: string;
+            /**
+             * The install job whose deployment is being reverted. Maps back
+             * to the entry in `Blueprint.deployments[]`.
+             *
+             */
+            install_job_id?: string | null;
+            /**
+             * The snapshot driving Phase 1 of the restore. Null for sweep-only
+             * restores (pure-create deployments with no captured manifest).
+             *
+             */
+            snapshot_id?: string | null;
+            sync_engine?: "v3";
+            status?: "IN_PROGRESS" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED";
+            /**
+             * Absent while the job is still IN_PROGRESS.
+             */
+            restore_result?: {
+                /**
+                 * The snapshot driving Phase 1 of the restore. Null/absent for
+                 * sweep-only restores (pure-create deployments with no captured
+                 * manifest).
+                 *
+                 */
+                snapshot_id?: string | null;
+                resources?: RestoreOutcomeItem[];
+            } | null;
+        }
         export interface BlueprintValidateJob {
             id?: /**
              * ID of a job
@@ -383,6 +516,7 @@ export declare namespace Components {
             events?: BlueprintJobEvent[];
             triggered_at?: string; // date-time
             created_by?: CallerIdentity;
+            job_type?: "validate";
             blueprint_id?: /**
              * ID of a blueprint
              * example:
@@ -409,6 +543,7 @@ export declare namespace Components {
             events?: BlueprintJobEvent[];
             triggered_at?: string; // date-time
             created_by?: CallerIdentity;
+            job_type?: "verification";
             source_org_id?: string;
             source_blueprint_id?: /**
              * ID of a blueprint
@@ -423,7 +558,7 @@ export declare namespace Components {
              * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
              */
             BlueprintID;
-            status?: "IN_PROGRESS" | "SUCCESS" | "FAILED";
+            status?: "IN_PROGRESS" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED";
             summary?: VerificationSummary;
             resource_results?: ResourceVerificationResult[];
             /**
@@ -501,6 +636,90 @@ export declare namespace Components {
                  * Outcome of this deployment
                  */
                 status?: "IN_PROGRESS" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED";
+                /**
+                 * Restore lifecycle metadata for this deployment.
+                 */
+                restore_details?: {
+                    /**
+                     * Whether this sync changed destination resources in a way that can
+                     * be reverted. `false` means the sync completed without create,
+                     * update, internal-update, or delete impacts, so there is no revert
+                     * action to offer.
+                     *
+                     */
+                    has_revertible_changes?: boolean;
+                    /**
+                     * Counts of resource impact values from the V3 apply result.
+                     */
+                    resource_impact_summary?: {
+                        create?: number;
+                        update?: number;
+                        internal_update?: number;
+                        delete?: number;
+                        no_op?: number;
+                        ignored?: number;
+                    };
+                    /**
+                     * BlueprintInstallationJob id of the most recent restore that ran
+                     * against this deployment. Used by the FE to keep the restore-status
+                     * badge visible across page reloads. Frontends poll this job to
+                     * render the latest restore outcome.
+                     *
+                     */
+                    last_restore_job_id?: string;
+                    /**
+                     * Timestamp of the most recent restore that ran against this
+                     * deployment. Stamped when the restore sweep finishes. Used by the
+                     * FE to show when a sync was reverted.
+                     *
+                     */
+                    last_restore_at?: string; // date-time
+                    /**
+                     * Identity of the caller who triggered the most recent restore.
+                     * Stamped when the restore sweep finishes. Used by the FE to show
+                     * who reverted a sync.
+                     *
+                     */
+                    last_restored_by?: {
+                        /**
+                         * Display name (email or token name) of the restorer.
+                         */
+                        name?: string;
+                        /**
+                         * User id of the restorer, when triggered by a user.
+                         */
+                        user_id?: string;
+                    };
+                    /**
+                     * Computed server-side from `(job_id, restore_details.last_restore_job_id, installation_status)`.
+                     * `available` when the deployment is restorable but has no prior
+                     * restore (including pure-create deployments without `snapshot_id`,
+                     * reverted via sweep-only);
+                     * `in_progress` while an install or restore is running on this
+                     * blueprint instance;
+                     * `restored` / `partially_restored` / `restore_failed` reflect the
+                     * terminal status of the job referenced by `last_restore_job_id`;
+                     * `unavailable` means there is no revert action, for example
+                     * malformed deployment rows missing `job_id` or no-change syncs.
+                     *
+                     */
+                    status?: "available" | "in_progress" | "restored" | "partially_restored" | "restore_failed" | "unavailable";
+                };
+                /**
+                 * Deprecated. Use `restore_details.has_revertible_changes`.
+                 *
+                 */
+                has_revertible_changes?: boolean;
+                /**
+                 * Deprecated. Use `restore_details.last_restore_job_id`.
+                 *
+                 */
+                last_restore_job_id?: string;
+                /**
+                 * Deprecated. Use `restore_details.status`.
+                 *
+                 */
+                restore_status?: "available" | "in_progress" | "restored" | "partially_restored" | "restore_failed" | "unavailable";
             }[];
             /**
              * Whether the blueprint is verified by epilot
@@ -788,6 +1007,90 @@ export declare namespace Components {
                  * Outcome of this deployment
                  */
                 status?: "IN_PROGRESS" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED";
+                /**
+                 * Restore lifecycle metadata for this deployment.
+                 */
+                restore_details?: {
+                    /**
+                     * Whether this sync changed destination resources in a way that can
+                     * be reverted. `false` means the sync completed without create,
+                     * update, internal-update, or delete impacts, so there is no revert
+                     * action to offer.
+                     *
+                     */
+                    has_revertible_changes?: boolean;
+                    /**
+                     * Counts of resource impact values from the V3 apply result.
+                     */
+                    resource_impact_summary?: {
+                        create?: number;
+                        update?: number;
+                        internal_update?: number;
+                        delete?: number;
+                        no_op?: number;
+                        ignored?: number;
+                    };
+                    /**
+                     * BlueprintInstallationJob id of the most recent restore that ran
+                     * against this deployment. Used by the FE to keep the restore-status
+                     * badge visible across page reloads. Frontends poll this job to
+                     * render the latest restore outcome.
+                     *
+                     */
+                    last_restore_job_id?: string;
+                    /**
+                     * Timestamp of the most recent restore that ran against this
+                     * deployment. Stamped when the restore sweep finishes. Used by the
+                     * FE to show when a sync was reverted.
+                     *
+                     */
+                    last_restore_at?: string; // date-time
+                    /**
+                     * Identity of the caller who triggered the most recent restore.
+                     * Stamped when the restore sweep finishes. Used by the FE to show
+                     * who reverted a sync.
+                     *
+                     */
+                    last_restored_by?: {
+                        /**
+                         * Display name (email or token name) of the restorer.
+                         */
+                        name?: string;
+                        /**
+                         * User id of the restorer, when triggered by a user.
+                         */
+                        user_id?: string;
+                    };
+                    /**
+                     * Computed server-side from `(job_id, restore_details.last_restore_job_id, installation_status)`.
+                     * `available` when the deployment is restorable but has no prior
+                     * restore (including pure-create deployments without `snapshot_id`,
+                     * reverted via sweep-only);
+                     * `in_progress` while an install or restore is running on this
+                     * blueprint instance;
+                     * `restored` / `partially_restored` / `restore_failed` reflect the
+                     * terminal status of the job referenced by `last_restore_job_id`;
+                     * `unavailable` means there is no revert action, for example
+                     * malformed deployment rows missing `job_id` or no-change syncs.
+                     *
+                     */
+                    status?: "available" | "in_progress" | "restored" | "partially_restored" | "restore_failed" | "unavailable";
+                };
+                /**
+                 * Deprecated. Use `restore_details.has_revertible_changes`.
+                 *
+                 */
+                has_revertible_changes?: boolean;
+                /**
+                 * Deprecated. Use `restore_details.last_restore_job_id`.
+                 *
+                 */
+                last_restore_job_id?: string;
+                /**
+                 * Deprecated. Use `restore_details.status`.
+                 *
+                 */
+                restore_status?: "available" | "in_progress" | "restored" | "partially_restored" | "restore_failed" | "unavailable";
             }[];
             /**
              * Whether the blueprint is verified by epilot
@@ -891,6 +1194,90 @@ export declare namespace Components {
                  * Outcome of this deployment
                  */
                 status?: "IN_PROGRESS" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED";
+                /**
+                 * Restore lifecycle metadata for this deployment.
+                 */
+                restore_details?: {
+                    /**
+                     * Whether this sync changed destination resources in a way that can
+                     * be reverted. `false` means the sync completed without create,
+                     * update, internal-update, or delete impacts, so there is no revert
+                     * action to offer.
+                     *
+                     */
+                    has_revertible_changes?: boolean;
+                    /**
+                     * Counts of resource impact values from the V3 apply result.
+                     */
+                    resource_impact_summary?: {
+                        create?: number;
+                        update?: number;
+                        internal_update?: number;
+                        delete?: number;
+                        no_op?: number;
+                        ignored?: number;
+                    };
+                    /**
+                     * BlueprintInstallationJob id of the most recent restore that ran
+                     * against this deployment. Used by the FE to keep the restore-status
+                     * badge visible across page reloads. Frontends poll this job to
+                     * render the latest restore outcome.
+                     *
+                     */
+                    last_restore_job_id?: string;
+                    /**
+                     * Timestamp of the most recent restore that ran against this
+                     * deployment. Stamped when the restore sweep finishes. Used by the
+                     * FE to show when a sync was reverted.
+                     *
+                     */
+                    last_restore_at?: string; // date-time
+                    /**
+                     * Identity of the caller who triggered the most recent restore.
+                     * Stamped when the restore sweep finishes. Used by the FE to show
+                     * who reverted a sync.
+                     *
+                     */
+                    last_restored_by?: {
+                        /**
+                         * Display name (email or token name) of the restorer.
+                         */
+                        name?: string;
+                        /**
+                         * User id of the restorer, when triggered by a user.
+                         */
+                        user_id?: string;
+                    };
+                    /**
+                     * Computed server-side from `(job_id, restore_details.last_restore_job_id, installation_status)`.
+                     * `available` when the deployment is restorable but has no prior
+                     * restore (including pure-create deployments without `snapshot_id`,
+                     * reverted via sweep-only);
+                     * `in_progress` while an install or restore is running on this
+                     * blueprint instance;
+                     * `restored` / `partially_restored` / `restore_failed` reflect the
+                     * terminal status of the job referenced by `last_restore_job_id`;
+                     * `unavailable` means there is no revert action, for example
+                     * malformed deployment rows missing `job_id` or no-change syncs.
+                     *
+                     */
+                    status?: "available" | "in_progress" | "restored" | "partially_restored" | "restore_failed" | "unavailable";
+                };
+                /**
+                 * Deprecated. Use `restore_details.has_revertible_changes`.
+                 *
+                 */
+                has_revertible_changes?: boolean;
+                /**
+                 * Deprecated. Use `restore_details.last_restore_job_id`.
+                 *
+                 */
+                last_restore_job_id?: string;
+                /**
+                 * Deprecated. Use `restore_details.status`.
+                 *
+                 */
+                restore_status?: "available" | "in_progress" | "restored" | "partially_restored" | "restore_failed" | "unavailable";
             }[];
             /**
              * Whether the blueprint is verified by epilot
@@ -1006,6 +1393,90 @@ export declare namespace Components {
                  * Outcome of this deployment
                  */
                 status?: "IN_PROGRESS" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED";
+                /**
+                 * Restore lifecycle metadata for this deployment.
+                 */
+                restore_details?: {
+                    /**
+                     * Whether this sync changed destination resources in a way that can
+                     * be reverted. `false` means the sync completed without create,
+                     * update, internal-update, or delete impacts, so there is no revert
+                     * action to offer.
+                     *
+                     */
+                    has_revertible_changes?: boolean;
+                    /**
+                     * Counts of resource impact values from the V3 apply result.
+                     */
+                    resource_impact_summary?: {
+                        create?: number;
+                        update?: number;
+                        internal_update?: number;
+                        delete?: number;
+                        no_op?: number;
+                        ignored?: number;
+                    };
+                    /**
+                     * BlueprintInstallationJob id of the most recent restore that ran
+                     * against this deployment. Used by the FE to keep the restore-status
+                     * badge visible across page reloads. Frontends poll this job to
+                     * render the latest restore outcome.
+                     *
+                     */
+                    last_restore_job_id?: string;
+                    /**
+                     * Timestamp of the most recent restore that ran against this
+                     * deployment. Stamped when the restore sweep finishes. Used by the
+                     * FE to show when a sync was reverted.
+                     *
+                     */
+                    last_restore_at?: string; // date-time
+                    /**
+                     * Identity of the caller who triggered the most recent restore.
+                     * Stamped when the restore sweep finishes. Used by the FE to show
+                     * who reverted a sync.
+                     *
+                     */
+                    last_restored_by?: {
+                        /**
+                         * Display name (email or token name) of the restorer.
+                         */
+                        name?: string;
+                        /**
+                         * User id of the restorer, when triggered by a user.
+                         */
+                        user_id?: string;
+                    };
+                    /**
+                     * Computed server-side from `(job_id, restore_details.last_restore_job_id, installation_status)`.
+                     * `available` when the deployment is restorable but has no prior
+                     * restore (including pure-create deployments without `snapshot_id`,
+                     * reverted via sweep-only);
+                     * `in_progress` while an install or restore is running on this
+                     * blueprint instance;
+                     * `restored` / `partially_restored` / `restore_failed` reflect the
+                     * terminal status of the job referenced by `last_restore_job_id`;
+                     * `unavailable` means there is no revert action, for example
+                     * malformed deployment rows missing `job_id` or no-change syncs.
+                     *
+                     */
+                    status?: "available" | "in_progress" | "restored" | "partially_restored" | "restore_failed" | "unavailable";
+                };
+                /**
+                 * Deprecated. Use `restore_details.has_revertible_changes`.
+                 *
+                 */
+                has_revertible_changes?: boolean;
+                /**
+                 * Deprecated. Use `restore_details.last_restore_job_id`.
+                 *
+                 */
+                last_restore_job_id?: string;
+                /**
+                 * Deprecated. Use `restore_details.status`.
+                 *
+                 */
+                restore_status?: "available" | "in_progress" | "restored" | "partially_restored" | "restore_failed" | "unavailable";
             }[];
             /**
              * Whether the blueprint is verified by epilot
@@ -1328,7 +1799,7 @@ export declare namespace Components {
              * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
              */
             BlueprintJobID;
-            status?: "IN_PROGRESS" | "SUCCESS" | "FAILED";
+            status?: "IN_PROGRESS" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED";
             triggered_at?: string; // date-time
             source_org_id?: string;
             source_blueprint_id?: /**
@@ -1717,6 +2188,90 @@ export declare namespace Components {
                  * Outcome of this deployment
                  */
                 status?: "IN_PROGRESS" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED";
+                /**
+                 * Restore lifecycle metadata for this deployment.
+                 */
+                restore_details?: {
+                    /**
+                     * Whether this sync changed destination resources in a way that can
+                     * be reverted. `false` means the sync completed without create,
+                     * update, internal-update, or delete impacts, so there is no revert
+                     * action to offer.
+                     *
+                     */
+                    has_revertible_changes?: boolean;
+                    /**
+                     * Counts of resource impact values from the V3 apply result.
+                     */
+                    resource_impact_summary?: {
+                        create?: number;
+                        update?: number;
+                        internal_update?: number;
+                        delete?: number;
+                        no_op?: number;
+                        ignored?: number;
+                    };
+                    /**
+                     * BlueprintInstallationJob id of the most recent restore that ran
+                     * against this deployment. Used by the FE to keep the restore-status
+                     * badge visible across page reloads. Frontends poll this job to
+                     * render the latest restore outcome.
+                     *
+                     */
+                    last_restore_job_id?: string;
+                    /**
+                     * Timestamp of the most recent restore that ran against this
+                     * deployment. Stamped when the restore sweep finishes. Used by the
+                     * FE to show when a sync was reverted.
+                     *
+                     */
+                    last_restore_at?: string; // date-time
+                    /**
+                     * Identity of the caller who triggered the most recent restore.
+                     * Stamped when the restore sweep finishes. Used by the FE to show
+                     * who reverted a sync.
+                     *
+                     */
+                    last_restored_by?: {
+                        /**
+                         * Display name (email or token name) of the restorer.
+                         */
+                        name?: string;
+                        /**
+                         * User id of the restorer, when triggered by a user.
+                         */
+                        user_id?: string;
+                    };
+                    /**
+                     * Computed server-side from `(job_id, restore_details.last_restore_job_id, installation_status)`.
+                     * `available` when the deployment is restorable but has no prior
+                     * restore (including pure-create deployments without `snapshot_id`,
+                     * reverted via sweep-only);
+                     * `in_progress` while an install or restore is running on this
+                     * blueprint instance;
+                     * `restored` / `partially_restored` / `restore_failed` reflect the
+                     * terminal status of the job referenced by `last_restore_job_id`;
+                     * `unavailable` means there is no revert action, for example
+                     * malformed deployment rows missing `job_id` or no-change syncs.
+                     *
+                     */
+                    status?: "available" | "in_progress" | "restored" | "partially_restored" | "restore_failed" | "unavailable";
+                };
+                /**
+                 * Deprecated. Use `restore_details.has_revertible_changes`.
+                 *
+                 */
+                has_revertible_changes?: boolean;
+                /**
+                 * Deprecated. Use `restore_details.last_restore_job_id`.
+                 *
+                 */
+                last_restore_job_id?: string;
+                /**
+                 * Deprecated. Use `restore_details.status`.
+                 *
+                 */
+                restore_status?: "available" | "in_progress" | "restored" | "partially_restored" | "restore_failed" | "unavailable";
             }[];
             /**
              * Whether the blueprint is verified by epilot
@@ -2007,6 +2562,45 @@ export declare namespace Components {
             field_diffs?: FieldDiff[];
             error?: string;
         }
+        export interface RestoreOutcome {
+            /**
+             * The snapshot driving Phase 1 of the restore. Null/absent for
+             * sweep-only restores (pure-create deployments with no captured
+             * manifest).
+             *
+             */
+            snapshot_id?: string | null;
+            resources?: RestoreOutcomeItem[];
+        }
+        export interface RestoreOutcomeItem {
+            lineage_id: string;
+            type: string;
+            name?: string | null;
+            target_id?: string | null;
+            /**
+             * On `restore-preview`: the action the restore would take.
+             * On `restore_result`: the action that was applied.
+             * `failed` only appears on `restore_result`.
+             *
+             */
+            action: "restore" | "delete" | "skip" | "failed";
+            /**
+             * Only set when `action == skip`.
+             */
+            reason?: "modified" | "co_owned" | "delete_unsupported" | "heuristic_match";
+            /**
+             * Only set when `reason == modified`. From the lineage row's last install write.
+             */
+            last_synced_at?: string | null; // date-time
+            /**
+             * Only set when `reason == modified`. From the destination resource's current state.
+             */
+            current_updated_at?: string | null; // date-time
+            /**
+             * Only set when `action == failed`.
+             */
+            error_message?: string | null;
+        }
         export interface RootResourceNode {
             /**
              * ID of the resource
@@ -2108,6 +2702,20 @@ export declare namespace Components {
              */
             add_dependencies_recommended?: boolean;
         }
+        export interface UniquenessCriteria {
+            org_id: string;
+            resource_type: /* Resource type for which custom uniqueness criteria can be configured. */ UniquenessCriteriaResourceType;
+            fields: [
+                string,
+                ...string[]
+            ];
+            updated_at: string; // date-time
+            updated_by?: string;
+        }
+        /**
+         * Resource type for which custom uniqueness criteria can be configured.
+         */
+        export type UniquenessCriteriaResourceType = "emailtemplate" | "product" | "price" | "tax" | "coupon" | "product_recommendation" | "file" | "document_template" | "schema" | "taxonomy" | "notification_template" | "family" | "permission" | "journey";
         export interface UploadFilePayload {
             /**
              * example:
@@ -2613,6 +3221,12 @@ export declare namespace Paths {
             }
         }
     }
+    namespace DeleteUniquenessCriteria {
+        namespace Responses {
+            export interface $204 {
+            }
+        }
+    }
     namespace DetectPatchChanges {
         namespace Parameters {
             export type BlueprintId = /**
@@ -2982,6 +3596,38 @@ export declare namespace Paths {
             }
         }
     }
+    namespace GetRestorePreview {
+        namespace Parameters {
+            export type BlueprintId = /**
+             * ID of a blueprint
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            Components.Schemas.BlueprintID;
+            export type JobId = /**
+             * ID of a job
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            Components.Schemas.BlueprintJobID;
+        }
+        export interface PathParameters {
+            blueprint_id: Parameters.BlueprintId;
+            job_id: Parameters.JobId;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.RestoreOutcome;
+            export interface $404 {
+            }
+        }
+    }
+    namespace GetUniquenessCriteria {
+        namespace Responses {
+            export type $200 = Components.Schemas.UniquenessCriteria;
+            export interface $404 {
+            }
+        }
+    }
     namespace InstallBlueprint {
         export interface RequestBody {
             source_org_id?: string;
@@ -3248,6 +3894,13 @@ export declare namespace Paths {
             }
         }
     }
+    namespace ListUniquenessCriteria {
+        namespace Responses {
+            export interface $200 {
+                results?: Components.Schemas.UniquenessCriteria[];
+            }
+        }
+    }
     namespace PreInstallBlueprint {
         export interface RequestBody {
             /**
@@ -3314,6 +3967,62 @@ export declare namespace Paths {
             export interface $400 {
             }
             export interface $404 {
+            }
+        }
+    }
+    namespace PutUniquenessCriteria {
+        export interface RequestBody {
+            fields: [
+                string,
+                ...string[]
+            ];
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.UniquenessCriteria;
+            export interface $400 {
+            }
+        }
+    }
+    namespace RestoreBlueprintDeploymentV3 {
+        namespace Parameters {
+            export type BlueprintId = /**
+             * ID of a blueprint
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            Components.Schemas.BlueprintID;
+            export type JobId = /**
+             * ID of a job
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            Components.Schemas.BlueprintJobID;
+        }
+        export interface PathParameters {
+            blueprint_id: Parameters.BlueprintId;
+            job_id: Parameters.JobId;
+        }
+        namespace Responses {
+            export interface $202 {
+                job_id?: /**
+                 * ID of a job
+                 * example:
+                 * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+                 */
+                Components.Schemas.BlueprintJobID;
+                blueprint_instance_id?: /**
+                 * ID of a blueprint
+                 * example:
+                 * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+                 */
+                Components.Schemas.BlueprintID;
+                snapshot_id?: string;
+            }
+            export interface $400 {
+            }
+            export interface $404 {
+            }
+            export interface $409 {
             }
         }
     }
@@ -3478,6 +4187,14 @@ export declare namespace Paths {
                  */
                 upload_url?: string; // url
             }
+        }
+    }
+    namespace V1BlueprintManifestUniquenessCriteria$ResourceType {
+        namespace Parameters {
+            export type ResourceType = /* Resource type for which custom uniqueness criteria can be configured. */ Components.Schemas.UniquenessCriteriaResourceType;
+        }
+        export interface PathParameters {
+            resource_type: Parameters.ResourceType;
         }
     }
     namespace ValidateBlueprint {
@@ -4146,6 +4863,55 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.InstallBlueprintV3.Responses.$202>
   /**
+   * restoreBlueprintDeploymentV3 - Restore a specific deployment by job_id
+   * 
+   * Roll a deployment back to its pre-install state. Two phases:
+   * 
+   *   1. Upsert — re-applies the captured payloads via snapshot-api's
+   *      `:restore` (server-side; runs config-engine.apply with captured
+   *      target ids pre-seeded). Skipped for pure-create deployments
+   *      whose snapshot was empty.
+   *   2. Delete sweep — for lineage rows of this blueprint instance not
+   *      present in the snapshot's captured set, deletes the live
+   *      resource via the type's adapter. Co-ownership / drift /
+   *      no-delete-capability skip the entry with the corresponding
+   *      reason.
+   * 
+   * Resolves `(blueprint_id, job_id)` to the entry in
+   * `Blueprint.deployments[]` and reads its `snapshot_id` and
+   * `destination_blueprint_id` — the caller never needs to handle
+   * snapshot ids directly.
+   * 
+   * Async — returns 202 with a job id. Poll the job to track progress.
+   * The per-instance lock (`installation_status === 'IN_PROGRESS'`)
+   * rejects concurrent installs or restores with 409.
+   * 
+   */
+  'restoreBlueprintDeploymentV3'(
+    parameters?: Parameters<Paths.RestoreBlueprintDeploymentV3.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.RestoreBlueprintDeploymentV3.Responses.$202>
+  /**
+   * getRestorePreview - Predicted outcome of reverting a deployment
+   * 
+   * Computes what would happen if the user triggered a restore on this
+   * deployment, without performing any writes. The forecast uses the
+   * snapshot's captured resources (when present) plus the current lineage
+   * state plus per-adapter gates (co-ownership, no-delete-capability,
+   * heuristic-match, drift when wired).
+   * 
+   * Idempotent and side-effect free. Safe to call repeatedly. The result
+   * may shift between calls if operators edit destination resources or
+   * another blueprint adopts a shared resource in the meantime.
+   * 
+   */
+  'getRestorePreview'(
+    parameters?: Parameters<Paths.GetRestorePreview.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetRestorePreview.Responses.$200>
+  /**
    * getBlueprintLineageV3 - Get Blueprint Lineage V3
    * 
    * Returns the lineage registry entries for a blueprint's resources in the current org.
@@ -4157,6 +4923,53 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetBlueprintLineageV3.Responses.$200>
+  /**
+   * listUniquenessCriteria - listUniquenessCriteria
+   * 
+   * List all custom uniqueness criteria configured for the caller's organization.
+   * These overrides are applied during install (V2 and V3) when matching incoming
+   * resources against existing ones in the destination org, replacing the default
+   * per-resource-type field set with the caller's chosen fields (AND-combined).
+   * 
+   */
+  'listUniquenessCriteria'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ListUniquenessCriteria.Responses.$200>
+  /**
+   * getUniquenessCriteria - getUniquenessCriteria
+   * 
+   * Get the configured uniqueness criteria for a specific resource type, if any.
+   */
+  'getUniquenessCriteria'(
+    parameters?: Parameters<Paths.V1BlueprintManifestUniquenessCriteria$ResourceType.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetUniquenessCriteria.Responses.$200>
+  /**
+   * putUniquenessCriteria - putUniquenessCriteria
+   * 
+   * Set or replace the uniqueness criteria for a resource type. The provided fields
+   * must be valid attributes on the resource's schema (the UI typically loads the
+   * schema to populate options). All listed fields are AND-combined during matching.
+   * 
+   */
+  'putUniquenessCriteria'(
+    parameters?: Parameters<Paths.V1BlueprintManifestUniquenessCriteria$ResourceType.PathParameters> | null,
+    data?: Paths.PutUniquenessCriteria.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.PutUniquenessCriteria.Responses.$200>
+  /**
+   * deleteUniquenessCriteria - deleteUniquenessCriteria
+   * 
+   * Remove the custom criteria for a resource type, reverting to the default fields.
+   */
+  'deleteUniquenessCriteria'(
+    parameters?: Parameters<Paths.V1BlueprintManifestUniquenessCriteria$ResourceType.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.DeleteUniquenessCriteria.Responses.$204>
 }
 
 export interface PathsDictionary {
@@ -4823,6 +5636,59 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.InstallBlueprintV3.Responses.$202>
   }
+  ['/v3/blueprint-manifest/blueprints/{blueprint_id}/deployments/{job_id}:restore']: {
+    /**
+     * restoreBlueprintDeploymentV3 - Restore a specific deployment by job_id
+     * 
+     * Roll a deployment back to its pre-install state. Two phases:
+     * 
+     *   1. Upsert — re-applies the captured payloads via snapshot-api's
+     *      `:restore` (server-side; runs config-engine.apply with captured
+     *      target ids pre-seeded). Skipped for pure-create deployments
+     *      whose snapshot was empty.
+     *   2. Delete sweep — for lineage rows of this blueprint instance not
+     *      present in the snapshot's captured set, deletes the live
+     *      resource via the type's adapter. Co-ownership / drift /
+     *      no-delete-capability skip the entry with the corresponding
+     *      reason.
+     * 
+     * Resolves `(blueprint_id, job_id)` to the entry in
+     * `Blueprint.deployments[]` and reads its `snapshot_id` and
+     * `destination_blueprint_id` — the caller never needs to handle
+     * snapshot ids directly.
+     * 
+     * Async — returns 202 with a job id. Poll the job to track progress.
+     * The per-instance lock (`installation_status === 'IN_PROGRESS'`)
+     * rejects concurrent installs or restores with 409.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.RestoreBlueprintDeploymentV3.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.RestoreBlueprintDeploymentV3.Responses.$202>
+  }
+  ['/v3/blueprint-manifest/blueprints/{blueprint_id}/deployments/{job_id}/restore-preview']: {
+    /**
+     * getRestorePreview - Predicted outcome of reverting a deployment
+     * 
+     * Computes what would happen if the user triggered a restore on this
+     * deployment, without performing any writes. The forecast uses the
+     * snapshot's captured resources (when present) plus the current lineage
+     * state plus per-adapter gates (co-ownership, no-delete-capability,
+     * heuristic-match, drift when wired).
+     * 
+     * Idempotent and side-effect free. Safe to call repeatedly. The result
+     * may shift between calls if operators edit destination resources or
+     * another blueprint adopts a shared resource in the meantime.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetRestorePreview.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetRestorePreview.Responses.$200>
+  }
   ['/v3/blueprint-manifest/blueprints/{blueprint_id}/lineage']: {
     /**
      * getBlueprintLineageV3 - Get Blueprint Lineage V3
@@ -4836,6 +5702,57 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetBlueprintLineageV3.Responses.$200>
+  }
+  ['/v1/blueprint-manifest/uniqueness-criteria']: {
+    /**
+     * listUniquenessCriteria - listUniquenessCriteria
+     * 
+     * List all custom uniqueness criteria configured for the caller's organization.
+     * These overrides are applied during install (V2 and V3) when matching incoming
+     * resources against existing ones in the destination org, replacing the default
+     * per-resource-type field set with the caller's chosen fields (AND-combined).
+     * 
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ListUniquenessCriteria.Responses.$200>
+  }
+  ['/v1/blueprint-manifest/uniqueness-criteria/{resource_type}']: {
+    /**
+     * getUniquenessCriteria - getUniquenessCriteria
+     * 
+     * Get the configured uniqueness criteria for a specific resource type, if any.
+     */
+    'get'(
+      parameters?: Parameters<Paths.V1BlueprintManifestUniquenessCriteria$ResourceType.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetUniquenessCriteria.Responses.$200>
+    /**
+     * putUniquenessCriteria - putUniquenessCriteria
+     * 
+     * Set or replace the uniqueness criteria for a resource type. The provided fields
+     * must be valid attributes on the resource's schema (the UI typically loads the
+     * schema to populate options). All listed fields are AND-combined during matching.
+     * 
+     */
+    'put'(
+      parameters?: Parameters<Paths.V1BlueprintManifestUniquenessCriteria$ResourceType.PathParameters> | null,
+      data?: Paths.PutUniquenessCriteria.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.PutUniquenessCriteria.Responses.$200>
+    /**
+     * deleteUniquenessCriteria - deleteUniquenessCriteria
+     * 
+     * Remove the custom criteria for a resource type, reverting to the default fields.
+     */
+    'delete'(
+      parameters?: Parameters<Paths.V1BlueprintManifestUniquenessCriteria$ResourceType.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.DeleteUniquenessCriteria.Responses.$204>
   }
 }
 
@@ -4858,6 +5775,7 @@ export type BlueprintPatchWithResults = Components.Schemas.BlueprintPatchWithRes
 export type BlueprintPreview = Components.Schemas.BlueprintPreview;
 export type BlueprintResource = Components.Schemas.BlueprintResource;
 export type BlueprintResourceID = Components.Schemas.BlueprintResourceID;
+export type BlueprintRestoreJob = Components.Schemas.BlueprintRestoreJob;
 export type BlueprintValidateJob = Components.Schemas.BlueprintValidateJob;
 export type BlueprintVerificationJob = Components.Schemas.BlueprintVerificationJob;
 export type CallerIdentity = Components.Schemas.CallerIdentity;
@@ -4900,11 +5818,15 @@ export type ResourceNode = Components.Schemas.ResourceNode;
 export type ResourceNodeType = Components.Schemas.ResourceNodeType;
 export type ResourceReplacement = Components.Schemas.ResourceReplacement;
 export type ResourceVerificationResult = Components.Schemas.ResourceVerificationResult;
+export type RestoreOutcome = Components.Schemas.RestoreOutcome;
+export type RestoreOutcomeItem = Components.Schemas.RestoreOutcomeItem;
 export type RootResourceNode = Components.Schemas.RootResourceNode;
 export type S3Reference = Components.Schemas.S3Reference;
 export type SelectedResources = Components.Schemas.SelectedResources;
 export type SuggestBlueprintResourcesRequest = Components.Schemas.SuggestBlueprintResourcesRequest;
 export type SuggestBlueprintResourcesResponse = Components.Schemas.SuggestBlueprintResourcesResponse;
+export type UniquenessCriteria = Components.Schemas.UniquenessCriteria;
+export type UniquenessCriteriaResourceType = Components.Schemas.UniquenessCriteriaResourceType;
 export type UploadFilePayload = Components.Schemas.UploadFilePayload;
 export type V3ResourceProgressEntry = Components.Schemas.V3ResourceProgressEntry;
 export type VerificationSummary = Components.Schemas.VerificationSummary;
