@@ -94,6 +94,15 @@ declare namespace Components {
             };
             create: Operation;
             restores: Operation[];
+            /**
+             * Number of `resource` filter pairs from the request that are
+             * contained in this snapshot. Present only on `listSnapshots`
+             * responses where the caller passed at least one `resource`
+             * filter — absent on `getSnapshot` and on unfiltered list calls.
+             * Drives the coverage badge in Config Hub's snapshot picker.
+             *
+             */
+            matched_count?: number;
         }
         /**
          * A single captured resource with its full payload. The identity fields

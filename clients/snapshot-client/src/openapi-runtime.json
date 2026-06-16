@@ -6,7 +6,7 @@
   },
   "servers": [
     {
-      "url": "https://snapshot.dev.sls.epilot.io"
+      "url": "https://snapshot.sls.epilot.io"
     }
   ],
   "paths": {

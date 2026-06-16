@@ -7,15 +7,15 @@
   },
   "servers": [
     {
-      "url": "https://snapshot.dev.sls.epilot.io"
+      "url": "https://snapshot.sls.epilot.io"
+    },
+    {
+      "url": "https://snapshot.dev.sls.epilot.io",
+      "description": "Dev"
     },
     {
       "url": "https://snapshot.staging.sls.epilot.io",
       "description": "Staging"
-    },
-    {
-      "url": "https://snapshot.sls.epilot.io",
-      "description": "Production"
     }
   ],
   "security": [
@@ -665,6 +665,10 @@
             "items": {
               "$ref": "#/components/schemas/Operation"
             }
+          },
+          "matched_count": {
+            "type": "integer",
+            "description": "Number of `resource` filter pairs from the request that are\ncontained in this snapshot. Present only on `listSnapshots`\nresponses where the caller passed at least one `resource`\nfilter — absent on `getSnapshot` and on unfiltered list calls.\nDrives the coverage badge in Config Hub's snapshot picker.\n"
           }
         }
       },
