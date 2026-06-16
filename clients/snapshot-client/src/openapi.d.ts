@@ -59,9 +59,22 @@ declare namespace Components {
             type: "create" | "restore";
             started_at: string; // date-time
             completed_at?: string; // date-time
-            status: "in_progress" | "completed" | "failed";
+            /**
+             * `partial` indicates the operation completed but skipped at least
+             * one resource — see `skipped`. Only populated by restores triggered
+             * with `mode: 'preserve_edits'`.
+             *
+             */
+            status: "in_progress" | "completed" | "partial" | "failed";
             error?: string;
             triggered_by: CallerIdentity;
+            /**
+             * Per-resource skips, populated only for restores triggered with
+             * `mode: 'preserve_edits'`. Empty / absent for Config Hub's
+             * default overwrite-mode restores.
+             *
+             */
+            skipped?: SkippedResource[];
         }
         export interface ResourceRef {
             /**
@@ -70,9 +83,41 @@ declare namespace Components {
             type: string;
             id: string;
         }
+        export interface RestoreSnapshotRequest {
+            /**
+             * How to handle destination resources whose content has been modified
+             * since the snapshot was captured:
+             *
+             * - `overwrite` (default) — apply every captured payload regardless
+             *   of current destination state. Matches the manual-restore
+             *   semantics Config Hub relies on.
+             * - `preserve_edits` — for each captured resource, compare the live
+             *   destination payload's fingerprint against the install-time
+             *   fingerprint on lineage. If modified, skip and surface the
+             *   entry under `Operation.skipped`. Also skips co-owned resources
+             *   (lineage row carrying ≥2 distinct blueprint_instance_ids).
+             *   Used by blueprint-manifest-api when reverting a blueprint
+             *   install so user edits and other blueprints' contributions
+             *   survive.
+             *
+             */
+            mode?: "overwrite" | "preserve_edits";
+        }
         export interface RestoreSnapshotResponse {
             id: string;
             status: "restoring";
+        }
+        export interface SkippedResource {
+            lineage_id: string;
+            /**
+             * - `modified` — current destination payload's fingerprint differs
+             *   from the install-time fingerprint on the lineage row.
+             * - `co_owned` — lineage row has ≥2 distinct
+             *   `blueprint_instance_ids`; restoring would unilaterally affect
+             *   another blueprint instance's contribution.
+             *
+             */
+            reason: "modified" | "co_owned";
         }
         export interface Snapshot {
             id: string;
@@ -220,58 +265,7 @@ declare namespace Paths {
     namespace ListSnapshots {
         namespace Parameters {
             export type Cursor = string;
-            export type Resource = [
-                string?,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?,
-                string?
-            ];
+            export type Resource = string /* ^[^:]+:.+$ */[];
             export type Size = number;
         }
         export interface QueryParameters {
@@ -295,6 +289,7 @@ declare namespace Paths {
         }
     }
     namespace RestoreSnapshot {
+        export type RequestBody = Components.Schemas.RestoreSnapshotRequest;
         namespace Responses {
             export type $202 = Components.Schemas.RestoreSnapshotResponse;
             export type $401 = Components.Responses.Unauthorized;
@@ -394,7 +389,7 @@ export interface OperationMethods {
    * 
    * Restore a snapshot to the org. Async — returns immediately; client polls
    * `getSnapshot` until the latest entry in `restores` moves from
-   * `in_progress` to `completed` or `failed`.
+   * `in_progress` to one of `completed | partial | failed`.
    * 
    * v1: full restore only. Cherry-pick (`resources?` body filter) is an open
    * question — see RFC OQ #1.
@@ -402,7 +397,7 @@ export interface OperationMethods {
    */
   'restoreSnapshot'(
     parameters?: Parameters<Paths.V1Snapshots$IdRestore.PathParameters> | null,
-    data?: any,
+    data?: Paths.RestoreSnapshot.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.RestoreSnapshot.Responses.$202>
   /**
@@ -512,7 +507,7 @@ export interface PathsDictionary {
      * 
      * Restore a snapshot to the org. Async — returns immediately; client polls
      * `getSnapshot` until the latest entry in `restores` moves from
-     * `in_progress` to `completed` or `failed`.
+     * `in_progress` to one of `completed | partial | failed`.
      * 
      * v1: full restore only. Cherry-pick (`resources?` body filter) is an open
      * question — see RFC OQ #1.
@@ -520,7 +515,7 @@ export interface PathsDictionary {
      */
     'post'(
       parameters?: Parameters<Paths.V1Snapshots$IdRestore.PathParameters> | null,
-      data?: any,
+      data?: Paths.RestoreSnapshot.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.RestoreSnapshot.Responses.$202>
   }
@@ -585,7 +580,9 @@ export type CreateSnapshotResponse = Components.Schemas.CreateSnapshotResponse;
 export type Error = Components.Schemas.Error;
 export type Operation = Components.Schemas.Operation;
 export type ResourceRef = Components.Schemas.ResourceRef;
+export type RestoreSnapshotRequest = Components.Schemas.RestoreSnapshotRequest;
 export type RestoreSnapshotResponse = Components.Schemas.RestoreSnapshotResponse;
+export type SkippedResource = Components.Schemas.SkippedResource;
 export type Snapshot = Components.Schemas.Snapshot;
 export type SnapshotResourceDetail = Components.Schemas.SnapshotResourceDetail;
 export type SnapshotResourceList = Components.Schemas.SnapshotResourceList;

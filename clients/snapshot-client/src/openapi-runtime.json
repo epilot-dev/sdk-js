@@ -67,6 +67,12 @@
       ],
       "post": {
         "operationId": "restoreSnapshot",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {}
+          }
+        },
         "responses": {}
       }
     },

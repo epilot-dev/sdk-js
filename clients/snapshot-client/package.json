@@ -1,6 +1,6 @@
 {
   "name": "@epilot/snapshot-client",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Client for epilot Snapshot API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

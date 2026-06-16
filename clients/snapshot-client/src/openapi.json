@@ -98,7 +98,6 @@
             "description": "Filter to snapshots containing one or more resources. Format\n`<type>:<id>`. Split on the first colon — the `<id>` half may\ncontain colons (e.g., role acl ids like `role:acl:internal:foo`).\nRepeat the param for multiple resources — results are OR-unioned.\nMaximum 50 pairs per request.\n",
             "schema": {
               "type": "array",
-              "maxItems": 50,
               "items": {
                 "type": "string",
                 "pattern": "^[^:]+:.+$"
@@ -214,10 +213,20 @@
       "post": {
         "operationId": "restoreSnapshot",
         "summary": "restoreSnapshot",
-        "description": "Restore a snapshot to the org. Async — returns immediately; client polls\n`getSnapshot` until the latest entry in `restores` moves from\n`in_progress` to `completed` or `failed`.\n\nv1: full restore only. Cherry-pick (`resources?` body filter) is an open\nquestion — see RFC OQ #1.\n",
+        "description": "Restore a snapshot to the org. Async — returns immediately; client polls\n`getSnapshot` until the latest entry in `restores` moves from\n`in_progress` to one of `completed | partial | failed`.\n\nv1: full restore only. Cherry-pick (`resources?` body filter) is an open\nquestion — see RFC OQ #1.\n",
         "tags": [
           "Snapshots"
         ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RestoreSnapshotRequest"
+              }
+            }
+          }
+        },
         "responses": {
           "202": {
             "description": "Restore started",
@@ -596,6 +605,20 @@
           }
         }
       },
+      "RestoreSnapshotRequest": {
+        "type": "object",
+        "properties": {
+          "mode": {
+            "type": "string",
+            "enum": [
+              "overwrite",
+              "preserve_edits"
+            ],
+            "default": "overwrite",
+            "description": "How to handle destination resources whose content has been modified\nsince the snapshot was captured:\n\n- `overwrite` (default) — apply every captured payload regardless\n  of current destination state. Matches the manual-restore\n  semantics Config Hub relies on.\n- `preserve_edits` — for each captured resource, compare the live\n  destination payload's fingerprint against the install-time\n  fingerprint on lineage. If modified, skip and surface the\n  entry under `Operation.skipped`. Also skips co-owned resources\n  (lineage row carrying ≥2 distinct blueprint_instance_ids).\n  Used by blueprint-manifest-api when reverting a blueprint\n  install so user edits and other blueprints' contributions\n  survive.\n"
+          }
+        }
+      },
       "RestoreSnapshotResponse": {
         "type": "object",
         "required": [
@@ -701,14 +724,43 @@
             "enum": [
               "in_progress",
               "completed",
+              "partial",
               "failed"
-            ]
+            ],
+            "description": "`partial` indicates the operation completed but skipped at least\none resource — see `skipped`. Only populated by restores triggered\nwith `mode: 'preserve_edits'`.\n"
           },
           "error": {
             "type": "string"
           },
           "triggered_by": {
             "$ref": "#/components/schemas/CallerIdentity"
+          },
+          "skipped": {
+            "type": "array",
+            "description": "Per-resource skips, populated only for restores triggered with\n`mode: 'preserve_edits'`. Empty / absent for Config Hub's\ndefault overwrite-mode restores.\n",
+            "items": {
+              "$ref": "#/components/schemas/SkippedResource"
+            }
+          }
+        }
+      },
+      "SkippedResource": {
+        "type": "object",
+        "required": [
+          "lineage_id",
+          "reason"
+        ],
+        "properties": {
+          "lineage_id": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string",
+            "enum": [
+              "modified",
+              "co_owned"
+            ],
+            "description": "- `modified` — current destination payload's fingerprint differs\n  from the install-time fingerprint on the lineage row.\n- `co_owned` — lineage row has ≥2 distinct\n  `blueprint_instance_ids`; restoring would unilaterally affect\n  another blueprint instance's contribution.\n"
           }
         }
       },
