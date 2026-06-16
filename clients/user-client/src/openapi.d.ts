@@ -57,6 +57,12 @@ declare namespace Components {
              * }
              */
             GroupImageUri;
+            /**
+             * A short abbreviation for the group, up to 2 characters.
+             * example:
+             * FN
+             */
+            abbreviation?: string | null;
         }
         export interface DataPoint {
             /**
@@ -134,6 +140,10 @@ declare namespace Components {
                  */
                 draft_email?: string | null; // email
                 /**
+                 * Server-set expiry for the pending email change verification link (ISO 8601). Read-only.
+                 */
+                draft_email_expires_at?: string | null; // date-time
+                /**
                  * User's department
                  * example:
                  * Sales
@@ -157,6 +167,12 @@ declare namespace Components {
                  * false
                  */
                 mfa_enabled?: boolean;
+                /**
+                 * Whether the user has any registered passkeys
+                 * example:
+                 * false
+                 */
+                has_passkeys?: boolean;
                 /**
                  * User's phone number verification status
                  * example:
@@ -286,6 +302,12 @@ declare namespace Components {
              * }
              */
             GroupImageUri;
+            /**
+             * A short abbreviation for the group, up to 2 characters.
+             * example:
+             * FN
+             */
+            abbreviation?: string | null;
         }
         /**
          * Group unique identifier
@@ -739,6 +761,12 @@ declare namespace Components {
              * }
              */
             GroupImageUri;
+            /**
+             * A short abbreviation for the group, up to 2 characters.
+             * example:
+             * FN
+             */
+            abbreviation?: string | null;
         }
         export interface User {
             id: /* User's unique identifier */ UserId;
@@ -845,6 +873,82 @@ declare namespace Components {
             language?: "en" | "de";
             roles?: string[];
         }
+        export interface UserSetting {
+            scope: /**
+             * User setting scope. Values are limited to 64 characters.
+             * example:
+             * calendar
+             */
+            UserSettingScope;
+            key: /**
+             * User setting key. Values are limited to 128 characters.
+             * example:
+             * visible_calendars
+             */
+            UserSettingKey;
+            value: /* The JSON value of a user setting. Objects are recommended for extensibility, but any JSON value is accepted up to 64 KiB when serialized as JSON. */ UserSettingValue;
+            created_at: string; // date-time
+            updated_at: string; // date-time
+        }
+        /**
+         * User setting key. Values are limited to 128 characters.
+         * example:
+         * visible_calendars
+         */
+        export type UserSettingKey = string;
+        /**
+         * User setting scope. Values are limited to 64 characters.
+         * example:
+         * calendar
+         */
+        export type UserSettingScope = string;
+        /**
+         * The JSON value of a user setting. Objects are recommended for extensibility, but any JSON value is accepted up to 64 KiB when serialized as JSON.
+         */
+        export type UserSettingValue = any;
+        export interface UserSettingsListResponse {
+            results: {
+                scope: /**
+                 * User setting scope. Values are limited to 64 characters.
+                 * example:
+                 * calendar
+                 */
+                UserSettingScope;
+                /**
+                 * example:
+                 * [
+                 *   "visible_calendars"
+                 * ]
+                 */
+                keys: /**
+                 * User setting key. Values are limited to 128 characters.
+                 * example:
+                 * visible_calendars
+                 */
+                UserSettingKey[];
+            }[];
+        }
+        export interface UserSettingsScopeResponse {
+            scope: /**
+             * User setting scope. Values are limited to 64 characters.
+             * example:
+             * calendar
+             */
+            UserSettingScope;
+            /**
+             * example:
+             * {
+             *   "visible_calendars": {
+             *     "calendar_ids": [
+             *       "holidays"
+             *     ]
+             *   }
+             * }
+             */
+            settings: {
+                [name: string]: /* The JSON value of a user setting. Objects are recommended for extensibility, but any JSON value is accepted up to 64 KiB when serialized as JSON. */ UserSettingValue;
+            };
+        }
         export interface UserV2 {
             id?: /* User's unique identifier */ UserId;
             organization_id?: OrganizationId;
@@ -865,6 +969,10 @@ declare namespace Components {
              * User's pending email address
              */
             draft_email?: string | null; // email
+            /**
+             * Server-set expiry for the pending email change verification link (ISO 8601). Read-only.
+             */
+            draft_email_expires_at?: string | null; // date-time
             /**
              * User's department
              * example:
@@ -889,6 +997,12 @@ declare namespace Components {
              * false
              */
             mfa_enabled?: boolean;
+            /**
+             * Whether the user has any registered passkeys
+             * example:
+             * false
+             */
+            has_passkeys?: boolean;
             /**
              * User's phone number verification status
              * example:
@@ -1151,6 +1265,30 @@ declare namespace Paths {
             }
         }
     }
+    namespace DeleteUserSetting {
+        namespace Parameters {
+            export type Key = /**
+             * User setting key. Values are limited to 128 characters.
+             * example:
+             * visible_calendars
+             */
+            Components.Schemas.UserSettingKey;
+            export type Scope = /**
+             * User setting scope. Values are limited to 64 characters.
+             * example:
+             * calendar
+             */
+            Components.Schemas.UserSettingScope;
+        }
+        export interface PathParameters {
+            scope: Parameters.Scope;
+            key: Parameters.Key;
+        }
+        namespace Responses {
+            export interface $204 {
+            }
+        }
+    }
     namespace DeleteUserV2 {
         namespace Parameters {
             export type Id = /* User's unique identifier */ Components.Schemas.UserId;
@@ -1279,6 +1417,47 @@ declare namespace Paths {
             }
         }
     }
+    namespace GetUserSetting {
+        namespace Parameters {
+            export type Key = /**
+             * User setting key. Values are limited to 128 characters.
+             * example:
+             * visible_calendars
+             */
+            Components.Schemas.UserSettingKey;
+            export type Scope = /**
+             * User setting scope. Values are limited to 64 characters.
+             * example:
+             * calendar
+             */
+            Components.Schemas.UserSettingScope;
+        }
+        export interface PathParameters {
+            scope: Parameters.Scope;
+            key: Parameters.Key;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.UserSetting;
+            export interface $404 {
+            }
+        }
+    }
+    namespace GetUserSettingsScope {
+        namespace Parameters {
+            export type Scope = /**
+             * User setting scope. Values are limited to 64 characters.
+             * example:
+             * calendar
+             */
+            Components.Schemas.UserSettingScope;
+        }
+        export interface PathParameters {
+            scope: Parameters.Scope;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.UserSettingsScopeResponse;
+        }
+    }
     namespace GetUserV2 {
         namespace Parameters {
             export type Id = /* User's unique identifier */ Components.Schemas.UserId;
@@ -1303,6 +1482,11 @@ declare namespace Paths {
             export interface $200 {
                 passkeys?: Components.Schemas.Passkey[];
             }
+        }
+    }
+    namespace ListUserSettings {
+        namespace Responses {
+            export type $200 = Components.Schemas.UserSettingsListResponse;
         }
     }
     namespace ListUsers {
@@ -1341,6 +1525,30 @@ declare namespace Paths {
             }
         }
     }
+    namespace PutUserSetting {
+        namespace Parameters {
+            export type Key = /**
+             * User setting key. Values are limited to 128 characters.
+             * example:
+             * visible_calendars
+             */
+            Components.Schemas.UserSettingKey;
+            export type Scope = /**
+             * User setting scope. Values are limited to 64 characters.
+             * example:
+             * calendar
+             */
+            Components.Schemas.UserSettingScope;
+        }
+        export interface PathParameters {
+            scope: Parameters.Scope;
+            key: Parameters.Key;
+        }
+        export type RequestBody = /* The JSON value of a user setting. Objects are recommended for extensibility, but any JSON value is accepted up to 64 KiB when serialized as JSON. */ Components.Schemas.UserSettingValue;
+        namespace Responses {
+            export type $200 = Components.Schemas.UserSetting;
+        }
+    }
     namespace RejectInvite {
         namespace Parameters {
             export type Token = /* Token used to invite a user to epilot */ Components.Schemas.InviteToken;
@@ -1357,6 +1565,25 @@ declare namespace Paths {
                 success?: boolean;
             }
             export interface $404 {
+            }
+        }
+    }
+    namespace RequestPasswordReset {
+        export interface RequestBody {
+            /**
+             * Email address of the account to reset
+             * example:
+             * test@example.com
+             */
+            email: string;
+        }
+        namespace Responses {
+            export interface $200 {
+                /**
+                 * example:
+                 * If an account exists, a password reset email has been sent.
+                 */
+                message: string;
             }
         }
     }
@@ -1400,6 +1627,29 @@ declare namespace Paths {
                 login_parameters?: Components.Schemas.LoginParameters[];
             }
             export interface $404 {
+            }
+        }
+    }
+    namespace SendUserPasswordReset {
+        export interface RequestBody {
+            /**
+             * Email address of the user to reset
+             * example:
+             * test@example.com
+             */
+            email: string;
+        }
+        namespace Responses {
+            export interface $200 {
+                /**
+                 * example:
+                 * true
+                 */
+                success: boolean;
+            }
+            export interface $400 {
+            }
+            export interface $403 {
             }
         }
     }
@@ -1468,7 +1718,11 @@ declare namespace Paths {
         namespace Responses {
             export interface $200 {
             }
+            export interface $400 {
+            }
             export interface $404 {
+            }
+            export interface $409 {
             }
         }
     }
@@ -1494,6 +1748,56 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetMeV2.Responses.$200>
+  /**
+   * listUserSettings - listUserSettings
+   * 
+   * List all setting scopes and keys available for the currently logged in user. Does not return setting values.
+   */
+  'listUserSettings'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ListUserSettings.Responses.$200>
+  /**
+   * getUserSettingsScope - getUserSettingsScope
+   * 
+   * Get all setting values for one scope for the currently logged in user.
+   */
+  'getUserSettingsScope'(
+    parameters?: Parameters<Paths.GetUserSettingsScope.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetUserSettingsScope.Responses.$200>
+  /**
+   * getUserSetting - getUserSetting
+   * 
+   * Get one setting value by scope and key for the currently logged in user.
+   */
+  'getUserSetting'(
+    parameters?: Parameters<Paths.GetUserSetting.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetUserSetting.Responses.$200>
+  /**
+   * putUserSetting - putUserSetting
+   * 
+   * Create or replace one setting value for the currently logged in user.
+   */
+  'putUserSetting'(
+    parameters?: Parameters<Paths.PutUserSetting.PathParameters> | null,
+    data?: Paths.PutUserSetting.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.PutUserSetting.Responses.$200>
+  /**
+   * deleteUserSetting - deleteUserSetting
+   * 
+   * Delete one setting value for the currently logged in user.
+   */
+  'deleteUserSetting'(
+    parameters?: Parameters<Paths.DeleteUserSetting.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.DeleteUserSetting.Responses.$204>
   /**
    * listUsersV2 - listUsersV2
    * 
@@ -1555,6 +1859,18 @@ export interface OperationMethods {
     data?: Paths.ResendUserInvitation.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ResendUserInvitation.Responses.$200>
+  /**
+   * sendUserPasswordReset - sendUserPasswordReset
+   * 
+   * Send a password reset email to a user in your organization.
+   * Requires `user:edit` on the target user.
+   * 
+   */
+  'sendUserPasswordReset'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.SendUserPasswordReset.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.SendUserPasswordReset.Responses.$200>
   /**
    * getGroupsForUser - getGroupsForUser
    * 
@@ -1657,6 +1973,19 @@ export interface OperationMethods {
     data?: Paths.VerifyEmailWithToken.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.VerifyEmailWithToken.Responses.$200>
+  /**
+   * requestPasswordReset - requestPasswordReset
+   * 
+   * Request a password reset email for the given email address. Always
+   * returns a success response whether or not an account exists with that
+   * email.
+   * 
+   */
+  'requestPasswordReset'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.RequestPasswordReset.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.RequestPasswordReset.Responses.$200>
   /**
    * checkInviteToken - checkInviteToken
    * 
@@ -1845,6 +2174,62 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetMeV2.Responses.$200>
   }
+  ['/v2/users/me/settings']: {
+    /**
+     * listUserSettings - listUserSettings
+     * 
+     * List all setting scopes and keys available for the currently logged in user. Does not return setting values.
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ListUserSettings.Responses.$200>
+  }
+  ['/v2/users/me/settings/{scope}']: {
+    /**
+     * getUserSettingsScope - getUserSettingsScope
+     * 
+     * Get all setting values for one scope for the currently logged in user.
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetUserSettingsScope.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetUserSettingsScope.Responses.$200>
+  }
+  ['/v2/users/me/settings/{scope}/{key}']: {
+    /**
+     * getUserSetting - getUserSetting
+     * 
+     * Get one setting value by scope and key for the currently logged in user.
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetUserSetting.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetUserSetting.Responses.$200>
+    /**
+     * putUserSetting - putUserSetting
+     * 
+     * Create or replace one setting value for the currently logged in user.
+     */
+    'put'(
+      parameters?: Parameters<Paths.PutUserSetting.PathParameters> | null,
+      data?: Paths.PutUserSetting.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.PutUserSetting.Responses.$200>
+    /**
+     * deleteUserSetting - deleteUserSetting
+     * 
+     * Delete one setting value for the currently logged in user.
+     */
+    'delete'(
+      parameters?: Parameters<Paths.DeleteUserSetting.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.DeleteUserSetting.Responses.$204>
+  }
   ['/v2/users']: {
     /**
      * listUsersV2 - listUsersV2
@@ -1913,6 +2298,20 @@ export interface PathsDictionary {
       data?: Paths.ResendUserInvitation.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ResendUserInvitation.Responses.$200>
+  }
+  ['/v2/users:sendPasswordReset']: {
+    /**
+     * sendUserPasswordReset - sendUserPasswordReset
+     * 
+     * Send a password reset email to a user in your organization.
+     * Requires `user:edit` on the target user.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.SendUserPasswordReset.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.SendUserPasswordReset.Responses.$200>
   }
   ['/v2/users/{id}/groups']: {
     /**
@@ -2029,6 +2428,21 @@ export interface PathsDictionary {
       data?: Paths.VerifyEmailWithToken.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.VerifyEmailWithToken.Responses.$200>
+  }
+  ['/v2/users/public/requestPasswordReset']: {
+    /**
+     * requestPasswordReset - requestPasswordReset
+     * 
+     * Request a password reset email for the given email address. Always
+     * returns a success response whether or not an account exists with that
+     * email.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.RequestPasswordReset.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.RequestPasswordReset.Responses.$200>
   }
   ['/v2/users/public/checkToken']: {
     /**
@@ -2265,6 +2679,12 @@ export type UserActivationPayload = Components.Schemas.UserActivationPayload;
 export type UserDetail = Components.Schemas.UserDetail;
 export type UserId = Components.Schemas.UserId;
 export type UserInvitationPayload = Components.Schemas.UserInvitationPayload;
+export type UserSetting = Components.Schemas.UserSetting;
+export type UserSettingKey = Components.Schemas.UserSettingKey;
+export type UserSettingScope = Components.Schemas.UserSettingScope;
+export type UserSettingValue = Components.Schemas.UserSettingValue;
+export type UserSettingsListResponse = Components.Schemas.UserSettingsListResponse;
+export type UserSettingsScopeResponse = Components.Schemas.UserSettingsScopeResponse;
 export type UserV2 = Components.Schemas.UserV2;
 export type UserVerificationPayload = Components.Schemas.UserVerificationPayload;
 export type Username = Components.Schemas.Username;

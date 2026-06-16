@@ -29,6 +29,81 @@
         "responses": {}
       }
     },
+    "/v2/users/me/settings": {
+      "get": {
+        "operationId": "listUserSettings",
+        "responses": {}
+      }
+    },
+    "/v2/users/me/settings/{scope}": {
+      "get": {
+        "operationId": "getUserSettingsScope",
+        "parameters": [
+          {
+            "name": "scope",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/users/me/settings/{scope}/{key}": {
+      "get": {
+        "operationId": "getUserSetting",
+        "parameters": [
+          {
+            "name": "scope",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "key",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      },
+      "put": {
+        "operationId": "putUserSetting",
+        "parameters": [
+          {
+            "name": "scope",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "key",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteUserSetting",
+        "parameters": [
+          {
+            "name": "scope",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "key",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v2/users": {
       "get": {
         "operationId": "listUsersV2",
@@ -107,6 +182,18 @@
       "post": {
         "operationId": "resendUserInvitation",
         "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/users:sendPasswordReset": {
+      "post": {
+        "operationId": "sendUserPasswordReset",
+        "requestBody": {
+          "required": true,
           "content": {
             "application/json": {}
           }
@@ -257,6 +344,18 @@
           }
         ],
         "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/users/public/requestPasswordReset": {
+      "post": {
+        "operationId": "requestPasswordReset",
+        "requestBody": {
+          "required": true,
           "content": {
             "application/json": {}
           }
