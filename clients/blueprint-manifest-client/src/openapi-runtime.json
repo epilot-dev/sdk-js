@@ -803,6 +803,42 @@
         "responses": {}
       }
     },
+    "/v3/blueprint-manifest/blueprints/{blueprint_id}/deployments/{job_id}:restore": {
+      "post": {
+        "operationId": "restoreBlueprintDeploymentV3",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "blueprint_id",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "job_id",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v3/blueprint-manifest/blueprints/{blueprint_id}/deployments/{job_id}/restore-preview": {
+      "get": {
+        "operationId": "getRestorePreview",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "blueprint_id",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "job_id",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v3/blueprint-manifest/blueprints/{blueprint_id}/lineage": {
       "get": {
         "operationId": "getBlueprintLineageV3",
@@ -813,6 +849,39 @@
             "name": "blueprint_id"
           }
         ],
+        "responses": {}
+      }
+    },
+    "/v1/blueprint-manifest/uniqueness-criteria": {
+      "get": {
+        "operationId": "listUniquenessCriteria",
+        "responses": {}
+      }
+    },
+    "/v1/blueprint-manifest/uniqueness-criteria/{resource_type}": {
+      "parameters": [
+        {
+          "in": "path",
+          "required": true,
+          "name": "resource_type"
+        }
+      ],
+      "get": {
+        "operationId": "getUniquenessCriteria",
+        "responses": {}
+      },
+      "put": {
+        "operationId": "putUniquenessCriteria",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteUniquenessCriteria",
         "responses": {}
       }
     }
