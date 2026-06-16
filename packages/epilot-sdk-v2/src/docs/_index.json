@@ -41,6 +41,7 @@
   "query": "query",
   "sandbox": "sandbox",
   "sharing": "sharing",
+  "snapshot": "snapshot",
   "submission": "submission",
   "targeting": "targeting",
   "templateVariables": "template-variables",

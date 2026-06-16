@@ -222,6 +222,11 @@ export const registerBuiltinApis = (registry: Map<string, ApiEntry>) => {
   });
   registerApi({
     registry,
+    name: 'snapshot',
+    loader: () => expandDef(require('../definitions/snapshot-runtime.json')),
+  });
+  registerApi({
+    registry,
     name: 'submission',
     loader: () => expandDef(require('../definitions/submission-runtime.json')),
   });

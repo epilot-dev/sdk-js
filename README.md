@@ -90,6 +90,7 @@ Full API documentation: [https://docs.epilot.io/api](https://docs.epilot.io/api)
 | `epilot.query` | `@epilot/sdk/query` | [docs](./packages/epilot-sdk-v2/docs/query.md) |
 | `epilot.sandbox` | `@epilot/sdk/sandbox` | [docs](./packages/epilot-sdk-v2/docs/sandbox.md) |
 | `epilot.sharing` | `@epilot/sdk/sharing` | [docs](./packages/epilot-sdk-v2/docs/sharing.md) |
+| `epilot.snapshot` | `@epilot/sdk/snapshot` | [docs](./packages/epilot-sdk-v2/docs/snapshot.md) |
 | `epilot.submission` | `@epilot/sdk/submission` | [docs](./packages/epilot-sdk-v2/docs/submission.md) |
 | `epilot.targeting` | `@epilot/sdk/targeting` | [docs](./packages/epilot-sdk-v2/docs/targeting.md) |
 | `epilot.templateVariables` | `@epilot/sdk/template-variables` | [docs](./packages/epilot-sdk-v2/docs/template-variables.md) |
