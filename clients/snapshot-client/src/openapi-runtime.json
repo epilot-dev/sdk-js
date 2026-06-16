@@ -1,0 +1,136 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "",
+    "version": ""
+  },
+  "servers": [
+    {
+      "url": "https://snapshot.dev.sls.epilot.io"
+    }
+  ],
+  "paths": {
+    "/v1/snapshots": {
+      "post": {
+        "operationId": "createSnapshot",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "get": {
+        "operationId": "listSnapshots",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "cursor"
+          },
+          {
+            "in": "query",
+            "name": "size"
+          },
+          {
+            "in": "query",
+            "name": "resource"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/snapshots/{id}": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id",
+          "required": true
+        }
+      ],
+      "get": {
+        "operationId": "getSnapshot",
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteSnapshot",
+        "responses": {}
+      }
+    },
+    "/v1/snapshots/{id}:restore": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id",
+          "required": true
+        }
+      ],
+      "post": {
+        "operationId": "restoreSnapshot",
+        "responses": {}
+      }
+    },
+    "/v1/snapshots/{id}/resources": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id",
+          "required": true
+        }
+      ],
+      "get": {
+        "operationId": "listSnapshotResources",
+        "responses": {}
+      }
+    },
+    "/v1/snapshots/{id}/resources/{lineage_id}": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id",
+          "required": true
+        },
+        {
+          "in": "path",
+          "name": "lineage_id",
+          "required": true
+        }
+      ],
+      "get": {
+        "operationId": "getSnapshotResource",
+        "responses": {}
+      }
+    },
+    "/v1/snapshots:list-dependencies": {
+      "post": {
+        "operationId": "listDependencies",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    }
+  },
+  "components": {
+    "responses": {
+      "BadRequest": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "Unauthorized": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "NotFound": {
+        "content": {
+          "application/json": {}
+        }
+      }
+    }
+  }
+}
