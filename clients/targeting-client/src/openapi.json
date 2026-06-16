@@ -479,9 +479,19 @@
           {
             "name": "next",
             "in": "query",
-            "description": "Cursor for pagination",
+            "description": "Cursor for sequential pagination. Ignored when `from` is provided.",
             "schema": {
               "type": "string"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "description": "Zero-based offset of the first item to return. Enables direct (random-access) pagination to any page. When provided, it takes precedence over `next`.",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
             }
           },
           {
@@ -1313,7 +1323,7 @@
               },
               "target_ids": {
                 "type": "array",
-                "description": "List of target entity IDs to attach to the campaign. Today only a single\nentry is supported (campaign.target is has_one) but the array shape is kept\nfor forward-compatibility — only `target_ids[0]` is used.\n",
+                "description": "List of target entity IDs to attach to the campaign. Today only a single\nentry is supported (campaign.target is has_one) but the array shape is kept\nfor forward-compatibility \u2014 only `target_ids[0]` is used.\n",
                 "items": {
                   "$ref": "#/components/schemas/BaseUUID"
                 }
