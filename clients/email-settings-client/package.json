@@ -43,7 +43,7 @@
     "!*.config.js"
   ],
   "author": "epilot GmbH",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "private": false,
   "peerDependencies": {
     "axios": "^1.0.0 || >=0.25.0 <1.0.0"
