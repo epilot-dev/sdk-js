@@ -274,6 +274,10 @@ export declare namespace Components {
              * If true, journey is displayed in read-only mode
              */
             protected?: boolean;
+            /**
+             * Whitelist of paths that remain editable when the journey is protected. Supports wildcard patterns (e.g. steps/*​/blocks/**).
+             */
+            protectedEditable?: string[];
             settings?: {
                 embedOptions?: {
                     mode?: "full-screen" | "inline";
@@ -526,6 +530,10 @@ export declare namespace Components {
              * If true, journey is displayed in read-only mode
              */
             protected?: boolean;
+            /**
+             * Whitelist of paths that remain editable when the journey is protected. Supports wildcard patterns (e.g. steps/*​/blocks/**).
+             */
+            protectedEditable?: string[];
             settings?: {
                 embedOptions?: {
                     mode?: "full-screen" | "inline";
@@ -761,6 +769,10 @@ export declare namespace Components {
              * If true, journey is displayed in read-only mode
              */
             protected?: boolean;
+            /**
+             * Whitelist of paths that remain editable when the journey is protected. Supports wildcard patterns (e.g. steps/*​/blocks/**).
+             */
+            protectedEditable?: string[];
             settings?: {
                 embedOptions?: {
                     mode?: "full-screen" | "inline";
@@ -818,6 +830,7 @@ export declare namespace Components {
                  * If true, the journey shows an icon to toggle dark mode
                  */
                 enableDarkMode?: boolean;
+                isActive?: boolean;
             };
             validationRules?: /**
              * References to validation rules organized by blocks and fields.
@@ -1679,13 +1692,13 @@ export interface OperationMethods {
   ): OperationResponse<Paths.PatchUpdateJourneyV2.Responses.$200>
   /**
    * getJourneyV2 - getJourneyV2
-   *
+   * 
    * Get journey by id
    */
   'getJourneyV2'(
     parameters?: Parameters<Paths.GetJourneyV2.QueryParameters & Paths.GetJourneyV2.PathParameters> | null,
     data?: any,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetJourneyV2.Responses.$200>
   /**
    * removeJourneyV2 - removeJourneyV2
@@ -1872,7 +1885,7 @@ export interface PathsDictionary {
      * Get journey by id
      */
     'get'(
-      parameters?: Parameters<Paths.GetJourneyV2.PathParameters> | null,
+      parameters?: Parameters<Paths.GetJourneyV2.QueryParameters & Paths.GetJourneyV2.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetJourneyV2.Responses.$200>

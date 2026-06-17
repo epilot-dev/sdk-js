@@ -1,6 +1,4 @@
 /* Auto-copied from ai-agents-client */
-/* eslint-disable */
-
 import type {
   OpenAPIClient,
   Parameters,

@@ -163,6 +163,7 @@ const { data } = await client.getJourney({
   ],
   "journey_type": "Sales template (Premium)",
   "protected": true,
+  "protectedEditable": ["string"],
   "settings": {
     "embedOptions": {
       "mode": "full-screen",
@@ -356,6 +357,7 @@ const { data } = await client.createJourney(
     ],
     journey_type: 'Sales template (Premium)',
     protected: true,
+    protectedEditable: ['string'],
     settings: {
       embedOptions: {
         mode: 'full-screen',
@@ -469,6 +471,7 @@ const { data } = await client.createJourney(
   ],
   "journey_type": "Sales template (Premium)",
   "protected": true,
+  "protectedEditable": ["string"],
   "settings": {
     "embedOptions": {
       "mode": "full-screen",
@@ -596,6 +599,7 @@ const { data } = await client.updateJourney(
     ],
     journey_type: 'Sales template (Premium)',
     protected: true,
+    protectedEditable: ['string'],
     settings: {
       embedOptions: {
         mode: 'full-screen',
@@ -700,6 +704,7 @@ const { data } = await client.patchUpdateJourney(
     ],
     "journey_type": "Sales template (Premium)",
     "protected": true,
+    "protectedEditable": ["string"],
     "settings": {
       "embedOptions": {},
       "safeModeAutomation": true,
@@ -940,6 +945,7 @@ const { data } = await client.createJourneyV2(
     ],
     journey_type: 'Sales template (Premium)',
     protected: true,
+    protectedEditable: ['string'],
     settings: {
       embedOptions: {
         mode: 'full-screen',
@@ -972,7 +978,8 @@ const { data } = await client.createJourneyV2(
       useNewDesign: true,
       thirdPartyCookies: true,
       accessMode: 'PUBLIC',
-      enableDarkMode: true
+      enableDarkMode: true,
+      isActive: true
     },
     validationRules: {
       block1: 'rule123',
@@ -1042,6 +1049,7 @@ const { data } = await client.createJourneyV2(
   ],
   "journey_type": "Sales template (Premium)",
   "protected": true,
+  "protectedEditable": ["string"],
   "settings": {
     "embedOptions": {
       "mode": "full-screen",
@@ -1074,7 +1082,8 @@ const { data } = await client.createJourneyV2(
     "useNewDesign": true,
     "thirdPartyCookies": true,
     "accessMode": "PUBLIC",
-    "enableDarkMode": true
+    "enableDarkMode": true,
+    "isActive": true
   },
   "validationRules": {
     "block1": "rule123",
@@ -1152,6 +1161,7 @@ const { data } = await client.updateJourneyV2(
     ],
     journey_type: 'Sales template (Premium)',
     protected: true,
+    protectedEditable: ['string'],
     settings: {
       embedOptions: {
         mode: 'full-screen',
@@ -1184,7 +1194,8 @@ const { data } = await client.updateJourneyV2(
       useNewDesign: true,
       thirdPartyCookies: true,
       accessMode: 'PUBLIC',
-      enableDarkMode: true
+      enableDarkMode: true,
+      isActive: true
     },
     validationRules: {
       block1: 'rule123',
@@ -1254,6 +1265,7 @@ const { data } = await client.updateJourneyV2(
   ],
   "journey_type": "Sales template (Premium)",
   "protected": true,
+  "protectedEditable": ["string"],
   "settings": {
     "embedOptions": {
       "mode": "full-screen",
@@ -1286,7 +1298,8 @@ const { data } = await client.updateJourneyV2(
     "useNewDesign": true,
     "thirdPartyCookies": true,
     "accessMode": "PUBLIC",
-    "enableDarkMode": true
+    "enableDarkMode": true,
+    "isActive": true
   },
   "validationRules": {
     "block1": "rule123",
@@ -1375,6 +1388,7 @@ const { data } = await client.patchUpdateJourneyV2(
   ],
   "journey_type": "Sales template (Premium)",
   "protected": true,
+  "protectedEditable": ["string"],
   "settings": {
     "embedOptions": {
       "mode": "full-screen",
@@ -1407,7 +1421,8 @@ const { data } = await client.patchUpdateJourneyV2(
     "useNewDesign": true,
     "thirdPartyCookies": true,
     "accessMode": "PUBLIC",
-    "enableDarkMode": true
+    "enableDarkMode": true,
+    "isActive": true
   },
   "validationRules": {
     "block1": "rule123",
@@ -1493,6 +1508,7 @@ const { data } = await client.getJourneyV2({
   ],
   "journey_type": "Sales template (Premium)",
   "protected": true,
+  "protectedEditable": ["string"],
   "settings": {
     "embedOptions": {
       "mode": "full-screen",
@@ -1525,7 +1541,8 @@ const { data } = await client.getJourneyV2({
     "useNewDesign": true,
     "thirdPartyCookies": true,
     "accessMode": "PUBLIC",
-    "enableDarkMode": true
+    "enableDarkMode": true,
+    "isActive": true
   },
   "validationRules": {
     "block1": "rule123",
@@ -1675,6 +1692,7 @@ type JourneyResponse = {
     }>
     journey_type?: string
     protected?: boolean
+    protectedEditable?: string[]
     settings?: {
       embedOptions?: { ... }
       safeModeAutomation?: { ... }
@@ -1814,6 +1832,7 @@ type JourneyCreationRequest = {
   }>
   journey_type?: string
   protected?: boolean
+  protectedEditable?: string[]
   settings?: {
     embedOptions?: {
       mode?: { ... }
@@ -1855,7 +1874,6 @@ type JourneyCreationRequest = {
     }
     thirdPartyCookies?: boolean
   }
-  validationRules?: Record<string, string | Record<string, string>>
   // ...
 }
 ```
@@ -1920,6 +1938,7 @@ type JourneyCreationRequestV2 = {
   }>
   journey_type?: string
   protected?: boolean
+  protectedEditable?: string[]
   settings?: {
     embedOptions?: {
       mode?: { ... }
@@ -1950,6 +1969,7 @@ type JourneyCreationRequestV2 = {
     thirdPartyCookies?: boolean
     accessMode?: "PUBLIC" | "PRIVATE"
     enableDarkMode?: boolean
+    isActive?: boolean
   }
   validationRules?: Record<string, string | Record<string, string>>
   _manifest?: string // uuid[]
@@ -2054,6 +2074,7 @@ type Journey = {
   }>
   journey_type?: string
   protected?: boolean
+  protectedEditable?: string[]
   settings?: {
     embedOptions?: {
       mode?: { ... }
@@ -2095,7 +2116,6 @@ type Journey = {
     }
     thirdPartyCookies?: boolean
   }
-  validationRules?: Record<string, string | Record<string, string>>
   // ...
 }
 ```
