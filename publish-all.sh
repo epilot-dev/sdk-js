@@ -58,7 +58,10 @@ TOTAL=0
 SUCCESS=0
 FAILED_PACKAGES=()
 
-while IFS=$'\t' read -r dir name version; do
+# Read the package list on FD 3 so the loop body keeps the real terminal on
+# stdin (FD 0). Otherwise pnpm can't prompt for an OTP and dies with
+# ERR_PNPM_OTP_NON_INTERACTIVE.
+while IFS=$'\t' read -r -u 3 dir name version; do
   [ -n "$dir" ] || continue
   TOTAL=$((TOTAL + 1))
   echo "=================================================="
@@ -71,14 +74,20 @@ while IFS=$'\t' read -r dir name version; do
     continue
   fi
 
-  OTP=$(totp npm)
-  if [ -z "$OTP" ]; then
-    echo "✗ Failed to generate OTP for $name"
-    FAILED_PACKAGES+=("$name (otp)")
-    continue
+  # Generate a fresh OTP right before publishing. Strip to digits and only use
+  # it if it's a valid 6-digit code; otherwise let pnpm prompt interactively
+  # (stdin is still the terminal thanks to the FD 3 redirect above).
+  OTP=$(totp npm 2>/dev/null | tr -dc '0-9')
+  if [[ "$OTP" =~ ^[0-9]{6}$ ]]; then
+    ( cd "$dir" && pnpm publish --no-git-checks --ignore-scripts $DRY_RUN --otp "$OTP" )
+    rc=$?
+  else
+    echo "⚠ 'totp npm' did not return a 6-digit code — pnpm will prompt you for the OTP."
+    ( cd "$dir" && pnpm publish --no-git-checks --ignore-scripts $DRY_RUN )
+    rc=$?
   fi
 
-  if ( cd "$dir" && pnpm publish --no-git-checks --ignore-scripts $DRY_RUN --otp "$OTP" ); then
+  if [ "$rc" -eq 0 ]; then
     echo "✓ Published $name@$version"
     SUCCESS=$((SUCCESS + 1))
   else
@@ -87,7 +96,7 @@ while IFS=$'\t' read -r dir name version; do
   fi
 
   sleep 1
-done < <(echo "$PKG_LINES")
+done 3< <(echo "$PKG_LINES")
 
 echo "=================================================="
 echo "Publishing summary"
