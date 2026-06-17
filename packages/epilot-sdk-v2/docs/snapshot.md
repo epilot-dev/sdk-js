@@ -27,6 +27,7 @@ const { data } = await snapshotClient.createSnapshot(...)
 **Snapshots**
 - [`createSnapshot`](#createsnapshot)
 - [`listSnapshots`](#listsnapshots)
+- [`captureOrgSnapshot`](#captureorgsnapshot)
 - [`getSnapshot`](#getsnapshot)
 - [`deleteSnapshot`](#deletesnapshot)
 - [`restoreSnapshot`](#restoresnapshot)
@@ -36,11 +37,13 @@ const { data } = await snapshotClient.createSnapshot(...)
 
 **Schemas**
 - [`Error`](#error)
+- [`EmptyInventoryError`](#emptyinventoryerror)
 - [`ResourceRef`](#resourceref)
 - [`SnapshotResourceSummary`](#snapshotresourcesummary)
 - [`SnapshotResourceList`](#snapshotresourcelist)
 - [`SnapshotResourceDetail`](#snapshotresourcedetail)
 - [`CreateSnapshotRequest`](#createsnapshotrequest)
+- [`CreateOrgSnapshotRequest`](#createorgsnapshotrequest)
 - [`CreateSnapshotResponse`](#createsnapshotresponse)
 - [`RestoreSnapshotRequest`](#restoresnapshotrequest)
 - [`RestoreSnapshotResponse`](#restoresnapshotresponse)
@@ -145,13 +148,45 @@ const { data } = await client.listSnapshots({
           ]
         }
       ],
-      "matched_count": 0
+      "matched_count": 0,
+      "scope": "selection",
+      "expires_at": "1970-01-01T00:00:00.000Z",
+      "capture_summary": {
+        "total": 0,
+        "captured": 0,
+        "skipped": 0,
+        "failed": 0
+      }
     }
   ]
 }
 ```
 
 </details>
+
+---
+
+### `captureOrgSnapshot`
+
+Snapshot the caller's whole organization now. Fetches a fresh inventory
+of the org's configuration resources from configuration-hub-api, persists
+it as an inventory artifact, and starts a `scope: "org
+
+`POST /v1/snapshots:capture-org`
+
+```ts
+const { data } = await client.captureOrgSnapshot(
+  null,
+  {
+    name: 'string',
+    retention: {
+      value: 1,
+      unit: 'days'
+    },
+    excluded_types: ['string']
+  },
+)
+```
 
 ---
 
@@ -217,7 +252,15 @@ const { data } = await client.getSnapshot({
       ]
     }
   ],
-  "matched_count": 0
+  "matched_count": 0,
+  "scope": "selection",
+  "expires_at": "1970-01-01T00:00:00.000Z",
+  "capture_summary": {
+    "total": 0,
+    "captured": 0,
+    "skipped": 0,
+    "failed": 0
+  }
 }
 ```
 
@@ -253,7 +296,8 @@ const { data } = await client.restoreSnapshot(
     id: '123e4567-e89b-12d3-a456-426614174000',
   },
   {
-    mode: 'overwrite'
+    preserve_modified: false,
+    preserve_co_owned: false
   },
 )
 ```
@@ -375,6 +419,23 @@ type Error = {
 }
 ```
 
+### `EmptyInventoryError`
+
+Returned (422) when the org inventory contains no capturable resources
+after filtering out sensitive, unsupported, and excluded types. The
+`skipped_types` array explains why every type was dropped.
+
+
+```ts
+type EmptyInventoryError = {
+  message: string
+  skipped_types: Array<{
+    type: string
+    reason: string
+  }>
+}
+```
+
 ### `ResourceRef`
 
 ```ts
@@ -436,12 +497,29 @@ type SnapshotResourceDetail = {
 type CreateSnapshotRequest = {
   name: string
   description?: string
-  trigger?: "manual" | "sync" | "blueprint_install"
+  trigger?: "manual" | "sync" | "blueprint_install" | "scheduled"
   blueprint_instance_id?: string
   resources: Array<{
     type: string
     id: string
   }>
+}
+```
+
+### `CreateOrgSnapshotRequest`
+
+Request body for `captureOrgSnapshot`. All fields optional — an empty body
+snapshots the whole org with a default name and the 90-day default TTL.
+
+
+```ts
+type CreateOrgSnapshotRequest = {
+  name?: string
+  retention?: {
+    value: number
+    unit: "days" | "weeks" | "months"
+  }
+  excluded_types?: string[]
 }
 ```
 
@@ -458,9 +536,16 @@ type CreateSnapshotResponse = {
 
 ### `RestoreSnapshotRequest`
 
+Both flags default to `false`, which restores every captured resource —
+Config Hub's manual-restore semantics. blueprint-manifest-api sets
+both `true` when reverting a blueprint install so user edits and
+cross-blueprint contributions survive. Each flag is independent so a
+caller can preserve edits w
+
 ```ts
 type RestoreSnapshotRequest = {
-  mode?: "overwrite" | "preserve_edits"
+  preserve_modified?: boolean
+  preserve_co_owned?: boolean
 }
 ```
 
@@ -481,7 +566,7 @@ type Snapshot = {
   org_id: string
   name: string
   description?: string
-  trigger: "manual" | "sync" | "blueprint_install"
+  trigger: "manual" | "sync" | "blueprint_install" | "scheduled"
   blueprint_instance_id?: string
   resource_counts: Record<string, number>
   create: {
@@ -517,6 +602,14 @@ type Snapshot = {
     }>
   }>
   matched_count?: number
+  scope?: "selection" | "org"
+  expires_at?: string // date-time
+  capture_summary?: {
+    total: number
+    captured: number
+    skipped: number
+    failed: number
+  }
 }
 ```
 
