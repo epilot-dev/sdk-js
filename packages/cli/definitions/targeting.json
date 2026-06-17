@@ -31,13 +31,6 @@
   "servers": [
     {
       "url": "https://targeting.sls.epilot.io"
-    },
-    {
-      "url": "https://targeting.sls.epilot.io"
-    },
-    {
-      "url": "https://targeting.sls.epilot.io",
-      "description": "Production Server"
     }
   ],
   "paths": {
@@ -171,6 +164,42 @@
           },
           "404": {
             "$ref": "#/components/responses/ServerErrorResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerErrorResponse"
+          }
+        }
+      }
+    },
+    "/v1/campaign:setup": {
+      "post": {
+        "operationId": "setupCampaign",
+        "summary": "Set up a campaign with related entities and configurations",
+        "description": "Creates a `campaign` entity together with its related entities and configurations in a single call.\nUsed by the campaign wizard UI, but not restricted to it.\n",
+        "tags": [
+          "Campaign"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetupCampaignRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "$ref": "#/components/responses/SetupCampaignResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/ClientErrorResponse"
           },
           "500": {
             "$ref": "#/components/responses/ServerErrorResponse"
@@ -1181,6 +1210,208 @@
         "required": [
           "status"
         ]
+      },
+      "SetupCampaignRequest": {
+        "description": "Discriminated by `type`. Each campaign variant has its own request shape;\nnew variants are added by introducing a new schema and extending the `oneOf` list.\n",
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/SetupTariffChangeCampaignRequest"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "tariff_change": "#/components/schemas/SetupTariffChangeCampaignRequest"
+          }
+        }
+      },
+      "SetupTariffChangeCampaignRequest": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "tariff_change"
+            ]
+          },
+          "product_recommendation": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Optional name of the product recommendation. Defaults to the campaign name."
+              },
+              "source_product_id": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/BaseUUID"
+                  }
+                ],
+                "description": "Optional source product entity ID for the recommendation."
+              },
+              "source_price_id": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/BaseUUID"
+                  }
+                ],
+                "description": "Optional source price entity ID for the recommendation."
+              },
+              "offers": {
+                "type": "array",
+                "description": "Offer blocks for the product_recommendation entity.",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "target_id": {
+                      "$ref": "#/components/schemas/BaseUUID",
+                      "description": "Optional per-offer target entity ID."
+                    },
+                    "items": {
+                      "type": "array",
+                      "description": "Product/price pairs within this offer.",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "product_id": {
+                            "$ref": "#/components/schemas/BaseUUID"
+                          },
+                          "price_id": {
+                            "$ref": "#/components/schemas/BaseUUID"
+                          },
+                          "highlight_config": {
+                            "type": "object",
+                            "description": "Opaque per-item highlight/comparison config persisted as-is on the entity.",
+                            "additionalProperties": true
+                          }
+                        },
+                        "required": [
+                          "product_id",
+                          "price_id"
+                        ],
+                        "additionalProperties": false
+                      }
+                    }
+                  },
+                  "required": [
+                    "items"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "additionalProperties": false
+          },
+          "campaign": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "goal": {
+                "type": "string"
+              },
+              "target_ids": {
+                "type": "array",
+                "description": "List of target entity IDs to attach to the campaign. Today only a single\nentry is supported (campaign.target is has_one) but the array shape is kept\nfor forward-compatibility — only `target_ids[0]` is used.\n",
+                "items": {
+                  "$ref": "#/components/schemas/BaseUUID"
+                }
+              }
+            },
+            "required": [
+              "name",
+              "target_ids"
+            ],
+            "additionalProperties": false
+          },
+          "journey": {
+            "type": "object",
+            "description": "Optional journey configuration selected in the wizard. Only sent by the\nconsumer once a journey has been chosen.\n",
+            "properties": {
+              "journey_id": {
+                "$ref": "#/components/schemas/BaseUUID"
+              }
+            },
+            "required": [
+              "journey_id"
+            ],
+            "additionalProperties": false
+          },
+          "channels": {
+            "type": "object",
+            "description": "Optional delivery channel configuration. Each channel is only sent by the\nconsumer once it has been enabled and fully configured in the wizard.\n",
+            "properties": {
+              "portal_widget": {
+                "type": "object",
+                "description": "Portal widget placement for the product recommendation block. Only sent by\nthe consumer once both a portal and a block have been selected.\n",
+                "properties": {
+                  "portal_id": {
+                    "$ref": "#/components/schemas/BaseUUID"
+                  },
+                  "block_id": {
+                    "$ref": "#/components/schemas/BaseUUID"
+                  }
+                },
+                "required": [
+                  "portal_id",
+                  "block_id"
+                ],
+                "additionalProperties": false
+              },
+              "email": {
+                "type": "object",
+                "description": "Email campaign delivery. An automation flow (legacy) and/or an email\ntemplate can be provided to send the campaign emails. The selection is\npersisted as the campaign's `flow_id`. If `automation_id` is provided it is\nused as-is; otherwise a flow is created from `template_id`. Only sent by the\nconsumer once one has been selected.\n",
+                "properties": {
+                  "automation_id": {
+                    "$ref": "#/components/schemas/BaseUUID"
+                  },
+                  "template_id": {
+                    "$ref": "#/components/schemas/BaseUUID"
+                  }
+                },
+                "minProperties": 1,
+                "additionalProperties": false
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "type",
+          "product_recommendation",
+          "campaign"
+        ],
+        "additionalProperties": false
+      },
+      "SetupTariffChangeCampaignResponse": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "tariff_change"
+            ]
+          },
+          "product_recommendation_id": {
+            "$ref": "#/components/schemas/BaseUUID"
+          },
+          "campaign_id": {
+            "$ref": "#/components/schemas/BaseUUID"
+          },
+          "journey_id": {
+            "$ref": "#/components/schemas/BaseUUID"
+          },
+          "portal_widget_id": {
+            "$ref": "#/components/schemas/BaseUUID"
+          }
+        },
+        "required": [
+          "type",
+          "product_recommendation_id",
+          "campaign_id"
+        ],
+        "additionalProperties": false
       }
     },
     "securitySchemes": {
@@ -1437,6 +1668,26 @@
                   "portal",
                   "widgets"
                 ]
+              }
+            }
+          }
+        }
+      },
+      "SetupCampaignResponse": {
+        "description": "Discriminated by `type`, mirroring the request. Each campaign variant has its\nown response shape; new variants extend the `oneOf` list alongside the request.\n",
+        "content": {
+          "application/json": {
+            "schema": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/SetupTariffChangeCampaignResponse"
+                }
+              ],
+              "discriminator": {
+                "propertyName": "type",
+                "mapping": {
+                  "tariff_change": "#/components/schemas/SetupTariffChangeCampaignResponse"
+                }
               }
             }
           }

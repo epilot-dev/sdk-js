@@ -802,7 +802,7 @@
                       "3fa85f64-5717-4562-b3fc-2c963f66afa6"
                     ],
                     "zip_filename": "Documents.zip",
-                    "notify_email": true
+                    "notify_email": "user@example.com"
                   }
                 }
               }
@@ -868,6 +868,57 @@
           },
           "404": {
             "$ref": "#/components/responses/NotFoundError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/files/{id}/summary:generate": {
+      "post": {
+        "operationId": "generateFileSummary",
+        "summary": "generateFileSummary",
+        "description": "Request AI generation of preview and short summaries for a file entity.",
+        "tags": [
+          "File"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "The UUID of the file entity",
+            "schema": {
+              "$ref": "#/components/schemas/FileEntityId"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Summary generation accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FileSummaryGenerationStatus"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "409": {
+            "$ref": "#/components/responses/ConflictError"
           },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
@@ -1167,6 +1218,20 @@
         "responses": {
           "200": {
             "description": "Generated thumbnail image for a public file",
+            "headers": {
+              "ETag": {
+                "description": "Identifier of the previewed file version, for conditional requests",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Cache-Control": {
+                "description": "Caching policy for the preview",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
             "content": {
               "image/png": {
                 "schema": {
@@ -1178,6 +1243,23 @@
                 "schema": {
                   "type": "string",
                   "format": "binary"
+                }
+              }
+            }
+          },
+          "304": {
+            "description": "The preview is unchanged since the version identified by the `If-None-Match`\nrequest header. No body is returned; the cached copy should be reused.\n",
+            "headers": {
+              "ETag": {
+                "description": "Identifier of the current file version's preview",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Cache-Control": {
+                "description": "Caching policy for the preview",
+                "schema": {
+                  "type": "string"
                 }
               }
             }
@@ -2113,6 +2195,29 @@
           },
           "custom_download_url": {
             "$ref": "#/components/schemas/CustomDownloadUrl"
+          },
+          "preview_summary_de": {
+            "type": "string",
+            "description": "Compact German summary for hover and list preview surfaces.",
+            "readOnly": true
+          },
+          "short_summary_de": {
+            "type": "string",
+            "description": "Short German paragraph summary for file preview surfaces.",
+            "readOnly": true
+          },
+          "preview_summary_en": {
+            "type": "string",
+            "description": "Compact English summary for hover and list preview surfaces.",
+            "readOnly": true
+          },
+          "short_summary_en": {
+            "type": "string",
+            "description": "Short English paragraph summary for file preview surfaces.",
+            "readOnly": true
+          },
+          "summary_status": {
+            "$ref": "#/components/schemas/FileSummaryStatus"
           }
         }
       },
@@ -2131,6 +2236,28 @@
           "archive",
           "application",
           "unknown"
+        ]
+      },
+      "FileSummaryStatus": {
+        "type": "string",
+        "description": "Current AI summary generation state for the file.",
+        "enum": [
+          "processing",
+          "completed",
+          "failed",
+          "unsupported"
+        ],
+        "readOnly": true
+      },
+      "FileSummaryGenerationStatus": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/FileSummaryStatus"
+          }
+        },
+        "required": [
+          "status"
         ]
       },
       "CustomDownloadUrl": {
@@ -2515,9 +2642,10 @@
             "example": "Documents.zip"
           },
           "notify_email": {
-            "type": "boolean",
-            "description": "Send email notification when ZIP is ready",
-            "default": true
+            "type": "string",
+            "format": "email",
+            "description": "Email address to notify when the ZIP is ready. Omit to skip the email notification.",
+            "example": "user@example.com"
           }
         },
         "oneOf": [
@@ -3063,6 +3191,26 @@
                   "example": {
                     "status": 404,
                     "error": "Not Found: File entity not found"
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      "ConflictError": {
+        "description": "The request conflicts with the current resource state",
+        "content": {
+          "application/json": {
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/ErrorObject"
+                },
+                {
+                  "example": {
+                    "status": 409,
+                    "error": "Extracted file content is still being prepared"
                   }
                 }
               ]

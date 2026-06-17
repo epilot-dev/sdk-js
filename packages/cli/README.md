@@ -29,7 +29,7 @@ npm install -g @epilot/cli
 
 <!-- usage-help -->
 ```
-epilot v0.1.30 — CLI for epilot APIs
+epilot v0.1.51 — CLI for epilot APIs
 
 USAGE
   epilot <api> <operationId> [params...] [flags]
@@ -103,6 +103,7 @@ APIs
   query                Query API
   sandbox              Sandbox API
   sharing              Sharing API
+  snapshot             Snapshot API
   submission           Submission API
   targeting            Targeting API
   template-variables   Template Variables API
@@ -359,6 +360,7 @@ Full documentation with sample calls and responses for all APIs:
 | Query API | `epilot query` | [docs](./docs/query.md) |
 | Sandbox API | `epilot sandbox` | [docs](./docs/sandbox.md) |
 | Sharing API | `epilot sharing` | [docs](./docs/sharing.md) |
+| Snapshot API | `epilot snapshot` | [docs](./docs/snapshot.md) |
 | Submission API | `epilot submission` | [docs](./docs/submission.md) |
 | Targeting API | `epilot targeting` | [docs](./docs/targeting.md) |
 | Template Variables API | `epilot template-variables` | [docs](./docs/template-variables.md) |

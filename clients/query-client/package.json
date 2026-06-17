@@ -1,6 +1,6 @@
 {
   "name": "@epilot/query-client",
-  "version": "0.5.0",
+  "version": "0.5.4",
   "description": "Client for epilot Query API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

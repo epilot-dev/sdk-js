@@ -305,7 +305,9 @@ epilot automation getExecutions --jsonata 'results[0]'
       "trigger_context": {},
       "version": 2,
       "trigger_event": {},
-      "workflow_context": {}
+      "workflow_context": {},
+      "loops": [],
+      "loop_state": {}
     }
   ]
 }
@@ -399,6 +401,7 @@ epilot automation startExecution --jsonata 'id'
       "id": "string",
       "schedule_id": "string",
       "evaluationResult": true,
+      "error_output": {},
       "statements": []
     }
   ],
@@ -425,12 +428,14 @@ epilot automation startExecution --jsonata 'id'
       "reason": {},
       "condition_id": "string",
       "schedule_id": "string",
+      "loop_id": "string",
       "execution_status": "pending",
       "started_at": "string",
       "updated_at": "string",
       "outputs": {},
       "error_output": {},
-      "retry_strategy": "RETRY_AND_RESUME"
+      "retry_strategy": "RETRY_AND_RESUME",
+      "iterations": []
     },
     {
       "id": "9ec3711b-db63-449c-b894-54d5bb622a8f",
@@ -444,12 +449,14 @@ epilot automation startExecution --jsonata 'id'
       "reason": {},
       "condition_id": "string",
       "schedule_id": "string",
+      "loop_id": "string",
       "execution_status": "pending",
       "started_at": "string",
       "updated_at": "string",
       "outputs": {},
       "error_output": {},
-      "retry_strategy": "RETRY_AND_RESUME"
+      "retry_strategy": "RETRY_AND_RESUME",
+      "iterations": []
     }
   ],
   "resume_token": "eyJraWQiOiJrZXkifQ==",
@@ -477,7 +484,16 @@ epilot automation startExecution --jsonata 'id'
     "entity_contexts": [
       {}
     ]
-  }
+  },
+  "loops": [
+    {
+      "id": "loop_contracts",
+      "source_path": "submission.steps[0]['Contracts']",
+      "source_type": "journey-multi-select",
+      "length": 0
+    }
+  ],
+  "loop_state": {}
 }
 ```
 
@@ -766,6 +782,7 @@ epilot automation getExecution -p execution_id=9baf184f-bc81-4128-bca3-d974c90a1
       "id": "string",
       "schedule_id": "string",
       "evaluationResult": true,
+      "error_output": {},
       "statements": []
     }
   ],
@@ -792,12 +809,14 @@ epilot automation getExecution -p execution_id=9baf184f-bc81-4128-bca3-d974c90a1
       "reason": {},
       "condition_id": "string",
       "schedule_id": "string",
+      "loop_id": "string",
       "execution_status": "pending",
       "started_at": "string",
       "updated_at": "string",
       "outputs": {},
       "error_output": {},
-      "retry_strategy": "RETRY_AND_RESUME"
+      "retry_strategy": "RETRY_AND_RESUME",
+      "iterations": []
     },
     {
       "id": "9ec3711b-db63-449c-b894-54d5bb622a8f",
@@ -811,12 +830,14 @@ epilot automation getExecution -p execution_id=9baf184f-bc81-4128-bca3-d974c90a1
       "reason": {},
       "condition_id": "string",
       "schedule_id": "string",
+      "loop_id": "string",
       "execution_status": "pending",
       "started_at": "string",
       "updated_at": "string",
       "outputs": {},
       "error_output": {},
-      "retry_strategy": "RETRY_AND_RESUME"
+      "retry_strategy": "RETRY_AND_RESUME",
+      "iterations": []
     }
   ],
   "resume_token": "eyJraWQiOiJrZXkifQ==",
@@ -844,7 +865,16 @@ epilot automation getExecution -p execution_id=9baf184f-bc81-4128-bca3-d974c90a1
     "entity_contexts": [
       {}
     ]
-  }
+  },
+  "loops": [
+    {
+      "id": "loop_contracts",
+      "source_path": "submission.steps[0]['Contracts']",
+      "source_type": "journey-multi-select",
+      "length": 0
+    }
+  ],
+  "loop_state": {}
 }
 ```
 
@@ -912,6 +942,7 @@ epilot automation cancelExecution -p execution_id=9baf184f-bc81-4128-bca3-d974c9
       "id": "string",
       "schedule_id": "string",
       "evaluationResult": true,
+      "error_output": {},
       "statements": []
     }
   ],
@@ -938,12 +969,14 @@ epilot automation cancelExecution -p execution_id=9baf184f-bc81-4128-bca3-d974c9
       "reason": {},
       "condition_id": "string",
       "schedule_id": "string",
+      "loop_id": "string",
       "execution_status": "pending",
       "started_at": "string",
       "updated_at": "string",
       "outputs": {},
       "error_output": {},
-      "retry_strategy": "RETRY_AND_RESUME"
+      "retry_strategy": "RETRY_AND_RESUME",
+      "iterations": []
     },
     {
       "id": "9ec3711b-db63-449c-b894-54d5bb622a8f",
@@ -957,12 +990,14 @@ epilot automation cancelExecution -p execution_id=9baf184f-bc81-4128-bca3-d974c9
       "reason": {},
       "condition_id": "string",
       "schedule_id": "string",
+      "loop_id": "string",
       "execution_status": "pending",
       "started_at": "string",
       "updated_at": "string",
       "outputs": {},
       "error_output": {},
-      "retry_strategy": "RETRY_AND_RESUME"
+      "retry_strategy": "RETRY_AND_RESUME",
+      "iterations": []
     }
   ],
   "resume_token": "eyJraWQiOiJrZXkifQ==",
@@ -990,7 +1025,16 @@ epilot automation cancelExecution -p execution_id=9baf184f-bc81-4128-bca3-d974c9
     "entity_contexts": [
       {}
     ]
-  }
+  },
+  "loops": [
+    {
+      "id": "loop_contracts",
+      "source_path": "submission.steps[0]['Contracts']",
+      "source_type": "journey-multi-select",
+      "length": 0
+    }
+  ],
+  "loop_state": {}
 }
 ```
 
@@ -1121,7 +1165,11 @@ epilot automation resumeExecutionWithToken --jsonata 'execution'
       "workflow_role": "trigger_workflow",
       "_execution_chain": {},
       "entity_contexts": []
-    }
+    },
+    "loops": [
+      {}
+    ],
+    "loop_state": {}
   },
   "resumedAction": {
     "id": "9ec3711b-db63-449c-b894-54d5bb622a8f",
@@ -1146,6 +1194,7 @@ epilot automation resumeExecutionWithToken --jsonata 'execution'
     },
     "condition_id": "string",
     "schedule_id": "string",
+    "loop_id": "string",
     "execution_status": "pending",
     "started_at": "string",
     "updated_at": "string",
@@ -1155,7 +1204,10 @@ epilot automation resumeExecutionWithToken --jsonata 'execution'
       "error_reason": "string",
       "error_info": {}
     },
-    "retry_strategy": "RETRY_AND_RESUME"
+    "retry_strategy": "RETRY_AND_RESUME",
+    "iterations": [
+      {}
+    ]
   }
 }
 ```

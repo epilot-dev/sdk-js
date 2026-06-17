@@ -1,6 +1,6 @@
 # epilot CLI — API Reference
 
-All 50 epilot APIs available via the CLI.
+All 51 epilot APIs available via the CLI.
 
 ## Setup
 
@@ -12,7 +12,7 @@ npx epilot auth login
 
 | API | Command | Operations | Docs |
 | --- | ------- | ---------- | ---- |
-| Access Token API | `epilot access-token` | 7 | [access-token.md](./access-token.md) |
+| Access Token API | `epilot access-token` | 9 | [access-token.md](./access-token.md) |
 | Address API | `epilot address` | 3 | [address.md](./address.md) |
 | Address Suggestions API | `epilot address-suggestions` | 4 | [address-suggestions.md](./address-suggestions.md) |
 | AI Agents API - OpenAPI 3.0 | `epilot ai-agents` | 12 | [ai-agents.md](./ai-agents.md) |
@@ -20,11 +20,11 @@ npx epilot auth login
 | Audit Log | `epilot audit-logs` | 2 | [audit-logs.md](./audit-logs.md) |
 | Automation API | `epilot automation` | 16 | [automation.md](./automation.md) |
 | Billing API | `epilot billing` | 10 | [billing.md](./billing.md) |
-| Blueprint Manifest API | `epilot blueprint-manifest` | 48 | [blueprint-manifest.md](./blueprint-manifest.md) |
+| Blueprint Manifest API | `epilot blueprint-manifest` | 61 | [blueprint-manifest.md](./blueprint-manifest.md) |
 | Calendar API | `epilot calendar` | 4 | [calendar.md](./calendar.md) |
 | Configuration Hub API | `epilot configuration-hub` | 11 | [configuration-hub.md](./configuration-hub.md) |
 | Consent API | `epilot consent` | 3 | [consent.md](./consent.md) |
-| Portal API | `epilot customer-portal` | 148 | [customer-portal.md](./customer-portal.md) |
+| Portal API | `epilot customer-portal` | 149 | [customer-portal.md](./customer-portal.md) |
 | Dashboard API | `epilot dashboard` | 7 | [dashboard.md](./dashboard.md) |
 | Data Governance API | `epilot data-governance` | 10 | [data-governance.md](./data-governance.md) |
 | Deduplication API | `epilot deduplication` | 3 | [deduplication.md](./deduplication.md) |
@@ -35,10 +35,10 @@ npx epilot auth login
 | Entity API | `epilot entity` | 87 | [entity.md](./entity.md) |
 | Entity Mapping API | `epilot entity-mapping` | 12 | [entity-mapping.md](./entity-mapping.md) |
 | Environments API | `epilot environments` | 8 | [environments.md](./environments.md) |
-| Event Catalog API | `epilot event-catalog` | 9 | [event-catalog.md](./event-catalog.md) |
-| File API | `epilot file` | 29 | [file.md](./file.md) |
+| Event Catalog API | `epilot event-catalog` | 10 | [event-catalog.md](./event-catalog.md) |
+| File API | `epilot file` | 30 | [file.md](./file.md) |
 | Iban API | `epilot iban` | 1 | [iban.md](./iban.md) |
-| Integration Toolkit API | `epilot integration-toolkit` | 46 | [integration-toolkit.md](./integration-toolkit.md) |
+| Integration Toolkit API | `epilot integration-toolkit` | 51 | [integration-toolkit.md](./integration-toolkit.md) |
 | Journey API | `epilot journey` | 16 | [journey.md](./journey.md) |
 | Kanban API | `epilot kanban` | 10 | [kanban.md](./kanban.md) |
 | Message API | `epilot message` | 52 | [message.md](./message.md) |
@@ -54,10 +54,11 @@ npx epilot auth login
 | Query API | `epilot query` | 21 | [query.md](./query.md) |
 | Sandbox API | `epilot sandbox` | 7 | [sandbox.md](./sandbox.md) |
 | Sharing API | `epilot sharing` | 12 | [sharing.md](./sharing.md) |
+| Snapshot API | `epilot snapshot` | 9 | [snapshot.md](./snapshot.md) |
 | Submission API | `epilot submission` | 2 | [submission.md](./submission.md) |
-| Targeting API | `epilot targeting` | 11 | [targeting.md](./targeting.md) |
+| Targeting API | `epilot targeting` | 12 | [targeting.md](./targeting.md) |
 | Template Variables API | `epilot template-variables` | 12 | [template-variables.md](./template-variables.md) |
-| User API | `epilot user` | 34 | [user.md](./user.md) |
+| User API | `epilot user` | 41 | [user.md](./user.md) |
 | Validation Rules API | `epilot validation-rules` | 7 | [validation-rules.md](./validation-rules.md) |
 | Webhooks | `epilot webhooks` | 15 | [webhooks.md](./webhooks.md) |
 | Workflows Executions | `epilot workflow` | 24 | [workflow.md](./workflow.md) |

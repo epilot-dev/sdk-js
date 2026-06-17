@@ -117,7 +117,7 @@
           {
             "name": "version",
             "in": "query",
-            "description": "DynamoDB version to fetch. `0` (default) is the live row; positive integers are historical snapshots created on each save. Note: this is distinct from the `revisions` counter on the row body.",
+            "description": "DynamoDB version to fetch. `0` (default) is the live row; positive integers are historical snapshots created on each save. Note: this is distinct from the `revisions` counter on the row body.\n",
             "required": false,
             "schema": {
               "type": "integer",
@@ -722,7 +722,7 @@
           {
             "name": "version",
             "in": "query",
-            "description": "DynamoDB version to fetch. `0` (default) is the live row; positive integers are historical snapshots created on each save. Note: this is distinct from the `revisions` counter on the row body.",
+            "description": "DynamoDB version to fetch. `0` (default) is the live row; positive integers are historical snapshots created on each save. Note: this is distinct from the `revisions` counter on the row body.\n",
             "required": false,
             "schema": {
               "type": "integer",
@@ -1314,6 +1314,13 @@
             "type": "boolean",
             "description": "If true, journey is displayed in read-only mode"
           },
+          "protectedEditable": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Whitelist of paths that remain editable when the journey is protected. Supports wildcard patterns (e.g. steps/*/blocks/**)."
+          },
           "settings": {
             "type": "object",
             "properties": {
@@ -1834,6 +1841,13 @@
             "type": "boolean",
             "description": "If true, journey is displayed in read-only mode"
           },
+          "protectedEditable": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Whitelist of paths that remain editable when the journey is protected. Supports wildcard patterns (e.g. steps/*/blocks/**)."
+          },
           "settings": {
             "type": "object",
             "properties": {
@@ -1981,6 +1995,9 @@
               "enableDarkMode": {
                 "type": "boolean",
                 "description": "If true, the journey shows an icon to toggle dark mode"
+              },
+              "isActive": {
+                "type": "boolean"
               }
             },
             "additionalProperties": false

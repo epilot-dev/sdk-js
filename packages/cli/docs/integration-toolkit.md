@@ -67,6 +67,11 @@ epilot integration-toolkit acknowledgeTracking
 - [`setIntegrationAppMapping`](#setintegrationappmapping) — Creates or updates a mapping from an app/component to an integration.
 - [`deleteIntegrationAppMapping`](#deleteintegrationappmapping) — Removes a mapping from an app/component to an integration.
 - [`getOutboundStatus`](#getoutboundstatus) — Get the status of all outbound use cases for a specific integration.
+- [`pollOutboundMessages`](#polloutboundmessages) — Poll outbound messages for an integration's poll-mode use cases.
+- [`ackOutboundMessages`](#ackoutboundmessages) — Acknowledge polled outbound messages. Acks are validated against the
+- [`listOutboundDlqMessages`](#listoutbounddlqmessages) — List an integration's dead-lettered outbound queue messages
+- [`redriveOutboundDlqMessages`](#redriveoutbounddlqmessages) — Redrive selected dead-lettered messages back into the live stream.
+- [`unblockOutboundStream`](#unblockoutboundstream) — Unblock an integration's outbound stream halted by the `block`
 - [`listSecureProxies`](#listsecureproxies) — Lists all secure_proxy use cases across all integrations for the authenticated organization.
 - [`generateTypesPreview`](#generatetypespreview) — Analyses the JSONata mappings of all managed-call use cases in the integration and returns scaffolded type descriptors. 
 - [`generateTypes`](#generatetypes) — Generates a complete TypeScript npm package with typed interfaces for all managed-call use cases. This is a stateless op
@@ -941,6 +946,7 @@ epilot integration-toolkit queryEvents \
   "correlation_id": "string",
   "object_type": "string",
   "event_name": "string",
+  "use_case_id": "string",
   "limit": 25,
   "cursor": {
     "event_time": "2025-10-31T12:34:56Z",
@@ -979,7 +985,8 @@ epilot integration-toolkit queryEvents -p integrationId=123e4567-e89b-12d3-a456-
       "timestamp": "1970-01-01T00:00:00.000Z",
       "format": "json",
       "payload": "string",
-      "deduplication_id": "evt-2025-05-01-12345-create-bp"
+      "deduplication_id": "evt-2025-05-01-12345-create-bp",
+      "use_case_id": "string"
     }
   ],
   "next_cursor": {
@@ -2618,9 +2625,313 @@ epilot integration-toolkit getOutboundStatus -p integrationId=123e4567-e89b-12d3
           "webhookId": "string",
           "message": "string"
         }
-      ]
+      ],
+      "poll": {
+        "queue_depth": 0,
+        "oldest_unconsumed_age_seconds": 0,
+        "last_poll_at": "1970-01-01T00:00:00.000Z",
+        "last_ack_at": "1970-01-01T00:00:00.000Z",
+        "blocked": true,
+        "dlq_count": 0
+      }
     }
   ]
+}
+```
+
+</details>
+
+---
+
+### `pollOutboundMessages`
+
+Poll outbound messages for an integration's poll-mode use cases.
+
+`POST /v1/integrations/{integrationId}/outbound/messages/poll`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `integrationId` | path | string (uuid) | Yes | The integration ID |
+
+**Request Body**
+
+**Sample Call**
+
+```bash
+epilot integration-toolkit pollOutboundMessages \
+  -p integrationId=123e4567-e89b-12d3-a456-426614174000 \
+  -d '{"limit":10}'
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot integration-toolkit pollOutboundMessages 123e4567-e89b-12d3-a456-426614174000
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot integration-toolkit pollOutboundMessages -p integrationId=123e4567-e89b-12d3-a456-426614174000
+```
+
+With JSONata filter:
+
+```bash
+epilot integration-toolkit pollOutboundMessages -p integrationId=123e4567-e89b-12d3-a456-426614174000 --jsonata 'messages'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "messages": [
+    {
+      "id": "string",
+      "lease_token": "string",
+      "use_case_id": "string",
+      "event_name": "string",
+      "event_id": "string",
+      "group": "string",
+      "payload": {},
+      "enqueued_at": "1970-01-01T00:00:00.000Z"
+    }
+  ],
+  "visibility_timeout_seconds": 0,
+  "has_more": true
+}
+```
+
+</details>
+
+---
+
+### `ackOutboundMessages`
+
+Acknowledge polled outbound messages. Acks are validated against the
+
+`POST /v1/integrations/{integrationId}/outbound/messages/ack`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `integrationId` | path | string (uuid) | Yes | The integration ID |
+
+**Request Body** (required)
+
+**Sample Call**
+
+```bash
+epilot integration-toolkit ackOutboundMessages \
+  -p integrationId=123e4567-e89b-12d3-a456-426614174000 \
+  -d '{"acks":[{"id":"string","lease_token":"string"}]}'
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot integration-toolkit ackOutboundMessages 123e4567-e89b-12d3-a456-426614174000
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot integration-toolkit ackOutboundMessages -p integrationId=123e4567-e89b-12d3-a456-426614174000
+```
+
+With JSONata filter:
+
+```bash
+epilot integration-toolkit ackOutboundMessages -p integrationId=123e4567-e89b-12d3-a456-426614174000 --jsonata 'results[0]'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "results": [
+    {
+      "id": "string",
+      "status": "accepted",
+      "reason": "stale_lease"
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `listOutboundDlqMessages`
+
+List an integration's dead-lettered outbound queue messages
+
+`GET /v1/integrations/{integrationId}/outbound/messages/dlq`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `integrationId` | path | string (uuid) | Yes | The integration ID |
+| `limit` | query | number | No | Maximum number of DLQ entries to return |
+| `next_token` | query | string | No | Opaque pagination token from a previous response |
+
+**Sample Call**
+
+```bash
+epilot integration-toolkit listOutboundDlqMessages \
+  -p integrationId=123e4567-e89b-12d3-a456-426614174000
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot integration-toolkit listOutboundDlqMessages 123e4567-e89b-12d3-a456-426614174000
+```
+
+With JSONata filter:
+
+```bash
+epilot integration-toolkit listOutboundDlqMessages -p integrationId=123e4567-e89b-12d3-a456-426614174000 --jsonata 'items[0]'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "items": [
+    {
+      "id": "string",
+      "use_case_id": "string",
+      "event_name": "string",
+      "event_id": "string",
+      "enqueued_at": "1970-01-01T00:00:00.000Z",
+      "dead_lettered_at": "1970-01-01T00:00:00.000Z",
+      "delivery_attempts": 0,
+      "reason": "string",
+      "expires_at": "1970-01-01T00:00:00.000Z"
+    }
+  ],
+  "next_token": "string"
+}
+```
+
+</details>
+
+---
+
+### `redriveOutboundDlqMessages`
+
+Redrive selected dead-lettered messages back into the live stream.
+
+`POST /v1/integrations/{integrationId}/outbound/messages/dlq/redrive`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `integrationId` | path | string (uuid) | Yes | The integration ID |
+
+**Request Body** (required)
+
+**Sample Call**
+
+```bash
+epilot integration-toolkit redriveOutboundDlqMessages \
+  -p integrationId=123e4567-e89b-12d3-a456-426614174000 \
+  -d '{"ids":["string"]}'
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot integration-toolkit redriveOutboundDlqMessages 123e4567-e89b-12d3-a456-426614174000
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot integration-toolkit redriveOutboundDlqMessages -p integrationId=123e4567-e89b-12d3-a456-426614174000
+```
+
+With JSONata filter:
+
+```bash
+epilot integration-toolkit redriveOutboundDlqMessages -p integrationId=123e4567-e89b-12d3-a456-426614174000 --jsonata 'results[0]'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "results": [
+    {
+      "id": "string",
+      "status": "redriven"
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `unblockOutboundStream`
+
+Unblock an integration's outbound stream halted by the `block`
+
+`POST /v1/integrations/{integrationId}/outbound/messages/unblock`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `integrationId` | path | string (uuid) | Yes | The integration ID |
+
+**Request Body**
+
+**Sample Call**
+
+```bash
+epilot integration-toolkit unblockOutboundStream \
+  -p integrationId=123e4567-e89b-12d3-a456-426614174000 \
+  -d '{"reason":"string"}'
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot integration-toolkit unblockOutboundStream 123e4567-e89b-12d3-a456-426614174000
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot integration-toolkit unblockOutboundStream -p integrationId=123e4567-e89b-12d3-a456-426614174000
+```
+
+With JSONata filter:
+
+```bash
+epilot integration-toolkit unblockOutboundStream -p integrationId=123e4567-e89b-12d3-a456-426614174000 --jsonata 'unblocked'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "unblocked": true,
+  "dead_lettered_id": "string"
 }
 ```
 
@@ -2926,8 +3237,21 @@ Get aggregated statistics from the unified erp_monitoring_v2 table.
 
 ```bash
 epilot integration-toolkit getMonitoringStatsV2 \
+  -p integrationId=123e4567-e89b-12d3-a456-426614174000
+```
+
+With request body:
+
+```bash
+epilot integration-toolkit getMonitoringStatsV2 \
   -p integrationId=123e4567-e89b-12d3-a456-426614174000 \
-  -d '{"from_date":"2025-01-01T00:00:00Z","to_date":"2025-01-31T23:59:59Z","use_case_type":"inbound","group_by":"use_case_id"}'
+  -d '{
+  "from_date": "2025-01-01T00:00:00Z",
+  "to_date": "2025-01-31T23:59:59Z",
+  "use_case_type": "inbound",
+  "group_by": "use_case_id",
+  "source": "monitoring"
+}'
 ```
 
 Using positional args for path parameters:

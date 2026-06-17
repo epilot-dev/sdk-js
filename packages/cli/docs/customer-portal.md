@@ -149,6 +149,7 @@ epilot customer-portal upsertPortal -p origin=example
 - [`getMeterReadings`](#getmeterreadings) — Fetches meter readings for a counter and optionally resolves Handlebars
 - [`getPortalPage`](#getportalpage) — Fetch a portal page by id
 - [`getPortalPages`](#getportalpages) — Fetch all portal pages
+- [`getTriggeredJourney`](#gettriggeredjourney) — Returns the auto-triggered journey configured for the given trigger
 - [`getPortalPageBlocks`](#getportalpageblocks) — Fetch all portal page blocks
 - [`getPortalPageBlock`](#getportalpageblock) — Fetch a portal page block by id
 - [`updateCampaignPortalBlockStatus`](#updatecampaignportalblockstatus) — Updates the status of a campaign portal block for multiple recipients.
@@ -246,7 +247,8 @@ epilot customer-portal upsertPortal \
   "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
   "allowed_portal_entities": ["contact", "contract"],
   "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
-  "self_registration_account_setting": "ALLOW_WITH_CONTACT_CREATION",
+  "self_registration_account_setting": "ALLOW_WITH_CREATION",
+  "block_registration_if_portal_user_exists": true,
   "self_registration_entity": "contact",
   "user_account_self_management": false,
   "feature_settings": {
@@ -348,10 +350,31 @@ epilot customer-portal upsertPortal \
       "schema": "contract"
     }
   ],
+  "contact_identifiers_for_account": [
+    {
+      "name": "first_name",
+      "schema": "contact"
+    },
+    {
+      "name": "last_name",
+      "schema": "contact"
+    }
+  ],
+  "additional_contact_attributes": [
+    {
+      "name": "first_name",
+      "required": true
+    },
+    {
+      "name": "last_name",
+      "required": true
+    }
+  ],
   "triggered_journeys": [
     {
       "trigger_name": "FIRST_LOGIN",
-      "journey_id": "5da0a718-c822-403d-9f5d-20d4584e0528"
+      "journey_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+      "context_params": []
     }
   ],
   "entity_edit_rules": [
@@ -423,7 +446,8 @@ epilot customer-portal upsertPortal -p origin=example --jsonata '$'
   "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
   "allowed_portal_entities": ["contact", "contract"],
   "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
-  "self_registration_account_setting": "ALLOW_WITH_CONTACT_CREATION",
+  "self_registration_account_setting": "ALLOW_WITH_CREATION",
+  "block_registration_if_portal_user_exists": true,
   "self_registration_entity": "contact",
   "user_account_self_management": false,
   "feature_settings": {
@@ -525,10 +549,31 @@ epilot customer-portal upsertPortal -p origin=example --jsonata '$'
       "schema": "contract"
     }
   ],
+  "contact_identifiers_for_account": [
+    {
+      "name": "first_name",
+      "schema": "contact"
+    },
+    {
+      "name": "last_name",
+      "schema": "contact"
+    }
+  ],
+  "additional_contact_attributes": [
+    {
+      "name": "first_name",
+      "required": true
+    },
+    {
+      "name": "last_name",
+      "required": true
+    }
+  ],
   "triggered_journeys": [
     {
       "trigger_name": "FIRST_LOGIN",
-      "journey_id": "5da0a718-c822-403d-9f5d-20d4584e0528"
+      "journey_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+      "context_params": []
     }
   ],
   "entity_edit_rules": [
@@ -640,6 +685,14 @@ epilot customer-portal createUserV3 \
     "contract": {
       "contract_number": "123456"
     }
+  },
+  "contact_identifiers_for_account": {
+    "first_name": "John",
+    "last_name": "Doe"
+  },
+  "additional_contact_attributes": {
+    "first_name": "John",
+    "last_name": "Doe"
   },
   "account_id": "string"
 }'
@@ -781,7 +834,8 @@ epilot customer-portal getPortalConfigByDomain -p domain=example.com --jsonata '
   "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
   "allowed_portal_entities": ["contact", "contract"],
   "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
-  "self_registration_account_setting": "ALLOW_WITH_CONTACT_CREATION",
+  "self_registration_account_setting": "ALLOW_WITH_CREATION",
+  "block_registration_if_portal_user_exists": true,
   "self_registration_entity": "contact",
   "user_account_self_management": false,
   "feature_settings": {
@@ -883,10 +937,31 @@ epilot customer-portal getPortalConfigByDomain -p domain=example.com --jsonata '
       "schema": "contract"
     }
   ],
+  "contact_identifiers_for_account": [
+    {
+      "name": "first_name",
+      "schema": "contact"
+    },
+    {
+      "name": "last_name",
+      "schema": "contact"
+    }
+  ],
+  "additional_contact_attributes": [
+    {
+      "name": "first_name",
+      "required": true
+    },
+    {
+      "name": "last_name",
+      "required": true
+    }
+  ],
   "triggered_journeys": [
     {
       "trigger_name": "FIRST_LOGIN",
-      "journey_id": "5da0a718-c822-403d-9f5d-20d4584e0528"
+      "journey_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+      "context_params": []
     }
   ],
   "entity_edit_rules": [
@@ -1000,7 +1075,8 @@ epilot customer-portal getPortalConfig --jsonata '$'
   "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
   "allowed_portal_entities": ["contact", "contract"],
   "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
-  "self_registration_account_setting": "ALLOW_WITH_CONTACT_CREATION",
+  "self_registration_account_setting": "ALLOW_WITH_CREATION",
+  "block_registration_if_portal_user_exists": true,
   "self_registration_entity": "contact",
   "user_account_self_management": false,
   "feature_settings": {
@@ -1102,10 +1178,31 @@ epilot customer-portal getPortalConfig --jsonata '$'
       "schema": "contract"
     }
   ],
+  "contact_identifiers_for_account": [
+    {
+      "name": "first_name",
+      "schema": "contact"
+    },
+    {
+      "name": "last_name",
+      "schema": "contact"
+    }
+  ],
+  "additional_contact_attributes": [
+    {
+      "name": "first_name",
+      "required": true
+    },
+    {
+      "name": "last_name",
+      "required": true
+    }
+  ],
   "triggered_journeys": [
     {
       "trigger_name": "FIRST_LOGIN",
-      "journey_id": "5da0a718-c822-403d-9f5d-20d4584e0528"
+      "journey_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+      "context_params": []
     }
   ],
   "entity_edit_rules": [
@@ -1322,6 +1419,10 @@ epilot customer-portal getPublicPortalExtensionDetails -p org_id=12324 -p origin
     }
   ],
   "contractIdentification": {
+    "app": {
+      "app_id": "string",
+      "name": {}
+    },
     "extension": {
       "id": "string",
       "name": {}
@@ -1464,6 +1565,10 @@ epilot customer-portal getPublicPortalExtensionDetailsV3 --jsonata 'consumptionD
     }
   ],
   "contractIdentification": {
+    "app": {
+      "app_id": "string",
+      "name": {}
+    },
     "extension": {
       "id": "string",
       "name": {}
@@ -1983,7 +2088,8 @@ epilot customer-portal getPublicPortalConfig -p org_id=12324 -p origin=example -
   "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
   "allowed_portal_entities": ["contact", "contract"],
   "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
-  "self_registration_account_setting": "ALLOW_WITH_CONTACT_CREATION",
+  "self_registration_account_setting": "ALLOW_WITH_CREATION",
+  "block_registration_if_portal_user_exists": true,
   "self_registration_entity": "contact",
   "user_account_self_management": false,
   "feature_settings": {
@@ -2085,10 +2191,31 @@ epilot customer-portal getPublicPortalConfig -p org_id=12324 -p origin=example -
       "schema": "contract"
     }
   ],
+  "contact_identifiers_for_account": [
+    {
+      "name": "first_name",
+      "schema": "contact"
+    },
+    {
+      "name": "last_name",
+      "schema": "contact"
+    }
+  ],
+  "additional_contact_attributes": [
+    {
+      "name": "first_name",
+      "required": true
+    },
+    {
+      "name": "last_name",
+      "required": true
+    }
+  ],
   "triggered_journeys": [
     {
       "trigger_name": "FIRST_LOGIN",
-      "journey_id": "5da0a718-c822-403d-9f5d-20d4584e0528"
+      "journey_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+      "context_params": []
     }
   ],
   "entity_edit_rules": [
@@ -2203,7 +2330,8 @@ epilot customer-portal getOrgPortalConfig -p origin=example --jsonata '$'
   "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
   "allowed_portal_entities": ["contact", "contract"],
   "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
-  "self_registration_account_setting": "ALLOW_WITH_CONTACT_CREATION",
+  "self_registration_account_setting": "ALLOW_WITH_CREATION",
+  "block_registration_if_portal_user_exists": true,
   "self_registration_entity": "contact",
   "user_account_self_management": false,
   "feature_settings": {
@@ -2305,10 +2433,31 @@ epilot customer-portal getOrgPortalConfig -p origin=example --jsonata '$'
       "schema": "contract"
     }
   ],
+  "contact_identifiers_for_account": [
+    {
+      "name": "first_name",
+      "schema": "contact"
+    },
+    {
+      "name": "last_name",
+      "schema": "contact"
+    }
+  ],
+  "additional_contact_attributes": [
+    {
+      "name": "first_name",
+      "required": true
+    },
+    {
+      "name": "last_name",
+      "required": true
+    }
+  ],
   "triggered_journeys": [
     {
       "trigger_name": "FIRST_LOGIN",
-      "journey_id": "5da0a718-c822-403d-9f5d-20d4584e0528"
+      "journey_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+      "context_params": []
     }
   ],
   "entity_edit_rules": [
@@ -2432,7 +2581,8 @@ epilot customer-portal getPublicPortalConfigV3 -p org_id=12324 -p portal_id=453a
   "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
   "allowed_portal_entities": ["contact", "contract"],
   "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
-  "self_registration_account_setting": "ALLOW_WITH_CONTACT_CREATION",
+  "self_registration_account_setting": "ALLOW_WITH_CREATION",
+  "block_registration_if_portal_user_exists": true,
   "self_registration_entity": "contact",
   "user_account_self_management": false,
   "feature_settings": {
@@ -2534,10 +2684,31 @@ epilot customer-portal getPublicPortalConfigV3 -p org_id=12324 -p portal_id=453a
       "schema": "contract"
     }
   ],
+  "contact_identifiers_for_account": [
+    {
+      "name": "first_name",
+      "schema": "contact"
+    },
+    {
+      "name": "last_name",
+      "schema": "contact"
+    }
+  ],
+  "additional_contact_attributes": [
+    {
+      "name": "first_name",
+      "required": true
+    },
+    {
+      "name": "last_name",
+      "required": true
+    }
+  ],
   "triggered_journeys": [
     {
       "trigger_name": "FIRST_LOGIN",
-      "journey_id": "5da0a718-c822-403d-9f5d-20d4584e0528"
+      "journey_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+      "context_params": []
     }
   ],
   "entity_edit_rules": [
@@ -2652,7 +2823,8 @@ epilot customer-portal getOrgPortalConfigV3 -p portal_id=453ad7bf-86d5-46c8-8252
   "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
   "allowed_portal_entities": ["contact", "contract"],
   "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
-  "self_registration_account_setting": "ALLOW_WITH_CONTACT_CREATION",
+  "self_registration_account_setting": "ALLOW_WITH_CREATION",
+  "block_registration_if_portal_user_exists": true,
   "self_registration_entity": "contact",
   "user_account_self_management": false,
   "feature_settings": {
@@ -2754,10 +2926,31 @@ epilot customer-portal getOrgPortalConfigV3 -p portal_id=453ad7bf-86d5-46c8-8252
       "schema": "contract"
     }
   ],
+  "contact_identifiers_for_account": [
+    {
+      "name": "first_name",
+      "schema": "contact"
+    },
+    {
+      "name": "last_name",
+      "schema": "contact"
+    }
+  ],
+  "additional_contact_attributes": [
+    {
+      "name": "first_name",
+      "required": true
+    },
+    {
+      "name": "last_name",
+      "required": true
+    }
+  ],
   "triggered_journeys": [
     {
       "trigger_name": "FIRST_LOGIN",
-      "journey_id": "5da0a718-c822-403d-9f5d-20d4584e0528"
+      "journey_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+      "context_params": []
     }
   ],
   "entity_edit_rules": [
@@ -2870,7 +3063,8 @@ epilot customer-portal getAllPortalConfigs --jsonata 'data'
       "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
       "allowed_portal_entities": ["contact", "contract"],
       "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
-      "self_registration_account_setting": "ALLOW_WITH_CONTACT_CREATION",
+      "self_registration_account_setting": "ALLOW_WITH_CREATION",
+      "block_registration_if_portal_user_exists": true,
       "self_registration_entity": "contact",
       "user_account_self_management": false,
       "feature_settings": {},
@@ -2887,6 +3081,8 @@ epilot customer-portal getAllPortalConfigs --jsonata 'data'
       "contract_identifiers": [],
       "contract_selector_config": {},
       "registration_identifiers": [],
+      "contact_identifiers_for_account": [],
+      "additional_contact_attributes": [],
       "triggered_journeys": [],
       "entity_edit_rules": [],
       "allowed_file_extensions": {},
@@ -7602,6 +7798,58 @@ epilot customer-portal interpolatePortalPages --jsonata '$'
 
 ---
 
+### `getTriggeredJourney`
+
+Returns the auto-triggered journey configured for the given trigger
+
+`GET /v2/portal/config/triggered-journeys/{trigger_name}`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `trigger_name` | path | "FIRST_LOGIN" \| "ACCEPT_ORDER" \| "DECLINE_ORDER" | Yes | The trigger event for the auto-triggered journey |
+| `context_entities` | query | object[] | No | Additional entities to include in the resolution context (e.g. the order being accepted at trigger time). Portal User and Contact entities are automatically part of the context. |
+
+**Sample Call**
+
+```bash
+epilot customer-portal getTriggeredJourney \
+  -p trigger_name=example
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot customer-portal getTriggeredJourney example
+```
+
+With JSONata filter:
+
+```bash
+epilot customer-portal getTriggeredJourney -p trigger_name=example --jsonata 'trigger_name'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "trigger_name": "FIRST_LOGIN",
+  "journey_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+  "context_params": [
+    {
+      "key": "string",
+      "value": "string"
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
 ### `getDefaultPages`
 
 Fetch all default portal pages
@@ -8329,7 +8577,8 @@ epilot customer-portal createPortalConfig \
   "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
   "allowed_portal_entities": ["contact", "contract"],
   "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
-  "self_registration_account_setting": "ALLOW_WITH_CONTACT_CREATION",
+  "self_registration_account_setting": "ALLOW_WITH_CREATION",
+  "block_registration_if_portal_user_exists": true,
   "self_registration_entity": "contact",
   "user_account_self_management": false,
   "feature_settings": {
@@ -8431,10 +8680,31 @@ epilot customer-portal createPortalConfig \
       "schema": "contract"
     }
   ],
+  "contact_identifiers_for_account": [
+    {
+      "name": "first_name",
+      "schema": "contact"
+    },
+    {
+      "name": "last_name",
+      "schema": "contact"
+    }
+  ],
+  "additional_contact_attributes": [
+    {
+      "name": "first_name",
+      "required": true
+    },
+    {
+      "name": "last_name",
+      "required": true
+    }
+  ],
   "triggered_journeys": [
     {
       "trigger_name": "FIRST_LOGIN",
-      "journey_id": "5da0a718-c822-403d-9f5d-20d4584e0528"
+      "journey_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+      "context_params": []
     }
   ],
   "entity_edit_rules": [
@@ -8556,7 +8826,8 @@ epilot customer-portal createPortalConfig --jsonata '$'
   "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
   "allowed_portal_entities": ["contact", "contract"],
   "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
-  "self_registration_account_setting": "ALLOW_WITH_CONTACT_CREATION",
+  "self_registration_account_setting": "ALLOW_WITH_CREATION",
+  "block_registration_if_portal_user_exists": true,
   "self_registration_entity": "contact",
   "user_account_self_management": false,
   "feature_settings": {
@@ -8658,10 +8929,31 @@ epilot customer-portal createPortalConfig --jsonata '$'
       "schema": "contract"
     }
   ],
+  "contact_identifiers_for_account": [
+    {
+      "name": "first_name",
+      "schema": "contact"
+    },
+    {
+      "name": "last_name",
+      "schema": "contact"
+    }
+  ],
+  "additional_contact_attributes": [
+    {
+      "name": "first_name",
+      "required": true
+    },
+    {
+      "name": "last_name",
+      "required": true
+    }
+  ],
   "triggered_journeys": [
     {
       "trigger_name": "FIRST_LOGIN",
-      "journey_id": "5da0a718-c822-403d-9f5d-20d4584e0528"
+      "journey_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+      "context_params": []
     }
   ],
   "entity_edit_rules": [
@@ -8827,7 +9119,8 @@ epilot customer-portal getPortalConfigV3 -p portal_id=5da0a718-c822-403d-9f5d-20
   "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
   "allowed_portal_entities": ["contact", "contract"],
   "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
-  "self_registration_account_setting": "ALLOW_WITH_CONTACT_CREATION",
+  "self_registration_account_setting": "ALLOW_WITH_CREATION",
+  "block_registration_if_portal_user_exists": true,
   "self_registration_entity": "contact",
   "user_account_self_management": false,
   "feature_settings": {
@@ -8929,10 +9222,31 @@ epilot customer-portal getPortalConfigV3 -p portal_id=5da0a718-c822-403d-9f5d-20
       "schema": "contract"
     }
   ],
+  "contact_identifiers_for_account": [
+    {
+      "name": "first_name",
+      "schema": "contact"
+    },
+    {
+      "name": "last_name",
+      "schema": "contact"
+    }
+  ],
+  "additional_contact_attributes": [
+    {
+      "name": "first_name",
+      "required": true
+    },
+    {
+      "name": "last_name",
+      "required": true
+    }
+  ],
   "triggered_journeys": [
     {
       "trigger_name": "FIRST_LOGIN",
-      "journey_id": "5da0a718-c822-403d-9f5d-20d4584e0528"
+      "journey_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+      "context_params": []
     }
   ],
   "entity_edit_rules": [
@@ -9089,7 +9403,8 @@ epilot customer-portal putPortalConfig \
   "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
   "allowed_portal_entities": ["contact", "contract"],
   "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
-  "self_registration_account_setting": "ALLOW_WITH_CONTACT_CREATION",
+  "self_registration_account_setting": "ALLOW_WITH_CREATION",
+  "block_registration_if_portal_user_exists": true,
   "self_registration_entity": "contact",
   "user_account_self_management": false,
   "feature_settings": {
@@ -9191,10 +9506,31 @@ epilot customer-portal putPortalConfig \
       "schema": "contract"
     }
   ],
+  "contact_identifiers_for_account": [
+    {
+      "name": "first_name",
+      "schema": "contact"
+    },
+    {
+      "name": "last_name",
+      "schema": "contact"
+    }
+  ],
+  "additional_contact_attributes": [
+    {
+      "name": "first_name",
+      "required": true
+    },
+    {
+      "name": "last_name",
+      "required": true
+    }
+  ],
   "triggered_journeys": [
     {
       "trigger_name": "FIRST_LOGIN",
-      "journey_id": "5da0a718-c822-403d-9f5d-20d4584e0528"
+      "journey_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+      "context_params": []
     }
   ],
   "entity_edit_rules": [
@@ -9343,7 +9679,8 @@ epilot customer-portal putPortalConfig -p portal_id=5da0a718-c822-403d-9f5d-20d4
   "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
   "allowed_portal_entities": ["contact", "contract"],
   "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
-  "self_registration_account_setting": "ALLOW_WITH_CONTACT_CREATION",
+  "self_registration_account_setting": "ALLOW_WITH_CREATION",
+  "block_registration_if_portal_user_exists": true,
   "self_registration_entity": "contact",
   "user_account_self_management": false,
   "feature_settings": {
@@ -9445,10 +9782,31 @@ epilot customer-portal putPortalConfig -p portal_id=5da0a718-c822-403d-9f5d-20d4
       "schema": "contract"
     }
   ],
+  "contact_identifiers_for_account": [
+    {
+      "name": "first_name",
+      "schema": "contact"
+    },
+    {
+      "name": "last_name",
+      "schema": "contact"
+    }
+  ],
+  "additional_contact_attributes": [
+    {
+      "name": "first_name",
+      "required": true
+    },
+    {
+      "name": "last_name",
+      "required": true
+    }
+  ],
   "triggered_journeys": [
     {
       "trigger_name": "FIRST_LOGIN",
-      "journey_id": "5da0a718-c822-403d-9f5d-20d4584e0528"
+      "journey_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+      "context_params": []
     }
   ],
   "entity_edit_rules": [
@@ -9606,7 +9964,8 @@ epilot customer-portal listAllPortalConfigs --jsonata 'data'
       "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
       "allowed_portal_entities": ["contact", "contract"],
       "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
-      "self_registration_account_setting": "ALLOW_WITH_CONTACT_CREATION",
+      "self_registration_account_setting": "ALLOW_WITH_CREATION",
+      "block_registration_if_portal_user_exists": true,
       "self_registration_entity": "contact",
       "user_account_self_management": false,
       "feature_settings": {},
@@ -9623,6 +9982,8 @@ epilot customer-portal listAllPortalConfigs --jsonata 'data'
       "contract_identifiers": [],
       "contract_selector_config": {},
       "registration_identifiers": [],
+      "contact_identifiers_for_account": [],
+      "additional_contact_attributes": [],
       "triggered_journeys": [],
       "entity_edit_rules": [],
       "allowed_file_extensions": {},
@@ -9775,7 +10136,8 @@ epilot customer-portal clonePortalConfig --jsonata '$'
   "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
   "allowed_portal_entities": ["contact", "contract"],
   "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
-  "self_registration_account_setting": "ALLOW_WITH_CONTACT_CREATION",
+  "self_registration_account_setting": "ALLOW_WITH_CREATION",
+  "block_registration_if_portal_user_exists": true,
   "self_registration_entity": "contact",
   "user_account_self_management": false,
   "feature_settings": {
@@ -9877,10 +10239,31 @@ epilot customer-portal clonePortalConfig --jsonata '$'
       "schema": "contract"
     }
   ],
+  "contact_identifiers_for_account": [
+    {
+      "name": "first_name",
+      "schema": "contact"
+    },
+    {
+      "name": "last_name",
+      "schema": "contact"
+    }
+  ],
+  "additional_contact_attributes": [
+    {
+      "name": "first_name",
+      "required": true
+    },
+    {
+      "name": "last_name",
+      "required": true
+    }
+  ],
   "triggered_journeys": [
     {
       "trigger_name": "FIRST_LOGIN",
-      "journey_id": "5da0a718-c822-403d-9f5d-20d4584e0528"
+      "journey_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+      "context_params": []
     }
   ],
   "entity_edit_rules": [

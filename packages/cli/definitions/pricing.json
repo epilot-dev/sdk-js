@@ -2307,11 +2307,50 @@
                     "value": [
                       {
                         "name": "Provider 1",
-                        "code": "code#1"
+                        "code": "code#1",
+                        "type": "power",
+                        "additionalData": {
+                          "gridOperators": [
+                            {
+                              "name": "Grid Operator 1",
+                              "codeNumber": "9900000000000"
+                            }
+                          ],
+                          "defaultSuppliers": [
+                            {
+                              "name": "Default Supplier 1",
+                              "codeNumber": "9900000000001"
+                            }
+                          ],
+                          "marketAreaDetails": {
+                            "controlZone": "10YDE-VE-------2",
+                            "balancingZone": "10YDE-VE-------2"
+                          }
+                        }
                       },
                       {
                         "name": "Provider 2",
-                        "code": "code#2"
+                        "code": "code#2",
+                        "type": "gas",
+                        "additionalData": {
+                          "gridOperators": [
+                            {
+                              "name": "Grid Operator 2",
+                              "codeNumber": "9870000000000"
+                            }
+                          ],
+                          "defaultSuppliers": [
+                            {
+                              "name": "Default Supplier 2",
+                              "codeNumber": "9870000000001"
+                            }
+                          ],
+                          "marketAreaDetails": {
+                            "gasType": "H-Gas",
+                            "marketArea": "NCG",
+                            "virtualTradingPoint": "VHP"
+                          }
+                        }
                       }
                     ]
                   }
@@ -6429,6 +6468,7 @@
       "GasMarketAreaDetails": {
         "description": "Market area details for gas",
         "type": "object",
+        "additionalProperties": false,
         "properties": {
           "gasType": {
             "description": "The type of gas used",
@@ -6451,6 +6491,7 @@
       "PowerMarketAreaDetails": {
         "description": "Market area details for power",
         "type": "object",
+        "additionalProperties": false,
         "properties": {
           "controlZone": {
             "description": "The EIC of the control zone",
@@ -9435,6 +9476,35 @@
           "hits"
         ]
       },
+      "OfferHighlightConfig": {
+        "type": "object",
+        "properties": {
+          "unique_selling_point": {
+            "type": "string"
+          },
+          "unique_selling_point_icon": {
+            "type": "string"
+          },
+          "total": {
+            "type": "object",
+            "properties": {
+              "enabled": {
+                "type": "boolean"
+              },
+              "format": {
+                "type": "string",
+                "enum": [
+                  "absolute",
+                  "relative"
+                ]
+              },
+              "only_if_better": {
+                "type": "boolean"
+              }
+            }
+          }
+        }
+      },
       "Offer": {
         "type": "object",
         "properties": {
@@ -9451,6 +9521,9 @@
                 },
                 "product_id": {
                   "type": "string"
+                },
+                "highlight_config": {
+                  "$ref": "#/components/schemas/OfferHighlightConfig"
                 }
               },
               "required": [

@@ -39,8 +39,9 @@ epilot event-catalog listEvents
 - [`listEvents`](#listevents) — Retrieve list of available business events
 - [`getEvent`](#getevent) — Retrieve the configuration of a specific business event
 - [`patchEvent`](#patchevent) — Update the configuration of a specific business event for the organization
-- [`getEventJSONSchema`](#geteventjsonschema) — Retrieve the JSON Schema of a specific business event
-- [`getEventExample`](#geteventexample) — Generate a sample event payload based on the event's JSON Schema
+- [`getEventJSONSchema`](#geteventjsonschema) — Retrieve the JSON Schema of a specific business event. Pass an optional
+- [`getEventExample`](#geteventexample) — Generate a sample event payload based on the event's JSON Schema. Pass an
+- [`listEventVersions`](#listeventversions) — List every known version of an event, along with the `latest`
 - [`searchEventHistory`](#searcheventhistory) — Paginated history of events
 - [`searchEventHistoryV2`](#searcheventhistoryv2) — Paginated history of events with projected/lightweight payload (v2).
 - [`getHistoricalEvent`](#gethistoricalevent) — Fetch a single historical event by id with full hydration
@@ -74,7 +75,7 @@ epilot event-catalog listEvents --jsonata 'results[0]'
       "event_name": "AddMeterReading",
       "event_title": "Add Meter Reading",
       "event_description": "Triggered when a new meter reading is added",
-      "event_version": "1.0.0",
+      "event_version": "1.0",
       "event_status": "active",
       "event_tags": ["builtin", "metering", "erp"],
       "schema_fields": {},
@@ -151,7 +152,7 @@ epilot event-catalog getEvent -p event_name=example --jsonata '$'
   "event_name": "AddMeterReading",
   "event_title": "Add Meter Reading",
   "event_description": "Triggered when a new meter reading is added",
-  "event_version": "1.0.0",
+  "event_version": "1.0",
   "event_status": "active",
   "event_tags": ["builtin", "metering", "erp"],
   "schema_fields": {},
@@ -217,7 +218,7 @@ epilot event-catalog patchEvent \
   "event_name": "AddMeterReading",
   "event_title": "Add Meter Reading",
   "event_description": "Triggered when a new meter reading is added",
-  "event_version": "1.0.0",
+  "event_version": "1.0",
   "event_status": "active",
   "event_tags": ["builtin", "metering", "erp"],
   "schema_fields": {},
@@ -275,7 +276,7 @@ epilot event-catalog patchEvent -p event_name=example --jsonata '$'
   "event_name": "AddMeterReading",
   "event_title": "Add Meter Reading",
   "event_description": "Triggered when a new meter reading is added",
-  "event_version": "1.0.0",
+  "event_version": "1.0",
   "event_status": "active",
   "event_tags": ["builtin", "metering", "erp"],
   "schema_fields": {},
@@ -313,7 +314,7 @@ epilot event-catalog patchEvent -p event_name=example --jsonata '$'
 
 ### `getEventJSONSchema`
 
-Retrieve the JSON Schema of a specific business event
+Retrieve the JSON Schema of a specific business event. Pass an optional
 
 `GET /v1/events/{event_name}/json_schema`
 
@@ -322,6 +323,7 @@ Retrieve the JSON Schema of a specific business event
 | Name | In | Type | Required | Description |
 | ---- | -- | ---- | -------- | ----------- |
 | `event_name` | path | string | Yes | Unique human readable name of the event |
+| `Epilot-Event-Version` | header | string | No | Event payload version (`MAJOR.MINOR`). Defaults to the event's latest version. |
 
 **Sample Call**
 
@@ -368,7 +370,7 @@ epilot event-catalog getEventJSONSchema -p event_name=example --jsonata '$'
     },
     "_event_version": {
       "type": "string",
-      "description": "Event version (semver)"
+      "description": "Event payload version (MAJOR.MINOR)"
     },
     "_event_source": {
       "type": "string",
@@ -454,7 +456,7 @@ epilot event-catalog getEventJSONSchema -p event_name=example --jsonata '$'
 
 ### `getEventExample`
 
-Generate a sample event payload based on the event's JSON Schema
+Generate a sample event payload based on the event's JSON Schema. Pass an
 
 `GET /v1/events/{event_name}/example`
 
@@ -463,6 +465,7 @@ Generate a sample event payload based on the event's JSON Schema
 | Name | In | Type | Required | Description |
 | ---- | -- | ---- | -------- | ----------- |
 | `event_name` | path | string | Yes | Unique human readable name of the event |
+| `Epilot-Event-Version` | header | string | No | Event payload version (`MAJOR.MINOR`). Defaults to the event's latest version. |
 
 **Sample Call**
 
@@ -488,6 +491,67 @@ epilot event-catalog getEventExample -p event_name=example --jsonata '$'
 
 ```json
 {}
+```
+
+</details>
+
+---
+
+### `listEventVersions`
+
+List every known version of an event, along with the `latest`
+
+`GET /v1/events/{event_name}/versions`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `event_name` | path | string | Yes | Unique human readable name of the event |
+
+**Sample Call**
+
+```bash
+epilot event-catalog listEventVersions \
+  -p event_name=example
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot event-catalog listEventVersions example
+```
+
+With JSONata filter:
+
+```bash
+epilot event-catalog listEventVersions -p event_name=example --jsonata 'event_name'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "event_name": "MeterReadingAdded",
+  "latest": "1.0",
+  "versions": [
+    {
+      "version": "1.0",
+      "released_at": "2025-11-15",
+      "change_summary": "string",
+      "change_notes": "string",
+      "changes": [
+        {
+          "field": "reading",
+          "op": "added",
+          "type_old": "string",
+          "type_new": "string"
+        }
+      ]
+    }
+  ]
+}
 ```
 
 </details>
@@ -563,7 +627,7 @@ epilot event-catalog searchEventHistory -p event_name=example --jsonata 'results
       "_event_time": "2024-01-01T12:00:00Z",
       "_event_id": "01FZ4Z5FZ5FZ5FZ5FZ5FZ5FZ5F",
       "_event_name": "MeterReading",
-      "_event_version": "1.0.0",
+      "_event_version": "1.0",
       "_event_source": "api",
       "_trigger_source_type": "api",
       "_trigger_source": "user_123456",
@@ -663,7 +727,7 @@ epilot event-catalog searchEventHistoryV2 -p event_name=example --jsonata 'resul
       "_event_time": "1970-01-01T00:00:00.000Z",
       "_event_id": "string",
       "_event_name": "string",
-      "_event_version": "1.0.0",
+      "_event_version": "1.0",
       "_event_source": "string",
       "_trigger_source_type": "api",
       "_trigger_source": "string",
@@ -723,7 +787,7 @@ epilot event-catalog getHistoricalEvent -p event_name=example -p event_id=123e45
   "_event_time": "2024-01-01T12:00:00Z",
   "_event_id": "01FZ4Z5FZ5FZ5FZ5FZ5FZ5FZ5F",
   "_event_name": "MeterReading",
-  "_event_version": "1.0.0",
+  "_event_version": "1.0",
   "_event_source": "api",
   "_trigger_source_type": "api",
   "_trigger_source": "user_123456",

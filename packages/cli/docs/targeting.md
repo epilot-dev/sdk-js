@@ -39,6 +39,7 @@ epilot targeting changeCampaignStatus -p campaign_id=b8c01433-5556-4e2b-aad4-6f5
 - [`changeCampaignStatus`](#changecampaignstatus) — Change the status of a campaign to a desired status.
 - [`getCampaignJobStatus`](#getcampaignjobstatus) — Get the status of a campaign's automation job
 - [`getCampaignPortals`](#getcampaignportals) — Get the list of portals and its widgets where the campaign is used.
+- [`setupCampaign`](#setupcampaign) — Creates a `campaign` entity together with its related entities and configurations in a single call.
 - [`matchCampaigns`](#matchcampaigns) — Match campaigns based on target entities.
 
 **Campaign Delivery**
@@ -295,6 +296,93 @@ epilot targeting retriggerCampaignAutomations -p campaign_id=b8c01433-5556-4e2b-
       "error": "string"
     }
   ]
+}
+```
+
+</details>
+
+---
+
+### `setupCampaign`
+
+Creates a `campaign` entity together with its related entities and configurations in a single call.
+
+`POST /v1/campaign:setup`
+
+**Request Body** (required)
+
+**Sample Call**
+
+```bash
+epilot targeting setupCampaign
+```
+
+With request body:
+
+```bash
+epilot targeting setupCampaign \
+  -d '{
+  "type": "tariff_change",
+  "product_recommendation": {
+    "name": "string",
+    "source_product_id": "b8c01433-5556-4e2b-aad4-6f5348d1df84",
+    "source_price_id": "b8c01433-5556-4e2b-aad4-6f5348d1df84",
+    "offers": [
+      {
+        "target_id": "b8c01433-5556-4e2b-aad4-6f5348d1df84",
+        "items": [
+          {
+            "product_id": "b8c01433-5556-4e2b-aad4-6f5348d1df84",
+            "price_id": "b8c01433-5556-4e2b-aad4-6f5348d1df84",
+            "highlight_config": {}
+          }
+        ]
+      }
+    ]
+  },
+  "campaign": {
+    "name": "string",
+    "goal": "string",
+    "target_ids": ["b8c01433-5556-4e2b-aad4-6f5348d1df84"]
+  },
+  "journey": {
+    "journey_id": "b8c01433-5556-4e2b-aad4-6f5348d1df84"
+  },
+  "channels": {
+    "portal_widget": {
+      "portal_id": "b8c01433-5556-4e2b-aad4-6f5348d1df84",
+      "block_id": "b8c01433-5556-4e2b-aad4-6f5348d1df84"
+    },
+    "email": {
+      "automation_id": "b8c01433-5556-4e2b-aad4-6f5348d1df84",
+      "template_id": "b8c01433-5556-4e2b-aad4-6f5348d1df84"
+    }
+  }
+}'
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot targeting setupCampaign
+```
+
+With JSONata filter:
+
+```bash
+epilot targeting setupCampaign --jsonata '$'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "type": "tariff_change",
+  "product_recommendation_id": "b8c01433-5556-4e2b-aad4-6f5348d1df84",
+  "campaign_id": "b8c01433-5556-4e2b-aad4-6f5348d1df84",
+  "journey_id": "b8c01433-5556-4e2b-aad4-6f5348d1df84",
+  "portal_widget_id": "b8c01433-5556-4e2b-aad4-6f5348d1df84"
 }
 ```
 
