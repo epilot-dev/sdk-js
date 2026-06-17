@@ -40,6 +40,7 @@ Full API documentation: [https://docs.epilot.io/api](https://docs.epilot.io/api)
 | Package | Description |
 | ------- | ----------- |
 | [`@epilot/sdk`](./packages/epilot-sdk-v2) | JavaScript/TypeScript SDK for epilot APIs |
+| [`@epilot/cli`](./packages/cli) | CLI for AI agents and automation from the command line |
 | [`@epilot/app-sdk`](./packages/app-sdk) | SDK to build Apps for epilot XRM |
 | [`@epilot/app-bridge`](./packages/app-bridge) | App bridge for communication between epilot apps and the host |
 
