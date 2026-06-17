@@ -1,0 +1,950 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Snapshot API",
+    "description": "Point-in-time backups of epilot configuration with restore.\n\nProvides a safety net for configuration changes: every blueprint install,\nevery Configuration Hub sync, and every manual config change can be preceded\nby a snapshot — giving operators a rollback point if something breaks.\n\nSee `docs/rfcs/RFC-snapshot-api.md` in the `blueprint-manifest-api` repo\nfor the full design.\n",
+    "version": "0.1.0"
+  },
+  "servers": [
+    {
+      "url": "https://snapshot.sls.epilot.io"
+    },
+    {
+      "url": "https://snapshot.dev.sls.epilot.io",
+      "description": "Dev"
+    },
+    {
+      "url": "https://snapshot.staging.sls.epilot.io",
+      "description": "Staging"
+    }
+  ],
+  "security": [
+    {
+      "EpilotAuth": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "Snapshots",
+      "description": "Snapshot CRUD and restore operations"
+    }
+  ],
+  "paths": {
+    "/v1/snapshots": {
+      "post": {
+        "operationId": "createSnapshot",
+        "summary": "createSnapshot",
+        "description": "Create a new snapshot of the given resources. Async — returns immediately\nwith a snapshot ID; client polls `getSnapshot` until `create.status`\nmoves from `in_progress` to `completed` or `failed`.\n",
+        "tags": [
+          "Snapshots"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSnapshotRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Snapshot creation started",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateSnapshotResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      },
+      "get": {
+        "operationId": "listSnapshots",
+        "summary": "listSnapshots",
+        "description": "List snapshots for the caller's organization, newest first.\n\nPass `resource=<type>:<id>` one or more times to filter to snapshots\ncontaining **any** of the listed resources (OR semantics). Each returned\nsnapshot includes a `matched_count` indicating how many of the filter\npairs are present in it. Hard cap of 50 filter pairs per request. When\nfiltered, pagination is not applied — the result set is bounded.\n",
+        "tags": [
+          "Snapshots"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "cursor",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 25
+            }
+          },
+          {
+            "in": "query",
+            "name": "resource",
+            "description": "Filter to snapshots containing one or more resources. Format\n`<type>:<id>`. Split on the first colon — the `<id>` half may\ncontain colons (e.g., role acl ids like `role:acl:internal:foo`).\nRepeat the param for multiple resources — results are OR-unioned.\nMaximum 50 pairs per request.\n",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[^:]+:.+$"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Snapshot list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "results",
+                    "page_size"
+                  ],
+                  "properties": {
+                    "page_size": {
+                      "type": "integer",
+                      "description": "Number of items in this page (not the total across all pages)."
+                    },
+                    "cursor": {
+                      "type": "string",
+                      "description": "Pagination cursor; pass to the next request to get the next page."
+                    },
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Snapshot"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      }
+    },
+    "/v1/snapshots:capture-org": {
+      "post": {
+        "operationId": "captureOrgSnapshot",
+        "summary": "captureOrgSnapshot",
+        "description": "Snapshot the caller's whole organization now. Fetches a fresh inventory\nof the org's configuration resources from configuration-hub-api, persists\nit as an inventory artifact, and starts a `scope: \"org\"` chunked capture.\nAsync — returns immediately with a snapshot ID; client polls `getSnapshot`\nand watches `capture_summary` fill in until `create.status` moves from\n`in_progress` to `completed` or `failed`.\n\nSensitive types (`access_token`, `environment_variable`), types with no\nengine adapter, and any `excluded_types` are dropped from the capture and\nrecorded in the snapshot's coverage report.\n",
+        "tags": [
+          "Snapshots"
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateOrgSnapshotRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Org snapshot creation started",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateSnapshotResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
+          }
+        }
+      }
+    },
+    "/v1/snapshots/{id}": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "get": {
+        "operationId": "getSnapshot",
+        "summary": "getSnapshot",
+        "description": "Fetch a snapshot's metadata. Poll this endpoint to track create/restore progress.",
+        "tags": [
+          "Snapshots"
+        ],
+        "responses": {
+          "200": {
+            "description": "Snapshot metadata",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Snapshot"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteSnapshot",
+        "summary": "deleteSnapshot",
+        "description": "Delete a snapshot's metadata and S3 manifest.",
+        "tags": [
+          "Snapshots"
+        ],
+        "responses": {
+          "204": {
+            "description": "Deleted"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/v1/snapshots/{id}:restore": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "post": {
+        "operationId": "restoreSnapshot",
+        "summary": "restoreSnapshot",
+        "description": "Restore a snapshot to the org. Async — returns immediately; client polls\n`getSnapshot` until the latest entry in `restores` moves from\n`in_progress` to one of `completed | partial | failed`.\n\nv1: full restore only. Cherry-pick (`resources?` body filter) is an open\nquestion — see RFC OQ #1.\n",
+        "tags": [
+          "Snapshots"
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RestoreSnapshotRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Restore started",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RestoreSnapshotResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/v1/snapshots/{id}/resources": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "get": {
+        "operationId": "listSnapshotResources",
+        "summary": "listSnapshotResources",
+        "description": "List the resources captured in this snapshot. Returns lightweight\nidentity fields per resource — payloads are fetched via the\nsingle-resource endpoint when needed.\n\nUsed by Config Hub UI to render snapshot contents, and by\nblueprint-manifest-api to partition lineage rows during a restore\nsweep (resources in this list are touched; others are net-new).\n",
+        "tags": [
+          "Snapshots"
+        ],
+        "responses": {
+          "200": {
+            "description": "Captured resources",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SnapshotResourceList"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/v1/snapshots/{id}/resources/{lineage_id}": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "in": "path",
+          "name": "lineage_id",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "get": {
+        "operationId": "getSnapshotResource",
+        "summary": "getSnapshotResource",
+        "description": "Fetch one captured resource with its full payload. For UI views\nthat diff the captured state against the current destination.\n",
+        "tags": [
+          "Snapshots"
+        ],
+        "responses": {
+          "200": {
+            "description": "Captured resource with payload",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SnapshotResourceDetail"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/v1/snapshots:list-dependencies": {
+      "post": {
+        "operationId": "listDependencies",
+        "summary": "listDependencies",
+        "description": "Walk the dependency tree for a set of resources and return the full\ntransitive closure, topologically sorted.\n\n**Not implemented in v1.** Returns 501. Callers should pass an explicit\nresource list to `createSnapshot`. See RFC Phase 5.\n",
+        "tags": [
+          "Snapshots"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "resources"
+                ],
+                "properties": {
+                  "resources": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/ResourceRef"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Transitive dependency closure for the given resources, topologically sorted.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "dependencies"
+                  ],
+                  "properties": {
+                    "dependencies": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ResourceRef"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "501": {
+            "description": "Not implemented",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "EpilotAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization"
+      }
+    },
+    "responses": {
+      "BadRequest": {
+        "description": "Bad request",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "Unauthorized": {
+        "description": "Unauthorized",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "Not found",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "UnprocessableEntity": {
+        "description": "Unprocessable entity",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/EmptyInventoryError"
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "required": [
+          "status",
+          "error"
+        ],
+        "properties": {
+          "status": {
+            "type": "integer"
+          },
+          "error": {
+            "type": "string"
+          }
+        }
+      },
+      "EmptyInventoryError": {
+        "type": "object",
+        "required": [
+          "message",
+          "skipped_types"
+        ],
+        "description": "Returned (422) when the org inventory contains no capturable resources\nafter filtering out sensitive, unsupported, and excluded types. The\n`skipped_types` array explains why every type was dropped.\n",
+        "properties": {
+          "message": {
+            "type": "string",
+            "example": "No capturable resources in the org inventory"
+          },
+          "skipped_types": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "type",
+                "reason"
+              ],
+              "properties": {
+                "type": {
+                  "type": "string"
+                },
+                "reason": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "ResourceRef": {
+        "type": "object",
+        "required": [
+          "type",
+          "id"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "Resource type (e.g., custom_variable, journey, automation_flow)"
+          },
+          "id": {
+            "type": "string"
+          }
+        }
+      },
+      "SnapshotResourceSummary": {
+        "type": "object",
+        "description": "Lightweight identity for a captured resource. Returned by\n`listSnapshotResources`; the full payload is fetched separately via\n`getSnapshotResource` when needed.\n",
+        "required": [
+          "lineage_id",
+          "target_id",
+          "type"
+        ],
+        "properties": {
+          "lineage_id": {
+            "type": "string",
+            "description": "Cross-service correlation key — matches the lineage row id in\nblueprint-manifest-api's lineage table for `blueprint_install`\nsnapshots. Same as `target_id` for snapshots whose capture\ndoesn't distinguish source vs destination identifiers.\n"
+          },
+          "target_id": {
+            "type": "string",
+            "description": "Identifier the resource was captured by (passed in via `ResourceRef.id` on createSnapshot)."
+          },
+          "type": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true,
+            "description": "Best-effort display name extracted from the captured payload\n(`name` / `title` / `label` / `key` in that order). Null when\nnone of those fields are present.\n"
+          }
+        }
+      },
+      "SnapshotResourceList": {
+        "type": "object",
+        "required": [
+          "resources"
+        ],
+        "properties": {
+          "resources": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SnapshotResourceSummary"
+            }
+          }
+        }
+      },
+      "SnapshotResourceDetail": {
+        "type": "object",
+        "description": "A single captured resource with its full payload. The identity fields\nmatch `SnapshotResourceSummary`; the `captured` payload is the\npre-install state at snapshot time.\n",
+        "required": [
+          "lineage_id",
+          "target_id",
+          "type",
+          "captured"
+        ],
+        "properties": {
+          "lineage_id": {
+            "type": "string"
+          },
+          "target_id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "captured": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Full captured payload of the resource at snapshot time."
+          }
+        }
+      },
+      "CreateSnapshotRequest": {
+        "type": "object",
+        "required": [
+          "name",
+          "resources"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "trigger": {
+            "type": "string",
+            "enum": [
+              "manual",
+              "sync",
+              "blueprint_install",
+              "scheduled"
+            ],
+            "default": "manual",
+            "description": "What initiated this snapshot. `scheduled` is used for automatic\nnightly backups triggered by an org's EventBridge schedule\n(RFC — Scheduled org snapshots).\n"
+          },
+          "blueprint_instance_id": {
+            "type": "string",
+            "description": "Required iff `trigger === 'blueprint_install'`; forbidden otherwise.\nIdentifies the destination blueprint instance whose install this\nsnapshot covers. Used at restore time as the join key for the\nlineage-driven delete sweep.\n"
+          },
+          "resources": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ResourceRef"
+            },
+            "description": "List of resources to capture. Required non-empty for\n`trigger === 'manual'` or `'sync'`. May be empty when\n`trigger === 'blueprint_install'` — an install with no\nresources to overwrite still needs a snapshot row so the\nblueprint-manifest-api restore endpoint can find it.\n"
+          }
+        }
+      },
+      "CreateOrgSnapshotRequest": {
+        "type": "object",
+        "description": "Request body for `captureOrgSnapshot`. All fields optional — an empty body\nsnapshots the whole org with a default name and the 90-day default TTL.\n",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Snapshot name. Defaults to \"Org snapshot — <ISO timestamp>\"."
+          },
+          "retention": {
+            "type": "object",
+            "description": "Retention window. Converted to an absolute `expires_at` at creation\ntime. Omit for the default 90-day TTL.\n",
+            "required": [
+              "value",
+              "unit"
+            ],
+            "properties": {
+              "value": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "unit": {
+                "type": "string",
+                "enum": [
+                  "days",
+                  "weeks",
+                  "months"
+                ]
+              }
+            }
+          },
+          "excluded_types": {
+            "type": "array",
+            "description": "Resource types to exclude from the capture, in addition to the\nalways-excluded sensitive types (`access_token`,\n`environment_variable`).\n",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "CreateSnapshotResponse": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "status",
+          "created_at"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "creating"
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "RestoreSnapshotRequest": {
+        "type": "object",
+        "description": "Both flags default to `false`, which restores every captured resource —\nConfig Hub's manual-restore semantics. blueprint-manifest-api sets\nboth `true` when reverting a blueprint install so user edits and\ncross-blueprint contributions survive. Each flag is independent so a\ncaller can preserve edits without preserving co-ownership (or vice\nversa). Skipped resources surface under `Operation.skipped`.\n",
+        "properties": {
+          "preserve_modified": {
+            "type": "boolean",
+            "default": false,
+            "description": "When `true`, skip captured resources whose live destination payload\nhas diverged from the install-time fingerprint stored on lineage.\nSurfaces under `Operation.skipped` with `reason: 'modified'`.\n"
+          },
+          "preserve_co_owned": {
+            "type": "boolean",
+            "default": false,
+            "description": "When `true`, skip captured resources whose lineage row carries\nanother blueprint instance's id (co-ownership ≥2). Surfaces under\n`Operation.skipped` with `reason: 'co_owned'`.\n"
+          }
+        }
+      },
+      "RestoreSnapshotResponse": {
+        "type": "object",
+        "required": [
+          "id",
+          "status"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "restoring"
+            ]
+          }
+        }
+      },
+      "Snapshot": {
+        "type": "object",
+        "required": [
+          "id",
+          "org_id",
+          "name",
+          "trigger",
+          "resource_counts",
+          "create",
+          "restores"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "org_id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "trigger": {
+            "type": "string",
+            "enum": [
+              "manual",
+              "sync",
+              "blueprint_install",
+              "scheduled"
+            ]
+          },
+          "blueprint_instance_id": {
+            "type": "string",
+            "description": "Set iff `trigger === 'blueprint_install'`. The destination blueprint\ninstance this snapshot covers.\n"
+          },
+          "resource_counts": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "description": "Resource type → count of resources of that type in the snapshot."
+          },
+          "create": {
+            "$ref": "#/components/schemas/Operation"
+          },
+          "restores": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Operation"
+            }
+          },
+          "matched_count": {
+            "type": "integer",
+            "description": "Number of `resource` filter pairs from the request that are\ncontained in this snapshot. Present only on `listSnapshots`\nresponses where the caller passed at least one `resource`\nfilter — absent on `getSnapshot` and on unfiltered list calls.\nDrives the coverage badge in Config Hub's snapshot picker.\n"
+          },
+          "scope": {
+            "type": "string",
+            "enum": [
+              "selection",
+              "org"
+            ],
+            "description": "Capture scope. `selection` (default for manual/sync/blueprint_install)\nmeans only the explicitly listed resources were snapshotted.\n`org` means a full org inventory was discovered and captured\n(scheduled snapshots set this automatically).\n"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO-8601 timestamp after which this snapshot will be deleted.\nDerived from the org's retention setting at capture time for\nscheduled snapshots; not set for manual snapshots (which use\na hardcoded 90-day TTL written directly as a DynamoDB `ttl` epoch).\n"
+          },
+          "capture_summary": {
+            "type": "object",
+            "description": "Per-snapshot coverage report set by the capture worker on completion.\nRecords how many resources were attempted, captured, skipped\n(unsupported type or explicitly excluded), and failed.\n",
+            "required": [
+              "total",
+              "captured",
+              "skipped",
+              "failed"
+            ],
+            "properties": {
+              "total": {
+                "type": "integer",
+                "description": "Total resources in the inventory that were attempted."
+              },
+              "captured": {
+                "type": "integer",
+                "description": "Resources successfully fetched and written to the manifest."
+              },
+              "skipped": {
+                "type": "integer",
+                "description": "Resources skipped — type not supported by config-engine or\nexcluded from capture (e.g. access_token, environment_variable).\n"
+              },
+              "failed": {
+                "type": "integer",
+                "description": "Resources where the fetch call returned an error."
+              }
+            }
+          }
+        }
+      },
+      "Operation": {
+        "type": "object",
+        "required": [
+          "type",
+          "started_at",
+          "status",
+          "triggered_by"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "create",
+              "restore"
+            ]
+          },
+          "started_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "completed_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "in_progress",
+              "completed",
+              "partial",
+              "failed"
+            ],
+            "description": "`partial` indicates the operation completed but skipped at least\none resource — see `skipped`. Only populated by restores triggered\nwith `mode: 'preserve_edits'`.\n"
+          },
+          "error": {
+            "type": "string"
+          },
+          "triggered_by": {
+            "$ref": "#/components/schemas/CallerIdentity"
+          },
+          "skipped": {
+            "type": "array",
+            "description": "Per-resource skips, populated only for restores triggered with\n`mode: 'preserve_edits'`. Empty / absent for Config Hub's\ndefault overwrite-mode restores.\n",
+            "items": {
+              "$ref": "#/components/schemas/SkippedResource"
+            }
+          }
+        }
+      },
+      "SkippedResource": {
+        "type": "object",
+        "required": [
+          "lineage_id",
+          "reason"
+        ],
+        "properties": {
+          "lineage_id": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string",
+            "enum": [
+              "modified",
+              "co_owned"
+            ],
+            "description": "- `modified` — current destination payload's fingerprint differs\n  from the install-time fingerprint on the lineage row.\n- `co_owned` — lineage row has ≥2 distinct\n  `blueprint_instance_ids`; restoring would unilaterally affect\n  another blueprint instance's contribution.\n"
+          }
+        }
+      },
+      "CallerIdentity": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "user_id": {
+            "type": "string"
+          },
+          "token_id": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

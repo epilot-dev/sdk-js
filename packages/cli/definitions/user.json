@@ -101,6 +101,189 @@
         }
       }
     },
+    "/v2/users/me/settings": {
+      "get": {
+        "operationId": "listUserSettings",
+        "summary": "listUserSettings",
+        "description": "List all setting scopes and keys available for the currently logged in user. Does not return setting values.",
+        "tags": [
+          "User V2"
+        ],
+        "responses": {
+          "200": {
+            "description": "List of user setting scopes and keys",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserSettingsListResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/users/me/settings/{scope}": {
+      "get": {
+        "operationId": "getUserSettingsScope",
+        "summary": "getUserSettingsScope",
+        "description": "Get all setting values for one scope for the currently logged in user.",
+        "tags": [
+          "User V2"
+        ],
+        "parameters": [
+          {
+            "name": "scope",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/UserSettingScope"
+            },
+            "description": "User setting scope, for example calendar, navigation, or search"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User settings for the requested scope",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserSettingsScopeResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/users/me/settings/{scope}/{key}": {
+      "get": {
+        "operationId": "getUserSetting",
+        "summary": "getUserSetting",
+        "description": "Get one setting value by scope and key for the currently logged in user.",
+        "tags": [
+          "User V2"
+        ],
+        "parameters": [
+          {
+            "name": "scope",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/UserSettingScope"
+            },
+            "description": "User setting scope"
+          },
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/UserSettingKey"
+            },
+            "description": "User setting key"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User setting",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserSetting"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User setting not found"
+          }
+        }
+      },
+      "put": {
+        "operationId": "putUserSetting",
+        "summary": "putUserSetting",
+        "description": "Create or replace one setting value for the currently logged in user.",
+        "tags": [
+          "User V2"
+        ],
+        "parameters": [
+          {
+            "name": "scope",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/UserSettingScope"
+            },
+            "description": "User setting scope"
+          },
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/UserSettingKey"
+            },
+            "description": "User setting key"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserSettingValue"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User setting saved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserSetting"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteUserSetting",
+        "summary": "deleteUserSetting",
+        "description": "Delete one setting value for the currently logged in user.",
+        "tags": [
+          "User V2"
+        ],
+        "parameters": [
+          {
+            "name": "scope",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/UserSettingScope"
+            },
+            "description": "User setting scope"
+          },
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/UserSettingKey"
+            },
+            "description": "User setting key"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "User setting deleted successfully"
+          }
+        }
+      }
+    },
     "/v2/users": {
       "get": {
         "operationId": "listUsersV2",
@@ -344,6 +527,63 @@
           },
           "400": {
             "description": "User not found."
+          }
+        }
+      }
+    },
+    "/v2/users:sendPasswordReset": {
+      "post": {
+        "operationId": "sendUserPasswordReset",
+        "summary": "sendUserPasswordReset",
+        "description": "Send a password reset email to a user in your organization.\nRequires `user:edit` on the target user.\n",
+        "tags": [
+          "User V2"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "email"
+                ],
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "description": "Email address of the user to reset",
+                    "example": "test@example.com"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Password reset triggered",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "success"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid email or user not found"
+          },
+          "403": {
+            "description": "Not permitted to reset this user's password"
           }
         }
       }
@@ -709,6 +949,9 @@
         "summary": "verifyEmailWithToken",
         "description": "Update new email using an verification token",
         "security": [],
+        "x-rate-limit": {
+          "limit": 10
+        },
         "tags": [
           "User V2"
         ],
@@ -736,8 +979,69 @@
           "200": {
             "description": "Verified successfully"
           },
+          "400": {
+            "description": "No pending email change for this token"
+          },
           "404": {
             "description": "Token not found"
+          },
+          "409": {
+            "description": "Email address already in use"
+          }
+        }
+      }
+    },
+    "/v2/users/public/requestPasswordReset": {
+      "post": {
+        "operationId": "requestPasswordReset",
+        "summary": "requestPasswordReset",
+        "description": "Request a password reset email for the given email address. Always\nreturns a success response whether or not an account exists with that\nemail.\n",
+        "security": [],
+        "x-rate-limit": {
+          "limit": 10
+        },
+        "tags": [
+          "User V2"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "email"
+                ],
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "description": "Email address of the account to reset",
+                    "example": "test@example.com"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Request accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "message"
+                  ],
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "If an account exists, a password reset email has been sent."
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -1687,6 +1991,13 @@
             "nullable": true,
             "format": "email"
           },
+          "draft_email_expires_at": {
+            "description": "Server-set expiry for the pending email change verification link (ISO 8601). Read-only.",
+            "type": "string",
+            "nullable": true,
+            "format": "date-time",
+            "readOnly": true
+          },
           "department": {
             "type": "string",
             "description": "User's department",
@@ -1707,6 +2018,11 @@
           },
           "mfa_enabled": {
             "description": "User's multi-factor authentication status",
+            "type": "boolean",
+            "example": false
+          },
+          "has_passkeys": {
+            "description": "Whether the user has any registered passkeys",
             "type": "boolean",
             "example": false
           },
@@ -2048,6 +2364,13 @@
           },
           "image_uri": {
             "$ref": "#/components/schemas/GroupImageUri"
+          },
+          "abbreviation": {
+            "description": "A short abbreviation for the group, up to 2 characters.",
+            "type": "string",
+            "maxLength": 2,
+            "nullable": true,
+            "example": "FN"
           }
         },
         "required": [
@@ -2075,6 +2398,13 @@
           },
           "image_uri": {
             "$ref": "#/components/schemas/GroupImageUri"
+          },
+          "abbreviation": {
+            "description": "A short abbreviation for the group, up to 2 characters.",
+            "type": "string",
+            "maxLength": 2,
+            "nullable": true,
+            "example": "FN"
           }
         }
       },
@@ -2132,6 +2462,13 @@
           },
           "image_uri": {
             "$ref": "#/components/schemas/GroupImageUri"
+          },
+          "abbreviation": {
+            "description": "A short abbreviation for the group, up to 2 characters.",
+            "type": "string",
+            "maxLength": 2,
+            "nullable": true,
+            "example": "FN"
           }
         },
         "required": [
@@ -2376,6 +2713,110 @@
             "example": 10
           }
         }
+      },
+      "UserSettingScope": {
+        "type": "string",
+        "description": "User setting scope. Values are limited to 64 characters.",
+        "minLength": 1,
+        "maxLength": 64,
+        "example": "calendar"
+      },
+      "UserSettingKey": {
+        "type": "string",
+        "description": "User setting key. Values are limited to 128 characters.",
+        "minLength": 1,
+        "maxLength": 128,
+        "example": "visible_calendars"
+      },
+      "UserSettingValue": {
+        "description": "The JSON value of a user setting. Objects are recommended for extensibility, but any JSON value is accepted up to 64 KiB when serialized as JSON.",
+        "x-maxSerializedBytes": 65536
+      },
+      "UserSetting": {
+        "type": "object",
+        "properties": {
+          "scope": {
+            "$ref": "#/components/schemas/UserSettingScope"
+          },
+          "key": {
+            "$ref": "#/components/schemas/UserSettingKey"
+          },
+          "value": {
+            "$ref": "#/components/schemas/UserSettingValue"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "scope",
+          "key",
+          "value",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "UserSettingsListResponse": {
+        "type": "object",
+        "properties": {
+          "results": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "scope": {
+                  "$ref": "#/components/schemas/UserSettingScope"
+                },
+                "keys": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserSettingKey"
+                  },
+                  "example": [
+                    "visible_calendars"
+                  ]
+                }
+              },
+              "required": [
+                "scope",
+                "keys"
+              ]
+            }
+          }
+        },
+        "required": [
+          "results"
+        ]
+      },
+      "UserSettingsScopeResponse": {
+        "type": "object",
+        "properties": {
+          "scope": {
+            "$ref": "#/components/schemas/UserSettingScope"
+          },
+          "settings": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/UserSettingValue"
+            },
+            "example": {
+              "visible_calendars": {
+                "calendar_ids": [
+                  "holidays"
+                ]
+              }
+            }
+          }
+        },
+        "required": [
+          "scope",
+          "settings"
+        ]
       },
       "Passkey": {
         "type": "object",

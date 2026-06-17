@@ -1265,6 +1265,13 @@
           "eventName": {
             "type": "string"
           },
+          "eventVersion": {
+            "type": "string",
+            "nullable": true,
+            "pattern": "^\\d+\\.\\d+$",
+            "description": "Pinned schema version of the Event Catalog event this webhook is subscribed to.\nOnly applicable when `eventName` refers to an Event Catalog event (prefixed with `event_`).\nWhen omitted on creation, it is backfilled lazily on first delivery to match the\nevent's own `_event_version` (the latest at that time, stamped on the event itself).\nAlways MAJOR.MINOR (e.g. \"1.0\", \"2.0\"), mirroring exactly what event-catalog-api\nstamps as `_event_version` and in its `_downgrades[].to` values. Absent for legacy\nconfigs that have not yet received an event.\n",
+            "example": "1.0"
+          },
           "url": {
             "type": "string"
           },
@@ -1365,6 +1372,26 @@
                 "description": "Map of `formFieldName → JSONata expression`. Each value is\nevaluated against the event payload, then passed through\nenv-resolution (same as `custom_headers`). Static literals\nmust be JSONata-quoted: a bare `\"business_partner\"` is\ntreated as a path lookup and yields `undefined`; for a\nliteral value, single-quote inside the JSON string:\n`\"'business_partner'\"`. Expressions yielding `undefined` or\n`null` silently omit the field. Object/array results are\nJSON-stringified before being appended. Values are not part\nof the signed payload.\n"
               }
             }
+          },
+          "retryPolicy": {
+            "type": "object",
+            "description": "Automatic-retry policy for transient delivery failures (5xx, 429,\nconnection-level errors). Newly-created webhooks are materialized\nwith defaults (`enabled: true`, `maxAttempts: 3`). Webhooks created\nbefore this feature have no policy and are treated as disabled — on\nupdate, omit this field to preserve the existing value. The backoff\ncurve is a fixed Standard Webhooks schedule (5s, 5m, 30m, 2h, 5h);\nonly the first `maxAttempts` intervals are used.\n",
+            "properties": {
+              "enabled": {
+                "type": "boolean",
+                "description": "Master on/off switch for automatic retries."
+              },
+              "maxAttempts": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 5,
+                "default": 3,
+                "description": "Maximum number of automatic retries after the initial delivery attempt."
+              }
+            },
+            "required": [
+              "enabled"
+            ]
           },
           "filterConditions": {
             "$ref": "#/components/schemas/WebhookConditionGroup"
@@ -1666,6 +1693,10 @@
           "payload": {
             "type": "string",
             "description": "stringified payload of the webhook request"
+          },
+          "retry_attempt": {
+            "type": "integer",
+            "description": "Number of automatic delivery retries that preceded this terminal outcome. 0 means the event was delivered (or finally failed) on the first attempt."
           }
         },
         "required": [

@@ -131,7 +131,7 @@
       "get": {
         "operationId": "getEventJSONSchema",
         "summary": "getEventJSONSchema",
-        "description": "Retrieve the JSON Schema of a specific business event",
+        "description": "Retrieve the JSON Schema of a specific business event. Pass an optional\n`Epilot-Event-Version` header to retrieve a specific version's schema;\nwhen omitted, the event's latest version is returned.\n",
         "tags": [
           "Event Catalog"
         ],
@@ -141,6 +141,15 @@
             "in": "path",
             "required": true,
             "description": "Unique human readable name of the event",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Epilot-Event-Version",
+            "in": "header",
+            "required": false,
+            "description": "Event payload version (`MAJOR.MINOR`). Defaults to the event's latest version.",
             "schema": {
               "type": "string"
             }
@@ -156,6 +165,9 @@
                 }
               }
             }
+          },
+          "404": {
+            "description": "Event or version not found"
           }
         }
       }
@@ -164,7 +176,7 @@
       "get": {
         "operationId": "getEventExample",
         "summary": "getEventExample",
-        "description": "Generate a sample event payload based on the event's JSON Schema",
+        "description": "Generate a sample event payload based on the event's JSON Schema. Pass an\noptional `Epilot-Event-Version` header to generate the example for a\nspecific version; when omitted, the event's latest version is used.\n",
         "tags": [
           "Event Catalog"
         ],
@@ -174,6 +186,15 @@
             "in": "path",
             "required": true,
             "description": "Unique human readable name of the event",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Epilot-Event-Version",
+            "in": "header",
+            "required": false,
+            "description": "Event payload version (`MAJOR.MINOR`). Defaults to the event's latest version.",
             "schema": {
               "type": "string"
             }
@@ -190,6 +211,45 @@
                 }
               }
             }
+          },
+          "404": {
+            "description": "Event or version not found"
+          }
+        }
+      }
+    },
+    "/v1/events/{event_name}/versions": {
+      "get": {
+        "operationId": "listEventVersions",
+        "summary": "listEventVersions",
+        "description": "List every known version of an event, along with the `latest`\nand the set of currently `active` versions. See §3.2 of the\nEvent Payload Versioning RFC.\n",
+        "tags": [
+          "Event Catalog"
+        ],
+        "parameters": [
+          {
+            "name": "event_name",
+            "in": "path",
+            "required": true,
+            "description": "Unique human readable name of the event",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Registry summary for the event.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventVersionRegistrySummary"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Event not found"
           }
         }
       }
@@ -265,7 +325,7 @@
       "post": {
         "operationId": "searchEventHistoryV2",
         "summary": "searchEventHistoryV2",
-        "description": "Paginated history of events with projected/lightweight payload (v2).\n\nReturns `EventSummary` objects instead of fully hydrated `Event` objects:\nnested entity graphs (objects/arrays-of-objects carrying `_schema`/`_id`)\nare stripped. Use GET /v2/events/{event_name}/history/{event_id} to fetch\nthe full hydrated event for a single result.\n",
+        "description": "Paginated history of events with projected/lightweight payload (v2).\n\nReturns `EventSummary` objects instead of fully hydrated `Event` objects:\nhydrated entity objects (values carrying `_schema`/`_id`) are reduced to\nreference stubs `{_schema, _id, _title}` — the full entity is recoverable\nvia GET /v2/events/{event_name}/history/{event_id} or by hitting\nentity-api directly with the `_id`.\n",
         "tags": [
           "Event Catalog"
         ],
@@ -463,8 +523,8 @@
           },
           "event_version": {
             "type": "string",
-            "description": "Event version (semver)",
-            "example": "1.0.0"
+            "description": "Event payload version (MAJOR.MINOR)",
+            "example": "1.0"
           },
           "event_status": {
             "type": "string",
@@ -704,7 +764,7 @@
             },
             "_event_version": {
               "type": "string",
-              "description": "Event version (semver)"
+              "description": "Event payload version (MAJOR.MINOR)"
             },
             "_event_source": {
               "type": "string",
@@ -841,8 +901,8 @@
           },
           "_event_version": {
             "type": "string",
-            "description": "Event version (semver)",
-            "example": "1.0.0"
+            "description": "Event payload version (MAJOR.MINOR)",
+            "example": "1.0"
           },
           "_event_source": {
             "type": "string",
@@ -876,7 +936,7 @@
           "_event_time": "2024-01-01T12:00:00Z",
           "_event_id": "01FZ4Z5FZ5FZ5FZ5FZ5FZ5FZ5F",
           "_event_name": "MeterReading",
-          "_event_version": "1.0.0",
+          "_event_version": "1.0",
           "_event_source": "api",
           "_trigger_source_type": "api",
           "_trigger_source": "user_123456",
@@ -897,7 +957,7 @@
       },
       "EventSummary": {
         "type": "object",
-        "description": "A lightweight event summary returned by the v2 history endpoint.\n\nIncludes the standard `_*` metadata fields plus a projected subset of the\nevent payload. Hydrated entity objects (values carrying `_schema` or `_id`\nand arrays of such objects) are stripped — fetch via\n`GET /v2/events/{event_name}/history/{event_id}` for full hydration.\n\nProjected scalar payload fields appear as additional top-level properties.\n",
+        "description": "A lightweight event summary returned by the v2 history endpoint.\n\nIncludes the standard `_*` metadata fields plus a projected subset of the\nevent payload. Hydrated entity objects (values carrying `_schema` or `_id`)\n— and arrays of such objects — are reduced to reference stubs\n`{_schema, _id, _title}` so consumers can identify and follow up on each\nentity without paying the cost of the full hydrated graph. Fetch\n`GET /v2/events/{event_name}/history/{event_id}` for the full hydration.\n\nProjected scalar payload fields appear as additional top-level properties.\n",
         "properties": {
           "_org_id": {
             "type": "string",
@@ -918,8 +978,8 @@
           },
           "_event_version": {
             "type": "string",
-            "description": "Event version (semver)",
-            "example": "1.0.0"
+            "description": "Event payload version (MAJOR.MINOR)",
+            "example": "1.0"
           },
           "_event_source": {
             "type": "string",
@@ -1294,6 +1354,102 @@
         "required": [
           "entity_id",
           "version_index"
+        ]
+      },
+      "FieldChange": {
+        "type": "object",
+        "description": "A field-level change descriptor. Powers the declarative half of the\nversion DSL.\n",
+        "properties": {
+          "field": {
+            "type": "string",
+            "description": "Name of the field affected by this change.",
+            "example": "reading"
+          },
+          "op": {
+            "type": "string",
+            "enum": [
+              "added",
+              "removed",
+              "type-changed"
+            ],
+            "description": "Kind of change. Renames are NOT a first-class op — represent them\nas a `removed` + `added` pair (semantic intent goes into\n`change_summary` / `change_notes`).\n"
+          },
+          "type_old": {
+            "type": "string",
+            "description": "Type label for the previous shape (for `removed` and `type-changed`)."
+          },
+          "type_new": {
+            "type": "string",
+            "description": "Type label for the new shape (for `added` and `type-changed`)."
+          }
+        },
+        "required": [
+          "field",
+          "op"
+        ]
+      },
+      "VersionMeta": {
+        "type": "object",
+        "description": "One entry of an event's version timeline.",
+        "properties": {
+          "version": {
+            "type": "string",
+            "description": "MAJOR.MINOR version label.",
+            "example": "1.0"
+          },
+          "released_at": {
+            "type": "string",
+            "description": "ISO 8601 release timestamp.",
+            "example": "2025-11-15"
+          },
+          "change_summary": {
+            "type": "string",
+            "description": "Required one-liner describing what changed in this version (≤280 chars)."
+          },
+          "change_notes": {
+            "type": "string",
+            "description": "Optional longer-form prose (markdown)."
+          },
+          "changes": {
+            "type": "array",
+            "description": "Hand-authored list of field-level changes from the previous version. Empty for v1.",
+            "items": {
+              "$ref": "#/components/schemas/FieldChange"
+            }
+          }
+        },
+        "required": [
+          "version",
+          "released_at",
+          "change_summary",
+          "changes"
+        ]
+      },
+      "EventVersionRegistrySummary": {
+        "type": "object",
+        "description": "Summary of an event's version timeline returned by\n`GET /v1/events/{event_name}/versions`.\n",
+        "properties": {
+          "event_name": {
+            "type": "string",
+            "example": "MeterReadingAdded"
+          },
+          "latest": {
+            "type": "string",
+            "description": "The newest registered version.",
+            "example": "1.0"
+          },
+          "versions": {
+            "type": "array",
+            "description": "Full version timeline, ordered oldest → newest.",
+            "items": {
+              "$ref": "#/components/schemas/VersionMeta"
+            }
+          }
+        },
+        "required": [
+          "event_name",
+          "latest",
+          "versions"
         ]
       }
     }

@@ -673,7 +673,8 @@ epilot webhooks getEventById -p configId=7hj28aasgag2gha2 -p eventId=123e4567-e8
   },
   "status": "succeeded",
   "http_method": "GET",
-  "payload": "string"
+  "payload": "string",
+  "retry_attempt": 0
 }
 ```
 
@@ -878,7 +879,8 @@ epilot webhooks getWebhookEventsV2 -p configId=7hj28aasgag2gha2 --jsonata 'data'
       },
       "status": "succeeded",
       "http_method": "GET",
-      "payload": "string"
+      "payload": "string",
+      "retry_attempt": 0
     }
   ],
   "next_cursor": {

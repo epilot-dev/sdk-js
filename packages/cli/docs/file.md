@@ -45,6 +45,7 @@ epilot file uploadFileV2
 - [`downloadFiles`](#downloadfiles) — Bulk generate pre-signed download URLs for multiple files in a single request.
 - [`createZipJob`](#createzipjob) — Create a background job to ZIP multiple files and send a download link via email.
 - [`getZipJob`](#getzipjob) — Get the status of a ZIP job
+- [`generateFileSummary`](#generatefilesummary) — Request AI generation of preview and short summaries for a file entity.
 - [`verifyCustomDownloadUrl`](#verifycustomdownloadurl) — Verify that a custom download URL is valid and has not expired.
 - [`uploadFilePublic`](#uploadfilepublic) — Create a pre-signed S3 URL for uploading a file without authentication.
 
@@ -180,6 +181,11 @@ epilot file saveFileV2 \
   "access_control": "private",
   "public_url": "https://epilot-prod-user-content.s3.eu-central-1.amazonaws.com/123/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf",
   "custom_download_url": "https://some-api-url.com/download?file_id=123",
+  "preview_summary_de": "string",
+  "short_summary_de": "string",
+  "preview_summary_en": "string",
+  "short_summary_en": "string",
+  "summary_status": "processing",
   "s3ref": {}
 }'
 ```
@@ -216,6 +222,11 @@ epilot file saveFileV2 --jsonata '$'
   "access_control": "private",
   "public_url": "https://epilot-prod-user-content.s3.eu-central-1.amazonaws.com/123/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf",
   "custom_download_url": "https://some-api-url.com/download?file_id=123",
+  "preview_summary_de": "string",
+  "short_summary_de": "string",
+  "preview_summary_en": "string",
+  "short_summary_en": "string",
+  "summary_status": "processing",
   "source_url": "https://productengineer-content.s3.eu-west-1.amazonaws.com/product-engineer-checklist.pdf",
   "s3ref": {},
   "versions": [
@@ -302,6 +313,11 @@ epilot file getFile -p id=ef7d985c-2385-44f4-9c71-ae06a52264f8 --jsonata '$'
   "access_control": "private",
   "public_url": "https://epilot-prod-user-content.s3.eu-central-1.amazonaws.com/123/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf",
   "custom_download_url": "https://some-api-url.com/download?file_id=123",
+  "preview_summary_de": "string",
+  "short_summary_de": "string",
+  "preview_summary_en": "string",
+  "short_summary_en": "string",
+  "summary_status": "processing",
   "source_url": "https://productengineer-content.s3.eu-west-1.amazonaws.com/product-engineer-checklist.pdf",
   "s3ref": {},
   "versions": [
@@ -388,6 +404,11 @@ epilot file deleteFile -p id=ef7d985c-2385-44f4-9c71-ae06a52264f8 --jsonata '$'
   "access_control": "private",
   "public_url": "https://epilot-prod-user-content.s3.eu-central-1.amazonaws.com/123/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf",
   "custom_download_url": "https://some-api-url.com/download?file_id=123",
+  "preview_summary_de": "string",
+  "short_summary_de": "string",
+  "preview_summary_en": "string",
+  "short_summary_en": "string",
+  "summary_status": "processing",
   "source_url": "https://productengineer-content.s3.eu-west-1.amazonaws.com/product-engineer-checklist.pdf",
   "s3ref": {},
   "versions": [
@@ -637,6 +658,39 @@ epilot file getZipJob -p job_id=123e4567-e89b-12d3-a456-426614174000 --jsonata '
 ```
 
 </details>
+
+---
+
+### `generateFileSummary`
+
+Request AI generation of preview and short summaries for a file entity.
+
+`POST /v1/files/{id}/summary:generate`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `id` | path | string \| string (uuid) | Yes | The UUID of the file entity |
+
+**Sample Call**
+
+```bash
+epilot file generateFileSummary \
+  -p id=ef7d985c-2385-44f4-9c71-ae06a52264f8
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot file generateFileSummary ef7d985c-2385-44f4-9c71-ae06a52264f8
+```
+
+With JSONata filter:
+
+```bash
+epilot file generateFileSummary -p id=ef7d985c-2385-44f4-9c71-ae06a52264f8 --jsonata '$'
+```
 
 ---
 
@@ -1336,6 +1390,11 @@ epilot file getFilesInCollection -p id=ef7d985c-2385-44f4-9c71-ae06a52264f8 -p c
     "access_control": "private",
     "public_url": "https://epilot-prod-user-content.s3.eu-central-1.amazonaws.com/123/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf",
     "custom_download_url": "https://some-api-url.com/download?file_id=123",
+    "preview_summary_de": "string",
+    "short_summary_de": "string",
+    "preview_summary_en": "string",
+    "short_summary_en": "string",
+    "summary_status": "processing",
     "source_url": "https://productengineer-content.s3.eu-west-1.amazonaws.com/product-engineer-checklist.pdf",
     "s3ref": {},
     "versions": [

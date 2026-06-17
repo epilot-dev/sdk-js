@@ -109,7 +109,8 @@ Get journey by id. Private journeys requires valid private token to be passed
 | Name | In | Type | Required | Description |
 | ---- | -- | ---- | -------- | ----------- |
 | `id` | path | string (uuid) | Yes | Journey ID |
-| `version` | query | number | No | DynamoDB version to fetch. `0` (default) is the live row; positive integers are historical snapshots created on each save. Note: this is distinct from the `revisions` counter on the row body. |
+| `version` | query | number | No | DynamoDB version to fetch. `0` (default) is the live row; positive integers are historical snapshots created on each save. Note: this is distinct from the `revisions` counter on the row body.
+ |
 | `source` | query | string | No | What source ID. Journey or Entity ID |
 | `orgId` | query | string | No | Organization ID |
 
@@ -189,6 +190,7 @@ epilot journey getJourney -p id=509cdffe-424f-457a-95c2-9708c304ce77 --jsonata '
   ],
   "journey_type": "Sales template (Premium)",
   "protected": true,
+  "protectedEditable": ["string"],
   "settings": {
     "embedOptions": {
       "mode": "full-screen",
@@ -433,6 +435,7 @@ epilot journey createJourney \
   ],
   "journey_type": "Sales template (Premium)",
   "protected": true,
+  "protectedEditable": ["string"],
   "settings": {
     "embedOptions": {
       "mode": "full-screen",
@@ -557,6 +560,7 @@ epilot journey createJourney --jsonata '$'
   ],
   "journey_type": "Sales template (Premium)",
   "protected": true,
+  "protectedEditable": ["string"],
   "settings": {
     "embedOptions": {
       "mode": "full-screen",
@@ -693,6 +697,7 @@ epilot journey updateJourney \
   ],
   "journey_type": "Sales template (Premium)",
   "protected": true,
+  "protectedEditable": ["string"],
   "settings": {
     "embedOptions": {
       "mode": "full-screen",
@@ -819,6 +824,7 @@ epilot journey patchUpdateJourney --jsonata 'createdJourney'
     ],
     "journey_type": "Sales template (Premium)",
     "protected": true,
+    "protectedEditable": ["string"],
     "settings": {
       "embedOptions": {},
       "safeModeAutomation": true,
@@ -1089,6 +1095,7 @@ epilot journey createJourneyV2 \
   ],
   "journey_type": "Sales template (Premium)",
   "protected": true,
+  "protectedEditable": ["string"],
   "settings": {
     "embedOptions": {
       "mode": "full-screen",
@@ -1118,7 +1125,8 @@ epilot journey createJourneyV2 \
     "useNewDesign": true,
     "thirdPartyCookies": true,
     "accessMode": "PUBLIC",
-    "enableDarkMode": true
+    "enableDarkMode": true,
+    "isActive": true
   },
   "validationRules": {
     "block1": "rule123",
@@ -1199,6 +1207,7 @@ epilot journey createJourneyV2 --jsonata 'journeyId'
   ],
   "journey_type": "Sales template (Premium)",
   "protected": true,
+  "protectedEditable": ["string"],
   "settings": {
     "embedOptions": {
       "mode": "full-screen",
@@ -1228,7 +1237,8 @@ epilot journey createJourneyV2 --jsonata 'journeyId'
     "useNewDesign": true,
     "thirdPartyCookies": true,
     "accessMode": "PUBLIC",
-    "enableDarkMode": true
+    "enableDarkMode": true,
+    "isActive": true
   },
   "validationRules": {
     "block1": "rule123",
@@ -1315,6 +1325,7 @@ epilot journey updateJourneyV2 \
   ],
   "journey_type": "Sales template (Premium)",
   "protected": true,
+  "protectedEditable": ["string"],
   "settings": {
     "embedOptions": {
       "mode": "full-screen",
@@ -1344,7 +1355,8 @@ epilot journey updateJourneyV2 \
     "useNewDesign": true,
     "thirdPartyCookies": true,
     "accessMode": "PUBLIC",
-    "enableDarkMode": true
+    "enableDarkMode": true,
+    "isActive": true
   },
   "validationRules": {
     "block1": "rule123",
@@ -1425,6 +1437,7 @@ epilot journey updateJourneyV2 --jsonata 'journeyId'
   ],
   "journey_type": "Sales template (Premium)",
   "protected": true,
+  "protectedEditable": ["string"],
   "settings": {
     "embedOptions": {
       "mode": "full-screen",
@@ -1454,7 +1467,8 @@ epilot journey updateJourneyV2 --jsonata 'journeyId'
     "useNewDesign": true,
     "thirdPartyCookies": true,
     "accessMode": "PUBLIC",
-    "enableDarkMode": true
+    "enableDarkMode": true,
+    "isActive": true
   },
   "validationRules": {
     "block1": "rule123",
@@ -1554,6 +1568,7 @@ epilot journey patchUpdateJourneyV2 --jsonata 'journeyId'
   ],
   "journey_type": "Sales template (Premium)",
   "protected": true,
+  "protectedEditable": ["string"],
   "settings": {
     "embedOptions": {
       "mode": "full-screen",
@@ -1583,7 +1598,8 @@ epilot journey patchUpdateJourneyV2 --jsonata 'journeyId'
     "useNewDesign": true,
     "thirdPartyCookies": true,
     "accessMode": "PUBLIC",
-    "enableDarkMode": true
+    "enableDarkMode": true,
+    "isActive": true
   },
   "validationRules": {
     "block1": "rule123",
@@ -1611,7 +1627,8 @@ Get journey by id
 | Name | In | Type | Required | Description |
 | ---- | -- | ---- | -------- | ----------- |
 | `id` | path | string (uuid) | Yes | Journey ID |
-| `version` | query | number | No | DynamoDB version to fetch. `0` (default) is the live row; positive integers are historical snapshots created on each save. Note: this is distinct from the `revisions` counter on the row body. |
+| `version` | query | number | No | DynamoDB version to fetch. `0` (default) is the live row; positive integers are historical snapshots created on each save. Note: this is distinct from the `revisions` counter on the row body.
+ |
 
 **Sample Call**
 
@@ -1688,6 +1705,7 @@ epilot journey getJourneyV2 -p id=509cdffe-424f-457a-95c2-9708c304ce77 --jsonata
   ],
   "journey_type": "Sales template (Premium)",
   "protected": true,
+  "protectedEditable": ["string"],
   "settings": {
     "embedOptions": {
       "mode": "full-screen",
@@ -1717,7 +1735,8 @@ epilot journey getJourneyV2 -p id=509cdffe-424f-457a-95c2-9708c304ce77 --jsonata
     "useNewDesign": true,
     "thirdPartyCookies": true,
     "accessMode": "PUBLIC",
-    "enableDarkMode": true
+    "enableDarkMode": true,
+    "isActive": true
   },
   "validationRules": {
     "block1": "rule123",

@@ -1064,6 +1064,13 @@
               "$ref": "#/components/schemas/ActionSchedule"
             }
           },
+          "loops": {
+            "type": "array",
+            "description": "Loop scope definitions. Each loop has an id and a source_path resolved against the trigger entity at execution time. Actions referencing a loop's id via their loop_id property run once per item in the resolved array. Loop members must be contiguous in the actions array.\n",
+            "items": {
+              "$ref": "#/components/schemas/AutomationLoop"
+            }
+          },
           "actions": {
             "type": "array",
             "description": "The actions (nodes) of the automation flow",
@@ -1354,8 +1361,47 @@
           "schedule_id": {
             "type": "string",
             "description": "Schedule Id which indicates the schedule of the action"
+          },
+          "loop_id": {
+            "type": "string",
+            "description": "Id of a loop scope defined on the parent flow. When set, the action runs once per item resolved from the loop's source_path. All actions sharing the same loop_id must be contiguous in the actions array.\n"
           }
         }
+      },
+      "AutomationLoop": {
+        "type": "object",
+        "description": "A loop scope on an automation flow.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Stable identifier referenced by AutomationActionConfig.loop_id",
+            "example": "loop_contracts"
+          },
+          "source_path": {
+            "type": "string",
+            "description": "Path resolved against the trigger entity to produce the array of iteration items. e.g. submission.steps[0]['Contracts'].\n",
+            "example": "submission.steps[0]['Contracts']"
+          },
+          "source_type": {
+            "type": "string",
+            "description": "How source_path is interpreted. 'journey-multi-select' is the v1 source type (journey card block with multi-select). Future source types (e.g. 'previous-action-outputs', 'entity-relation') will be added here.\n",
+            "enum": [
+              "journey-multi-select",
+              "previous-action-outputs",
+              "entity-relation"
+            ],
+            "default": "journey-multi-select"
+          },
+          "length": {
+            "type": "integer",
+            "description": "Maximum number of iterations. 0 / omitted = iterate the full resolved array.\n",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "id",
+          "source_path"
+        ]
       },
       "AutomationActionExecutionState": {
         "type": "object",
@@ -1379,8 +1425,48 @@
           },
           "retry_strategy": {
             "$ref": "#/components/schemas/RetryStrategy"
+          },
+          "iterations": {
+            "type": "array",
+            "description": "For looped actions, an archive of completed iterations. The action's own execution_status / outputs / error_output always reflect the current (latest) iteration. The previous iteration's state is pushed here before the action is reset for the next pass.\n",
+            "items": {
+              "$ref": "#/components/schemas/AutomationActionIteration"
+            }
           }
         }
+      },
+      "AutomationActionIteration": {
+        "type": "object",
+        "description": "A snapshot of a single completed pass through a looped action.",
+        "properties": {
+          "index": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Zero-based iteration index within the loop scope."
+          },
+          "execution_status": {
+            "$ref": "#/components/schemas/ExecutionStatus"
+          },
+          "started_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "ended_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "outputs": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "error_output": {
+            "$ref": "#/components/schemas/ErrorOutput"
+          }
+        },
+        "required": [
+          "index",
+          "execution_status"
+        ]
       },
       "RetryStrategy": {
         "type": "string",
@@ -3263,6 +3349,9 @@
             "type": "boolean",
             "description": "Result of the condition evaluation"
           },
+          "error_output": {
+            "$ref": "#/components/schemas/ErrorOutput"
+          },
           "statements": {
             "type": "array",
             "items": {
@@ -3433,6 +3522,20 @@
           },
           "workflow_context": {
             "$ref": "#/components/schemas/WorkflowExecutionContext"
+          },
+          "loops": {
+            "type": "array",
+            "description": "Loop scope definitions propagated from the flow onto the execution record. Each loop has an id and a source_path resolved against the trigger entity at execution time. Actions referencing a loop's id via their loop_id property run once per item in the resolved array.\n",
+            "items": {
+              "$ref": "#/components/schemas/AutomationLoop"
+            }
+          },
+          "loop_state": {
+            "type": "object",
+            "description": "Runtime iteration state, keyed by loop_id. Tracks the current_index and total for each active loop scope. Entries are removed once a loop exits.\n",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/AutomationLoopState"
+            }
           }
         },
         "required": [
@@ -3442,6 +3545,23 @@
           "org_id",
           "flow_id",
           "actions"
+        ]
+      },
+      "AutomationLoopState": {
+        "type": "object",
+        "properties": {
+          "current_index": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "total": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "current_index",
+          "total"
         ]
       },
       "WorkflowExecutionContext": {

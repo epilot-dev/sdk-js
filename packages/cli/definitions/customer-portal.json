@@ -8395,6 +8395,96 @@
         }
       }
     },
+    "/v2/portal/config/triggered-journeys/{trigger_name}": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "trigger_name",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "FIRST_LOGIN",
+              "ACCEPT_ORDER",
+              "DECLINE_ORDER"
+            ]
+          },
+          "description": "The trigger event for the auto-triggered journey"
+        }
+      ],
+      "get": {
+        "operationId": "getTriggeredJourney",
+        "summary": "getTriggeredJourney",
+        "description": "Returns the auto-triggered journey configured for the given trigger\nwith handlebars templates in `context_params` already resolved.\nUses the caller's auth context (contact, portal user) plus any\n`context_entities` supplied at trigger time (e.g. the order being\naccepted) — same resolver as `getPortalPages`.\n",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "context_entities",
+            "required": false,
+            "description": "Additional entities to include in the resolution context (e.g. the order being accepted at trigger time). Portal User and Contact entities are automatically part of the context.",
+            "schema": {
+              "$ref": "#/components/schemas/ContextEntities"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The triggered journey has been resolved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "trigger_name": {
+                      "type": "string",
+                      "enum": [
+                        "FIRST_LOGIN",
+                        "ACCEPT_ORDER",
+                        "DECLINE_ORDER"
+                      ]
+                    },
+                    "journey_id": {
+                      "$ref": "#/components/schemas/EntityId"
+                    },
+                    "context_params": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "key": {
+                            "type": "string"
+                          },
+                          "value": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/v2/portal/pages/default": {
       "get": {
         "operationId": "getDefaultPages",
@@ -10734,9 +10824,6 @@
       },
       "CommonConfigAttributes": {
         "type": "object",
-        "required": [
-          "domain"
-        ],
         "properties": {
           "enabled": {
             "type": "boolean",
@@ -10792,13 +10879,18 @@
           },
           "self_registration_account_setting": {
             "type": "string",
-            "description": "Controls behavior of self-registration when account is used as the registration entity",
+            "description": "Controls behavior of self-registration when account is the registration\nentity. `BLOCK_IF_PORTAL_USER_EXISTS` matches an existing account and\nrejects the request when any portal user is already linked to that\naccount (no creation). Blocking can also be enabled on the other\nnon-create modes via `block_registration_if_portal_user_exists`.\n",
             "enum": [
-              "ALLOW_WITH_CONTACT_CREATION",
+              "ALLOW_WITH_CREATION",
               "DENY",
-              "ALWAYS_CREATE_CONTACT",
+              "ALWAYS_CREATE",
+              "BLOCK_IF_PORTAL_USER_EXISTS",
               "DISALLOW_COMPLETELY"
             ]
+          },
+          "block_registration_if_portal_user_exists": {
+            "type": "boolean",
+            "description": "Account-mode only. Reject registration when the resolved account already\nhas any portal user (any portal user whose mapped contact is linked to\nthe account).\n"
           },
           "self_registration_entity": {
             "type": "string",
@@ -11116,6 +11208,40 @@
               }
             ]
           },
+          "contact_identifiers_for_account": {
+            "type": "array",
+            "description": "Account-mode only. Identifiers on the contact entity of the primarily\nidentified account. Used to pick an existing related contact within the\nresolved account; if none matches, the values are written onto the new\ncontact that is created and linked to the account.\n",
+            "items": {
+              "$ref": "#/components/schemas/RegistrationIdentifier"
+            },
+            "example": [
+              {
+                "name": "first_name",
+                "schema": "contact"
+              },
+              {
+                "name": "last_name",
+                "schema": "contact"
+              }
+            ]
+          },
+          "additional_contact_attributes": {
+            "type": "array",
+            "description": "Contact attributes collected from the user during self-registration that are\nwritten onto the newly created contact but are not used to identify an\nexisting one.\n",
+            "items": {
+              "$ref": "#/components/schemas/AdditionalContactAttribute"
+            },
+            "example": [
+              {
+                "name": "first_name",
+                "required": true
+              },
+              {
+                "name": "last_name",
+                "required": true
+              }
+            ]
+          },
           "triggered_journeys": {
             "type": "array",
             "description": "Journeys automatically opened on a portal user action",
@@ -11132,6 +11258,21 @@
                 },
                 "journey_id": {
                   "$ref": "#/components/schemas/EntityId"
+                },
+                "context_params": {
+                  "type": "array",
+                  "description": "Context parameters forwarded to the journey when it is\nauto-triggered. Values may contain handlebars templates\nthat reference the available context (e.g.\n`{{contact._id}}`, `{{portal_user.email}}`,\n`{{order._id}}`) — these are resolved at trigger time by\n`GET /v2/portal/config/triggered-journeys/{trigger_name}`\nusing the caller's auth context plus runtime entities\nsupplied via the `context_entities` query param.\n",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "key": {
+                        "type": "string"
+                      },
+                      "value": {
+                        "type": "string"
+                      }
+                    }
+                  }
                 }
               }
             }
@@ -11243,9 +11384,6 @@
         }
       },
       "UpsertPortalConfig": {
-        "required": [
-          "domain"
-        ],
         "allOf": [
           {
             "$ref": "#/components/schemas/UpdateOnlyPortalConfigAttributes"
@@ -11821,6 +11959,28 @@
                   "contract": {
                     "contract_number": "123456"
                   }
+                }
+              },
+              "contact_identifiers_for_account": {
+                "type": "object",
+                "description": "Account-mode only. Values for the contact identifiers configured\nunder `contact_identifiers_for_account` on the portal. Used to\nfind an existing related contact within the resolved account, or\nwritten onto the new contact if none matches.\n",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "example": {
+                  "first_name": "John",
+                  "last_name": "Doe"
+                }
+              },
+              "additional_contact_attributes": {
+                "type": "object",
+                "description": "Values for the contact attributes configured under\n`additional_contact_attributes` on the portal. These are written\nonto the newly created contact but are not used to identify an\nexisting one.\n",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "example": {
+                  "first_name": "John",
+                  "last_name": "Doe"
                 }
               },
               "account_id": {
@@ -13936,6 +14096,24 @@
           }
         }
       },
+      "AdditionalContactAttribute": {
+        "type": "object",
+        "description": "A contact attribute that is collected from the user during self-registration\nand written onto the newly created contact, but is NOT used to identify\nan existing contact.\n",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the contact attribute"
+          },
+          "required": {
+            "type": "boolean",
+            "description": "Whether the user must provide a value for this attribute",
+            "default": false
+          }
+        }
+      },
       "ContractIdentifier": {
         "type": "object",
         "properties": {
@@ -14083,6 +14261,9 @@
           "contractIdentification": {
             "type": "object",
             "properties": {
+              "app": {
+                "$ref": "#/components/schemas/PublicAppDetails"
+              },
               "extension": {
                 "$ref": "#/components/schemas/PublicExtensionDetails"
               },
@@ -14661,13 +14842,28 @@
               },
               "result": {
                 "type": "string",
-                "description": "Contact ID usually retrieved from the response body, e.g. `{{CallResponse.data.contact_id}}`. If no result is passed and the request suceeds, we attempt to resolve the Contact ID automatically. Supports variable interpolation."
+                "deprecated": true,
+                "description": "Deprecated. Use `resolved.result` instead. Contact ID usually retrieved from the response body, e.g. `{{CallResponse.data.contact_id}}`. If no result is passed and the request suceeds, we attempt to resolve the Contact ID automatically. Supports variable interpolation."
               }
             },
             "required": [
               "url",
               "headers"
             ]
+          },
+          "resolved": {
+            "type": "object",
+            "properties": {
+              "result": {
+                "type": "string",
+                "description": "Contact ID usually retrieved from the response body, e.g. `{{CallResponse.data.contact_id}}`. If no result is passed and the request suceeds, we attempt to resolve the Contact ID automatically. Supports variable interpolation. Supersedes the deprecated `call.result`."
+              },
+              "error_message_path": {
+                "type": "string",
+                "description": "Optional path to a human-readable error message in the third-party response body, used when the call fails (non-2xx status).\nIf specified and the path resolves to a string, that message is forwarded to the end user instead of a generic error.\n",
+                "example": "error.message"
+              }
+            }
           },
           "use_static_ips": {
             "type": "boolean",
@@ -14731,13 +14927,28 @@
               },
               "result": {
                 "type": "string",
-                "description": "Contact ID usually retrieved from the response body, e.g. `{{CallResponse.data.contact_id}}`. If no result is passed and the request suceeds, we attempt to resolve the Contact ID automatically. Supports variable interpolation."
+                "deprecated": true,
+                "description": "Deprecated. Use `resolved.result` instead. Contact ID usually retrieved from the response body, e.g. `{{CallResponse.data.contact_id}}`. If no result is passed and the request suceeds, we attempt to resolve the Contact ID automatically. Supports variable interpolation."
               }
             },
             "required": [
               "url",
               "headers"
             ]
+          },
+          "resolved": {
+            "type": "object",
+            "properties": {
+              "result": {
+                "type": "string",
+                "description": "Contract or Contact ID usually retrieved from the response body, e.g. `{{CallResponse.data.contact_id}}`. If no result is passed and the request suceeds, we attempt to resolve the Contact ID automatically. Supports variable interpolation. Supersedes the deprecated `call.result`."
+              },
+              "error_message_path": {
+                "type": "string",
+                "description": "Optional path to a human-readable error message in the third-party response body, used when the call fails (non-2xx status).\nIf specified and the path resolves to a string, that message is forwarded to the end user instead of a generic error.\n",
+                "example": "error.message"
+              }
+            }
           },
           "assignment_mode": {
             "type": "string",
@@ -14843,10 +15054,15 @@
             "type": "object",
             "description": "Response to the call",
             "properties": {
-              "dataPath": {
+              "data_path": {
                 "type": "string",
                 "description": "Optional path to an array in the response. If specified and the path points to an array,\nthe hook will map over each item using 'Item' variable for interpolation.\nRelevant only if plausibility_mode is \"range\".\n",
                 "example": "data.results"
+              },
+              "dataPath": {
+                "type": "string",
+                "deprecated": true,
+                "description": "Deprecated. Use `data_path` instead."
               },
               "counter_identifiers": {
                 "description": "Counter identifier(s) used to match against the meter's counters.\nCan be a string (counter ID) or an object with counter properties.\nThe backend resolves this to meter_counter_id in the final response.\nRelevant only if plausibility_mode is \"range\".\n",
@@ -14881,7 +15097,7 @@
                 "description": "Lower allowed limit of the meter reading",
                 "example": "{{CallResponse.data.lower_limit}}"
               },
-              "errorMessagePath": {
+              "error_message_path": {
                 "type": "string",
                 "description": "Optional path to a human-readable error message in the third-party response body, used when the call fails (non-2xx status).\nIf specified and the path resolves to a string, that message is forwarded to the end user instead of a generic error.\n",
                 "example": "error.message"
@@ -14961,11 +15177,16 @@
           "resolved": {
             "type": "object",
             "properties": {
-              "dataPath": {
+              "data_path": {
                 "type": "string",
                 "description": "Optional path to the data (array) in the response. If omitted, the data is assumed to be on the top level."
               },
-              "errorMessagePath": {
+              "dataPath": {
+                "type": "string",
+                "deprecated": true,
+                "description": "Deprecated. Use `data_path` instead."
+              },
+              "error_message_path": {
                 "type": "string",
                 "description": "Optional path to a human-readable error message in the third-party response body, used when the call fails (non-2xx status).\nIf specified and the path resolves to a string, that message is forwarded to the end user instead of a generic error.\n",
                 "example": "error.message"
@@ -15044,11 +15265,16 @@
           "resolved": {
             "type": "object",
             "properties": {
-              "dataPath": {
+              "data_path": {
                 "type": "string",
                 "description": "Optional path to the data (array) in the response. If omitted, the data is assumed to be on the top level."
               },
-              "errorMessagePath": {
+              "dataPath": {
+                "type": "string",
+                "deprecated": true,
+                "description": "Deprecated. Use `data_path` instead."
+              },
+              "error_message_path": {
                 "type": "string",
                 "description": "Optional path to a human-readable error message in the third-party response body, used when the call fails (non-2xx status).\nIf specified and the path resolves to a string, that message is forwarded to the end user instead of a generic error.\n",
                 "example": "error.message"
@@ -15134,7 +15360,7 @@
           "resolved": {
             "type": "object",
             "properties": {
-              "errorMessagePath": {
+              "error_message_path": {
                 "type": "string",
                 "description": "Optional path to a human-readable error message in the third-party response body, used when the call fails (non-2xx status).\nIf specified and the path resolves to a string, that message is forwarded to the end user instead of a generic error.\n",
                 "example": "error.message"
@@ -15213,11 +15439,16 @@
           "resolved": {
             "type": "object",
             "properties": {
-              "dataPath": {
+              "data_path": {
                 "type": "string",
                 "description": "Optional path to the metadata object in the response. If omitted, the metadata is assumed to be on the top level."
               },
-              "errorMessagePath": {
+              "dataPath": {
+                "type": "string",
+                "deprecated": true,
+                "description": "Deprecated. Use `data_path` instead."
+              },
+              "error_message_path": {
                 "type": "string",
                 "description": "Optional path to a human-readable error message in the third-party response body, used when the call fails (non-2xx status).\nIf specified and the path resolves to a string, that message is forwarded to the end user instead of a generic error.\n",
                 "example": "error.message"
@@ -15296,11 +15527,16 @@
           "resolved": {
             "type": "object",
             "properties": {
-              "dataPath": {
+              "data_path": {
                 "type": "string",
                 "description": "Optional path to the data (array) in the response. If omitted, the data is assumed to be on the top level."
               },
-              "errorMessagePath": {
+              "dataPath": {
+                "type": "string",
+                "deprecated": true,
+                "description": "Deprecated. Use `data_path` instead."
+              },
+              "error_message_path": {
                 "type": "string",
                 "description": "Optional path to a human-readable error message in the third-party response body, used when the call fails (non-2xx status).\nIf specified and the path resolves to a string, that message is forwarded to the end user instead of a generic error.\n",
                 "example": "error.message"
@@ -15865,7 +16101,8 @@
             "enum": [
               "login",
               "select_account",
-              "consent"
+              "consent",
+              "signup"
             ]
           }
         },
@@ -16421,13 +16658,18 @@
           },
           "self_registration_account_setting": {
             "type": "string",
-            "description": "Controls behavior of self-registration when account is used as the registration entity",
+            "description": "Controls behavior of self-registration when account is the registration\nentity. `BLOCK_IF_PORTAL_USER_EXISTS` matches an existing account and\nrejects the request when any portal user is already linked to that\naccount (no creation). Blocking can also be enabled on the other\nnon-create modes via `block_registration_if_portal_user_exists`.\n",
             "enum": [
-              "ALLOW_WITH_CONTACT_CREATION",
+              "ALLOW_WITH_CREATION",
               "DENY",
-              "ALWAYS_CREATE_CONTACT",
+              "ALWAYS_CREATE",
+              "BLOCK_IF_PORTAL_USER_EXISTS",
               "DISALLOW_COMPLETELY"
             ]
+          },
+          "block_registration_if_portal_user_exists": {
+            "type": "boolean",
+            "description": "Account-mode only. Reject registration when the resolved account already\nhas any portal user (any portal user whose mapped contact is linked to\nthe account).\n"
           },
           "self_registration_entity": {
             "type": "string",
@@ -16745,6 +16987,40 @@
               }
             ]
           },
+          "contact_identifiers_for_account": {
+            "type": "array",
+            "description": "Account-mode only. Identifiers on the contact entity of the primarily\nidentified account. Used to pick an existing related contact within the\nresolved account; if none matches, the values are written onto the new\ncontact that is created and linked to the account.\n",
+            "items": {
+              "$ref": "#/components/schemas/RegistrationIdentifier"
+            },
+            "example": [
+              {
+                "name": "first_name",
+                "schema": "contact"
+              },
+              {
+                "name": "last_name",
+                "schema": "contact"
+              }
+            ]
+          },
+          "additional_contact_attributes": {
+            "type": "array",
+            "description": "Contact attributes collected from the user during self-registration that are\nwritten onto the newly created contact but are not used to identify an\nexisting one.\n",
+            "items": {
+              "$ref": "#/components/schemas/AdditionalContactAttribute"
+            },
+            "example": [
+              {
+                "name": "first_name",
+                "required": true
+              },
+              {
+                "name": "last_name",
+                "required": true
+              }
+            ]
+          },
           "triggered_journeys": {
             "type": "array",
             "description": "Journeys automatically opened on a portal user action",
@@ -16761,6 +17037,21 @@
                 },
                 "journey_id": {
                   "$ref": "#/components/schemas/EntityId"
+                },
+                "context_params": {
+                  "type": "array",
+                  "description": "Context parameters forwarded to the journey when it is\nauto-triggered. Values may contain handlebars templates\nthat reference the available context (e.g.\n`{{contact._id}}`, `{{portal_user.email}}`,\n`{{order._id}}`) — these are resolved at trigger time by\n`GET /v2/portal/config/triggered-journeys/{trigger_name}`\nusing the caller's auth context plus runtime entities\nsupplied via the `context_entities` query param.\n",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "key": {
+                        "type": "string"
+                      },
+                      "value": {
+                        "type": "string"
+                      }
+                    }
+                  }
                 }
               }
             }
