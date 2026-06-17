@@ -142,6 +142,44 @@
         }
       }
     },
+    "/v1/snapshots:capture-org": {
+      "post": {
+        "operationId": "captureOrgSnapshot",
+        "summary": "captureOrgSnapshot",
+        "description": "Snapshot the caller's whole organization now. Fetches a fresh inventory\nof the org's configuration resources from configuration-hub-api, persists\nit as an inventory artifact, and starts a `scope: \"org\"` chunked capture.\nAsync — returns immediately with a snapshot ID; client polls `getSnapshot`\nand watches `capture_summary` fill in until `create.status` moves from\n`in_progress` to `completed` or `failed`.\n\nSensitive types (`access_token`, `environment_variable`), types with no\nengine adapter, and any `excluded_types` are dropped from the capture and\nrecorded in the snapshot's coverage report.\n",
+        "tags": [
+          "Snapshots"
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateOrgSnapshotRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Org snapshot creation started",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateSnapshotResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
+          }
+        }
+      }
+    },
     "/v1/snapshots/{id}": {
       "parameters": [
         {
@@ -437,6 +475,16 @@
             }
           }
         }
+      },
+      "UnprocessableEntity": {
+        "description": "Unprocessable entity",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/EmptyInventoryError"
+            }
+          }
+        }
       }
     },
     "schemas": {
@@ -452,6 +500,38 @@
           },
           "error": {
             "type": "string"
+          }
+        }
+      },
+      "EmptyInventoryError": {
+        "type": "object",
+        "required": [
+          "message",
+          "skipped_types"
+        ],
+        "description": "Returned (422) when the org inventory contains no capturable resources\nafter filtering out sensitive, unsupported, and excluded types. The\n`skipped_types` array explains why every type was dropped.\n",
+        "properties": {
+          "message": {
+            "type": "string",
+            "example": "No capturable resources in the org inventory"
+          },
+          "skipped_types": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "type",
+                "reason"
+              ],
+              "properties": {
+                "type": {
+                  "type": "string"
+                },
+                "reason": {
+                  "type": "string"
+                }
+              }
+            }
           }
         }
       },
@@ -560,10 +640,11 @@
             "enum": [
               "manual",
               "sync",
-              "blueprint_install"
+              "blueprint_install",
+              "scheduled"
             ],
             "default": "manual",
-            "description": "What initiated this snapshot. `scheduled` may be added in a later\nphase for nightly backups (RFC OQ #3).\n"
+            "description": "What initiated this snapshot. `scheduled` is used for automatic\nnightly backups triggered by an org's EventBridge schedule\n(RFC — Scheduled org snapshots).\n"
           },
           "blueprint_instance_id": {
             "type": "string",
@@ -575,6 +656,45 @@
               "$ref": "#/components/schemas/ResourceRef"
             },
             "description": "List of resources to capture. Required non-empty for\n`trigger === 'manual'` or `'sync'`. May be empty when\n`trigger === 'blueprint_install'` — an install with no\nresources to overwrite still needs a snapshot row so the\nblueprint-manifest-api restore endpoint can find it.\n"
+          }
+        }
+      },
+      "CreateOrgSnapshotRequest": {
+        "type": "object",
+        "description": "Request body for `captureOrgSnapshot`. All fields optional — an empty body\nsnapshots the whole org with a default name and the 90-day default TTL.\n",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Snapshot name. Defaults to \"Org snapshot — <ISO timestamp>\"."
+          },
+          "retention": {
+            "type": "object",
+            "description": "Retention window. Converted to an absolute `expires_at` at creation\ntime. Omit for the default 90-day TTL.\n",
+            "required": [
+              "value",
+              "unit"
+            ],
+            "properties": {
+              "value": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "unit": {
+                "type": "string",
+                "enum": [
+                  "days",
+                  "weeks",
+                  "months"
+                ]
+              }
+            }
+          },
+          "excluded_types": {
+            "type": "array",
+            "description": "Resource types to exclude from the capture, in addition to the\nalways-excluded sensitive types (`access_token`,\n`environment_variable`).\n",
+            "items": {
+              "type": "string"
+            }
           }
         }
       },
@@ -607,15 +727,17 @@
       },
       "RestoreSnapshotRequest": {
         "type": "object",
+        "description": "Both flags default to `false`, which restores every captured resource —\nConfig Hub's manual-restore semantics. blueprint-manifest-api sets\nboth `true` when reverting a blueprint install so user edits and\ncross-blueprint contributions survive. Each flag is independent so a\ncaller can preserve edits without preserving co-ownership (or vice\nversa). Skipped resources surface under `Operation.skipped`.\n",
         "properties": {
-          "mode": {
-            "type": "string",
-            "enum": [
-              "overwrite",
-              "preserve_edits"
-            ],
-            "default": "overwrite",
-            "description": "How to handle destination resources whose content has been modified\nsince the snapshot was captured:\n\n- `overwrite` (default) — apply every captured payload regardless\n  of current destination state. Matches the manual-restore\n  semantics Config Hub relies on.\n- `preserve_edits` — for each captured resource, compare the live\n  destination payload's fingerprint against the install-time\n  fingerprint on lineage. If modified, skip and surface the\n  entry under `Operation.skipped`. Also skips co-owned resources\n  (lineage row carrying ≥2 distinct blueprint_instance_ids).\n  Used by blueprint-manifest-api when reverting a blueprint\n  install so user edits and other blueprints' contributions\n  survive.\n"
+          "preserve_modified": {
+            "type": "boolean",
+            "default": false,
+            "description": "When `true`, skip captured resources whose live destination payload\nhas diverged from the install-time fingerprint stored on lineage.\nSurfaces under `Operation.skipped` with `reason: 'modified'`.\n"
+          },
+          "preserve_co_owned": {
+            "type": "boolean",
+            "default": false,
+            "description": "When `true`, skip captured resources whose lineage row carries\nanother blueprint instance's id (co-ownership ≥2). Surfaces under\n`Operation.skipped` with `reason: 'co_owned'`.\n"
           }
         }
       },
@@ -666,7 +788,8 @@
             "enum": [
               "manual",
               "sync",
-              "blueprint_install"
+              "blueprint_install",
+              "scheduled"
             ]
           },
           "blueprint_instance_id": {
@@ -692,6 +815,47 @@
           "matched_count": {
             "type": "integer",
             "description": "Number of `resource` filter pairs from the request that are\ncontained in this snapshot. Present only on `listSnapshots`\nresponses where the caller passed at least one `resource`\nfilter — absent on `getSnapshot` and on unfiltered list calls.\nDrives the coverage badge in Config Hub's snapshot picker.\n"
+          },
+          "scope": {
+            "type": "string",
+            "enum": [
+              "selection",
+              "org"
+            ],
+            "description": "Capture scope. `selection` (default for manual/sync/blueprint_install)\nmeans only the explicitly listed resources were snapshotted.\n`org` means a full org inventory was discovered and captured\n(scheduled snapshots set this automatically).\n"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO-8601 timestamp after which this snapshot will be deleted.\nDerived from the org's retention setting at capture time for\nscheduled snapshots; not set for manual snapshots (which use\na hardcoded 90-day TTL written directly as a DynamoDB `ttl` epoch).\n"
+          },
+          "capture_summary": {
+            "type": "object",
+            "description": "Per-snapshot coverage report set by the capture worker on completion.\nRecords how many resources were attempted, captured, skipped\n(unsupported type or explicitly excluded), and failed.\n",
+            "required": [
+              "total",
+              "captured",
+              "skipped",
+              "failed"
+            ],
+            "properties": {
+              "total": {
+                "type": "integer",
+                "description": "Total resources in the inventory that were attempted."
+              },
+              "captured": {
+                "type": "integer",
+                "description": "Resources successfully fetched and written to the manifest."
+              },
+              "skipped": {
+                "type": "integer",
+                "description": "Resources skipped — type not supported by config-engine or\nexcluded from capture (e.g. access_token, environment_variable).\n"
+              },
+              "failed": {
+                "type": "integer",
+                "description": "Resources where the fetch call returned an error."
+              }
+            }
           }
         }
       },

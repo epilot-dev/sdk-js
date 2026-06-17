@@ -11,6 +11,13 @@ declare namespace Components {
         export type BadRequest = Schemas.Error;
         export type NotFound = Schemas.Error;
         export type Unauthorized = Schemas.Error;
+        export type UnprocessableEntity = /**
+         * Returned (422) when the org inventory contains no capturable resources
+         * after filtering out sensitive, unsupported, and excluded types. The
+         * `skipped_types` array explains why every type was dropped.
+         *
+         */
+        Schemas.EmptyInventoryError;
     }
     namespace Schemas {
         export interface CallerIdentity {
@@ -18,15 +25,43 @@ declare namespace Components {
             user_id?: string;
             token_id?: string;
         }
+        /**
+         * Request body for `captureOrgSnapshot`. All fields optional — an empty body
+         * snapshots the whole org with a default name and the 90-day default TTL.
+         *
+         */
+        export interface CreateOrgSnapshotRequest {
+            /**
+             * Snapshot name. Defaults to "Org snapshot — <ISO timestamp>".
+             */
+            name?: string;
+            /**
+             * Retention window. Converted to an absolute `expires_at` at creation
+             * time. Omit for the default 90-day TTL.
+             *
+             */
+            retention?: {
+                value: number;
+                unit: "days" | "weeks" | "months";
+            };
+            /**
+             * Resource types to exclude from the capture, in addition to the
+             * always-excluded sensitive types (`access_token`,
+             * `environment_variable`).
+             *
+             */
+            excluded_types?: string[];
+        }
         export interface CreateSnapshotRequest {
             name: string;
             description?: string;
             /**
-             * What initiated this snapshot. `scheduled` may be added in a later
-             * phase for nightly backups (RFC OQ #3).
+             * What initiated this snapshot. `scheduled` is used for automatic
+             * nightly backups triggered by an org's EventBridge schedule
+             * (RFC — Scheduled org snapshots).
              *
              */
-            trigger?: "manual" | "sync" | "blueprint_install";
+            trigger?: "manual" | "sync" | "blueprint_install" | "scheduled";
             /**
              * Required iff `trigger === 'blueprint_install'`; forbidden otherwise.
              * Identifies the destination blueprint instance whose install this
@@ -50,6 +85,23 @@ declare namespace Components {
             name: string;
             status: "creating";
             created_at: string; // date-time
+        }
+        /**
+         * Returned (422) when the org inventory contains no capturable resources
+         * after filtering out sensitive, unsupported, and excluded types. The
+         * `skipped_types` array explains why every type was dropped.
+         *
+         */
+        export interface EmptyInventoryError {
+            /**
+             * example:
+             * No capturable resources in the org inventory
+             */
+            message: string;
+            skipped_types: {
+                type: string;
+                reason: string;
+            }[];
         }
         export interface Error {
             status: number;
@@ -83,25 +135,30 @@ declare namespace Components {
             type: string;
             id: string;
         }
+        /**
+         * Both flags default to `false`, which restores every captured resource —
+         * Config Hub's manual-restore semantics. blueprint-manifest-api sets
+         * both `true` when reverting a blueprint install so user edits and
+         * cross-blueprint contributions survive. Each flag is independent so a
+         * caller can preserve edits without preserving co-ownership (or vice
+         * versa). Skipped resources surface under `Operation.skipped`.
+         *
+         */
         export interface RestoreSnapshotRequest {
             /**
-             * How to handle destination resources whose content has been modified
-             * since the snapshot was captured:
-             *
-             * - `overwrite` (default) — apply every captured payload regardless
-             *   of current destination state. Matches the manual-restore
-             *   semantics Config Hub relies on.
-             * - `preserve_edits` — for each captured resource, compare the live
-             *   destination payload's fingerprint against the install-time
-             *   fingerprint on lineage. If modified, skip and surface the
-             *   entry under `Operation.skipped`. Also skips co-owned resources
-             *   (lineage row carrying ≥2 distinct blueprint_instance_ids).
-             *   Used by blueprint-manifest-api when reverting a blueprint
-             *   install so user edits and other blueprints' contributions
-             *   survive.
+             * When `true`, skip captured resources whose live destination payload
+             * has diverged from the install-time fingerprint stored on lineage.
+             * Surfaces under `Operation.skipped` with `reason: 'modified'`.
              *
              */
-            mode?: "overwrite" | "preserve_edits";
+            preserve_modified?: boolean;
+            /**
+             * When `true`, skip captured resources whose lineage row carries
+             * another blueprint instance's id (co-ownership ≥2). Surfaces under
+             * `Operation.skipped` with `reason: 'co_owned'`.
+             *
+             */
+            preserve_co_owned?: boolean;
         }
         export interface RestoreSnapshotResponse {
             id: string;
@@ -124,7 +181,7 @@ declare namespace Components {
             org_id: string;
             name: string;
             description?: string;
-            trigger: "manual" | "sync" | "blueprint_install";
+            trigger: "manual" | "sync" | "blueprint_install" | "scheduled";
             /**
              * Set iff `trigger === 'blueprint_install'`. The destination blueprint
              * instance this snapshot covers.
@@ -148,6 +205,48 @@ declare namespace Components {
              *
              */
             matched_count?: number;
+            /**
+             * Capture scope. `selection` (default for manual/sync/blueprint_install)
+             * means only the explicitly listed resources were snapshotted.
+             * `org` means a full org inventory was discovered and captured
+             * (scheduled snapshots set this automatically).
+             *
+             */
+            scope?: "selection" | "org";
+            /**
+             * ISO-8601 timestamp after which this snapshot will be deleted.
+             * Derived from the org's retention setting at capture time for
+             * scheduled snapshots; not set for manual snapshots (which use
+             * a hardcoded 90-day TTL written directly as a DynamoDB `ttl` epoch).
+             *
+             */
+            expires_at?: string; // date-time
+            /**
+             * Per-snapshot coverage report set by the capture worker on completion.
+             * Records how many resources were attempted, captured, skipped
+             * (unsupported type or explicitly excluded), and failed.
+             *
+             */
+            capture_summary?: {
+                /**
+                 * Total resources in the inventory that were attempted.
+                 */
+                total: number;
+                /**
+                 * Resources successfully fetched and written to the manifest.
+                 */
+                captured: number;
+                /**
+                 * Resources skipped — type not supported by config-engine or
+                 * excluded from capture (e.g. access_token, environment_variable).
+                 *
+                 */
+                skipped: number;
+                /**
+                 * Resources where the fetch call returned an error.
+                 */
+                failed: number;
+            };
         }
         /**
          * A single captured resource with its full payload. The identity fields
@@ -207,6 +306,19 @@ declare namespace Components {
     }
 }
 declare namespace Paths {
+    namespace CaptureOrgSnapshot {
+        export type RequestBody = /**
+         * Request body for `captureOrgSnapshot`. All fields optional — an empty body
+         * snapshots the whole org with a default name and the 90-day default TTL.
+         *
+         */
+        Components.Schemas.CreateOrgSnapshotRequest;
+        namespace Responses {
+            export type $202 = Components.Schemas.CreateSnapshotResponse;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $422 = Components.Responses.UnprocessableEntity;
+        }
+    }
     namespace CreateSnapshot {
         export type RequestBody = Components.Schemas.CreateSnapshotRequest;
         namespace Responses {
@@ -289,7 +401,16 @@ declare namespace Paths {
         }
     }
     namespace RestoreSnapshot {
-        export type RequestBody = Components.Schemas.RestoreSnapshotRequest;
+        export type RequestBody = /**
+         * Both flags default to `false`, which restores every captured resource —
+         * Config Hub's manual-restore semantics. blueprint-manifest-api sets
+         * both `true` when reverting a blueprint install so user edits and
+         * cross-blueprint contributions survive. Each flag is independent so a
+         * caller can preserve edits without preserving co-ownership (or vice
+         * versa). Skipped resources surface under `Operation.skipped`.
+         *
+         */
+        Components.Schemas.RestoreSnapshotRequest;
         namespace Responses {
             export type $202 = Components.Schemas.RestoreSnapshotResponse;
             export type $401 = Components.Responses.Unauthorized;
@@ -364,6 +485,26 @@ export interface OperationMethods {
     data?: Paths.CreateSnapshot.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CreateSnapshot.Responses.$202>
+  /**
+   * captureOrgSnapshot - captureOrgSnapshot
+   * 
+   * Snapshot the caller's whole organization now. Fetches a fresh inventory
+   * of the org's configuration resources from configuration-hub-api, persists
+   * it as an inventory artifact, and starts a `scope: "org"` chunked capture.
+   * Async — returns immediately with a snapshot ID; client polls `getSnapshot`
+   * and watches `capture_summary` fill in until `create.status` moves from
+   * `in_progress` to `completed` or `failed`.
+   * 
+   * Sensitive types (`access_token`, `environment_variable`), types with no
+   * engine adapter, and any `excluded_types` are dropped from the capture and
+   * recorded in the snapshot's coverage report.
+   * 
+   */
+  'captureOrgSnapshot'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.CaptureOrgSnapshot.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CaptureOrgSnapshot.Responses.$202>
   /**
    * getSnapshot - getSnapshot
    * 
@@ -479,6 +620,28 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ListSnapshots.Responses.$200>
   }
+  ['/v1/snapshots:capture-org']: {
+    /**
+     * captureOrgSnapshot - captureOrgSnapshot
+     * 
+     * Snapshot the caller's whole organization now. Fetches a fresh inventory
+     * of the org's configuration resources from configuration-hub-api, persists
+     * it as an inventory artifact, and starts a `scope: "org"` chunked capture.
+     * Async — returns immediately with a snapshot ID; client polls `getSnapshot`
+     * and watches `capture_summary` fill in until `create.status` moves from
+     * `in_progress` to `completed` or `failed`.
+     * 
+     * Sensitive types (`access_token`, `environment_variable`), types with no
+     * engine adapter, and any `excluded_types` are dropped from the capture and
+     * recorded in the snapshot's coverage report.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.CaptureOrgSnapshot.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CaptureOrgSnapshot.Responses.$202>
+  }
   ['/v1/snapshots/{id}']: {
     /**
      * getSnapshot - getSnapshot
@@ -575,8 +738,10 @@ export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
 
 export type CallerIdentity = Components.Schemas.CallerIdentity;
+export type CreateOrgSnapshotRequest = Components.Schemas.CreateOrgSnapshotRequest;
 export type CreateSnapshotRequest = Components.Schemas.CreateSnapshotRequest;
 export type CreateSnapshotResponse = Components.Schemas.CreateSnapshotResponse;
+export type EmptyInventoryError = Components.Schemas.EmptyInventoryError;
 export type Error = Components.Schemas.Error;
 export type Operation = Components.Schemas.Operation;
 export type ResourceRef = Components.Schemas.ResourceRef;
