@@ -291,7 +291,8 @@ const { data } = await client.setupCampaign(
         block_id: 'b8c01433-5556-4e2b-aad4-6f5348d1df84'
       },
       email: {
-        automation_id: 'b8c01433-5556-4e2b-aad4-6f5348d1df84'
+        automation_id: 'b8c01433-5556-4e2b-aad4-6f5348d1df84',
+        template_id: 'b8c01433-5556-4e2b-aad4-6f5348d1df84'
       }
     }
   },
@@ -1060,7 +1061,8 @@ type SetupCampaignRequest = {
       block_id: { ... }
     }
     email?: {
-      automation_id: { ... }
+      automation_id?: { ... }
+      template_id?: { ... }
     }
   }
 }
@@ -1094,7 +1096,8 @@ type SetupTariffChangeCampaignRequest = {
       block_id: { ... }
     }
     email?: {
-      automation_id: { ... }
+      automation_id?: { ... }
+      template_id?: { ... }
     }
   }
 }

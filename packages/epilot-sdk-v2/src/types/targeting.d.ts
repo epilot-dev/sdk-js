@@ -1584,13 +1584,20 @@ export declare namespace Components {
                     BaseUUID /* uuid */;
                 };
                 /**
-                 * Email campaign delivery. The selected automation flow is persisted as the
-                 * campaign's `flow_id` and is responsible for sending the campaign emails.
-                 * Only sent by the consumer once an automation has been selected.
+                 * Email campaign delivery. An automation flow (legacy) and/or an email
+                 * template can be provided to send the campaign emails. The selection is
+                 * persisted as the campaign's `flow_id`. If `automation_id` is provided it is
+                 * used as-is; otherwise a flow is created from `template_id`. Only sent by the
+                 * consumer once one has been selected.
                  *
                  */
                 email?: {
-                    automation_id: /**
+                    automation_id?: /**
+                     * example:
+                     * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                     */
+                    BaseUUID /* uuid */;
+                    template_id?: /**
                      * example:
                      * b8c01433-5556-4e2b-aad4-6f5348d1df84
                      */
