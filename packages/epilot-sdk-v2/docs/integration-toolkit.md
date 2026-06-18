@@ -50,6 +50,8 @@ const { data } = await integrationToolkitClient.acknowledgeTracking(...)
 - [`getIntegrationV2`](#getintegrationv2)
 - [`updateIntegrationV2`](#updateintegrationv2)
 - [`deleteIntegrationV2`](#deleteintegrationv2)
+- [`listNotificationHistory`](#listnotificationhistory)
+- [`testSendNotification`](#testsendnotification)
 - [`getSecureProxyWhitelist`](#getsecureproxywhitelist)
 - [`updateSecureProxyWhitelist`](#updatesecureproxywhitelist)
 - [`listSecureProxyWhitelistHistory`](#listsecureproxywhitelisthistory)
@@ -84,6 +86,10 @@ const { data } = await integrationToolkitClient.acknowledgeTracking(...)
 - [`managedCallExecute`](#managedcallexecute)
 
 **Schemas**
+- [`NotificationHistoryItem`](#notificationhistoryitem)
+- [`NotificationHistoryResponse`](#notificationhistoryresponse)
+- [`TestNotificationRequest`](#testnotificationrequest)
+- [`TestNotificationResponse`](#testnotificationresponse)
 - [`ErrorResponseBase`](#errorresponsebase)
 - [`ErpEvent`](#erpevent)
 - [`ErpUpdatesEventsV2Request`](#erpupdateseventsv2request)
@@ -100,6 +106,11 @@ const { data } = await integrationToolkitClient.acknowledgeTracking(...)
 - [`EnvironmentFieldConfig`](#environmentfieldconfig)
 - [`IntegrationSettings`](#integrationsettings)
 - [`AutoRefreshSettings`](#autorefreshsettings)
+- [`IntegrationNotificationConfig`](#integrationnotificationconfig)
+- [`NotificationRecipient`](#notificationrecipient)
+- [`NotificationChannelSet`](#notificationchannelset)
+- [`NotificationRule`](#notificationrule)
+- [`NotificationDigestConfig`](#notificationdigestconfig)
 - [`SetIntegrationAppMappingRequest`](#setintegrationappmappingrequest)
 - [`DeleteIntegrationAppMappingRequest`](#deleteintegrationappmappingrequest)
 - [`IntegrationAppMapping`](#integrationappmapping)
@@ -500,52 +511,10 @@ const { data } = await client.listIntegrations()
       "description": "string",
       "access_token_ids": ["string"],
       "app_ids": ["string"],
-      "environment_config": [
-        {
-          "key": "string",
-          "label": "string",
-          "type": "String",
-          "description": "string",
-          "required": false,
-          "order": 0
-        }
-      ],
-      "settings": {
-        "autoRefresh": {
-          "enabled": false,
-          "freshnessThresholdMinutes": 1
-        }
-      },
+      "environment_config": [],
+      "settings": {},
       "integration_type": "erp",
-      "connector_config": {
-        "base_url": "string",
-        "auth": {
-          "type": "oauth2_client_credentials",
-          "token_url": "string",
-          "client_id": "string",
-          "client_secret": "string",
-          "scope": "string",
-          "audience": "string",
-          "resource": "string",
-          "body_params": {},
-          "headers": {},
-          "query_params": {},
-          "api_key_header": "string",
-          "api_key": "string",
-          "token": "string"
-        },
-        "types_versions": [
-          {
-            "version": "string",
-            "package_name": "string",
-            "generated_at": "1970-01-01T00:00:00.000Z",
-            "generated_by": "string",
-            "status": "active"
-          }
-        ],
-        "latest_types_version": "string",
-        "latest_types_package_name": "string"
-      },
+      "connector_config": {},
       "protected": true,
       "_manifest": ["string"]
     }
@@ -585,6 +554,16 @@ const { data } = await client.createIntegration(
       autoRefresh: {
         enabled: false,
         freshnessThresholdMinutes: 1
+      },
+      notifications: {
+        enabled: true,
+        recipients: [ /* ... */ ],
+        defaultChannels: { /* ... */ },
+        monitoredUseCases: ['string'],
+        monitoredCodes: ['string'],
+        rules: [ /* ... */ ],
+        digest: { /* ... */ },
+        muteUntil: '1970-01-01T00:00:00.000Z'
       }
     },
     integration_type: 'erp',
@@ -606,13 +585,7 @@ const { data } = await client.createIntegration(
         token: 'string'
       },
       types_versions: [
-        {
-          version: 'string',
-          package_name: 'string',
-          generated_at: '1970-01-01T00:00:00.000Z',
-          generated_by: 'string',
-          status: 'active'
-        }
+        { /* ... */ }
       ],
       latest_types_version: 'string',
       latest_types_package_name: 'string'
@@ -650,6 +623,16 @@ const { data } = await client.createIntegration(
     "autoRefresh": {
       "enabled": false,
       "freshnessThresholdMinutes": 1
+    },
+    "notifications": {
+      "enabled": true,
+      "recipients": [],
+      "defaultChannels": {},
+      "monitoredUseCases": ["string"],
+      "monitoredCodes": ["string"],
+      "rules": [],
+      "digest": {},
+      "muteUntil": "1970-01-01T00:00:00.000Z"
     }
   },
   "integration_type": "erp",
@@ -671,13 +654,7 @@ const { data } = await client.createIntegration(
       "token": "string"
     },
     "types_versions": [
-      {
-        "version": "string",
-        "package_name": "string",
-        "generated_at": "1970-01-01T00:00:00.000Z",
-        "generated_by": "string",
-        "status": "active"
-      }
+      {}
     ],
     "latest_types_version": "string",
     "latest_types_package_name": "string"
@@ -730,6 +707,16 @@ const { data } = await client.getIntegration({
     "autoRefresh": {
       "enabled": false,
       "freshnessThresholdMinutes": 1
+    },
+    "notifications": {
+      "enabled": true,
+      "recipients": [],
+      "defaultChannels": {},
+      "monitoredUseCases": ["string"],
+      "monitoredCodes": ["string"],
+      "rules": [],
+      "digest": {},
+      "muteUntil": "1970-01-01T00:00:00.000Z"
     }
   },
   "integration_type": "erp",
@@ -751,13 +738,7 @@ const { data } = await client.getIntegration({
       "token": "string"
     },
     "types_versions": [
-      {
-        "version": "string",
-        "package_name": "string",
-        "generated_at": "1970-01-01T00:00:00.000Z",
-        "generated_by": "string",
-        "status": "active"
-      }
+      {}
     ],
     "latest_types_version": "string",
     "latest_types_package_name": "string"
@@ -813,6 +794,16 @@ const { data } = await client.updateIntegration(
     "autoRefresh": {
       "enabled": false,
       "freshnessThresholdMinutes": 1
+    },
+    "notifications": {
+      "enabled": true,
+      "recipients": [],
+      "defaultChannels": {},
+      "monitoredUseCases": ["string"],
+      "monitoredCodes": ["string"],
+      "rules": [],
+      "digest": {},
+      "muteUntil": "1970-01-01T00:00:00.000Z"
     }
   },
   "integration_type": "erp",
@@ -834,13 +825,7 @@ const { data } = await client.updateIntegration(
       "token": "string"
     },
     "types_versions": [
-      {
-        "version": "string",
-        "package_name": "string",
-        "generated_at": "1970-01-01T00:00:00.000Z",
-        "generated_by": "string",
-        "status": "active"
-      }
+      {}
     ],
     "latest_types_version": "string",
     "latest_types_package_name": "string"
@@ -1301,6 +1286,16 @@ const { data } = await client.createIntegrationV2(
       autoRefresh: {
         enabled: false,
         freshnessThresholdMinutes: 1
+      },
+      notifications: {
+        enabled: true,
+        recipients: [ /* ... */ ],
+        defaultChannels: { /* ... */ },
+        monitoredUseCases: ['string'],
+        monitoredCodes: ['string'],
+        rules: [ /* ... */ ],
+        digest: { /* ... */ },
+        muteUntil: '1970-01-01T00:00:00.000Z'
       }
     },
     integration_type: 'erp',
@@ -1371,6 +1366,16 @@ const { data } = await client.createIntegrationV2(
     "autoRefresh": {
       "enabled": false,
       "freshnessThresholdMinutes": 1
+    },
+    "notifications": {
+      "enabled": true,
+      "recipients": [],
+      "defaultChannels": {},
+      "monitoredUseCases": ["string"],
+      "monitoredCodes": ["string"],
+      "rules": [],
+      "digest": {},
+      "muteUntil": "1970-01-01T00:00:00.000Z"
     }
   },
   "integration_type": "erp",
@@ -1459,6 +1464,16 @@ const { data } = await client.getIntegrationV2({
     "autoRefresh": {
       "enabled": false,
       "freshnessThresholdMinutes": 1
+    },
+    "notifications": {
+      "enabled": true,
+      "recipients": [],
+      "defaultChannels": {},
+      "monitoredUseCases": ["string"],
+      "monitoredCodes": ["string"],
+      "rules": [],
+      "digest": {},
+      "muteUntil": "1970-01-01T00:00:00.000Z"
     }
   },
   "integration_type": "erp",
@@ -1542,6 +1557,16 @@ const { data } = await client.updateIntegrationV2(
       autoRefresh: {
         enabled: false,
         freshnessThresholdMinutes: 1
+      },
+      notifications: {
+        enabled: true,
+        recipients: [ /* ... */ ],
+        defaultChannels: { /* ... */ },
+        monitoredUseCases: ['string'],
+        monitoredCodes: ['string'],
+        rules: [ /* ... */ ],
+        digest: { /* ... */ },
+        muteUntil: '1970-01-01T00:00:00.000Z'
       }
     },
     integration_type: 'erp',
@@ -1612,6 +1637,16 @@ const { data } = await client.updateIntegrationV2(
     "autoRefresh": {
       "enabled": false,
       "freshnessThresholdMinutes": 1
+    },
+    "notifications": {
+      "enabled": true,
+      "recipients": [],
+      "defaultChannels": {},
+      "monitoredUseCases": ["string"],
+      "monitoredCodes": ["string"],
+      "rules": [],
+      "digest": {},
+      "muteUntil": "1970-01-01T00:00:00.000Z"
     }
   },
   "integration_type": "erp",
@@ -1683,6 +1718,74 @@ const { data } = await client.deleteIntegrationV2({
 ```
 
 </details>
+
+---
+
+### `listNotificationHistory`
+
+Returns the cursor-paginated, newest-first notification history for an
+integration (every real notification decision — both fired and suppressed).
+Requires the `integration:view` permission on the int
+
+`GET /v2/integrations/{integrationId}/notifications/history`
+
+```ts
+const { data } = await client.listNotificationHistory({
+  integrationId: 'example',
+  cursor: 'example',
+  limit: 1,
+  type: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "history": [
+    {
+      "id": "string",
+      "type": "string",
+      "state_transition": "string",
+      "severity": "error",
+      "title": "string",
+      "occurred_at": "1970-01-01T00:00:00.000Z",
+      "notified": true,
+      "suppressed_reason": "muted",
+      "recipients": ["string"],
+      "context": {},
+      "created_at": "1970-01-01T00:00:00.000Z"
+    }
+  ],
+  "next_cursor": "string"
+}
+```
+
+</details>
+
+---
+
+### `testSendNotification`
+
+Renders and sends ONE representative notification of the requested kind/type to
+the CALLING USER ONLY (never any other recipient), so an operator can preview how
+a notification looks. A test send does
+
+`POST /v2/integrations/{integrationId}/notifications/test`
+
+```ts
+const { data } = await client.testSendNotification(
+  {
+    integrationId: 'example',
+  },
+  {
+    kind: 'alert',
+    type: 'string',
+    channels: ['email']
+  },
+)
+```
 
 ---
 
@@ -2829,6 +2932,68 @@ const { data } = await client.commitTypes(
 
 ## Schemas
 
+### `NotificationHistoryItem`
+
+A single notification-history row (one real notification decision).
+
+```ts
+type NotificationHistoryItem = {
+  id: string
+  type: string
+  state_transition?: string
+  severity: "error" | "warning" | "info"
+  title: string
+  occurred_at: string // date-time
+  notified: boolean
+  suppressed_reason?: "muted" | "debounced" | "recipient_opt_out"
+  recipients: string[]
+  context: Record<string, unknown>
+  created_at: string // date-time
+}
+```
+
+### `NotificationHistoryResponse`
+
+```ts
+type NotificationHistoryResponse = {
+  history: Array<{
+    id: string
+    type: string
+    state_transition?: string
+    severity: "error" | "warning" | "info"
+    title: string
+    occurred_at: string // date-time
+    notified: boolean
+    suppressed_reason?: "muted" | "debounced" | "recipient_opt_out"
+    recipients: string[]
+    context: Record<string, unknown>
+    created_at: string // date-time
+  }>
+  next_cursor?: string
+}
+```
+
+### `TestNotificationRequest`
+
+```ts
+type TestNotificationRequest = {
+  kind: "alert" | "digest"
+  type?: string
+  channels?: "email" | "in_app"[]
+}
+```
+
+### `TestNotificationResponse`
+
+```ts
+type TestNotificationResponse = {
+  sent: boolean
+  recipient: string
+  channels: string[]
+  notification_id?: string
+}
+```
+
 ### `ErrorResponseBase`
 
 ```ts
@@ -2939,6 +3104,16 @@ type IntegrationEditableFields = {
     autoRefresh?: {
       enabled?: { ... }
       freshnessThresholdMinutes?: { ... }
+    }
+    notifications?: {
+      enabled: { ... }
+      recipients: { ... }
+      defaultChannels: { ... }
+      monitoredUseCases?: { ... }
+      monitoredCodes?: { ... }
+      rules: { ... }
+      digest: { ... }
+      muteUntil?: { ... }
     }
   }
   integration_type?: "erp" | "connector"
@@ -3055,6 +3230,16 @@ type Integration = {
       enabled?: { ... }
       freshnessThresholdMinutes?: { ... }
     }
+    notifications?: {
+      enabled: { ... }
+      recipients: { ... }
+      defaultChannels: { ... }
+      monitoredUseCases?: { ... }
+      monitoredCodes?: { ... }
+      rules: { ... }
+      digest: { ... }
+      muteUntil?: { ... }
+    }
   }
   integration_type?: "erp" | "connector"
   connector_config?: {
@@ -3110,6 +3295,16 @@ type CreateIntegrationRequest = {
       enabled?: { ... }
       freshnessThresholdMinutes?: { ... }
     }
+    notifications?: {
+      enabled: { ... }
+      recipients: { ... }
+      defaultChannels: { ... }
+      monitoredUseCases?: { ... }
+      monitoredCodes?: { ... }
+      rules: { ... }
+      digest: { ... }
+      muteUntil?: { ... }
+    }
   }
   integration_type?: "erp" | "connector"
   connector_config?: {
@@ -3164,6 +3359,16 @@ type UpdateIntegrationRequest = {
     autoRefresh?: {
       enabled?: { ... }
       freshnessThresholdMinutes?: { ... }
+    }
+    notifications?: {
+      enabled: { ... }
+      recipients: { ... }
+      defaultChannels: { ... }
+      monitoredUseCases?: { ... }
+      monitoredCodes?: { ... }
+      rules: { ... }
+      digest: { ... }
+      muteUntil?: { ... }
     }
   }
   integration_type?: "erp" | "connector"
@@ -3222,6 +3427,44 @@ type IntegrationSettings = {
     enabled?: boolean
     freshnessThresholdMinutes?: number
   }
+  notifications?: {
+    enabled: boolean
+    recipients: Array<{
+      user_id: { ... }
+    }>
+    defaultChannels: {
+      email: { ... }
+      in_app: { ... }
+    }
+    monitoredUseCases?: string[]
+    monitoredCodes?: string[]
+    rules: Array<{
+      id: { ... }
+      name?: { ... }
+      type: { ... }
+      enabled: { ... }
+      channels?: { ... }
+      codes?: { ... }
+      threshold?: { ... }
+      sensitivity?: { ... }
+      fallbackThreshold?: { ... }
+      window?: { ... }
+      minSampleSize?: { ... }
+      consecutive?: { ... }
+      quietPeriod?: { ... }
+    }>
+    digest: {
+      enabled: { ... }
+      frequency: { ... }
+      dayOfWeek?: { ... }
+      timeOfDay: { ... }
+      timezone: { ... }
+      channels: { ... }
+      includeHealthy: { ... }
+      skipIfEmpty: { ... }
+    }
+    muteUntil?: string // date-time
+  }
 }
 ```
 
@@ -3233,6 +3476,123 @@ Auto-refresh settings for keeping integration data fresh
 type AutoRefreshSettings = {
   enabled?: boolean
   freshnessThresholdMinutes?: number
+}
+```
+
+### `IntegrationNotificationConfig`
+
+Integration monitoring notification configuration. Rides Integration.settings.notifications (camelCase) and surfaces on both v1 and v2 GET/PUT. Unknown keys are stripped server-side to stay forward-compatible with deferred (V2) rule types.
+
+```ts
+type IntegrationNotificationConfig = {
+  enabled: boolean
+  recipients: Array<{
+    user_id: string
+  }>
+  defaultChannels: {
+    email: boolean
+    in_app: boolean
+  }
+  monitoredUseCases?: string[]
+  monitoredCodes?: string[]
+  rules: Array<{
+    id: string
+    name?: string
+    type: "critical_error" | "error_threshold" | "warning_threshold" | "success_rate_drop" | "recovery" | "silence" | "consecutive_failures" | "first_error" | "new_error_code" | "auth_expiry" | "ack_timeout" | "validation_surge"
+    enabled: boolean
+    channels?: {
+      email: { ... }
+      in_app: { ... }
+    }
+    codes?: string[]
+    threshold?: number | "auto"
+    sensitivity?: "low" | "medium" | "high"
+    fallbackThreshold?: number
+    window?: string
+    minSampleSize?: number
+    consecutive?: number
+    quietPeriod?: string
+  }>
+  digest: {
+    enabled: boolean
+    frequency: "daily" | "weekly"
+    dayOfWeek?: 0 | 1 | 2 | 3 | 4 | 5 | 6
+    timeOfDay: string
+    timezone: string
+    channels: {
+      email: { ... }
+      in_app: { ... }
+    }
+    includeHealthy: boolean
+    skipIfEmpty: boolean
+  }
+  muteUntil?: string // date-time
+}
+```
+
+### `NotificationRecipient`
+
+A configured recipient. Only the epilot user_id is stored.
+
+```ts
+type NotificationRecipient = {
+  user_id: string
+}
+```
+
+### `NotificationChannelSet`
+
+Delivery channel toggles. New channels added in svc-notification-api inherit here.
+
+```ts
+type NotificationChannelSet = {
+  email: boolean
+  in_app: boolean
+}
+```
+
+### `NotificationRule`
+
+A single notification rule. Only the params relevant to a given type are set. The id is a server-minted ULID, preserved across edits.
+
+```ts
+type NotificationRule = {
+  id: string
+  name?: string
+  type: "critical_error" | "error_threshold" | "warning_threshold" | "success_rate_drop" | "recovery" | "silence" | "consecutive_failures" | "first_error" | "new_error_code" | "auth_expiry" | "ack_timeout" | "validation_surge"
+  enabled: boolean
+  channels?: {
+    email: boolean
+    in_app: boolean
+  }
+  codes?: string[]
+  threshold?: number | "auto"
+  sensitivity?: "low" | "medium" | "high"
+  fallbackThreshold?: number
+  window?: string
+  minSampleSize?: number
+  consecutive?: number
+  quietPeriod?: string
+}
+```
+
+### `NotificationDigestConfig`
+
+Digest schedule and content configuration.
+
+```ts
+type NotificationDigestConfig = {
+  enabled: boolean
+  frequency: "daily" | "weekly"
+  dayOfWeek?: 0 | 1 | 2 | 3 | 4 | 5 | 6
+  timeOfDay: string
+  timezone: string
+  channels: {
+    email: boolean
+    in_app: boolean
+  }
+  includeHealthy: boolean
+  skipIfEmpty: boolean
 }
 ```
 
@@ -3374,6 +3734,16 @@ type UpsertIntegrationWithUseCasesRequest = {
       enabled?: { ... }
       freshnessThresholdMinutes?: { ... }
     }
+    notifications?: {
+      enabled: { ... }
+      recipients: { ... }
+      defaultChannels: { ... }
+      monitoredUseCases?: { ... }
+      monitoredCodes?: { ... }
+      rules: { ... }
+      digest: { ... }
+      muteUntil?: { ... }
+    }
   }
   integration_type?: "erp" | "connector"
   connector_config?: {
@@ -3446,16 +3816,6 @@ type UpsertIntegrationWithUseCasesRequest = {
     id?: string // uuid
     name: string
     slug?: string
-    enabled: boolean
-    change_description?: string
-    type: "managed_call"
-    configuration?: {
-      operation: { ... }
-      request_mapping?: { ... }
-      response_mapping?: { ... }
-      inbound_use_case_slug?: { ... }
-    }
-  } | {
   // ...
 }
 ```
