@@ -112,18 +112,19 @@ declare namespace Components {
             started_at: string; // date-time
             completed_at?: string; // date-time
             /**
-             * `partial` indicates the operation completed but skipped at least
-             * one resource — see `skipped`. Only populated by restores triggered
-             * with `mode: 'preserve_edits'`.
+             * `partial` indicates the operation completed but snapshot-api
+             * skipped at least one captured resource via its own drift check
+             * (see `skipped`).
              *
              */
             status: "in_progress" | "completed" | "partial" | "failed";
             error?: string;
             triggered_by: CallerIdentity;
             /**
-             * Per-resource skips, populated only for restores triggered with
-             * `mode: 'preserve_edits'`. Empty / absent for Config Hub's
-             * default overwrite-mode restores.
+             * Captured resources snapshot-api elected to skip — currently
+             * only drift detections (`preserve_modified: true`). Caller-
+             * supplied `exclude_target_ids` skips are NOT echoed here; the
+             * caller built the list, the caller knows.
              *
              */
             skipped?: SkippedResource[];
@@ -136,37 +137,27 @@ declare namespace Components {
             id: string;
         }
         /**
-         * Skipped resources surface under `Operation.skipped`. All filters default
-         * to the open setting (apply everything), which keeps Config Hub's manual-
-         * restore semantics unchanged.
+         * Apply a captured snapshot to its source org. All filters default to the
+         * open setting (apply everything), which keeps Config Hub's manual-restore
+         * semantics unchanged.
          *
          */
         export interface RestoreSnapshotRequest {
             /**
              * When `true`, skip captured resources whose live payload's content
              * fingerprint diverges from the capture-time fingerprint stored on
-             * the manifest entry. Self-contained: snapshot-api fetches and hashes
-             * the live payload itself; no cross-service lookup. Surfaces under
+             * the manifest entry. snapshot-api fetches the live payload and
+             * hashes it itself; no cross-service lookup. Surfaces under
              * `Operation.skipped` with `reason: 'modified'`. Legacy snapshots
              * captured before fingerprints were stored fail open (applied).
              *
              */
             preserve_modified?: boolean;
             /**
-             * Deprecated. Accepted for back-compat but treated as a no-op.
-             * Co-ownership is now expressed via `exclude_target_ids` — the caller
-             * (typically blueprint-manifest-api) computes which targets to skip
-             * from its own data and passes the list. snapshot-api no longer
-             * reaches into BMA's lineage table.
-             *
-             */
-            preserve_co_owned?: boolean;
-            /**
              * Target ids the caller has decided not to restore. snapshot-api
-             * applies the manifest minus these ids and reports them under
-             * `Operation.skipped` with `reason: 'co_owned'` (the only current
-             * producer of exclude lists is BMA's revert flow, which uses this to
-             * honor multi-blueprint ownership).
+             * applies the manifest minus these ids. Drops are silent — not
+             * echoed in `Operation.skipped` — because the caller supplied the
+             * list and already knows.
              *
              */
             exclude_target_ids?: string[];
@@ -176,16 +167,15 @@ declare namespace Components {
             status: "restoring";
         }
         export interface SkippedResource {
-            lineage_id: string;
+            target_id: string;
             /**
-             * - `modified` — current destination payload's fingerprint differs
-             *   from the install-time fingerprint on the lineage row.
-             * - `co_owned` — lineage row has ≥2 distinct
-             *   `blueprint_instance_ids`; restoring would unilaterally affect
-             *   another blueprint instance's contribution.
+             * - `modified` — live destination payload's content fingerprint
+             *   differs from the capture-time fingerprint stored on the
+             *   manifest entry. Only set when the restore was requested with
+             *   `preserve_modified: true`.
              *
              */
-            reason: "modified" | "co_owned";
+            reason: "modified";
         }
         export interface Snapshot {
             id: string;
@@ -413,9 +403,9 @@ declare namespace Paths {
     }
     namespace RestoreSnapshot {
         export type RequestBody = /**
-         * Skipped resources surface under `Operation.skipped`. All filters default
-         * to the open setting (apply everything), which keeps Config Hub's manual-
-         * restore semantics unchanged.
+         * Apply a captured snapshot to its source org. All filters default to the
+         * open setting (apply everything), which keeps Config Hub's manual-restore
+         * semantics unchanged.
          *
          */
         Components.Schemas.RestoreSnapshotRequest;
