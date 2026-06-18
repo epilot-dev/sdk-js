@@ -3895,7 +3895,7 @@ declare namespace Components {
              */
             retention_days?: number;
             /**
-             * What happens when an item exhausts max_delivery_attempts: dead_letter routes the exhausted item to the dead-letter queue; block halts the queue until operator/consumer action. Enforcement lands with the queue consumer (Phase 10) — this field defines the contract.
+             * What happens when an item exhausts max_delivery_attempts: dead_letter routes the exhausted item to the dead-letter queue and advances past it so the stream keeps flowing; block halts the queue at that item until operator/consumer action removes it.
              */
             poison_policy?: "dead_letter" | "block";
             /**
@@ -4729,7 +4729,7 @@ declare namespace Components {
                 [name: string]: string;
             };
             /**
-             * Response body from upstream
+             * Response body from upstream. When `status_code` is 502 and the target never produced an HTTP response (TLS/connection/DNS failure or timeout), this is a `SecureProxyUpstreamError` describing the underlying cause.
              */
             body?: any;
         }
@@ -4743,6 +4743,23 @@ declare namespace Components {
             allowed_ips?: string[];
             integration_id: string; // uuid
             integration_name: string;
+        }
+        /**
+         * Error payload returned when epilot could not obtain an HTTP response from the proxied target. The failure is epilot-generated (HTTP 502) but the cause is usually remote-side; `code`/`reason` make that attributable.
+         */
+        export interface SecureProxyUpstreamError {
+            /**
+             * Short error category.
+             */
+            message: "Upstream network error" | "Upstream error";
+            /**
+             * Underlying Node.js/axios error code when available (e.g. `UNABLE_TO_VERIFY_LEAF_SIGNATURE`, `ECONNREFUSED`, `ETIMEDOUT`, `ENOTFOUND`).
+             */
+            code?: string;
+            /**
+             * Human-readable explanation, present only for well-known codes (TLS/certificate, DNS and connection failures).
+             */
+            reason?: string;
         }
         export interface SecureProxyUseCase {
             /**
@@ -6178,7 +6195,7 @@ declare namespace Paths {
             export type $400 = Components.Responses.BadRequest;
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Schemas.ErrorResponseBase;
-            export type $502 = Components.Schemas.ErrorResponseBase;
+            export type $502 = /* Error payload returned when epilot could not obtain an HTTP response from the proxied target. The failure is epilot-generated (HTTP 502) but the cause is usually remote-side; `code`/`reason` make that attributable. */ Components.Schemas.SecureProxyUpstreamError;
             export type $503 = Components.Schemas.ErrorResponseBase;
             export type $504 = Components.Schemas.ErrorResponseBase;
         }
@@ -7849,6 +7866,7 @@ export type ReplayEventsRequest = Components.Schemas.ReplayEventsRequest;
 export type SecureProxyRequest = Components.Schemas.SecureProxyRequest;
 export type SecureProxyResponse = Components.Schemas.SecureProxyResponse;
 export type SecureProxySummary = Components.Schemas.SecureProxySummary;
+export type SecureProxyUpstreamError = Components.Schemas.SecureProxyUpstreamError;
 export type SecureProxyUseCase = Components.Schemas.SecureProxyUseCase;
 export type SecureProxyUseCaseConfiguration = Components.Schemas.SecureProxyUseCaseConfiguration;
 export type SecureProxyUseCaseHistoryEntry = Components.Schemas.SecureProxyUseCaseHistoryEntry;

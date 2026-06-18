@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Integration Toolkit API",
-    "version": "1.2.0",
+    "version": "1.3.0",
     "description": "API for integrating with external systems in a standardised way."
   },
   "tags": [
@@ -3100,11 +3100,11 @@
             }
           },
           "502": {
-            "description": "Upstream error from the proxied target",
+            "description": "Upstream failure: epilot could not obtain an HTTP response from the proxied target\n(e.g. TLS handshake failure, connection refused/reset, DNS failure or timeout).\nThe body's `code`/`reason` identify the underlying cause, distinguishing a\nremote-side problem from an epilot-side one. When the target *does* answer with\nits own status, that status and body are passed through unchanged via\n`SecureProxyResponse` instead.\n",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponseBase"
+                  "$ref": "#/components/schemas/SecureProxyUpstreamError"
                 }
               }
             }
@@ -5856,7 +5856,32 @@
             "description": "Response headers from upstream"
           },
           "body": {
-            "description": "Response body from upstream"
+            "description": "Response body from upstream. When `status_code` is 502 and the target never produced an HTTP response (TLS/connection/DNS failure or timeout), this is a `SecureProxyUpstreamError` describing the underlying cause."
+          }
+        }
+      },
+      "SecureProxyUpstreamError": {
+        "type": "object",
+        "description": "Error payload returned when epilot could not obtain an HTTP response from the proxied target. The failure is epilot-generated (HTTP 502) but the cause is usually remote-side; `code`/`reason` make that attributable.",
+        "required": [
+          "message"
+        ],
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Short error category.",
+            "enum": [
+              "Upstream network error",
+              "Upstream error"
+            ]
+          },
+          "code": {
+            "type": "string",
+            "description": "Underlying Node.js/axios error code when available (e.g. `UNABLE_TO_VERIFY_LEAF_SIGNATURE`, `ECONNREFUSED`, `ETIMEDOUT`, `ENOTFOUND`)."
+          },
+          "reason": {
+            "type": "string",
+            "description": "Human-readable explanation, present only for well-known codes (TLS/certificate, DNS and connection failures)."
           }
         }
       },
@@ -6908,7 +6933,7 @@
               "block"
             ],
             "default": "dead_letter",
-            "description": "What happens when an item exhausts max_delivery_attempts: dead_letter routes the exhausted item to the dead-letter queue; block halts the queue until operator/consumer action. Enforcement lands with the queue consumer (Phase 10) — this field defines the contract."
+            "description": "What happens when an item exhausts max_delivery_attempts: dead_letter routes the exhausted item to the dead-letter queue and advances past it so the stream keeps flowing; block halts the queue at that item until operator/consumer action removes it."
           },
           "max_delivery_attempts": {
             "type": "integer",
