@@ -49,7 +49,6 @@ const { data } = await snapshotClient.createSnapshot(...)
 - [`RestoreSnapshotResponse`](#restoresnapshotresponse)
 - [`Snapshot`](#snapshot)
 - [`Operation`](#operation)
-- [`SkippedResource`](#skippedresource)
 - [`CallerIdentity`](#calleridentity)
 
 ### `createSnapshot`
@@ -121,13 +120,7 @@ const { data } = await client.listSnapshots({
           "name": "string",
           "user_id": "string",
           "token_id": "string"
-        },
-        "skipped": [
-          {
-            "target_id": "string",
-            "reason": "modified"
-          }
-        ]
+        }
       },
       "restores": [
         {
@@ -140,13 +133,7 @@ const { data } = await client.listSnapshots({
             "name": "string",
             "user_id": "string",
             "token_id": "string"
-          },
-          "skipped": [
-            {
-              "target_id": "string",
-              "reason": "modified"
-            }
-          ]
+          }
         }
       ],
       "matched_count": 0,
@@ -225,13 +212,7 @@ const { data } = await client.getSnapshot({
       "name": "string",
       "user_id": "string",
       "token_id": "string"
-    },
-    "skipped": [
-      {
-        "target_id": "string",
-        "reason": "modified"
-      }
-    ]
+    }
   },
   "restores": [
     {
@@ -244,13 +225,7 @@ const { data } = await client.getSnapshot({
         "name": "string",
         "user_id": "string",
         "token_id": "string"
-      },
-      "skipped": [
-        {
-          "target_id": "string",
-          "reason": "modified"
-        }
-      ]
+      }
     }
   ],
   "matched_count": 0,
@@ -297,7 +272,6 @@ const { data } = await client.restoreSnapshot(
     id: '123e4567-e89b-12d3-a456-426614174000',
   },
   {
-    preserve_modified: false,
     exclude_target_ids: ['string']
   },
 )
@@ -537,14 +511,14 @@ type CreateSnapshotResponse = {
 
 ### `RestoreSnapshotRequest`
 
-Apply a captured snapshot to its source org. All filters default to the
-open setting (apply everything), which keeps Config Hub's manual-restore
-semantics unchanged.
-
+Apply a captured snapshot to its source org. snapshot-api applies the
+manifest verbatim minus any target ids the caller pre-decided to skip.
+Drift detection (skip modified-since-install) is the caller's
+responsibility — blueprint-manifest-api owns that logic for blueprint
+restores; Config Hub's manu
 
 ```ts
 type RestoreSnapshotRequest = {
-  preserve_modified?: boolean
   exclude_target_ids?: string[]
 }
 ```
@@ -580,10 +554,6 @@ type Snapshot = {
       user_id?: { ... }
       token_id?: { ... }
     }
-    skipped?: Array<{
-      target_id: { ... }
-      reason: { ... }
-    }>
   }
   restores: Array<{
     type: "create" | "restore"
@@ -596,10 +566,6 @@ type Snapshot = {
       user_id?: { ... }
       token_id?: { ... }
     }
-    skipped?: Array<{
-      target_id: { ... }
-      reason: { ... }
-    }>
   }>
   matched_count?: number
   scope?: "selection" | "org"
@@ -627,19 +593,6 @@ type Operation = {
     user_id?: string
     token_id?: string
   }
-  skipped?: Array<{
-    target_id: string
-    reason: "modified"
-  }>
-}
-```
-
-### `SkippedResource`
-
-```ts
-type SkippedResource = {
-  target_id: string
-  reason: "modified"
 }
 ```
 

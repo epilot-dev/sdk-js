@@ -113,22 +113,14 @@ export declare namespace Components {
             started_at: string; // date-time
             completed_at?: string; // date-time
             /**
-             * `partial` indicates the operation completed but snapshot-api
-             * skipped at least one captured resource via its own drift check
-             * (see `skipped`).
+             * `partial` indicates `engine.apply` reported a partial success
+             * (one or more resources failed individually) but the operation
+             * as a whole did not fail.
              *
              */
             status: "in_progress" | "completed" | "partial" | "failed";
             error?: string;
             triggered_by: CallerIdentity;
-            /**
-             * Captured resources snapshot-api elected to skip — currently
-             * only drift detections (`preserve_modified: true`). Caller-
-             * supplied `exclude_target_ids` skips are NOT echoed here; the
-             * caller built the list, the caller knows.
-             *
-             */
-            skipped?: SkippedResource[];
         }
         export interface ResourceRef {
             /**
@@ -138,27 +130,18 @@ export declare namespace Components {
             id: string;
         }
         /**
-         * Apply a captured snapshot to its source org. All filters default to the
-         * open setting (apply everything), which keeps Config Hub's manual-restore
-         * semantics unchanged.
+         * Apply a captured snapshot to its source org. snapshot-api applies the
+         * manifest verbatim minus any target ids the caller pre-decided to skip.
+         * Drift detection (skip modified-since-install) is the caller's
+         * responsibility — blueprint-manifest-api owns that logic for blueprint
+         * restores; Config Hub's manual restore just omits the field.
          *
          */
         export interface RestoreSnapshotRequest {
             /**
-             * When `true`, skip captured resources whose live payload's content
-             * fingerprint diverges from the capture-time fingerprint stored on
-             * the manifest entry. snapshot-api fetches the live payload and
-             * hashes it itself; no cross-service lookup. Surfaces under
-             * `Operation.skipped` with `reason: 'modified'`. Legacy snapshots
-             * captured before fingerprints were stored fail open (applied).
-             *
-             */
-            preserve_modified?: boolean;
-            /**
              * Target ids the caller has decided not to restore. snapshot-api
-             * applies the manifest minus these ids. Drops are silent — not
-             * echoed in `Operation.skipped` — because the caller supplied the
-             * list and already knows.
+             * applies the manifest minus these ids. Drops are silent — the
+             * caller supplied the list and already knows.
              *
              */
             exclude_target_ids?: string[];
@@ -166,17 +149,6 @@ export declare namespace Components {
         export interface RestoreSnapshotResponse {
             id: string;
             status: "restoring";
-        }
-        export interface SkippedResource {
-            target_id: string;
-            /**
-             * - `modified` — live destination payload's content fingerprint
-             *   differs from the capture-time fingerprint stored on the
-             *   manifest entry. Only set when the restore was requested with
-             *   `preserve_modified: true`.
-             *
-             */
-            reason: "modified";
         }
         export interface Snapshot {
             id: string;
@@ -404,9 +376,11 @@ export declare namespace Paths {
     }
     namespace RestoreSnapshot {
         export type RequestBody = /**
-         * Apply a captured snapshot to its source org. All filters default to the
-         * open setting (apply everything), which keeps Config Hub's manual-restore
-         * semantics unchanged.
+         * Apply a captured snapshot to its source org. snapshot-api applies the
+         * manifest verbatim minus any target ids the caller pre-decided to skip.
+         * Drift detection (skip modified-since-install) is the caller's
+         * responsibility — blueprint-manifest-api owns that logic for blueprint
+         * restores; Config Hub's manual restore just omits the field.
          *
          */
         Components.Schemas.RestoreSnapshotRequest;
@@ -746,7 +720,6 @@ export type Operation = Components.Schemas.Operation;
 export type ResourceRef = Components.Schemas.ResourceRef;
 export type RestoreSnapshotRequest = Components.Schemas.RestoreSnapshotRequest;
 export type RestoreSnapshotResponse = Components.Schemas.RestoreSnapshotResponse;
-export type SkippedResource = Components.Schemas.SkippedResource;
 export type Snapshot = Components.Schemas.Snapshot;
 export type SnapshotResourceDetail = Components.Schemas.SnapshotResourceDetail;
 export type SnapshotResourceList = Components.Schemas.SnapshotResourceList;
