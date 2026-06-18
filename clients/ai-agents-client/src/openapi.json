@@ -2,7 +2,7 @@
   "openapi": "3.0.0",
   "info": {
     "version": "3.0.0",
-    "title": "AI Agents API - OpenAPI 3.0",
+    "title": "AI Agents API",
     "description": "API for configuring and invoking AI agents in epilot platform",
     "termsOfService": "https://epilot.cloud/agb",
     "contact": {
@@ -29,6 +29,14 @@
     {
       "name": "Agent Execution",
       "description": "Execute AI agents and manage executions"
+    },
+    {
+      "name": "Chat",
+      "description": "Streaming chat with AI agents"
+    },
+    {
+      "name": "Conversations",
+      "description": "Manage conversation history"
     }
   ],
   "paths": {
@@ -315,6 +323,73 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ExecutionResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error while executing the agent",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Agent not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/agents/{agent_id}/execute/stream": {
+      "post": {
+        "tags": [
+          "Agent Execution"
+        ],
+        "summary": "Execute an agent with streaming response",
+        "description": "Executes an agent with real-time streaming of tokens and tool events.\nReturns Server-Sent Events (SSE) stream with token-by-token output,\ntool call progress, and completion status.\n\nUnlike the async `/execute` endpoint which returns immediately with\nan execution_id for polling, this endpoint streams all events in real-time.\n\nSupports both:\n- System skill IDs (prefixed): \"skill:email-categorizer\"\n- Custom agent IDs (UUID): \"0336a235-9417-4dd8-894c-fe81285bba75\"\n",
+        "operationId": "executeAgentStream",
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "agent_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/AgentId"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExecuteAgentRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "SSE stream of execution events",
+            "content": {
+              "text/event-stream": {
+                "schema": {
+                  "$ref": "#/components/schemas/StreamEvent"
                 }
               }
             }
@@ -689,6 +764,352 @@
           }
         }
       }
+    },
+    "/v1/executions/{execution_id}/stream": {
+      "get": {
+        "tags": [
+          "Agent Execution"
+        ],
+        "summary": "Reconnect to execution stream",
+        "description": "Reconnects to an execution's event stream after approval. Replays missed events from event log and continues streaming if execution is still running.",
+        "operationId": "streamExecution",
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "execution_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "from_sequence",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Resume from this event sequence number (for reconnection)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "SSE stream of execution events",
+            "content": {
+              "text/event-stream": {
+                "schema": {
+                  "$ref": "#/components/schemas/StreamEvent"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Execution not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/chat": {
+      "post": {
+        "tags": [
+          "Chat"
+        ],
+        "summary": "Streaming chat with AI agent",
+        "description": "Initiates a streaming chat session with an AI agent. Supports server-side conversation memory via conversationId or client-provided history via clientHistory.",
+        "operationId": "chat",
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChatRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "SSE stream of chat events",
+            "content": {
+              "text/event-stream": {
+                "schema": {
+                  "$ref": "#/components/schemas/StreamEvent"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Agent not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/conversations": {
+      "get": {
+        "tags": [
+          "Conversations"
+        ],
+        "summary": "List conversations",
+        "description": "Lists conversations for the authenticated user, sorted by most recent.",
+        "operationId": "listConversations",
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "agent_id",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by agent ID"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            },
+            "description": "Maximum number of conversations to return"
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Pagination cursor"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of conversations",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListConversationsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error fetching conversations",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/conversations/{conversation_id}": {
+      "get": {
+        "tags": [
+          "Conversations"
+        ],
+        "summary": "Get conversation with messages",
+        "description": "Retrieves a conversation and its message history.",
+        "operationId": "getConversation",
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "conversation_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "message_limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 100
+            },
+            "description": "Maximum number of messages to return"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Conversation with messages",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationWithMessages"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Conversation not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Conversations"
+        ],
+        "summary": "Delete conversation",
+        "description": "Deletes a conversation and all its messages.",
+        "operationId": "deleteConversation",
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "conversation_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Conversation deleted"
+          },
+          "404": {
+            "description": "Conversation not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/conversations/{conversation_id}/feedback": {
+      "post": {
+        "tags": [
+          "Conversations"
+        ],
+        "summary": "Submit feedback for an assistant turn",
+        "description": "Records a thumbs up/down (with optional comment) for the assistant turn identified by its Langfuse trace id. The rating is persisted on the message and mirrored to Langfuse as a trace score.\n",
+        "operationId": "submitConversationFeedback",
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "conversation_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubmitFeedbackRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Feedback recorded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "feedback": {
+                      "$ref": "#/components/schemas/MessageFeedback"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Conversation or message not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -946,6 +1367,28 @@
           "reason": {
             "type": "string",
             "description": "Optional reason for approval"
+          },
+          "approved_action_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "For batch approval - list of action IDs to approve. If not provided, all actions are approved."
+          },
+          "rejected_action_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "For batch approval - list of action IDs to reject. Actions not in approved_action_ids are implicitly rejected."
+          },
+          "share_scope": {
+            "type": "string",
+            "enum": [
+              "primary_only",
+              "primary_and_relations"
+            ],
+            "description": "For `partnering.proposeAssignment` approvals. `primary_only` (default) shares only the primary entity; `primary_and_relations` also shares every entity in the proposal's `related_entities` as a child of the primary. Ignored by other tools.\n"
           }
         }
       },
@@ -1098,6 +1541,37 @@
             "type": "string",
             "format": "date-time",
             "nullable": true
+          },
+          "iterations": {
+            "type": "array",
+            "description": "Slim, labels-only step-progress projection of the ReAct iterations (empty for direct mode). Exposes only index, tool, status, and timestamp — raw thought, action input, and observation are intentionally excluded.",
+            "items": {
+              "$ref": "#/components/schemas/ExecutionIterationProjection"
+            }
+          }
+        }
+      },
+      "ExecutionIterationProjection": {
+        "type": "object",
+        "properties": {
+          "index": {
+            "type": "integer"
+          },
+          "tool": {
+            "type": "string",
+            "nullable": true,
+            "description": "Tool id the iteration invoked, or null for a non-tool step"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "running",
+              "completed"
+            ]
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       },
@@ -1286,7 +1760,8 @@
           "apply",
           "send",
           "link",
-          "unlink"
+          "unlink",
+          "batch_approval"
         ],
         "description": "Type of action being previewed"
       },
@@ -1414,7 +1889,7 @@
             "type": "string",
             "enum": [
               "entity",
-              "email",
+              "message",
               "taxonomy",
               "rag",
               "workflow"
@@ -1462,9 +1937,10 @@
         "enum": [
           "flows",
           "copilot",
+          "portals",
           "all"
         ],
-        "description": "Where the skill/agent is available:\n- flows: Available in workflow automations\n- copilot: Available as a sub-agent in copilot\n- all: Available everywhere\n"
+        "description": "Where the skill/agent is available:\n- flows: Available in workflow automations\n- copilot: Available as a sub-agent in copilot\n- portals: Available in end-user self-service portals\n- all: Available everywhere\n"
       },
       "ExecutionContext": {
         "type": "string",
@@ -1517,9 +1993,10 @@
           "taxonomy",
           "taxonomy-classification",
           "shared-inbox",
-          "label"
+          "label",
+          "matching-criteria"
         ],
-        "description": "Base types:\n- text: Text input field\n- textarea: Multi-line text input field\n- number: Numeric input field\n- boolean: Toggle switch\n- select: Dropdown selection (requires enum array)\n\nCustom types (domain-specific):\n- entity-schema: Entity schema selector (fetches from Entity API)\n- entity-attribute: Entity attribute selector (requires dependsOn)\n- entity-id: Entity picker (search and select entities)\n- taxonomy: Taxonomy selector (fetches from Taxonomy API)\n- taxonomy-classification: Classification selector (requires dependsOn)\n- shared-inbox: Shared inbox selector (fetches from Email Settings API)\n"
+        "description": "Base types:\n- text: Text input field\n- textarea: Multi-line text input field\n- number: Numeric input field\n- boolean: Toggle switch\n- select: Dropdown selection (requires enum array)\n\nCustom types (domain-specific):\n- entity-schema: Entity schema selector (fetches from Entity API)\n- entity-attribute: Entity attribute selector (requires dependsOn)\n- entity-id: Entity picker (search and select entities)\n- taxonomy: Taxonomy selector (fetches from Taxonomy API)\n- taxonomy-classification: Classification selector (requires dependsOn)\n- shared-inbox: Shared inbox selector (fetches from Email Settings API)\n- matching-criteria: Criteria editor for mapping compared fields between two contexts or entities\n"
       },
       "InputParameterDefinition": {
         "type": "object",
@@ -1605,6 +2082,11 @@
               "type": "string"
             },
             "description": "Filter to specific attribute types (for entity-attribute)"
+          },
+          "hidden": {
+            "type": "boolean",
+            "default": false,
+            "description": "Whether to hide the parameter from the UI"
           }
         }
       },
@@ -1689,6 +2171,18 @@
             "type": "integer",
             "default": 4096,
             "maximum": 8192
+          },
+          "thinking": {
+            "type": "boolean",
+            "default": false,
+            "description": "Enable extended thinking/reasoning for the model"
+          },
+          "thinking_budget": {
+            "type": "integer",
+            "default": 10000,
+            "minimum": 1000,
+            "maximum": 50000,
+            "description": "Token budget for extended thinking (only used when thinking is enabled)"
           }
         }
       },
@@ -1703,6 +2197,385 @@
           },
           "details": {
             "type": "object"
+          }
+        }
+      },
+      "ChatRequest": {
+        "type": "object",
+        "required": [
+          "agentId",
+          "message"
+        ],
+        "properties": {
+          "agentId": {
+            "type": "string",
+            "description": "Agent ID to chat with"
+          },
+          "message": {
+            "type": "string",
+            "description": "User message"
+          },
+          "conversationId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Conversation ID for server-side memory. If provided, loads history from DynamoDB."
+          },
+          "clientHistory": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChatMessage"
+            },
+            "description": "Client-provided message history (overrides server-side memory)"
+          },
+          "context": {
+            "type": "object",
+            "properties": {
+              "entityId": {
+                "type": "string"
+              },
+              "customData": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            }
+          },
+          "streaming": {
+            "$ref": "#/components/schemas/StreamingOptions"
+          }
+        }
+      },
+      "ChatMessage": {
+        "type": "object",
+        "required": [
+          "role",
+          "content"
+        ],
+        "properties": {
+          "role": {
+            "type": "string",
+            "enum": [
+              "user",
+              "assistant",
+              "tool",
+              "system"
+            ]
+          },
+          "content": {
+            "type": "string"
+          },
+          "tool_calls": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "input": {
+                  "type": "object"
+                },
+                "output": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "StreamingOptions": {
+        "type": "object",
+        "properties": {
+          "mode": {
+            "type": "string",
+            "enum": [
+              "updates",
+              "messages"
+            ],
+            "default": "updates",
+            "description": "Stream mode - updates for step-based, messages for token-based"
+          },
+          "streamTokens": {
+            "type": "boolean",
+            "default": false,
+            "description": "Enable token-level streaming"
+          },
+          "includeMetadata": {
+            "type": "boolean",
+            "default": false,
+            "description": "Include metadata events"
+          }
+        }
+      },
+      "StreamEvent": {
+        "type": "object",
+        "description": "Server-Sent Event for streaming responses",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "token",
+              "agent_step",
+              "tool_call",
+              "tool_result",
+              "complete",
+              "error",
+              "metadata",
+              "needs_approval"
+            ]
+          },
+          "content": {
+            "type": "string",
+            "description": "Token content (for token events)"
+          },
+          "index": {
+            "type": "integer",
+            "description": "Token index (for token events)"
+          },
+          "tool": {
+            "type": "string",
+            "description": "Tool name (for tool events)"
+          },
+          "input": {
+            "type": "object",
+            "description": "Tool input (for tool_call events)"
+          },
+          "output": {
+            "type": "string",
+            "description": "Tool output (for tool_result events)"
+          },
+          "callId": {
+            "type": "string",
+            "description": "Tool call ID"
+          },
+          "result": {
+            "$ref": "#/components/schemas/ExecutionResult"
+          },
+          "error": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            }
+          },
+          "conversationId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Conversation ID (included in complete events)"
+          }
+        }
+      },
+      "ExecutionResult": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "type": "string"
+          },
+          "structured_output": {
+            "type": "object"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "completed",
+              "failed",
+              "max_iterations",
+              "rejected"
+            ]
+          },
+          "metrics": {
+            "$ref": "#/components/schemas/ExecutionMetrics"
+          }
+        }
+      },
+      "ConversationItem": {
+        "type": "object",
+        "properties": {
+          "conversation_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "user_id": {
+            "type": "string"
+          },
+          "agent_id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "message_count": {
+            "type": "integer"
+          },
+          "last_message": {
+            "type": "string",
+            "description": "Preview of the last message"
+          },
+          "last_message_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "context": {
+            "type": "object",
+            "properties": {
+              "entityId": {
+                "type": "string"
+              },
+              "customData": {
+                "type": "object"
+              }
+            }
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "MessageItem": {
+        "type": "object",
+        "properties": {
+          "conversation_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "user",
+              "assistant",
+              "tool",
+              "system"
+            ]
+          },
+          "content": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "tool_calls": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "input": {
+                  "type": "object"
+                },
+                "output": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "token_count": {
+            "type": "integer"
+          },
+          "trace_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Langfuse trace id for the turn (assistant messages only)"
+          },
+          "feedback": {
+            "$ref": "#/components/schemas/MessageFeedback"
+          }
+        }
+      },
+      "MessageFeedback": {
+        "type": "object",
+        "required": [
+          "rating",
+          "user_id",
+          "submitted_at"
+        ],
+        "properties": {
+          "rating": {
+            "type": "string",
+            "enum": [
+              "up",
+              "down"
+            ]
+          },
+          "comment": {
+            "type": "string"
+          },
+          "user_id": {
+            "type": "string"
+          },
+          "submitted_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "SubmitFeedbackRequest": {
+        "type": "object",
+        "required": [
+          "trace_id",
+          "rating"
+        ],
+        "properties": {
+          "trace_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Langfuse trace id of the assistant turn being rated"
+          },
+          "rating": {
+            "type": "string",
+            "enum": [
+              "up",
+              "down"
+            ]
+          },
+          "comment": {
+            "type": "string",
+            "description": "Optional free-text feedback"
+          }
+        }
+      },
+      "ListConversationsResponse": {
+        "type": "object",
+        "properties": {
+          "conversations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ConversationItem"
+            }
+          },
+          "next_cursor": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ConversationWithMessages": {
+        "type": "object",
+        "properties": {
+          "conversation": {
+            "$ref": "#/components/schemas/ConversationItem"
+          },
+          "messages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MessageItem"
+            }
           }
         }
       }

@@ -100,6 +100,25 @@
         "responses": {}
       }
     },
+    "/v1/agents/{agent_id}/execute/stream": {
+      "post": {
+        "operationId": "executeAgentStream",
+        "parameters": [
+          {
+            "name": "agent_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v1/executions": {
       "get": {
         "operationId": "listExecutions",
@@ -181,6 +200,102 @@
         "parameters": [
           {
             "name": "execution_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/executions/{execution_id}/stream": {
+      "get": {
+        "operationId": "streamExecution",
+        "parameters": [
+          {
+            "name": "execution_id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "from_sequence",
+            "in": "query"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/chat": {
+      "post": {
+        "operationId": "chat",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/conversations": {
+      "get": {
+        "operationId": "listConversations",
+        "parameters": [
+          {
+            "name": "agent_id",
+            "in": "query"
+          },
+          {
+            "name": "limit",
+            "in": "query"
+          },
+          {
+            "name": "cursor",
+            "in": "query"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/conversations/{conversation_id}": {
+      "get": {
+        "operationId": "getConversation",
+        "parameters": [
+          {
+            "name": "conversation_id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "message_limit",
+            "in": "query"
+          }
+        ],
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteConversation",
+        "parameters": [
+          {
+            "name": "conversation_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/conversations/{conversation_id}/feedback": {
+      "post": {
+        "operationId": "submitConversationFeedback",
+        "parameters": [
+          {
+            "name": "conversation_id",
             "in": "path",
             "required": true
           }
