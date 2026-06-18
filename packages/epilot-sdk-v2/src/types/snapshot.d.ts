@@ -137,29 +137,40 @@ export declare namespace Components {
             id: string;
         }
         /**
-         * Both flags default to `false`, which restores every captured resource —
-         * Config Hub's manual-restore semantics. blueprint-manifest-api sets
-         * both `true` when reverting a blueprint install so user edits and
-         * cross-blueprint contributions survive. Each flag is independent so a
-         * caller can preserve edits without preserving co-ownership (or vice
-         * versa). Skipped resources surface under `Operation.skipped`.
+         * Skipped resources surface under `Operation.skipped`. All filters default
+         * to the open setting (apply everything), which keeps Config Hub's manual-
+         * restore semantics unchanged.
          *
          */
         export interface RestoreSnapshotRequest {
             /**
-             * When `true`, skip captured resources whose live destination payload
-             * has diverged from the install-time fingerprint stored on lineage.
-             * Surfaces under `Operation.skipped` with `reason: 'modified'`.
+             * When `true`, skip captured resources whose live payload's content
+             * fingerprint diverges from the capture-time fingerprint stored on
+             * the manifest entry. Self-contained: snapshot-api fetches and hashes
+             * the live payload itself; no cross-service lookup. Surfaces under
+             * `Operation.skipped` with `reason: 'modified'`. Legacy snapshots
+             * captured before fingerprints were stored fail open (applied).
              *
              */
             preserve_modified?: boolean;
             /**
-             * When `true`, skip captured resources whose lineage row carries
-             * another blueprint instance's id (co-ownership ≥2). Surfaces under
-             * `Operation.skipped` with `reason: 'co_owned'`.
+             * Deprecated. Accepted for back-compat but treated as a no-op.
+             * Co-ownership is now expressed via `exclude_target_ids` — the caller
+             * (typically blueprint-manifest-api) computes which targets to skip
+             * from its own data and passes the list. snapshot-api no longer
+             * reaches into BMA's lineage table.
              *
              */
             preserve_co_owned?: boolean;
+            /**
+             * Target ids the caller has decided not to restore. snapshot-api
+             * applies the manifest minus these ids and reports them under
+             * `Operation.skipped` with `reason: 'co_owned'` (the only current
+             * producer of exclude lists is BMA's revert flow, which uses this to
+             * honor multi-blueprint ownership).
+             *
+             */
+            exclude_target_ids?: string[];
         }
         export interface RestoreSnapshotResponse {
             id: string;
@@ -284,10 +295,8 @@ export declare namespace Components {
          */
         export interface SnapshotResourceSummary {
             /**
-             * Cross-service correlation key — matches the lineage row id in
-             * blueprint-manifest-api's lineage table for `blueprint_install`
-             * snapshots. Same as `target_id` for snapshots whose capture
-             * doesn't distinguish source vs destination identifiers.
+             * Deprecated alias of `target_id`. Always equals `target_id` (the
+             * implementation never distinguished them). Use `target_id`.
              *
              */
             lineage_id: string;
@@ -380,11 +389,13 @@ export declare namespace Paths {
             export type Cursor = string;
             export type Resource = string /* ^[^:]+:.+$ */[];
             export type Size = number;
+            export type Trigger = "manual" | "sync" | "blueprint_install" | "scheduled";
         }
         export interface QueryParameters {
             cursor?: Parameters.Cursor;
             size?: Parameters.Size;
             resource?: Parameters.Resource;
+            trigger?: Parameters.Trigger;
         }
         namespace Responses {
             export interface $200 {
@@ -403,12 +414,9 @@ export declare namespace Paths {
     }
     namespace RestoreSnapshot {
         export type RequestBody = /**
-         * Both flags default to `false`, which restores every captured resource —
-         * Config Hub's manual-restore semantics. blueprint-manifest-api sets
-         * both `true` when reverting a blueprint install so user edits and
-         * cross-blueprint contributions survive. Each flag is independent so a
-         * caller can preserve edits without preserving co-ownership (or vice
-         * versa). Skipped resources surface under `Operation.skipped`.
+         * Skipped resources surface under `Operation.skipped`. All filters default
+         * to the open setting (apply everything), which keeps Config Hub's manual-
+         * restore semantics unchanged.
          *
          */
         Components.Schemas.RestoreSnapshotRequest;

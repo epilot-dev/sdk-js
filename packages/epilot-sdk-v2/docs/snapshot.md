@@ -91,6 +91,7 @@ const { data } = await client.listSnapshots({
   cursor: 'example',
   size: 1,
   resource: ['...'],
+  trigger: 'example',
 })
 ```
 
@@ -297,7 +298,8 @@ const { data } = await client.restoreSnapshot(
   },
   {
     preserve_modified: false,
-    preserve_co_owned: false
+    preserve_co_owned: false,
+    exclude_target_ids: ['string']
   },
 )
 ```
@@ -536,16 +538,16 @@ type CreateSnapshotResponse = {
 
 ### `RestoreSnapshotRequest`
 
-Both flags default to `false`, which restores every captured resource —
-Config Hub's manual-restore semantics. blueprint-manifest-api sets
-both `true` when reverting a blueprint install so user edits and
-cross-blueprint contributions survive. Each flag is independent so a
-caller can preserve edits w
+Skipped resources surface under `Operation.skipped`. All filters default
+to the open setting (apply everything), which keeps Config Hub's manual-
+restore semantics unchanged.
+
 
 ```ts
 type RestoreSnapshotRequest = {
   preserve_modified?: boolean
   preserve_co_owned?: boolean
+  exclude_target_ids?: string[]
 }
 ```
 
