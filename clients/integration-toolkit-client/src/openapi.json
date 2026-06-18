@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Integration Toolkit API",
-    "version": "1.3.0",
+    "version": "1.5.1",
     "description": "API for integrating with external systems in a standardised way."
   },
   "tags": [
@@ -1839,6 +1839,164 @@
         }
       }
     },
+    "/v2/integrations/{integrationId}/notifications/history": {
+      "get": {
+        "operationId": "listNotificationHistory",
+        "summary": "listNotificationHistory",
+        "description": "Returns the cursor-paginated, newest-first notification history for an\nintegration (every real notification decision — both fired and suppressed).\nRequires the `integration:view` permission on the integration's organization.\n",
+        "tags": [
+          "integrations"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true,
+            "description": "The integration ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "description": "Opaque base64 pagination cursor returned as `next_cursor` by a prior page.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Maximum number of items to return (clamped to 100).",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 50
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "required": false,
+            "description": "Optional notification type filter (e.g. `critical_error`, `error_threshold`).",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Cursor-paginated notification history (newest first)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationHistoryResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/integrations/{integrationId}/notifications/test": {
+      "post": {
+        "operationId": "testSendNotification",
+        "summary": "testSendNotification",
+        "description": "Renders and sends ONE representative notification of the requested kind/type to\nthe CALLING USER ONLY (never any other recipient), so an operator can preview how\na notification looks. A test send does NOT write to the notification history.\nRequires the `integration:manage` permission on the integration's organization.\n",
+        "tags": [
+          "integrations"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true,
+            "description": "The integration ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TestNotificationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Test notification accepted for delivery to the calling user (sent is true)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TestNotificationResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          },
+          "502": {
+            "description": "The downstream notification service rejected or failed the test send.\nThe body uses TestNotificationResponse with sent set to false so the\noperator sees the real (failed) delivery outcome.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TestNotificationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v2/integrations/{integrationId}/use-cases/{useCaseId}/secure-proxy-whitelist": {
       "get": {
         "operationId": "getSecureProxyWhitelist",
@@ -3402,6 +3560,166 @@
       }
     },
     "schemas": {
+      "NotificationHistoryItem": {
+        "type": "object",
+        "description": "A single notification-history row (one real notification decision).",
+        "required": [
+          "id",
+          "type",
+          "severity",
+          "title",
+          "occurred_at",
+          "notified",
+          "recipients",
+          "context",
+          "created_at"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Stable history row id (ULID)."
+          },
+          "type": {
+            "type": "string",
+            "description": "The notification/rule type (e.g. critical_error, error_threshold, integration_digest)."
+          },
+          "state_transition": {
+            "type": "string",
+            "nullable": true,
+            "description": "The state transition that produced this decision (e.g. OK->ALERTING), when applicable."
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "error",
+              "warning",
+              "info"
+            ],
+            "description": "Severity of the decision."
+          },
+          "title": {
+            "type": "string",
+            "description": "Human-readable title at decision time."
+          },
+          "occurred_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the decision occurred (newest-first ordering key)."
+          },
+          "notified": {
+            "type": "boolean",
+            "description": "Whether the notification was actually sent (true) or suppressed (false)."
+          },
+          "suppressed_reason": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "muted",
+              "debounced",
+              "recipient_opt_out"
+            ],
+            "description": "Why the notification was suppressed (only set when notified is false)."
+          },
+          "recipients": {
+            "type": "array",
+            "description": "epilot user ids the notification was (or would have been) delivered to.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "context": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Type-specific context captured at decision time."
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the history row was written."
+          }
+        }
+      },
+      "NotificationHistoryResponse": {
+        "type": "object",
+        "required": [
+          "history"
+        ],
+        "properties": {
+          "history": {
+            "type": "array",
+            "description": "Notification-history rows, newest first.",
+            "items": {
+              "$ref": "#/components/schemas/NotificationHistoryItem"
+            }
+          },
+          "next_cursor": {
+            "type": "string",
+            "nullable": true,
+            "description": "Opaque base64 cursor for the next page, or null when there are no more rows."
+          }
+        }
+      },
+      "TestNotificationRequest": {
+        "type": "object",
+        "required": [
+          "kind"
+        ],
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "alert",
+              "digest"
+            ],
+            "description": "The kind of notification to render and send."
+          },
+          "type": {
+            "type": "string",
+            "description": "The alert type to render when kind=alert (e.g. critical_error, error_threshold)."
+          },
+          "channels": {
+            "type": "array",
+            "description": "Delivery channels to use; defaults to the integration's configured channels.",
+            "items": {
+              "type": "string",
+              "enum": [
+                "email",
+                "in_app"
+              ]
+            }
+          }
+        }
+      },
+      "TestNotificationResponse": {
+        "type": "object",
+        "required": [
+          "sent",
+          "recipient",
+          "channels"
+        ],
+        "properties": {
+          "sent": {
+            "type": "boolean",
+            "description": "Whether the test notification was accepted for delivery."
+          },
+          "recipient": {
+            "type": "string",
+            "description": "The calling user id the test was sent to (the only recipient)."
+          },
+          "channels": {
+            "type": "array",
+            "description": "The channels the test was delivered on.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "notification_id": {
+            "type": "string",
+            "nullable": true,
+            "description": "The svc-notification-api message id, or null when not returned."
+          }
+        }
+      },
       "ErrorResponseBase": {
         "type": "object",
         "properties": {
@@ -4007,6 +4325,9 @@
         "properties": {
           "autoRefresh": {
             "$ref": "#/components/schemas/AutoRefreshSettings"
+          },
+          "notifications": {
+            "$ref": "#/components/schemas/IntegrationNotificationConfig"
           }
         }
       },
@@ -4023,6 +4344,241 @@
             "type": "integer",
             "minimum": 1,
             "description": "Maximum age (in minutes) of data before it is considered stale and eligible for refresh"
+          }
+        }
+      },
+      "IntegrationNotificationConfig": {
+        "type": "object",
+        "description": "Integration monitoring notification configuration. Rides Integration.settings.notifications (camelCase) and surfaces on both v1 and v2 GET/PUT. Unknown keys are stripped server-side to stay forward-compatible with deferred (V2) rule types.",
+        "required": [
+          "enabled",
+          "recipients",
+          "defaultChannels",
+          "rules",
+          "digest"
+        ],
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "description": "Master switch for this integration's notifications."
+          },
+          "recipients": {
+            "type": "array",
+            "description": "epilot user ids notified for this integration. Same-org membership and per-user notification preferences are enforced at send time (Phases 3–5), not at config-write time.",
+            "items": {
+              "$ref": "#/components/schemas/NotificationRecipient"
+            }
+          },
+          "defaultChannels": {
+            "$ref": "#/components/schemas/NotificationChannelSet"
+          },
+          "monitoredUseCases": {
+            "type": "array",
+            "description": "Integration-level use-case include-filter; absent/empty means all use cases.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "monitoredCodes": {
+            "type": "array",
+            "description": "Integration-level code scope; absent/empty resolves to ['_error_']. Accepts concrete monitoring error codes or group sentinels (_error_, _warning_, _success_, _info_, _any_, _parent_).",
+            "items": {
+              "type": "string"
+            }
+          },
+          "rules": {
+            "type": "array",
+            "description": "Enabled triggers and their params. A type MAY repeat; capped at 20 rules (enforced at the write boundary).",
+            "items": {
+              "$ref": "#/components/schemas/NotificationRule"
+            }
+          },
+          "digest": {
+            "$ref": "#/components/schemas/NotificationDigestConfig"
+          },
+          "muteUntil": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO instant; snooze all non-digest alerts until this time."
+          }
+        }
+      },
+      "NotificationRecipient": {
+        "type": "object",
+        "description": "A configured recipient. Only the epilot user_id is stored.",
+        "required": [
+          "user_id"
+        ],
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "description": "epilot user id. Same-org membership is enforced at send time (Phases 3–5), which re-validates each recipient against the integration's org before fanning out — it is not enforced at config-write time."
+          }
+        }
+      },
+      "NotificationChannelSet": {
+        "type": "object",
+        "description": "Delivery channel toggles. New channels added in svc-notification-api inherit here.",
+        "required": [
+          "email",
+          "in_app"
+        ],
+        "properties": {
+          "email": {
+            "type": "boolean"
+          },
+          "in_app": {
+            "type": "boolean"
+          }
+        }
+      },
+      "NotificationRule": {
+        "type": "object",
+        "description": "A single notification rule. Only the params relevant to a given type are set. The id is a server-minted ULID, preserved across edits.",
+        "required": [
+          "id",
+          "type",
+          "enabled"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Stable server-minted ULID. AlertState + baseline key."
+          },
+          "name": {
+            "type": "string",
+            "description": "Optional human label disambiguating two rules of the same type."
+          },
+          "type": {
+            "type": "string",
+            "description": "Rule trigger type. V1 produces the first six; the remaining values are deferred (V2) catalog types accepted by the data model but not produced by any V1 producer.",
+            "enum": [
+              "critical_error",
+              "error_threshold",
+              "warning_threshold",
+              "success_rate_drop",
+              "recovery",
+              "silence",
+              "consecutive_failures",
+              "first_error",
+              "new_error_code",
+              "auth_expiry",
+              "ack_timeout",
+              "validation_surge"
+            ]
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "channels": {
+            "$ref": "#/components/schemas/NotificationChannelSet"
+          },
+          "codes": {
+            "type": "array",
+            "description": "Per-rule code scope. Event-matching rules default to ['_parent_']; silence defaults to ['_any_']. success_rate_drop and recovery take no codes.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "threshold": {
+            "description": "Count or percentage; 'auto' selects anomaly-baseline mode.",
+            "oneOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string",
+                "enum": [
+                  "auto"
+                ]
+              }
+            ]
+          },
+          "sensitivity": {
+            "type": "string",
+            "description": "Band width for 'auto' mode.",
+            "enum": [
+              "low",
+              "medium",
+              "high"
+            ]
+          },
+          "fallbackThreshold": {
+            "type": "number",
+            "description": "Static value used while the 'auto' baseline is immature (cold start)."
+          },
+          "window": {
+            "type": "string",
+            "description": "Evaluation window, e.g. '15m', '1h', '24h'."
+          },
+          "minSampleSize": {
+            "type": "integer",
+            "description": "success_rate_drop minimum sample size guard."
+          },
+          "consecutive": {
+            "type": "integer",
+            "description": "consecutive_failures count."
+          },
+          "quietPeriod": {
+            "type": "string",
+            "description": "silence quiet period, e.g. '12h'."
+          }
+        }
+      },
+      "NotificationDigestConfig": {
+        "type": "object",
+        "description": "Digest schedule and content configuration.",
+        "required": [
+          "enabled",
+          "frequency",
+          "timeOfDay",
+          "timezone",
+          "channels",
+          "includeHealthy",
+          "skipIfEmpty"
+        ],
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "frequency": {
+            "type": "string",
+            "enum": [
+              "daily",
+              "weekly"
+            ]
+          },
+          "dayOfWeek": {
+            "type": "integer",
+            "description": "Weekly only. 0 = Sunday … 6 = Saturday.",
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "timeOfDay": {
+            "type": "string",
+            "description": "HH:mm"
+          },
+          "timezone": {
+            "type": "string",
+            "description": "IANA timezone, e.g. 'Europe/Berlin'."
+          },
+          "channels": {
+            "$ref": "#/components/schemas/NotificationChannelSet"
+          },
+          "includeHealthy": {
+            "type": "boolean",
+            "description": "List all integrations vs. only ones with issues."
+          },
+          "skipIfEmpty": {
+            "type": "boolean",
+            "description": "Suppress the digest when nothing happened."
           }
         }
       },

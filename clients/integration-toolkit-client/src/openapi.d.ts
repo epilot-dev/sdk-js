@@ -2883,6 +2883,37 @@ declare namespace Components {
              */
             fields: IntegrationEntityField[];
         }
+        /**
+         * Integration monitoring notification configuration. Rides Integration.settings.notifications (camelCase) and surfaces on both v1 and v2 GET/PUT. Unknown keys are stripped server-side to stay forward-compatible with deferred (V2) rule types.
+         */
+        export interface IntegrationNotificationConfig {
+            /**
+             * Master switch for this integration's notifications.
+             */
+            enabled: boolean;
+            /**
+             * epilot user ids notified for this integration. Same-org membership and per-user notification preferences are enforced at send time (Phases 3–5), not at config-write time.
+             */
+            recipients: /* A configured recipient. Only the epilot user_id is stored. */ NotificationRecipient[];
+            defaultChannels: /* Delivery channel toggles. New channels added in svc-notification-api inherit here. */ NotificationChannelSet;
+            /**
+             * Integration-level use-case include-filter; absent/empty means all use cases.
+             */
+            monitoredUseCases?: string[];
+            /**
+             * Integration-level code scope; absent/empty resolves to ['_error_']. Accepts concrete monitoring error codes or group sentinels (_error_, _warning_, _success_, _info_, _any_, _parent_).
+             */
+            monitoredCodes?: string[];
+            /**
+             * Enabled triggers and their params. A type MAY repeat; capped at 20 rules (enforced at the write boundary).
+             */
+            rules: /* A single notification rule. Only the params relevant to a given type are set. The id is a server-minted ULID, preserved across edits. */ NotificationRule[];
+            digest: /* Digest schedule and content configuration. */ NotificationDigestConfig;
+            /**
+             * ISO instant; snooze all non-digest alerts until this time.
+             */
+            muteUntil?: string; // date-time
+        }
         export interface IntegrationObjectV1 {
             /**
              * Mapping of entity types to their unique identifier field mappings
@@ -2902,6 +2933,7 @@ declare namespace Components {
          */
         export interface IntegrationSettings {
             autoRefresh?: /* Auto-refresh settings for keeping integration data fresh */ AutoRefreshSettings;
+            notifications?: /* Integration monitoring notification configuration. Rides Integration.settings.notifications (camelCase) and surfaces on both v1 and v2 GET/PUT. Unknown keys are stripped server-side to stay forward-compatible with deferred (V2) rule types. */ IntegrationNotificationConfig;
         }
         /**
          * Integration with embedded use cases for atomic CRUD operations
@@ -3489,6 +3521,162 @@ declare namespace Components {
             breakdown?: {
                 [name: string]: any;
             }[];
+        }
+        /**
+         * Delivery channel toggles. New channels added in svc-notification-api inherit here.
+         */
+        export interface NotificationChannelSet {
+            email: boolean;
+            in_app: boolean;
+        }
+        /**
+         * Digest schedule and content configuration.
+         */
+        export interface NotificationDigestConfig {
+            enabled: boolean;
+            frequency: "daily" | "weekly";
+            /**
+             * Weekly only. 0 = Sunday … 6 = Saturday.
+             */
+            dayOfWeek?: 0 | 1 | 2 | 3 | 4 | 5 | 6;
+            /**
+             * HH:mm
+             */
+            timeOfDay: string;
+            /**
+             * IANA timezone, e.g. 'Europe/Berlin'.
+             */
+            timezone: string;
+            channels: /* Delivery channel toggles. New channels added in svc-notification-api inherit here. */ NotificationChannelSet;
+            /**
+             * List all integrations vs. only ones with issues.
+             */
+            includeHealthy: boolean;
+            /**
+             * Suppress the digest when nothing happened.
+             */
+            skipIfEmpty: boolean;
+        }
+        /**
+         * A single notification-history row (one real notification decision).
+         */
+        export interface NotificationHistoryItem {
+            /**
+             * Stable history row id (ULID).
+             */
+            id: string;
+            /**
+             * The notification/rule type (e.g. critical_error, error_threshold, integration_digest).
+             */
+            type: string;
+            /**
+             * The state transition that produced this decision (e.g. OK->ALERTING), when applicable.
+             */
+            state_transition?: string | null;
+            /**
+             * Severity of the decision.
+             */
+            severity: "error" | "warning" | "info";
+            /**
+             * Human-readable title at decision time.
+             */
+            title: string;
+            /**
+             * When the decision occurred (newest-first ordering key).
+             */
+            occurred_at: string; // date-time
+            /**
+             * Whether the notification was actually sent (true) or suppressed (false).
+             */
+            notified: boolean;
+            /**
+             * Why the notification was suppressed (only set when notified is false).
+             */
+            suppressed_reason?: "muted" | "debounced" | "recipient_opt_out";
+            /**
+             * epilot user ids the notification was (or would have been) delivered to.
+             */
+            recipients: string[];
+            /**
+             * Type-specific context captured at decision time.
+             */
+            context: {
+                [name: string]: any;
+            };
+            /**
+             * When the history row was written.
+             */
+            created_at: string; // date-time
+        }
+        export interface NotificationHistoryResponse {
+            /**
+             * Notification-history rows, newest first.
+             */
+            history: /* A single notification-history row (one real notification decision). */ NotificationHistoryItem[];
+            /**
+             * Opaque base64 cursor for the next page, or null when there are no more rows.
+             */
+            next_cursor?: string | null;
+        }
+        /**
+         * A configured recipient. Only the epilot user_id is stored.
+         */
+        export interface NotificationRecipient {
+            /**
+             * epilot user id. Same-org membership is enforced at send time (Phases 3–5), which re-validates each recipient against the integration's org before fanning out — it is not enforced at config-write time.
+             */
+            user_id: string;
+        }
+        /**
+         * A single notification rule. Only the params relevant to a given type are set. The id is a server-minted ULID, preserved across edits.
+         */
+        export interface NotificationRule {
+            /**
+             * Stable server-minted ULID. AlertState + baseline key.
+             */
+            id: string;
+            /**
+             * Optional human label disambiguating two rules of the same type.
+             */
+            name?: string;
+            /**
+             * Rule trigger type. V1 produces the first six; the remaining values are deferred (V2) catalog types accepted by the data model but not produced by any V1 producer.
+             */
+            type: "critical_error" | "error_threshold" | "warning_threshold" | "success_rate_drop" | "recovery" | "silence" | "consecutive_failures" | "first_error" | "new_error_code" | "auth_expiry" | "ack_timeout" | "validation_surge";
+            enabled: boolean;
+            channels?: /* Delivery channel toggles. New channels added in svc-notification-api inherit here. */ NotificationChannelSet;
+            /**
+             * Per-rule code scope. Event-matching rules default to ['_parent_']; silence defaults to ['_any_']. success_rate_drop and recovery take no codes.
+             */
+            codes?: string[];
+            /**
+             * Count or percentage; 'auto' selects anomaly-baseline mode.
+             */
+            threshold?: /* Count or percentage; 'auto' selects anomaly-baseline mode. */ number | ("auto");
+            /**
+             * Band width for 'auto' mode.
+             */
+            sensitivity?: "low" | "medium" | "high";
+            /**
+             * Static value used while the 'auto' baseline is immature (cold start).
+             */
+            fallbackThreshold?: number;
+            /**
+             * Evaluation window, e.g. '15m', '1h', '24h'.
+             */
+            window?: string;
+            /**
+             * success_rate_drop minimum sample size guard.
+             */
+            minSampleSize?: number;
+            /**
+             * consecutive_failures count.
+             */
+            consecutive?: number;
+            /**
+             * silence quiet period, e.g. '12h'.
+             */
+            quietPeriod?: string;
         }
         export interface OutboundConflict {
             /**
@@ -4944,6 +5132,38 @@ declare namespace Components {
              */
             overwrite?: boolean;
         }
+        export interface TestNotificationRequest {
+            /**
+             * The kind of notification to render and send.
+             */
+            kind: "alert" | "digest";
+            /**
+             * The alert type to render when kind=alert (e.g. critical_error, error_threshold).
+             */
+            type?: string;
+            /**
+             * Delivery channels to use; defaults to the integration's configured channels.
+             */
+            channels?: ("email" | "in_app")[];
+        }
+        export interface TestNotificationResponse {
+            /**
+             * Whether the test notification was accepted for delivery.
+             */
+            sent: boolean;
+            /**
+             * The calling user id the test was sent to (the only recipient).
+             */
+            recipient: string;
+            /**
+             * The channels the test was delivered on.
+             */
+            channels: string[];
+            /**
+             * The svc-notification-api message id, or null when not returned.
+             */
+            notification_id?: string | null;
+        }
         export interface TimeSeriesBreakdownItemV2 {
             /**
              * Present when grouping by use_case_type
@@ -5875,6 +6095,30 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace ListNotificationHistory {
+        namespace Parameters {
+            export type Cursor = string;
+            export type IntegrationId = string; // uuid
+            export type Limit = number;
+            export type Type = string;
+        }
+        export interface PathParameters {
+            integrationId: Parameters.IntegrationId /* uuid */;
+        }
+        export interface QueryParameters {
+            cursor?: Parameters.Cursor;
+            limit?: Parameters.Limit;
+            type?: Parameters.Type;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.NotificationHistoryResponse;
+            export type $400 = Components.Responses.BadRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace ListOutboundDlqMessages {
         namespace Parameters {
             export type IntegrationId = string; // uuid
@@ -6241,6 +6485,24 @@ declare namespace Paths {
             export type $401 = Components.Responses.Unauthorized;
             export type $422 = Components.Schemas.ErrorResponseBase;
             export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace TestSendNotification {
+        namespace Parameters {
+            export type IntegrationId = string; // uuid
+        }
+        export interface PathParameters {
+            integrationId: Parameters.IntegrationId /* uuid */;
+        }
+        export type RequestBody = Components.Schemas.TestNotificationRequest;
+        namespace Responses {
+            export type $202 = Components.Schemas.TestNotificationResponse;
+            export type $400 = Components.Responses.BadRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+            export type $502 = Components.Schemas.TestNotificationResponse;
         }
     }
     namespace TriggerErp {
@@ -6645,6 +6907,33 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteIntegrationV2.Responses.$200>
+  /**
+   * listNotificationHistory - listNotificationHistory
+   * 
+   * Returns the cursor-paginated, newest-first notification history for an
+   * integration (every real notification decision — both fired and suppressed).
+   * Requires the `integration:view` permission on the integration's organization.
+   * 
+   */
+  'listNotificationHistory'(
+    parameters?: Parameters<Paths.ListNotificationHistory.QueryParameters & Paths.ListNotificationHistory.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ListNotificationHistory.Responses.$200>
+  /**
+   * testSendNotification - testSendNotification
+   * 
+   * Renders and sends ONE representative notification of the requested kind/type to
+   * the CALLING USER ONLY (never any other recipient), so an operator can preview how
+   * a notification looks. A test send does NOT write to the notification history.
+   * Requires the `integration:manage` permission on the integration's organization.
+   * 
+   */
+  'testSendNotification'(
+    parameters?: Parameters<Paths.TestSendNotification.PathParameters> | null,
+    data?: Paths.TestSendNotification.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.TestSendNotification.Responses.$202>
   /**
    * getSecureProxyWhitelist - Get secure_proxy whitelist (admin portal only)
    * 
@@ -7323,6 +7612,37 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteIntegrationV2.Responses.$200>
   }
+  ['/v2/integrations/{integrationId}/notifications/history']: {
+    /**
+     * listNotificationHistory - listNotificationHistory
+     * 
+     * Returns the cursor-paginated, newest-first notification history for an
+     * integration (every real notification decision — both fired and suppressed).
+     * Requires the `integration:view` permission on the integration's organization.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.ListNotificationHistory.QueryParameters & Paths.ListNotificationHistory.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ListNotificationHistory.Responses.$200>
+  }
+  ['/v2/integrations/{integrationId}/notifications/test']: {
+    /**
+     * testSendNotification - testSendNotification
+     * 
+     * Renders and sends ONE representative notification of the requested kind/type to
+     * the CALLING USER ONLY (never any other recipient), so an operator can preview how
+     * a notification looks. A test send does NOT write to the notification history.
+     * Requires the `integration:manage` permission on the integration's organization.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.TestSendNotification.PathParameters> | null,
+      data?: Paths.TestSendNotification.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.TestSendNotification.Responses.$202>
+  }
   ['/v2/integrations/{integrationId}/use-cases/{useCaseId}/secure-proxy-whitelist']: {
     /**
      * getSecureProxyWhitelist - Get secure_proxy whitelist (admin portal only)
@@ -7807,6 +8127,7 @@ export type IntegrationEntity = Components.Schemas.IntegrationEntity;
 export type IntegrationEntityField = Components.Schemas.IntegrationEntityField;
 export type IntegrationFieldV1 = Components.Schemas.IntegrationFieldV1;
 export type IntegrationMeterReading = Components.Schemas.IntegrationMeterReading;
+export type IntegrationNotificationConfig = Components.Schemas.IntegrationNotificationConfig;
 export type IntegrationObjectV1 = Components.Schemas.IntegrationObjectV1;
 export type IntegrationSettings = Components.Schemas.IntegrationSettings;
 export type IntegrationWithUseCases = Components.Schemas.IntegrationWithUseCases;
@@ -7828,6 +8149,12 @@ export type MeterUniqueIdsConfig = Components.Schemas.MeterUniqueIdsConfig;
 export type MonitoringEventV2 = Components.Schemas.MonitoringEventV2;
 export type MonitoringStats = Components.Schemas.MonitoringStats;
 export type MonitoringStatsV2 = Components.Schemas.MonitoringStatsV2;
+export type NotificationChannelSet = Components.Schemas.NotificationChannelSet;
+export type NotificationDigestConfig = Components.Schemas.NotificationDigestConfig;
+export type NotificationHistoryItem = Components.Schemas.NotificationHistoryItem;
+export type NotificationHistoryResponse = Components.Schemas.NotificationHistoryResponse;
+export type NotificationRecipient = Components.Schemas.NotificationRecipient;
+export type NotificationRule = Components.Schemas.NotificationRule;
 export type OutboundConflict = Components.Schemas.OutboundConflict;
 export type OutboundDlqListResponse = Components.Schemas.OutboundDlqListResponse;
 export type OutboundDlqMessage = Components.Schemas.OutboundDlqMessage;
@@ -7873,6 +8200,8 @@ export type SecureProxyUseCaseHistoryEntry = Components.Schemas.SecureProxyUseCa
 export type SecureProxyWhitelist = Components.Schemas.SecureProxyWhitelist;
 export type SecureProxyWhitelistUpdate = Components.Schemas.SecureProxyWhitelistUpdate;
 export type SetIntegrationAppMappingRequest = Components.Schemas.SetIntegrationAppMappingRequest;
+export type TestNotificationRequest = Components.Schemas.TestNotificationRequest;
+export type TestNotificationResponse = Components.Schemas.TestNotificationResponse;
 export type TimeSeriesBreakdownItemV2 = Components.Schemas.TimeSeriesBreakdownItemV2;
 export type TimeSeriesBucket = Components.Schemas.TimeSeriesBucket;
 export type TimeSeriesBucketV2 = Components.Schemas.TimeSeriesBucketV2;
