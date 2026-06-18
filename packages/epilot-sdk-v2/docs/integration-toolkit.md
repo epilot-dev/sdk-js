@@ -161,6 +161,7 @@ const { data } = await integrationToolkitClient.acknowledgeTracking(...)
 - [`SecureProxySummary`](#secureproxysummary)
 - [`SecureProxyRequest`](#secureproxyrequest)
 - [`SecureProxyResponse`](#secureproxyresponse)
+- [`SecureProxyUpstreamError`](#secureproxyupstreamerror)
 - [`ManagedCallOperationConfig`](#managedcalloperationconfig)
 - [`ManagedCallOperation`](#managedcalloperation)
 - [`ManagedCallExecuteRequest`](#managedcallexecuterequest)
@@ -5450,6 +5451,18 @@ type SecureProxyResponse = {
   status_code?: number
   headers?: Record<string, string>
   body?: unknown
+}
+```
+
+### `SecureProxyUpstreamError`
+
+Error payload returned when epilot could not obtain an HTTP response from the proxied target. The failure is epilot-generated (HTTP 502) but the cause is usually remote-side; `code`/`reason` make that attributable.
+
+```ts
+type SecureProxyUpstreamError = {
+  message: "Upstream network error" | "Upstream error"
+  code?: string
+  reason?: string
 }
 ```
 
