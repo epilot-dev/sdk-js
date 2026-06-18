@@ -742,19 +742,14 @@
       },
       "RestoreSnapshotRequest": {
         "type": "object",
-        "description": "Apply a captured snapshot to its source org. All filters default to the\nopen setting (apply everything), which keeps Config Hub's manual-restore\nsemantics unchanged.\n",
+        "description": "Apply a captured snapshot to its source org. snapshot-api applies the\nmanifest verbatim minus any target ids the caller pre-decided to skip.\nDrift detection (skip modified-since-install) is the caller's\nresponsibility — blueprint-manifest-api owns that logic for blueprint\nrestores; Config Hub's manual restore just omits the field.\n",
         "properties": {
-          "preserve_modified": {
-            "type": "boolean",
-            "default": false,
-            "description": "When `true`, skip captured resources whose live payload's content\nfingerprint diverges from the capture-time fingerprint stored on\nthe manifest entry. snapshot-api fetches the live payload and\nhashes it itself; no cross-service lookup. Surfaces under\n`Operation.skipped` with `reason: 'modified'`. Legacy snapshots\ncaptured before fingerprints were stored fail open (applied).\n"
-          },
           "exclude_target_ids": {
             "type": "array",
             "items": {
               "type": "string"
             },
-            "description": "Target ids the caller has decided not to restore. snapshot-api\napplies the manifest minus these ids. Drops are silent — not\nechoed in `Operation.skipped` — because the caller supplied the\nlist and already knows.\n"
+            "description": "Target ids the caller has decided not to restore. snapshot-api\napplies the manifest minus these ids. Drops are silent — the\ncaller supplied the list and already knows.\n"
           }
         }
       },
@@ -908,39 +903,13 @@
               "partial",
               "failed"
             ],
-            "description": "`partial` indicates the operation completed but snapshot-api\nskipped at least one captured resource via its own drift check\n(see `skipped`).\n"
+            "description": "`partial` indicates `engine.apply` reported a partial success\n(one or more resources failed individually) but the operation\nas a whole did not fail.\n"
           },
           "error": {
             "type": "string"
           },
           "triggered_by": {
             "$ref": "#/components/schemas/CallerIdentity"
-          },
-          "skipped": {
-            "type": "array",
-            "description": "Captured resources snapshot-api elected to skip — currently\nonly drift detections (`preserve_modified: true`). Caller-\nsupplied `exclude_target_ids` skips are NOT echoed here; the\ncaller built the list, the caller knows.\n",
-            "items": {
-              "$ref": "#/components/schemas/SkippedResource"
-            }
-          }
-        }
-      },
-      "SkippedResource": {
-        "type": "object",
-        "required": [
-          "target_id",
-          "reason"
-        ],
-        "properties": {
-          "target_id": {
-            "type": "string"
-          },
-          "reason": {
-            "type": "string",
-            "enum": [
-              "modified"
-            ],
-            "description": "- `modified` — live destination payload's content fingerprint\n  differs from the capture-time fingerprint stored on the\n  manifest entry. Only set when the restore was requested with\n  `preserve_modified: true`.\n"
           }
         }
       },
