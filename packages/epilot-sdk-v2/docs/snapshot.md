@@ -124,7 +124,7 @@ const { data } = await client.listSnapshots({
         },
         "skipped": [
           {
-            "lineage_id": "string",
+            "target_id": "string",
             "reason": "modified"
           }
         ]
@@ -143,7 +143,7 @@ const { data } = await client.listSnapshots({
           },
           "skipped": [
             {
-              "lineage_id": "string",
+              "target_id": "string",
               "reason": "modified"
             }
           ]
@@ -228,7 +228,7 @@ const { data } = await client.getSnapshot({
     },
     "skipped": [
       {
-        "lineage_id": "string",
+        "target_id": "string",
         "reason": "modified"
       }
     ]
@@ -247,7 +247,7 @@ const { data } = await client.getSnapshot({
       },
       "skipped": [
         {
-          "lineage_id": "string",
+          "target_id": "string",
           "reason": "modified"
         }
       ]
@@ -298,7 +298,6 @@ const { data } = await client.restoreSnapshot(
   },
   {
     preserve_modified: false,
-    preserve_co_owned: false,
     exclude_target_ids: ['string']
   },
 )
@@ -538,15 +537,14 @@ type CreateSnapshotResponse = {
 
 ### `RestoreSnapshotRequest`
 
-Skipped resources surface under `Operation.skipped`. All filters default
-to the open setting (apply everything), which keeps Config Hub's manual-
-restore semantics unchanged.
+Apply a captured snapshot to its source org. All filters default to the
+open setting (apply everything), which keeps Config Hub's manual-restore
+semantics unchanged.
 
 
 ```ts
 type RestoreSnapshotRequest = {
   preserve_modified?: boolean
-  preserve_co_owned?: boolean
   exclude_target_ids?: string[]
 }
 ```
@@ -583,7 +581,7 @@ type Snapshot = {
       token_id?: { ... }
     }
     skipped?: Array<{
-      lineage_id: { ... }
+      target_id: { ... }
       reason: { ... }
     }>
   }
@@ -599,7 +597,7 @@ type Snapshot = {
       token_id?: { ... }
     }
     skipped?: Array<{
-      lineage_id: { ... }
+      target_id: { ... }
       reason: { ... }
     }>
   }>
@@ -630,8 +628,8 @@ type Operation = {
     token_id?: string
   }
   skipped?: Array<{
-    lineage_id: string
-    reason: "modified" | "co_owned"
+    target_id: string
+    reason: "modified"
   }>
 }
 ```
@@ -640,8 +638,8 @@ type Operation = {
 
 ```ts
 type SkippedResource = {
-  lineage_id: string
-  reason: "modified" | "co_owned"
+  target_id: string
+  reason: "modified"
 }
 ```
 
