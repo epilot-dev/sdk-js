@@ -1,4 +1,4 @@
-# AI Agents API - OpenAPI 3.0
+# AI Agents API
 
 - **Base URL:** `https://ai-agents.sls.epilot.io`
 - **Full API Docs:** [https://docs.epilot.io/api/ai-agents](https://docs.epilot.io/api/ai-agents)
@@ -33,12 +33,23 @@ const { data } = await aiAgentsClient.createAgent(...)
 
 **Agent Execution**
 - [`executeAgent`](#executeagent)
+- [`executeAgentStream`](#executeagentstream)
 - [`listExecutions`](#listexecutions)
 - [`getExecution`](#getexecution)
 - [`cancelExecution`](#cancelexecution)
 - [`getExecutionTrace`](#getexecutiontrace)
 - [`approveExecution`](#approveexecution)
 - [`rejectExecution`](#rejectexecution)
+- [`streamExecution`](#streamexecution)
+
+**Chat**
+- [`chat`](#chat)
+
+**Conversations**
+- [`listConversations`](#listconversations)
+- [`getConversation`](#getconversation)
+- [`deleteConversation`](#deleteconversation)
+- [`submitConversationFeedback`](#submitconversationfeedback)
 
 **Schemas**
 - [`AgentId`](#agentid)
@@ -51,6 +62,7 @@ const { data } = await aiAgentsClient.createAgent(...)
 - [`RejectExecutionRequest`](#rejectexecutionrequest)
 - [`ExecuteAgentRequest`](#executeagentrequest)
 - [`ExecutionResponse`](#executionresponse)
+- [`ExecutionIterationProjection`](#executioniterationprojection)
 - [`ExecutionTrace`](#executiontrace)
 - [`ExecutionIteration`](#executioniteration)
 - [`PendingAction`](#pendingaction)
@@ -74,6 +86,17 @@ const { data } = await aiAgentsClient.createAgent(...)
 - [`InputParametersSchema`](#inputparametersschema)
 - [`ModelConfig`](#modelconfig)
 - [`Error`](#error)
+- [`ChatRequest`](#chatrequest)
+- [`ChatMessage`](#chatmessage)
+- [`StreamingOptions`](#streamingoptions)
+- [`StreamEvent`](#streamevent)
+- [`ExecutionResult`](#executionresult)
+- [`ConversationItem`](#conversationitem)
+- [`MessageItem`](#messageitem)
+- [`MessageFeedback`](#messagefeedback)
+- [`SubmitFeedbackRequest`](#submitfeedbackrequest)
+- [`ListConversationsResponse`](#listconversationsresponse)
+- [`ConversationWithMessages`](#conversationwithmessages)
 
 ### `createAgent`
 
@@ -94,7 +117,9 @@ const { data } = await client.createAgent(
     model_config: {
       model_id: 'anthropic.claude-3-5-sonnet-20241022-v2:0',
       temperature: 0.7,
-      max_tokens: 4096
+      max_tokens: 4096,
+      thinking: false,
+      thinking_budget: 10000
     },
     max_iterations: 10,
     execution_pattern: 'direct',
@@ -144,7 +169,9 @@ const { data } = await client.createAgent(
   "model_config": {
     "model_id": "anthropic.claude-3-5-sonnet-20241022-v2:0",
     "temperature": 0.7,
-    "max_tokens": 4096
+    "max_tokens": 4096,
+    "thinking": false,
+    "thinking_budget": 10000
   },
   "max_iterations": 0,
   "execution_pattern": "direct",
@@ -216,7 +243,9 @@ const { data } = await client.listAgents({
       "model_config": {
         "model_id": "anthropic.claude-3-5-sonnet-20241022-v2:0",
         "temperature": 0.7,
-        "max_tokens": 4096
+        "max_tokens": 4096,
+        "thinking": false,
+        "thinking_budget": 10000
       },
       "max_iterations": 0,
       "execution_pattern": "direct",
@@ -287,7 +316,9 @@ const { data } = await client.getAgentById({
   "model_config": {
     "model_id": "anthropic.claude-3-5-sonnet-20241022-v2:0",
     "temperature": 0.7,
-    "max_tokens": 4096
+    "max_tokens": 4096,
+    "thinking": false,
+    "thinking_budget": 10000
   },
   "max_iterations": 0,
   "execution_pattern": "direct",
@@ -345,7 +376,9 @@ const { data } = await client.updateAgentById(
     model_config: {
       model_id: 'anthropic.claude-3-5-sonnet-20241022-v2:0',
       temperature: 0.7,
-      max_tokens: 4096
+      max_tokens: 4096,
+      thinking: false,
+      thinking_budget: 10000
     },
     max_iterations: 1,
     execution_pattern: 'direct',
@@ -395,7 +428,9 @@ const { data } = await client.updateAgentById(
   "model_config": {
     "model_id": "anthropic.claude-3-5-sonnet-20241022-v2:0",
     "temperature": 0.7,
-    "max_tokens": 4096
+    "max_tokens": 4096,
+    "thinking": false,
+    "thinking_budget": 10000
   },
   "max_iterations": 0,
   "execution_pattern": "direct",
@@ -566,11 +601,56 @@ const { data } = await client.executeAgent(
     "iteration_count": 0
   },
   "started_at": "1970-01-01T00:00:00.000Z",
-  "completed_at": "1970-01-01T00:00:00.000Z"
+  "completed_at": "1970-01-01T00:00:00.000Z",
+  "iterations": [
+    {
+      "index": 0,
+      "tool": "string",
+      "status": "running",
+      "timestamp": "1970-01-01T00:00:00.000Z"
+    }
+  ]
 }
 ```
 
 </details>
+
+---
+
+### `executeAgentStream`
+
+Execute an agent with streaming response
+
+`POST /v1/agents/{agent_id}/execute/stream`
+
+```ts
+const { data } = await client.executeAgentStream(
+  {
+    agent_id: 'example',
+  },
+  {
+    input: {
+      entity_id: 'string',
+      entity_schema: 'string',
+      workflow_id: 'string',
+      workflow_execution_id: 'string',
+      task_id: 'string',
+      custom_data: {},
+      flow_context: [
+        {
+          entity_id: 'string',
+          entity_schema: 'string'
+        }
+      ]
+    },
+    parameters: {},
+    execution_mode_override: 'automatic',
+    execution_context: 'flows',
+    callback_url: 'https://example.com/path',
+    timeout_ms: 30000
+  },
+)
+```
 
 ---
 
@@ -675,7 +755,15 @@ const { data } = await client.listExecutions({
         "iteration_count": 0
       },
       "started_at": "1970-01-01T00:00:00.000Z",
-      "completed_at": "1970-01-01T00:00:00.000Z"
+      "completed_at": "1970-01-01T00:00:00.000Z",
+      "iterations": [
+        {
+          "index": 0,
+          "tool": "string",
+          "status": "running",
+          "timestamp": "1970-01-01T00:00:00.000Z"
+        }
+      ]
     }
   ],
   "next_cursor": "string"
@@ -783,7 +871,15 @@ const { data } = await client.getExecution({
     "iteration_count": 0
   },
   "started_at": "1970-01-01T00:00:00.000Z",
-  "completed_at": "1970-01-01T00:00:00.000Z"
+  "completed_at": "1970-01-01T00:00:00.000Z",
+  "iterations": [
+    {
+      "index": 0,
+      "tool": "string",
+      "status": "running",
+      "timestamp": "1970-01-01T00:00:00.000Z"
+    }
+  ]
 }
 ```
 
@@ -888,7 +984,15 @@ const { data } = await client.cancelExecution({
     "iteration_count": 0
   },
   "started_at": "1970-01-01T00:00:00.000Z",
-  "completed_at": "1970-01-01T00:00:00.000Z"
+  "completed_at": "1970-01-01T00:00:00.000Z",
+  "iterations": [
+    {
+      "index": 0,
+      "tool": "string",
+      "status": "running",
+      "timestamp": "1970-01-01T00:00:00.000Z"
+    }
+  ]
 }
 ```
 
@@ -948,7 +1052,10 @@ const { data } = await client.approveExecution(
     execution_id: 'example',
   },
   {
-    reason: 'string'
+    reason: 'string',
+    approved_action_ids: ['string'],
+    rejected_action_ids: ['string'],
+    share_scope: 'primary_only'
   },
 )
 ```
@@ -1038,7 +1145,15 @@ const { data } = await client.approveExecution(
     "iteration_count": 0
   },
   "started_at": "1970-01-01T00:00:00.000Z",
-  "completed_at": "1970-01-01T00:00:00.000Z"
+  "completed_at": "1970-01-01T00:00:00.000Z",
+  "iterations": [
+    {
+      "index": 0,
+      "tool": "string",
+      "status": "running",
+      "timestamp": "1970-01-01T00:00:00.000Z"
+    }
+  ]
 }
 ```
 
@@ -1148,7 +1263,231 @@ const { data } = await client.rejectExecution(
     "iteration_count": 0
   },
   "started_at": "1970-01-01T00:00:00.000Z",
-  "completed_at": "1970-01-01T00:00:00.000Z"
+  "completed_at": "1970-01-01T00:00:00.000Z",
+  "iterations": [
+    {
+      "index": 0,
+      "tool": "string",
+      "status": "running",
+      "timestamp": "1970-01-01T00:00:00.000Z"
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `streamExecution`
+
+Reconnect to execution stream
+
+`GET /v1/executions/{execution_id}/stream`
+
+```ts
+const { data } = await client.streamExecution({
+  execution_id: 'example',
+  from_sequence: 1,
+})
+```
+
+---
+
+### `chat`
+
+Streaming chat with AI agent
+
+`POST /v1/chat`
+
+```ts
+const { data } = await client.chat(
+  null,
+  {
+    agentId: 'string',
+    message: 'string',
+    conversationId: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+    clientHistory: [
+      {
+        role: 'user',
+        content: 'string',
+        tool_calls: [
+          {
+            id: 'string',
+            name: 'string',
+            input: {},
+            output: 'string'
+          }
+        ]
+      }
+    ],
+    context: {
+      entityId: 'string',
+      customData: {}
+    },
+    streaming: {
+      mode: 'updates',
+      streamTokens: false,
+      includeMetadata: false
+    }
+  },
+)
+```
+
+---
+
+### `listConversations`
+
+List conversations
+
+`GET /v1/conversations`
+
+```ts
+const { data } = await client.listConversations({
+  agent_id: 'example',
+  limit: 1,
+  cursor: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "conversations": [
+    {
+      "conversation_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "user_id": "string",
+      "agent_id": "string",
+      "title": "string",
+      "message_count": 0,
+      "last_message": "string",
+      "last_message_at": "1970-01-01T00:00:00.000Z",
+      "context": {
+        "entityId": "string",
+        "customData": {}
+      },
+      "created_at": "1970-01-01T00:00:00.000Z",
+      "updated_at": "1970-01-01T00:00:00.000Z"
+    }
+  ],
+  "next_cursor": "string"
+}
+```
+
+</details>
+
+---
+
+### `getConversation`
+
+Get conversation with messages
+
+`GET /v1/conversations/{conversation_id}`
+
+```ts
+const { data } = await client.getConversation({
+  conversation_id: 'example',
+  message_limit: 1,
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "conversation": {
+    "conversation_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "user_id": "string",
+    "agent_id": "string",
+    "title": "string",
+    "message_count": 0,
+    "last_message": "string",
+    "last_message_at": "1970-01-01T00:00:00.000Z",
+    "context": {
+      "entityId": "string",
+      "customData": {}
+    },
+    "created_at": "1970-01-01T00:00:00.000Z",
+    "updated_at": "1970-01-01T00:00:00.000Z"
+  },
+  "messages": [
+    {
+      "conversation_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "role": "user",
+      "content": "string",
+      "timestamp": "1970-01-01T00:00:00.000Z",
+      "tool_calls": [
+        {
+          "id": "string",
+          "name": "string",
+          "input": {},
+          "output": "string"
+        }
+      ],
+      "token_count": 0,
+      "trace_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "feedback": {
+        "rating": "up",
+        "comment": "string",
+        "user_id": "string",
+        "submitted_at": "1970-01-01T00:00:00.000Z"
+      }
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `deleteConversation`
+
+Delete conversation
+
+`DELETE /v1/conversations/{conversation_id}`
+
+```ts
+const { data } = await client.deleteConversation({
+  conversation_id: 'example',
+})
+```
+
+---
+
+### `submitConversationFeedback`
+
+Submit feedback for an assistant turn
+
+`POST /v1/conversations/{conversation_id}/feedback`
+
+```ts
+const { data } = await client.submitConversationFeedback(
+  {
+    conversation_id: 'example',
+  },
+  {
+    trace_id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+    rating: 'up',
+    comment: 'string'
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "feedback": {
+    "rating": "up",
+    "comment": "string",
+    "user_id": "string",
+    "submitted_at": "1970-01-01T00:00:00.000Z"
+  }
 }
 ```
 
@@ -1183,6 +1522,8 @@ type CreateAgentRequest = {
     model_id?: string
     temperature?: number
     max_tokens?: number
+    thinking?: boolean
+    thinking_budget?: number
   }
   max_iterations?: number
   execution_pattern: "direct" | "react"
@@ -1207,6 +1548,7 @@ type CreateAgentRequest = {
       maxLength?: { ... }
       schemaFilter?: { ... }
       attributeTypeFilter?: { ... }
+      hidden?: { ... }
     }>
     required?: string[]
   }
@@ -1227,6 +1569,8 @@ type UpdateAgentRequest = {
     model_id?: string
     temperature?: number
     max_tokens?: number
+    thinking?: boolean
+    thinking_budget?: number
   }
   max_iterations?: number
   execution_pattern?: "direct" | "react"
@@ -1251,6 +1595,7 @@ type UpdateAgentRequest = {
       maxLength?: { ... }
       schemaFilter?: { ... }
       attributeTypeFilter?: { ... }
+      hidden?: { ... }
     }>
     required?: string[]
   }
@@ -1268,7 +1613,7 @@ type AgentDefinition = {
   category?: "message" | "entity" | "document" | "classification" | "custom"
   icon?: string
   source?: "system" | "custom"
-  availability?: "flows" | "copilot" | "all"[]
+  availability?: "flows" | "copilot" | "portals" | "all"[]
   allowed_entity_schemas?: string[]
   system_prompt?: string
   tools?: string[]
@@ -1276,6 +1621,8 @@ type AgentDefinition = {
     model_id?: string
     temperature?: number
     max_tokens?: number
+    thinking?: boolean
+    thinking_budget?: number
   }
   max_iterations?: number
   execution_pattern?: "direct" | "react"
@@ -1300,6 +1647,7 @@ type AgentDefinition = {
       maxLength?: { ... }
       schemaFilter?: { ... }
       attributeTypeFilter?: { ... }
+      hidden?: { ... }
     }>
     required?: string[]
   }
@@ -1322,7 +1670,7 @@ type ListAgentsResponse = {
     category?: "message" | "entity" | "document" | "classification" | "custom"
     icon?: string
     source?: "system" | "custom"
-    availability?: "flows" | "copilot" | "all"[]
+    availability?: "flows" | "copilot" | "portals" | "all"[]
     allowed_entity_schemas?: string[]
     system_prompt?: string
     tools?: string[]
@@ -1330,6 +1678,8 @@ type ListAgentsResponse = {
       model_id?: { ... }
       temperature?: { ... }
       max_tokens?: { ... }
+      thinking?: { ... }
+      thinking_budget?: { ... }
     }
     max_iterations?: number
     execution_pattern?: "direct" | "react"
@@ -1388,6 +1738,12 @@ type ListExecutionsResponse = {
     }
     started_at?: string // date-time
     completed_at?: string // date-time
+    iterations?: Array<{
+      index?: { ... }
+      tool?: { ... }
+      status?: { ... }
+      timestamp?: { ... }
+    }>
   }>
   next_cursor?: string
 }
@@ -1398,6 +1754,9 @@ type ListExecutionsResponse = {
 ```ts
 type ApproveExecutionRequest = {
   reason?: string
+  approved_action_ids?: string[]
+  rejected_action_ids?: string[]
+  share_scope?: "primary_only" | "primary_and_relations"
 }
 ```
 
@@ -1478,6 +1837,23 @@ type ExecutionResponse = {
   }
   started_at?: string // date-time
   completed_at?: string // date-time
+  iterations?: Array<{
+    index?: number
+    tool?: string
+    status?: "running" | "completed"
+    timestamp?: string // date-time
+  }>
+}
+```
+
+### `ExecutionIterationProjection`
+
+```ts
+type ExecutionIterationProjection = {
+  index?: number
+  tool?: string
+  status?: "running" | "completed"
+  timestamp?: string // date-time
 }
 ```
 
@@ -1599,7 +1975,7 @@ Structured preview data for approval UI. Provides a generic format that any tool
 ```ts
 type ToolPreview = {
   action?: {
-    type: "move" | "create" | "update" | "delete" | "apply" | "send" | "link" | "unlink"
+    type: "move" | "create" | "update" | "delete" | "apply" | "send" | "link" | "unlink" | "batch_approval"
     verb: string
   }
   source?: {
@@ -1658,7 +2034,7 @@ type ToolPreview = {
 Type of action being previewed
 
 ```ts
-type PreviewActionType = "move" | "create" | "update" | "delete" | "apply" | "send" | "link" | "unlink"
+type PreviewActionType = "move" | "create" | "update" | "delete" | "apply" | "send" | "link" | "unlink" | "batch_approval"
 ```
 
 ### `PreviewEntity`
@@ -1728,7 +2104,7 @@ type ToolDefinition = {
   tool_id?: string
   name?: string
   description?: string
-  category?: "entity" | "email" | "taxonomy" | "rag" | "workflow"
+  category?: "entity" | "message" | "taxonomy" | "rag" | "workflow"
   parameters?: object
   returns?: object
   requires_approval?: boolean
@@ -1757,11 +2133,12 @@ type AgentSource = "system" | "custom"
 Where the skill/agent is available:
 - flows: Available in workflow automations
 - copilot: Available as a sub-agent in copilot
+- portals: Available in end-user self-service portals
 - all: Available everywhere
 
 
 ```ts
-type SkillAvailability = "flows" | "copilot" | "all"
+type SkillAvailability = "flows" | "copilot" | "portals" | "all"
 ```
 
 ### `ExecutionContext`
@@ -1817,7 +2194,7 @@ Custom types (domain-specific):
 - entity-attribute
 
 ```ts
-type ParameterType = "text" | "textarea" | "number" | "boolean" | "select" | "entity-schema" | "entity-attribute" | "entity-id" | "taxonomy" | "taxonomy-classification" | "shared-inbox" | "label"
+type ParameterType = "text" | "textarea" | "number" | "boolean" | "select" | "entity-schema" | "entity-attribute" | "entity-id" | "taxonomy" | "taxonomy-classification" | "shared-inbox" | "label" | "matching-criteria"
 ```
 
 ### `InputParameterDefinition`
@@ -1826,7 +2203,7 @@ type ParameterType = "text" | "textarea" | "number" | "boolean" | "select" | "en
 type InputParameterDefinition = {
   name: string
   label: string
-  type: "text" | "textarea" | "number" | "boolean" | "select" | "entity-schema" | "entity-attribute" | "entity-id" | "taxonomy" | "taxonomy-classification" | "shared-inbox" | "label"
+  type: "text" | "textarea" | "number" | "boolean" | "select" | "entity-schema" | "entity-attribute" | "entity-id" | "taxonomy" | "taxonomy-classification" | "shared-inbox" | "label" | "matching-criteria"
   description?: string
   default?: unknown
   multi?: boolean
@@ -1840,6 +2217,7 @@ type InputParameterDefinition = {
   maxLength?: number
   schemaFilter?: string[]
   attributeTypeFilter?: string[]
+  hidden?: boolean
 }
 ```
 
@@ -1851,7 +2229,7 @@ type InputParametersSchema = {
   parameters: Array<{
     name: string
     label: string
-    type: "text" | "textarea" | "number" | "boolean" | "select" | "entity-schema" | "entity-attribute" | "entity-id" | "taxonomy" | "taxonomy-classification" | "shared-inbox" | "label"
+    type: "text" | "textarea" | "number" | "boolean" | "select" | "entity-schema" | "entity-attribute" | "entity-id" | "taxonomy" | "taxonomy-classification" | "shared-inbox" | "label" | "matching-criteria"
     description?: string
     default?: unknown
     multi?: boolean
@@ -1865,6 +2243,7 @@ type InputParametersSchema = {
     maxLength?: number
     schemaFilter?: string[]
     attributeTypeFilter?: string[]
+    hidden?: boolean
   }>
   required?: string[]
 }
@@ -1877,6 +2256,8 @@ type ModelConfig = {
   model_id?: string
   temperature?: number
   max_tokens?: number
+  thinking?: boolean
+  thinking_budget?: number
 }
 ```
 
@@ -1887,5 +2268,242 @@ type Error = {
   error?: string
   message?: string
   details?: object
+}
+```
+
+### `ChatRequest`
+
+```ts
+type ChatRequest = {
+  agentId: string
+  message: string
+  conversationId?: string // uuid
+  clientHistory?: Array<{
+    role: "user" | "assistant" | "tool" | "system"
+    content: string
+    tool_calls?: Array<{
+      id?: { ... }
+      name?: { ... }
+      input?: { ... }
+      output?: { ... }
+    }>
+  }>
+  context?: {
+    entityId?: string
+    customData?: Record<string, unknown>
+  }
+  streaming?: {
+    mode?: "updates" | "messages"
+    streamTokens?: boolean
+    includeMetadata?: boolean
+  }
+}
+```
+
+### `ChatMessage`
+
+```ts
+type ChatMessage = {
+  role: "user" | "assistant" | "tool" | "system"
+  content: string
+  tool_calls?: Array<{
+    id?: string
+    name?: string
+    input?: object
+    output?: string
+  }>
+}
+```
+
+### `StreamingOptions`
+
+```ts
+type StreamingOptions = {
+  mode?: "updates" | "messages"
+  streamTokens?: boolean
+  includeMetadata?: boolean
+}
+```
+
+### `StreamEvent`
+
+Server-Sent Event for streaming responses
+
+```ts
+type StreamEvent = {
+  type?: "token" | "agent_step" | "tool_call" | "tool_result" | "complete" | "error" | "metadata" | "needs_approval"
+  content?: string
+  index?: number
+  tool?: string
+  input?: object
+  output?: string
+  callId?: string
+  result?: {
+    response?: string
+    structured_output?: object
+    status?: "completed" | "failed" | "max_iterations" | "rejected"
+    metrics?: {
+      total_tokens?: { ... }
+      input_tokens?: { ... }
+      output_tokens?: { ... }
+      total_cost_usd?: { ... }
+      duration_ms?: { ... }
+      iteration_count?: { ... }
+    }
+  }
+  error?: {
+    code?: string
+    message?: string
+  }
+  conversationId?: string // uuid
+}
+```
+
+### `ExecutionResult`
+
+```ts
+type ExecutionResult = {
+  response?: string
+  structured_output?: object
+  status?: "completed" | "failed" | "max_iterations" | "rejected"
+  metrics?: {
+    total_tokens?: number
+    input_tokens?: number
+    output_tokens?: number
+    total_cost_usd?: number
+    duration_ms?: number
+    iteration_count?: number
+  }
+}
+```
+
+### `ConversationItem`
+
+```ts
+type ConversationItem = {
+  conversation_id?: string // uuid
+  user_id?: string
+  agent_id?: string
+  title?: string
+  message_count?: number
+  last_message?: string
+  last_message_at?: string // date-time
+  context?: {
+    entityId?: string
+    customData?: object
+  }
+  created_at?: string // date-time
+  updated_at?: string // date-time
+}
+```
+
+### `MessageItem`
+
+```ts
+type MessageItem = {
+  conversation_id?: string // uuid
+  role?: "user" | "assistant" | "tool" | "system"
+  content?: string
+  timestamp?: string // date-time
+  tool_calls?: Array<{
+    id?: string
+    name?: string
+    input?: object
+    output?: string
+  }>
+  token_count?: number
+  trace_id?: string // uuid
+  feedback?: {
+    rating: "up" | "down"
+    comment?: string
+    user_id: string
+    submitted_at: string // date-time
+  }
+}
+```
+
+### `MessageFeedback`
+
+```ts
+type MessageFeedback = {
+  rating: "up" | "down"
+  comment?: string
+  user_id: string
+  submitted_at: string // date-time
+}
+```
+
+### `SubmitFeedbackRequest`
+
+```ts
+type SubmitFeedbackRequest = {
+  trace_id: string // uuid
+  rating: "up" | "down"
+  comment?: string
+}
+```
+
+### `ListConversationsResponse`
+
+```ts
+type ListConversationsResponse = {
+  conversations?: Array<{
+    conversation_id?: string // uuid
+    user_id?: string
+    agent_id?: string
+    title?: string
+    message_count?: number
+    last_message?: string
+    last_message_at?: string // date-time
+    context?: {
+      entityId?: { ... }
+      customData?: { ... }
+    }
+    created_at?: string // date-time
+    updated_at?: string // date-time
+  }>
+  next_cursor?: string
+}
+```
+
+### `ConversationWithMessages`
+
+```ts
+type ConversationWithMessages = {
+  conversation?: {
+    conversation_id?: string // uuid
+    user_id?: string
+    agent_id?: string
+    title?: string
+    message_count?: number
+    last_message?: string
+    last_message_at?: string // date-time
+    context?: {
+      entityId?: { ... }
+      customData?: { ... }
+    }
+    created_at?: string // date-time
+    updated_at?: string // date-time
+  }
+  messages?: Array<{
+    conversation_id?: string // uuid
+    role?: "user" | "assistant" | "tool" | "system"
+    content?: string
+    timestamp?: string // date-time
+    tool_calls?: Array<{
+      id?: { ... }
+      name?: { ... }
+      input?: { ... }
+      output?: { ... }
+    }>
+    token_count?: number
+    trace_id?: string // uuid
+    feedback?: {
+      rating: { ... }
+      comment?: { ... }
+      user_id: { ... }
+      submitted_at: { ... }
+    }
+  }>
 }
 ```
