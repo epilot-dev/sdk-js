@@ -35,6 +35,10 @@
           {
             "in": "query",
             "name": "resource"
+          },
+          {
+            "in": "query",
+            "name": "trigger"
           }
         ],
         "responses": {}

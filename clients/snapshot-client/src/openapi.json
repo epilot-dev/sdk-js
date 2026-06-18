@@ -103,6 +103,20 @@
                 "pattern": "^[^:]+:.+$"
               }
             }
+          },
+          {
+            "in": "query",
+            "name": "trigger",
+            "description": "Filter to snapshots with a specific trigger. Uses the `byTrigger` GSI\nfor an efficient indexed query — no table scan. Only snapshots created\nafter the GSI was added carry this index entry; pre-existing rows will\nnot appear in trigger-filtered results.\n",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "manual",
+                "sync",
+                "blueprint_install",
+                "scheduled"
+              ]
+            }
           }
         ],
         "responses": {
@@ -562,7 +576,8 @@
         "properties": {
           "lineage_id": {
             "type": "string",
-            "description": "Cross-service correlation key — matches the lineage row id in\nblueprint-manifest-api's lineage table for `blueprint_install`\nsnapshots. Same as `target_id` for snapshots whose capture\ndoesn't distinguish source vs destination identifiers.\n"
+            "deprecated": true,
+            "description": "Deprecated alias of `target_id`. Always equals `target_id` (the\nimplementation never distinguished them). Use `target_id`.\n"
           },
           "target_id": {
             "type": "string",
@@ -727,17 +742,25 @@
       },
       "RestoreSnapshotRequest": {
         "type": "object",
-        "description": "Both flags default to `false`, which restores every captured resource —\nConfig Hub's manual-restore semantics. blueprint-manifest-api sets\nboth `true` when reverting a blueprint install so user edits and\ncross-blueprint contributions survive. Each flag is independent so a\ncaller can preserve edits without preserving co-ownership (or vice\nversa). Skipped resources surface under `Operation.skipped`.\n",
+        "description": "Skipped resources surface under `Operation.skipped`. All filters default\nto the open setting (apply everything), which keeps Config Hub's manual-\nrestore semantics unchanged.\n",
         "properties": {
           "preserve_modified": {
             "type": "boolean",
             "default": false,
-            "description": "When `true`, skip captured resources whose live destination payload\nhas diverged from the install-time fingerprint stored on lineage.\nSurfaces under `Operation.skipped` with `reason: 'modified'`.\n"
+            "description": "When `true`, skip captured resources whose live payload's content\nfingerprint diverges from the capture-time fingerprint stored on\nthe manifest entry. Self-contained: snapshot-api fetches and hashes\nthe live payload itself; no cross-service lookup. Surfaces under\n`Operation.skipped` with `reason: 'modified'`. Legacy snapshots\ncaptured before fingerprints were stored fail open (applied).\n"
           },
           "preserve_co_owned": {
             "type": "boolean",
             "default": false,
-            "description": "When `true`, skip captured resources whose lineage row carries\nanother blueprint instance's id (co-ownership ≥2). Surfaces under\n`Operation.skipped` with `reason: 'co_owned'`.\n"
+            "deprecated": true,
+            "description": "Deprecated. Accepted for back-compat but treated as a no-op.\nCo-ownership is now expressed via `exclude_target_ids` — the caller\n(typically blueprint-manifest-api) computes which targets to skip\nfrom its own data and passes the list. snapshot-api no longer\nreaches into BMA's lineage table.\n"
+          },
+          "exclude_target_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Target ids the caller has decided not to restore. snapshot-api\napplies the manifest minus these ids and reports them under\n`Operation.skipped` with `reason: 'co_owned'` (the only current\nproducer of exclude lists is BMA's revert flow, which uses this to\nhonor multi-blueprint ownership).\n"
           }
         }
       },
