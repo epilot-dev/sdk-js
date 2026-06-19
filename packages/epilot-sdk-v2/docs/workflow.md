@@ -51,6 +51,7 @@ const { data } = await workflowClient.getExecutions(...)
 - [`patchPhase`](#patchphase)
 - [`addTask`](#addtask)
 - [`cancelTaskSchedule`](#canceltaskschedule)
+- [`reconcileAutomationTask`](#reconcileautomationtask)
 - [`runTaskScheduleNow`](#runtaskschedulenow)
 
 **Schemas**
@@ -210,7 +211,7 @@ const { data } = await client.getExecutions({
 
 ### `createExecution`
 
-Create a Workflow Execution. Start a new workflow execution, based on a workflow definition (template).
+Creates a new V1 Workflow Execution from a workflow definition (template).
 
 `POST /v1/workflows/executions`
 
@@ -284,7 +285,7 @@ const { data } = await client.createExecution(
 
 ### `getExecution`
 
-Get a full workflow execution, included steps information, by execution id.
+Retrieves a complete V1 workflow execution by ID, including all steps information.
 
 `GET /v1/workflows/executions/{executionId}`
 
@@ -522,7 +523,7 @@ const { data } = await client.createStep(
 
 ### `updateStep`
 
-Patches various changes to a workflow execution step.
+Updates a workflow execution step with new values for status, assignees, due date, position, and more.
 
 `PATCH /v1/workflows/executions/{executionId}/steps/{stepId}`
 
@@ -707,7 +708,7 @@ const { data } = await client.getClosingReasonExecution({
 
 ### `startFlowExecution`
 
-Starts a new Flow Execution based on a flow template.
+Starts a new Flow Execution based on a flow template (definition).
 
 `POST /v2/flows/executions`
 
@@ -715,7 +716,7 @@ Starts a new Flow Execution based on a flow template.
 const { data } = await client.startFlowExecution(
   null,
   {
-    flow_template_id: 'string',
+    flow_template_id: 'tpl_abc123def456',
     trigger: {
       type: 'MANUAL',
       automation_config: {
@@ -726,7 +727,9 @@ const { data } = await client.startFlowExecution(
         input_context: {
           source: 'trigger',
           task_id: 'string'
-        }
+        },
+        heal_attempts: 0,
+        last_heal_attempted_at: '1970-01-01T00:00:00.000Z'
       }
     },
     contexts: [
@@ -778,7 +781,8 @@ const { data } = await client.startFlowExecution(
   ],
   "crt_tasks": [
     {
-      "id": "string"
+      "id": "string",
+      "crt_since": "1970-01-01T00:00:00.000Z"
     }
   ],
   "phases": [
@@ -861,7 +865,9 @@ const { data } = await client.startFlowExecution(
       "execution_id": "string",
       "execution_status": "string",
       "error_reason": "string",
-      "input_context": {}
+      "input_context": {},
+      "heal_attempts": 0,
+      "last_heal_attempted_at": "1970-01-01T00:00:00.000Z"
     }
   },
   "singleClosingReasonSelection": true
@@ -874,7 +880,7 @@ const { data } = await client.startFlowExecution(
 
 ### `getFlowExecution`
 
-Get a full flow execution, included tasks, phases, edges & analytics.
+Retrieves a complete flow execution by ID, including all phases, tasks, edges, contexts, and analytics.
 
 `GET /v2/flows/executions/{execution_id}`
 
@@ -921,7 +927,8 @@ const { data } = await client.getFlowExecution({
   ],
   "crt_tasks": [
     {
-      "id": "string"
+      "id": "string",
+      "crt_since": "1970-01-01T00:00:00.000Z"
     }
   ],
   "phases": [
@@ -1004,7 +1011,9 @@ const { data } = await client.getFlowExecution({
       "execution_id": "string",
       "execution_status": "string",
       "error_reason": "string",
-      "input_context": {}
+      "input_context": {},
+      "heal_attempts": 0,
+      "last_heal_attempted_at": "1970-01-01T00:00:00.000Z"
     }
   },
   "singleClosingReasonSelection": true
@@ -1100,7 +1109,8 @@ const { data } = await client.patchFlowExecution(
   ],
   "crt_tasks": [
     {
-      "id": "string"
+      "id": "string",
+      "crt_since": "1970-01-01T00:00:00.000Z"
     }
   ],
   "phases": [
@@ -1183,7 +1193,9 @@ const { data } = await client.patchFlowExecution(
       "execution_id": "string",
       "execution_status": "string",
       "error_reason": "string",
-      "input_context": {}
+      "input_context": {},
+      "heal_attempts": 0,
+      "last_heal_attempted_at": "1970-01-01T00:00:00.000Z"
     }
   },
   "singleClosingReasonSelection": true
@@ -1266,7 +1278,7 @@ const { data } = await client.searchFlowExecutions(
 
 ### `patchTask`
 
-Changes various attributes of a flow task, like assignees, status, due date, etc.
+Updates attributes of a flow task including status, assignees, due date, and more.
 
 `PATCH /v2/flows/executions/{execution_id}/tasks/{task_id}`
 
@@ -1277,9 +1289,9 @@ const { data } = await client.patchTask(
     task_id: 'example',
   },
   {
-    name: 'string',
+    name: 'Review customer application',
     status: 'UNASSIGNED',
-    due_date: '2021-04-27T12:00:00.000Z',
+    due_date: '2026-05-28T00:00:00.000',
     due_date_config: {
       duration: 0,
       unit: 'minutes',
@@ -1297,7 +1309,9 @@ const { data } = await client.patchTask(
       input_context: {
         source: 'trigger',
         task_id: 'string'
-      }
+      },
+      heal_attempts: 0,
+      last_heal_attempted_at: '1970-01-01T00:00:00.000Z'
     },
     description: {
       enabled: true,
@@ -1330,8 +1344,9 @@ const { data } = await client.patchTask(
       label: 'string',
       description: 'string'
     },
-    next_condition_id: 'string',
-    revert_execution: false
+    next_condition_id: 'cond_branch_approved',
+    revert_execution: false,
+    completed_via_journey: false
   },
 )
 ```
@@ -1526,7 +1541,9 @@ const { data } = await client.runTaskAutomation({
     "input_context": {
       "source": "trigger",
       "task_id": "string"
-    }
+    },
+    "heal_attempts": 0,
+    "last_heal_attempted_at": "1970-01-01T00:00:00.000Z"
   },
   "automation_execution_id": "string",
   "trigger_mode": "manual",
@@ -1751,7 +1768,9 @@ const { data } = await client.addTask(
         input_context: {
           source: 'trigger',
           task_id: 'string'
-        }
+        },
+        heal_attempts: 0,
+        last_heal_attempted_at: '1970-01-01T00:00:00.000Z'
       },
       phase_id: 'string',
       task_type: 'MANUAL'
@@ -1862,6 +1881,153 @@ const { data } = await client.cancelTaskSchedule({
   task_id: 'example',
 })
 ```
+
+---
+
+### `reconcileAutomationTask`
+
+Reconciles an automation task's status against its linked automation execution.
+
+`POST /v2/flows/executions/{execution_id}/tasks/{task_id}/reconcile-automation`
+
+```ts
+const { data } = await client.reconcileAutomationTask({
+  execution_id: 'example',
+  task_id: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "id": "string",
+  "flow_template_id": "string",
+  "org_id": "string",
+  "name": "string",
+  "created_at": "string",
+  "updated_at": "string",
+  "due_date": "string",
+  "due_date_config": {
+    "duration": 0,
+    "unit": "minutes",
+    "type": "WORKFLOW_STARTED",
+    "task_id": "string",
+    "phase_id": "string"
+  },
+  "status": "STARTED",
+  "assigned_to": ["string"],
+  "analytics": {
+    "started_at": "string",
+    "completed_at": "string",
+    "closed_at": "string",
+    "started_by": "string",
+    "closed_by": "string"
+  },
+  "contexts": [
+    {
+      "entity_id": "string",
+      "entity_schema": "string",
+      "is_primary": false
+    }
+  ],
+  "crt_tasks": [
+    {
+      "id": "string",
+      "crt_since": "1970-01-01T00:00:00.000Z"
+    }
+  ],
+  "phases": [
+    {
+      "id": "string",
+      "template_id": "string",
+      "name": "string",
+      "status": "OPEN",
+      "updated_at": "string",
+      "due_date": "2021-04-27T12:00:00.000Z",
+      "due_date_config": {},
+      "assigned_to": ["string"],
+      "analytics": {},
+      "taxonomies": ["string"],
+      "loop_config": {}
+    }
+  ],
+  "tasks": [
+    {
+      "id": "string",
+      "template_id": "string",
+      "name": "string",
+      "description": {},
+      "status": "UNASSIGNED",
+      "journey": {},
+      "due_date": "2021-04-27T12:00:00.000Z",
+      "due_date_config": {},
+      "requirements": [],
+      "assigned_to": ["string"],
+      "analytics": {},
+      "created_at": "1970-01-01T00:00:00.000Z",
+      "updated_at": "1970-01-01T00:00:00.000Z",
+      "manually_created": true,
+      "enabled": true,
+      "ecp": {},
+      "installer": {},
+      "partner": {},
+      "taxonomies": ["string"],
+      "phase_id": "string",
+      "task_type": "MANUAL",
+      "loop_config": {}
+    }
+  ],
+  "edges": [
+    {
+      "id": "string",
+      "from_id": "string",
+      "to_id": "string",
+      "condition_id": "abc123",
+      "none_met": true
+    }
+  ],
+  "_execution_chain": {
+    "parent_execution_id": "string",
+    "parent_task_id": "string",
+    "depth": 0
+  },
+  "closing_reason": {
+    "selected_reasons": [
+      {}
+    ],
+    "configured_reasons": [
+      {}
+    ],
+    "extra_description": "string"
+  },
+  "available_in_ecp": true,
+  "entity_sync": [
+    {
+      "trigger": {},
+      "target": {},
+      "value": {}
+    }
+  ],
+  "taxonomies": ["string"],
+  "trigger": {
+    "type": "MANUAL",
+    "automation_config": {
+      "flow_id": "string",
+      "execution_id": "string",
+      "execution_status": "string",
+      "error_reason": "string",
+      "input_context": {},
+      "heal_attempts": 0,
+      "last_heal_attempted_at": "1970-01-01T00:00:00.000Z"
+    }
+  },
+  "singleClosingReasonSelection": true
+}
+```
+
+</details>
 
 ---
 
@@ -3264,9 +3430,13 @@ type ExecutionPaginationDynamo = {
 
 ### `ErrorResp`
 
+Standard error response returned when an API request fails.
+Contains a human-readable message describing the error.
+
+
 ```ts
 type ErrorResp = {
-  message?: string
+  message: string
 }
 ```
 
@@ -3391,6 +3561,9 @@ type StepRequirement = {
 
 ### `StartFlowReq`
 
+Request payload for starting a new flow execution from a template.
+
+
 ```ts
 type StartFlowReq = {
   flow_template_id: string
@@ -3402,6 +3575,8 @@ type StartFlowReq = {
       execution_status?: { ... }
       error_reason?: { ... }
       input_context?: { ... }
+      heal_attempts?: { ... }
+      last_heal_attempted_at?: { ... }
     }
   }
   contexts: Array<{
@@ -3445,7 +3620,7 @@ type PatchFlowReq = {
   due_date?: string
   due_date_config?: {
     duration: number
-    unit: "minutes" | "hours" | "days" | "weeks" | "months"
+    unit: "minutes" | "hours" | "days" | "weeks" | "months" | "years"
     type: "WORKFLOW_STARTED" | "TASK_FINISHED" | "PHASE_FINISHED" | "A_PRECEDING_TASK_COMPLETED" | "ALL_PRECEDING_TASKS_COMPLETED"
     task_id?: string
     phase_id?: string
@@ -3471,7 +3646,7 @@ type FlowExecution = {
   due_date?: string
   due_date_config?: {
     duration: number
-    unit: "minutes" | "hours" | "days" | "weeks" | "months"
+    unit: "minutes" | "hours" | "days" | "weeks" | "months" | "years"
     type: "WORKFLOW_STARTED" | "TASK_FINISHED" | "PHASE_FINISHED" | "A_PRECEDING_TASK_COMPLETED" | "ALL_PRECEDING_TASKS_COMPLETED"
     task_id?: string
     phase_id?: string
@@ -3495,6 +3670,7 @@ type FlowExecution = {
   }>
   crt_tasks: Array<{
     id?: string
+    crt_since?: string // date-time
   }>
   phases?: Array<{
     id: string
@@ -3560,7 +3736,6 @@ type FlowExecution = {
     }>
     assigned_to?: Array<string | {
       variable: { ... }
-      value?: { ... }
   // ...
 }
 ```
@@ -3595,6 +3770,8 @@ type FlowTrigger = {
       source: { ... }
       task_id?: { ... }
     }
+    heal_attempts?: number
+    last_heal_attempted_at?: string // date-time
   }
 }
 ```
@@ -3652,7 +3829,7 @@ type Task = {
   due_date?: string
   due_date_config?: {
     duration: number
-    unit: "minutes" | "hours" | "days" | "weeks" | "months"
+    unit: "minutes" | "hours" | "days" | "weeks" | "months" | "years"
     type: "WORKFLOW_STARTED" | "TASK_FINISHED" | "PHASE_FINISHED" | "A_PRECEDING_TASK_COMPLETED" | "ALL_PRECEDING_TASKS_COMPLETED"
     task_id?: string
     phase_id?: string
@@ -3732,7 +3909,7 @@ type Task = {
   due_date?: string
   due_date_config?: {
     duration: number
-    unit: "minutes" | "hours" | "days" | "weeks" | "months"
+    unit: "minutes" | "hours" | "days" | "weeks" | "months" | "years"
     type: "WORKFLOW_STARTED" | "TASK_FINISHED" | "PHASE_FINISHED" | "A_PRECEDING_TASK_COMPLETED" | "ALL_PRECEDING_TASKS_COMPLETED"
   // ...
 }
@@ -3765,7 +3942,7 @@ type ManualTask = {
   due_date?: string
   due_date_config?: {
     duration: number
-    unit: "minutes" | "hours" | "days" | "weeks" | "months"
+    unit: "minutes" | "hours" | "days" | "weeks" | "months" | "years"
     type: "WORKFLOW_STARTED" | "TASK_FINISHED" | "PHASE_FINISHED" | "A_PRECEDING_TASK_COMPLETED" | "ALL_PRECEDING_TASKS_COMPLETED"
     task_id?: string
     phase_id?: string
@@ -3851,7 +4028,7 @@ type AutomationTask = {
   due_date?: string
   due_date_config?: {
     duration: number
-    unit: "minutes" | "hours" | "days" | "weeks" | "months"
+    unit: "minutes" | "hours" | "days" | "weeks" | "months" | "years"
     type: "WORKFLOW_STARTED" | "TASK_FINISHED" | "PHASE_FINISHED" | "A_PRECEDING_TASK_COMPLETED" | "ALL_PRECEDING_TASKS_COMPLETED"
     task_id?: string
     phase_id?: string
@@ -3918,6 +4095,8 @@ type AutomationTask = {
       source: { ... }
       task_id?: { ... }
     }
+    heal_attempts?: number
+    last_heal_attempted_at?: string // date-time
   }
   automation_execution_id?: string
   trigger_mode?: "manual" | "automatic"
@@ -3926,13 +4105,11 @@ type AutomationTask = {
   } | {
     mode: "delayed"
     duration: number
-    unit: "minutes" | "hours" | "days" | "weeks" | "months"
+    unit: "minutes" | "hours" | "days" | "weeks" | "months" | "years"
     schedule_id?: string
+    scheduled_at?: string
   } | {
     mode: "relative"
-    direction: "before" | "after"
-    duration: number
-    unit: "minutes" | "hours" | "days" | "weeks" | "months"
   // ...
 }
 ```
@@ -3973,13 +4150,14 @@ type ActionSchedule = {
 } | {
   mode: "delayed"
   duration: number
-  unit: "minutes" | "hours" | "days" | "weeks" | "months"
+  unit: "minutes" | "hours" | "days" | "weeks" | "months" | "years"
   schedule_id?: string
+  scheduled_at?: string
 } | {
   mode: "relative"
   direction: "before" | "after"
   duration: number
-  unit: "minutes" | "hours" | "days" | "weeks" | "months"
+  unit: "minutes" | "hours" | "days" | "weeks" | "months" | "years"
   reference: {
     id: string
     origin: "flow_started" | "task_completed" | "trigger_entity_attribute" | "all_preceding_tasks_completed"
@@ -3987,6 +4165,7 @@ type ActionSchedule = {
     attribute?: string
   }
   schedule_id?: string
+  scheduled_at?: string
 }
 ```
 
@@ -4004,8 +4183,9 @@ type ImmediateSchedule = {
 type DelayedSchedule = {
   mode: "delayed"
   duration: number
-  unit: "minutes" | "hours" | "days" | "weeks" | "months"
+  unit: "minutes" | "hours" | "days" | "weeks" | "months" | "years"
   schedule_id?: string
+  scheduled_at?: string
 }
 ```
 
@@ -4016,7 +4196,7 @@ type RelativeSchedule = {
   mode: "relative"
   direction: "before" | "after"
   duration: number
-  unit: "minutes" | "hours" | "days" | "weeks" | "months"
+  unit: "minutes" | "hours" | "days" | "weeks" | "months" | "years"
   reference: {
     id: string
     origin: "flow_started" | "task_completed" | "trigger_entity_attribute" | "all_preceding_tasks_completed"
@@ -4024,6 +4204,7 @@ type RelativeSchedule = {
     attribute?: string
   }
   schedule_id?: string
+  scheduled_at?: string
 }
 ```
 
@@ -4048,7 +4229,7 @@ type DecisionTask = {
   due_date?: string
   due_date_config?: {
     duration: number
-    unit: "minutes" | "hours" | "days" | "weeks" | "months"
+    unit: "minutes" | "hours" | "days" | "weeks" | "months" | "years"
     type: "WORKFLOW_STARTED" | "TASK_FINISHED" | "PHASE_FINISHED" | "A_PRECEDING_TASK_COMPLETED" | "ALL_PRECEDING_TASKS_COMPLETED"
     task_id?: string
     phase_id?: string
@@ -4125,11 +4306,11 @@ type DecisionTask = {
   schedule?: {
     mode: "delayed"
     duration: number
-    unit: "minutes" | "hours" | "days" | "weeks" | "months"
+    unit: "minutes" | "hours" | "days" | "weeks" | "months" | "years"
     schedule_id?: string
+    scheduled_at?: string
   } | {
     mode: "relative"
-    direction: "before" | "after"
   // ...
 }
 ```
@@ -4155,7 +4336,7 @@ type AiAgentTask = {
   due_date?: string
   due_date_config?: {
     duration: number
-    unit: "minutes" | "hours" | "days" | "weeks" | "months"
+    unit: "minutes" | "hours" | "days" | "weeks" | "months" | "years"
     type: "WORKFLOW_STARTED" | "TASK_FINISHED" | "PHASE_FINISHED" | "A_PRECEDING_TASK_COMPLETED" | "ALL_PRECEDING_TASKS_COMPLETED"
     task_id?: string
     phase_id?: string
@@ -4225,6 +4406,7 @@ type AiAgentTask = {
     execution_id?: string
     execution_status?: string
     error_reason?: string
+    outcome?: string
   }
   agent_execution_id?: string
 }
@@ -4248,6 +4430,7 @@ type AgentExecutionInfo = {
   execution_id?: string
   execution_status?: string
   error_reason?: string
+  outcome?: string
 }
 ```
 
@@ -4272,7 +4455,7 @@ type TaskBase = {
   due_date?: string
   due_date_config?: {
     duration: number
-    unit: "minutes" | "hours" | "days" | "weeks" | "months"
+    unit: "minutes" | "hours" | "days" | "weeks" | "months" | "years"
     type: "WORKFLOW_STARTED" | "TASK_FINISHED" | "PHASE_FINISHED" | "A_PRECEDING_TASK_COMPLETED" | "ALL_PRECEDING_TASKS_COMPLETED"
     task_id?: string
     phase_id?: string
@@ -4345,7 +4528,7 @@ type Phase = {
   due_date?: string
   due_date_config?: {
     duration: number
-    unit: "minutes" | "hours" | "days" | "weeks" | "months"
+    unit: "minutes" | "hours" | "days" | "weeks" | "months" | "years"
     type: "WORKFLOW_STARTED" | "TASK_FINISHED" | "PHASE_FINISHED" | "A_PRECEDING_TASK_COMPLETED" | "ALL_PRECEDING_TASKS_COMPLETED"
     task_id?: string
     phase_id?: string
@@ -4396,6 +4579,8 @@ type AutomationInfo = {
     source: "trigger" | "task"
     task_id?: string
   }
+  heal_attempts?: number
+  last_heal_attempted_at?: string // date-time
 }
 ```
 
@@ -4452,6 +4637,8 @@ type Condition = {
       attribute_type?: { ... }
       attribute_repeatable?: { ... }
       attribute_operation?: { ... }
+      attributes?: { ... }
+      attributes_match?: { ... }
       attribute_sub_field?: { ... }
       date_offset?: { ... }
     }
@@ -4478,6 +4665,8 @@ type Statement = {
     attribute_type?: "string" | "text" | "number" | "boolean" | "date" | "datetime" | "tags" | "country" | "email" | "phone" | "product" | "price" | "status" | "relation" | "multiselect" | "select" | "radio" | "relation_user" | "purpose" | "label" | "message_email_address"
     attribute_repeatable?: boolean
     attribute_operation?: "all" | "updated" | "added" | "deleted"
+    attributes?: string[]
+    attributes_match?: "any" | "all"
     attribute_sub_field?: string
     date_offset?: {
       amount?: { ... }
@@ -4502,6 +4691,8 @@ type EvaluationSource = {
   attribute_type?: "string" | "text" | "number" | "boolean" | "date" | "datetime" | "tags" | "country" | "email" | "phone" | "product" | "price" | "status" | "relation" | "multiselect" | "select" | "radio" | "relation_user" | "purpose" | "label" | "message_email_address"
   attribute_repeatable?: boolean
   attribute_operation?: "all" | "updated" | "added" | "deleted"
+  attributes?: string[]
+  attributes_match?: "any" | "all"
   attribute_sub_field?: string
   date_offset?: {
     amount?: number
@@ -4523,7 +4714,7 @@ Set due date for the task based on a dynamic condition
 ```ts
 type DueDateConfig = {
   duration: number
-  unit: "minutes" | "hours" | "days" | "weeks" | "months"
+  unit: "minutes" | "hours" | "days" | "weeks" | "months" | "years"
   type: "WORKFLOW_STARTED" | "TASK_FINISHED" | "PHASE_FINISHED" | "A_PRECEDING_TASK_COMPLETED" | "ALL_PRECEDING_TASKS_COMPLETED"
   task_id?: string
   phase_id?: string
@@ -4533,7 +4724,7 @@ type DueDateConfig = {
 ### `TimeUnit`
 
 ```ts
-type TimeUnit = "minutes" | "hours" | "days" | "weeks" | "months"
+type TimeUnit = "minutes" | "hours" | "days" | "weeks" | "months" | "years"
 ```
 
 ### `EnableRequirement`
@@ -4592,6 +4783,10 @@ type Assignees = Array<string | {
 
 ### `PatchTaskReq`
 
+Request payload for updating a task within a flow execution.
+All fields are optional; only provided fields will be updated.
+
+
 ```ts
 type PatchTaskReq = {
   name?: string
@@ -4599,7 +4794,7 @@ type PatchTaskReq = {
   due_date?: string
   due_date_config?: {
     duration: number
-    unit: "minutes" | "hours" | "days" | "weeks" | "months"
+    unit: "minutes" | "hours" | "days" | "weeks" | "months" | "years"
     type: "WORKFLOW_STARTED" | "TASK_FINISHED" | "PHASE_FINISHED" | "A_PRECEDING_TASK_COMPLETED" | "ALL_PRECEDING_TASKS_COMPLETED"
     task_id?: string
     phase_id?: string
@@ -4618,6 +4813,8 @@ type PatchTaskReq = {
       source: { ... }
       task_id?: { ... }
     }
+    heal_attempts?: number
+    last_heal_attempted_at?: string // date-time
   }
   description?: {
     enabled?: boolean
@@ -4652,6 +4849,7 @@ type PatchTaskReq = {
   }
   next_condition_id?: string
   revert_execution?: boolean
+  completed_via_journey?: boolean
 }
 ```
 
@@ -4663,7 +4861,7 @@ type PatchPhaseReq = {
   due_date?: string
   due_date_config?: {
     duration: number
-    unit: "minutes" | "hours" | "days" | "weeks" | "months"
+    unit: "minutes" | "hours" | "days" | "weeks" | "months" | "years"
     type: "WORKFLOW_STARTED" | "TASK_FINISHED" | "PHASE_FINISHED" | "A_PRECEDING_TASK_COMPLETED" | "ALL_PRECEDING_TASKS_COMPLETED"
     task_id?: string
     phase_id?: string
@@ -4704,6 +4902,8 @@ type AddTaskReq = {
       execution_status?: { ... }
       error_reason?: { ... }
       input_context?: { ... }
+      heal_attempts?: { ... }
+      last_heal_attempted_at?: { ... }
     }
     phase_id?: string
     task_type?: "MANUAL" | "AUTOMATION" | "DECISION" | "AI_AGENT"

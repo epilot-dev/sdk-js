@@ -99,6 +99,10 @@ export declare namespace Components {
              */
             execution_status?: string;
             error_reason?: string;
+            /**
+             * Server-computed outcome read from the agent execution's structured_output (e.g. assigned, recommended, no_eligible_partner, missing_input). When the outcome means the work is not really done (no_eligible_partner, missing_input) the task is held as the current task instead of auto-completing, so the phase does not advance.
+             */
+            outcome?: string;
         }
         export interface AiAgentTask {
             id: TaskId;
@@ -232,6 +236,14 @@ export declare namespace Components {
              *
              */
             AutomationInputContext;
+            /**
+             * Internal — number of times flow-healing-service has attempted to re-trigger this task's lost automation dispatch. Used to cap retries and avoid an indefinite heal-on-every-read storm against a deterministically-failing automation flow.
+             */
+            heal_attempts?: number;
+            /**
+             * Internal — timestamp of the most recent heal attempt for this task. flow-healing-service uses this as a per-task debounce gate so the heal cannot fire more than once per HEAL_RETRY_COOLDOWN_MS regardless of how often the flow execution is read.
+             */
+            last_heal_attempted_at?: string; // date-time
         }
         /**
          * Optional. Source of the entity fed into this automation task. If omitted, the workflow's primary entity is used.
@@ -465,6 +477,26 @@ export declare namespace Components {
              * The id of the created schedule
              */
             schedule_id?: string;
+            /**
+             * The resolved absolute timestamp (ISO 8601, UTC) at which the task is
+             * armed to run. Set by the backend when the schedule is armed and the
+             * task transitions to SCHEDULED. Absent while the task is still
+             * pending/unscheduled.
+             *
+             * Note: intentionally typed as plain `string` (not
+             * `format: date-time`). `schedule` is embedded in the AutomationTask /
+             * DecisionTask schemas; if a future request body ever accepts a task
+             * (or schedule) and `safeParse`s it, `format: date-time` would make
+             * openapi-zod-client emit `z.string().datetime({ offset: true })` and
+             * reject any round-tripped value that is empty or tz-less — the exact
+             * mechanism behind the May 2026 due_date incident (513ed597 added the
+             * format, ee574b43 activated it via an unrelated regen; see commit
+             * 2c91ff35). This field is server-written via `toISOString()` so it is
+             * always a valid UTC instant; the datetime validator adds no
+             * protection, only latent risk.
+             *
+             */
+            scheduled_at?: string;
         }
         /**
          * Set due date for the task based on a dynamic condition
@@ -595,8 +627,18 @@ export declare namespace Components {
                 entityAttribute: string;
             };
         }
+        /**
+         * Standard error response returned when an API request fails.
+         * Contains a human-readable message describing the error.
+         *
+         */
         export interface ErrorResp {
-            message?: string;
+            /**
+             * Human-readable description of the error that occurred
+             * example:
+             * Validation failed: workflowId is required
+             */
+            message: string;
         }
         export interface EvaluationSource {
             /**
@@ -610,6 +652,34 @@ export declare namespace Components {
             attribute_type?: "string" | "text" | "number" | "boolean" | "date" | "datetime" | "tags" | "country" | "email" | "phone" | "product" | "price" | "status" | "relation" | "multiselect" | "select" | "radio" | "relation_user" | "purpose" | "label" | "message_email_address";
             attribute_repeatable?: boolean;
             attribute_operation?: "all" | "updated" | "added" | "deleted";
+            /**
+             * Multi-attribute mode. When present and length > 1, the statement is
+             * evaluated against every listed attribute and combined via
+             * `attributes_match`. All listed attributes must share the same
+             * `attribute_type`. Mutually exclusive with `attribute_sub_field`,
+             * `date_offset`, and `attribute_operation`. When absent or length === 1,
+             * the legacy `attribute` field is used.
+             *
+             */
+            attributes?: [
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?
+            ];
+            /**
+             * Inner connector across `attributes`. `any` (default) means at least
+             * one attribute must satisfy the operator; `all` means every attribute
+             * must satisfy it. Ignored when `attributes` is absent or has length < 2.
+             *
+             */
+            attributes_match?: "any" | "all";
             /**
              * For complex attribute types, specifies which sub-field to extract (e.g., 'address', 'name', 'email_type')
              */
@@ -686,6 +756,10 @@ export declare namespace Components {
             contexts: FlowContext[];
             crt_tasks: {
                 id?: TaskId;
+                /**
+                 * Timestamp when this task entered crt_tasks (i.e. became current). Used by the flow-healing-service as the authoritative gate for "has this PENDING task been stuck long enough to heal?". Using the task's own analytics.status_updated_at as the gate produced false positives because transitioning a task INTO crt_tasks does not change its status — so that timestamp can be hours old for a freshly-current task.
+                 */
+                crt_since?: string; // date-time
             }[];
             phases?: Phase[];
             tasks: Task[];
@@ -874,7 +948,17 @@ export declare namespace Components {
             due_date_config?: /* Set due date for the task based on a dynamic condition */ DueDateConfig;
             assigned_to?: /* The user ids or variable assignments */ Assignees;
         }
+        /**
+         * Request payload for updating a task within a flow execution.
+         * All fields are optional; only provided fields will be updated.
+         *
+         */
         export interface PatchTaskReq {
+            /**
+             * Display name of the task
+             * example:
+             * Review customer application
+             */
             name?: string;
             status?: /**
              * **Note**: "UNASSIGNED" and "ASSIGNED" are deprecated and will be removed in a future version. Please use "PENDING" instead. Status values for workflow execution steps/tasks:
@@ -893,14 +977,37 @@ export declare namespace Components {
              */
             StepStatus;
             /**
+             * Explicit due date for the task. Takes precedence over
+             * due_date_config if both are provided.
+             *
+             * Note: intentionally typed as plain `string` (not
+             * `format: date-time`). For day/week/month-precision due
+             * dates the server stores a "floating" datetime without a
+             * timezone designator (e.g. `2026-05-28T00:00:00.000`) so
+             * that the UI can render it as a date in the user's local
+             * timezone without shifting the displayed day. Tightening
+             * this to `format: date-time` causes openapi-zod-client to
+             * emit `z.string().datetime({ offset: true })` in
+             * `validators-generated.ts`, which then trips
+             * `safeParse(body)` in `patch-task.ts` whenever the
+             * sidebar sends a stored task back with a tz-less
+             * `due_date`. See commit 4aca299c (Aug 2024) for the
+             * original date-only display rationale and the May 2026
+             * incident (513ed597 added the format, ee574b43
+             * unintentionally activated it via an unrelated regen) for
+             * the history. Long-term, day-precision due dates should
+             * migrate to a separate `format: date` field.
+             *
              * example:
-             * 2021-04-27T12:00:00.000Z
+             * 2026-05-28T00:00:00.000
              */
             due_date?: string;
             due_date_config?: /* Set due date for the task based on a dynamic condition */ DueDateConfig;
             assigned_to?: /* The user ids or variable assignments */ Assignees;
             /**
-             * flag for controlling enabled/disabled state of the task
+             * Controls whether the task is enabled (can be worked on) or disabled (grayed out).
+             * Disabled tasks cannot have their status changed until re-enabled.
+             *
              */
             enabled?: boolean;
             automation_config?: AutomationInfo;
@@ -912,17 +1019,37 @@ export declare namespace Components {
              */
             partner?: /* Details regarding partner for the workflow step */ PartnerDetails;
             /**
-             * Condition to evaluate as true for a decision task with a manual trigger mode
+             * For decision tasks with manual trigger mode, specifies which condition/branch
+             * to follow when completing the task. The condition ID must match one of the
+             * conditions defined on the decision task.
+             *
+             * example:
+             * cond_branch_approved
              */
             next_condition_id?: string;
             /**
-             * When patching an already completed/skipped task that comes before the current task, this flag controls whether to revert the execution:
-             * - `true`: The patched task becomes the current task AND all succeeding tasks are reset to PENDING (full revert)
-             * - `false` or omitted (undefined): The task is updated but the current task does not change and no downstream tasks are affected
-             * This parameter is silently ignored when patching the current task or future tasks.
+             * Controls behavior when updating a task that was already completed/skipped and
+             * comes before the current task in the workflow:
+             * - `true`: Reverts the execution - the patched task becomes the current task
+             *   and all subsequent tasks are reset to PENDING status
+             * - `false` (default): Updates only this task without affecting workflow position
+             *   or other tasks
+             *
+             * **Important:** This parameter is silently ignored when:
+             * - Patching the current task
+             * - Patching future tasks (tasks that haven't been reached yet)
              *
              */
             revert_execution?: boolean;
+            /**
+             * Request-only signal indicating the task is being completed as a
+             * result of the user submitting the task's linked journey (journey
+             * auto-completion). When `true` and the task transitions to
+             * `COMPLETED`, the activity log records a journey-specific message
+             * instead of the generic completion message. Not persisted on the task.
+             *
+             */
+            completed_via_journey?: boolean;
         }
         export interface Phase {
             id: PhaseId;
@@ -978,6 +1105,26 @@ export declare namespace Components {
              * The id of the created schedule
              */
             schedule_id?: string;
+            /**
+             * The resolved absolute timestamp (ISO 8601, UTC) at which the task is
+             * armed to run. Set by the backend when the schedule is armed and the
+             * task transitions to SCHEDULED. Absent while the task is still
+             * pending/unscheduled.
+             *
+             * Note: intentionally typed as plain `string` (not
+             * `format: date-time`). `schedule` is embedded in the AutomationTask /
+             * DecisionTask schemas; if a future request body ever accepts a task
+             * (or schedule) and `safeParse`s it, `format: date-time` would make
+             * openapi-zod-client emit `z.string().datetime({ offset: true })` and
+             * reject any round-tripped value that is empty or tz-less — the exact
+             * mechanism behind the May 2026 due_date incident (513ed597 added the
+             * format, ee574b43 activated it via an unrelated regen; see commit
+             * 2c91ff35). This field is server-written via `toISOString()` so it is
+             * always a valid UTC instant; the datetime validator adds no
+             * protection, only latent risk.
+             *
+             */
+            scheduled_at?: string;
         }
         export interface SearchExecutionsReq {
             name?: string;
@@ -1185,15 +1332,35 @@ export declare namespace Components {
             assignedTo?: string[];
         }
         export type SectionStatus = "OPEN" | "IN_PROGRESS" | "COMPLETED";
+        /**
+         * Request payload for starting a new flow execution from a template.
+         *
+         */
         export interface StartFlowReq {
+            /**
+             * The unique identifier of the flow template (definition) to instantiate.
+             * The template must exist and be accessible within the organization.
+             *
+             * example:
+             * tpl_abc123def456
+             */
             flow_template_id: string;
             trigger?: FlowTrigger;
+            /**
+             * Entity references that this execution is linked to. At least one context
+             * is required. The primary context (is_primary: true) is used for condition
+             * evaluation and data mapping.
+             *
+             */
             contexts: [
                 FlowContext,
                 ...FlowContext[]
             ];
             /**
-             * An array of purposes to filter workflow phases.
+             * Taxonomy purpose IDs to filter which phases and tasks are included in the execution.
+             * Only phases/tasks tagged with matching purposes will be active. If empty or omitted,
+             * all phases and tasks from the template are included.
+             *
              */
             purposes?: string[];
         }
@@ -1491,7 +1658,7 @@ export declare namespace Components {
         }
         export type TaskId = string;
         export type TaskType = "MANUAL" | "AUTOMATION" | "DECISION" | "AI_AGENT";
-        export type TimeUnit = "minutes" | "hours" | "days" | "weeks" | "months";
+        export type TimeUnit = "minutes" | "hours" | "days" | "weeks" | "months" | "years";
         export type TriggerMode = "manual" | "automatic";
         export type TriggerType = "MANUAL" | "AUTOMATIC";
         export interface UpdateEntityAttributes {
@@ -2005,9 +2172,24 @@ export declare namespace Paths {
         export type RequestBody = Components.Schemas.AddTaskReq;
         namespace Responses {
             export type $201 = Components.Schemas.Task;
-            export type $400 = Components.Schemas.ErrorResp;
-            export type $401 = Components.Schemas.ErrorResp;
-            export type $500 = Components.Schemas.ErrorResp;
+            export type $400 = /**
+             * Standard error response returned when an API request fails.
+             * Contains a human-readable message describing the error.
+             *
+             */
+            Components.Schemas.ErrorResp;
+            export type $401 = /**
+             * Standard error response returned when an API request fails.
+             * Contains a human-readable message describing the error.
+             *
+             */
+            Components.Schemas.ErrorResp;
+            export type $500 = /**
+             * Standard error response returned when an API request fails.
+             * Contains a human-readable message describing the error.
+             *
+             */
+            Components.Schemas.ErrorResp;
         }
     }
     namespace CancelSchedule {
@@ -2022,10 +2204,30 @@ export declare namespace Paths {
         namespace Responses {
             export interface $204 {
             }
-            export type $400 = Components.Schemas.ErrorResp;
-            export type $401 = Components.Schemas.ErrorResp;
-            export type $404 = Components.Schemas.ErrorResp;
-            export type $500 = Components.Schemas.ErrorResp;
+            export type $400 = /**
+             * Standard error response returned when an API request fails.
+             * Contains a human-readable message describing the error.
+             *
+             */
+            Components.Schemas.ErrorResp;
+            export type $401 = /**
+             * Standard error response returned when an API request fails.
+             * Contains a human-readable message describing the error.
+             *
+             */
+            Components.Schemas.ErrorResp;
+            export type $404 = /**
+             * Standard error response returned when an API request fails.
+             * Contains a human-readable message describing the error.
+             *
+             */
+            Components.Schemas.ErrorResp;
+            export type $500 = /**
+             * Standard error response returned when an API request fails.
+             * Contains a human-readable message describing the error.
+             *
+             */
+            Components.Schemas.ErrorResp;
         }
     }
     namespace CancelTaskSchedule {
@@ -2040,10 +2242,30 @@ export declare namespace Paths {
         namespace Responses {
             export interface $204 {
             }
-            export type $400 = Components.Schemas.ErrorResp;
-            export type $401 = Components.Schemas.ErrorResp;
-            export type $404 = Components.Schemas.ErrorResp;
-            export type $500 = Components.Schemas.ErrorResp;
+            export type $400 = /**
+             * Standard error response returned when an API request fails.
+             * Contains a human-readable message describing the error.
+             *
+             */
+            Components.Schemas.ErrorResp;
+            export type $401 = /**
+             * Standard error response returned when an API request fails.
+             * Contains a human-readable message describing the error.
+             *
+             */
+            Components.Schemas.ErrorResp;
+            export type $404 = /**
+             * Standard error response returned when an API request fails.
+             * Contains a human-readable message describing the error.
+             *
+             */
+            Components.Schemas.ErrorResp;
+            export type $500 = /**
+             * Standard error response returned when an API request fails.
+             * Contains a human-readable message describing the error.
+             *
+             */
+            Components.Schemas.ErrorResp;
         }
     }
     namespace CreateExecution {
@@ -2119,9 +2341,24 @@ export declare namespace Paths {
              * }
              */
             Components.Schemas.WorkflowExecution;
-            export type $400 = Components.Schemas.ErrorResp;
-            export type $401 = Components.Schemas.ErrorResp;
-            export type $500 = Components.Schemas.ErrorResp;
+            export type $400 = /**
+             * Standard error response returned when an API request fails.
+             * Contains a human-readable message describing the error.
+             *
+             */
+            Components.Schemas.ErrorResp;
+            export type $401 = /**
+             * Standard error response returned when an API request fails.
+             * Contains a human-readable message describing the error.
+             *
+             */
+            Components.Schemas.ErrorResp;
+            export type $500 = /**
+             * Standard error response returned when an API request fails.
+             * Contains a human-readable message describing the error.
+             *
+             */
+            Components.Schemas.ErrorResp;
         }
     }
     namespace CreateStep {
@@ -2134,9 +2371,24 @@ export declare namespace Paths {
         export type RequestBody = Components.Schemas.CreateStepReq;
         namespace Responses {
             export type $201 = Components.Schemas.Step;
-            export type $400 = Components.Schemas.ErrorResp;
-            export type $401 = Components.Schemas.ErrorResp;
-            export type $500 = Components.Schemas.ErrorResp;
+            export type $400 = /**
+             * Standard error response returned when an API request fails.
+             * Contains a human-readable message describing the error.
+             *
+             */
+            Components.Schemas.ErrorResp;
+            export type $401 = /**
+             * Standard error response returned when an API request fails.
+             * Contains a human-readable message describing the error.
+             *
+             */
+            Components.Schemas.ErrorResp;
+            export type $500 = /**
+             * Standard error response returned when an API request fails.
+             * Contains a human-readable message describing the error.
+             *
+             */
+            Components.Schemas.ErrorResp;
         }
     }
     namespace DeleteExecution {
@@ -2149,7 +2401,12 @@ export declare namespace Paths {
         namespace Responses {
             export interface $204 {
             }
-            export type $401 = Components.Schemas.ErrorResp;
+            export type $401 = /**
+             * Standard error response returned when an API request fails.
+             * Contains a human-readable message describing the error.
+             *
+             */
+            Components.Schemas.ErrorResp;
             export interface $404 {
             }
         }
@@ -2188,7 +2445,12 @@ export declare namespace Paths {
         namespace Responses {
             export interface $204 {
             }
-            export type $500 = Components.Schemas.ErrorResp;
+            export type $500 = /**
+             * Standard error response returned when an API request fails.
+             * Contains a human-readable message describing the error.
+             *
+             */
+            Components.Schemas.ErrorResp;
         }
     }
     namespace ExecuteTask {
@@ -2202,9 +2464,24 @@ export declare namespace Paths {
         }
         namespace Responses {
             export type $200 = Components.Schemas.Task;
-            export type $400 = Components.Schemas.ErrorResp;
-            export type $401 = Components.Schemas.ErrorResp;
-            export type $500 = Components.Schemas.ErrorResp;
+            export type $400 = /**
+             * Standard error response returned when an API request fails.
+             * Contains a human-readable message describing the error.
+             *
+             */
+            Components.Schemas.ErrorResp;
+            export type $401 = /**
+             * Standard error response returned when an API request fails.
+             * Contains a human-readable message describing the error.
+             *
+             */
+            Components.Schemas.ErrorResp;
+            export type $500 = /**
+             * Standard error response returned when an API request fails.
+             * Contains a human-readable message describing the error.
+             *
+             */
+            Components.Schemas.ErrorResp;
         }
     }
     namespace GetClosingReasonExecution {
@@ -2216,7 +2493,12 @@ export declare namespace Paths {
         }
         namespace Responses {
             export type $200 = Components.Schemas.ClosingReasonResp;
-            export type $500 = Components.Schemas.ErrorResp;
+            export type $500 = /**
+             * Standard error response returned when an API request fails.
+             * Contains a human-readable message describing the error.
+             *
+             */
+            Components.Schemas.ErrorResp;
         }
     }
     namespace GetExecution {
@@ -2280,7 +2562,12 @@ export declare namespace Paths {
              * }
              */
             Components.Schemas.WorkflowExecution;
-            export type $500 = Components.Schemas.ErrorResp;
+            export type $500 = /**
+             * Standard error response returned when an API request fails.
+             * Contains a human-readable message describing the error.
+             *
+             */
+            Components.Schemas.ErrorResp;
         }
     }
     namespace GetExecutions {
@@ -2337,7 +2624,12 @@ export declare namespace Paths {
              * }
              */
             Components.Schemas.WorkflowExecutionSlim[];
-            export type $500 = Components.Schemas.ErrorResp;
+            export type $500 = /**
+             * Standard error response returned when an API request fails.
+             * Contains a human-readable message describing the error.
+             *
+             */
+            Components.Schemas.ErrorResp;
         }
     }
     namespace GetFlowExecution {
@@ -2373,7 +2665,12 @@ export declare namespace Paths {
             }
             export interface $404 {
             }
-            export type $500 = Components.Schemas.ErrorResp;
+            export type $500 = /**
+             * Standard error response returned when an API request fails.
+             * Contains a human-readable message describing the error.
+             *
+             */
+            Components.Schemas.ErrorResp;
         }
     }
     namespace PatchPhase {
@@ -2388,9 +2685,24 @@ export declare namespace Paths {
         export type RequestBody = Components.Schemas.PatchPhaseReq;
         namespace Responses {
             export type $200 = Components.Schemas.Phase;
-            export type $400 = Components.Schemas.ErrorResp;
-            export type $401 = Components.Schemas.ErrorResp;
-            export type $500 = Components.Schemas.ErrorResp;
+            export type $400 = /**
+             * Standard error response returned when an API request fails.
+             * Contains a human-readable message describing the error.
+             *
+             */
+            Components.Schemas.ErrorResp;
+            export type $401 = /**
+             * Standard error response returned when an API request fails.
+             * Contains a human-readable message describing the error.
+             *
+             */
+            Components.Schemas.ErrorResp;
+            export type $500 = /**
+             * Standard error response returned when an API request fails.
+             * Contains a human-readable message describing the error.
+             *
+             */
+            Components.Schemas.ErrorResp;
         }
     }
     namespace PatchTask {
@@ -2402,12 +2714,81 @@ export declare namespace Paths {
             execution_id: Parameters.ExecutionId;
             task_id: Parameters.TaskId;
         }
-        export type RequestBody = Components.Schemas.PatchTaskReq;
+        export type RequestBody = /**
+         * Request payload for updating a task within a flow execution.
+         * All fields are optional; only provided fields will be updated.
+         *
+         */
+        Components.Schemas.PatchTaskReq;
         namespace Responses {
             export type $200 = Components.Schemas.Task;
-            export type $400 = Components.Schemas.ErrorResp;
-            export type $401 = Components.Schemas.ErrorResp;
-            export type $500 = Components.Schemas.ErrorResp;
+            export type $400 = /**
+             * Standard error response returned when an API request fails.
+             * Contains a human-readable message describing the error.
+             *
+             */
+            Components.Schemas.ErrorResp;
+            export type $401 = /**
+             * Standard error response returned when an API request fails.
+             * Contains a human-readable message describing the error.
+             *
+             */
+            Components.Schemas.ErrorResp;
+            export type $404 = /**
+             * Standard error response returned when an API request fails.
+             * Contains a human-readable message describing the error.
+             *
+             */
+            Components.Schemas.ErrorResp;
+            export type $500 = /**
+             * Standard error response returned when an API request fails.
+             * Contains a human-readable message describing the error.
+             *
+             */
+            Components.Schemas.ErrorResp;
+        }
+    }
+    namespace ReconcileAutomationTask {
+        namespace Parameters {
+            export type ExecutionId = string;
+            export type TaskId = string;
+        }
+        export interface PathParameters {
+            execution_id: Parameters.ExecutionId;
+            task_id: Parameters.TaskId;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.FlowExecution;
+            export type $400 = /**
+             * Standard error response returned when an API request fails.
+             * Contains a human-readable message describing the error.
+             *
+             */
+            Components.Schemas.ErrorResp;
+            export type $401 = /**
+             * Standard error response returned when an API request fails.
+             * Contains a human-readable message describing the error.
+             *
+             */
+            Components.Schemas.ErrorResp;
+            export type $403 = /**
+             * Standard error response returned when an API request fails.
+             * Contains a human-readable message describing the error.
+             *
+             */
+            Components.Schemas.ErrorResp;
+            export type $404 = /**
+             * Standard error response returned when an API request fails.
+             * Contains a human-readable message describing the error.
+             *
+             */
+            Components.Schemas.ErrorResp;
+            export type $500 = /**
+             * Standard error response returned when an API request fails.
+             * Contains a human-readable message describing the error.
+             *
+             */
+            Components.Schemas.ErrorResp;
         }
     }
     namespace RunTaskAutomation {
@@ -2421,9 +2802,24 @@ export declare namespace Paths {
         }
         namespace Responses {
             export type $200 = Components.Schemas.AutomationTask;
-            export type $400 = Components.Schemas.ErrorResp;
-            export type $401 = Components.Schemas.ErrorResp;
-            export type $500 = Components.Schemas.ErrorResp;
+            export type $400 = /**
+             * Standard error response returned when an API request fails.
+             * Contains a human-readable message describing the error.
+             *
+             */
+            Components.Schemas.ErrorResp;
+            export type $401 = /**
+             * Standard error response returned when an API request fails.
+             * Contains a human-readable message describing the error.
+             *
+             */
+            Components.Schemas.ErrorResp;
+            export type $500 = /**
+             * Standard error response returned when an API request fails.
+             * Contains a human-readable message describing the error.
+             *
+             */
+            Components.Schemas.ErrorResp;
         }
     }
     namespace RunTaskScheduleNow {
@@ -2437,19 +2833,54 @@ export declare namespace Paths {
         }
         namespace Responses {
             export type $200 = Components.Schemas.Task;
-            export type $400 = Components.Schemas.ErrorResp;
-            export type $401 = Components.Schemas.ErrorResp;
-            export type $404 = Components.Schemas.ErrorResp;
-            export type $500 = Components.Schemas.ErrorResp;
+            export type $400 = /**
+             * Standard error response returned when an API request fails.
+             * Contains a human-readable message describing the error.
+             *
+             */
+            Components.Schemas.ErrorResp;
+            export type $401 = /**
+             * Standard error response returned when an API request fails.
+             * Contains a human-readable message describing the error.
+             *
+             */
+            Components.Schemas.ErrorResp;
+            export type $404 = /**
+             * Standard error response returned when an API request fails.
+             * Contains a human-readable message describing the error.
+             *
+             */
+            Components.Schemas.ErrorResp;
+            export type $500 = /**
+             * Standard error response returned when an API request fails.
+             * Contains a human-readable message describing the error.
+             *
+             */
+            Components.Schemas.ErrorResp;
         }
     }
     namespace SearchExecutions {
         export type RequestBody = Components.Schemas.SearchExecutionsReq;
         namespace Responses {
             export type $200 = Components.Schemas.SearchExecutionsResp;
-            export type $400 = Components.Schemas.ErrorResp;
-            export type $401 = Components.Schemas.ErrorResp;
-            export type $500 = Components.Schemas.ErrorResp;
+            export type $400 = /**
+             * Standard error response returned when an API request fails.
+             * Contains a human-readable message describing the error.
+             *
+             */
+            Components.Schemas.ErrorResp;
+            export type $401 = /**
+             * Standard error response returned when an API request fails.
+             * Contains a human-readable message describing the error.
+             *
+             */
+            Components.Schemas.ErrorResp;
+            export type $500 = /**
+             * Standard error response returned when an API request fails.
+             * Contains a human-readable message describing the error.
+             *
+             */
+            Components.Schemas.ErrorResp;
         }
     }
     namespace SearchFlowExecutions {
@@ -2458,33 +2889,80 @@ export declare namespace Paths {
             export interface $200 {
                 results?: Components.Schemas.FlowExecution[];
             }
-            export type $400 = Components.Schemas.ErrorResp;
+            export type $400 = /**
+             * Standard error response returned when an API request fails.
+             * Contains a human-readable message describing the error.
+             *
+             */
+            Components.Schemas.ErrorResp;
             export interface $401 {
             }
             export interface $403 {
             }
-            export type $500 = Components.Schemas.ErrorResp;
+            export type $500 = /**
+             * Standard error response returned when an API request fails.
+             * Contains a human-readable message describing the error.
+             *
+             */
+            Components.Schemas.ErrorResp;
         }
     }
     namespace SearchSteps {
         export type RequestBody = Components.Schemas.SearchStepsReq;
         namespace Responses {
             export type $200 = Components.Schemas.SearchStepsResp;
-            export type $400 = Components.Schemas.ErrorResp;
-            export type $401 = Components.Schemas.ErrorResp;
-            export type $500 = Components.Schemas.ErrorResp;
+            export type $400 = /**
+             * Standard error response returned when an API request fails.
+             * Contains a human-readable message describing the error.
+             *
+             */
+            Components.Schemas.ErrorResp;
+            export type $401 = /**
+             * Standard error response returned when an API request fails.
+             * Contains a human-readable message describing the error.
+             *
+             */
+            Components.Schemas.ErrorResp;
+            export type $500 = /**
+             * Standard error response returned when an API request fails.
+             * Contains a human-readable message describing the error.
+             *
+             */
+            Components.Schemas.ErrorResp;
         }
     }
     namespace StartFlowExecution {
-        export type RequestBody = Components.Schemas.StartFlowReq;
+        export type RequestBody = /**
+         * Request payload for starting a new flow execution from a template.
+         *
+         */
+        Components.Schemas.StartFlowReq;
         namespace Responses {
             export type $201 = Components.Schemas.FlowExecution;
-            export type $400 = Components.Schemas.ErrorResp;
-            export interface $401 {
-            }
-            export interface $403 {
-            }
-            export type $500 = Components.Schemas.ErrorResp;
+            export type $400 = /**
+             * Standard error response returned when an API request fails.
+             * Contains a human-readable message describing the error.
+             *
+             */
+            Components.Schemas.ErrorResp;
+            export type $401 = /**
+             * Standard error response returned when an API request fails.
+             * Contains a human-readable message describing the error.
+             *
+             */
+            Components.Schemas.ErrorResp;
+            export type $403 = /**
+             * Standard error response returned when an API request fails.
+             * Contains a human-readable message describing the error.
+             *
+             */
+            Components.Schemas.ErrorResp;
+            export type $500 = /**
+             * Standard error response returned when an API request fails.
+             * Contains a human-readable message describing the error.
+             *
+             */
+            Components.Schemas.ErrorResp;
         }
     }
     namespace UpdateExecution {
@@ -2498,7 +2976,12 @@ export declare namespace Paths {
         namespace Responses {
             export interface $204 {
             }
-            export type $500 = Components.Schemas.ErrorResp;
+            export type $500 = /**
+             * Standard error response returned when an API request fails.
+             * Contains a human-readable message describing the error.
+             *
+             */
+            Components.Schemas.ErrorResp;
         }
     }
     namespace UpdateStep {
@@ -2513,9 +2996,24 @@ export declare namespace Paths {
         export type RequestBody = Components.Schemas.UpdateStepReq;
         namespace Responses {
             export type $200 = Components.Schemas.Step;
-            export type $400 = Components.Schemas.ErrorResp;
-            export type $401 = Components.Schemas.ErrorResp;
-            export type $500 = Components.Schemas.ErrorResp;
+            export type $400 = /**
+             * Standard error response returned when an API request fails.
+             * Contains a human-readable message describing the error.
+             *
+             */
+            Components.Schemas.ErrorResp;
+            export type $401 = /**
+             * Standard error response returned when an API request fails.
+             * Contains a human-readable message describing the error.
+             *
+             */
+            Components.Schemas.ErrorResp;
+            export type $500 = /**
+             * Standard error response returned when an API request fails.
+             * Contains a human-readable message describing the error.
+             *
+             */
+            Components.Schemas.ErrorResp;
         }
     }
 }
@@ -2535,7 +3033,13 @@ export interface OperationMethods {
   /**
    * createExecution - createExecution
    * 
-   * Create a Workflow Execution. Start a new workflow execution, based on a workflow definition (template).
+   * Creates a new V1 Workflow Execution from a workflow definition (template).
+   * 
+   * **Note:** This is the legacy V1 API. For new integrations, use `POST /v2/flows/executions` instead.
+   * 
+   * The workflow definition specifies the structure (sections and steps) of the workflow.
+   * When created, the execution instantiates all steps and begins tracking progress.
+   * 
    */
   'createExecution'(
     parameters?: Parameters<UnknownParamsObject> | null,
@@ -2545,7 +3049,10 @@ export interface OperationMethods {
   /**
    * getExecution - getExecution
    * 
-   * Get a full workflow execution, included steps information, by execution id.
+   * Retrieves a complete V1 workflow execution by ID, including all steps information.
+   * 
+   * **Note:** This is the legacy V1 API. For new integrations, use `GET /v2/flows/executions/{execution_id}` instead.
+   * 
    */
   'getExecution'(
     parameters?: Parameters<Paths.GetExecution.PathParameters> | null,
@@ -2585,7 +3092,16 @@ export interface OperationMethods {
   /**
    * updateStep - updateStep
    * 
-   * Patches various changes to a workflow execution step.
+   * Updates a workflow execution step with new values for status, assignees, due date, position, and more.
+   * 
+   * **Note:** This is the legacy V1 API. For new integrations, use `PATCH /v2/flows/executions/{execution_id}/tasks/{task_id}` instead.
+   * 
+   * **Common use cases:**
+   * - Mark a step as completed or skipped
+   * - Assign or reassign users to a step
+   * - Update step due dates (static or dynamic)
+   * - Reorder steps within a section
+   * 
    */
   'updateStep'(
     parameters?: Parameters<Paths.UpdateStep.PathParameters> | null,
@@ -2638,7 +3154,20 @@ export interface OperationMethods {
   /**
    * startFlowExecution - startFlowExecution
    * 
-   * Starts a new Flow Execution based on a flow template.
+   * Starts a new Flow Execution based on a flow template (definition).
+   * 
+   * The flow template defines the structure of the workflow including phases, tasks, edges (transitions),
+   * and automation configurations. When started, the execution creates runtime instances of all tasks
+   * and begins processing from the initial task(s).
+   * 
+   * **Required fields:**
+   * - `flow_template_id`: The ID of the flow template to instantiate
+   * - `contexts`: At least one entity context to link the execution to
+   * 
+   * **Optional fields:**
+   * - `trigger`: Specifies how the execution was triggered (manual or automatic)
+   * - `purposes`: Filter which phases/tasks are included based on taxonomy purposes
+   * 
    */
   'startFlowExecution'(
     parameters?: Parameters<UnknownParamsObject> | null,
@@ -2648,7 +3177,16 @@ export interface OperationMethods {
   /**
    * getFlowExecution - getFlowExecution
    * 
-   * Get a full flow execution, included tasks, phases, edges & analytics.
+   * Retrieves a complete flow execution by ID, including all phases, tasks, edges, contexts, and analytics.
+   * 
+   * The response includes:
+   * - **Execution metadata**: ID, name, status, timestamps, assignees
+   * - **Phases**: Organizational groupings of tasks with progress tracking
+   * - **Tasks**: Individual work items with their status, assignees, and configurations
+   * - **Edges**: Connections between tasks defining the workflow graph
+   * - **Analytics**: Timing information (started, completed, closed timestamps)
+   * - **Contexts**: Linked entity references
+   * 
    */
   'getFlowExecution'(
     parameters?: Parameters<Paths.GetFlowExecution.PathParameters> | null,
@@ -2688,7 +3226,26 @@ export interface OperationMethods {
   /**
    * patchTask - patchTask
    * 
-   * Changes various attributes of a flow task, like assignees, status, due date, etc.
+   * Updates attributes of a flow task including status, assignees, due date, and more.
+   * 
+   * **Common use cases:**
+   * - Mark a task as completed or skipped
+   * - Assign or reassign users to a task
+   * - Update task due dates
+   * - Enable or disable a task
+   * - Revert execution to a previous task
+   * 
+   * **Status transitions:**
+   * - `PENDING` -> `IN_PROGRESS`: User starts working on the task
+   * - `IN_PROGRESS` -> `COMPLETED`: User finishes the task
+   * - `PENDING` or `IN_PROGRESS` -> `SKIPPED`: Task is bypassed
+   * - `COMPLETED` or `SKIPPED` -> `PENDING`: Task is reopened (with revert_execution flag)
+   * 
+   * **Reverting execution:**
+   * When updating a task that was already completed/skipped and comes before the current task,
+   * use `revert_execution: true` to reset the flow back to that point. All subsequent tasks
+   * will be reset to PENDING status.
+   * 
    */
   'patchTask'(
     parameters?: Parameters<Paths.PatchTask.PathParameters> | null,
@@ -2746,6 +3303,29 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CancelTaskSchedule.Responses.$204>
   /**
+   * reconcileAutomationTask - reconcileAutomationTask
+   * 
+   * Reconciles an automation task's status against its linked automation execution.
+   * 
+   * Looks the task up by id (whether or not it is currently a `crt_task`),
+   * fetches its automation execution, and — if the automation has reached a
+   * terminal state (success/failed/skipped) — corrects the task's `status`,
+   * `automation_config` and `analytics` to match and persists them. If the
+   * task is the current task and the flow is still active, the flow is
+   * advanced; otherwise only the task record is corrected.
+   * 
+   * Used by the "Refresh status" action to recover a task left `IN_PROGRESS`
+   * after a missed or clobbered completion event. No-op (returns the
+   * execution unchanged) when the task is already terminal or the automation
+   * is still running.
+   * 
+   */
+  'reconcileAutomationTask'(
+    parameters?: Parameters<Paths.ReconcileAutomationTask.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ReconcileAutomationTask.Responses.$200>
+  /**
    * runTaskScheduleNow - runTaskScheduleNow
    * 
    * Cancels the pending schedule for a task and immediately triggers its automation execution.
@@ -2785,7 +3365,13 @@ export interface PathsDictionary {
     /**
      * createExecution - createExecution
      * 
-     * Create a Workflow Execution. Start a new workflow execution, based on a workflow definition (template).
+     * Creates a new V1 Workflow Execution from a workflow definition (template).
+     * 
+     * **Note:** This is the legacy V1 API. For new integrations, use `POST /v2/flows/executions` instead.
+     * 
+     * The workflow definition specifies the structure (sections and steps) of the workflow.
+     * When created, the execution instantiates all steps and begins tracking progress.
+     * 
      */
     'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
@@ -2797,7 +3383,10 @@ export interface PathsDictionary {
     /**
      * getExecution - getExecution
      * 
-     * Get a full workflow execution, included steps information, by execution id.
+     * Retrieves a complete V1 workflow execution by ID, including all steps information.
+     * 
+     * **Note:** This is the legacy V1 API. For new integrations, use `GET /v2/flows/executions/{execution_id}` instead.
+     * 
      */
     'get'(
       parameters?: Parameters<Paths.GetExecution.PathParameters> | null,
@@ -2841,7 +3430,16 @@ export interface PathsDictionary {
     /**
      * updateStep - updateStep
      * 
-     * Patches various changes to a workflow execution step.
+     * Updates a workflow execution step with new values for status, assignees, due date, position, and more.
+     * 
+     * **Note:** This is the legacy V1 API. For new integrations, use `PATCH /v2/flows/executions/{execution_id}/tasks/{task_id}` instead.
+     * 
+     * **Common use cases:**
+     * - Mark a step as completed or skipped
+     * - Assign or reassign users to a step
+     * - Update step due dates (static or dynamic)
+     * - Reorder steps within a section
+     * 
      */
     'patch'(
       parameters?: Parameters<Paths.UpdateStep.PathParameters> | null,
@@ -2902,7 +3500,20 @@ export interface PathsDictionary {
     /**
      * startFlowExecution - startFlowExecution
      * 
-     * Starts a new Flow Execution based on a flow template.
+     * Starts a new Flow Execution based on a flow template (definition).
+     * 
+     * The flow template defines the structure of the workflow including phases, tasks, edges (transitions),
+     * and automation configurations. When started, the execution creates runtime instances of all tasks
+     * and begins processing from the initial task(s).
+     * 
+     * **Required fields:**
+     * - `flow_template_id`: The ID of the flow template to instantiate
+     * - `contexts`: At least one entity context to link the execution to
+     * 
+     * **Optional fields:**
+     * - `trigger`: Specifies how the execution was triggered (manual or automatic)
+     * - `purposes`: Filter which phases/tasks are included based on taxonomy purposes
+     * 
      */
     'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
@@ -2914,7 +3525,16 @@ export interface PathsDictionary {
     /**
      * getFlowExecution - getFlowExecution
      * 
-     * Get a full flow execution, included tasks, phases, edges & analytics.
+     * Retrieves a complete flow execution by ID, including all phases, tasks, edges, contexts, and analytics.
+     * 
+     * The response includes:
+     * - **Execution metadata**: ID, name, status, timestamps, assignees
+     * - **Phases**: Organizational groupings of tasks with progress tracking
+     * - **Tasks**: Individual work items with their status, assignees, and configurations
+     * - **Edges**: Connections between tasks defining the workflow graph
+     * - **Analytics**: Timing information (started, completed, closed timestamps)
+     * - **Contexts**: Linked entity references
+     * 
      */
     'get'(
       parameters?: Parameters<Paths.GetFlowExecution.PathParameters> | null,
@@ -2958,7 +3578,26 @@ export interface PathsDictionary {
     /**
      * patchTask - patchTask
      * 
-     * Changes various attributes of a flow task, like assignees, status, due date, etc.
+     * Updates attributes of a flow task including status, assignees, due date, and more.
+     * 
+     * **Common use cases:**
+     * - Mark a task as completed or skipped
+     * - Assign or reassign users to a task
+     * - Update task due dates
+     * - Enable or disable a task
+     * - Revert execution to a previous task
+     * 
+     * **Status transitions:**
+     * - `PENDING` -> `IN_PROGRESS`: User starts working on the task
+     * - `IN_PROGRESS` -> `COMPLETED`: User finishes the task
+     * - `PENDING` or `IN_PROGRESS` -> `SKIPPED`: Task is bypassed
+     * - `COMPLETED` or `SKIPPED` -> `PENDING`: Task is reopened (with revert_execution flag)
+     * 
+     * **Reverting execution:**
+     * When updating a task that was already completed/skipped and comes before the current task,
+     * use `revert_execution: true` to reset the flow back to that point. All subsequent tasks
+     * will be reset to PENDING status.
+     * 
      */
     'patch'(
       parameters?: Parameters<Paths.PatchTask.PathParameters> | null,
@@ -3025,6 +3664,31 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.CancelTaskSchedule.Responses.$204>
+  }
+  ['/v2/flows/executions/{execution_id}/tasks/{task_id}/reconcile-automation']: {
+    /**
+     * reconcileAutomationTask - reconcileAutomationTask
+     * 
+     * Reconciles an automation task's status against its linked automation execution.
+     * 
+     * Looks the task up by id (whether or not it is currently a `crt_task`),
+     * fetches its automation execution, and — if the automation has reached a
+     * terminal state (success/failed/skipped) — corrects the task's `status`,
+     * `automation_config` and `analytics` to match and persists them. If the
+     * task is the current task and the flow is still active, the flow is
+     * advanced; otherwise only the task record is corrected.
+     * 
+     * Used by the "Refresh status" action to recover a task left `IN_PROGRESS`
+     * after a missed or clobbered completion event. No-op (returns the
+     * execution unchanged) when the task is already terminal or the automation
+     * is still running.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.ReconcileAutomationTask.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ReconcileAutomationTask.Responses.$200>
   }
   ['/v2/flows/executions/{execution_id}/tasks/{task_id}/schedule/run-now']: {
     /**
