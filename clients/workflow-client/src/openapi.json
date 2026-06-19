@@ -3,7 +3,7 @@
   "info": {
     "title": "Workflows Executions",
     "version": "1.0.0",
-    "description": "Service for Workflow Executions which covers executions of processes defined in an Organization\n"
+    "description": "## Overview\nThe Workflows Executions API manages the runtime instances of workflow processes within an organization.\nWhile **Workflow Definitions** (managed by the Workflows Definitions API) serve as reusable templates\nthat define the structure, phases, and tasks of a process, **Workflow Executions** are the active\ninstances created from those definitions.\n\n## Key Concepts\n\n### Definitions vs Executions\n- **Definition (Template)**: A blueprint defining workflow structure, phases, tasks, conditions, and automation rules\n- **Execution (Instance)**: A running instance of a definition, tracking actual progress, assignees, and status\n\n### Execution Lifecycle\n1. **STARTED**: Execution is active and tasks can be worked on\n2. **DONE**: All required tasks are completed\n3. **CLOSED**: Execution is terminated (completed successfully or cancelled with closing reasons)\n\n### Task Types\n- **Manual Tasks**: Require human action to complete\n- **Automation Tasks**: Execute configured automations automatically\n- **Decision Tasks**: Evaluate conditions to determine the next path in the workflow\n- **AI Agent Tasks**: Execute AI-powered agents for intelligent task processing\n\n### Contexts\nExecutions are linked to entity contexts (e.g., contacts, opportunities) that provide the data\ncontext for the workflow and allow tracking which entities a workflow operates on.\n\n## API Versions\n- **V1 (`/v1/workflows/`)**: Legacy linear phase/section/step model (deprecated for new integrations)\n- **V2 (`/v2/flows/`)**: Current graph-based model with advanced features like conditional branching,\n  loops, and scheduling. **Recommended for all new integrations.**\n"
   },
   "servers": [
     {
@@ -13,16 +13,19 @@
   "tags": [
     {
       "name": "Workflow Executions",
-      "description": "Interact with workflow executions - start / close / retrieve one or all / search / delete"
+      "description": "Manage V1 workflow executions (legacy linear model). Operations include starting new executions\nfrom definitions, retrieving execution details, updating execution status and assignees,\nand deleting executions. Use the Flows V2 endpoints for new integrations.\n"
     },
     {
-      "name": "Workflow Steps"
+      "name": "Workflow Steps",
+      "description": "Manage individual steps within V1 workflow executions (legacy). Steps represent discrete tasks\nthat can be assigned to users, have due dates, and track completion status. Use the Flows V2\ntask endpoints for new integrations.\n"
     },
     {
-      "name": "Closing Reasons"
+      "name": "Closing Reasons",
+      "description": "Retrieve closing reasons configured for workflow executions. When a workflow is closed/cancelled,\nusers can select from predefined closing reasons to document why the workflow ended. Closing\nreasons are snapshots from the definition at execution creation time.\n"
     },
     {
-      "name": "Flows V2"
+      "name": "Flows V2",
+      "description": "**Recommended for new integrations.** Manage V2 flow executions using the graph-based execution model.\nThis API version supports advanced features including:\n- Conditional branching with decision tasks\n- Automation tasks with configurable triggers\n- AI agent tasks for intelligent processing\n- Task scheduling (immediate, delayed, or relative to events)\n- Loop iterations for repeatable task sequences\n- Phase-based organization with progress tracking\n"
     }
   ],
   "security": [
@@ -90,24 +93,61 @@
       "post": {
         "operationId": "createExecution",
         "summary": "createExecution",
-        "description": "Create a Workflow Execution. Start a new workflow execution, based on a workflow definition (template).",
+        "description": "Creates a new V1 Workflow Execution from a workflow definition (template).\n\n**Note:** This is the legacy V1 API. For new integrations, use `POST /v2/flows/executions` instead.\n\nThe workflow definition specifies the structure (sections and steps) of the workflow.\nWhen created, the execution instantiates all steps and begins tracking progress.\n",
         "tags": [
           "Workflow Executions"
         ],
         "requestBody": {
-          "description": "Workflow Execution payload",
+          "description": "Workflow execution creation payload with definition ID and entity contexts",
           "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/WorkflowExecutionCreateReq"
+              },
+              "examples": {
+                "basicCreate": {
+                  "summary": "Create with single context",
+                  "description": "Create an execution linked to an opportunity entity",
+                  "value": {
+                    "workflowId": "j3f23fh23uif98",
+                    "trigger": "MANUAL",
+                    "contexts": [
+                      {
+                        "id": "3fa3fa86-0907-4642-a57e-0fe30a19874d",
+                        "title": "New Opportunity",
+                        "schema": "opportunity"
+                      }
+                    ]
+                  }
+                },
+                "automatedTrigger": {
+                  "summary": "Create from automation",
+                  "description": "Create an execution triggered automatically by an automation rule",
+                  "value": {
+                    "workflowId": "j3f23fh23uif98",
+                    "trigger": "AUTOMATIC",
+                    "contexts": [
+                      {
+                        "id": "3fa3fa86-0907-4642-a57e-0fe30a19874d",
+                        "title": "John Doe",
+                        "schema": "contact"
+                      },
+                      {
+                        "id": "3a6d42fa-5070-4723-b90f-41ead4303e33",
+                        "title": "Sales Opportunity",
+                        "schema": "opportunity"
+                      }
+                    ]
+                  }
+                }
               }
             }
           }
         },
         "responses": {
           "201": {
-            "description": "Success - if the execution is created successfully",
+            "description": "Execution created successfully. Returns the complete workflow execution\nincluding all sections, steps, and initial status.\n",
             "content": {
               "application/json": {
                 "schema": {
@@ -117,31 +157,40 @@
             }
           },
           "400": {
-            "description": "Validation Errors",
+            "description": "Validation error. Common causes include:\n- Missing required workflowId\n- Invalid workflowId (definition not found)\n- Invalid context entity references\n",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResp"
+                },
+                "example": {
+                  "message": "workflowId is required"
                 }
               }
             }
           },
           "401": {
-            "description": "Authentication Errors",
+            "description": "Authentication failed. The Bearer token is missing, expired, or invalid.\n",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResp"
+                },
+                "example": {
+                  "message": "Unauthorized"
                 }
               }
             }
           },
           "500": {
-            "description": "Other errors",
+            "description": "Internal server error. An unexpected error occurred while processing the request.\n",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResp"
+                },
+                "example": {
+                  "message": "Internal server error"
                 }
               }
             }
@@ -153,7 +202,7 @@
       "get": {
         "operationId": "getExecution",
         "summary": "getExecution",
-        "description": "Get a full workflow execution, included steps information, by execution id.",
+        "description": "Retrieves a complete V1 workflow execution by ID, including all steps information.\n\n**Note:** This is the legacy V1 API. For new integrations, use `GET /v2/flows/executions/{execution_id}` instead.\n",
         "tags": [
           "Workflow Executions"
         ],
@@ -356,7 +405,7 @@
       "patch": {
         "operationId": "updateStep",
         "summary": "updateStep",
-        "description": "Patches various changes to a workflow execution step.",
+        "description": "Updates a workflow execution step with new values for status, assignees, due date, position, and more.\n\n**Note:** This is the legacy V1 API. For new integrations, use `PATCH /v2/flows/executions/{execution_id}/tasks/{task_id}` instead.\n\n**Common use cases:**\n- Mark a step as completed or skipped\n- Assign or reassign users to a step\n- Update step due dates (static or dynamic)\n- Reorder steps within a section\n",
         "tags": [
           "Workflow Steps"
         ],
@@ -368,7 +417,7 @@
               "type": "string"
             },
             "required": true,
-            "description": "Id of the execution",
+            "description": "Unique identifier of the workflow execution",
             "example": "wd56125gah"
           },
           {
@@ -378,12 +427,12 @@
               "type": "string"
             },
             "required": true,
-            "description": "Short uuid (length 6) to identify the Workflow Execution Step.",
+            "description": "Short unique identifier (typically 6 characters) of the step within the execution",
             "example": "7hj28a"
           }
         ],
         "requestBody": {
-          "description": "Workflow Execution Step payload",
+          "description": "Step update payload with fields to modify",
           "required": true,
           "content": {
             "application/json": {
@@ -391,24 +440,57 @@
                 "$ref": "#/components/schemas/UpdateStepReq"
               },
               "examples": {
-                "dynamicDueDate": {
+                "markCompleted": {
+                  "summary": "Mark step as completed",
+                  "description": "Complete a step, advancing the workflow",
                   "value": {
-                    "stepId": "string",
+                    "status": "COMPLETED"
+                  }
+                },
+                "markInProgress": {
+                  "summary": "Mark step as in progress",
+                  "description": "Indicate that work has started on this step",
+                  "value": {
+                    "status": "IN_PROGRESS"
+                  }
+                },
+                "assignUsers": {
+                  "summary": "Assign users to step",
+                  "description": "Assign one or more users to the step",
+                  "value": {
                     "assignedTo": [
-                      "10010730"
-                    ],
+                      "10010730",
+                      "10010731"
+                    ]
+                  }
+                },
+                "setStaticDueDate": {
+                  "summary": "Set static due date",
+                  "description": "Set an explicit due date for the step",
+                  "value": {
+                    "dueDate": "2024-06-15T17:00:00.000Z"
+                  }
+                },
+                "setDynamicDueDate": {
+                  "summary": "Set dynamic due date",
+                  "description": "Configure due date relative to workflow start or another step",
+                  "value": {
                     "dynamicDueDate": {
                       "numberOfUnits": 2,
                       "timePeriod": "weeks",
                       "actionTypeCondition": "STEP_CLOSED",
-                      "stepId": "optional"
-                    },
-                    "name": "Static Duedate",
+                      "stepId": "abc123"
+                    }
+                  }
+                },
+                "reorderStep": {
+                  "summary": "Reorder step position",
+                  "description": "Move a step to a different position within its section",
+                  "value": {
                     "position": {
-                      "index": 0
-                    },
-                    "sectionId": "string",
-                    "status": "string"
+                      "index": 2,
+                      "sectionId": "section_abc123"
+                    }
                   }
                 }
               }
@@ -417,7 +499,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success - if the step is updated successfully",
+            "description": "Step updated successfully. Returns the updated step object with all current values.\n",
             "content": {
               "application/json": {
                 "schema": {
@@ -681,24 +763,80 @@
       "post": {
         "operationId": "startFlowExecution",
         "summary": "startFlowExecution",
-        "description": "Starts a new Flow Execution based on a flow template.",
+        "description": "Starts a new Flow Execution based on a flow template (definition).\n\nThe flow template defines the structure of the workflow including phases, tasks, edges (transitions),\nand automation configurations. When started, the execution creates runtime instances of all tasks\nand begins processing from the initial task(s).\n\n**Required fields:**\n- `flow_template_id`: The ID of the flow template to instantiate\n- `contexts`: At least one entity context to link the execution to\n\n**Optional fields:**\n- `trigger`: Specifies how the execution was triggered (manual or automatic)\n- `purposes`: Filter which phases/tasks are included based on taxonomy purposes\n",
         "tags": [
           "Flows V2"
         ],
         "requestBody": {
-          "description": "Flow Execution payload",
+          "description": "Flow Execution payload containing the template ID and entity contexts",
           "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/StartFlowReq"
+              },
+              "examples": {
+                "basicStart": {
+                  "summary": "Start with single entity context",
+                  "description": "Start a flow execution linked to an opportunity entity",
+                  "value": {
+                    "flow_template_id": "tpl_abc123def456",
+                    "contexts": [
+                      {
+                        "entity_id": "3fa3fa86-0907-4642-a57e-0fe30a19874d",
+                        "entity_schema": "opportunity",
+                        "is_primary": true
+                      }
+                    ]
+                  }
+                },
+                "multipleContexts": {
+                  "summary": "Start with multiple entity contexts",
+                  "description": "Start a flow execution linked to both a contact and an opportunity",
+                  "value": {
+                    "flow_template_id": "tpl_abc123def456",
+                    "trigger": {
+                      "type": "MANUAL"
+                    },
+                    "contexts": [
+                      {
+                        "entity_id": "3fa3fa86-0907-4642-a57e-0fe30a19874d",
+                        "entity_schema": "contact",
+                        "is_primary": true
+                      },
+                      {
+                        "entity_id": "7bc8de90-1234-5678-90ab-cdef12345678",
+                        "entity_schema": "opportunity",
+                        "is_primary": false
+                      }
+                    ]
+                  }
+                },
+                "withPurposes": {
+                  "summary": "Start with purpose filtering",
+                  "description": "Start a flow execution with specific purposes to filter applicable phases",
+                  "value": {
+                    "flow_template_id": "tpl_abc123def456",
+                    "contexts": [
+                      {
+                        "entity_id": "3fa3fa86-0907-4642-a57e-0fe30a19874d",
+                        "entity_schema": "opportunity",
+                        "is_primary": true
+                      }
+                    ],
+                    "purposes": [
+                      "sales",
+                      "onboarding"
+                    ]
+                  }
+                }
               }
             }
           }
         },
         "responses": {
           "201": {
-            "description": "Success - when the flow execution is started successfully",
+            "description": "Flow execution started successfully. Returns the complete execution object including\nall phases, tasks, edges, and initial status.\n",
             "content": {
               "application/json": {
                 "schema": {
@@ -708,27 +846,53 @@
             }
           },
           "400": {
-            "description": "Validation Errors",
+            "description": "Validation error. Common causes include:\n- Missing required fields (flow_template_id, contexts)\n- Invalid flow_template_id (template not found)\n- Invalid entity context (entity not found)\n- Empty contexts array\n",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResp"
+                },
+                "example": {
+                  "message": "flow_template_id is required"
                 }
               }
             }
           },
           "401": {
-            "description": "Unauthorized"
-          },
-          "403": {
-            "description": "Forbidden"
-          },
-          "500": {
-            "description": "Other errors",
+            "description": "Authentication failed. The Bearer token is missing, expired, or invalid.\n",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResp"
+                },
+                "example": {
+                  "message": "Unauthorized"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Access forbidden. The authenticated user does not have permission to start\nexecutions for this flow template or organization.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                },
+                "example": {
+                  "message": "Forbidden"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error. An unexpected error occurred while processing the request.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                },
+                "example": {
+                  "message": "Internal server error"
                 }
               }
             }
@@ -740,7 +904,7 @@
       "get": {
         "operationId": "getFlowExecution",
         "summary": "getFlowExecution",
-        "description": "Get a full flow execution, included tasks, phases, edges & analytics.",
+        "description": "Retrieves a complete flow execution by ID, including all phases, tasks, edges, contexts, and analytics.\n\nThe response includes:\n- **Execution metadata**: ID, name, status, timestamps, assignees\n- **Phases**: Organizational groupings of tasks with progress tracking\n- **Tasks**: Individual work items with their status, assignees, and configurations\n- **Edges**: Connections between tasks defining the workflow graph\n- **Analytics**: Timing information (started, completed, closed timestamps)\n- **Contexts**: Linked entity references\n",
         "tags": [
           "Flows V2"
         ],
@@ -928,7 +1092,7 @@
       "patch": {
         "operationId": "patchTask",
         "summary": "patchTask",
-        "description": "Changes various attributes of a flow task, like assignees, status, due date, etc.",
+        "description": "Updates attributes of a flow task including status, assignees, due date, and more.\n\n**Common use cases:**\n- Mark a task as completed or skipped\n- Assign or reassign users to a task\n- Update task due dates\n- Enable or disable a task\n- Revert execution to a previous task\n\n**Status transitions:**\n- `PENDING` -> `IN_PROGRESS`: User starts working on the task\n- `IN_PROGRESS` -> `COMPLETED`: User finishes the task\n- `PENDING` or `IN_PROGRESS` -> `SKIPPED`: Task is bypassed\n- `COMPLETED` or `SKIPPED` -> `PENDING`: Task is reopened (with revert_execution flag)\n\n**Reverting execution:**\nWhen updating a task that was already completed/skipped and comes before the current task,\nuse `revert_execution: true` to reset the flow back to that point. All subsequent tasks\nwill be reset to PENDING status.\n",
         "tags": [
           "Flows V2"
         ],
@@ -941,19 +1105,75 @@
           }
         ],
         "requestBody": {
-          "description": "Patch Task Payload",
+          "description": "Task update payload with fields to modify",
           "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/PatchTaskReq"
+              },
+              "examples": {
+                "markCompleted": {
+                  "summary": "Mark task as completed",
+                  "description": "Complete a task, advancing the workflow to the next task",
+                  "value": {
+                    "status": "COMPLETED"
+                  }
+                },
+                "markInProgress": {
+                  "summary": "Mark task as in progress",
+                  "description": "Indicate that work has started on this task",
+                  "value": {
+                    "status": "IN_PROGRESS"
+                  }
+                },
+                "skipTask": {
+                  "summary": "Skip a task",
+                  "description": "Bypass a task without completing it",
+                  "value": {
+                    "status": "SKIPPED"
+                  }
+                },
+                "assignUsers": {
+                  "summary": "Assign users to task",
+                  "description": "Assign one or more users to be responsible for this task",
+                  "value": {
+                    "assigned_to": [
+                      "10010730",
+                      "10010731"
+                    ]
+                  }
+                },
+                "updateDueDate": {
+                  "summary": "Set task due date",
+                  "description": "Set an explicit due date for the task",
+                  "value": {
+                    "due_date": "2024-06-15T17:00:00.000Z"
+                  }
+                },
+                "revertToPreviousTask": {
+                  "summary": "Revert execution to previous task",
+                  "description": "Reset workflow back to a previously completed task, clearing all subsequent progress",
+                  "value": {
+                    "status": "PENDING",
+                    "revert_execution": true
+                  }
+                },
+                "decisionTaskBranch": {
+                  "summary": "Select branch for decision task",
+                  "description": "For manual decision tasks, specify which condition/branch to follow",
+                  "value": {
+                    "status": "COMPLETED",
+                    "next_condition_id": "cond_branch_a"
+                  }
+                }
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "Success - when task has been successfully updated",
+            "description": "Task updated successfully. Returns the updated task object with all current values.\nIf the status change triggers workflow advancement, the flow execution state is also updated.\n",
             "content": {
               "application/json": {
                 "schema": {
@@ -963,31 +1183,53 @@
             }
           },
           "400": {
-            "description": "Validation Errors",
+            "description": "Validation error. Common causes include:\n- Invalid status transition (e.g., COMPLETED to IN_PROGRESS without revert)\n- Invalid task_id\n- Invalid assigned_to user IDs\n- Invalid due_date format\n",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResp"
+                },
+                "example": {
+                  "message": "Invalid status transition from COMPLETED to IN_PROGRESS"
                 }
               }
             }
           },
           "401": {
-            "description": "Authentication Errors",
+            "description": "Authentication failed. The Bearer token is missing, expired, or invalid.\n",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResp"
+                },
+                "example": {
+                  "message": "Unauthorized"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Task or execution not found. The specified execution_id or task_id does not exist.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                },
+                "example": {
+                  "message": "Task not found"
                 }
               }
             }
           },
           "500": {
-            "description": "Other errors",
+            "description": "Internal server error. An unexpected error occurred while processing the request.\n",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResp"
+                },
+                "example": {
+                  "message": "Internal server error"
                 }
               }
             }
@@ -1317,6 +1559,86 @@
         }
       }
     },
+    "/v2/flows/executions/{execution_id}/tasks/{task_id}/reconcile-automation": {
+      "post": {
+        "operationId": "reconcileAutomationTask",
+        "summary": "reconcileAutomationTask",
+        "description": "Reconciles an automation task's status against its linked automation execution.\n\nLooks the task up by id (whether or not it is currently a `crt_task`),\nfetches its automation execution, and — if the automation has reached a\nterminal state (success/failed/skipped) — corrects the task's `status`,\n`automation_config` and `analytics` to match and persists them. If the\ntask is the current task and the flow is still active, the flow is\nadvanced; otherwise only the task record is corrected.\n\nUsed by the \"Refresh status\" action to recover a task left `IN_PROGRESS`\nafter a missed or clobbered completion event. No-op (returns the\nexecution unchanged) when the task is already terminal or the automation\nis still running.\n",
+        "tags": [
+          "Flows V2"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ExecutionIdParam"
+          },
+          {
+            "$ref": "#/components/parameters/TaskIdParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success - returns the (possibly updated) flow execution",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FlowExecution"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Other errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v2/flows/executions/{execution_id}/tasks/{task_id}/schedule/run-now": {
       "post": {
         "operationId": "runTaskScheduleNow",
@@ -1468,8 +1790,8 @@
           "type": "string"
         },
         "required": true,
-        "description": "Id of the execution",
-        "example": "wd561"
+        "description": "Unique identifier for the flow execution. This ID is generated when the execution\nis created and remains constant throughout its lifecycle.\n",
+        "example": "exec_abc123def456"
       },
       "TaskIdParam": {
         "in": "path",
@@ -1478,8 +1800,8 @@
           "type": "string"
         },
         "required": true,
-        "description": "Id of the task",
-        "example": "7hj28a"
+        "description": "Unique identifier for a task within the execution. Each task has a unique ID\nthat distinguishes it from other tasks in the same execution.\n",
+        "example": "task_7hj28a"
       },
       "PhaseIdParam": {
         "in": "path",
@@ -1488,8 +1810,8 @@
           "type": "string"
         },
         "required": true,
-        "description": "Id of the phase",
-        "example": "9gjs2952j"
+        "description": "Unique identifier for a phase within the execution. Phases group related tasks\ntogether and track collective progress.\n",
+        "example": "phase_9gjs2952j"
       },
       "ScheduleIdParam": {
         "in": "path",
@@ -1498,7 +1820,7 @@
           "type": "string"
         },
         "required": true,
-        "description": "Id of the schedule",
+        "description": "Unique identifier for a scheduled task action. Schedules are created when tasks\nare configured with delayed or relative timing.\n",
         "example": "sch_8k2m9n4p"
       },
       "SoftDeleteParam": {
@@ -1509,7 +1831,7 @@
           "default": false
         },
         "required": false,
-        "description": "If true, the execution will NOT be deleted permanently, but rather kept for archive purpose.",
+        "description": "When true, the execution is marked as deleted but retained in storage for archival\nand audit purposes. When false (default), the execution is permanently removed.\nSoft-deleted executions do not appear in normal queries.\n",
         "example": true
       }
     },
@@ -2606,11 +2928,17 @@
       },
       "ErrorResp": {
         "type": "object",
+        "description": "Standard error response returned when an API request fails.\nContains a human-readable message describing the error.\n",
         "properties": {
           "message": {
-            "type": "string"
+            "type": "string",
+            "description": "Human-readable description of the error that occurred",
+            "example": "Validation failed: workflowId is required"
           }
-        }
+        },
+        "required": [
+          "message"
+        ]
       },
       "ClosingReasonResp": {
         "type": "object",
@@ -2944,19 +3272,23 @@
       },
       "StartFlowReq": {
         "type": "object",
+        "description": "Request payload for starting a new flow execution from a template.\n",
         "required": [
           "flow_template_id",
           "contexts"
         ],
         "properties": {
           "flow_template_id": {
-            "type": "string"
+            "type": "string",
+            "description": "The unique identifier of the flow template (definition) to instantiate.\nThe template must exist and be accessible within the organization.\n",
+            "example": "tpl_abc123def456"
           },
           "trigger": {
             "$ref": "#/components/schemas/FlowTrigger"
           },
           "contexts": {
             "type": "array",
+            "description": "Entity references that this execution is linked to. At least one context\nis required. The primary context (is_primary: true) is used for condition\nevaluation and data mapping.\n",
             "minItems": 1,
             "items": {
               "$ref": "#/components/schemas/FlowContext"
@@ -2967,7 +3299,7 @@
             "items": {
               "type": "string"
             },
-            "description": "An array of purposes to filter workflow phases."
+            "description": "Taxonomy purpose IDs to filter which phases and tasks are included in the execution.\nOnly phases/tasks tagged with matching purposes will be active. If empty or omitted,\nall phases and tasks from the template are included.\n"
           }
         }
       },
@@ -3101,6 +3433,11 @@
               "properties": {
                 "id": {
                   "$ref": "#/components/schemas/TaskId"
+                },
+                "crt_since": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "Timestamp when this task entered crt_tasks (i.e. became current). Used by the flow-healing-service as the authoritative gate for \"has this PENDING task been stuck long enough to heal?\". Using the task's own analytics.status_updated_at as the gate produced false positives because transitioning a task INTO crt_tasks does not change its status — so that timestamp can be hours old for a freshly-current task."
                 }
               }
             }
@@ -3410,6 +3747,10 @@
           "schedule_id": {
             "type": "string",
             "description": "The id of the created schedule"
+          },
+          "scheduled_at": {
+            "type": "string",
+            "description": "The resolved absolute timestamp (ISO 8601, UTC) at which the task is\narmed to run. Set by the backend when the schedule is armed and the\ntask transitions to SCHEDULED. Absent while the task is still\npending/unscheduled.\n\nNote: intentionally typed as plain `string` (not\n`format: date-time`). `schedule` is embedded in the AutomationTask /\nDecisionTask schemas; if a future request body ever accepts a task\n(or schedule) and `safeParse`s it, `format: date-time` would make\nopenapi-zod-client emit `z.string().datetime({ offset: true })` and\nreject any round-tripped value that is empty or tz-less — the exact\nmechanism behind the May 2026 due_date incident (513ed597 added the\nformat, ee574b43 activated it via an unrelated regen; see commit\n2c91ff35). This field is server-written via `toISOString()` so it is\nalways a valid UTC instant; the datetime validator adds no\nprotection, only latent risk.\n"
           }
         }
       },
@@ -3467,6 +3808,10 @@
           "schedule_id": {
             "type": "string",
             "description": "The id of the created schedule"
+          },
+          "scheduled_at": {
+            "type": "string",
+            "description": "The resolved absolute timestamp (ISO 8601, UTC) at which the task is\narmed to run. Set by the backend when the schedule is armed and the\ntask transitions to SCHEDULED. Absent while the task is still\npending/unscheduled.\n\nNote: intentionally typed as plain `string` (not\n`format: date-time`). `schedule` is embedded in the AutomationTask /\nDecisionTask schemas; if a future request body ever accepts a task\n(or schedule) and `safeParse`s it, `format: date-time` would make\nopenapi-zod-client emit `z.string().datetime({ offset: true })` and\nreject any round-tripped value that is empty or tz-less — the exact\nmechanism behind the May 2026 due_date incident (513ed597 added the\nformat, ee574b43 activated it via an unrelated regen; see commit\n2c91ff35). This field is server-written via `toISOString()` so it is\nalways a valid UTC instant; the datetime validator adds no\nprotection, only latent risk.\n"
           }
         },
         "required": [
@@ -3576,6 +3921,10 @@
           },
           "error_reason": {
             "type": "string"
+          },
+          "outcome": {
+            "type": "string",
+            "description": "Server-computed outcome read from the agent execution's structured_output (e.g. assigned, recommended, no_eligible_partner, missing_input). When the outcome means the work is not really done (no_eligible_partner, missing_input) the task is held as the current task instead of auto-completing, so the phase does not advance."
           }
         }
       },
@@ -3767,6 +4116,15 @@
           },
           "input_context": {
             "$ref": "#/components/schemas/AutomationInputContext"
+          },
+          "heal_attempts": {
+            "type": "integer",
+            "description": "Internal — number of times flow-healing-service has attempted to re-trigger this task's lost automation dispatch. Used to cap retries and avoid an indefinite heal-on-every-read storm against a deterministically-failing automation flow."
+          },
+          "last_heal_attempted_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Internal — timestamp of the most recent heal attempt for this task. flow-healing-service uses this as a per-task debounce gate so the heal cannot fire more than once per HEAL_RETRY_COOLDOWN_MS regardless of how often the flow execution is read."
           }
         },
         "required": [
@@ -3978,6 +4336,22 @@
               "deleted"
             ]
           },
+          "attributes": {
+            "type": "array",
+            "maxItems": 10,
+            "items": {
+              "type": "string"
+            },
+            "description": "Multi-attribute mode. When present and length > 1, the statement is\nevaluated against every listed attribute and combined via\n`attributes_match`. All listed attributes must share the same\n`attribute_type`. Mutually exclusive with `attribute_sub_field`,\n`date_offset`, and `attribute_operation`. When absent or length === 1,\nthe legacy `attribute` field is used.\n"
+          },
+          "attributes_match": {
+            "type": "string",
+            "enum": [
+              "any",
+              "all"
+            ],
+            "description": "Inner connector across `attributes`. `any` (default) means at least\none attribute must satisfy the operator; `all` means every attribute\nmust satisfy it. Ignored when `attributes` is absent or has length < 2.\n"
+          },
           "attribute_sub_field": {
             "type": "string",
             "description": "For complex attribute types, specifies which sub-field to extract (e.g., 'address', 'name', 'email_type')"
@@ -4062,7 +4436,8 @@
           "hours",
           "days",
           "weeks",
-          "months"
+          "months",
+          "years"
         ]
       },
       "EnableRequirement": {
@@ -4139,16 +4514,20 @@
       },
       "PatchTaskReq": {
         "type": "object",
+        "description": "Request payload for updating a task within a flow execution.\nAll fields are optional; only provided fields will be updated.\n",
         "properties": {
           "name": {
-            "type": "string"
+            "type": "string",
+            "description": "Display name of the task",
+            "example": "Review customer application"
           },
           "status": {
             "$ref": "#/components/schemas/StepStatus"
           },
           "due_date": {
             "type": "string",
-            "example": "2021-04-27T12:00:00.000Z"
+            "description": "Explicit due date for the task. Takes precedence over\ndue_date_config if both are provided.\n\nNote: intentionally typed as plain `string` (not\n`format: date-time`). For day/week/month-precision due\ndates the server stores a \"floating\" datetime without a\ntimezone designator (e.g. `2026-05-28T00:00:00.000`) so\nthat the UI can render it as a date in the user's local\ntimezone without shifting the displayed day. Tightening\nthis to `format: date-time` causes openapi-zod-client to\nemit `z.string().datetime({ offset: true })` in\n`validators-generated.ts`, which then trips\n`safeParse(body)` in `patch-task.ts` whenever the\nsidebar sends a stored task back with a tz-less\n`due_date`. See commit 4aca299c (Aug 2024) for the\noriginal date-only display rationale and the May 2026\nincident (513ed597 added the format, ee574b43\nunintentionally activated it via an unrelated regen) for\nthe history. Long-term, day-precision due dates should\nmigrate to a separate `format: date` field.\n",
+            "example": "2026-05-28T00:00:00.000"
           },
           "due_date_config": {
             "$ref": "#/components/schemas/DueDateConfig"
@@ -4158,7 +4537,7 @@
           },
           "enabled": {
             "type": "boolean",
-            "description": "flag for controlling enabled/disabled state of the task"
+            "description": "Controls whether the task is enabled (can be worked on) or disabled (grayed out).\nDisabled tasks cannot have their status changed until re-enabled.\n"
           },
           "automation_config": {
             "$ref": "#/components/schemas/AutomationInfo"
@@ -4178,11 +4557,17 @@
           },
           "next_condition_id": {
             "type": "string",
-            "description": "Condition to evaluate as true for a decision task with a manual trigger mode"
+            "description": "For decision tasks with manual trigger mode, specifies which condition/branch\nto follow when completing the task. The condition ID must match one of the\nconditions defined on the decision task.\n",
+            "example": "cond_branch_approved"
           },
           "revert_execution": {
             "type": "boolean",
-            "description": "When patching an already completed/skipped task that comes before the current task, this flag controls whether to revert the execution:\n- `true`: The patched task becomes the current task AND all succeeding tasks are reset to PENDING (full revert)\n- `false` or omitted (undefined): The task is updated but the current task does not change and no downstream tasks are affected\nThis parameter is silently ignored when patching the current task or future tasks.\n",
+            "description": "Controls behavior when updating a task that was already completed/skipped and\ncomes before the current task in the workflow:\n- `true`: Reverts the execution - the patched task becomes the current task\n  and all subsequent tasks are reset to PENDING status\n- `false` (default): Updates only this task without affecting workflow position\n  or other tasks\n\n**Important:** This parameter is silently ignored when:\n- Patching the current task\n- Patching future tasks (tasks that haven't been reached yet)\n",
+            "default": false
+          },
+          "completed_via_journey": {
+            "type": "boolean",
+            "description": "Request-only signal indicating the task is being completed as a\nresult of the user submitting the task's linked journey (journey\nauto-completion). When `true` and the task transitions to\n`COMPLETED`, the activity log records a journey-specific message\ninstead of the generic completion message. Not persisted on the task.\n",
             "default": false
           }
         }
