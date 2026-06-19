@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Integration Toolkit API",
-    "version": "1.5.1",
+    "version": "1.5.3",
     "description": "API for integrating with external systems in a standardised way."
   },
   "tags": [
@@ -1997,6 +1997,72 @@
         }
       }
     },
+    "/v2/integrations/{integrationId}/notifications/status": {
+      "get": {
+        "operationId": "getNotificationStatus",
+        "summary": "getNotificationStatus",
+        "description": "Returns the live per-rule alert state and (for 'auto' rules) the current\nhour-of-week baseline band for an integration's notification monitoring.\nReflects the latest 5-minute sweep — near-real-time, not live.\nRequires the `integration:view` permission on the integration's organization.\n",
+        "tags": [
+          "integrations"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true,
+            "description": "The integration ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "include",
+            "in": "query",
+            "required": false,
+            "description": "Add `baseline_series` to also return all 168 hour-of-week buckets per\n'auto' rule (heavier; omit for just the current-bucket markers).\n",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "baseline_series"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Live notification status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationStatusResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/v2/integrations/{integrationId}/use-cases/{useCaseId}/secure-proxy-whitelist": {
       "get": {
         "operationId": "getSecureProxyWhitelist",
@@ -3720,6 +3786,150 @@
           }
         }
       },
+      "NotificationStatusResponse": {
+        "type": "object",
+        "required": [
+          "health",
+          "rules"
+        ],
+        "properties": {
+          "health": {
+            "type": "string",
+            "enum": [
+              "healthy",
+              "alerting",
+              "muted"
+            ],
+            "description": "Rolled-up live status: `muted` when muteUntil is in the future; else `alerting` if any rule is currently ALERTING; else `healthy`.\n"
+          },
+          "evaluated_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "Most recent per-rule evaluation instant (max lastEvaluatedAt), or null when no rule has been evaluated. Updates on the 5-minute sweep tick.\n"
+          },
+          "rules": {
+            "type": "array",
+            "description": "Per-rule status, one entry per configured rule.",
+            "items": {
+              "$ref": "#/components/schemas/NotificationRuleStatus"
+            }
+          }
+        }
+      },
+      "NotificationRuleStatus": {
+        "type": "object",
+        "required": [
+          "rule_id",
+          "state"
+        ],
+        "properties": {
+          "rule_id": {
+            "type": "string",
+            "description": "The rule's stable id (matches the configured rule id)."
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "ok",
+              "alerting",
+              "recovered"
+            ],
+            "description": "The rule's live AlertState (defaults to `ok` when never evaluated)."
+          },
+          "last_fired_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "ISO instant the rule last entered ALERTING."
+          },
+          "last_cleared_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "ISO instant the rule last cleared back to OK."
+          },
+          "baseline": {
+            "nullable": true,
+            "description": "Present only for enabled 'auto'-threshold rules; null otherwise.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RuleBaselineStatus"
+              }
+            ]
+          }
+        }
+      },
+      "RuleBaselineStatus": {
+        "type": "object",
+        "required": [
+          "is_mature"
+        ],
+        "properties": {
+          "is_mature": {
+            "type": "boolean",
+            "description": "False during cold start; the sweeper uses the static fallbackThreshold until the baseline's history span is mature.\n"
+          },
+          "computed_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "ISO instant the baseline was last computed."
+          },
+          "median": {
+            "type": "number",
+            "nullable": true,
+            "description": "Typical in-scope event volume for the current hour-of-week bucket."
+          },
+          "mad": {
+            "type": "number",
+            "nullable": true,
+            "description": "Median absolute deviation for the current hour-of-week bucket."
+          },
+          "upper": {
+            "type": "number",
+            "nullable": true,
+            "description": "Dynamic alert threshold (median + k·MAD, k by sensitivity) for the current hour-of-week, or null when the bucket is uncovered.\n"
+          },
+          "buckets": {
+            "type": "array",
+            "nullable": true,
+            "description": "Full 168-bucket series; only present when ?include=baseline_series.",
+            "items": {
+              "$ref": "#/components/schemas/RuleBaselineBucket"
+            }
+          }
+        }
+      },
+      "RuleBaselineBucket": {
+        "type": "object",
+        "required": [
+          "dow",
+          "hour",
+          "median",
+          "mad"
+        ],
+        "properties": {
+          "dow": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 7,
+            "description": "Day of week, 1=Monday … 7=Sunday."
+          },
+          "hour": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 23,
+            "description": "Hour of day, 0 … 23 (UTC)."
+          },
+          "median": {
+            "type": "number"
+          },
+          "mad": {
+            "type": "number"
+          }
+        }
+      },
       "ErrorResponseBase": {
         "type": "object",
         "properties": {
@@ -4399,7 +4609,8 @@
           "muteUntil": {
             "type": "string",
             "format": "date-time",
-            "description": "ISO instant; snooze all non-digest alerts until this time."
+            "nullable": true,
+            "description": "ISO instant; snooze all non-digest alerts until this time. `null` means not muted."
           }
         }
       },

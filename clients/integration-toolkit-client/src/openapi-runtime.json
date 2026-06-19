@@ -400,6 +400,24 @@
         "responses": {}
       }
     },
+    "/v2/integrations/{integrationId}/notifications/status": {
+      "get": {
+        "operationId": "getNotificationStatus",
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "include",
+            "in": "query",
+            "required": false
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v2/integrations/{integrationId}/use-cases/{useCaseId}/secure-proxy-whitelist": {
       "get": {
         "operationId": "getSecureProxyWhitelist",
