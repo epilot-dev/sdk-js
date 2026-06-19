@@ -52,6 +52,7 @@ const { data } = await integrationToolkitClient.acknowledgeTracking(...)
 - [`deleteIntegrationV2`](#deleteintegrationv2)
 - [`listNotificationHistory`](#listnotificationhistory)
 - [`testSendNotification`](#testsendnotification)
+- [`getNotificationStatus`](#getnotificationstatus)
 - [`getSecureProxyWhitelist`](#getsecureproxywhitelist)
 - [`updateSecureProxyWhitelist`](#updatesecureproxywhitelist)
 - [`listSecureProxyWhitelistHistory`](#listsecureproxywhitelisthistory)
@@ -90,6 +91,10 @@ const { data } = await integrationToolkitClient.acknowledgeTracking(...)
 - [`NotificationHistoryResponse`](#notificationhistoryresponse)
 - [`TestNotificationRequest`](#testnotificationrequest)
 - [`TestNotificationResponse`](#testnotificationresponse)
+- [`NotificationStatusResponse`](#notificationstatusresponse)
+- [`NotificationRuleStatus`](#notificationrulestatus)
+- [`RuleBaselineStatus`](#rulebaselinestatus)
+- [`RuleBaselineBucket`](#rulebaselinebucket)
 - [`ErrorResponseBase`](#errorresponsebase)
 - [`ErpEvent`](#erpevent)
 - [`ErpUpdatesEventsV2Request`](#erpupdateseventsv2request)
@@ -1789,6 +1794,58 @@ const { data } = await client.testSendNotification(
 
 ---
 
+### `getNotificationStatus`
+
+Returns the live per-rule alert state and (for 'auto' rules) the current
+hour-of-week baseline band for an integration's notification monitoring.
+Reflects the latest 5-minute sweep — near-real-time, n
+
+`GET /v2/integrations/{integrationId}/notifications/status`
+
+```ts
+const { data } = await client.getNotificationStatus({
+  integrationId: 'example',
+  include: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "health": "healthy",
+  "evaluated_at": "1970-01-01T00:00:00.000Z",
+  "rules": [
+    {
+      "rule_id": "string",
+      "state": "ok",
+      "last_fired_at": "1970-01-01T00:00:00.000Z",
+      "last_cleared_at": "1970-01-01T00:00:00.000Z",
+      "baseline": {
+        "is_mature": true,
+        "computed_at": "1970-01-01T00:00:00.000Z",
+        "median": 0,
+        "mad": 0,
+        "upper": 0,
+        "buckets": [
+          {
+            "dow": 1,
+            "hour": 0,
+            "median": 0,
+            "mad": 0
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
 ### `getSecureProxyWhitelist`
 
 Get secure_proxy whitelist (admin portal only)
@@ -2991,6 +3048,82 @@ type TestNotificationResponse = {
   recipient: string
   channels: string[]
   notification_id?: string
+}
+```
+
+### `NotificationStatusResponse`
+
+```ts
+type NotificationStatusResponse = {
+  health: "healthy" | "alerting" | "muted"
+  evaluated_at?: string // date-time
+  rules: Array<{
+    rule_id: string
+    state: "ok" | "alerting" | "recovered"
+    last_fired_at?: string // date-time
+    last_cleared_at?: string // date-time
+    baseline?: {
+      is_mature: { ... }
+      computed_at?: { ... }
+      median?: { ... }
+      mad?: { ... }
+      upper?: { ... }
+      buckets?: { ... }
+    }
+  }>
+}
+```
+
+### `NotificationRuleStatus`
+
+```ts
+type NotificationRuleStatus = {
+  rule_id: string
+  state: "ok" | "alerting" | "recovered"
+  last_fired_at?: string // date-time
+  last_cleared_at?: string // date-time
+  baseline?: {
+    is_mature: boolean
+    computed_at?: string // date-time
+    median?: number
+    mad?: number
+    upper?: number
+    buckets?: Array<{
+      dow: { ... }
+      hour: { ... }
+      median: { ... }
+      mad: { ... }
+    }>
+  }
+}
+```
+
+### `RuleBaselineStatus`
+
+```ts
+type RuleBaselineStatus = {
+  is_mature: boolean
+  computed_at?: string // date-time
+  median?: number
+  mad?: number
+  upper?: number
+  buckets?: Array<{
+    dow: number
+    hour: number
+    median: number
+    mad: number
+  }>
+}
+```
+
+### `RuleBaselineBucket`
+
+```ts
+type RuleBaselineBucket = {
+  dow: number
+  hour: number
+  median: number
+  mad: number
 }
 ```
 

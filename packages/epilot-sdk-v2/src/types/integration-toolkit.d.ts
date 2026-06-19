@@ -2911,9 +2911,9 @@ export declare namespace Components {
             rules: /* A single notification rule. Only the params relevant to a given type are set. The id is a server-minted ULID, preserved across edits. */ NotificationRule[];
             digest: /* Digest schedule and content configuration. */ NotificationDigestConfig;
             /**
-             * ISO instant; snooze all non-digest alerts until this time.
+             * ISO instant; snooze all non-digest alerts until this time. `null` means not muted.
              */
-            muteUntil?: string; // date-time
+            muteUntil?: string | null; // date-time
         }
         export interface IntegrationObjectV1 {
             /**
@@ -3678,6 +3678,71 @@ export declare namespace Components {
              * silence quiet period, e.g. '12h'.
              */
             quietPeriod?: string;
+        }
+        export interface NotificationRuleStatus {
+            /**
+             * The rule's stable id (matches the configured rule id).
+             */
+            rule_id: string;
+            /**
+             * The rule's live AlertState (defaults to `ok` when never evaluated).
+             */
+            state: "ok" | "alerting" | "recovered";
+            /**
+             * ISO instant the rule last entered ALERTING.
+             */
+            last_fired_at?: string | null; // date-time
+            /**
+             * ISO instant the rule last cleared back to OK.
+             */
+            last_cleared_at?: string | null; // date-time
+            /**
+             * Present only for enabled 'auto'-threshold rules; null otherwise.
+             */
+            baseline?: {
+                /**
+                 * False during cold start; the sweeper uses the static fallbackThreshold until the baseline's history span is mature.
+                 *
+                 */
+                is_mature: boolean;
+                /**
+                 * ISO instant the baseline was last computed.
+                 */
+                computed_at?: string | null; // date-time
+                /**
+                 * Typical in-scope event volume for the current hour-of-week bucket.
+                 */
+                median?: number | null;
+                /**
+                 * Median absolute deviation for the current hour-of-week bucket.
+                 */
+                mad?: number | null;
+                /**
+                 * Dynamic alert threshold (median + k·MAD, k by sensitivity) for the current hour-of-week, or null when the bucket is uncovered.
+                 *
+                 */
+                upper?: number | null;
+                /**
+                 * Full 168-bucket series; only present when ?include=baseline_series.
+                 */
+                buckets?: RuleBaselineBucket[] | null;
+            } | null;
+        }
+        export interface NotificationStatusResponse {
+            /**
+             * Rolled-up live status: `muted` when muteUntil is in the future; else `alerting` if any rule is currently ALERTING; else `healthy`.
+             *
+             */
+            health: "healthy" | "alerting" | "muted";
+            /**
+             * Most recent per-rule evaluation instant (max lastEvaluatedAt), or null when no rule has been evaluated. Updates on the 5-minute sweep tick.
+             *
+             */
+            evaluated_at?: string | null; // date-time
+            /**
+             * Per-rule status, one entry per configured rule.
+             */
+            rules: NotificationRuleStatus[];
         }
         export interface OutboundConflict {
             /**
@@ -4870,6 +4935,46 @@ export declare namespace Components {
                 string?
             ];
         }
+        export interface RuleBaselineBucket {
+            /**
+             * Day of week, 1=Monday … 7=Sunday.
+             */
+            dow: number;
+            /**
+             * Hour of day, 0 … 23 (UTC).
+             */
+            hour: number;
+            median: number;
+            mad: number;
+        }
+        export interface RuleBaselineStatus {
+            /**
+             * False during cold start; the sweeper uses the static fallbackThreshold until the baseline's history span is mature.
+             *
+             */
+            is_mature: boolean;
+            /**
+             * ISO instant the baseline was last computed.
+             */
+            computed_at?: string | null; // date-time
+            /**
+             * Typical in-scope event volume for the current hour-of-week bucket.
+             */
+            median?: number | null;
+            /**
+             * Median absolute deviation for the current hour-of-week bucket.
+             */
+            mad?: number | null;
+            /**
+             * Dynamic alert threshold (median + k·MAD, k by sensitivity) for the current hour-of-week, or null when the bucket is uncovered.
+             *
+             */
+            upper?: number | null;
+            /**
+             * Full 168-bucket series; only present when ?include=baseline_series.
+             */
+            buckets?: RuleBaselineBucket[] | null;
+        }
         export interface SecureProxyRequest {
             /**
              * Integration ID that owns the secure_proxy use case
@@ -6024,6 +6129,26 @@ export declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace GetNotificationStatus {
+        namespace Parameters {
+            export type Include = "baseline_series";
+            export type IntegrationId = string; // uuid
+        }
+        export interface PathParameters {
+            integrationId: Parameters.IntegrationId /* uuid */;
+        }
+        export interface QueryParameters {
+            include?: Parameters.Include;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.NotificationStatusResponse;
+            export type $400 = Components.Responses.BadRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace GetOutboundStatus {
         namespace Parameters {
             export type IntegrationId = string; // uuid
@@ -6936,6 +7061,20 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.TestSendNotification.Responses.$202>
   /**
+   * getNotificationStatus - getNotificationStatus
+   * 
+   * Returns the live per-rule alert state and (for 'auto' rules) the current
+   * hour-of-week baseline band for an integration's notification monitoring.
+   * Reflects the latest 5-minute sweep — near-real-time, not live.
+   * Requires the `integration:view` permission on the integration's organization.
+   * 
+   */
+  'getNotificationStatus'(
+    parameters?: Parameters<Paths.GetNotificationStatus.QueryParameters & Paths.GetNotificationStatus.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetNotificationStatus.Responses.$200>
+  /**
    * getSecureProxyWhitelist - Get secure_proxy whitelist (admin portal only)
    * 
    * Returns the current allowed_domains, allowed_ips, and vpc_mode for a secure_proxy use case.
@@ -7644,6 +7783,22 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.TestSendNotification.Responses.$202>
   }
+  ['/v2/integrations/{integrationId}/notifications/status']: {
+    /**
+     * getNotificationStatus - getNotificationStatus
+     * 
+     * Returns the live per-rule alert state and (for 'auto' rules) the current
+     * hour-of-week baseline band for an integration's notification monitoring.
+     * Reflects the latest 5-minute sweep — near-real-time, not live.
+     * Requires the `integration:view` permission on the integration's organization.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetNotificationStatus.QueryParameters & Paths.GetNotificationStatus.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetNotificationStatus.Responses.$200>
+  }
   ['/v2/integrations/{integrationId}/use-cases/{useCaseId}/secure-proxy-whitelist']: {
     /**
      * getSecureProxyWhitelist - Get secure_proxy whitelist (admin portal only)
@@ -8156,6 +8311,8 @@ export type NotificationHistoryItem = Components.Schemas.NotificationHistoryItem
 export type NotificationHistoryResponse = Components.Schemas.NotificationHistoryResponse;
 export type NotificationRecipient = Components.Schemas.NotificationRecipient;
 export type NotificationRule = Components.Schemas.NotificationRule;
+export type NotificationRuleStatus = Components.Schemas.NotificationRuleStatus;
+export type NotificationStatusResponse = Components.Schemas.NotificationStatusResponse;
 export type OutboundConflict = Components.Schemas.OutboundConflict;
 export type OutboundDlqListResponse = Components.Schemas.OutboundDlqListResponse;
 export type OutboundDlqMessage = Components.Schemas.OutboundDlqMessage;
@@ -8191,6 +8348,8 @@ export type RelationRefsConfig = Components.Schemas.RelationRefsConfig;
 export type RelationUniqueIdField = Components.Schemas.RelationUniqueIdField;
 export type RepeatableFieldType = Components.Schemas.RepeatableFieldType;
 export type ReplayEventsRequest = Components.Schemas.ReplayEventsRequest;
+export type RuleBaselineBucket = Components.Schemas.RuleBaselineBucket;
+export type RuleBaselineStatus = Components.Schemas.RuleBaselineStatus;
 export type SecureProxyRequest = Components.Schemas.SecureProxyRequest;
 export type SecureProxyResponse = Components.Schemas.SecureProxyResponse;
 export type SecureProxySummary = Components.Schemas.SecureProxySummary;
