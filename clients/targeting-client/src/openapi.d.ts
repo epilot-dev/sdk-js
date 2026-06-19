@@ -1757,7 +1757,7 @@ declare namespace Paths {
     }
     namespace GetRecipients {
         namespace Parameters {
-            export type AutomationStatus = Components.Schemas.AutomationStatus;
+            export type AutomationStatus = Components.Schemas.AutomationStatus[];
             export type CampaignId = /**
              * example:
              * b8c01433-5556-4e2b-aad4-6f5348d1df84

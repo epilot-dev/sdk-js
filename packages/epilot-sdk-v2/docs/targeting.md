@@ -619,7 +619,7 @@ const { data } = await client.getRecipients({
   limit: 1,
   next: 'example',
   q: 'example',
-  automation_status: 'example',
+  automation_status: ['...'],
   portal_status: 'example',
 })
 ```

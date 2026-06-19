@@ -186,7 +186,9 @@
           },
           {
             "name": "automation_status",
-            "in": "query"
+            "in": "query",
+            "style": "form",
+            "explode": true
           },
           {
             "name": "portal_status",

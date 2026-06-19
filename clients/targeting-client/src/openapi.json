@@ -495,9 +495,14 @@
           {
             "name": "automation_status",
             "in": "query",
-            "description": "Filter by automation status",
+            "description": "Filter by automation status. Repeat the parameter to match multiple\nstatuses in one request\n(e.g. automation_status=failed&automation_status=cancelled).\n",
+            "style": "form",
+            "explode": true,
             "schema": {
-              "$ref": "#/components/schemas/AutomationStatus"
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/AutomationStatus"
+              }
             }
           },
           {
