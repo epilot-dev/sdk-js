@@ -10,12 +10,14 @@ export default defineCommand({
   args: {
     token: { type: 'string', description: 'Manually provide a token instead of browser login' },
     profile: { type: 'string', description: 'Save credentials to this profile' },
+    readonly: { type: 'boolean', description: 'Generate a read-only token (cannot perform write actions)' },
     'use-dev': { type: 'boolean', description: 'Use dev environment (portal.dev.epilot.cloud)' },
     'use-staging': { type: 'boolean', description: 'Use staging environment (portal.staging.epilot.cloud)' },
   },
   run: async ({ args }) => {
     const profileName = args.profile || process.env.EPILOT_PROFILE;
     const env = resolveEnvironment(args['use-dev'], args['use-staging']);
+    const readonly = Boolean(args.readonly);
 
     // Manual token input
     if (args.token) {
@@ -33,7 +35,7 @@ export default defineCommand({
       process.exit(1);
     }
 
-    const token = await browserLogin(profileName, env);
+    const token = await browserLogin(profileName, env, readonly);
     if (token) {
       process.stdout.write(`${GREEN}${BOLD}Login successful!${RESET}\n`);
     } else {
@@ -43,7 +45,11 @@ export default defineCommand({
   },
 });
 
-const browserLogin = async (profileName?: string, env: Environment = 'production'): Promise<string | null> => {
+const browserLogin = async (
+  profileName?: string,
+  env: Environment = 'production',
+  readonly = false,
+): Promise<string | null> => {
   // Generate a cryptographic state parameter to prevent CSRF
   const state = randomBytes(32).toString('hex');
 
@@ -54,6 +60,11 @@ const browserLogin = async (profileName?: string, env: Environment = 'production
   const suffix = profileName ? ` ${DIM}(profile: ${profileName})${RESET}` : '';
   process.stdout.write(`\n${BOLD}epilot CLI Login${RESET}${suffix}\n\n`);
   process.stdout.write('This will open your browser to authenticate with epilot.\n');
+  if (readonly) {
+    process.stdout.write(
+      `${YELLOW}Read-only mode: the CLI session will not be able to perform write actions.${RESET}\n`,
+    );
+  }
   process.stdout.write('\n');
   process.stdout.write(`  ${YELLOW}Verification code: ${BOLD}${verificationCode}${RESET}\n`);
   process.stdout.write('\n');
@@ -99,7 +110,8 @@ const browserLogin = async (profileName?: string, env: Environment = 'production
       const loginUrl =
         `${portalUrl}/login?cli_callback=${encodeURIComponent(callbackUrl)}` +
         `&state=${state}` +
-        `&code=${verificationCode}`;
+        `&code=${verificationCode}` +
+        (readonly ? `&readonly=true` : '');
 
       process.stdout.write(`\n${DIM}Login URL: ${loginUrl}${RESET}\n\n`);
 
