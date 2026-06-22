@@ -587,6 +587,30 @@
         "responses": {}
       }
     },
+    "/v3/portal/email-templates:migrate-references": {
+      "post": {
+        "operationId": "migrateEmailTemplateReferences",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v3/portal/email-templates:list-references": {
+      "post": {
+        "operationId": "listEmailTemplateReferences",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v3/portal/email-templates/{portal_id}": {
       "post": {
         "operationId": "upsertEmailTemplatesByPortalId",
@@ -981,6 +1005,18 @@
         "operationId": "updatePortalUserEmail",
         "requestBody": {
           "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/portal/user/change/password": {
+      "put": {
+        "operationId": "changePortalUserPassword",
+        "requestBody": {
+          "required": false,
           "content": {
             "application/json": {}
           }
@@ -1750,6 +1786,28 @@
         "responses": {}
       }
     },
+    "/v2/portal/entity:create": {
+      "post": {
+        "operationId": "createPortalUserEntity",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/portal/entity:update": {
+      "post": {
+        "operationId": "updatePortalUserEntity",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v2/portal/can-trigger-portal-flow": {
       "post": {
         "operationId": "canTriggerPortalFlow",
@@ -2343,6 +2401,11 @@
             "in": "path",
             "name": "portal_id",
             "required": true
+          },
+          {
+            "in": "query",
+            "name": "page_upsert_mode",
+            "required": false
           }
         ],
         "requestBody": {

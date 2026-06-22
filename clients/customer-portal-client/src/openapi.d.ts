@@ -1052,6 +1052,11 @@ declare namespace Components {
                  * Decide whether to automatically redirect to the provider page during login, which would completely bypass showing the portal authentication page.
                  */
                 auto_redirect_to_sso?: boolean;
+                /**
+                 * Opt-in. When true, suppresses responses that reveal whether a user exists for public, pre-authentication actions (the login entry-point check and self-registration), at the expense of some UX. Already-authenticated actions are unaffected. Default false.
+                 *
+                 */
+                prevent_user_enumeration?: boolean;
             };
             /**
              * AWS Cognito Pool details for the portal
@@ -1564,6 +1569,11 @@ declare namespace Components {
                  * Decide whether to automatically redirect to the provider page during login, which would completely bypass showing the portal authentication page.
                  */
                 auto_redirect_to_sso?: boolean;
+                /**
+                 * Opt-in. When true, suppresses responses that reveal whether a user exists for public, pre-authentication actions (the login entry-point check and self-registration), at the expense of some UX. Already-authenticated actions are unaffected. Default false.
+                 *
+                 */
+                prevent_user_enumeration?: boolean;
             };
             /**
              * AWS Cognito Pool details for the portal
@@ -2644,6 +2654,29 @@ declare namespace Components {
                 fragment?: string;
             }[];
         }
+        export interface EntityCreateParams {
+            /**
+             * Entity schema slug to create. Limited to the supported (experimental) schemas, currently `asset`.
+             */
+            slug: /**
+             * URL-friendly identifier for the entity schema
+             * example:
+             * contact
+             */
+            EntitySlug;
+            /**
+             * Attribute values for the new entity. Writable fields are governed by the caller's role grants. The owning `customer` relation is set automatically to the caller's contact and must not be supplied.
+             * example:
+             * {
+             *   "title": "PV Inverter",
+             *   "manufacturer": "SMA",
+             *   "external_id": "device-123"
+             * }
+             */
+            attributes: {
+                [name: string]: any;
+            };
+        }
         export interface EntityEditRule {
             slug?: /**
              * URL-friendly identifier for the entity schema
@@ -3238,6 +3271,36 @@ declare namespace Components {
                 };
             };
         }
+        export interface EntityUpdateParams {
+            /**
+             * Entity schema slug to update. Limited to the supported (experimental) schemas, currently `asset`.
+             */
+            slug: /**
+             * URL-friendly identifier for the entity schema
+             * example:
+             * contact
+             */
+            EntitySlug;
+            /**
+             * ID of the entity to update. Must already be owned by the caller's contact.
+             */
+            entity_id: /**
+             * Entity ID
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            EntityId /* uuid */;
+            /**
+             * Attribute values to patch. Use null to clear a field (e.g. external_id). Writable fields are governed by the caller's role grants.
+             * example:
+             * {
+             *   "external_id": null
+             * }
+             */
+            attributes: {
+                [name: string]: any;
+            };
+        }
         export interface EntityWidget {
             id: string;
             type: "ACTION_WIDGET" | "CONTENT_WIDGET" | "ENTITY_WIDGET" | "TEASER_WIDGET" | "DOCUMENT_WIDGET" | "PAYMENT_WIDGET" | "METER_READING_WIDGET" | "METER_CHART_WIDGET" | "CAMPAIGN_WIDGET" | "PRODUCT_RECOMMENDATIONS_WIDGET";
@@ -3466,7 +3529,32 @@ declare namespace Components {
              * Hook that returns runtime metadata describing how a visualization should be rendered for a given portal context. Invoked by the portal before fetching data, with the same context the data hook receives.
              *
              */
-            ExtensionHookVisualizationMetadata))[];
+            ExtensionHookVisualizationMetadata | /**
+             * Hook that replaces the built-in change email functionality for portal users. When configured, the portal does not change the user's login email itself. Instead, this hook makes an HTTP call to the third-party system, which is expected to handle the email change (most likely by sending the user instructions to confirm the new email address).
+             * The expected response http status code to the call is:
+             *   - 2xx if the request was accepted
+             *   - non-2xx if the request failed (optionally with a human-readable message resolved via `resolved.error_message_path`)
+             *
+             */
+            ExtensionHookChangeEmail | /**
+             * Hook that replaces the built-in change password functionality for portal users. When configured, the portal does not change the user's password itself. Instead, this hook makes an HTTP call to the third-party system, which is expected to handle the password change (most likely by sending the user instructions to complete the process).
+             * The expected response http status code to the call is:
+             *   - 2xx if the request was accepted
+             *   - non-2xx if the request failed (optionally with a human-readable message resolved via `resolved.error_message_path`)
+             *
+             */
+            ExtensionHookChangePassword | /**
+             * Hook that replaces the built-in delete account functionality for portal users. When configured, the portal does not delete the user itself. Instead, this hook makes an HTTP call to the third-party system, which is expected to handle the deletion.
+             * The `deletion_mode` controls what the portal does after the call:
+             *   - `synchronous`: The third-party system deletes the user immediately. The portal waits for a successful (2xx) response and then also deletes the epilot user.
+             *   - `asynchronous`: The third-party system handles deletion out-of-band. The portal does not delete anything immediately; cleanup is expected to happen later (e.g. via the user deletion API or webhooks).
+             *
+             * The expected response http status code to the call is:
+             *   - 2xx if the request was accepted
+             *   - non-2xx if the request failed (optionally with a human-readable message resolved via `resolved.error_message_path`)
+             *
+             */
+            ExtensionHookDeleteAccount))[];
         }
         export interface ExtensionAuthBlock {
             /**
@@ -3531,6 +3619,140 @@ declare namespace Components {
              * Identifier of the hook. Should not change between updates.
              */
             id?: string;
+        }
+        /**
+         * Hook that replaces the built-in change email functionality for portal users. When configured, the portal does not change the user's login email itself. Instead, this hook makes an HTTP call to the third-party system, which is expected to handle the email change (most likely by sending the user instructions to confirm the new email address).
+         * The expected response http status code to the call is:
+         *   - 2xx if the request was accepted
+         *   - non-2xx if the request failed (optionally with a human-readable message resolved via `resolved.error_message_path`)
+         *
+         */
+        export interface ExtensionHookChangeEmail {
+            type: "changeEmail";
+            /**
+             * Whether the portal user must confirm their current password before the change email request is handed over to the third-party system. When true, the portal collects and verifies the current password before calling the hook.
+             *
+             */
+            require_password_confirmation?: boolean;
+            /**
+             * Optional explanation shown to the user in the change email confirmation dialog.
+             */
+            explanation?: {
+                [name: string]: string;
+                /**
+                 * Explanation of the functionality shown to the end user.
+                 * example:
+                 * You will receive an email with instructions to confirm your new email address.
+                 */
+                en: string;
+            };
+            auth?: ExtensionAuthBlock;
+            call: {
+                /**
+                 * HTTP method to use for the call
+                 */
+                method?: string;
+                /**
+                 * URL to call. Supports variable interpolation.
+                 */
+                url: string;
+                /**
+                 * Parameters to append to the URL. Supports variable interpolation.
+                 */
+                params?: {
+                    [name: string]: string;
+                };
+                /**
+                 * Headers to use. Supports variable interpolation.
+                 */
+                headers: {
+                    [name: string]: string;
+                };
+                /**
+                 * Optional JSON body to use for the call. Defaults to an object with the requested new email and portal user context. The requested new email is available as `{{Input.new_email}}` and the current account email as `{{Input.old_email}}`. Supports variable interpolation.
+                 */
+                body?: {
+                    [key: string]: any;
+                };
+            };
+            resolved?: {
+                /**
+                 * Optional path to a human-readable error message in the third-party response body, used when the call fails (non-2xx status).
+                 * If specified and the path resolves to a string, that message is forwarded to the end user instead of a generic error.
+                 *
+                 * example:
+                 * error.message
+                 */
+                error_message_path?: string;
+            };
+            secure_proxy?: /* Configuration for routing requests through the ERP Integration secure proxy. Mutually exclusive with use_static_ips. */ SecureProxyConfig;
+        }
+        /**
+         * Hook that replaces the built-in change password functionality for portal users. When configured, the portal does not change the user's password itself. Instead, this hook makes an HTTP call to the third-party system, which is expected to handle the password change (most likely by sending the user instructions to complete the process).
+         * The expected response http status code to the call is:
+         *   - 2xx if the request was accepted
+         *   - non-2xx if the request failed (optionally with a human-readable message resolved via `resolved.error_message_path`)
+         *
+         */
+        export interface ExtensionHookChangePassword {
+            type: "changePassword";
+            /**
+             * Whether the portal user must provide a new password. When false, the portal only asks the user to confirm (showing the configured explanation) and no new password is collected; the third-party system is expected to handle the password change. When true, the portal collects a new password and passes it to the third-party system as `{{Input.new_password}}`.
+             *
+             */
+            require_new_password?: boolean;
+            /**
+             * Optional explanation shown to the user in the change password confirmation dialog.
+             */
+            explanation?: {
+                [name: string]: string;
+                /**
+                 * Explanation of the functionality shown to the end user.
+                 * example:
+                 * You will receive an email with instructions to reset your password.
+                 */
+                en: string;
+            };
+            auth?: ExtensionAuthBlock;
+            call: {
+                /**
+                 * HTTP method to use for the call
+                 */
+                method?: string;
+                /**
+                 * URL to call. Supports variable interpolation.
+                 */
+                url: string;
+                /**
+                 * Parameters to append to the URL. Supports variable interpolation.
+                 */
+                params?: {
+                    [name: string]: string;
+                };
+                /**
+                 * Headers to use. Supports variable interpolation.
+                 */
+                headers: {
+                    [name: string]: string;
+                };
+                /**
+                 * Optional JSON body to use for the call. Defaults to an object with portal user context (and the new password as `{{Input.new_password}}` when `require_new_password` is true). Supports variable interpolation.
+                 */
+                body?: {
+                    [key: string]: any;
+                };
+            };
+            resolved?: {
+                /**
+                 * Optional path to a human-readable error message in the third-party response body, used when the call fails (non-2xx status).
+                 * If specified and the path resolves to a string, that message is forwarded to the end user instead of a generic error.
+                 *
+                 * example:
+                 * error.message
+                 */
+                error_message_path?: string;
+            };
+            secure_proxy?: /* Configuration for routing requests through the ERP Integration secure proxy. Mutually exclusive with use_static_ips. */ SecureProxyConfig;
         }
         /**
          * Hook that will allow using the specified source as data for consumption visualizations. This hook is triggered to fetch the data. Format of the request and response has to follow the following specification: TBD. The expected response to the call is:
@@ -3809,6 +4031,77 @@ declare namespace Components {
              *
              */
             use_static_ips?: boolean;
+            secure_proxy?: /* Configuration for routing requests through the ERP Integration secure proxy. Mutually exclusive with use_static_ips. */ SecureProxyConfig;
+        }
+        /**
+         * Hook that replaces the built-in delete account functionality for portal users. When configured, the portal does not delete the user itself. Instead, this hook makes an HTTP call to the third-party system, which is expected to handle the deletion.
+         * The `deletion_mode` controls what the portal does after the call:
+         *   - `synchronous`: The third-party system deletes the user immediately. The portal waits for a successful (2xx) response and then also deletes the epilot user.
+         *   - `asynchronous`: The third-party system handles deletion out-of-band. The portal does not delete anything immediately; cleanup is expected to happen later (e.g. via the user deletion API or webhooks).
+         *
+         * The expected response http status code to the call is:
+         *   - 2xx if the request was accepted
+         *   - non-2xx if the request failed (optionally with a human-readable message resolved via `resolved.error_message_path`)
+         *
+         */
+        export interface ExtensionHookDeleteAccount {
+            type: "deleteAccount";
+            /**
+             * Controls how the account deletion is handled. `synchronous` waits for the third-party system to respond and then also deletes the epilot user. `asynchronous` hands the deletion over entirely to the third-party system and the portal does not delete anything immediately.
+             *
+             */
+            deletion_mode?: "synchronous" | "asynchronous";
+            /**
+             * Optional explanation shown to the user in the delete account confirmation dialog.
+             */
+            explanation?: {
+                [name: string]: string;
+                /**
+                 * Explanation of the functionality shown to the end user.
+                 * example:
+                 * Your account deletion will be processed by our system. This may take a few days.
+                 */
+                en: string;
+            };
+            auth?: ExtensionAuthBlock;
+            call: {
+                /**
+                 * HTTP method to use for the call
+                 */
+                method?: string;
+                /**
+                 * URL to call. Supports variable interpolation.
+                 */
+                url: string;
+                /**
+                 * Parameters to append to the URL. Supports variable interpolation.
+                 */
+                params?: {
+                    [name: string]: string;
+                };
+                /**
+                 * Headers to use. Supports variable interpolation.
+                 */
+                headers: {
+                    [name: string]: string;
+                };
+                /**
+                 * Optional JSON body to use for the call. Defaults to an object with portal user context, e.g. `{"portal_user_id": "...", "email": "..."}`. Supports variable interpolation.
+                 */
+                body?: {
+                    [key: string]: any;
+                };
+            };
+            resolved?: {
+                /**
+                 * Optional path to a human-readable error message in the third-party response body, used when the call fails (non-2xx status).
+                 * If specified and the path resolves to a string, that message is forwarded to the end user instead of a generic error.
+                 *
+                 * example:
+                 * error.message
+                 */
+                error_message_path?: string;
+            };
             secure_proxy?: /* Configuration for routing requests through the ERP Integration secure proxy. Mutually exclusive with use_static_ips. */ SecureProxyConfig;
         }
         /**
@@ -5648,6 +5941,11 @@ declare namespace Components {
                  * Decide whether to automatically redirect to the provider page during login, which would completely bypass showing the portal authentication page.
                  */
                 auto_redirect_to_sso?: boolean;
+                /**
+                 * Opt-in. When true, suppresses responses that reveal whether a user exists for public, pre-authentication actions (the login entry-point check and self-registration), at the expense of some UX. Already-authenticated actions are unaffected. Default false.
+                 *
+                 */
+                prevent_user_enumeration?: boolean;
             };
             /**
              * AWS Cognito Pool details for the portal
@@ -6255,6 +6553,11 @@ declare namespace Components {
                  * Decide whether to automatically redirect to the provider page during login, which would completely bypass showing the portal authentication page.
                  */
                 auto_redirect_to_sso?: boolean;
+                /**
+                 * Opt-in. When true, suppresses responses that reveal whether a user exists for public, pre-authentication actions (the login entry-point check and self-registration), at the expense of some UX. Already-authenticated actions are unaffected. Default false.
+                 *
+                 */
+                prevent_user_enumeration?: boolean;
             };
             /**
              * AWS Cognito Pool details for the portal
@@ -6896,6 +7199,18 @@ declare namespace Components {
              *
              */
             MoblieOIDCConfig;
+            /**
+             * Allow the resolved `client_secret` to be returned through the
+             * public single-provider endpoint at SSO initiation. Only set this
+             * for OIDC flows that require a public client secret in the
+             * browser (e.g. some PKCE-less authorization-code variants). When
+             * unset (default), the secret is kept server-side and only used at
+             * the token exchange.
+             *
+             * example:
+             * false
+             */
+            expose_client_secret?: boolean;
         }
         /**
          * Human-readable display name for identity provider shown in login
@@ -6953,6 +7268,28 @@ declare namespace Components {
                 en: string;
             };
         }
+        export interface PublicChangeEmailDetails {
+            /**
+             * Identifier of the hook.
+             */
+            id?: string;
+            /**
+             * Whether the portal user must confirm their current password before the email change is handed over to the third-party system.
+             */
+            require_password_confirmation?: boolean;
+            explanation?: /* Explanation of the hook. */ PublicSelfManagementExplanation;
+        }
+        export interface PublicChangePasswordDetails {
+            /**
+             * Identifier of the hook.
+             */
+            id?: string;
+            /**
+             * Whether the portal user must provide a new password that is passed to the third-party system.
+             */
+            require_new_password?: boolean;
+            explanation?: /* Explanation of the hook. */ PublicSelfManagementExplanation;
+        }
         export interface PublicContractIdentificationDetails {
             /**
              * Explanation of the hook.
@@ -6991,6 +7328,13 @@ declare namespace Components {
              */
             block_types?: string[];
         }
+        export interface PublicDeleteAccountDetails {
+            /**
+             * Identifier of the hook.
+             */
+            id?: string;
+            explanation?: /* Explanation of the hook. */ PublicSelfManagementExplanation;
+        }
         export interface PublicExtensionCapabilities {
             consumptionDataRetrieval?: DataRetrievalItem[];
             dataExport?: DataRetrievalItem[];
@@ -7004,6 +7348,21 @@ declare namespace Components {
             meterReadingPlausibilityCheck?: {
                 extension?: PublicExtensionDetails;
                 hook?: PublicMeterReadingPlausibilityCheckDetails;
+            };
+            changeEmail?: {
+                app?: PublicAppDetails;
+                extension?: PublicExtensionDetails;
+                hook?: PublicChangeEmailDetails;
+            };
+            changePassword?: {
+                app?: PublicAppDetails;
+                extension?: PublicExtensionDetails;
+                hook?: PublicChangePasswordDetails;
+            };
+            deleteAccount?: {
+                app?: PublicAppDetails;
+                extension?: PublicExtensionDetails;
+                hook?: PublicDeleteAccountDetails;
             };
         }
         export interface PublicExtensionDetails {
@@ -7027,6 +7386,16 @@ declare namespace Components {
              *
              */
             plausibility_mode?: "check" | "range";
+        }
+        /**
+         * Explanation of the hook.
+         */
+        export interface PublicSelfManagementExplanation {
+            [name: string]: string;
+            /**
+             * Explanation of the functionality shown to the end user.
+             */
+            en: string;
         }
         /**
          * The person who recorded the reading
@@ -7682,6 +8051,11 @@ declare namespace Components {
                  * Decide whether to automatically redirect to the provider page during login, which would completely bypass showing the portal authentication page.
                  */
                 auto_redirect_to_sso?: boolean;
+                /**
+                 * Opt-in. When true, suppresses responses that reveal whether a user exists for public, pre-authentication actions (the login entry-point check and self-registration), at the expense of some UX. Already-authenticated actions are unaffected. Default false.
+                 *
+                 */
+                prevent_user_enumeration?: boolean;
             };
             /**
              * AWS Cognito Pool details for the portal
@@ -8257,6 +8631,11 @@ declare namespace Components {
                  * Decide whether to automatically redirect to the provider page during login, which would completely bypass showing the portal authentication page.
                  */
                 auto_redirect_to_sso?: boolean;
+                /**
+                 * Opt-in. When true, suppresses responses that reveal whether a user exists for public, pre-authentication actions (the login entry-point check and self-registration), at the expense of some UX. Already-authenticated actions are unaffected. Default false.
+                 *
+                 */
+                prevent_user_enumeration?: boolean;
             };
             /**
              * AWS Cognito Pool details for the portal
@@ -8932,6 +9311,26 @@ declare namespace Paths {
             }
         }
     }
+    namespace ChangePortalUserPassword {
+        export interface RequestBody {
+            /**
+             * New password chosen by the portal user.
+             * Required when the configured `changePassword` hook has `require_new_password` enabled, ignored otherwise.
+             *
+             */
+            new_password?: string;
+        }
+        namespace Responses {
+            export interface $200 {
+                message?: string;
+            }
+            export type $400 = Components.Responses.InvalidRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export interface $404 {
+            }
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace CheckAccountExists {
         namespace Parameters {
             export type Domain = string;
@@ -9267,6 +9666,16 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace CreatePortalUserEntity {
+        export type RequestBody = Components.Schemas.EntityCreateParams;
+        namespace Responses {
+            export type $201 = /* Response for entity get request */ Components.Schemas.EntityResponse;
+            export type $400 = Components.Responses.InvalidRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace CreateUser {
         namespace Parameters {
             export type Origin = /* Origin of the portal */ Components.Schemas.Origin;
@@ -9402,7 +9811,14 @@ declare namespace Paths {
     namespace DeletePortalUser {
         namespace Responses {
             export interface $200 {
-                message?: "User Succesfully Deleted";
+                /**
+                 * `User Succesfully Deleted` when the user was deleted, or `Account deletion requested`
+                 * when an asynchronous deleteAccount portal extension hook handed the deletion over to a third party.
+                 *
+                 * example:
+                 * User Succesfully Deleted
+                 */
+                message?: string;
                 data?: /**
                  * Entity ID
                  * example:
@@ -11180,6 +11596,11 @@ declare namespace Paths {
                      * Decide whether to automatically redirect to the provider page during login, which would completely bypass showing the portal authentication page.
                      */
                     auto_redirect_to_sso?: boolean;
+                    /**
+                     * Opt-in. When true, suppresses responses that reveal whether a user exists for public, pre-authentication actions (the login entry-point check and self-registration), at the expense of some UX. Already-authenticated actions are unaffected. Default false.
+                     *
+                     */
+                    prevent_user_enumeration?: boolean;
                 };
                 /**
                  * AWS Cognito Pool details for the portal
@@ -11786,6 +12207,11 @@ declare namespace Paths {
                      * Decide whether to automatically redirect to the provider page during login, which would completely bypass showing the portal authentication page.
                      */
                     auto_redirect_to_sso?: boolean;
+                    /**
+                     * Opt-in. When true, suppresses responses that reveal whether a user exists for public, pre-authentication actions (the login entry-point check and self-registration), at the expense of some UX. Already-authenticated actions are unaffected. Default false.
+                     *
+                     */
+                    prevent_user_enumeration?: boolean;
                 };
                 /**
                  * AWS Cognito Pool details for the portal
@@ -13512,6 +13938,28 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace ListEmailTemplateReferences {
+        export interface RequestBody {
+            /**
+             * Email template id to find portal references for
+             */
+            template_id: string;
+        }
+        namespace Responses {
+            export interface $200 {
+                portals: {
+                    id: string;
+                    /**
+                     * Portal display name (or domain); falls back to id when unavailable
+                     */
+                    name?: string | null;
+                }[];
+            }
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace LoginToPortalAsUser {
         export interface RequestBody {
             /**
@@ -13537,6 +13985,32 @@ declare namespace Paths {
                  */
                 login_as_token?: string;
             }
+        }
+    }
+    namespace MigrateEmailTemplateReferences {
+        export interface RequestBody {
+            /**
+             * Template id currently referenced on portal rows
+             */
+            source_template_id: string;
+            /**
+             * Template id to write in place of the source
+             */
+            destination_template_id: string;
+        }
+        namespace Responses {
+            export interface $200 {
+                /**
+                 * example:
+                 * 2
+                 */
+                migrated_portal_count: number;
+                migrated_portal_ids: string[];
+                failed_portal_ids: string[];
+            }
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $500 = Components.Responses.InternalServerError;
         }
     }
     namespace NotifyMLoginInterestChange {
@@ -13716,6 +14190,7 @@ declare namespace Paths {
     }
     namespace PutPortalConfig {
         namespace Parameters {
+            export type PageUpsertMode = "id" | "slug";
             /**
              * example:
              * 5da0a718-c822-403d-9f5d-20d4584e0528
@@ -13728,6 +14203,9 @@ declare namespace Paths {
              * 5da0a718-c822-403d-9f5d-20d4584e0528
              */
             Parameters.PortalId /* uuid */;
+        }
+        export interface QueryParameters {
+            page_upsert_mode?: Parameters.PageUpsertMode;
         }
         export type RequestBody = Components.Schemas.PortalConfigV3;
         namespace Responses {
@@ -14527,16 +15005,37 @@ declare namespace Paths {
              */
             email: string;
             /**
-             * Password of the portal user for confirmation
+             * Password of the portal user for confirmation.
+             * Required unless a `changeEmail` portal extension hook with `require_password_confirmation` disabled is configured for the portal.
+             *
              */
-            password: string;
+            password?: string;
         }
         namespace Responses {
             export interface $200 {
-                message?: "You will receive a confirmation mail soon on your updated email address.";
+                /**
+                 * `You will receive a confirmation mail soon on your updated email address.` for the built-in flow,
+                 * or `Your email change request has been received.` when a changeEmail portal extension hook handed
+                 * the change over to a third party.
+                 *
+                 * example:
+                 * You will receive a confirmation mail soon on your updated email address.
+                 */
+                message?: string;
             }
             export type $400 = Components.Responses.InvalidRequest;
             export type $401 = Components.Responses.Unauthorized;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace UpdatePortalUserEntity {
+        export type RequestBody = Components.Schemas.EntityUpdateParams;
+        namespace Responses {
+            export type $200 = /* Response for entity get request */ Components.Schemas.EntityResponse;
+            export type $400 = Components.Responses.InvalidRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -15328,6 +15827,38 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UpsertEmailTemplates.Responses.$200>
   /**
+   * migrateEmailTemplateReferences - migrateEmailTemplateReferences
+   * 
+   * Walk every email-template config row in the caller's org and re-point any
+   * field on `email_templates` that currently references `source_template_id`
+   * at `destination_template_id`. Intended to be called from the email-template
+   * migration flow when a duplicated template is refined.
+   * 
+   * Only v3-shaped rows are migrated (those carrying `portal_sk_v3`). Returns
+   * the portal IDs that were rewritten and any whose update failed.
+   * 
+   */
+  'migrateEmailTemplateReferences'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.MigrateEmailTemplateReferences.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.MigrateEmailTemplateReferences.Responses.$200>
+  /**
+   * listEmailTemplateReferences - listEmailTemplateReferences
+   * 
+   * Read-only sibling of migrateEmailTemplateReferences. Lists every portal in
+   * the caller's org whose `email_templates` config references `template_id`,
+   * without rewriting anything. Used by the email-template MFE to show which
+   * portals a template affects (in template settings and as a pre-migrate
+   * preview). Uses the same discovery as the migrate path.
+   * 
+   */
+  'listEmailTemplateReferences'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.ListEmailTemplateReferences.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ListEmailTemplateReferences.Responses.$200>
+  /**
    * getEmailTemplatesByPortalId - getEmailTemplatesByPortalId
    * 
    * Retrieves the email templates of a portal by portal ID
@@ -15633,6 +16164,18 @@ export interface OperationMethods {
     data?: Paths.UpdatePortalUserEmail.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UpdatePortalUserEmail.Responses.$200>
+  /**
+   * changePortalUserPassword - changePortalUserPassword
+   * 
+   * Hand over a password change to the third-party system configured via the `changePassword` portal extension hook.
+   * Only available when such a hook is configured for the portal; the built-in password change flow does not use this endpoint.
+   * 
+   */
+  'changePortalUserPassword'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.ChangePortalUserPassword.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ChangePortalUserPassword.Responses.$200>
   /**
    * resendConfirmationEmail - resendConfirmationEmail
    * 
@@ -16093,6 +16636,28 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.SearchPortalUserEntities.Responses.$200>
   /**
+   * createPortalUserEntity - createPortalUserEntity
+   * 
+   * **EXPERIMENTAL — do not rely on this endpoint.** It is unstable, currently limited to the `asset` schema, and may change or be removed without notice; third parties must not build on it yet.
+   * Create a single entity on behalf of a portal user. The schema must be one of the supported (experimental) schemas; field-level permissions are enforced by the caller's role grants. The created entity is automatically related to the caller's contact.
+   */
+  'createPortalUserEntity'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.CreatePortalUserEntity.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CreatePortalUserEntity.Responses.$201>
+  /**
+   * updatePortalUserEntity - updatePortalUserEntity
+   * 
+   * **EXPERIMENTAL — do not rely on this endpoint.** It is unstable, currently limited to the `asset` schema, and may change or be removed without notice; third parties must not build on it yet.
+   * Update a single entity on behalf of a portal user. The schema must be one of the supported (experimental) schemas; field-level permissions are enforced by the caller's role grants (use null to clear a field, e.g. external_id). The target entity must already be owned by the caller's contact.
+   */
+  'updatePortalUserEntity'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.UpdatePortalUserEntity.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.UpdatePortalUserEntity.Responses.$200>
+  /**
    * canTriggerPortalFlow - canTriggerPortalFlow
    * 
    * Returns whether the user can trigger a portal flow
@@ -16476,7 +17041,7 @@ export interface OperationMethods {
    * Updates a specific portal configuration by ID.
    */
   'putPortalConfig'(
-    parameters?: Parameters<Paths.PutPortalConfig.PathParameters> | null,
+    parameters?: Parameters<Paths.PutPortalConfig.QueryParameters & Paths.PutPortalConfig.PathParameters> | null,
     data?: Paths.PutPortalConfig.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.PutPortalConfig.Responses.$200>
@@ -16959,6 +17524,42 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetEmailTemplates.Responses.$200>
   }
+  ['/v3/portal/email-templates:migrate-references']: {
+    /**
+     * migrateEmailTemplateReferences - migrateEmailTemplateReferences
+     * 
+     * Walk every email-template config row in the caller's org and re-point any
+     * field on `email_templates` that currently references `source_template_id`
+     * at `destination_template_id`. Intended to be called from the email-template
+     * migration flow when a duplicated template is refined.
+     * 
+     * Only v3-shaped rows are migrated (those carrying `portal_sk_v3`). Returns
+     * the portal IDs that were rewritten and any whose update failed.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.MigrateEmailTemplateReferences.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.MigrateEmailTemplateReferences.Responses.$200>
+  }
+  ['/v3/portal/email-templates:list-references']: {
+    /**
+     * listEmailTemplateReferences - listEmailTemplateReferences
+     * 
+     * Read-only sibling of migrateEmailTemplateReferences. Lists every portal in
+     * the caller's org whose `email_templates` config references `template_id`,
+     * without rewriting anything. Used by the email-template MFE to show which
+     * portals a template affects (in template settings and as a pre-migrate
+     * preview). Uses the same discovery as the migrate path.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.ListEmailTemplateReferences.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ListEmailTemplateReferences.Responses.$200>
+  }
   ['/v3/portal/email-templates/{portal_id}']: {
     /**
      * upsertEmailTemplatesByPortalId - upsertEmailTemplatesByPortalId
@@ -17310,6 +17911,20 @@ export interface PathsDictionary {
       data?: Paths.UpdatePortalUserEmail.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.UpdatePortalUserEmail.Responses.$200>
+  }
+  ['/v2/portal/user/change/password']: {
+    /**
+     * changePortalUserPassword - changePortalUserPassword
+     * 
+     * Hand over a password change to the third-party system configured via the `changePassword` portal extension hook.
+     * Only available when such a hook is configured for the portal; the built-in password change flow does not use this endpoint.
+     * 
+     */
+    'put'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.ChangePortalUserPassword.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ChangePortalUserPassword.Responses.$200>
   }
   ['/v2/portal/user/resend/confirmation-email/{id}']: {
     /**
@@ -17850,6 +18465,32 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.SearchPortalUserEntities.Responses.$200>
   }
+  ['/v2/portal/entity:create']: {
+    /**
+     * createPortalUserEntity - createPortalUserEntity
+     * 
+     * **EXPERIMENTAL — do not rely on this endpoint.** It is unstable, currently limited to the `asset` schema, and may change or be removed without notice; third parties must not build on it yet.
+     * Create a single entity on behalf of a portal user. The schema must be one of the supported (experimental) schemas; field-level permissions are enforced by the caller's role grants. The created entity is automatically related to the caller's contact.
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.CreatePortalUserEntity.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CreatePortalUserEntity.Responses.$201>
+  }
+  ['/v2/portal/entity:update']: {
+    /**
+     * updatePortalUserEntity - updatePortalUserEntity
+     * 
+     * **EXPERIMENTAL — do not rely on this endpoint.** It is unstable, currently limited to the `asset` schema, and may change or be removed without notice; third parties must not build on it yet.
+     * Update a single entity on behalf of a portal user. The schema must be one of the supported (experimental) schemas; field-level permissions are enforced by the caller's role grants (use null to clear a field, e.g. external_id). The target entity must already be owned by the caller's contact.
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.UpdatePortalUserEntity.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.UpdatePortalUserEntity.Responses.$200>
+  }
   ['/v2/portal/can-trigger-portal-flow']: {
     /**
      * canTriggerPortalFlow - canTriggerPortalFlow
@@ -18289,7 +18930,7 @@ export interface PathsDictionary {
      * Updates a specific portal configuration by ID.
      */
     'put'(
-      parameters?: Parameters<Paths.PutPortalConfig.PathParameters> | null,
+      parameters?: Parameters<Paths.PutPortalConfig.QueryParameters & Paths.PutPortalConfig.PathParameters> | null,
       data?: Paths.PutPortalConfig.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.PutPortalConfig.Responses.$200>
@@ -18487,6 +19128,7 @@ export type DocumentWidget = Components.Schemas.DocumentWidget;
 export type DomainSettings = Components.Schemas.DomainSettings;
 export type EmailTemplates = Components.Schemas.EmailTemplates;
 export type Entity = Components.Schemas.Entity;
+export type EntityCreateParams = Components.Schemas.EntityCreateParams;
 export type EntityEditRule = Components.Schemas.EntityEditRule;
 export type EntityFileCount = Components.Schemas.EntityFileCount;
 export type EntityGetParams = Components.Schemas.EntityGetParams;
@@ -18500,6 +19142,7 @@ export type EntitySearchParams = Components.Schemas.EntitySearchParams;
 export type EntitySlug = Components.Schemas.EntitySlug;
 export type EntitySlugConfig = Components.Schemas.EntitySlugConfig;
 export type EntityTemplates = Components.Schemas.EntityTemplates;
+export type EntityUpdateParams = Components.Schemas.EntityUpdateParams;
 export type EntityWidget = Components.Schemas.EntityWidget;
 export type ErrorResp = Components.Schemas.ErrorResp;
 export type Exists = Components.Schemas.Exists;
@@ -18507,10 +19150,13 @@ export type Extension = Components.Schemas.Extension;
 export type ExtensionAuthBlock = Components.Schemas.ExtensionAuthBlock;
 export type ExtensionConfig = Components.Schemas.ExtensionConfig;
 export type ExtensionHook = Components.Schemas.ExtensionHook;
+export type ExtensionHookChangeEmail = Components.Schemas.ExtensionHookChangeEmail;
+export type ExtensionHookChangePassword = Components.Schemas.ExtensionHookChangePassword;
 export type ExtensionHookConsumptionDataRetrieval = Components.Schemas.ExtensionHookConsumptionDataRetrieval;
 export type ExtensionHookContractIdentification = Components.Schemas.ExtensionHookContractIdentification;
 export type ExtensionHookCostDataRetrieval = Components.Schemas.ExtensionHookCostDataRetrieval;
 export type ExtensionHookDataExport = Components.Schemas.ExtensionHookDataExport;
+export type ExtensionHookDeleteAccount = Components.Schemas.ExtensionHookDeleteAccount;
 export type ExtensionHookMeterReadingPlausibilityCheck = Components.Schemas.ExtensionHookMeterReadingPlausibilityCheck;
 export type ExtensionHookPriceDataRetrieval = Components.Schemas.ExtensionHookPriceDataRetrieval;
 export type ExtensionHookRegistrationIdentifiersCheck = Components.Schemas.ExtensionHookRegistrationIdentifiersCheck;
@@ -18556,11 +19202,15 @@ export type ProviderDisplayName = Components.Schemas.ProviderDisplayName;
 export type ProviderPublicConfig = Components.Schemas.ProviderPublicConfig;
 export type ProviderSlug = Components.Schemas.ProviderSlug;
 export type PublicAppDetails = Components.Schemas.PublicAppDetails;
+export type PublicChangeEmailDetails = Components.Schemas.PublicChangeEmailDetails;
+export type PublicChangePasswordDetails = Components.Schemas.PublicChangePasswordDetails;
 export type PublicContractIdentificationDetails = Components.Schemas.PublicContractIdentificationDetails;
 export type PublicDataRetrievalHookDetails = Components.Schemas.PublicDataRetrievalHookDetails;
+export type PublicDeleteAccountDetails = Components.Schemas.PublicDeleteAccountDetails;
 export type PublicExtensionCapabilities = Components.Schemas.PublicExtensionCapabilities;
 export type PublicExtensionDetails = Components.Schemas.PublicExtensionDetails;
 export type PublicMeterReadingPlausibilityCheckDetails = Components.Schemas.PublicMeterReadingPlausibilityCheckDetails;
+export type PublicSelfManagementExplanation = Components.Schemas.PublicSelfManagementExplanation;
 export type ReadBy = Components.Schemas.ReadBy;
 export type ReadingStatus = Components.Schemas.ReadingStatus;
 export type Reason = Components.Schemas.Reason;
