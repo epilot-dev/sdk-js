@@ -136,6 +136,7 @@ function printRootHelp() {
   w(`\n`);
   w(`${BOLD}EXAMPLES${R}\n`);
   w(`  ${YELLOW}$${R} epilot auth login\n`);
+  w(`  ${YELLOW}$${R} epilot auth login --readonly ${DIM}# read-only session${R}\n`);
   w(`  ${YELLOW}$${R} epilot user getMeV2\n`);
   w(`  ${YELLOW}$${R} epilot entity getEntity contact abc123\n`);
   w(`  ${YELLOW}$${R} epilot entity searchEntities -d '{"q":"*"}'\n`);

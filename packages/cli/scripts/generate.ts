@@ -825,6 +825,7 @@ const updateReadme = (clients: ClientInfo[]): void => {
     '',
     'EXAMPLES',
     '  $ epilot auth login',
+    '  $ epilot auth login --readonly   # read-only session',
     '  $ epilot user getMeV2',
     '  $ epilot entity getEntity contact abc123',
     '  $ epilot entity searchEntities -d \'{"q":"*"}\'',
