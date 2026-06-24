@@ -216,6 +216,63 @@
         "responses": {}
       }
     },
+    "/v1/files/{id}/summary": {
+      "get": {
+        "operationId": "getFileSummary",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/files/{id}/summary-jobs": {
+      "post": {
+        "operationId": "createFileSummaryJob",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/files/{id}/summary-jobs/current": {
+      "get": {
+        "operationId": "getCurrentFileSummaryJob",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/files/{id}/summary-jobs/{job_id}": {
+      "get": {
+        "operationId": "getFileSummaryJob",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v1/files/{id}/summary:generate": {
       "post": {
         "operationId": "generateFileSummary",

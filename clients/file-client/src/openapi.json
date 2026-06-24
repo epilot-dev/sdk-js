@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "File API",
-    "version": "1.10.0",
+    "version": "1.12.0",
     "description": "The File API enables you to upload, store, manage, and share files within the epilot platform.\n\n## Key Features\n- **Upload files** to temporary storage and save them permanently as File entities\n- **Generate previews** (thumbnails) for images and documents\n- **Create public links** to share private files externally\n- **Organize files** into collections for better management\n- **Version control** with automatic file versioning on updates\n\n## File Upload Workflow\n1. Call `uploadFileV2` to get a pre-signed S3 URL\n2. Upload your file directly to S3 using the pre-signed URL (PUT request)\n3. Call `saveFileV2` with the S3 reference to create a permanent File entity\n\n## Changelog\n<a href=\"changelog\">View API Changelog</a>\n"
   },
   "tags": [
@@ -875,11 +875,213 @@
         }
       }
     },
+    "/v1/files/{id}/summary": {
+      "get": {
+        "operationId": "getFileSummary",
+        "summary": "getFileSummary",
+        "description": "Get summary text for a file entity together with the current summary job status when available.",
+        "tags": [
+          "File"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "The UUID of the file entity",
+            "schema": {
+              "$ref": "#/components/schemas/FileEntityId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Current file summary state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FileSummary"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/files/{id}/summary-jobs": {
+      "post": {
+        "operationId": "createFileSummaryJob",
+        "summary": "createFileSummaryJob",
+        "description": "Create or return the current AI summary job for a file entity.",
+        "tags": [
+          "File"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "The UUID of the file entity",
+            "schema": {
+              "$ref": "#/components/schemas/FileEntityId"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Summary job accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FileSummaryJob"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/files/{id}/summary-jobs/current": {
+      "get": {
+        "operationId": "getCurrentFileSummaryJob",
+        "summary": "getCurrentFileSummaryJob",
+        "description": "Get the latest AI summary job for the file entity's current source.",
+        "tags": [
+          "File"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "The UUID of the file entity",
+            "schema": {
+              "$ref": "#/components/schemas/FileEntityId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Current summary job",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FileSummaryJob"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/files/{id}/summary-jobs/{job_id}": {
+      "get": {
+        "operationId": "getFileSummaryJob",
+        "summary": "getFileSummaryJob",
+        "description": "Get an AI summary job by id.",
+        "tags": [
+          "File"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "The UUID of the file entity",
+            "schema": {
+              "$ref": "#/components/schemas/FileEntityId"
+            }
+          },
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "description": "The UUID of the summary job",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Summary job",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FileSummaryJob"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/v1/files/{id}/summary:generate": {
       "post": {
         "operationId": "generateFileSummary",
         "summary": "generateFileSummary",
-        "description": "Request AI generation of preview and short summaries for a file entity.",
+        "description": "Compatibility alias for creating or returning the current AI summary job for a file entity.",
         "tags": [
           "File"
         ],
@@ -900,7 +1102,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/FileSummaryGenerationStatus"
+                  "$ref": "#/components/schemas/FileSummaryJob"
                 }
               }
             }
@@ -916,9 +1118,6 @@
           },
           "404": {
             "$ref": "#/components/responses/NotFoundError"
-          },
-          "409": {
-            "$ref": "#/components/responses/ConflictError"
           },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
@@ -2196,6 +2395,9 @@
           "custom_download_url": {
             "$ref": "#/components/schemas/CustomDownloadUrl"
           },
+          "custom_download_url_auth": {
+            "$ref": "#/components/schemas/CustomDownloadUrlAuth"
+          },
           "preview_summary_de": {
             "type": "string",
             "description": "Compact German summary for hover and list preview surfaces.",
@@ -2215,9 +2417,6 @@
             "type": "string",
             "description": "Short English paragraph summary for file preview surfaces.",
             "readOnly": true
-          },
-          "summary_status": {
-            "$ref": "#/components/schemas/FileSummaryStatus"
           }
         }
       },
@@ -2238,33 +2437,107 @@
           "unknown"
         ]
       },
-      "FileSummaryStatus": {
+      "FileSummaryJobStatus": {
         "type": "string",
-        "description": "Current AI summary generation state for the file.",
+        "description": "Current state of a file summary job.",
         "enum": [
+          "queued",
+          "waiting_for_extraction",
           "processing",
           "completed",
           "failed",
-          "unsupported"
+          "unsupported",
+          "stale"
         ],
         "readOnly": true
       },
-      "FileSummaryGenerationStatus": {
+      "FileSummaryJob": {
         "type": "object",
         "properties": {
+          "job_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "File summary job ID."
+          },
+          "file_id": {
+            "$ref": "#/components/schemas/FileEntityId"
+          },
           "status": {
-            "$ref": "#/components/schemas/FileSummaryStatus"
+            "$ref": "#/components/schemas/FileSummaryJobStatus"
+          },
+          "error": {
+            "type": "string",
+            "description": "Human-readable failure or unsupported reason when available."
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "completed_at": {
+            "type": "string",
+            "format": "date-time"
           }
         },
         "required": [
-          "status"
+          "job_id",
+          "file_id",
+          "status",
+          "created_at",
+          "updated_at"
         ]
+      },
+      "FileSummary": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/FileSummaryJobStatus"
+          },
+          "job_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Current summary job ID when available."
+          },
+          "preview_summary_de": {
+            "type": "string",
+            "nullable": true,
+            "description": "Compact German summary for hover and list preview surfaces."
+          },
+          "short_summary_de": {
+            "type": "string",
+            "nullable": true,
+            "description": "Short German paragraph summary for file preview surfaces."
+          },
+          "preview_summary_en": {
+            "type": "string",
+            "nullable": true,
+            "description": "Compact English summary for hover and list preview surfaces."
+          },
+          "short_summary_en": {
+            "type": "string",
+            "nullable": true,
+            "description": "Short English paragraph summary for file preview surfaces."
+          }
+        }
       },
       "CustomDownloadUrl": {
         "description": "Custom external download url used for the file",
         "type": "string",
         "format": "uri",
         "example": "https://some-api-url.com/download?file_id=123"
+      },
+      "CustomDownloadUrlAuth": {
+        "description": "Authorization mode for the custom_download_url. `presigned` (the default) uses an HMAC-signed URL; `token` authorizes the download via the caller's bearer token, matched against the exact stored custom_download_url. In token mode the File API returns the unsigned custom_download_url (no expires_at/signature query params) so the stored url matches exactly.",
+        "type": "string",
+        "enum": [
+          "presigned",
+          "token"
+        ],
+        "default": "presigned",
+        "example": "token"
       },
       "FileEntity": {
         "allOf": [
@@ -2437,6 +2710,9 @@
             "properties": {
               "custom_download_url": {
                 "$ref": "#/components/schemas/CustomDownloadUrl"
+              },
+              "custom_download_url_auth": {
+                "$ref": "#/components/schemas/CustomDownloadUrlAuth"
               }
             }
           }
