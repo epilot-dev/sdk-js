@@ -2357,6 +2357,12 @@ export declare namespace Components {
          * https://some-api-url.com/download?file_id=123
          */
         export type CustomDownloadUrl = string; // uri
+        /**
+         * Authorization mode for the custom_download_url. `presigned` (the default) uses an HMAC-signed URL; `token` authorizes the download via the caller's bearer token, matched against the exact stored custom_download_url. In token mode the File API returns the unsigned custom_download_url (no expires_at/signature query params) so the stored url matches exactly.
+         * example:
+         * token
+         */
+        export type CustomDownloadUrlAuth = "presigned" | "token";
         export type DownloadFilesPayload = {
             id: /**
              * example:
@@ -2456,6 +2462,12 @@ export declare namespace Components {
              * https://some-api-url.com/download?file_id=123
              */
             CustomDownloadUrl /* uri */;
+            custom_download_url_auth?: /**
+             * Authorization mode for the custom_download_url. `presigned` (the default) uses an HMAC-signed URL; `token` authorizes the download via the caller's bearer token, matched against the exact stored custom_download_url. In token mode the File API returns the unsigned custom_download_url (no expires_at/signature query params) so the stored url matches exactly.
+             * example:
+             * token
+             */
+            CustomDownloadUrlAuth;
             /**
              * Compact German summary for hover and list preview surfaces.
              */
@@ -2472,7 +2484,6 @@ export declare namespace Components {
              * Short English paragraph summary for file preview surfaces.
              */
             short_summary_en?: string;
-            summary_status?: /* Current AI summary generation state for the file. */ FileSummaryStatus;
         }
         export interface FileCollectionAttributes {
             /**
@@ -2672,6 +2683,12 @@ export declare namespace Components {
              * https://some-api-url.com/download?file_id=123
              */
             CustomDownloadUrl /* uri */;
+            custom_download_url_auth?: /**
+             * Authorization mode for the custom_download_url. `presigned` (the default) uses an HMAC-signed URL; `token` authorizes the download via the caller's bearer token, matched against the exact stored custom_download_url. In token mode the File API returns the unsigned custom_download_url (no expires_at/signature query params) so the stored url matches exactly.
+             * example:
+             * token
+             */
+            CustomDownloadUrlAuth;
             /**
              * Compact German summary for hover and list preview surfaces.
              */
@@ -2688,7 +2705,6 @@ export declare namespace Components {
              * Short English paragraph summary for file preview surfaces.
              */
             short_summary_en?: string;
-            summary_status?: /* Current AI summary generation state for the file. */ FileSummaryStatus;
             /**
              * Source URL for the file. Included if the entity was created from source_url, or when ?source_url=true
              * example:
@@ -2760,13 +2776,52 @@ export declare namespace Components {
             EntitySlug;
             _tags?: string[];
         }
-        export interface FileSummaryGenerationStatus {
-            status: /* Current AI summary generation state for the file. */ FileSummaryStatus;
+        export interface FileSummary {
+            status?: /* Current state of a file summary job. */ FileSummaryJobStatus;
+            /**
+             * Current summary job ID when available.
+             */
+            job_id?: string; // uuid
+            /**
+             * Compact German summary for hover and list preview surfaces.
+             */
+            preview_summary_de?: string | null;
+            /**
+             * Short German paragraph summary for file preview surfaces.
+             */
+            short_summary_de?: string | null;
+            /**
+             * Compact English summary for hover and list preview surfaces.
+             */
+            preview_summary_en?: string | null;
+            /**
+             * Short English paragraph summary for file preview surfaces.
+             */
+            short_summary_en?: string | null;
+        }
+        export interface FileSummaryJob {
+            /**
+             * File summary job ID.
+             */
+            job_id: string; // uuid
+            file_id: /**
+             * example:
+             * ef7d985c-2385-44f4-9c71-ae06a52264f8
+             */
+            FileEntityId;
+            status: /* Current state of a file summary job. */ FileSummaryJobStatus;
+            /**
+             * Human-readable failure or unsupported reason when available.
+             */
+            error?: string;
+            created_at: string; // date-time
+            updated_at: string; // date-time
+            completed_at?: string; // date-time
         }
         /**
-         * Current AI summary generation state for the file.
+         * Current state of a file summary job.
          */
-        export type FileSummaryStatus = "processing" | "completed" | "failed" | "unsupported";
+        export type FileSummaryJobStatus = "queued" | "waiting_for_extraction" | "processing" | "completed" | "failed" | "unsupported" | "stale";
         export type FileType = "document" | "document_template" | "text" | "image" | "video" | "audio" | "spreadsheet" | "presentation" | "font" | "archive" | "application" | "unknown";
         export interface FileUpload {
             s3ref?: S3Reference;
@@ -2891,6 +2946,12 @@ export declare namespace Components {
              * https://some-api-url.com/download?file_id=123
              */
             CustomDownloadUrl /* uri */;
+            custom_download_url_auth?: /**
+             * Authorization mode for the custom_download_url. `presigned` (the default) uses an HMAC-signed URL; `token` authorizes the download via the caller's bearer token, matched against the exact stored custom_download_url. In token mode the File API returns the unsigned custom_download_url (no expires_at/signature query params) so the stored url matches exactly.
+             * example:
+             * token
+             */
+            CustomDownloadUrlAuth;
             /**
              * Compact German summary for hover and list preview surfaces.
              */
@@ -2907,7 +2968,6 @@ export declare namespace Components {
              * Short English paragraph summary for file preview surfaces.
              */
             short_summary_en?: string;
-            summary_status?: /* Current AI summary generation state for the file. */ FileSummaryStatus;
         }
         export interface SaveFileFromSourceURLPayload {
             [name: string]: any;
@@ -2987,6 +3047,12 @@ export declare namespace Components {
              * https://some-api-url.com/download?file_id=123
              */
             CustomDownloadUrl /* uri */;
+            custom_download_url_auth?: /**
+             * Authorization mode for the custom_download_url. `presigned` (the default) uses an HMAC-signed URL; `token` authorizes the download via the caller's bearer token, matched against the exact stored custom_download_url. In token mode the File API returns the unsigned custom_download_url (no expires_at/signature query params) so the stored url matches exactly.
+             * example:
+             * token
+             */
+            CustomDownloadUrlAuth;
             /**
              * Compact German summary for hover and list preview surfaces.
              */
@@ -3003,7 +3069,6 @@ export declare namespace Components {
              * Short English paragraph summary for file preview surfaces.
              */
             short_summary_en?: string;
-            summary_status?: /* Current AI summary generation state for the file. */ FileSummaryStatus;
             source_url?: /**
              * Custom external download url used for the file
              * example:
@@ -3091,6 +3156,12 @@ export declare namespace Components {
              * https://some-api-url.com/download?file_id=123
              */
             CustomDownloadUrl /* uri */;
+            custom_download_url_auth?: /**
+             * Authorization mode for the custom_download_url. `presigned` (the default) uses an HMAC-signed URL; `token` authorizes the download via the caller's bearer token, matched against the exact stored custom_download_url. In token mode the File API returns the unsigned custom_download_url (no expires_at/signature query params) so the stored url matches exactly.
+             * example:
+             * token
+             */
+            CustomDownloadUrlAuth;
             /**
              * Compact German summary for hover and list preview surfaces.
              */
@@ -3107,7 +3178,6 @@ export declare namespace Components {
              * Short English paragraph summary for file preview surfaces.
              */
             short_summary_en?: string;
-            summary_status?: /* Current AI summary generation state for the file. */ FileSummaryStatus;
             s3ref?: S3Ref;
         }
         export interface UploadFilePayload {
@@ -3266,6 +3336,66 @@ export declare namespace Paths {
             export interface $302 {
             }
             export type $404 = /* A generic error returned by the API */ Components.Schemas.ErrorObject;
+            export type $500 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 500,
+             *   "error": "Internal Server Error"
+             * }
+             */
+            Components.Responses.InternalServerError;
+        }
+    }
+    namespace CreateFileSummaryJob {
+        namespace Parameters {
+            export type Id = /**
+             * example:
+             * ef7d985c-2385-44f4-9c71-ae06a52264f8
+             */
+            Components.Schemas.FileEntityId;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        namespace Responses {
+            export type $202 = Components.Schemas.FileSummaryJob;
+            export type $400 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 400,
+             *   "error": "Bad Request: filename is required"
+             * }
+             */
+            Components.Responses.BadRequestError;
+            export type $401 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 401,
+             *   "error": "Unauthorized: Invalid or expired token"
+             * }
+             */
+            Components.Responses.UnauthorizedError;
+            export type $403 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 403,
+             *   "error": "Forbidden: You do not have permission to access this file"
+             * }
+             */
+            Components.Responses.ForbiddenError;
+            export type $404 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 404,
+             *   "error": "Not Found: File entity not found"
+             * }
+             */
+            Components.Responses.NotFoundError;
             export type $500 = /**
              * A generic error returned by the API
              * example:
@@ -3647,7 +3777,7 @@ export declare namespace Paths {
             id: Parameters.Id;
         }
         namespace Responses {
-            export type $202 = Components.Schemas.FileSummaryGenerationStatus;
+            export type $202 = Components.Schemas.FileSummaryJob;
             export type $400 = /**
              * A generic error returned by the API
              * example:
@@ -3684,15 +3814,6 @@ export declare namespace Paths {
              * }
              */
             Components.Responses.NotFoundError;
-            export type $409 = /**
-             * A generic error returned by the API
-             * example:
-             * {
-             *   "status": 409,
-             *   "error": "Extracted file content is still being prepared"
-             * }
-             */
-            Components.Responses.ConflictError;
             export type $500 = /**
              * A generic error returned by the API
              * example:
@@ -3758,6 +3879,66 @@ export declare namespace Paths {
             Components.Responses.InternalServerError;
         }
     }
+    namespace GetCurrentFileSummaryJob {
+        namespace Parameters {
+            export type Id = /**
+             * example:
+             * ef7d985c-2385-44f4-9c71-ae06a52264f8
+             */
+            Components.Schemas.FileEntityId;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.FileSummaryJob;
+            export type $400 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 400,
+             *   "error": "Bad Request: filename is required"
+             * }
+             */
+            Components.Responses.BadRequestError;
+            export type $401 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 401,
+             *   "error": "Unauthorized: Invalid or expired token"
+             * }
+             */
+            Components.Responses.UnauthorizedError;
+            export type $403 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 403,
+             *   "error": "Forbidden: You do not have permission to access this file"
+             * }
+             */
+            Components.Responses.ForbiddenError;
+            export type $404 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 404,
+             *   "error": "Not Found: File entity not found"
+             * }
+             */
+            Components.Responses.NotFoundError;
+            export type $500 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 500,
+             *   "error": "Internal Server Error"
+             * }
+             */
+            Components.Responses.InternalServerError;
+        }
+    }
     namespace GetFile {
         namespace Parameters {
             export type Async = boolean;
@@ -3782,6 +3963,128 @@ export declare namespace Paths {
         }
         namespace Responses {
             export type $200 = Components.Schemas.FileEntity;
+            export type $401 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 401,
+             *   "error": "Unauthorized: Invalid or expired token"
+             * }
+             */
+            Components.Responses.UnauthorizedError;
+            export type $403 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 403,
+             *   "error": "Forbidden: You do not have permission to access this file"
+             * }
+             */
+            Components.Responses.ForbiddenError;
+            export type $404 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 404,
+             *   "error": "Not Found: File entity not found"
+             * }
+             */
+            Components.Responses.NotFoundError;
+            export type $500 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 500,
+             *   "error": "Internal Server Error"
+             * }
+             */
+            Components.Responses.InternalServerError;
+        }
+    }
+    namespace GetFileSummary {
+        namespace Parameters {
+            export type Id = /**
+             * example:
+             * ef7d985c-2385-44f4-9c71-ae06a52264f8
+             */
+            Components.Schemas.FileEntityId;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.FileSummary;
+            export type $400 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 400,
+             *   "error": "Bad Request: filename is required"
+             * }
+             */
+            Components.Responses.BadRequestError;
+            export type $401 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 401,
+             *   "error": "Unauthorized: Invalid or expired token"
+             * }
+             */
+            Components.Responses.UnauthorizedError;
+            export type $403 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 403,
+             *   "error": "Forbidden: You do not have permission to access this file"
+             * }
+             */
+            Components.Responses.ForbiddenError;
+            export type $404 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 404,
+             *   "error": "Not Found: File entity not found"
+             * }
+             */
+            Components.Responses.NotFoundError;
+            export type $500 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 500,
+             *   "error": "Internal Server Error"
+             * }
+             */
+            Components.Responses.InternalServerError;
+        }
+    }
+    namespace GetFileSummaryJob {
+        namespace Parameters {
+            export type Id = /**
+             * example:
+             * ef7d985c-2385-44f4-9c71-ae06a52264f8
+             */
+            Components.Schemas.FileEntityId;
+            export type JobId = string; // uuid
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+            job_id: Parameters.JobId /* uuid */;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.FileSummaryJob;
+            export type $400 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 400,
+             *   "error": "Bad Request: filename is required"
+             * }
+             */
+            Components.Responses.BadRequestError;
             export type $401 = /**
              * A generic error returned by the API
              * example:
@@ -4727,9 +5030,49 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetZipJob.Responses.$200>
   /**
+   * getFileSummary - getFileSummary
+   * 
+   * Get summary text for a file entity together with the current summary job status when available.
+   */
+  'getFileSummary'(
+    parameters?: Parameters<Paths.GetFileSummary.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetFileSummary.Responses.$200>
+  /**
+   * createFileSummaryJob - createFileSummaryJob
+   * 
+   * Create or return the current AI summary job for a file entity.
+   */
+  'createFileSummaryJob'(
+    parameters?: Parameters<Paths.CreateFileSummaryJob.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CreateFileSummaryJob.Responses.$202>
+  /**
+   * getCurrentFileSummaryJob - getCurrentFileSummaryJob
+   * 
+   * Get the latest AI summary job for the file entity's current source.
+   */
+  'getCurrentFileSummaryJob'(
+    parameters?: Parameters<Paths.GetCurrentFileSummaryJob.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetCurrentFileSummaryJob.Responses.$200>
+  /**
+   * getFileSummaryJob - getFileSummaryJob
+   * 
+   * Get an AI summary job by id.
+   */
+  'getFileSummaryJob'(
+    parameters?: Parameters<Paths.GetFileSummaryJob.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetFileSummaryJob.Responses.$200>
+  /**
    * generateFileSummary - generateFileSummary
    * 
-   * Request AI generation of preview and short summaries for a file entity.
+   * Compatibility alias for creating or returning the current AI summary job for a file entity.
    */
   'generateFileSummary'(
     parameters?: Parameters<Paths.GenerateFileSummary.PathParameters> | null,
@@ -5187,11 +5530,59 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetZipJob.Responses.$200>
   }
+  ['/v1/files/{id}/summary']: {
+    /**
+     * getFileSummary - getFileSummary
+     * 
+     * Get summary text for a file entity together with the current summary job status when available.
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetFileSummary.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetFileSummary.Responses.$200>
+  }
+  ['/v1/files/{id}/summary-jobs']: {
+    /**
+     * createFileSummaryJob - createFileSummaryJob
+     * 
+     * Create or return the current AI summary job for a file entity.
+     */
+    'post'(
+      parameters?: Parameters<Paths.CreateFileSummaryJob.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CreateFileSummaryJob.Responses.$202>
+  }
+  ['/v1/files/{id}/summary-jobs/current']: {
+    /**
+     * getCurrentFileSummaryJob - getCurrentFileSummaryJob
+     * 
+     * Get the latest AI summary job for the file entity's current source.
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetCurrentFileSummaryJob.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetCurrentFileSummaryJob.Responses.$200>
+  }
+  ['/v1/files/{id}/summary-jobs/{job_id}']: {
+    /**
+     * getFileSummaryJob - getFileSummaryJob
+     * 
+     * Get an AI summary job by id.
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetFileSummaryJob.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetFileSummaryJob.Responses.$200>
+  }
   ['/v1/files/{id}/summary:generate']: {
     /**
      * generateFileSummary - generateFileSummary
      * 
-     * Request AI generation of preview and short summaries for a file entity.
+     * Compatibility alias for creating or returning the current AI summary job for a file entity.
      */
     'post'(
       parameters?: Parameters<Paths.GenerateFileSummary.PathParameters> | null,
@@ -5494,6 +5885,7 @@ export type BatchSaveFileVersionPayload = Components.Schemas.BatchSaveFileVersio
 export type CommonSaveFilePayload = Components.Schemas.CommonSaveFilePayload;
 export type CreateZipJobPayload = Components.Schemas.CreateZipJobPayload;
 export type CustomDownloadUrl = Components.Schemas.CustomDownloadUrl;
+export type CustomDownloadUrlAuth = Components.Schemas.CustomDownloadUrlAuth;
 export type DownloadFilesPayload = Components.Schemas.DownloadFilesPayload;
 export type EntityId = Components.Schemas.EntityId;
 export type EntitySlug = Components.Schemas.EntitySlug;
@@ -5507,8 +5899,9 @@ export type FileEntity = Components.Schemas.FileEntity;
 export type FileEntityId = Components.Schemas.FileEntityId;
 export type FileItem = Components.Schemas.FileItem;
 export type FileRelationItem = Components.Schemas.FileRelationItem;
-export type FileSummaryGenerationStatus = Components.Schemas.FileSummaryGenerationStatus;
-export type FileSummaryStatus = Components.Schemas.FileSummaryStatus;
+export type FileSummary = Components.Schemas.FileSummary;
+export type FileSummaryJob = Components.Schemas.FileSummaryJob;
+export type FileSummaryJobStatus = Components.Schemas.FileSummaryJobStatus;
 export type FileType = Components.Schemas.FileType;
 export type FileUpload = Components.Schemas.FileUpload;
 export type PublicLink = Components.Schemas.PublicLink;
