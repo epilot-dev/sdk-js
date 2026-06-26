@@ -3665,14 +3665,6 @@
                     "contactId": {
                       "$ref": "#/components/schemas/EntityId",
                       "description": "ID of the contact if exists"
-                    },
-                    "reason": {
-                      "type": "string",
-                      "enum": [
-                        "TIMEOUT",
-                        "NOT_FOUND"
-                      ],
-                      "description": "Present only when exists is false. NOT_FOUND means the given identifiers did\nnot match any contact (definitive - the client should not retry). TIMEOUT\nmeans the contact was not found within the processing window but may still be\ningesting; the client may retry (ideally with trigger_identifiers_check=false).\n"
                     }
                   }
                 }
@@ -3751,14 +3743,6 @@
                     "accountId": {
                       "$ref": "#/components/schemas/EntityId",
                       "description": "ID of the resolved account when the portal is configured for account-based registration"
-                    },
-                    "reason": {
-                      "type": "string",
-                      "enum": [
-                        "TIMEOUT",
-                        "NOT_FOUND"
-                      ],
-                      "description": "Present only when exists is false. NOT_FOUND means the given identifiers did\nnot match any contact (definitive - the client should not retry). TIMEOUT\nmeans the contact was not found within the processing window but may still be\ningesting; the client may retry (ideally with trigger_identifiers_check=false).\n"
                     }
                   }
                 }
@@ -11034,6 +11018,9 @@
                 "$ref": "#/components/schemas/MobileBuildStatus"
               }
             }
+          },
+          "ota": {
+            "$ref": "#/components/schemas/MobileOtaConfig"
           }
         }
       },
@@ -11077,6 +11064,82 @@
           },
           "branding": {
             "$ref": "#/components/schemas/MobileBranding"
+          },
+          "ota": {
+            "$ref": "#/components/schemas/MobileOtaConfig"
+          }
+        }
+      },
+      "MobileOtaConfig": {
+        "type": "object",
+        "description": "OTA (over-the-air) update settings for the portal's mobile app. Drives the OTA build pipeline and the per-portal manifest. channel / update_strategy / min_native_version are epilot-internal controls.",
+        "additionalProperties": true,
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "description": "Whether OTA updates are enabled for this portal."
+          },
+          "channel": {
+            "type": "string",
+            "enum": [
+              "canary",
+              "stable"
+            ],
+            "description": "Release channel this portal follows."
+          },
+          "auto_update": {
+            "type": "boolean",
+            "description": "Whether the app auto-updates or prompts the user."
+          },
+          "update_strategy": {
+            "type": "string",
+            "enum": [
+              "next-launch",
+              "immediate"
+            ],
+            "description": "When to apply a downloaded bundle."
+          },
+          "min_native_version": {
+            "type": "string",
+            "description": "Minimum native app version required to load OTA bundles."
+          }
+        }
+      },
+      "OtaPortal": {
+        "type": "object",
+        "description": "A portal that has mobile OTA updates enabled.",
+        "required": [
+          "domain",
+          "channel",
+          "autoUpdate",
+          "updateStrategy"
+        ],
+        "properties": {
+          "domain": {
+            "type": "string",
+            "description": "Portal hostname — the OTA manifest filename ({domain}.json).",
+            "example": "kundenportal.twl.de"
+          },
+          "channel": {
+            "type": "string",
+            "enum": [
+              "canary",
+              "stable"
+            ]
+          },
+          "autoUpdate": {
+            "type": "boolean"
+          },
+          "updateStrategy": {
+            "type": "string",
+            "enum": [
+              "next-launch",
+              "immediate"
+            ]
+          },
+          "minNativeVersion": {
+            "type": "string",
+            "example": "1.0.0"
           }
         }
       },
@@ -12578,11 +12641,6 @@
                 "contract_number": "123456"
               }
             }
-          },
-          "trigger_identifiers_check": {
-            "type": "boolean",
-            "default": true,
-            "description": "Whether to (re)trigger the registration identifiers check hook, which issues a request\nto the connected ERP to (re)sync the contact, in addition to waiting for the entity to\narrive. Defaults to true to preserve existing behaviour. Set to false on retry attempts\nto only poll for an already-triggered sync to land, without issuing another upstream\nrequest to the ERP.\n"
           }
         }
       },
