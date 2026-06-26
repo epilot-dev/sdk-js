@@ -2190,6 +2190,170 @@
         }
       }
     },
+    "/v3/portal/email-templates:migrate-references": {
+      "post": {
+        "operationId": "migrateEmailTemplateReferences",
+        "summary": "migrateEmailTemplateReferences",
+        "description": "Walk every email-template config row in the caller's org and re-point any\nfield on `email_templates` that currently references `source_template_id`\nat `destination_template_id`. Intended to be called from the email-template\nmigration flow when a duplicated template is refined.\n\nOnly v3-shaped rows are migrated (those carrying `portal_sk_v3`). Returns\nthe portal IDs that were rewritten and any whose update failed.\n",
+        "tags": [
+          "ECP Admin"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "requestBody": {
+          "description": "Source and destination template ids",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "source_template_id",
+                  "destination_template_id"
+                ],
+                "properties": {
+                  "source_template_id": {
+                    "type": "string",
+                    "description": "Template id currently referenced on portal rows"
+                  },
+                  "destination_template_id": {
+                    "type": "string",
+                    "description": "Template id to write in place of the source"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Migration completed (may have partial failures in failed_portal_ids).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "migrated_portal_count",
+                    "migrated_portal_ids",
+                    "failed_portal_ids"
+                  ],
+                  "properties": {
+                    "migrated_portal_count": {
+                      "type": "integer",
+                      "example": 2
+                    },
+                    "migrated_portal_ids": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "failed_portal_ids": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v3/portal/email-templates:list-references": {
+      "post": {
+        "operationId": "listEmailTemplateReferences",
+        "summary": "listEmailTemplateReferences",
+        "description": "Read-only sibling of migrateEmailTemplateReferences. Lists every portal in\nthe caller's org whose `email_templates` config references `template_id`,\nwithout rewriting anything. Used by the email-template MFE to show which\nportals a template affects (in template settings and as a pre-migrate\npreview). Uses the same discovery as the migrate path.\n",
+        "tags": [
+          "ECP Admin"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "requestBody": {
+          "description": "Template id to look up references for",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "template_id"
+                ],
+                "properties": {
+                  "template_id": {
+                    "type": "string",
+                    "description": "Email template id to find portal references for"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Portals referencing the template.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "portals"
+                  ],
+                  "properties": {
+                    "portals": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "id"
+                        ],
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string",
+                            "nullable": true,
+                            "description": "Portal display name (or domain); falls back to id when unavailable"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/v3/portal/email-templates/{portal_id}": {
       "post": {
         "operationId": "upsertEmailTemplatesByPortalId",
@@ -3831,9 +3995,8 @@
                   "properties": {
                     "message": {
                       "type": "string",
-                      "enum": [
-                        "User Succesfully Deleted"
-                      ]
+                      "description": "`User Succesfully Deleted` when the user was deleted, or `Account deletion requested`\nwhen an asynchronous deleteAccount portal extension hook handed the deletion over to a third party.\n",
+                      "example": "User Succesfully Deleted"
                     },
                     "data": {
                       "$ref": "#/components/schemas/EntityId"
@@ -3873,8 +4036,7 @@
               "schema": {
                 "type": "object",
                 "required": [
-                  "email",
-                  "password"
+                  "email"
                 ],
                 "properties": {
                   "email": {
@@ -3884,7 +4046,7 @@
                   },
                   "password": {
                     "type": "string",
-                    "description": "Password of the portal user for confirmation"
+                    "description": "Password of the portal user for confirmation.\nRequired unless a `changeEmail` portal extension hook with `require_password_confirmation` disabled is configured for the portal.\n"
                   }
                 }
               }
@@ -3901,9 +4063,8 @@
                   "properties": {
                     "message": {
                       "type": "string",
-                      "enum": [
-                        "You will receive a confirmation mail soon on your updated email address."
-                      ]
+                      "description": "`You will receive a confirmation mail soon on your updated email address.` for the built-in flow,\nor `Your email change request has been received.` when a changeEmail portal extension hook handed\nthe change over to a third party.\n",
+                      "example": "You will receive a confirmation mail soon on your updated email address."
                     }
                   }
                 }
@@ -3915,6 +4076,67 @@
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/user/change/password": {
+      "put": {
+        "operationId": "changePortalUserPassword",
+        "summary": "changePortalUserPassword",
+        "description": "Hand over a password change to the third-party system configured via the `changePassword` portal extension hook.\nOnly available when such a hook is configured for the portal; the built-in password change flow does not use this endpoint.\n",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "requestBody": {
+          "description": "Request payload",
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "new_password": {
+                    "type": "string",
+                    "description": "New password chosen by the portal user.\nRequired when the configured `changePassword` hook has `require_new_password` enabled, ignored otherwise.\n"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The password change request was handed over to the third-party system.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "description": "No changePassword portal extension hook is configured for this portal."
           },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
@@ -7034,6 +7256,156 @@
         }
       }
     },
+    "/v2/portal/entity/{slug}": {
+      "post": {
+        "operationId": "createPortalUserEntity",
+        "summary": "createPortalUserEntity",
+        "description": "**EXPERIMENTAL — do not rely on this endpoint.** It is unstable, currently limited to the `asset` schema, and may change or be removed without notice; third parties must not build on it yet.\nCreate a single entity on behalf of a portal user. The schema slug is passed in the path and must be one of the supported (experimental) schemas; field-level permissions are enforced by the caller's role grants. The request body is the entity to create (its attributes); the created entity is automatically related to the caller's contact.",
+        "deprecated": true,
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "description": "Entity schema slug to create. Limited to the supported (experimental) schemas, currently `asset`.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asset"
+              ],
+              "example": "asset"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Entity"
+              },
+              "example": {
+                "title": "PV Inverter",
+                "manufacturer": "SMA",
+                "external_id": "device-123"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The entity has been created successfully for the portal user.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntityResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/entity/{slug}/{id}": {
+      "patch": {
+        "operationId": "patchPortalUserEntity",
+        "summary": "patchPortalUserEntity",
+        "description": "**EXPERIMENTAL — do not rely on this endpoint.** It is unstable, currently limited to the `asset` schema, and may change or be removed without notice; third parties must not build on it yet.\nPartially update a single entity on behalf of a portal user. The schema slug and entity id are passed in the path; the schema must be one of the supported (experimental) schemas. Field-level permissions are enforced by the caller's role grants (use null to clear a field, e.g. external_id). The target entity must already be owned by the caller's contact.",
+        "deprecated": true,
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "description": "Entity schema slug to update. Limited to the supported (experimental) schemas, currently `asset`.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asset"
+              ],
+              "example": "asset"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "description": "ID of the entity to update. Must already be owned by the caller's contact.",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Entity"
+              },
+              "example": {
+                "external_id": null
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The entity has been updated successfully for the portal user.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntityResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/v2/portal/can-trigger-portal-flow": {
       "post": {
         "operationId": "canTriggerPortalFlow",
@@ -9319,6 +9691,20 @@
               "example": "5da0a718-c822-403d-9f5d-20d4584e0528"
             },
             "description": "Portal ID (readonly UUID generated on portal creation)"
+          },
+          {
+            "in": "query",
+            "name": "page_upsert_mode",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "id",
+                "slug"
+              ],
+              "default": "id"
+            },
+            "description": "Determines how pages are matched for upsert operations:\n- `id` (default): Match pages by their ID. Use this when page IDs are stable and known upfront.\n- `slug`: Match pages by their slug. When a request page has the same slug as an existing page, the existing page ID is adopted. Use this when page ids are unknown or when source page IDs differ from destination page IDs.\n"
           }
         ],
         "requestBody": {
@@ -10127,6 +10513,127 @@
           }
         }
       }
+    },
+    "/v1/portal/mobile-config": {
+      "get": {
+        "operationId": "getMobileConfig",
+        "summary": "getMobileConfig",
+        "description": "Returns the portal's mobile app configuration. By default the response is build-ready (resolved): base info (display_name from the portal name, app_host from the domain, environment) and branding (logo from the portal images, colors from the design palette) are filled in. Pass raw=true to get only the stored mobile_config without resolution.",
+        "tags": [
+          "ECP Admin"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "portal_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Portal ID"
+          },
+          {
+            "in": "query",
+            "name": "raw",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Return only the stored mobile_config without resolving base info/branding."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Mobile config retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MobileConfig"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "put": {
+        "operationId": "putMobileConfig",
+        "summary": "putMobileConfig",
+        "description": "Merges the provided fields into the portal's mobile app configuration\n(deep merge). Only mobile_config is modified; all other portal settings\nare left untouched.\n",
+        "tags": [
+          "ECP Admin"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "portal_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Portal ID"
+          }
+        ],
+        "requestBody": {
+          "description": "Editable mobile fields to merge into the existing mobile_config. Only mobile-relevant settings + app branding are applied; other fields are ignored.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MobileConfigUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Mobile config updated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MobileConfig"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -10360,6 +10867,203 @@
       }
     },
     "schemas": {
+      "MobileBuildStatus": {
+        "type": "object",
+        "description": "Latest build/upload status for a platform (system-written).",
+        "additionalProperties": true,
+        "properties": {
+          "version": {
+            "type": "string"
+          },
+          "build_number": {
+            "type": "integer"
+          },
+          "track": {
+            "type": "string",
+            "description": "e.g. testflight | internal | beta"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "building",
+              "uploaded",
+              "failed"
+            ]
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "error": {
+            "type": "string"
+          }
+        }
+      },
+      "MobileBranding": {
+        "type": "object",
+        "additionalProperties": true,
+        "properties": {
+          "app_icon": {
+            "type": "string"
+          },
+          "splash": {
+            "type": "string"
+          },
+          "splash_dark": {
+            "type": "string"
+          },
+          "icon_background_color": {
+            "type": "string"
+          },
+          "splash_background_color": {
+            "type": "string"
+          },
+          "splash_background_color_dark": {
+            "type": "string"
+          }
+        }
+      },
+      "MobileConfig": {
+        "type": "object",
+        "description": "Mobile app configuration for the portal. Stored inside the portal's config object. Identifiers/branding are non-secret; signing credentials live in a secure store, never here.",
+        "additionalProperties": true,
+        "properties": {
+          "portal_id": {
+            "type": "string",
+            "description": "Portal id (response-only; ignored on write)."
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "display_name": {
+            "type": "string",
+            "description": "App display name compiled into the binary."
+          },
+          "app_host": {
+            "type": "string",
+            "description": "Host the mobile shell loads (defaults to the portal domain)."
+          },
+          "environment": {
+            "type": "string",
+            "enum": [
+              "prod",
+              "staging",
+              "dev"
+            ]
+          },
+          "branding": {
+            "$ref": "#/components/schemas/MobileBranding"
+          },
+          "ios": {
+            "type": "object",
+            "additionalProperties": true,
+            "properties": {
+              "bundle_id": {
+                "type": "string",
+                "description": "iOS bundle id (matches the App Store Connect app)."
+              },
+              "team_id": {
+                "type": "string",
+                "description": "Apple Developer Team ID."
+              },
+              "credentials_status": {
+                "type": "string",
+                "enum": [
+                  "not_configured",
+                  "configured"
+                ]
+              },
+              "app_store_id": {
+                "type": "string",
+                "description": "Numeric App Store id (system-written after first upload)."
+              },
+              "store_url": {
+                "type": "string",
+                "description": "System-written App Store URL."
+              },
+              "last_build": {
+                "$ref": "#/components/schemas/MobileBuildStatus"
+              }
+            }
+          },
+          "android": {
+            "type": "object",
+            "additionalProperties": true,
+            "properties": {
+              "package_name": {
+                "type": "string",
+                "description": "Android package name (matches the Play Console app)."
+              },
+              "credentials_status": {
+                "type": "string",
+                "enum": [
+                  "not_configured",
+                  "configured"
+                ]
+              },
+              "upload_key_status": {
+                "type": "string",
+                "description": "Play App Signing upload-key state.",
+                "enum": [
+                  "not_configured",
+                  "generated",
+                  "enrolled"
+                ]
+              },
+              "store_url": {
+                "type": "string",
+                "description": "System-written Play Store URL."
+              },
+              "last_build": {
+                "$ref": "#/components/schemas/MobileBuildStatus"
+              }
+            }
+          }
+        }
+      },
+      "MobileConfigUpdate": {
+        "type": "object",
+        "description": "Editable mobile fields for PUT. Only mobile-relevant settings + app branding can be changed. Portal-derived values (display_name, app_host), the portal logo, and system-written fields (credentials_status, app_store_id, last_build, …) are ignored if sent.",
+        "additionalProperties": true,
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "ios": {
+            "type": "object",
+            "additionalProperties": true,
+            "properties": {
+              "bundle_id": {
+                "type": "string"
+              },
+              "team_id": {
+                "type": "string"
+              },
+              "store_url": {
+                "type": "string"
+              },
+              "app_store_id": {
+                "type": "string"
+              }
+            }
+          },
+          "android": {
+            "type": "object",
+            "additionalProperties": true,
+            "properties": {
+              "package_name": {
+                "type": "string"
+              },
+              "store_url": {
+                "type": "string"
+              }
+            }
+          },
+          "branding": {
+            "$ref": "#/components/schemas/MobileBranding"
+          }
+        }
+      },
       "ContextEntity": {
         "type": "object",
         "description": "An entity reference for context-aware operations",
@@ -10969,6 +11673,10 @@
               "auto_redirect_to_sso": {
                 "type": "boolean",
                 "description": "Decide whether to automatically redirect to the provider page during login, which would completely bypass showing the portal authentication page."
+              },
+              "prevent_user_enumeration": {
+                "type": "boolean",
+                "description": "Opt-in. When true, suppresses responses that reveal whether a user exists for public, pre-authentication actions (the login entry-point check and self-registration), at the expense of some UX. Already-authenticated actions are unaffected. Default false.\n"
               }
             }
           },
@@ -14282,6 +14990,111 @@
                 "$ref": "#/components/schemas/PublicMeterReadingPlausibilityCheckDetails"
               }
             }
+          },
+          "changeEmail": {
+            "type": "object",
+            "properties": {
+              "app": {
+                "$ref": "#/components/schemas/PublicAppDetails"
+              },
+              "extension": {
+                "$ref": "#/components/schemas/PublicExtensionDetails"
+              },
+              "hook": {
+                "$ref": "#/components/schemas/PublicChangeEmailDetails"
+              }
+            }
+          },
+          "changePassword": {
+            "type": "object",
+            "properties": {
+              "app": {
+                "$ref": "#/components/schemas/PublicAppDetails"
+              },
+              "extension": {
+                "$ref": "#/components/schemas/PublicExtensionDetails"
+              },
+              "hook": {
+                "$ref": "#/components/schemas/PublicChangePasswordDetails"
+              }
+            }
+          },
+          "deleteAccount": {
+            "type": "object",
+            "properties": {
+              "app": {
+                "$ref": "#/components/schemas/PublicAppDetails"
+              },
+              "extension": {
+                "$ref": "#/components/schemas/PublicExtensionDetails"
+              },
+              "hook": {
+                "$ref": "#/components/schemas/PublicDeleteAccountDetails"
+              }
+            }
+          }
+        }
+      },
+      "PublicSelfManagementExplanation": {
+        "type": "object",
+        "properties": {
+          "en": {
+            "type": "string",
+            "description": "Explanation of the functionality shown to the end user."
+          }
+        },
+        "additionalProperties": {
+          "type": "string",
+          "description": "Explanation of the functionality in language denoted by ISO 3166-1 alpha-2 code."
+        },
+        "required": [
+          "en"
+        ],
+        "description": "Explanation of the hook."
+      },
+      "PublicChangeEmailDetails": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Identifier of the hook."
+          },
+          "require_password_confirmation": {
+            "type": "boolean",
+            "description": "Whether the portal user must confirm their current password before the email change is handed over to the third-party system.",
+            "default": true
+          },
+          "explanation": {
+            "$ref": "#/components/schemas/PublicSelfManagementExplanation"
+          }
+        }
+      },
+      "PublicChangePasswordDetails": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Identifier of the hook."
+          },
+          "require_new_password": {
+            "type": "boolean",
+            "description": "Whether the portal user must provide a new password that is passed to the third-party system.",
+            "default": false
+          },
+          "explanation": {
+            "$ref": "#/components/schemas/PublicSelfManagementExplanation"
+          }
+        }
+      },
+      "PublicDeleteAccountDetails": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Identifier of the hook."
+          },
+          "explanation": {
+            "$ref": "#/components/schemas/PublicSelfManagementExplanation"
           }
         }
       },
@@ -14694,6 +15507,15 @@
                     },
                     {
                       "$ref": "#/components/schemas/ExtensionHookVisualizationMetadata"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ExtensionHookChangeEmail"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ExtensionHookChangePassword"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ExtensionHookDeleteAccount"
                     }
                   ]
                 }
@@ -15558,6 +16380,289 @@
           "call"
         ]
       },
+      "ExtensionHookChangeEmail": {
+        "description": "Hook that replaces the built-in change email functionality for portal users. When configured, the portal does not change the user's login email itself. Instead, this hook makes an HTTP call to the third-party system, which is expected to handle the email change (most likely by sending the user instructions to confirm the new email address).\nThe expected response http status code to the call is:\n  - 2xx if the request was accepted\n  - non-2xx if the request failed (optionally with a human-readable message resolved via `resolved.error_message_path`)\n",
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "changeEmail"
+            ]
+          },
+          "require_password_confirmation": {
+            "type": "boolean",
+            "description": "Whether the portal user must confirm their current password before the change email request is handed over to the third-party system. When true, the portal collects and verifies the current password before calling the hook.\n",
+            "default": true
+          },
+          "explanation": {
+            "type": "object",
+            "properties": {
+              "en": {
+                "type": "string",
+                "description": "Explanation of the functionality shown to the end user.",
+                "example": "You will receive an email with instructions to confirm your new email address."
+              }
+            },
+            "additionalProperties": {
+              "type": "string",
+              "description": "Explanation of the functionality in language denoted by ISO 3166-1 alpha-2 code."
+            },
+            "required": [
+              "en"
+            ],
+            "description": "Optional explanation shown to the user in the change email confirmation dialog."
+          },
+          "auth": {
+            "$ref": "#/components/schemas/ExtensionAuthBlock"
+          },
+          "call": {
+            "type": "object",
+            "properties": {
+              "method": {
+                "type": "string",
+                "description": "HTTP method to use for the call",
+                "default": "POST"
+              },
+              "url": {
+                "type": "string",
+                "description": "URL to call. Supports variable interpolation."
+              },
+              "params": {
+                "type": "object",
+                "description": "Parameters to append to the URL. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              },
+              "headers": {
+                "type": "object",
+                "description": "Headers to use. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              },
+              "body": {
+                "type": "object",
+                "description": "Optional JSON body to use for the call. Defaults to an object with the requested new email and portal user context. The requested new email is available as `{{Input.new_email}}` and the current account email as `{{Input.old_email}}`. Supports variable interpolation."
+              }
+            },
+            "required": [
+              "url",
+              "headers"
+            ]
+          },
+          "resolved": {
+            "type": "object",
+            "properties": {
+              "error_message_path": {
+                "type": "string",
+                "description": "Optional path to a human-readable error message in the third-party response body, used when the call fails (non-2xx status).\nIf specified and the path resolves to a string, that message is forwarded to the end user instead of a generic error.\n",
+                "example": "error.message"
+              }
+            }
+          },
+          "secure_proxy": {
+            "$ref": "#/components/schemas/SecureProxyConfig"
+          }
+        },
+        "required": [
+          "type",
+          "call"
+        ]
+      },
+      "ExtensionHookChangePassword": {
+        "description": "Hook that replaces the built-in change password functionality for portal users. When configured, the portal does not change the user's password itself. Instead, this hook makes an HTTP call to the third-party system, which is expected to handle the password change (most likely by sending the user instructions to complete the process).\nThe expected response http status code to the call is:\n  - 2xx if the request was accepted\n  - non-2xx if the request failed (optionally with a human-readable message resolved via `resolved.error_message_path`)\n",
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "changePassword"
+            ]
+          },
+          "require_new_password": {
+            "type": "boolean",
+            "description": "Whether the portal user must provide a new password. When false, the portal only asks the user to confirm (showing the configured explanation) and no new password is collected; the third-party system is expected to handle the password change. When true, the portal collects a new password and passes it to the third-party system as `{{Input.new_password}}`.\n",
+            "default": false
+          },
+          "explanation": {
+            "type": "object",
+            "properties": {
+              "en": {
+                "type": "string",
+                "description": "Explanation of the functionality shown to the end user.",
+                "example": "You will receive an email with instructions to reset your password."
+              }
+            },
+            "additionalProperties": {
+              "type": "string",
+              "description": "Explanation of the functionality in language denoted by ISO 3166-1 alpha-2 code."
+            },
+            "required": [
+              "en"
+            ],
+            "description": "Optional explanation shown to the user in the change password confirmation dialog."
+          },
+          "auth": {
+            "$ref": "#/components/schemas/ExtensionAuthBlock"
+          },
+          "call": {
+            "type": "object",
+            "properties": {
+              "method": {
+                "type": "string",
+                "description": "HTTP method to use for the call",
+                "default": "POST"
+              },
+              "url": {
+                "type": "string",
+                "description": "URL to call. Supports variable interpolation."
+              },
+              "params": {
+                "type": "object",
+                "description": "Parameters to append to the URL. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              },
+              "headers": {
+                "type": "object",
+                "description": "Headers to use. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              },
+              "body": {
+                "type": "object",
+                "description": "Optional JSON body to use for the call. Defaults to an object with portal user context (and the new password as `{{Input.new_password}}` when `require_new_password` is true). Supports variable interpolation."
+              }
+            },
+            "required": [
+              "url",
+              "headers"
+            ]
+          },
+          "resolved": {
+            "type": "object",
+            "properties": {
+              "error_message_path": {
+                "type": "string",
+                "description": "Optional path to a human-readable error message in the third-party response body, used when the call fails (non-2xx status).\nIf specified and the path resolves to a string, that message is forwarded to the end user instead of a generic error.\n",
+                "example": "error.message"
+              }
+            }
+          },
+          "secure_proxy": {
+            "$ref": "#/components/schemas/SecureProxyConfig"
+          }
+        },
+        "required": [
+          "type",
+          "call"
+        ]
+      },
+      "ExtensionHookDeleteAccount": {
+        "description": "Hook that replaces the built-in delete account functionality for portal users. When configured, the portal does not delete the user itself. Instead, this hook makes an HTTP call to the third-party system, which is expected to handle the deletion.\nThe `deletion_mode` controls what the portal does after the call:\n  - `synchronous`: The third-party system deletes the user immediately. The portal waits for a successful (2xx) response and then also deletes the epilot user.\n  - `asynchronous`: The third-party system handles deletion out-of-band. The portal does not delete anything immediately; cleanup is expected to happen later (e.g. via the user deletion API or webhooks).\n\nThe expected response http status code to the call is:\n  - 2xx if the request was accepted\n  - non-2xx if the request failed (optionally with a human-readable message resolved via `resolved.error_message_path`)\n",
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "deleteAccount"
+            ]
+          },
+          "deletion_mode": {
+            "type": "string",
+            "enum": [
+              "synchronous",
+              "asynchronous"
+            ],
+            "description": "Controls how the account deletion is handled. `synchronous` waits for the third-party system to respond and then also deletes the epilot user. `asynchronous` hands the deletion over entirely to the third-party system and the portal does not delete anything immediately.\n",
+            "default": "synchronous"
+          },
+          "explanation": {
+            "type": "object",
+            "properties": {
+              "en": {
+                "type": "string",
+                "description": "Explanation of the functionality shown to the end user.",
+                "example": "Your account deletion will be processed by our system. This may take a few days."
+              }
+            },
+            "additionalProperties": {
+              "type": "string",
+              "description": "Explanation of the functionality in language denoted by ISO 3166-1 alpha-2 code."
+            },
+            "required": [
+              "en"
+            ],
+            "description": "Optional explanation shown to the user in the delete account confirmation dialog."
+          },
+          "auth": {
+            "$ref": "#/components/schemas/ExtensionAuthBlock"
+          },
+          "call": {
+            "type": "object",
+            "properties": {
+              "method": {
+                "type": "string",
+                "description": "HTTP method to use for the call",
+                "default": "POST"
+              },
+              "url": {
+                "type": "string",
+                "description": "URL to call. Supports variable interpolation."
+              },
+              "params": {
+                "type": "object",
+                "description": "Parameters to append to the URL. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              },
+              "headers": {
+                "type": "object",
+                "description": "Headers to use. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              },
+              "body": {
+                "type": "object",
+                "description": "Optional JSON body to use for the call. Defaults to an object with portal user context, e.g. `{\"portal_user_id\": \"...\", \"email\": \"...\"}`. Supports variable interpolation."
+              }
+            },
+            "required": [
+              "url",
+              "headers"
+            ]
+          },
+          "resolved": {
+            "type": "object",
+            "properties": {
+              "error_message_path": {
+                "type": "string",
+                "description": "Optional path to a human-readable error message in the third-party response body, used when the call fails (non-2xx status).\nIf specified and the path resolves to a string, that message is forwarded to the end user instead of a generic error.\n",
+                "example": "error.message"
+              }
+            }
+          },
+          "secure_proxy": {
+            "$ref": "#/components/schemas/SecureProxyConfig"
+          }
+        },
+        "required": [
+          "type",
+          "call"
+        ]
+      },
       "SecureProxyConfig": {
         "type": "object",
         "description": "Configuration for routing requests through the ERP Integration secure proxy. Mutually exclusive with use_static_ips.",
@@ -15886,6 +16991,11 @@
           },
           "mobile_oidc_config": {
             "$ref": "#/components/schemas/MoblieOIDCConfig"
+          },
+          "expose_client_secret": {
+            "type": "boolean",
+            "description": "Allow the resolved `client_secret` to be returned through the\npublic single-provider endpoint at SSO initiation. Only set this\nfor OIDC flows that require a public client secret in the\nbrowser (e.g. some PKCE-less authorization-code variants). When\nunset (default), the secret is kept server-side and only used at\nthe token exchange.\n",
+            "example": false
           }
         },
         "required": [
@@ -16748,6 +17858,10 @@
               "auto_redirect_to_sso": {
                 "type": "boolean",
                 "description": "Decide whether to automatically redirect to the provider page during login, which would completely bypass showing the portal authentication page."
+              },
+              "prevent_user_enumeration": {
+                "type": "boolean",
+                "description": "Opt-in. When true, suppresses responses that reveal whether a user exists for public, pre-authentication actions (the login entry-point check and self-registration), at the expense of some UX. Already-authenticated actions are unaffected. Default false.\n"
               }
             }
           },

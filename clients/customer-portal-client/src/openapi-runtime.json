@@ -587,6 +587,30 @@
         "responses": {}
       }
     },
+    "/v3/portal/email-templates:migrate-references": {
+      "post": {
+        "operationId": "migrateEmailTemplateReferences",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v3/portal/email-templates:list-references": {
+      "post": {
+        "operationId": "listEmailTemplateReferences",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v3/portal/email-templates/{portal_id}": {
       "post": {
         "operationId": "upsertEmailTemplatesByPortalId",
@@ -981,6 +1005,18 @@
         "operationId": "updatePortalUserEmail",
         "requestBody": {
           "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/portal/user/change/password": {
+      "put": {
+        "operationId": "changePortalUserPassword",
+        "requestBody": {
+          "required": false,
           "content": {
             "application/json": {}
           }
@@ -1750,6 +1786,51 @@
         "responses": {}
       }
     },
+    "/v2/portal/entity/{slug}": {
+      "post": {
+        "operationId": "createPortalUserEntity",
+        "deprecated": true,
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/portal/entity/{slug}/{id}": {
+      "patch": {
+        "operationId": "patchPortalUserEntity",
+        "deprecated": true,
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v2/portal/can-trigger-portal-flow": {
       "post": {
         "operationId": "canTriggerPortalFlow",
@@ -2343,6 +2424,11 @@
             "in": "path",
             "name": "portal_id",
             "required": true
+          },
+          {
+            "in": "query",
+            "name": "page_upsert_mode",
+            "required": false
           }
         ],
         "requestBody": {
@@ -2481,6 +2567,41 @@
     "/v2/portal/proxy/execute": {
       "post": {
         "operationId": "portalProxyExecute",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/portal/mobile-config": {
+      "get": {
+        "operationId": "getMobileConfig",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "portal_id",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "raw",
+            "required": false
+          }
+        ],
+        "responses": {}
+      },
+      "put": {
+        "operationId": "putMobileConfig",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "portal_id",
+            "required": true
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
