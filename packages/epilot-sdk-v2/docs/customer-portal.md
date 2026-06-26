@@ -174,6 +174,8 @@ const { data } = await customerPortalClient.upsertPortal(...)
 - [`MobileBranding`](#mobilebranding)
 - [`MobileConfig`](#mobileconfig)
 - [`MobileConfigUpdate`](#mobileconfigupdate)
+- [`MobileOtaConfig`](#mobileotaconfig)
+- [`OtaPortal`](#otaportal)
 - [`ContextEntity`](#contextentity)
 - [`ContextEntities`](#contextentities)
 - [`ErrorResp`](#errorresp)
@@ -4194,8 +4196,7 @@ const { data } = await client.checkContactExists(
       contract: {
         contract_number: '123456'
       }
-    },
-    trigger_identifiers_check: true
+    }
   },
 )
 ```
@@ -4206,8 +4207,7 @@ const { data } = await client.checkContactExists(
 ```json
 {
   "exists": true,
-  "contactId": "5da0a718-c822-403d-9f5d-20d4584e0528",
-  "reason": "TIMEOUT"
+  "contactId": "5da0a718-c822-403d-9f5d-20d4584e0528"
 }
 ```
 
@@ -4239,8 +4239,7 @@ const { data } = await client.checkContactExistsV3(
       contract: {
         contract_number: '123456'
       }
-    },
-    trigger_identifiers_check: true
+    }
   },
 )
 ```
@@ -4252,8 +4251,7 @@ const { data } = await client.checkContactExistsV3(
 {
   "exists": true,
   "contactId": "5da0a718-c822-403d-9f5d-20d4584e0528",
-  "accountId": "5da0a718-c822-403d-9f5d-20d4584e0528",
-  "reason": "TIMEOUT"
+  "accountId": "5da0a718-c822-403d-9f5d-20d4584e0528"
 }
 ```
 
@@ -9193,6 +9191,13 @@ const { data } = await client.getMobileConfig({
       "updated_at": "1970-01-01T00:00:00.000Z",
       "error": "string"
     }
+  },
+  "ota": {
+    "enabled": true,
+    "channel": "canary",
+    "auto_update": true,
+    "update_strategy": "next-launch",
+    "min_native_version": "string"
   }
 }
 ```
@@ -9233,6 +9238,13 @@ const { data } = await client.putMobileConfig(
       icon_background_color: 'string',
       splash_background_color: 'string',
       splash_background_color_dark: 'string'
+    },
+    ota: {
+      enabled: true,
+      channel: 'canary',
+      auto_update: true,
+      update_strategy: 'next-launch',
+      min_native_version: 'string'
     }
   },
 )
@@ -9284,6 +9296,13 @@ const { data } = await client.putMobileConfig(
       "updated_at": "1970-01-01T00:00:00.000Z",
       "error": "string"
     }
+  },
+  "ota": {
+    "enabled": true,
+    "channel": "canary",
+    "auto_update": true,
+    "update_strategy": "next-launch",
+    "min_native_version": "string"
   }
 }
 ```
@@ -9370,6 +9389,13 @@ type MobileConfig = {
       error?: { ... }
     }
   }
+  ota?: {
+    enabled?: boolean
+    channel?: "canary" | "stable"
+    auto_update?: boolean
+    update_strategy?: "next-launch" | "immediate"
+    min_native_version?: string
+  }
 }
 ```
 
@@ -9398,6 +9424,41 @@ type MobileConfigUpdate = {
     splash_background_color?: string
     splash_background_color_dark?: string
   }
+  ota?: {
+    enabled?: boolean
+    channel?: "canary" | "stable"
+    auto_update?: boolean
+    update_strategy?: "next-launch" | "immediate"
+    min_native_version?: string
+  }
+}
+```
+
+### `MobileOtaConfig`
+
+OTA (over-the-air) update settings for the portal's mobile app. Drives the OTA build pipeline and the per-portal manifest. channel / update_strategy / min_native_version are epilot-internal controls.
+
+```ts
+type MobileOtaConfig = {
+  enabled?: boolean
+  channel?: "canary" | "stable"
+  auto_update?: boolean
+  update_strategy?: "next-launch" | "immediate"
+  min_native_version?: string
+}
+```
+
+### `OtaPortal`
+
+A portal that has mobile OTA updates enabled.
+
+```ts
+type OtaPortal = {
+  domain: string
+  channel: "canary" | "stable"
+  autoUpdate: boolean
+  updateStrategy: "next-launch" | "immediate"
+  minNativeVersion?: string
 }
 ```
 
@@ -10398,7 +10459,6 @@ type ContactCountRequest = {
 type ContactExistsRequest = {
   org_id: string
   registration_identifiers: Record<string, Record<string, string>>
-  trigger_identifiers_check?: boolean
 }
 ```
 

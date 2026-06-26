@@ -2064,15 +2064,6 @@ export declare namespace Components {
                     [name: string]: string;
                 };
             };
-            /**
-             * Whether to (re)trigger the registration identifiers check hook, which issues a request
-             * to the connected ERP to (re)sync the contact, in addition to waiting for the entity to
-             * arrive. Defaults to true to preserve existing behaviour. Set to false on retry attempts
-             * to only poll for an already-triggered sync to land, without issuing another upstream
-             * request to the ERP.
-             *
-             */
-            trigger_identifiers_check?: boolean;
         }
         export interface ContentWidget {
             id: string;
@@ -5179,6 +5170,7 @@ export declare namespace Components {
                 store_url?: string;
                 last_build?: /* Latest build/upload status for a platform (system-written). */ MobileBuildStatus;
             };
+            ota?: /* OTA (over-the-air) update settings for the portal's mobile app. Drives the OTA build pipeline and the per-portal manifest. channel / update_strategy / min_native_version are epilot-internal controls. */ MobileOtaConfig;
         }
         /**
          * Editable mobile fields for PUT. Only mobile-relevant settings + app branding can be changed. Portal-derived values (display_name, app_host), the portal logo, and system-written fields (credentials_status, app_store_id, last_build, …) are ignored if sent.
@@ -5199,6 +5191,33 @@ export declare namespace Components {
                 store_url?: string;
             };
             branding?: MobileBranding;
+            ota?: /* OTA (over-the-air) update settings for the portal's mobile app. Drives the OTA build pipeline and the per-portal manifest. channel / update_strategy / min_native_version are epilot-internal controls. */ MobileOtaConfig;
+        }
+        /**
+         * OTA (over-the-air) update settings for the portal's mobile app. Drives the OTA build pipeline and the per-portal manifest. channel / update_strategy / min_native_version are epilot-internal controls.
+         */
+        export interface MobileOtaConfig {
+            [name: string]: any;
+            /**
+             * Whether OTA updates are enabled for this portal.
+             */
+            enabled?: boolean;
+            /**
+             * Release channel this portal follows.
+             */
+            channel?: "canary" | "stable";
+            /**
+             * Whether the app auto-updates or prompts the user.
+             */
+            auto_update?: boolean;
+            /**
+             * When to apply a downloaded bundle.
+             */
+            update_strategy?: "next-launch" | "immediate";
+            /**
+             * Minimum native app version required to load OTA bundles.
+             */
+            min_native_version?: string;
         }
         /**
          * Mobile OIDC configuration. Values are resolved at SSO invocation time, so the
@@ -5589,6 +5608,25 @@ export declare namespace Components {
          * Origin of the portal
          */
         export type Origin = string;
+        /**
+         * A portal that has mobile OTA updates enabled.
+         */
+        export interface OtaPortal {
+            /**
+             * Portal hostname — the OTA manifest filename ({domain}.json).
+             * example:
+             * kundenportal.twl.de
+             */
+            domain: string;
+            channel: "canary" | "stable";
+            autoUpdate: boolean;
+            updateStrategy: "next-launch" | "immediate";
+            /**
+             * example:
+             * 1.0.0
+             */
+            minNativeVersion?: string;
+        }
         export interface Page {
             [name: string]: any;
             /**
@@ -9454,14 +9492,6 @@ export declare namespace Paths {
                  * 5da0a718-c822-403d-9f5d-20d4584e0528
                  */
                 Components.Schemas.EntityId /* uuid */;
-                /**
-                 * Present only when exists is false. NOT_FOUND means the given identifiers did
-                 * not match any contact (definitive - the client should not retry). TIMEOUT
-                 * means the contact was not found within the processing window but may still be
-                 * ingesting; the client may retry (ideally with trigger_identifiers_check=false).
-                 *
-                 */
-                reason?: "TIMEOUT" | "NOT_FOUND";
             }
             export type $400 = Components.Responses.InvalidRequest;
             export type $404 = Components.Responses.NotFound;
@@ -9509,14 +9539,6 @@ export declare namespace Paths {
                  * 5da0a718-c822-403d-9f5d-20d4584e0528
                  */
                 Components.Schemas.EntityId /* uuid */;
-                /**
-                 * Present only when exists is false. NOT_FOUND means the given identifiers did
-                 * not match any contact (definitive - the client should not retry). TIMEOUT
-                 * means the contact was not found within the processing window but may still be
-                 * ingesting; the client may retry (ideally with trigger_identifiers_check=false).
-                 *
-                 */
-                reason?: "TIMEOUT" | "NOT_FOUND";
             }
             export type $400 = Components.Responses.InvalidRequest;
             export type $404 = Components.Responses.NotFound;
@@ -19374,6 +19396,7 @@ export type MobileBranding = Components.Schemas.MobileBranding;
 export type MobileBuildStatus = Components.Schemas.MobileBuildStatus;
 export type MobileConfig = Components.Schemas.MobileConfig;
 export type MobileConfigUpdate = Components.Schemas.MobileConfigUpdate;
+export type MobileOtaConfig = Components.Schemas.MobileOtaConfig;
 export type MoblieOIDCConfig = Components.Schemas.MoblieOIDCConfig;
 export type OIDCProviderConfig = Components.Schemas.OIDCProviderConfig;
 export type OIDCProviderMetadata = Components.Schemas.OIDCProviderMetadata;
@@ -19381,6 +19404,7 @@ export type Opportunity = Components.Schemas.Opportunity;
 export type Order = Components.Schemas.Order;
 export type OrganizationSettings = Components.Schemas.OrganizationSettings;
 export type Origin = Components.Schemas.Origin;
+export type OtaPortal = Components.Schemas.OtaPortal;
 export type Page = Components.Schemas.Page;
 export type PageRequest = Components.Schemas.PageRequest;
 export type PaymentWidget = Components.Schemas.PaymentWidget;
