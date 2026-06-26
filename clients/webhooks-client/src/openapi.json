@@ -763,12 +763,33 @@
             "description": "Event id"
           }
         ],
+        "requestBody": {
+          "description": "Optional replay options",
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReplayRequest"
+              }
+            }
+          }
+        },
         "responses": {
           "204": {
             "description": "Success - replay event"
           },
           "404": {
             "description": "No events found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Re-apply requested but the original (pre-transform) input could not be reconstructed (e.g. dangling catalog reference past retention).",
             "content": {
               "application/json": {
                 "schema": {
@@ -1697,6 +1718,19 @@
           "retry_attempt": {
             "type": "integer",
             "description": "Number of automatic delivery retries that preceded this terminal outcome. 0 means the event was delivered (or finally failed) on the first attempt."
+          },
+          "can_reapply_transform": {
+            "type": "boolean",
+            "description": "Whether this event can be replayed with the JSONata transform re-applied. True only when the webhook config has a non-empty jsonataExpression AND a usable original source exists (a catalog reference or a locally stored original payload). Computed without a synchronous catalog round-trip."
+          },
+          "can_reapply_transform_reason": {
+            "type": "string",
+            "enum": [
+              "available",
+              "no_transform_configured",
+              "no_original_source"
+            ],
+            "description": "Reason explaining the can_reapply_transform value."
           }
         },
         "required": [
@@ -1766,6 +1800,16 @@
           "message"
         ]
       },
+      "ReplayRequest": {
+        "type": "object",
+        "properties": {
+          "reapply_transform": {
+            "type": "boolean",
+            "default": false,
+            "description": "When true, reconstruct the original (pre-transform) event input and re-run the full delivery pipeline (file-loading + JSONata). When false or omitted, resend the previously delivered (post-transform) payload verbatim (backward-compatible default)."
+          }
+        }
+      },
       "BatchReplayRequest": {
         "type": "object",
         "properties": {
@@ -1781,6 +1825,11 @@
               "2f1b7cf8-ff55-4359-966f-e56f39a52c94",
               "48c984bf-466b-470b-b743-d07cea168243"
             ]
+          },
+          "reapply_transform": {
+            "type": "boolean",
+            "default": false,
+            "description": "When true, reconstruct the original (pre-transform) input for each event and re-run the full delivery pipeline (file-loading + JSONata). When false or omitted, resend the previously delivered (post-transform) payload verbatim (backward-compatible default)."
           }
         },
         "required": [
