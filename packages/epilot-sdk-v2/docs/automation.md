@@ -316,7 +316,8 @@ const { data } = await client.getExecutions({
       "trigger_event": {},
       "workflow_context": {},
       "loops": [],
-      "loop_state": {}
+      "loop_state": {},
+      "chain": ["string"]
     }
   ]
 }
@@ -389,8 +390,10 @@ const { data } = await client.startExecution(
     {
       "id": "string",
       "schedule_id": "string",
+      "evaluation_order": "AFTER_SCHEDULE",
       "evaluationResult": true,
       "error_output": {},
+      "allow_failure": true,
       "statements": []
     }
   ],
@@ -482,7 +485,8 @@ const { data } = await client.startExecution(
       "length": 0
     }
   ],
-  "loop_state": {}
+  "loop_state": {},
+  "chain": ["string"]
 }
 ```
 
@@ -690,8 +694,10 @@ const { data } = await client.getExecution({
     {
       "id": "string",
       "schedule_id": "string",
+      "evaluation_order": "AFTER_SCHEDULE",
       "evaluationResult": true,
       "error_output": {},
+      "allow_failure": true,
       "statements": []
     }
   ],
@@ -783,7 +789,8 @@ const { data } = await client.getExecution({
       "length": 0
     }
   ],
-  "loop_state": {}
+  "loop_state": {},
+  "chain": ["string"]
 }
 ```
 
@@ -831,8 +838,10 @@ const { data } = await client.cancelExecution({
     {
       "id": "string",
       "schedule_id": "string",
+      "evaluation_order": "AFTER_SCHEDULE",
       "evaluationResult": true,
       "error_output": {},
+      "allow_failure": true,
       "statements": []
     }
   ],
@@ -924,7 +933,8 @@ const { data } = await client.cancelExecution({
       "length": 0
     }
   ],
-  "loop_state": {}
+  "loop_state": {},
+  "chain": ["string"]
 }
 ```
 
@@ -1024,7 +1034,8 @@ const { data } = await client.resumeExecutionWithToken(
     "loops": [
       {}
     ],
-    "loop_state": {}
+    "loop_state": {},
+    "chain": ["string"]
   },
   "resumedAction": {
     "id": "9ec3711b-db63-449c-b894-54d5bb622a8f",
@@ -1206,12 +1217,14 @@ type AutomationFlow = {
   conditions?: Array<{
     id?: string
     schedule_id?: string
+    evaluation_order?: "AFTER_SCHEDULE" | "BEFORE_SCHEDULE"
     evaluationResult?: boolean
     error_output?: {
       error_code: { ... }
       error_reason: { ... }
       error_info?: { ... }
     }
+    allow_failure?: boolean
     statements?: Array<{
       id?: { ... }
       source?: { ... }
@@ -1224,8 +1237,6 @@ type AutomationFlow = {
     scheduleApiId?: string
     numberOfUnits?: number
     timePeriod?: "minutes" | "hours" | "days" | "weeks" | "months"
-    timeRelation?: "after" | "before"
-    source: {
   // ...
 }
 ```
@@ -1298,8 +1309,10 @@ type SearchAutomationsResp = {
     conditions?: Array<{
       id?: { ... }
       schedule_id?: { ... }
+      evaluation_order?: { ... }
       evaluationResult?: { ... }
       error_output?: { ... }
+      allow_failure?: { ... }
       statements?: { ... }
     }>
     schedules?: Array<{
@@ -1339,8 +1352,6 @@ type SearchAutomationsResp = {
       config?: { ... }
     } | {
       type?: { ... }
-      config?: { ... }
-    } | {
   // ...
 }
 ```
@@ -2971,6 +2982,7 @@ type ConditionStatement = {
 type ActionCondition = {
   id?: string
   schedule_id?: string
+  evaluation_order?: "AFTER_SCHEDULE" | "BEFORE_SCHEDULE"
   evaluationResult?: boolean
   error_output?: {
     error_code: "MAPPING_ERROR" | "REFRESH_RELATIONS_ERROR" | "DUPLICATE_ENTITY_ERROR" | "TRIGGER_WORKFLOW_ERROR" | "TIMEOUT_ERROR" | "BAD_CONFIG" | "INTERNAL_ERROR" | "TRIGGER_WEBHOOK_ERROR" | "TEMPLATE_ERROR" | "INVALID_PAYLOAD" | "INVALID_SCHEDULE_CONFIG" | "CUSTOM_ACTION_ERROR" | "ORDER_CREATION_ERROR" | "DOCUMENT_GENERATION_ERROR" | "BULK_EMAIL_ERROR" | "SHARING_ERROR" | "CANCEL_FLOW_EXECUTION_ERROR" | "METER_READING_NOT_FOUND" | "ENTITY_NOT_FOUND"
@@ -2979,6 +2991,7 @@ type ActionCondition = {
       details?: { ... }
     }
   }
+  allow_failure?: boolean
   statements?: Array<{
     id?: string // uuid
     source?: {
@@ -3061,12 +3074,14 @@ type AutomationExecution = {
   conditions?: Array<{
     id?: string
     schedule_id?: string
+    evaluation_order?: "AFTER_SCHEDULE" | "BEFORE_SCHEDULE"
     evaluationResult?: boolean
     error_output?: {
       error_code: { ... }
       error_reason: { ... }
       error_info?: { ... }
     }
+    allow_failure?: boolean
     statements?: Array<{
       id?: { ... }
       source?: { ... }
@@ -3136,8 +3151,6 @@ type AutomationExecution = {
   } | {
     type?: "create-document"
     config?: {
-      template_id?: { ... }
-      filename?: { ... }
   // ...
 }
 ```
@@ -3310,8 +3323,10 @@ type GetExecutionsResp = {
     conditions?: Array<{
       id?: { ... }
       schedule_id?: { ... }
+      evaluation_order?: { ... }
       evaluationResult?: { ... }
       error_output?: { ... }
+      allow_failure?: { ... }
       statements?: { ... }
     }>
     schedules?: Array<{
@@ -3383,8 +3398,6 @@ type GetExecutionsResp = {
       config?: { ... }
     }>
     resume_token?: string
-    trigger_context?: Record<string, string>
-    version?: number
   // ...
 }
 ```
@@ -4260,8 +4273,10 @@ type ResumeResp = {
     conditions?: Array<{
       id?: { ... }
       schedule_id?: { ... }
+      evaluation_order?: { ... }
       evaluationResult?: { ... }
       error_output?: { ... }
+      allow_failure?: { ... }
       statements?: { ... }
     }>
     schedules?: Array<{
@@ -4334,8 +4349,6 @@ type ResumeResp = {
     }>
     resume_token?: string
     trigger_context?: Record<string, string>
-    version?: number
-    trigger_event?: {
   // ...
 }
 ```
