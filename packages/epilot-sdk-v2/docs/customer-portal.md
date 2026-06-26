@@ -4194,7 +4194,8 @@ const { data } = await client.checkContactExists(
       contract: {
         contract_number: '123456'
       }
-    }
+    },
+    trigger_identifiers_check: true
   },
 )
 ```
@@ -4205,7 +4206,8 @@ const { data } = await client.checkContactExists(
 ```json
 {
   "exists": true,
-  "contactId": "5da0a718-c822-403d-9f5d-20d4584e0528"
+  "contactId": "5da0a718-c822-403d-9f5d-20d4584e0528",
+  "reason": "TIMEOUT"
 }
 ```
 
@@ -4237,7 +4239,8 @@ const { data } = await client.checkContactExistsV3(
       contract: {
         contract_number: '123456'
       }
-    }
+    },
+    trigger_identifiers_check: true
   },
 )
 ```
@@ -4249,7 +4252,8 @@ const { data } = await client.checkContactExistsV3(
 {
   "exists": true,
   "contactId": "5da0a718-c822-403d-9f5d-20d4584e0528",
-  "accountId": "5da0a718-c822-403d-9f5d-20d4584e0528"
+  "accountId": "5da0a718-c822-403d-9f5d-20d4584e0528",
+  "reason": "TIMEOUT"
 }
 ```
 
@@ -10394,6 +10398,7 @@ type ContactCountRequest = {
 type ContactExistsRequest = {
   org_id: string
   registration_identifiers: Record<string, Record<string, string>>
+  trigger_identifiers_check?: boolean
 }
 ```
 

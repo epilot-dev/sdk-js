@@ -2064,6 +2064,15 @@ export declare namespace Components {
                     [name: string]: string;
                 };
             };
+            /**
+             * Whether to (re)trigger the registration identifiers check hook, which issues a request
+             * to the connected ERP to (re)sync the contact, in addition to waiting for the entity to
+             * arrive. Defaults to true to preserve existing behaviour. Set to false on retry attempts
+             * to only poll for an already-triggered sync to land, without issuing another upstream
+             * request to the ERP.
+             *
+             */
+            trigger_identifiers_check?: boolean;
         }
         export interface ContentWidget {
             id: string;
@@ -9445,6 +9454,14 @@ export declare namespace Paths {
                  * 5da0a718-c822-403d-9f5d-20d4584e0528
                  */
                 Components.Schemas.EntityId /* uuid */;
+                /**
+                 * Present only when exists is false. NOT_FOUND means the given identifiers did
+                 * not match any contact (definitive - the client should not retry). TIMEOUT
+                 * means the contact was not found within the processing window but may still be
+                 * ingesting; the client may retry (ideally with trigger_identifiers_check=false).
+                 *
+                 */
+                reason?: "TIMEOUT" | "NOT_FOUND";
             }
             export type $400 = Components.Responses.InvalidRequest;
             export type $404 = Components.Responses.NotFound;
@@ -9492,6 +9509,14 @@ export declare namespace Paths {
                  * 5da0a718-c822-403d-9f5d-20d4584e0528
                  */
                 Components.Schemas.EntityId /* uuid */;
+                /**
+                 * Present only when exists is false. NOT_FOUND means the given identifiers did
+                 * not match any contact (definitive - the client should not retry). TIMEOUT
+                 * means the contact was not found within the processing window but may still be
+                 * ingesting; the client may retry (ideally with trigger_identifiers_check=false).
+                 *
+                 */
+                reason?: "TIMEOUT" | "NOT_FOUND";
             }
             export type $400 = Components.Responses.InvalidRequest;
             export type $404 = Components.Responses.NotFound;
