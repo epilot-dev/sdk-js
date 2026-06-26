@@ -3345,12 +3345,24 @@
             "type": "string",
             "description": "Schedule Id which indicates the schedule of the actions inside the condition"
           },
+          "evaluation_order": {
+            "type": "string",
+            "enum": [
+              "AFTER_SCHEDULE",
+              "BEFORE_SCHEDULE"
+            ],
+            "description": "Determines how the condition and its schedule combine in time, when the condition block also has a schedule.\n\n- `AFTER_SCHEDULE` (default): the schedule is created first and the condition is evaluated when the schedule fires, against the data at that moment (\"wait, then check\").\n- `BEFORE_SCHEDULE`: the condition is evaluated at trigger time against the current data; only when it passes is the schedule created, and it is not re-evaluated when it fires (\"check now, then wait\"). A failing condition skips the block immediately.\n\nAn absent value is treated as `AFTER_SCHEDULE` for backwards compatibility."
+          },
           "evaluationResult": {
             "type": "boolean",
             "description": "Result of the condition evaluation"
           },
           "error_output": {
             "$ref": "#/components/schemas/ErrorOutput"
+          },
+          "allow_failure": {
+            "description": "Whether the execution should continue when processing the condition\nblock itself fails (e.g. its schedule cannot be computed). When true,\nthe block's actions are cancelled and the execution moves on to the\nnext action instead of stopping in a failed state.\n",
+            "type": "boolean"
           },
           "statements": {
             "type": "array",
@@ -3535,6 +3547,13 @@
             "description": "Runtime iteration state, keyed by loop_id. Tracks the current_index and total for each active loop scope. Entries are removed once a loop exits.\n",
             "additionalProperties": {
               "$ref": "#/components/schemas/AutomationLoopState"
+            }
+          },
+          "chain": {
+            "type": "array",
+            "description": "Ordered automation flow ids in this execution's trigger chain (multi-automation loop prevention).",
+            "items": {
+              "type": "string"
             }
           }
         },
