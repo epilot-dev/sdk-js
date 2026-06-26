@@ -56,10 +56,27 @@ export declare namespace Components {
              */
             schedule_id?: string;
             /**
+             * Determines how the condition and its schedule combine in time, when the condition block also has a schedule.
+             *
+             * - `AFTER_SCHEDULE` (default): the schedule is created first and the condition is evaluated when the schedule fires, against the data at that moment ("wait, then check").
+             * - `BEFORE_SCHEDULE`: the condition is evaluated at trigger time against the current data; only when it passes is the schedule created, and it is not re-evaluated when it fires ("check now, then wait"). A failing condition skips the block immediately.
+             *
+             * An absent value is treated as `AFTER_SCHEDULE` for backwards compatibility.
+             */
+            evaluation_order?: "AFTER_SCHEDULE" | "BEFORE_SCHEDULE";
+            /**
              * Result of the condition evaluation
              */
             evaluationResult?: boolean;
             error_output?: ErrorOutput;
+            /**
+             * Whether the execution should continue when processing the condition
+             * block itself fails (e.g. its schedule cannot be computed). When true,
+             * the block's actions are cancelled and the execution moves on to the
+             * next action instead of stopping in a failed state.
+             *
+             */
+            allow_failure?: boolean;
             statements?: /**
              * example:
              * {
@@ -980,6 +997,10 @@ export declare namespace Components {
             loop_state?: {
                 [name: string]: AutomationLoopState;
             };
+            /**
+             * Ordered automation flow ids in this execution's trigger chain (multi-automation loop prevention).
+             */
+            chain?: string[];
         }
         /**
          * example:
