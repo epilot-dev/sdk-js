@@ -157,6 +157,10 @@ export declare namespace Components {
                 string?,
                 string?
             ];
+            /**
+             * When true, reconstruct the original (pre-transform) input for each event and re-run the full delivery pipeline (file-loading + JSONata). When false or omitted, resend the previously delivered (post-transform) payload verbatim (backward-compatible default).
+             */
+            reapply_transform?: boolean;
         }
         /**
          * Object representing custom headers as key-value pairs.
@@ -366,6 +370,12 @@ export declare namespace Components {
              * epilot
              */
             issuer?: string;
+        }
+        export interface ReplayRequest {
+            /**
+             * When true, reconstruct the original (pre-transform) event input and re-run the full delivery pipeline (file-loading + JSONata). When false or omitted, resend the previously delivered (post-transform) payload verbatim (backward-compatible default).
+             */
+            reapply_transform?: boolean;
         }
         export interface SearchOptions {
             /**
@@ -697,6 +707,14 @@ export declare namespace Components {
              * Number of automatic delivery retries that preceded this terminal outcome. 0 means the event was delivered (or finally failed) on the first attempt.
              */
             retry_attempt?: number;
+            /**
+             * Whether this event can be replayed with the JSONata transform re-applied. True only when the webhook config has a non-empty jsonataExpression AND a usable original source exists (a catalog reference or a locally stored original payload). Computed without a synchronous catalog round-trip.
+             */
+            can_reapply_transform?: boolean;
+            /**
+             * Reason explaining the can_reapply_transform value.
+             */
+            can_reapply_transform_reason?: "available" | "no_transform_configured" | "no_original_source";
         }
     }
 }
@@ -964,10 +982,12 @@ export declare namespace Paths {
             configId: Parameters.ConfigId;
             eventId: Parameters.EventId;
         }
+        export type RequestBody = Components.Schemas.ReplayRequest;
         namespace Responses {
             export interface $204 {
             }
             export type $404 = Components.Schemas.ErrorResp;
+            export type $422 = Components.Schemas.ErrorResp;
             export type $500 = Components.Schemas.ErrorResp;
         }
     }
@@ -1201,7 +1221,7 @@ export interface OperationMethods {
    */
   'replayEvent'(
     parameters?: Parameters<Paths.ReplayEvent.PathParameters> | null,
-    data?: any,
+    data?: Paths.ReplayEvent.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ReplayEvent.Responses.$204>
   /**
@@ -1379,7 +1399,7 @@ export interface PathsDictionary {
      */
     'post'(
       parameters?: Parameters<Paths.ReplayEvent.PathParameters> | null,
-      data?: any,
+      data?: Paths.ReplayEvent.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ReplayEvent.Responses.$204>
   }
@@ -1432,6 +1452,7 @@ export type Metadata = Components.Schemas.Metadata;
 export type OAuthConfig = Components.Schemas.OAuthConfig;
 export type PayloadConfiguration = Components.Schemas.PayloadConfiguration;
 export type PublicKeyResponse = Components.Schemas.PublicKeyResponse;
+export type ReplayRequest = Components.Schemas.ReplayRequest;
 export type SearchOptions = Components.Schemas.SearchOptions;
 export type TestOAuthResponse = Components.Schemas.TestOAuthResponse;
 export type TriggerWebhookResp = Components.Schemas.TriggerWebhookResp;

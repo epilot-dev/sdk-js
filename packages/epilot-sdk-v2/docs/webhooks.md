@@ -69,6 +69,7 @@ const { data } = await webhooksClient.getPublicKey(...)
 - [`ExampleRequest`](#examplerequest)
 - [`ExampleResponse`](#exampleresponse)
 - [`TestOAuthResponse`](#testoauthresponse)
+- [`ReplayRequest`](#replayrequest)
 - [`BatchReplayRequest`](#batchreplayrequest)
 
 ### `getPublicKey`
@@ -423,7 +424,8 @@ const { data } = await client.batchReplayEvents(
     configId: 'example',
   },
   {
-    eventIds: ['2f1b7cf8-ff55-4359-966f-e56f39a52c94', '48c984bf-466b-470b-b743-d07cea168243']
+    eventIds: ['2f1b7cf8-ff55-4359-966f-e56f39a52c94', '48c984bf-466b-470b-b743-d07cea168243'],
+    reapply_transform: false
   },
 )
 ```
@@ -476,7 +478,9 @@ const { data } = await client.getEventById({
   "status": "succeeded",
   "http_method": "GET",
   "payload": "string",
-  "retry_attempt": 0
+  "retry_attempt": 0,
+  "can_reapply_transform": true,
+  "can_reapply_transform_reason": "available"
 }
 ```
 
@@ -491,10 +495,15 @@ Replay a webhook event
 `POST /v1/webhooks/configs/{configId}/events/{eventId}/replay`
 
 ```ts
-const { data } = await client.replayEvent({
-  configId: 'example',
-  eventId: 'example',
-})
+const { data } = await client.replayEvent(
+  {
+    configId: 'example',
+    eventId: 'example',
+  },
+  {
+    reapply_transform: false
+  },
+)
 ```
 
 ---
@@ -607,7 +616,9 @@ const { data } = await client.getWebhookEventsV2(
       "status": "succeeded",
       "http_method": "GET",
       "payload": "string",
-      "retry_attempt": 0
+      "retry_attempt": 0,
+      "can_reapply_transform": true,
+      "can_reapply_transform_reason": "available"
     }
   ],
   "next_cursor": {
@@ -686,6 +697,8 @@ type EventListResponse = {
     http_method?: "GET" | "POST" | "PUT"
     payload?: string
     retry_attempt?: number
+    can_reapply_transform?: boolean
+    can_reapply_transform_reason?: "available" | "no_transform_configured" | "no_original_source"
   }>
   next_cursor?: {
     created_at?: string // date-time
@@ -1054,6 +1067,8 @@ type WebhookEvent = {
   http_method?: "GET" | "POST" | "PUT"
   payload?: string
   retry_attempt?: number
+  can_reapply_transform?: boolean
+  can_reapply_transform_reason?: "available" | "no_transform_configured" | "no_original_source"
 }
 ```
 
@@ -1098,10 +1113,19 @@ type TestOAuthResponse = {
 }
 ```
 
+### `ReplayRequest`
+
+```ts
+type ReplayRequest = {
+  reapply_transform?: boolean
+}
+```
+
 ### `BatchReplayRequest`
 
 ```ts
 type BatchReplayRequest = {
   eventIds: string[]
+  reapply_transform?: boolean
 }
 ```
