@@ -3665,6 +3665,14 @@
                     "contactId": {
                       "$ref": "#/components/schemas/EntityId",
                       "description": "ID of the contact if exists"
+                    },
+                    "reason": {
+                      "type": "string",
+                      "enum": [
+                        "TIMEOUT",
+                        "NOT_FOUND"
+                      ],
+                      "description": "Present only when exists is false. NOT_FOUND means the given identifiers did\nnot match any contact (definitive - the client should not retry). TIMEOUT\nmeans the contact was not found within the processing window but may still be\ningesting; the client may retry (ideally with trigger_identifiers_check=false).\n"
                     }
                   }
                 }
@@ -3743,6 +3751,14 @@
                     "accountId": {
                       "$ref": "#/components/schemas/EntityId",
                       "description": "ID of the resolved account when the portal is configured for account-based registration"
+                    },
+                    "reason": {
+                      "type": "string",
+                      "enum": [
+                        "TIMEOUT",
+                        "NOT_FOUND"
+                      ],
+                      "description": "Present only when exists is false. NOT_FOUND means the given identifiers did\nnot match any contact (definitive - the client should not retry). TIMEOUT\nmeans the contact was not found within the processing window but may still be\ningesting; the client may retry (ideally with trigger_identifiers_check=false).\n"
                     }
                   }
                 }
@@ -12562,6 +12578,11 @@
                 "contract_number": "123456"
               }
             }
+          },
+          "trigger_identifiers_check": {
+            "type": "boolean",
+            "default": true,
+            "description": "Whether to (re)trigger the registration identifiers check hook, which issues a request\nto the connected ERP to (re)sync the contact, in addition to waiting for the entity to\narrive. Defaults to true to preserve existing behaviour. Set to false on retry attempts\nto only poll for an already-triggered sync to land, without issuing another upstream\nrequest to the ERP.\n"
           }
         }
       },
