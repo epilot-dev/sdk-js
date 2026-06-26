@@ -37,6 +37,8 @@ const { data } = await customerPortalClient.upsertPortal(...)
 - [`getAllPortalConfigs`](#getallportalconfigs)
 - [`upsertEmailTemplates`](#upsertemailtemplates)
 - [`getEmailTemplates`](#getemailtemplates)
+- [`migrateEmailTemplateReferences`](#migrateemailtemplatereferences)
+- [`listEmailTemplateReferences`](#listemailtemplatereferences)
 - [`upsertEmailTemplatesByPortalId`](#upsertemailtemplatesbyportalid)
 - [`getEmailTemplatesByPortalId`](#getemailtemplatesbyportalid)
 - [`getPortalWidgetsV3`](#getportalwidgetsv3)
@@ -74,6 +76,8 @@ const { data } = await customerPortalClient.upsertPortal(...)
 - [`swapPortalConfig`](#swapportalconfig)
 - [`clonePortalConfig`](#cloneportalconfig)
 - [`verifyDns`](#verifydns)
+- [`getMobileConfig`](#getmobileconfig)
+- [`putMobileConfig`](#putmobileconfig)
 
 **Public**
 - [`createUserV3`](#createuserv3)
@@ -116,6 +120,7 @@ const { data } = await customerPortalClient.upsertPortal(...)
 - [`updatePortalUser`](#updateportaluser)
 - [`deletePortalUser`](#deleteportaluser)
 - [`updatePortalUserEmail`](#updateportaluseremail)
+- [`changePortalUserPassword`](#changeportaluserpassword)
 - [`postOrderAcceptance`](#postorderacceptance)
 - [`addContractByIdentifiers`](#addcontractbyidentifiers)
 - [`validateCadenceEntityEditRules`](#validatecadenceentityeditrules)
@@ -165,6 +170,10 @@ const { data } = await customerPortalClient.upsertPortal(...)
 - [`ssoLoginV3`](#ssologinv3)
 
 **Schemas**
+- [`MobileBuildStatus`](#mobilebuildstatus)
+- [`MobileBranding`](#mobilebranding)
+- [`MobileConfig`](#mobileconfig)
+- [`MobileConfigUpdate`](#mobileconfigupdate)
 - [`ContextEntity`](#contextentity)
 - [`ContextEntities`](#contextentities)
 - [`ErrorResp`](#errorresp)
@@ -257,6 +266,10 @@ const { data } = await customerPortalClient.upsertPortal(...)
 - [`ExtensionConfig`](#extensionconfig)
 - [`ExtensionHookSelection`](#extensionhookselection)
 - [`PublicExtensionCapabilities`](#publicextensioncapabilities)
+- [`PublicSelfManagementExplanation`](#publicselfmanagementexplanation)
+- [`PublicChangeEmailDetails`](#publicchangeemaildetails)
+- [`PublicChangePasswordDetails`](#publicchangepassworddetails)
+- [`PublicDeleteAccountDetails`](#publicdeleteaccountdetails)
 - [`DataRetrievalItem`](#dataretrievalitem)
 - [`PublicAppDetails`](#publicappdetails)
 - [`PublicExtensionDetails`](#publicextensiondetails)
@@ -277,6 +290,9 @@ const { data } = await customerPortalClient.upsertPortal(...)
 - [`ExtensionHookDataExport`](#extensionhookdataexport)
 - [`ExtensionHookVisualizationMetadata`](#extensionhookvisualizationmetadata)
 - [`ExtensionHookCostDataRetrieval`](#extensionhookcostdataretrieval)
+- [`ExtensionHookChangeEmail`](#extensionhookchangeemail)
+- [`ExtensionHookChangePassword`](#extensionhookchangepassword)
+- [`ExtensionHookDeleteAccount`](#extensionhookdeleteaccount)
 - [`SecureProxyConfig`](#secureproxyconfig)
 - [`ExtensionAuthBlock`](#extensionauthblock)
 - [`Direction`](#direction)
@@ -358,7 +374,8 @@ const { data } = await client.upsertPortal(
         attribute_mappings: { /* ... */ },
         entity_matching: { /* ... */ },
         oidc_config: { /* ... */ },
-        mobile_oidc_config: { /* ... */ }
+        mobile_oidc_config: { /* ... */ },
+        expose_client_secret: false
       }
     ],
     enabled: true,
@@ -394,7 +411,8 @@ const { data } = await client.upsertPortal(
       },
       entry_point: 'PASSWORD',
       preferred_sso_providers: ['office-365-login'],
-      auto_redirect_to_sso: true
+      auto_redirect_to_sso: true,
+      prevent_user_enumeration: true
     },
     cognito_details: {
       cognito_user_pool_client_id: '6bsd0jkgoie74k2i8mrhc1vest',
@@ -583,7 +601,8 @@ const { data } = await client.upsertPortal(
     },
     "entry_point": "PASSWORD",
     "preferred_sso_providers": ["office-365-login"],
-    "auto_redirect_to_sso": true
+    "auto_redirect_to_sso": true,
+    "prevent_user_enumeration": true
   },
   "cognito_details": {
     "cognito_user_pool_client_id": "6bsd0jkgoie74k2i8mrhc1vest",
@@ -909,7 +928,8 @@ const { data } = await client.getPortalConfigByDomain({
     },
     "entry_point": "PASSWORD",
     "preferred_sso_providers": ["office-365-login"],
-    "auto_redirect_to_sso": true
+    "auto_redirect_to_sso": true,
+    "prevent_user_enumeration": true
   },
   "cognito_details": {
     "cognito_user_pool_client_id": "6bsd0jkgoie74k2i8mrhc1vest",
@@ -1138,7 +1158,8 @@ const { data } = await client.getPortalConfig({
     },
     "entry_point": "PASSWORD",
     "preferred_sso_providers": ["office-365-login"],
-    "auto_redirect_to_sso": true
+    "auto_redirect_to_sso": true,
+    "prevent_user_enumeration": true
   },
   "cognito_details": {
     "cognito_user_pool_client_id": "6bsd0jkgoie74k2i8mrhc1vest",
@@ -1509,6 +1530,50 @@ const { data } = await client.getPublicPortalExtensionDetails({
     "hook": {
       "plausibility_mode": "check"
     }
+  },
+  "changeEmail": {
+    "app": {
+      "app_id": "string",
+      "name": {}
+    },
+    "extension": {
+      "id": "string",
+      "name": {}
+    },
+    "hook": {
+      "id": "string",
+      "require_password_confirmation": true,
+      "explanation": {}
+    }
+  },
+  "changePassword": {
+    "app": {
+      "app_id": "string",
+      "name": {}
+    },
+    "extension": {
+      "id": "string",
+      "name": {}
+    },
+    "hook": {
+      "id": "string",
+      "require_new_password": false,
+      "explanation": {}
+    }
+  },
+  "deleteAccount": {
+    "app": {
+      "app_id": "string",
+      "name": {}
+    },
+    "extension": {
+      "id": "string",
+      "name": {}
+    },
+    "hook": {
+      "id": "string",
+      "explanation": {}
+    }
   }
 }
 ```
@@ -1698,6 +1763,50 @@ const { data } = await client.getPublicPortalExtensionDetailsV3({
     },
     "hook": {
       "plausibility_mode": "check"
+    }
+  },
+  "changeEmail": {
+    "app": {
+      "app_id": "string",
+      "name": {}
+    },
+    "extension": {
+      "id": "string",
+      "name": {}
+    },
+    "hook": {
+      "id": "string",
+      "require_password_confirmation": true,
+      "explanation": {}
+    }
+  },
+  "changePassword": {
+    "app": {
+      "app_id": "string",
+      "name": {}
+    },
+    "extension": {
+      "id": "string",
+      "name": {}
+    },
+    "hook": {
+      "id": "string",
+      "require_new_password": false,
+      "explanation": {}
+    }
+  },
+  "deleteAccount": {
+    "app": {
+      "app_id": "string",
+      "name": {}
+    },
+    "extension": {
+      "id": "string",
+      "name": {}
+    },
+    "hook": {
+      "id": "string",
+      "explanation": {}
     }
   }
 }
@@ -2088,7 +2197,8 @@ const { data } = await client.getPublicPortalConfig({
     },
     "entry_point": "PASSWORD",
     "preferred_sso_providers": ["office-365-login"],
-    "auto_redirect_to_sso": true
+    "auto_redirect_to_sso": true,
+    "prevent_user_enumeration": true
   },
   "cognito_details": {
     "cognito_user_pool_client_id": "6bsd0jkgoie74k2i8mrhc1vest",
@@ -2317,7 +2427,8 @@ const { data } = await client.getOrgPortalConfig({
     },
     "entry_point": "PASSWORD",
     "preferred_sso_providers": ["office-365-login"],
-    "auto_redirect_to_sso": true
+    "auto_redirect_to_sso": true,
+    "prevent_user_enumeration": true
   },
   "cognito_details": {
     "cognito_user_pool_client_id": "6bsd0jkgoie74k2i8mrhc1vest",
@@ -2489,7 +2600,8 @@ const { data } = await client.getOrgPortalConfig({
       "mobile_oidc_config": {},
       "provider_type": "OIDC",
       "attribute_mappings": {},
-      "entity_matching": {}
+      "entity_matching": {},
+      "expose_client_secret": false
     }
   ],
   "certificate_details": {
@@ -2554,7 +2666,8 @@ const { data } = await client.getPublicPortalConfigV3({
     },
     "entry_point": "PASSWORD",
     "preferred_sso_providers": ["office-365-login"],
-    "auto_redirect_to_sso": true
+    "auto_redirect_to_sso": true,
+    "prevent_user_enumeration": true
   },
   "cognito_details": {
     "cognito_user_pool_client_id": "6bsd0jkgoie74k2i8mrhc1vest",
@@ -2783,7 +2896,8 @@ const { data } = await client.getOrgPortalConfigV3({
     },
     "entry_point": "PASSWORD",
     "preferred_sso_providers": ["office-365-login"],
-    "auto_redirect_to_sso": true
+    "auto_redirect_to_sso": true,
+    "prevent_user_enumeration": true
   },
   "cognito_details": {
     "cognito_user_pool_client_id": "6bsd0jkgoie74k2i8mrhc1vest",
@@ -2955,7 +3069,8 @@ const { data } = await client.getOrgPortalConfigV3({
       "mobile_oidc_config": {},
       "provider_type": "OIDC",
       "attribute_mappings": {},
-      "entity_matching": {}
+      "entity_matching": {},
+      "expose_client_secret": false
     }
   ],
   "certificate_details": {
@@ -3136,6 +3251,74 @@ const { data } = await client.getEmailTemplates({
   "onWorkflowStepAssigned": "5da0a718-c822-403d-9f5d-20d4584e0528",
   "confirmEmailUpdate": "5da0a718-c822-403d-9f5d-20d4584e0528",
   "verifyCodeToSetPassword": "5da0a718-c822-403d-9f5d-20d4584e0528"
+}
+```
+
+</details>
+
+---
+
+### `migrateEmailTemplateReferences`
+
+Walk every email-template config row in the caller's org and re-point any
+field on `email_templates` that currently references `source_template_id`
+at `destination_template_id`. Intended to be called 
+
+`POST /v3/portal/email-templates:migrate-references`
+
+```ts
+const { data } = await client.migrateEmailTemplateReferences(
+  null,
+  {
+    source_template_id: 'string',
+    destination_template_id: 'string'
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "migrated_portal_count": 2,
+  "migrated_portal_ids": ["string"],
+  "failed_portal_ids": ["string"]
+}
+```
+
+</details>
+
+---
+
+### `listEmailTemplateReferences`
+
+Read-only sibling of migrateEmailTemplateReferences. Lists every portal in
+the caller's org whose `email_templates` config references `template_id`,
+without rewriting anything. Used by the email-templ
+
+`POST /v3/portal/email-templates:list-references`
+
+```ts
+const { data } = await client.listEmailTemplateReferences(
+  null,
+  {
+    template_id: 'string'
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "portals": [
+    {
+      "id": "string",
+      "name": "string"
+    }
+  ]
 }
 ```
 
@@ -4278,6 +4461,35 @@ const { data } = await client.updatePortalUserEmail(
 ```json
 {
   "message": "You will receive a confirmation mail soon on your updated email address."
+}
+```
+
+</details>
+
+---
+
+### `changePortalUserPassword`
+
+Hand over a password change to the third-party system configured via the `changePassword` portal extension hook.
+Only available when such a hook is configured for the portal; the built-in password cha
+
+`PUT /v2/portal/user/change/password`
+
+```ts
+const { data } = await client.changePortalUserPassword(
+  null,
+  {
+    new_password: 'string'
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "message": "string"
 }
 ```
 
@@ -7012,7 +7224,8 @@ const { data } = await client.createPortalConfig(
         attribute_mappings: { /* ... */ },
         entity_matching: { /* ... */ },
         oidc_config: { /* ... */ },
-        mobile_oidc_config: { /* ... */ }
+        mobile_oidc_config: { /* ... */ },
+        expose_client_secret: false
       }
     ],
     enabled: true,
@@ -7048,7 +7261,8 @@ const { data } = await client.createPortalConfig(
       },
       entry_point: 'PASSWORD',
       preferred_sso_providers: ['office-365-login'],
-      auto_redirect_to_sso: true
+      auto_redirect_to_sso: true,
+      prevent_user_enumeration: true
     },
     cognito_details: {
       cognito_user_pool_client_id: '6bsd0jkgoie74k2i8mrhc1vest',
@@ -7251,7 +7465,8 @@ const { data } = await client.createPortalConfig(
       "attribute_mappings": {},
       "entity_matching": {},
       "oidc_config": {},
-      "mobile_oidc_config": {}
+      "mobile_oidc_config": {},
+      "expose_client_secret": false
     }
   ],
   "enabled": true,
@@ -7287,7 +7502,8 @@ const { data } = await client.createPortalConfig(
     },
     "entry_point": "PASSWORD",
     "preferred_sso_providers": ["office-365-login"],
-    "auto_redirect_to_sso": true
+    "auto_redirect_to_sso": true,
+    "prevent_user_enumeration": true
   },
   "cognito_details": {
     "cognito_user_pool_client_id": "6bsd0jkgoie74k2i8mrhc1vest",
@@ -7525,7 +7741,8 @@ const { data } = await client.getPortalConfigV3({
       "attribute_mappings": {},
       "entity_matching": {},
       "oidc_config": {},
-      "mobile_oidc_config": {}
+      "mobile_oidc_config": {},
+      "expose_client_secret": false
     }
   ],
   "enabled": true,
@@ -7561,7 +7778,8 @@ const { data } = await client.getPortalConfigV3({
     },
     "entry_point": "PASSWORD",
     "preferred_sso_providers": ["office-365-login"],
-    "auto_redirect_to_sso": true
+    "auto_redirect_to_sso": true,
+    "prevent_user_enumeration": true
   },
   "cognito_details": {
     "cognito_user_pool_client_id": "6bsd0jkgoie74k2i8mrhc1vest",
@@ -7764,6 +7982,7 @@ Updates a specific portal configuration by ID.
 const { data } = await client.putPortalConfig(
   {
     portal_id: 'example',
+    page_upsert_mode: 'example',
   },
   {
     entity_actions: [
@@ -7794,7 +8013,8 @@ const { data } = await client.putPortalConfig(
         attribute_mappings: { /* ... */ },
         entity_matching: { /* ... */ },
         oidc_config: { /* ... */ },
-        mobile_oidc_config: { /* ... */ }
+        mobile_oidc_config: { /* ... */ },
+        expose_client_secret: false
       }
     ],
     enabled: true,
@@ -7830,7 +8050,8 @@ const { data } = await client.putPortalConfig(
       },
       entry_point: 'PASSWORD',
       preferred_sso_providers: ['office-365-login'],
-      auto_redirect_to_sso: true
+      auto_redirect_to_sso: true,
+      prevent_user_enumeration: true
     },
     cognito_details: {
       cognito_user_pool_client_id: '6bsd0jkgoie74k2i8mrhc1vest',
@@ -8054,7 +8275,8 @@ const { data } = await client.putPortalConfig(
       "attribute_mappings": {},
       "entity_matching": {},
       "oidc_config": {},
-      "mobile_oidc_config": {}
+      "mobile_oidc_config": {},
+      "expose_client_secret": false
     }
   ],
   "enabled": true,
@@ -8090,7 +8312,8 @@ const { data } = await client.putPortalConfig(
     },
     "entry_point": "PASSWORD",
     "preferred_sso_providers": ["office-365-login"],
-    "auto_redirect_to_sso": true
+    "auto_redirect_to_sso": true,
+    "prevent_user_enumeration": true
   },
   "cognito_details": {
     "cognito_user_pool_client_id": "6bsd0jkgoie74k2i8mrhc1vest",
@@ -8453,7 +8676,8 @@ const { data } = await client.clonePortalConfig(
       "attribute_mappings": {},
       "entity_matching": {},
       "oidc_config": {},
-      "mobile_oidc_config": {}
+      "mobile_oidc_config": {},
+      "expose_client_secret": false
     }
   ],
   "enabled": true,
@@ -8489,7 +8713,8 @@ const { data } = await client.clonePortalConfig(
     },
     "entry_point": "PASSWORD",
     "preferred_sso_providers": ["office-365-login"],
-    "auto_redirect_to_sso": true
+    "auto_redirect_to_sso": true,
+    "prevent_user_enumeration": true
   },
   "cognito_details": {
     "cognito_user_pool_client_id": "6bsd0jkgoie74k2i8mrhc1vest",
@@ -8905,7 +9130,272 @@ const { data } = await client.portalProxyExecute(
 
 ---
 
+### `getMobileConfig`
+
+Returns the portal's mobile app configuration. By default the response is build-ready (resolved): base info (display_name from the portal name, app_host from the domain, environment) and branding (log
+
+`GET /v1/portal/mobile-config`
+
+```ts
+const { data } = await client.getMobileConfig({
+  portal_id: 'example',
+  raw: true,
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "portal_id": "string",
+  "enabled": true,
+  "display_name": "string",
+  "app_host": "string",
+  "environment": "prod",
+  "branding": {
+    "app_icon": "string",
+    "splash": "string",
+    "splash_dark": "string",
+    "icon_background_color": "string",
+    "splash_background_color": "string",
+    "splash_background_color_dark": "string"
+  },
+  "ios": {
+    "bundle_id": "string",
+    "team_id": "string",
+    "credentials_status": "not_configured",
+    "app_store_id": "string",
+    "store_url": "string",
+    "last_build": {
+      "version": "string",
+      "build_number": 0,
+      "track": "string",
+      "status": "building",
+      "updated_at": "1970-01-01T00:00:00.000Z",
+      "error": "string"
+    }
+  },
+  "android": {
+    "package_name": "string",
+    "credentials_status": "not_configured",
+    "upload_key_status": "not_configured",
+    "store_url": "string",
+    "last_build": {
+      "version": "string",
+      "build_number": 0,
+      "track": "string",
+      "status": "building",
+      "updated_at": "1970-01-01T00:00:00.000Z",
+      "error": "string"
+    }
+  }
+}
+```
+
+</details>
+
+---
+
+### `putMobileConfig`
+
+Merges the provided fields into the portal's mobile app configuration
+(deep merge). Only mobile_config is modified; all other portal settings
+are left untouched.
+
+`PUT /v1/portal/mobile-config`
+
+```ts
+const { data } = await client.putMobileConfig(
+  {
+    portal_id: 'example',
+  },
+  {
+    enabled: true,
+    ios: {
+      bundle_id: 'string',
+      team_id: 'string',
+      store_url: 'string',
+      app_store_id: 'string'
+    },
+    android: {
+      package_name: 'string',
+      store_url: 'string'
+    },
+    branding: {
+      app_icon: 'string',
+      splash: 'string',
+      splash_dark: 'string',
+      icon_background_color: 'string',
+      splash_background_color: 'string',
+      splash_background_color_dark: 'string'
+    }
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "portal_id": "string",
+  "enabled": true,
+  "display_name": "string",
+  "app_host": "string",
+  "environment": "prod",
+  "branding": {
+    "app_icon": "string",
+    "splash": "string",
+    "splash_dark": "string",
+    "icon_background_color": "string",
+    "splash_background_color": "string",
+    "splash_background_color_dark": "string"
+  },
+  "ios": {
+    "bundle_id": "string",
+    "team_id": "string",
+    "credentials_status": "not_configured",
+    "app_store_id": "string",
+    "store_url": "string",
+    "last_build": {
+      "version": "string",
+      "build_number": 0,
+      "track": "string",
+      "status": "building",
+      "updated_at": "1970-01-01T00:00:00.000Z",
+      "error": "string"
+    }
+  },
+  "android": {
+    "package_name": "string",
+    "credentials_status": "not_configured",
+    "upload_key_status": "not_configured",
+    "store_url": "string",
+    "last_build": {
+      "version": "string",
+      "build_number": 0,
+      "track": "string",
+      "status": "building",
+      "updated_at": "1970-01-01T00:00:00.000Z",
+      "error": "string"
+    }
+  }
+}
+```
+
+</details>
+
+---
+
 ## Schemas
+
+### `MobileBuildStatus`
+
+Latest build/upload status for a platform (system-written).
+
+```ts
+type MobileBuildStatus = {
+  version?: string
+  build_number?: number
+  track?: string
+  status?: "building" | "uploaded" | "failed"
+  updated_at?: string // date-time
+  error?: string
+}
+```
+
+### `MobileBranding`
+
+```ts
+type MobileBranding = {
+  app_icon?: string
+  splash?: string
+  splash_dark?: string
+  icon_background_color?: string
+  splash_background_color?: string
+  splash_background_color_dark?: string
+}
+```
+
+### `MobileConfig`
+
+Mobile app configuration for the portal. Stored inside the portal's config object. Identifiers/branding are non-secret; signing credentials live in a secure store, never here.
+
+```ts
+type MobileConfig = {
+  portal_id?: string
+  enabled?: boolean
+  display_name?: string
+  app_host?: string
+  environment?: "prod" | "staging" | "dev"
+  branding?: {
+    app_icon?: string
+    splash?: string
+    splash_dark?: string
+    icon_background_color?: string
+    splash_background_color?: string
+    splash_background_color_dark?: string
+  }
+  ios?: {
+    bundle_id?: string
+    team_id?: string
+    credentials_status?: "not_configured" | "configured"
+    app_store_id?: string
+    store_url?: string
+    last_build?: {
+      version?: { ... }
+      build_number?: { ... }
+      track?: { ... }
+      status?: { ... }
+      updated_at?: { ... }
+      error?: { ... }
+    }
+  }
+  android?: {
+    package_name?: string
+    credentials_status?: "not_configured" | "configured"
+    upload_key_status?: "not_configured" | "generated" | "enrolled"
+    store_url?: string
+    last_build?: {
+      version?: { ... }
+      build_number?: { ... }
+      track?: { ... }
+      status?: { ... }
+      updated_at?: { ... }
+      error?: { ... }
+    }
+  }
+}
+```
+
+### `MobileConfigUpdate`
+
+Editable mobile fields for PUT. Only mobile-relevant settings + app branding can be changed. Portal-derived values (display_name, app_host), the portal logo, and system-written fields (credentials_status, app_store_id, last_build, …) are ignored if sent.
+
+```ts
+type MobileConfigUpdate = {
+  enabled?: boolean
+  ios?: {
+    bundle_id?: string
+    team_id?: string
+    store_url?: string
+    app_store_id?: string
+  }
+  android?: {
+    package_name?: string
+    store_url?: string
+  }
+  branding?: {
+    app_icon?: string
+    splash?: string
+    splash_dark?: string
+    icon_background_color?: string
+    splash_background_color?: string
+    splash_background_color_dark?: string
+  }
+}
+```
 
 ### `ContextEntity`
 
@@ -9114,6 +9604,7 @@ type UpdateOnlyPortalConfigAttributes = {
       client_id?: { ... }
       client_secret?: { ... }
     }
+    expose_client_secret?: boolean
   }>
 }
 ```
@@ -9156,6 +9647,7 @@ type CommonConfigAttributes = {
     entry_point?: "PASSWORD" | "SSO"
     preferred_sso_providers?: string[]
     auto_redirect_to_sso?: boolean
+    prevent_user_enumeration?: boolean
   }
   cognito_details?: {
     cognito_user_pool_client_id?: string
@@ -9220,7 +9712,6 @@ type CommonConfigAttributes = {
     title_path?: string
   }
   registration_identifiers?: Array<{
-    name?: string
   // ...
 }
 ```
@@ -9288,6 +9779,7 @@ type UpsertPortalConfig = {
       client_id?: { ... }
       client_secret?: { ... }
     }
+    expose_client_secret?: boolean
   }>
   enabled?: boolean
   name?: string
@@ -9323,11 +9815,10 @@ type UpsertPortalConfig = {
     entry_point?: "PASSWORD" | "SSO"
     preferred_sso_providers?: string[]
     auto_redirect_to_sso?: boolean
+    prevent_user_enumeration?: boolean
   }
   cognito_details?: {
     cognito_user_pool_client_id?: string
-    cognito_user_pool_arn?: string
-    cognito_user_pool_id?: string
   // ...
 }
 ```
@@ -9370,6 +9861,7 @@ type PortalConfig = {
     entry_point?: "PASSWORD" | "SSO"
     preferred_sso_providers?: string[]
     auto_redirect_to_sso?: boolean
+    prevent_user_enumeration?: boolean
   }
   cognito_details?: {
     cognito_user_pool_client_id?: string
@@ -9434,7 +9926,6 @@ type PortalConfig = {
     title_path?: string
   }
   registration_identifiers?: Array<{
-    name?: string
   // ...
 }
 ```
@@ -10980,6 +11471,65 @@ type PublicExtensionCapabilities = {
       plausibility_mode?: { ... }
     }
   }
+  changeEmail?: {
+    app?: {
+      app_id?: { ... }
+      name?: { ... }
+    }
+    extension?: {
+      id?: { ... }
+      name?: { ... }
+    }
+    hook?: {
+      id?: { ... }
+      require_password_confirmation?: { ... }
+      explanation?: { ... }
+  // ...
+}
+```
+
+### `PublicSelfManagementExplanation`
+
+Explanation of the hook.
+
+```ts
+type PublicSelfManagementExplanation = {
+  en: string
+}
+```
+
+### `PublicChangeEmailDetails`
+
+```ts
+type PublicChangeEmailDetails = {
+  id?: string
+  require_password_confirmation?: boolean
+  explanation?: {
+    en: string
+  }
+}
+```
+
+### `PublicChangePasswordDetails`
+
+```ts
+type PublicChangePasswordDetails = {
+  id?: string
+  require_new_password?: boolean
+  explanation?: {
+    en: string
+  }
+}
+```
+
+### `PublicDeleteAccountDetails`
+
+```ts
+type PublicDeleteAccountDetails = {
+  id?: string
+  explanation?: {
+    en: string
+  }
 }
 ```
 
@@ -11535,6 +12085,124 @@ type ExtensionHookCostDataRetrieval = {
 }
 ```
 
+### `ExtensionHookChangeEmail`
+
+Hook that replaces the built-in change email functionality for portal users. When configured, the portal does not change the user's login email itself. Instead, this hook makes an HTTP call to the third-party system, which is expected to handle the email change (most likely by sending the user instr
+
+```ts
+type ExtensionHookChangeEmail = {
+  type: "changeEmail"
+  require_password_confirmation?: boolean
+  explanation?: {
+    en: string
+  }
+  auth?: {
+    method?: string
+    url: string
+    params?: Record<string, string>
+    headers?: Record<string, string>
+    body?: Record<string, string>
+    cache?: {
+      key: { ... }
+      ttl: { ... }
+    }
+  }
+  call: {
+    method?: string
+    url: string
+    params?: Record<string, string>
+    headers: Record<string, string>
+    body?: object
+  }
+  resolved?: {
+    error_message_path?: string
+  }
+  secure_proxy?: {
+    integration_id: string // uuid
+    use_case_slug: string
+  }
+}
+```
+
+### `ExtensionHookChangePassword`
+
+Hook that replaces the built-in change password functionality for portal users. When configured, the portal does not change the user's password itself. Instead, this hook makes an HTTP call to the third-party system, which is expected to handle the password change (most likely by sending the user in
+
+```ts
+type ExtensionHookChangePassword = {
+  type: "changePassword"
+  require_new_password?: boolean
+  explanation?: {
+    en: string
+  }
+  auth?: {
+    method?: string
+    url: string
+    params?: Record<string, string>
+    headers?: Record<string, string>
+    body?: Record<string, string>
+    cache?: {
+      key: { ... }
+      ttl: { ... }
+    }
+  }
+  call: {
+    method?: string
+    url: string
+    params?: Record<string, string>
+    headers: Record<string, string>
+    body?: object
+  }
+  resolved?: {
+    error_message_path?: string
+  }
+  secure_proxy?: {
+    integration_id: string // uuid
+    use_case_slug: string
+  }
+}
+```
+
+### `ExtensionHookDeleteAccount`
+
+Hook that replaces the built-in delete account functionality for portal users. When configured, the portal does not delete the user itself. Instead, this hook makes an HTTP call to the third-party system, which is expected to handle the deletion.
+The `deletion_mode` controls what the portal does aft
+
+```ts
+type ExtensionHookDeleteAccount = {
+  type: "deleteAccount"
+  deletion_mode?: "synchronous" | "asynchronous"
+  explanation?: {
+    en: string
+  }
+  auth?: {
+    method?: string
+    url: string
+    params?: Record<string, string>
+    headers?: Record<string, string>
+    body?: Record<string, string>
+    cache?: {
+      key: { ... }
+      ttl: { ... }
+    }
+  }
+  call: {
+    method?: string
+    url: string
+    params?: Record<string, string>
+    headers: Record<string, string>
+    body?: object
+  }
+  resolved?: {
+    error_message_path?: string
+  }
+  secure_proxy?: {
+    integration_id: string // uuid
+    use_case_slug: string
+  }
+}
+```
+
 ### `SecureProxyConfig`
 
 Configuration for routing requests through the ERP Integration secure proxy. Mutually exclusive with use_static_ips.
@@ -11744,6 +12412,7 @@ type ProviderConfig = {
     client_id?: string
     client_secret?: string
   }
+  expose_client_secret?: boolean
 }
 ```
 
@@ -12142,6 +12811,7 @@ type CommonConfigAttributesV3 = {
     entry_point?: "PASSWORD" | "SSO"
     preferred_sso_providers?: string[]
     auto_redirect_to_sso?: boolean
+    prevent_user_enumeration?: boolean
   }
   cognito_details?: {
     cognito_user_pool_client_id?: string
@@ -12206,7 +12876,6 @@ type CommonConfigAttributesV3 = {
     title_path?: string
   }
   registration_identifiers?: Array<{
-    name?: string
   // ...
 }
 ```
@@ -12282,6 +12951,7 @@ type UpsertPortalConfigV3 = {
       client_id?: { ... }
       client_secret?: { ... }
     }
+    expose_client_secret?: boolean
   }>
   enabled?: boolean
   name?: string
@@ -12317,11 +12987,10 @@ type UpsertPortalConfigV3 = {
     entry_point?: "PASSWORD" | "SSO"
     preferred_sso_providers?: string[]
     auto_redirect_to_sso?: boolean
+    prevent_user_enumeration?: boolean
   }
   cognito_details?: {
     cognito_user_pool_client_id?: string
-    cognito_user_pool_arn?: string
-    cognito_user_pool_id?: string
   // ...
 }
 ```
@@ -12412,6 +13081,7 @@ type PortalConfigV3 = {
     entry_point?: "PASSWORD" | "SSO"
     preferred_sso_providers?: string[]
     auto_redirect_to_sso?: boolean
+    prevent_user_enumeration?: boolean
   }
   cognito_details?: {
     cognito_user_pool_client_id?: string
@@ -12428,7 +13098,6 @@ type PortalConfigV3 = {
       compromised_credentials_detection?: { ... }
     }
     password_policy?: {
-      minimum_length?: { ... }
   // ...
 }
 ```
