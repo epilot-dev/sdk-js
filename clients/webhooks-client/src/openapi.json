@@ -1715,6 +1715,10 @@
             "type": "string",
             "description": "stringified payload of the webhook request"
           },
+          "original_payload": {
+            "type": "string",
+            "description": "Stringified pre-transform original payload — the raw input captured before any JSONata transform was applied. Returned by getEventById for non-catalog events that have a locally stored original source (inline or claim-checked to S3, hydrated here). Omitted when no original source exists or when the payload would exceed the inline response size limit. Catalog-backed events (event_-prefixed) do not carry a local original — their pre-transform payload is sourced from the event catalog instead."
+          },
           "retry_attempt": {
             "type": "integer",
             "description": "Number of automatic delivery retries that preceded this terminal outcome. 0 means the event was delivered (or finally failed) on the first attempt."
