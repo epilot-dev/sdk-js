@@ -1750,6 +1750,51 @@
         "responses": {}
       }
     },
+    "/v2/portal/entity/{slug}": {
+      "post": {
+        "operationId": "createPortalUserEntity",
+        "deprecated": true,
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/portal/entity/{slug}/{id}": {
+      "patch": {
+        "operationId": "patchPortalUserEntity",
+        "deprecated": true,
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v2/portal/can-trigger-portal-flow": {
       "post": {
         "operationId": "canTriggerPortalFlow",

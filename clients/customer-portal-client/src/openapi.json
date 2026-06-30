@@ -7034,6 +7034,156 @@
         }
       }
     },
+    "/v2/portal/entity/{slug}": {
+      "post": {
+        "operationId": "createPortalUserEntity",
+        "summary": "createPortalUserEntity",
+        "description": "**EXPERIMENTAL — do not rely on this endpoint.** It is unstable, currently limited to the `asset` schema, and may change or be removed without notice; third parties must not build on it yet.\nCreate a single entity on behalf of a portal user. The schema slug is passed in the path and must be one of the supported (experimental) schemas; field-level permissions are enforced by the caller's role grants. The request body is the entity to create (its attributes); the created entity is automatically related to the caller's contact.",
+        "deprecated": true,
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "description": "Entity schema slug to create. Limited to the supported (experimental) schemas, currently `asset`.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asset"
+              ],
+              "example": "asset"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Entity"
+              },
+              "example": {
+                "title": "PV Inverter",
+                "manufacturer": "SMA",
+                "external_id": "device-123"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The entity has been created successfully for the portal user.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntityResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/entity/{slug}/{id}": {
+      "patch": {
+        "operationId": "patchPortalUserEntity",
+        "summary": "patchPortalUserEntity",
+        "description": "**EXPERIMENTAL — do not rely on this endpoint.** It is unstable, currently limited to the `asset` schema, and may change or be removed without notice; third parties must not build on it yet.\nPartially update a single entity on behalf of a portal user. The schema slug and entity id are passed in the path; the schema must be one of the supported (experimental) schemas. Field-level permissions are enforced by the caller's role grants (use null to clear a field, e.g. external_id). The target entity must already be owned by the caller's contact.",
+        "deprecated": true,
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "description": "Entity schema slug to update. Limited to the supported (experimental) schemas, currently `asset`.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asset"
+              ],
+              "example": "asset"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "description": "ID of the entity to update. Must already be owned by the caller's contact.",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Entity"
+              },
+              "example": {
+                "external_id": null
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The entity has been updated successfully for the portal user.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntityResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/v2/portal/can-trigger-portal-flow": {
       "post": {
         "operationId": "canTriggerPortalFlow",
