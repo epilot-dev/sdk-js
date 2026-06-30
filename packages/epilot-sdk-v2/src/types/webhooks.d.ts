@@ -704,6 +704,10 @@ export declare namespace Components {
              */
             payload?: string;
             /**
+             * Stringified pre-transform original payload — the raw input captured before any JSONata transform was applied. Returned by getEventById for non-catalog events that have a locally stored original source (inline or claim-checked to S3, hydrated here). Omitted when no original source exists or when the payload would exceed the inline response size limit. Catalog-backed events (event_-prefixed) do not carry a local original — their pre-transform payload is sourced from the event catalog instead.
+             */
+            original_payload?: string;
+            /**
              * Number of automatic delivery retries that preceded this terminal outcome. 0 means the event was delivered (or finally failed) on the first attempt.
              */
             retry_attempt?: number;

@@ -478,6 +478,7 @@ const { data } = await client.getEventById({
   "status": "succeeded",
   "http_method": "GET",
   "payload": "string",
+  "original_payload": "string",
   "retry_attempt": 0,
   "can_reapply_transform": true,
   "can_reapply_transform_reason": "available"
@@ -616,6 +617,7 @@ const { data } = await client.getWebhookEventsV2(
       "status": "succeeded",
       "http_method": "GET",
       "payload": "string",
+      "original_payload": "string",
       "retry_attempt": 0,
       "can_reapply_transform": true,
       "can_reapply_transform_reason": "available"
@@ -696,6 +698,7 @@ type EventListResponse = {
     status?: "succeeded" | "failed" | "in_progress" | "skipped"
     http_method?: "GET" | "POST" | "PUT"
     payload?: string
+    original_payload?: string
     retry_attempt?: number
     can_reapply_transform?: boolean
     can_reapply_transform_reason?: "available" | "no_transform_configured" | "no_original_source"
@@ -1066,6 +1069,7 @@ type WebhookEvent = {
   status?: "succeeded" | "failed" | "in_progress" | "skipped"
   http_method?: "GET" | "POST" | "PUT"
   payload?: string
+  original_payload?: string
   retry_attempt?: number
   can_reapply_transform?: boolean
   can_reapply_transform_reason?: "available" | "no_transform_configured" | "no_original_source"
