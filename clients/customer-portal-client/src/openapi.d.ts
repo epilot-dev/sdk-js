@@ -9267,6 +9267,30 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace CreatePortalUserEntity {
+        namespace Parameters {
+            /**
+             * example:
+             * asset
+             */
+            export type Slug = "asset";
+        }
+        export interface PathParameters {
+            slug: /**
+             * example:
+             * asset
+             */
+            Parameters.Slug;
+        }
+        export type RequestBody = Components.Schemas.Entity;
+        namespace Responses {
+            export type $201 = /* Response for entity get request */ Components.Schemas.EntityResponse;
+            export type $400 = Components.Responses.InvalidRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace CreateUser {
         namespace Parameters {
             export type Origin = /* Origin of the portal */ Components.Schemas.Origin;
@@ -13593,6 +13617,38 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace PatchPortalUserEntity {
+        namespace Parameters {
+            export type Id = /**
+             * Entity ID
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            Components.Schemas.EntityId /* uuid */;
+            /**
+             * example:
+             * asset
+             */
+            export type Slug = "asset";
+        }
+        export interface PathParameters {
+            slug: /**
+             * example:
+             * asset
+             */
+            Parameters.Slug;
+            id: Parameters.Id;
+        }
+        export type RequestBody = Components.Schemas.Entity;
+        namespace Responses {
+            export type $200 = /* Response for entity get request */ Components.Schemas.EntityResponse;
+            export type $400 = Components.Responses.InvalidRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace PortalProxyExecute {
         export interface RequestBody {
             /**
@@ -16093,6 +16149,28 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.SearchPortalUserEntities.Responses.$200>
   /**
+   * createPortalUserEntity - createPortalUserEntity
+   * 
+   * **EXPERIMENTAL — do not rely on this endpoint.** It is unstable, currently limited to the `asset` schema, and may change or be removed without notice; third parties must not build on it yet.
+   * Create a single entity on behalf of a portal user. The schema slug is passed in the path and must be one of the supported (experimental) schemas; field-level permissions are enforced by the caller's role grants. The request body is the entity to create (its attributes); the created entity is automatically related to the caller's contact.
+   */
+  'createPortalUserEntity'(
+    parameters?: Parameters<Paths.CreatePortalUserEntity.PathParameters> | null,
+    data?: Paths.CreatePortalUserEntity.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CreatePortalUserEntity.Responses.$201>
+  /**
+   * patchPortalUserEntity - patchPortalUserEntity
+   * 
+   * **EXPERIMENTAL — do not rely on this endpoint.** It is unstable, currently limited to the `asset` schema, and may change or be removed without notice; third parties must not build on it yet.
+   * Partially update a single entity on behalf of a portal user. The schema slug and entity id are passed in the path; the schema must be one of the supported (experimental) schemas. Field-level permissions are enforced by the caller's role grants (use null to clear a field, e.g. external_id). The target entity must already be owned by the caller's contact.
+   */
+  'patchPortalUserEntity'(
+    parameters?: Parameters<Paths.PatchPortalUserEntity.PathParameters> | null,
+    data?: Paths.PatchPortalUserEntity.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.PatchPortalUserEntity.Responses.$200>
+  /**
    * canTriggerPortalFlow - canTriggerPortalFlow
    * 
    * Returns whether the user can trigger a portal flow
@@ -17849,6 +17927,32 @@ export interface PathsDictionary {
       data?: Paths.SearchPortalUserEntities.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.SearchPortalUserEntities.Responses.$200>
+  }
+  ['/v2/portal/entity/{slug}']: {
+    /**
+     * createPortalUserEntity - createPortalUserEntity
+     * 
+     * **EXPERIMENTAL — do not rely on this endpoint.** It is unstable, currently limited to the `asset` schema, and may change or be removed without notice; third parties must not build on it yet.
+     * Create a single entity on behalf of a portal user. The schema slug is passed in the path and must be one of the supported (experimental) schemas; field-level permissions are enforced by the caller's role grants. The request body is the entity to create (its attributes); the created entity is automatically related to the caller's contact.
+     */
+    'post'(
+      parameters?: Parameters<Paths.CreatePortalUserEntity.PathParameters> | null,
+      data?: Paths.CreatePortalUserEntity.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CreatePortalUserEntity.Responses.$201>
+  }
+  ['/v2/portal/entity/{slug}/{id}']: {
+    /**
+     * patchPortalUserEntity - patchPortalUserEntity
+     * 
+     * **EXPERIMENTAL — do not rely on this endpoint.** It is unstable, currently limited to the `asset` schema, and may change or be removed without notice; third parties must not build on it yet.
+     * Partially update a single entity on behalf of a portal user. The schema slug and entity id are passed in the path; the schema must be one of the supported (experimental) schemas. Field-level permissions are enforced by the caller's role grants (use null to clear a field, e.g. external_id). The target entity must already be owned by the caller's contact.
+     */
+    'patch'(
+      parameters?: Parameters<Paths.PatchPortalUserEntity.PathParameters> | null,
+      data?: Paths.PatchPortalUserEntity.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.PatchPortalUserEntity.Responses.$200>
   }
   ['/v2/portal/can-trigger-portal-flow']: {
     /**
