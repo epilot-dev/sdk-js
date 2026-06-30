@@ -108,6 +108,8 @@ const { data } = await customerPortalClient.upsertPortal(...)
 **ECP**
 - [`validateToken`](#validatetoken)
 - [`revokeToken`](#revoketoken)
+- [`createExport`](#createexport)
+- [`getExport`](#getexport)
 - [`getConsumption`](#getconsumption)
 - [`prepareVisualizationExport`](#preparevisualizationexport)
 - [`getVisualizationMetadata`](#getvisualizationmetadata)
@@ -380,6 +382,43 @@ const { data } = await client.upsertPortal(
         expose_client_secret: false
       }
     ],
+    mobile_config: {
+      portal_id: 'string',
+      enabled: true,
+      display_name: 'string',
+      app_host: 'string',
+      environment: 'prod',
+      branding: {
+        app_icon: 'string',
+        splash: 'string',
+        splash_dark: 'string',
+        icon_background_color: 'string',
+        splash_background_color: 'string',
+        splash_background_color_dark: 'string'
+      },
+      ios: {
+        bundle_id: 'string',
+        team_id: 'string',
+        credentials_status: 'not_configured',
+        app_store_id: 'string',
+        store_url: 'string',
+        last_build: { /* ... */ }
+      },
+      android: {
+        package_name: 'string',
+        credentials_status: 'not_configured',
+        upload_key_status: 'not_configured',
+        store_url: 'string',
+        last_build: { /* ... */ }
+      },
+      ota: {
+        enabled: true,
+        channel: 'canary',
+        auto_update: true,
+        update_strategy: 'next-launch',
+        min_native_version: 'string'
+      }
+    },
     enabled: true,
     name: 'Installer Portal',
     domain: 'abc.com',
@@ -570,6 +609,43 @@ const { data } = await client.upsertPortal(
 
 ```json
 {
+  "mobile_config": {
+    "portal_id": "string",
+    "enabled": true,
+    "display_name": "string",
+    "app_host": "string",
+    "environment": "prod",
+    "branding": {
+      "app_icon": "string",
+      "splash": "string",
+      "splash_dark": "string",
+      "icon_background_color": "string",
+      "splash_background_color": "string",
+      "splash_background_color_dark": "string"
+    },
+    "ios": {
+      "bundle_id": "string",
+      "team_id": "string",
+      "credentials_status": "not_configured",
+      "app_store_id": "string",
+      "store_url": "string",
+      "last_build": {}
+    },
+    "android": {
+      "package_name": "string",
+      "credentials_status": "not_configured",
+      "upload_key_status": "not_configured",
+      "store_url": "string",
+      "last_build": {}
+    },
+    "ota": {
+      "enabled": true,
+      "channel": "canary",
+      "auto_update": true,
+      "update_strategy": "next-launch",
+      "min_native_version": "string"
+    }
+  },
   "enabled": true,
   "name": "Installer Portal",
   "domain": "abc.com",
@@ -897,6 +973,43 @@ const { data } = await client.getPortalConfigByDomain({
 
 ```json
 {
+  "mobile_config": {
+    "portal_id": "string",
+    "enabled": true,
+    "display_name": "string",
+    "app_host": "string",
+    "environment": "prod",
+    "branding": {
+      "app_icon": "string",
+      "splash": "string",
+      "splash_dark": "string",
+      "icon_background_color": "string",
+      "splash_background_color": "string",
+      "splash_background_color_dark": "string"
+    },
+    "ios": {
+      "bundle_id": "string",
+      "team_id": "string",
+      "credentials_status": "not_configured",
+      "app_store_id": "string",
+      "store_url": "string",
+      "last_build": {}
+    },
+    "android": {
+      "package_name": "string",
+      "credentials_status": "not_configured",
+      "upload_key_status": "not_configured",
+      "store_url": "string",
+      "last_build": {}
+    },
+    "ota": {
+      "enabled": true,
+      "channel": "canary",
+      "auto_update": true,
+      "update_strategy": "next-launch",
+      "min_native_version": "string"
+    }
+  },
   "enabled": true,
   "name": "Installer Portal",
   "domain": "abc.com",
@@ -1127,6 +1240,43 @@ const { data } = await client.getPortalConfig({
 
 ```json
 {
+  "mobile_config": {
+    "portal_id": "string",
+    "enabled": true,
+    "display_name": "string",
+    "app_host": "string",
+    "environment": "prod",
+    "branding": {
+      "app_icon": "string",
+      "splash": "string",
+      "splash_dark": "string",
+      "icon_background_color": "string",
+      "splash_background_color": "string",
+      "splash_background_color_dark": "string"
+    },
+    "ios": {
+      "bundle_id": "string",
+      "team_id": "string",
+      "credentials_status": "not_configured",
+      "app_store_id": "string",
+      "store_url": "string",
+      "last_build": {}
+    },
+    "android": {
+      "package_name": "string",
+      "credentials_status": "not_configured",
+      "upload_key_status": "not_configured",
+      "store_url": "string",
+      "last_build": {}
+    },
+    "ota": {
+      "enabled": true,
+      "channel": "canary",
+      "auto_update": true,
+      "update_strategy": "next-launch",
+      "min_native_version": "string"
+    }
+  },
   "enabled": true,
   "name": "Installer Portal",
   "domain": "abc.com",
@@ -1351,6 +1501,48 @@ const { data } = await client.deletePortal({
   origin: 'example',
 })
 ```
+
+---
+
+### `createExport`
+
+Request an asynchronous CSV export of the portal user's contracts, delivery points and meters. Returns a job id to poll.
+
+`POST /v1/portal/exports`
+
+```ts
+const { data } = await client.createExport({
+  language: 'example',
+})
+```
+
+---
+
+### `getExport`
+
+Get the status of an export job, including the download URL once ready.
+
+`GET /v1/portal/exports/{jobId}`
+
+```ts
+const { data } = await client.getExport({
+  jobId: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "jobId": "string",
+  "status": "queued",
+  "downloadUrl": "string",
+  "error": "string"
+}
+```
+
+</details>
 
 ---
 
@@ -2166,6 +2358,43 @@ const { data } = await client.getPublicPortalConfig({
 
 ```json
 {
+  "mobile_config": {
+    "portal_id": "string",
+    "enabled": true,
+    "display_name": "string",
+    "app_host": "string",
+    "environment": "prod",
+    "branding": {
+      "app_icon": "string",
+      "splash": "string",
+      "splash_dark": "string",
+      "icon_background_color": "string",
+      "splash_background_color": "string",
+      "splash_background_color_dark": "string"
+    },
+    "ios": {
+      "bundle_id": "string",
+      "team_id": "string",
+      "credentials_status": "not_configured",
+      "app_store_id": "string",
+      "store_url": "string",
+      "last_build": {}
+    },
+    "android": {
+      "package_name": "string",
+      "credentials_status": "not_configured",
+      "upload_key_status": "not_configured",
+      "store_url": "string",
+      "last_build": {}
+    },
+    "ota": {
+      "enabled": true,
+      "channel": "canary",
+      "auto_update": true,
+      "update_strategy": "next-launch",
+      "min_native_version": "string"
+    }
+  },
   "enabled": true,
   "name": "Installer Portal",
   "domain": "abc.com",
@@ -2396,6 +2625,43 @@ const { data } = await client.getOrgPortalConfig({
 
 ```json
 {
+  "mobile_config": {
+    "portal_id": "string",
+    "enabled": true,
+    "display_name": "string",
+    "app_host": "string",
+    "environment": "prod",
+    "branding": {
+      "app_icon": "string",
+      "splash": "string",
+      "splash_dark": "string",
+      "icon_background_color": "string",
+      "splash_background_color": "string",
+      "splash_background_color_dark": "string"
+    },
+    "ios": {
+      "bundle_id": "string",
+      "team_id": "string",
+      "credentials_status": "not_configured",
+      "app_store_id": "string",
+      "store_url": "string",
+      "last_build": {}
+    },
+    "android": {
+      "package_name": "string",
+      "credentials_status": "not_configured",
+      "upload_key_status": "not_configured",
+      "store_url": "string",
+      "last_build": {}
+    },
+    "ota": {
+      "enabled": true,
+      "channel": "canary",
+      "auto_update": true,
+      "update_strategy": "next-launch",
+      "min_native_version": "string"
+    }
+  },
   "enabled": true,
   "name": "Installer Portal",
   "domain": "abc.com",
@@ -2635,6 +2901,43 @@ const { data } = await client.getPublicPortalConfigV3({
 
 ```json
 {
+  "mobile_config": {
+    "portal_id": "string",
+    "enabled": true,
+    "display_name": "string",
+    "app_host": "string",
+    "environment": "prod",
+    "branding": {
+      "app_icon": "string",
+      "splash": "string",
+      "splash_dark": "string",
+      "icon_background_color": "string",
+      "splash_background_color": "string",
+      "splash_background_color_dark": "string"
+    },
+    "ios": {
+      "bundle_id": "string",
+      "team_id": "string",
+      "credentials_status": "not_configured",
+      "app_store_id": "string",
+      "store_url": "string",
+      "last_build": {}
+    },
+    "android": {
+      "package_name": "string",
+      "credentials_status": "not_configured",
+      "upload_key_status": "not_configured",
+      "store_url": "string",
+      "last_build": {}
+    },
+    "ota": {
+      "enabled": true,
+      "channel": "canary",
+      "auto_update": true,
+      "update_strategy": "next-launch",
+      "min_native_version": "string"
+    }
+  },
   "enabled": true,
   "name": "Installer Portal",
   "domain": "abc.com",
@@ -2865,6 +3168,43 @@ const { data } = await client.getOrgPortalConfigV3({
 
 ```json
 {
+  "mobile_config": {
+    "portal_id": "string",
+    "enabled": true,
+    "display_name": "string",
+    "app_host": "string",
+    "environment": "prod",
+    "branding": {
+      "app_icon": "string",
+      "splash": "string",
+      "splash_dark": "string",
+      "icon_background_color": "string",
+      "splash_background_color": "string",
+      "splash_background_color_dark": "string"
+    },
+    "ios": {
+      "bundle_id": "string",
+      "team_id": "string",
+      "credentials_status": "not_configured",
+      "app_store_id": "string",
+      "store_url": "string",
+      "last_build": {}
+    },
+    "android": {
+      "package_name": "string",
+      "credentials_status": "not_configured",
+      "upload_key_status": "not_configured",
+      "store_url": "string",
+      "last_build": {}
+    },
+    "ota": {
+      "enabled": true,
+      "channel": "canary",
+      "auto_update": true,
+      "update_strategy": "next-launch",
+      "min_native_version": "string"
+    }
+  },
   "enabled": true,
   "name": "Installer Portal",
   "domain": "abc.com",
@@ -3103,6 +3443,7 @@ const { data } = await client.getAllPortalConfigs()
 {
   "data": [
     {
+      "mobile_config": {},
       "enabled": true,
       "name": "Installer Portal",
       "domain": "abc.com",
@@ -7234,6 +7575,43 @@ const { data } = await client.createPortalConfig(
         expose_client_secret: false
       }
     ],
+    mobile_config: {
+      portal_id: 'string',
+      enabled: true,
+      display_name: 'string',
+      app_host: 'string',
+      environment: 'prod',
+      branding: {
+        app_icon: 'string',
+        splash: 'string',
+        splash_dark: 'string',
+        icon_background_color: 'string',
+        splash_background_color: 'string',
+        splash_background_color_dark: 'string'
+      },
+      ios: {
+        bundle_id: 'string',
+        team_id: 'string',
+        credentials_status: 'not_configured',
+        app_store_id: 'string',
+        store_url: 'string',
+        last_build: { /* ... */ }
+      },
+      android: {
+        package_name: 'string',
+        credentials_status: 'not_configured',
+        upload_key_status: 'not_configured',
+        store_url: 'string',
+        last_build: { /* ... */ }
+      },
+      ota: {
+        enabled: true,
+        channel: 'canary',
+        auto_update: true,
+        update_strategy: 'next-launch',
+        min_native_version: 'string'
+      }
+    },
     enabled: true,
     name: 'Installer Portal',
     domain: 'abc.com',
@@ -7475,6 +7853,43 @@ const { data } = await client.createPortalConfig(
       "expose_client_secret": false
     }
   ],
+  "mobile_config": {
+    "portal_id": "string",
+    "enabled": true,
+    "display_name": "string",
+    "app_host": "string",
+    "environment": "prod",
+    "branding": {
+      "app_icon": "string",
+      "splash": "string",
+      "splash_dark": "string",
+      "icon_background_color": "string",
+      "splash_background_color": "string",
+      "splash_background_color_dark": "string"
+    },
+    "ios": {
+      "bundle_id": "string",
+      "team_id": "string",
+      "credentials_status": "not_configured",
+      "app_store_id": "string",
+      "store_url": "string",
+      "last_build": {}
+    },
+    "android": {
+      "package_name": "string",
+      "credentials_status": "not_configured",
+      "upload_key_status": "not_configured",
+      "store_url": "string",
+      "last_build": {}
+    },
+    "ota": {
+      "enabled": true,
+      "channel": "canary",
+      "auto_update": true,
+      "update_strategy": "next-launch",
+      "min_native_version": "string"
+    }
+  },
   "enabled": true,
   "name": "Installer Portal",
   "domain": "abc.com",
@@ -7751,6 +8166,43 @@ const { data } = await client.getPortalConfigV3({
       "expose_client_secret": false
     }
   ],
+  "mobile_config": {
+    "portal_id": "string",
+    "enabled": true,
+    "display_name": "string",
+    "app_host": "string",
+    "environment": "prod",
+    "branding": {
+      "app_icon": "string",
+      "splash": "string",
+      "splash_dark": "string",
+      "icon_background_color": "string",
+      "splash_background_color": "string",
+      "splash_background_color_dark": "string"
+    },
+    "ios": {
+      "bundle_id": "string",
+      "team_id": "string",
+      "credentials_status": "not_configured",
+      "app_store_id": "string",
+      "store_url": "string",
+      "last_build": {}
+    },
+    "android": {
+      "package_name": "string",
+      "credentials_status": "not_configured",
+      "upload_key_status": "not_configured",
+      "store_url": "string",
+      "last_build": {}
+    },
+    "ota": {
+      "enabled": true,
+      "channel": "canary",
+      "auto_update": true,
+      "update_strategy": "next-launch",
+      "min_native_version": "string"
+    }
+  },
   "enabled": true,
   "name": "Installer Portal",
   "domain": "abc.com",
@@ -8023,6 +8475,43 @@ const { data } = await client.putPortalConfig(
         expose_client_secret: false
       }
     ],
+    mobile_config: {
+      portal_id: 'string',
+      enabled: true,
+      display_name: 'string',
+      app_host: 'string',
+      environment: 'prod',
+      branding: {
+        app_icon: 'string',
+        splash: 'string',
+        splash_dark: 'string',
+        icon_background_color: 'string',
+        splash_background_color: 'string',
+        splash_background_color_dark: 'string'
+      },
+      ios: {
+        bundle_id: 'string',
+        team_id: 'string',
+        credentials_status: 'not_configured',
+        app_store_id: 'string',
+        store_url: 'string',
+        last_build: { /* ... */ }
+      },
+      android: {
+        package_name: 'string',
+        credentials_status: 'not_configured',
+        upload_key_status: 'not_configured',
+        store_url: 'string',
+        last_build: { /* ... */ }
+      },
+      ota: {
+        enabled: true,
+        channel: 'canary',
+        auto_update: true,
+        update_strategy: 'next-launch',
+        min_native_version: 'string'
+      }
+    },
     enabled: true,
     name: 'Installer Portal',
     domain: 'abc.com',
@@ -8285,6 +8774,43 @@ const { data } = await client.putPortalConfig(
       "expose_client_secret": false
     }
   ],
+  "mobile_config": {
+    "portal_id": "string",
+    "enabled": true,
+    "display_name": "string",
+    "app_host": "string",
+    "environment": "prod",
+    "branding": {
+      "app_icon": "string",
+      "splash": "string",
+      "splash_dark": "string",
+      "icon_background_color": "string",
+      "splash_background_color": "string",
+      "splash_background_color_dark": "string"
+    },
+    "ios": {
+      "bundle_id": "string",
+      "team_id": "string",
+      "credentials_status": "not_configured",
+      "app_store_id": "string",
+      "store_url": "string",
+      "last_build": {}
+    },
+    "android": {
+      "package_name": "string",
+      "credentials_status": "not_configured",
+      "upload_key_status": "not_configured",
+      "store_url": "string",
+      "last_build": {}
+    },
+    "ota": {
+      "enabled": true,
+      "channel": "canary",
+      "auto_update": true,
+      "update_strategy": "next-launch",
+      "min_native_version": "string"
+    }
+  },
   "enabled": true,
   "name": "Installer Portal",
   "domain": "abc.com",
@@ -8548,6 +9074,7 @@ const { data } = await client.listAllPortalConfigs()
       "extension_hooks": {},
       "default_user_to_notify": {},
       "identity_providers": [],
+      "mobile_config": {},
       "enabled": true,
       "name": "Installer Portal",
       "domain": "abc.com",
@@ -8686,6 +9213,43 @@ const { data } = await client.clonePortalConfig(
       "expose_client_secret": false
     }
   ],
+  "mobile_config": {
+    "portal_id": "string",
+    "enabled": true,
+    "display_name": "string",
+    "app_host": "string",
+    "environment": "prod",
+    "branding": {
+      "app_icon": "string",
+      "splash": "string",
+      "splash_dark": "string",
+      "icon_background_color": "string",
+      "splash_background_color": "string",
+      "splash_background_color_dark": "string"
+    },
+    "ios": {
+      "bundle_id": "string",
+      "team_id": "string",
+      "credentials_status": "not_configured",
+      "app_store_id": "string",
+      "store_url": "string",
+      "last_build": {}
+    },
+    "android": {
+      "package_name": "string",
+      "credentials_status": "not_configured",
+      "upload_key_status": "not_configured",
+      "store_url": "string",
+      "last_build": {}
+    },
+    "ota": {
+      "enabled": true,
+      "channel": "canary",
+      "auto_update": true,
+      "update_strategy": "next-launch",
+      "min_native_version": "string"
+    }
+  },
   "enabled": true,
   "name": "Installer Portal",
   "domain": "abc.com",
@@ -9682,6 +10246,43 @@ type UpdateOnlyPortalConfigAttributes = {
 
 ```ts
 type CommonConfigAttributes = {
+  mobile_config?: {
+    portal_id?: string
+    enabled?: boolean
+    display_name?: string
+    app_host?: string
+    environment?: "prod" | "staging" | "dev"
+    branding?: {
+      app_icon?: { ... }
+      splash?: { ... }
+      splash_dark?: { ... }
+      icon_background_color?: { ... }
+      splash_background_color?: { ... }
+      splash_background_color_dark?: { ... }
+    }
+    ios?: {
+      bundle_id?: { ... }
+      team_id?: { ... }
+      credentials_status?: { ... }
+      app_store_id?: { ... }
+      store_url?: { ... }
+      last_build?: { ... }
+    }
+    android?: {
+      package_name?: { ... }
+      credentials_status?: { ... }
+      upload_key_status?: { ... }
+      store_url?: { ... }
+      last_build?: { ... }
+    }
+    ota?: {
+      enabled?: { ... }
+      channel?: { ... }
+      auto_update?: { ... }
+      update_strategy?: { ... }
+      min_native_version?: { ... }
+    }
+  }
   enabled?: boolean
   name?: string
   domain?: string
@@ -9744,43 +10345,6 @@ type CommonConfigAttributes = {
   config?: string
   contact_identifiers?: string[]
   approval_state_attributes?: Record<string, string[]>
-  email_templates?: {
-    confirmAccount?: string // uuid
-    advancedAuth?: string // uuid
-    advancedMFA?: string // uuid
-    journeySignUp?: string // uuid
-    journeySignInOneTimePassword?: string // uuid
-    journeyLoginOTP?: string // uuid
-    forgotPassword?: string // uuid
-    invitation?: string // uuid
-    partnerInvitation?: string // uuid
-    onNewQuote?: string // uuid
-    onMapAPendingUser?: string // uuid
-    onDocUpload?: string // uuid
-    onWorkflowStepAssigned?: string // uuid
-    confirmEmailUpdate?: string // uuid
-    verifyCodeToSetPassword?: string // uuid
-  }
-  images?: {
-    orderLeftTeaser?: string
-    orderRightTeaser?: string
-    welcomeBanner?: string
-  }
-  entity_identifiers?: {
-    type?: {
-      isEnabled?: { ... }
-      attributes?: { ... }
-    }
-  }
-  contract_identifiers?: Array<{
-    name?: string
-    schema?: string
-  }>
-  contract_selector_config?: {
-    show_inactive?: boolean
-    title_path?: string
-  }
-  registration_identifiers?: Array<{
   // ...
 }
 ```
@@ -9850,44 +10414,44 @@ type UpsertPortalConfig = {
     }
     expose_client_secret?: boolean
   }>
-  enabled?: boolean
-  name?: string
-  domain?: string
-  is_epilot_domain?: boolean
-  epilot_domain?: string
-  domain_settings?: {
-    is_custom_domain_enabled?: boolean
-    is_epilot_domain_enabled?: boolean
-    is_redirection_enabled?: boolean
-  }
-  design_id?: string // uuid
-  allowed_portal_entities?: string[]
-  self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY" | "BLOCK_IF_PORTAL_USER_EXISTS"
-  self_registration_account_setting?: "ALLOW_WITH_CREATION" | "DENY" | "ALWAYS_CREATE" | "BLOCK_IF_PORTAL_USER_EXISTS" | "DISALLOW_COMPLETELY"
-  block_registration_if_portal_user_exists?: boolean
-  self_registration_entity?: "contact" | "account"
-  user_account_self_management?: boolean
-  feature_settings?: {
-    start_page?: boolean
-    billing?: boolean
-    change_due_date?: boolean
-    new_design?: boolean
-  }
-  accessToken?: string
-  advanced_mfa?: {
+  mobile_config?: {
+    portal_id?: string
     enabled?: boolean
-  }
-  auth_settings?: {
-    passwordless_login?: {
-      enabled?: { ... }
+    display_name?: string
+    app_host?: string
+    environment?: "prod" | "staging" | "dev"
+    branding?: {
+      app_icon?: { ... }
+      splash?: { ... }
+      splash_dark?: { ... }
+      icon_background_color?: { ... }
+      splash_background_color?: { ... }
+      splash_background_color_dark?: { ... }
     }
-    entry_point?: "PASSWORD" | "SSO"
-    preferred_sso_providers?: string[]
-    auto_redirect_to_sso?: boolean
-    prevent_user_enumeration?: boolean
+    ios?: {
+      bundle_id?: { ... }
+      team_id?: { ... }
+      credentials_status?: { ... }
+      app_store_id?: { ... }
+      store_url?: { ... }
+      last_build?: { ... }
+    }
+    android?: {
+      package_name?: { ... }
+      credentials_status?: { ... }
+      upload_key_status?: { ... }
+      store_url?: { ... }
+      last_build?: { ... }
+    }
+    ota?: {
+      enabled?: { ... }
+      channel?: { ... }
+      auto_update?: { ... }
+      update_strategy?: { ... }
+      min_native_version?: { ... }
+    }
   }
-  cognito_details?: {
-    cognito_user_pool_client_id?: string
+  enabled?: boolean
   // ...
 }
 ```
@@ -9896,6 +10460,43 @@ type UpsertPortalConfig = {
 
 ```ts
 type PortalConfig = {
+  mobile_config?: {
+    portal_id?: string
+    enabled?: boolean
+    display_name?: string
+    app_host?: string
+    environment?: "prod" | "staging" | "dev"
+    branding?: {
+      app_icon?: { ... }
+      splash?: { ... }
+      splash_dark?: { ... }
+      icon_background_color?: { ... }
+      splash_background_color?: { ... }
+      splash_background_color_dark?: { ... }
+    }
+    ios?: {
+      bundle_id?: { ... }
+      team_id?: { ... }
+      credentials_status?: { ... }
+      app_store_id?: { ... }
+      store_url?: { ... }
+      last_build?: { ... }
+    }
+    android?: {
+      package_name?: { ... }
+      credentials_status?: { ... }
+      upload_key_status?: { ... }
+      store_url?: { ... }
+      last_build?: { ... }
+    }
+    ota?: {
+      enabled?: { ... }
+      channel?: { ... }
+      auto_update?: { ... }
+      update_strategy?: { ... }
+      min_native_version?: { ... }
+    }
+  }
   enabled?: boolean
   name?: string
   domain?: string
@@ -9958,43 +10559,6 @@ type PortalConfig = {
   config?: string
   contact_identifiers?: string[]
   approval_state_attributes?: Record<string, string[]>
-  email_templates?: {
-    confirmAccount?: string // uuid
-    advancedAuth?: string // uuid
-    advancedMFA?: string // uuid
-    journeySignUp?: string // uuid
-    journeySignInOneTimePassword?: string // uuid
-    journeyLoginOTP?: string // uuid
-    forgotPassword?: string // uuid
-    invitation?: string // uuid
-    partnerInvitation?: string // uuid
-    onNewQuote?: string // uuid
-    onMapAPendingUser?: string // uuid
-    onDocUpload?: string // uuid
-    onWorkflowStepAssigned?: string // uuid
-    confirmEmailUpdate?: string // uuid
-    verifyCodeToSetPassword?: string // uuid
-  }
-  images?: {
-    orderLeftTeaser?: string
-    orderRightTeaser?: string
-    welcomeBanner?: string
-  }
-  entity_identifiers?: {
-    type?: {
-      isEnabled?: { ... }
-      attributes?: { ... }
-    }
-  }
-  contract_identifiers?: Array<{
-    name?: string
-    schema?: string
-  }>
-  contract_selector_config?: {
-    show_inactive?: boolean
-    title_path?: string
-  }
-  registration_identifiers?: Array<{
   // ...
 }
 ```
@@ -12847,6 +13411,43 @@ type Page = {
 
 ```ts
 type CommonConfigAttributesV3 = {
+  mobile_config?: {
+    portal_id?: string
+    enabled?: boolean
+    display_name?: string
+    app_host?: string
+    environment?: "prod" | "staging" | "dev"
+    branding?: {
+      app_icon?: { ... }
+      splash?: { ... }
+      splash_dark?: { ... }
+      icon_background_color?: { ... }
+      splash_background_color?: { ... }
+      splash_background_color_dark?: { ... }
+    }
+    ios?: {
+      bundle_id?: { ... }
+      team_id?: { ... }
+      credentials_status?: { ... }
+      app_store_id?: { ... }
+      store_url?: { ... }
+      last_build?: { ... }
+    }
+    android?: {
+      package_name?: { ... }
+      credentials_status?: { ... }
+      upload_key_status?: { ... }
+      store_url?: { ... }
+      last_build?: { ... }
+    }
+    ota?: {
+      enabled?: { ... }
+      channel?: { ... }
+      auto_update?: { ... }
+      update_strategy?: { ... }
+      min_native_version?: { ... }
+    }
+  }
   enabled?: boolean
   name?: string
   domain?: string
@@ -12909,43 +13510,6 @@ type CommonConfigAttributesV3 = {
   config?: string
   contact_identifiers?: string[]
   approval_state_attributes?: Record<string, string[]>
-  email_templates?: {
-    confirmAccount?: string // uuid
-    advancedAuth?: string // uuid
-    advancedMFA?: string // uuid
-    journeySignUp?: string // uuid
-    journeySignInOneTimePassword?: string // uuid
-    journeyLoginOTP?: string // uuid
-    forgotPassword?: string // uuid
-    invitation?: string // uuid
-    partnerInvitation?: string // uuid
-    onNewQuote?: string // uuid
-    onMapAPendingUser?: string // uuid
-    onDocUpload?: string // uuid
-    onWorkflowStepAssigned?: string // uuid
-    confirmEmailUpdate?: string // uuid
-    verifyCodeToSetPassword?: string // uuid
-  }
-  images?: {
-    orderLeftTeaser?: string
-    orderRightTeaser?: string
-    welcomeBanner?: string
-  }
-  entity_identifiers?: {
-    type?: {
-      isEnabled?: { ... }
-      attributes?: { ... }
-    }
-  }
-  contract_identifiers?: Array<{
-    name?: string
-    schema?: string
-  }>
-  contract_selector_config?: {
-    show_inactive?: boolean
-    title_path?: string
-  }
-  registration_identifiers?: Array<{
   // ...
 }
 ```
@@ -13023,44 +13587,44 @@ type UpsertPortalConfigV3 = {
     }
     expose_client_secret?: boolean
   }>
-  enabled?: boolean
-  name?: string
-  domain?: string
-  is_epilot_domain?: boolean
-  epilot_domain?: string
-  domain_settings?: {
-    is_custom_domain_enabled?: boolean
-    is_epilot_domain_enabled?: boolean
-    is_redirection_enabled?: boolean
-  }
-  design_id?: string // uuid
-  allowed_portal_entities?: string[]
-  self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY" | "BLOCK_IF_PORTAL_USER_EXISTS"
-  self_registration_account_setting?: "ALLOW_WITH_CREATION" | "DENY" | "ALWAYS_CREATE" | "BLOCK_IF_PORTAL_USER_EXISTS" | "DISALLOW_COMPLETELY"
-  block_registration_if_portal_user_exists?: boolean
-  self_registration_entity?: "contact" | "account"
-  user_account_self_management?: boolean
-  feature_settings?: {
-    start_page?: boolean
-    billing?: boolean
-    change_due_date?: boolean
-    new_design?: boolean
-  }
-  accessToken?: string
-  advanced_mfa?: {
+  mobile_config?: {
+    portal_id?: string
     enabled?: boolean
-  }
-  auth_settings?: {
-    passwordless_login?: {
-      enabled?: { ... }
+    display_name?: string
+    app_host?: string
+    environment?: "prod" | "staging" | "dev"
+    branding?: {
+      app_icon?: { ... }
+      splash?: { ... }
+      splash_dark?: { ... }
+      icon_background_color?: { ... }
+      splash_background_color?: { ... }
+      splash_background_color_dark?: { ... }
     }
-    entry_point?: "PASSWORD" | "SSO"
-    preferred_sso_providers?: string[]
-    auto_redirect_to_sso?: boolean
-    prevent_user_enumeration?: boolean
+    ios?: {
+      bundle_id?: { ... }
+      team_id?: { ... }
+      credentials_status?: { ... }
+      app_store_id?: { ... }
+      store_url?: { ... }
+      last_build?: { ... }
+    }
+    android?: {
+      package_name?: { ... }
+      credentials_status?: { ... }
+      upload_key_status?: { ... }
+      store_url?: { ... }
+      last_build?: { ... }
+    }
+    ota?: {
+      enabled?: { ... }
+      channel?: { ... }
+      auto_update?: { ... }
+      update_strategy?: { ... }
+      min_native_version?: { ... }
+    }
   }
-  cognito_details?: {
-    cognito_user_pool_client_id?: string
+  enabled?: boolean
   // ...
 }
 ```
@@ -13117,6 +13681,43 @@ type PortalConfigV3 = {
       client_secret?: { ... }
     }
   }>
+  mobile_config?: {
+    portal_id?: string
+    enabled?: boolean
+    display_name?: string
+    app_host?: string
+    environment?: "prod" | "staging" | "dev"
+    branding?: {
+      app_icon?: { ... }
+      splash?: { ... }
+      splash_dark?: { ... }
+      icon_background_color?: { ... }
+      splash_background_color?: { ... }
+      splash_background_color_dark?: { ... }
+    }
+    ios?: {
+      bundle_id?: { ... }
+      team_id?: { ... }
+      credentials_status?: { ... }
+      app_store_id?: { ... }
+      store_url?: { ... }
+      last_build?: { ... }
+    }
+    android?: {
+      package_name?: { ... }
+      credentials_status?: { ... }
+      upload_key_status?: { ... }
+      store_url?: { ... }
+      last_build?: { ... }
+    }
+    ota?: {
+      enabled?: { ... }
+      channel?: { ... }
+      auto_update?: { ... }
+      update_strategy?: { ... }
+      min_native_version?: { ... }
+    }
+  }
   enabled?: boolean
   name?: string
   domain?: string
@@ -13131,43 +13732,6 @@ type PortalConfigV3 = {
   allowed_portal_entities?: string[]
   self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY" | "BLOCK_IF_PORTAL_USER_EXISTS"
   self_registration_account_setting?: "ALLOW_WITH_CREATION" | "DENY" | "ALWAYS_CREATE" | "BLOCK_IF_PORTAL_USER_EXISTS" | "DISALLOW_COMPLETELY"
-  block_registration_if_portal_user_exists?: boolean
-  self_registration_entity?: "contact" | "account"
-  user_account_self_management?: boolean
-  feature_settings?: {
-    start_page?: boolean
-    billing?: boolean
-    change_due_date?: boolean
-    new_design?: boolean
-  }
-  accessToken?: string
-  advanced_mfa?: {
-    enabled?: boolean
-  }
-  auth_settings?: {
-    passwordless_login?: {
-      enabled?: { ... }
-    }
-    entry_point?: "PASSWORD" | "SSO"
-    preferred_sso_providers?: string[]
-    auto_redirect_to_sso?: boolean
-    prevent_user_enumeration?: boolean
-  }
-  cognito_details?: {
-    cognito_user_pool_client_id?: string
-    cognito_user_pool_arn?: string
-    cognito_user_pool_id?: string
-    timeouts?: {
-      refresh_token?: { ... }
-      access_token?: { ... }
-      id_token?: { ... }
-    }
-    advanced_authentication?: {
-      user_activity_logging?: { ... }
-      adaptive_authentication?: { ... }
-      compromised_credentials_detection?: { ... }
-    }
-    password_policy?: {
   // ...
 }
 ```
