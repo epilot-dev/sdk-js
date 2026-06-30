@@ -480,6 +480,142 @@
         }
       }
     },
+    "/v1/portal/exports": {
+      "post": {
+        "operationId": "createExport",
+        "summary": "createExport",
+        "description": "Request an asynchronous CSV export of the portal user's contracts, delivery points and meters. Returns a job id to poll.",
+        "tags": [
+          "ECP"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "language",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "de",
+                "en"
+              ]
+            },
+            "description": "Output language for headers and value formatting. Defaults to German when omitted or unsupported."
+          }
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Export job accepted.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "jobId": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "queued",
+                        "running",
+                        "ready",
+                        "failed"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "description": "No export profile configured for this organization."
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/portal/exports/{jobId}": {
+      "get": {
+        "operationId": "getExport",
+        "summary": "getExport",
+        "description": "Get the status of an export job, including the download URL once ready.",
+        "tags": [
+          "ECP"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "jobId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The export job id returned by createExport."
+          }
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Export job status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "jobId": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "queued",
+                        "running",
+                        "ready",
+                        "failed",
+                        "expired"
+                      ]
+                    },
+                    "downloadUrl": {
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "description": "Export job not found."
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/v2/portal/extensions": {
       "get": {
         "operationId": "getPortalExtensions",
@@ -2929,6 +3065,10 @@
                         },
                         "is_main_entity": {
                           "type": "boolean"
+                        },
+                        "journey_registration_email": {
+                          "type": "string",
+                          "description": "The email address registered in the journey's Login & Registration block"
                         }
                       }
                     }
@@ -11624,6 +11764,10 @@
       "CommonConfigAttributes": {
         "type": "object",
         "properties": {
+          "mobile_config": {
+            "description": "Mobile app configuration (top-level; moved out of the config blob).",
+            "$ref": "#/components/schemas/MobileConfig"
+          },
           "enabled": {
             "type": "boolean",
             "description": "Enable/Disable the portal access"
@@ -17814,6 +17958,10 @@
       "CommonConfigAttributesV3": {
         "type": "object",
         "properties": {
+          "mobile_config": {
+            "description": "Mobile app configuration (top-level; moved out of the config blob).",
+            "$ref": "#/components/schemas/MobileConfig"
+          },
           "enabled": {
             "type": "boolean",
             "description": "Enable/Disable the portal access"

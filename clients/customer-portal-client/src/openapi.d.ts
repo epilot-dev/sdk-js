@@ -929,6 +929,10 @@ declare namespace Components {
         }
         export interface CommonConfigAttributes {
             /**
+             * Mobile app configuration (top-level; moved out of the config blob).
+             */
+            mobile_config?: /* Mobile app configuration for the portal. Stored inside the portal's config object. Identifiers/branding are non-secret; signing credentials live in a secure store, never here. */ MobileConfig;
+            /**
              * Enable/Disable the portal access
              */
             enabled?: boolean;
@@ -1445,6 +1449,10 @@ declare namespace Components {
             };
         }
         export interface CommonConfigAttributesV3 {
+            /**
+             * Mobile app configuration (top-level; moved out of the config blob).
+             */
+            mobile_config?: /* Mobile app configuration for the portal. Stored inside the portal's config object. Identifiers/branding are non-secret; signing credentials live in a secure store, never here. */ MobileConfig;
             /**
              * Enable/Disable the portal access
              */
@@ -5926,6 +5934,7 @@ declare namespace Components {
             };
         }
         export interface PortalConfig {
+            mobile_config?: /* Mobile app configuration for the portal. Stored inside the portal's config object. Identifiers/branding are non-secret; signing credentials live in a secure store, never here. */ MobileConfig;
             /**
              * Enable/Disable the portal access
              */
@@ -6538,6 +6547,7 @@ declare namespace Components {
              *
              */
             identity_providers?: ProviderPublicConfig[];
+            mobile_config?: /* Mobile app configuration for the portal. Stored inside the portal's config object. Identifiers/branding are non-secret; signing credentials live in a secure store, never here. */ MobileConfig;
             /**
              * Enable/Disable the portal access
              */
@@ -8036,6 +8046,7 @@ declare namespace Components {
              *
              */
             ProviderConfig[];
+            mobile_config?: /* Mobile app configuration for the portal. Stored inside the portal's config object. Identifiers/branding are non-secret; signing credentials live in a secure store, never here. */ MobileConfig;
             /**
              * Enable/Disable the portal access
              */
@@ -8616,6 +8627,7 @@ declare namespace Components {
              *
              */
             ProviderConfig[];
+            mobile_config?: /* Mobile app configuration for the portal. Stored inside the portal's config object. Identifiers/branding are non-secret; signing credentials live in a secure store, never here. */ MobileConfig;
             /**
              * Enable/Disable the portal access
              */
@@ -9736,6 +9748,25 @@ declare namespace Paths {
             export type $201 = Components.Schemas.ActivityItem;
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace CreateExport {
+        namespace Parameters {
+            export type Language = "de" | "en";
+        }
+        export interface QueryParameters {
+            language?: Parameters.Language;
+        }
+        namespace Responses {
+            export interface $202 {
+                jobId?: string;
+                status?: "queued" | "running" | "ready" | "failed";
+            }
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export interface $404 {
+            }
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -11304,6 +11335,26 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace GetExport {
+        namespace Parameters {
+            export type JobId = string;
+        }
+        export interface PathParameters {
+            jobId: Parameters.JobId;
+        }
+        namespace Responses {
+            export interface $200 {
+                jobId?: string;
+                status?: "queued" | "running" | "ready" | "failed" | "expired";
+                downloadUrl?: string;
+                error?: string;
+            }
+            export type $401 = Components.Responses.Unauthorized;
+            export interface $404 {
+            }
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace GetExternalLinks {
         namespace Parameters {
             export type ContactId = /**
@@ -11628,6 +11679,7 @@ declare namespace Paths {
         }
         namespace Responses {
             export interface $200 {
+                mobile_config?: /* Mobile app configuration for the portal. Stored inside the portal's config object. Identifiers/branding are non-secret; signing credentials live in a secure store, never here. */ Components.Schemas.MobileConfig;
                 /**
                  * Enable/Disable the portal access
                  */
@@ -12239,6 +12291,7 @@ declare namespace Paths {
         }
         namespace Responses {
             export interface $200 {
+                mobile_config?: /* Mobile app configuration for the portal. Stored inside the portal's config object. Identifiers/branding are non-secret; signing credentials live in a secure store, never here. */ Components.Schemas.MobileConfig;
                 /**
                  * Enable/Disable the portal access
                  */
@@ -14442,6 +14495,10 @@ declare namespace Paths {
                      */
                     Components.Schemas.EntityId /* uuid */;
                     is_main_entity?: boolean;
+                    /**
+                     * The email address registered in the journey's Login & Registration block
+                     */
+                    journey_registration_email?: string;
                 };
             };
         }
@@ -15801,6 +15858,26 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeletePortal.Responses.$204>
+  /**
+   * createExport - createExport
+   * 
+   * Request an asynchronous CSV export of the portal user's contracts, delivery points and meters. Returns a job id to poll.
+   */
+  'createExport'(
+    parameters?: Parameters<Paths.CreateExport.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CreateExport.Responses.$202>
+  /**
+   * getExport - getExport
+   * 
+   * Get the status of an export job, including the download URL once ready.
+   */
+  'getExport'(
+    parameters?: Parameters<Paths.GetExport.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetExport.Responses.$200>
   /**
    * getPortalExtensions - getPortalExtensions
    * 
@@ -17481,6 +17558,30 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeletePortal.Responses.$204>
+  }
+  ['/v1/portal/exports']: {
+    /**
+     * createExport - createExport
+     * 
+     * Request an asynchronous CSV export of the portal user's contracts, delivery points and meters. Returns a job id to poll.
+     */
+    'post'(
+      parameters?: Parameters<Paths.CreateExport.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CreateExport.Responses.$202>
+  }
+  ['/v1/portal/exports/{jobId}']: {
+    /**
+     * getExport - getExport
+     * 
+     * Get the status of an export job, including the download URL once ready.
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetExport.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetExport.Responses.$200>
   }
   ['/v2/portal/extensions']: {
     /**
