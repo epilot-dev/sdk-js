@@ -35,9 +35,13 @@ const { data } = await snapshotClient.createSnapshot(...)
 - [`getSnapshotResource`](#getsnapshotresource)
 - [`listDependencies`](#listdependencies)
 
+**ScheduledSnapshots**
+- [`getOrgSnapshotSchedule`](#getorgsnapshotschedule)
+- [`putOrgSnapshotSchedule`](#putorgsnapshotschedule)
+- [`deleteOrgSnapshotSchedule`](#deleteorgsnapshotschedule)
+
 **Schemas**
 - [`Error`](#error)
-- [`EmptyInventoryError`](#emptyinventoryerror)
 - [`ResourceRef`](#resourceref)
 - [`SnapshotResourceSummary`](#snapshotresourcesummary)
 - [`SnapshotResourceList`](#snapshotresourcelist)
@@ -50,6 +54,9 @@ const { data } = await snapshotClient.createSnapshot(...)
 - [`Snapshot`](#snapshot)
 - [`Operation`](#operation)
 - [`CallerIdentity`](#calleridentity)
+- [`RetentionConfig`](#retentionconfig)
+- [`PutOrgSnapshotScheduleRequest`](#putorgsnapshotschedulerequest)
+- [`OrgSnapshotSchedule`](#orgsnapshotschedule)
 
 ### `createSnapshot`
 
@@ -156,9 +163,9 @@ const { data } = await client.listSnapshots({
 
 ### `captureOrgSnapshot`
 
-Snapshot the caller's whole organization now. Fetches a fresh inventory
-of the org's configuration resources from configuration-hub-api, persists
-it as an inventory artifact, and starts a `scope: "org
+Snapshot the caller's whole organization now. Creates a `scope: "org"`
+snapshot row and starts a chunked capture Step Function, then returns
+immediately. The capture asynchronously fetches a fresh inv
 
 `POST /v1/snapshots:capture-org`
 
@@ -344,6 +351,112 @@ const { data } = await client.getSnapshotResource({
 
 ---
 
+### `getOrgSnapshotSchedule`
+
+Return the scheduled-snapshot enrollment config for the caller's org.
+Returns 404 when the org has not yet enrolled.
+
+`GET /v1/org-snapshot-schedule`
+
+```ts
+const { data } = await client.getOrgSnapshotSchedule()
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "org_id": "string",
+  "enabled": true,
+  "cron_expression": "cron(0 2 * * ? *)",
+  "timezone": "string",
+  "retention": {
+    "value": 1,
+    "unit": "days"
+  },
+  "excluded_types": ["string"],
+  "schedule_name": "string",
+  "last_started_at": "1970-01-01T00:00:00.000Z",
+  "last_completed_at": "1970-01-01T00:00:00.000Z",
+  "last_status": "completed",
+  "created_by": "string",
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "updated_at": "1970-01-01T00:00:00.000Z"
+}
+```
+
+</details>
+
+---
+
+### `putOrgSnapshotSchedule`
+
+Create or update the scheduled-snapshot enrollment config for the
+caller's org (upsert). The cron expression and retention window are
+validated server-side; invalid values are rejected with 400.
+
+`PUT /v1/org-snapshot-schedule`
+
+```ts
+const { data } = await client.putOrgSnapshotSchedule(
+  null,
+  {
+    enabled: true,
+    cron_expression: 'cron(0 2 * * ? *)',
+    timezone: 'Europe/Berlin',
+    retention: {
+      value: 1,
+      unit: 'days'
+    },
+    excluded_types: ['string']
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "org_id": "string",
+  "enabled": true,
+  "cron_expression": "cron(0 2 * * ? *)",
+  "timezone": "string",
+  "retention": {
+    "value": 1,
+    "unit": "days"
+  },
+  "excluded_types": ["string"],
+  "schedule_name": "string",
+  "last_started_at": "1970-01-01T00:00:00.000Z",
+  "last_completed_at": "1970-01-01T00:00:00.000Z",
+  "last_status": "completed",
+  "created_by": "string",
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "updated_at": "1970-01-01T00:00:00.000Z"
+}
+```
+
+</details>
+
+---
+
+### `deleteOrgSnapshotSchedule`
+
+Remove the scheduled-snapshot enrollment for the caller's org.
+Returns 404 when no schedule exists.
+The corresponding EventBridge schedule is removed by a reconcile
+step (Task 6).
+
+`DELETE /v1/org-snapshot-schedule`
+
+```ts
+const { data } = await client.deleteOrgSnapshotSchedule()
+```
+
+---
+
 ### `listDependencies`
 
 Walk the dependency tree for a set of resources and return the full
@@ -391,23 +504,6 @@ const { data } = await client.listDependencies(
 type Error = {
   status: number
   error: string
-}
-```
-
-### `EmptyInventoryError`
-
-Returned (422) when the org inventory contains no capturable resources
-after filtering out sensitive, unsupported, and excluded types. The
-`skipped_types` array explains why every type was dropped.
-
-
-```ts
-type EmptyInventoryError = {
-  message: string
-  skipped_types: Array<{
-    type: string
-    reason: string
-  }>
 }
 ```
 
@@ -603,5 +699,67 @@ type CallerIdentity = {
   name: string
   user_id?: string
   token_id?: string
+}
+```
+
+### `RetentionConfig`
+
+Flat retention window for a scheduled snapshot.
+Converted to a `ttl` epoch at capture time. Capped at ~24 months.
+
+
+```ts
+type RetentionConfig = {
+  value: number
+  unit: "days" | "weeks" | "months"
+}
+```
+
+### `PutOrgSnapshotScheduleRequest`
+
+Body for `putOrgSnapshotSchedule`. All fields optional; unset fields
+receive defaults on first create and are left unchanged on updates
+(except `updated_at`).
+
+
+```ts
+type PutOrgSnapshotScheduleRequest = {
+  enabled?: boolean
+  cron_expression?: string
+  timezone?: string
+  retention?: {
+    value: number
+    unit: "days" | "weeks" | "months"
+  }
+  excluded_types?: string[]
+}
+```
+
+### `OrgSnapshotSchedule`
+
+Enrollment record for a scheduled org snapshot. One row per org.
+This table — not EventBridge — is the source of truth; the EventBridge
+schedule entry is the materialization of this row (reconciled on write
+by Task 6).
+
+
+```ts
+type OrgSnapshotSchedule = {
+  org_id: string
+  enabled: boolean
+  cron_expression: string
+  timezone: string
+  retention: {
+    value: number
+    unit: "days" | "weeks" | "months"
+  }
+  excluded_types?: string[]
+  schedule_name: string
+  last_started_at?: string // date-time
+  last_completed_at?: string // date-time
+  last_status?: "completed" | "partial" | "failed"
+  created_by: string
+  created_at: string // date-time
+  updated_at: string // date-time
 }
 ```
