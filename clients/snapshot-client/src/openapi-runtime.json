@@ -123,6 +123,26 @@
         "responses": {}
       }
     },
+    "/v1/org-snapshot-schedule": {
+      "get": {
+        "operationId": "getOrgSnapshotSchedule",
+        "responses": {}
+      },
+      "put": {
+        "operationId": "putOrgSnapshotSchedule",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteOrgSnapshotSchedule",
+        "responses": {}
+      }
+    },
     "/v1/snapshots:list-dependencies": {
       "post": {
         "operationId": "listDependencies",
@@ -149,11 +169,6 @@
         }
       },
       "NotFound": {
-        "content": {
-          "application/json": {}
-        }
-      },
-      "UnprocessableEntity": {
         "content": {
           "application/json": {}
         }
