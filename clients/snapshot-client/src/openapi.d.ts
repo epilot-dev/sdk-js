@@ -11,13 +11,6 @@ declare namespace Components {
         export type BadRequest = Schemas.Error;
         export type NotFound = Schemas.Error;
         export type Unauthorized = Schemas.Error;
-        export type UnprocessableEntity = /**
-         * Returned (422) when the org inventory contains no capturable resources
-         * after filtering out sensitive, unsupported, and excluded types. The
-         * `skipped_types` array explains why every type was dropped.
-         *
-         */
-        Schemas.EmptyInventoryError;
     }
     namespace Schemas {
         export interface CallerIdentity {
@@ -86,23 +79,6 @@ declare namespace Components {
             status: "creating";
             created_at: string; // date-time
         }
-        /**
-         * Returned (422) when the org inventory contains no capturable resources
-         * after filtering out sensitive, unsupported, and excluded types. The
-         * `skipped_types` array explains why every type was dropped.
-         *
-         */
-        export interface EmptyInventoryError {
-            /**
-             * example:
-             * No capturable resources in the org inventory
-             */
-            message: string;
-            skipped_types: {
-                type: string;
-                reason: string;
-            }[];
-        }
         export interface Error {
             status: number;
             error: string;
@@ -120,6 +96,89 @@ declare namespace Components {
             status: "in_progress" | "completed" | "partial" | "failed";
             error?: string;
             triggered_by: CallerIdentity;
+        }
+        /**
+         * Enrollment record for a scheduled org snapshot. One row per org.
+         * This table — not EventBridge — is the source of truth; the EventBridge
+         * schedule entry is the materialization of this row (reconciled on write
+         * by Task 6).
+         *
+         */
+        export interface OrgSnapshotSchedule {
+            org_id: string;
+            enabled: boolean;
+            /**
+             * Validated 6-field EventBridge cron. Default `cron(0 2 * * ? *)`.
+             * example:
+             * cron(0 2 * * ? *)
+             */
+            cron_expression: string;
+            /**
+             * IANA timezone. Default `Europe/Berlin`.
+             */
+            timezone: string;
+            retention: /**
+             * Flat retention window for a scheduled snapshot.
+             * Converted to a `ttl` epoch at capture time. Capped at ~24 months.
+             *
+             */
+            RetentionConfig;
+            excluded_types?: string[];
+            /**
+             * Name of the EventBridge Scheduler entry this row owns.
+             * Set at enrollment time as `org-snapshot-{orgId}`.
+             *
+             */
+            schedule_name: string;
+            last_started_at?: string; // date-time
+            last_completed_at?: string; // date-time
+            last_status?: "completed" | "partial" | "failed";
+            created_by: string;
+            created_at: string; // date-time
+            updated_at: string; // date-time
+        }
+        /**
+         * Body for `putOrgSnapshotSchedule`. All fields optional; unset fields
+         * receive defaults on first create and are left unchanged on updates
+         * (except `updated_at`).
+         *
+         */
+        export interface PutOrgSnapshotScheduleRequest {
+            /**
+             * Whether the schedule is active.
+             */
+            enabled?: boolean;
+            /**
+             * 6-field EventBridge cron expression, e.g. `cron(0 2 * * ? *)`.
+             * Validated server-side: minute + hour must be concrete single integers
+             * (no `*`, lists, ranges, or steps) to cap cadence at ≤ once/day.
+             * Exactly one of day-of-month / day-of-week must be `?`.
+             *
+             * example:
+             * cron(0 2 * * ? *)
+             */
+            cron_expression?: string;
+            /**
+             * IANA timezone string passed to EventBridge `ScheduleExpressionTimezone`,
+             * e.g. `Europe/Berlin`. AWS handles DST natively.
+             *
+             * example:
+             * Europe/Berlin
+             */
+            timezone?: string;
+            retention?: /**
+             * Flat retention window for a scheduled snapshot.
+             * Converted to a `ttl` epoch at capture time. Capped at ~24 months.
+             *
+             */
+            RetentionConfig;
+            /**
+             * Resource types to exclude from the scheduled capture, in addition
+             * to the always-excluded sensitive types (`access_token`,
+             * `environment_variable`).
+             *
+             */
+            excluded_types?: string[];
         }
         export interface ResourceRef {
             /**
@@ -148,6 +207,18 @@ declare namespace Components {
         export interface RestoreSnapshotResponse {
             id: string;
             status: "restoring";
+        }
+        /**
+         * Flat retention window for a scheduled snapshot.
+         * Converted to a `ttl` epoch at capture time. Capped at ~24 months.
+         *
+         */
+        export interface RetentionConfig {
+            /**
+             * Numeric quantity of retention (e.g. 90 for "90 days").
+             */
+            value: number;
+            unit: "days" | "weeks" | "months";
         }
         export interface Snapshot {
             id: string;
@@ -287,7 +358,6 @@ declare namespace Paths {
         namespace Responses {
             export type $202 = Components.Schemas.CreateSnapshotResponse;
             export type $401 = Components.Responses.Unauthorized;
-            export type $422 = Components.Responses.UnprocessableEntity;
         }
     }
     namespace CreateSnapshot {
@@ -298,10 +368,32 @@ declare namespace Paths {
             export type $401 = Components.Responses.Unauthorized;
         }
     }
+    namespace DeleteOrgSnapshotSchedule {
+        namespace Responses {
+            export interface $204 {
+            }
+            export type $401 = Components.Responses.Unauthorized;
+            export type $404 = Components.Responses.NotFound;
+        }
+    }
     namespace DeleteSnapshot {
         namespace Responses {
             export interface $204 {
             }
+            export type $401 = Components.Responses.Unauthorized;
+            export type $404 = Components.Responses.NotFound;
+        }
+    }
+    namespace GetOrgSnapshotSchedule {
+        namespace Responses {
+            export type $200 = /**
+             * Enrollment record for a scheduled org snapshot. One row per org.
+             * This table — not EventBridge — is the source of truth; the EventBridge
+             * schedule entry is the materialization of this row (reconciled on write
+             * by Task 6).
+             *
+             */
+            Components.Schemas.OrgSnapshotSchedule;
             export type $401 = Components.Responses.Unauthorized;
             export type $404 = Components.Responses.NotFound;
         }
@@ -370,6 +462,27 @@ declare namespace Paths {
                 cursor?: string;
                 results: Components.Schemas.Snapshot[];
             }
+            export type $401 = Components.Responses.Unauthorized;
+        }
+    }
+    namespace PutOrgSnapshotSchedule {
+        export type RequestBody = /**
+         * Body for `putOrgSnapshotSchedule`. All fields optional; unset fields
+         * receive defaults on first create and are left unchanged on updates
+         * (except `updated_at`).
+         *
+         */
+        Components.Schemas.PutOrgSnapshotScheduleRequest;
+        namespace Responses {
+            export type $200 = /**
+             * Enrollment record for a scheduled org snapshot. One row per org.
+             * This table — not EventBridge — is the source of truth; the EventBridge
+             * schedule entry is the materialization of this row (reconciled on write
+             * by Task 6).
+             *
+             */
+            Components.Schemas.OrgSnapshotSchedule;
+            export type $400 = Components.Responses.BadRequest;
             export type $401 = Components.Responses.Unauthorized;
         }
     }
@@ -460,12 +573,14 @@ export interface OperationMethods {
   /**
    * captureOrgSnapshot - captureOrgSnapshot
    * 
-   * Snapshot the caller's whole organization now. Fetches a fresh inventory
-   * of the org's configuration resources from configuration-hub-api, persists
-   * it as an inventory artifact, and starts a `scope: "org"` chunked capture.
-   * Async — returns immediately with a snapshot ID; client polls `getSnapshot`
-   * and watches `capture_summary` fill in until `create.status` moves from
-   * `in_progress` to `completed` or `failed`.
+   * Snapshot the caller's whole organization now. Creates a `scope: "org"`
+   * snapshot row and starts a chunked capture Step Function, then returns
+   * immediately. The capture asynchronously fetches a fresh inventory of the
+   * org's configuration resources from configuration-hub-api, persists it as
+   * an inventory artifact, and captures each resource. Client polls
+   * `getSnapshot` and watches `capture_summary` fill in until `create.status`
+   * moves from `in_progress` to `completed` or `failed`. An org with no
+   * capturable resources finalizes as a completed 0-resource snapshot.
    * 
    * Sensitive types (`access_token`, `environment_variable`), types with no
    * engine adapter, and any `excluded_types` are dropped from the capture and
@@ -543,6 +658,55 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetSnapshotResource.Responses.$200>
   /**
+   * getOrgSnapshotSchedule - getOrgSnapshotSchedule
+   * 
+   * Return the scheduled-snapshot enrollment config for the caller's org.
+   * Returns 404 when the org has not yet enrolled.
+   * 
+   */
+  'getOrgSnapshotSchedule'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetOrgSnapshotSchedule.Responses.$200>
+  /**
+   * putOrgSnapshotSchedule - putOrgSnapshotSchedule
+   * 
+   * Create or update the scheduled-snapshot enrollment config for the
+   * caller's org (upsert). The cron expression and retention window are
+   * validated server-side; invalid values are rejected with 400.
+   * 
+   * Defaults applied when a field is omitted on first create:
+   *   - `cron_expression`: `cron(0 2 * * ? *)` (daily at 02:00)
+   *   - `timezone`: `Europe/Berlin`
+   *   - `retention`: `{ value: 90, unit: "days" }`
+   *   - `enabled`: `true`
+   * 
+   * **Note:** this call persists the row only. EventBridge schedule
+   * materialization is performed by a subsequent reconcile step (Task 6).
+   * The row is the authoritative source of truth for the UI.
+   * 
+   */
+  'putOrgSnapshotSchedule'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.PutOrgSnapshotSchedule.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.PutOrgSnapshotSchedule.Responses.$200>
+  /**
+   * deleteOrgSnapshotSchedule - deleteOrgSnapshotSchedule
+   * 
+   * Remove the scheduled-snapshot enrollment for the caller's org.
+   * Returns 404 when no schedule exists.
+   * The corresponding EventBridge schedule is removed by a reconcile
+   * step (Task 6).
+   * 
+   */
+  'deleteOrgSnapshotSchedule'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.DeleteOrgSnapshotSchedule.Responses.$204>
+  /**
    * listDependencies - listDependencies
    * 
    * Walk the dependency tree for a set of resources and return the full
@@ -596,12 +760,14 @@ export interface PathsDictionary {
     /**
      * captureOrgSnapshot - captureOrgSnapshot
      * 
-     * Snapshot the caller's whole organization now. Fetches a fresh inventory
-     * of the org's configuration resources from configuration-hub-api, persists
-     * it as an inventory artifact, and starts a `scope: "org"` chunked capture.
-     * Async — returns immediately with a snapshot ID; client polls `getSnapshot`
-     * and watches `capture_summary` fill in until `create.status` moves from
-     * `in_progress` to `completed` or `failed`.
+     * Snapshot the caller's whole organization now. Creates a `scope: "org"`
+     * snapshot row and starts a chunked capture Step Function, then returns
+     * immediately. The capture asynchronously fetches a fresh inventory of the
+     * org's configuration resources from configuration-hub-api, persists it as
+     * an inventory artifact, and captures each resource. Client polls
+     * `getSnapshot` and watches `capture_summary` fill in until `create.status`
+     * moves from `in_progress` to `completed` or `failed`. An org with no
+     * capturable resources finalizes as a completed 0-resource snapshot.
      * 
      * Sensitive types (`access_token`, `environment_variable`), types with no
      * engine adapter, and any `excluded_types` are dropped from the capture and
@@ -687,6 +853,57 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetSnapshotResource.Responses.$200>
   }
+  ['/v1/org-snapshot-schedule']: {
+    /**
+     * getOrgSnapshotSchedule - getOrgSnapshotSchedule
+     * 
+     * Return the scheduled-snapshot enrollment config for the caller's org.
+     * Returns 404 when the org has not yet enrolled.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetOrgSnapshotSchedule.Responses.$200>
+    /**
+     * putOrgSnapshotSchedule - putOrgSnapshotSchedule
+     * 
+     * Create or update the scheduled-snapshot enrollment config for the
+     * caller's org (upsert). The cron expression and retention window are
+     * validated server-side; invalid values are rejected with 400.
+     * 
+     * Defaults applied when a field is omitted on first create:
+     *   - `cron_expression`: `cron(0 2 * * ? *)` (daily at 02:00)
+     *   - `timezone`: `Europe/Berlin`
+     *   - `retention`: `{ value: 90, unit: "days" }`
+     *   - `enabled`: `true`
+     * 
+     * **Note:** this call persists the row only. EventBridge schedule
+     * materialization is performed by a subsequent reconcile step (Task 6).
+     * The row is the authoritative source of truth for the UI.
+     * 
+     */
+    'put'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.PutOrgSnapshotSchedule.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.PutOrgSnapshotSchedule.Responses.$200>
+    /**
+     * deleteOrgSnapshotSchedule - deleteOrgSnapshotSchedule
+     * 
+     * Remove the scheduled-snapshot enrollment for the caller's org.
+     * Returns 404 when no schedule exists.
+     * The corresponding EventBridge schedule is removed by a reconcile
+     * step (Task 6).
+     * 
+     */
+    'delete'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.DeleteOrgSnapshotSchedule.Responses.$204>
+  }
   ['/v1/snapshots:list-dependencies']: {
     /**
      * listDependencies - listDependencies
@@ -713,12 +930,14 @@ export type CallerIdentity = Components.Schemas.CallerIdentity;
 export type CreateOrgSnapshotRequest = Components.Schemas.CreateOrgSnapshotRequest;
 export type CreateSnapshotRequest = Components.Schemas.CreateSnapshotRequest;
 export type CreateSnapshotResponse = Components.Schemas.CreateSnapshotResponse;
-export type EmptyInventoryError = Components.Schemas.EmptyInventoryError;
 export type Error = Components.Schemas.Error;
 export type Operation = Components.Schemas.Operation;
+export type OrgSnapshotSchedule = Components.Schemas.OrgSnapshotSchedule;
+export type PutOrgSnapshotScheduleRequest = Components.Schemas.PutOrgSnapshotScheduleRequest;
 export type ResourceRef = Components.Schemas.ResourceRef;
 export type RestoreSnapshotRequest = Components.Schemas.RestoreSnapshotRequest;
 export type RestoreSnapshotResponse = Components.Schemas.RestoreSnapshotResponse;
+export type RetentionConfig = Components.Schemas.RetentionConfig;
 export type Snapshot = Components.Schemas.Snapshot;
 export type SnapshotResourceDetail = Components.Schemas.SnapshotResourceDetail;
 export type SnapshotResourceList = Components.Schemas.SnapshotResourceList;
