@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Metering API",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "description": "The Metering API manages smart meter data, meter counters, and meter readings for epilot customers and administrators.\n\nIt supports two audiences:\n- **ECP (End Customer Portal)**: Portal users can view their meters, counters, and submit readings via the customer portal.\n- **ECP Admin**: Internal epilot users and ERP integrations can create, update, and bulk-manage meter readings.\n\nKey capabilities:\n- Retrieve meters and counters associated with a customer or contract\n- Submit individual or bulk meter readings (with optional validation skip)\n- Batch upsert/delete readings using the v2 endpoint\n- Query historical readings by date interval with cumulative or relative consumption modes\n- Retrieve allowed reading ranges to guide end customers entering readings\n"
   },
   "tags": [
@@ -554,6 +554,9 @@
           },
           {
             "$ref": "#/components/parameters/DirectQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/CreateTicketQueryParam"
           }
         ],
         "requestBody": {
@@ -722,6 +725,9 @@
           },
           {
             "$ref": "#/components/parameters/DirectQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/CreateTicketQueryParam"
           }
         ],
         "requestBody": {
@@ -2969,6 +2975,16 @@
           "$ref": "#/components/schemas/ActivityId"
         }
       },
+      "CreateTicketQueryParam": {
+        "name": "create_ticket",
+        "in": "query",
+        "required": false,
+        "description": "Controls whether a manual-intervention (\"Übermittlung Zählerstand\") ticket is created for the\nwritten readings. Defaults to true, preserving portal/journey behaviour (readings with\nsource ECP or journey-submission mint a review ticket).\n\nSet to false for authoritative, system-driven writes — e.g. the ERP inbound integration\npipeline — whose readings arrive already confirmed and must not spawn a review ticket. This\nalso prevents the ticket-triggered `ServiceMeterReadingAdded` echo back to the ERP.\n",
+        "schema": {
+          "type": "boolean",
+          "default": true
+        }
+      },
       "SkipValidationQueryParam": {
         "name": "skip_validation",
         "in": "query",
@@ -2981,5 +2997,9 @@
       }
     }
   },
-  "servers": []
+  "servers": [
+    {
+      "url": "https://metering.sls.epilot.io"
+    }
+  ]
 }

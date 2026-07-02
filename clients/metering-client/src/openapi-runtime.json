@@ -118,6 +118,9 @@
           },
           {
             "$ref": "#/components/parameters/DirectQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/CreateTicketQueryParam"
           }
         ],
         "requestBody": {
@@ -168,6 +171,9 @@
           },
           {
             "$ref": "#/components/parameters/DirectQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/CreateTicketQueryParam"
           }
         ],
         "requestBody": {
@@ -491,6 +497,11 @@
         "in": "query",
         "required": false
       },
+      "CreateTicketQueryParam": {
+        "name": "create_ticket",
+        "in": "query",
+        "required": false
+      },
       "SkipValidationQueryParam": {
         "name": "skip_validation",
         "in": "query",
@@ -498,5 +509,9 @@
       }
     }
   },
-  "servers": []
+  "servers": [
+    {
+      "url": "https://metering.sls.epilot.io"
+    }
+  ]
 }
