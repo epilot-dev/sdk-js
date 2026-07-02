@@ -2,21 +2,58 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Billing API",
-    "description": "API to manage billing data for epilot contracts and orders",
+    "description": "API to manage billing data for epilot contracts and orders.\n\nThis API provides endpoints for managing financial transactions (Buchungssätze) related to\ncustomer contracts (Verträge) including installments (Abschlagszahlungen), payments (Zahlungseingänge),\nreimbursements (Rückerstattungen), and other billing events.\n\n## Key Concepts\n\n- **Billing Event (Buchungssatz)**: A single financial transaction entry in the billing ledger\n- **Contract (Vertrag)**: A customer agreement linked to billing events\n- **Balance (Kontostand)**: The current financial standing of a customer across all contracts\n",
     "version": "1.0.0"
   },
   "tags": [
     {
       "name": "Billing Events",
-      "description": "Manage installments, payments and reimbursements"
+      "description": "Manage billing events (Buchungssätze) such as installments (Abschlagszahlungen),\npayments (Zahlungseingänge), reimbursements (Rückerstattungen), dunning fees (Mahngebühren),\nand other financial transactions.\n\nBilling events follow double-entry accounting principles where each entry is either\na debit (Soll) or credit (Haben) transaction.\n"
     },
     {
       "name": "Contracts",
-      "description": "Manage contracts within 360"
+      "description": "Manage contract entities (Verträge) within epilot 360.\n\nContracts represent customer agreements and serve as the parent entity for billing events.\nEach contract has associated billing settings such as billing period (Abrechnungszeitraum),\ninstallment amounts (Abschlagsbeträge), and balance tracking.\n"
     },
     {
       "name": "Balance",
-      "description": "Get customer balance"
+      "description": "Retrieve customer balance information (Kontostand).\n\nThe balance represents the total financial standing of a customer across all their\ncontracts and orders, calculated from the sum of all billing events.\n"
+    },
+    {
+      "name": "Pricing Information",
+      "description": "Read contract and billing account pricing information"
+    },
+    {
+      "name": "Configuration History",
+      "description": "Read billing configuration change history"
+    },
+    {
+      "name": "billing_event_schema",
+      "x-displayName": "Billing Event",
+      "description": "<SchemaDefinition schemaRef=\"#/components/schemas/BillingEvent\" />\n"
+    },
+    {
+      "name": "contract_schema",
+      "x-displayName": "Contract",
+      "description": "<SchemaDefinition schemaRef=\"#/components/schemas/Contract\" />\n"
+    }
+  ],
+  "x-tagGroups": [
+    {
+      "name": "APIs",
+      "tags": [
+        "Billing Events",
+        "Contracts",
+        "Balance",
+        "Pricing Information",
+        "Configuration History"
+      ]
+    },
+    {
+      "name": "Schemas",
+      "tags": [
+        "billing_event_schema",
+        "contract_schema"
+      ]
     }
   ],
   "security": [
@@ -29,29 +66,32 @@
       "get": {
         "operationId": "getBillingEvents",
         "summary": "getBillingEvents",
-        "description": "Get and filter billing events such as installments and reimbursements.",
+        "description": "Retrieve and filter billing events (Buchungssätze) such as installments (Abschlagszahlungen),\npayments (Zahlungseingänge), and reimbursements (Rückerstattungen).\n\nResults are paginated and can be filtered by entity, contact, event type, or date range.\n",
         "tags": [
           "Billing Events"
         ],
         "parameters": [
           {
-            "in": "query",
             "name": "from",
+            "in": "query",
             "required": false,
+            "description": "Pagination offset - number of results to skip",
             "schema": {
               "type": "number",
-              "description": "Initial offset to set for the search results",
+              "minimum": 0,
               "example": 0,
               "default": 0
             }
           },
           {
-            "in": "query",
             "name": "size",
+            "in": "query",
             "required": false,
+            "description": "Maximum number of results to return per page",
             "schema": {
               "type": "number",
-              "description": "Size of the search results",
+              "minimum": 1,
+              "maximum": 1000,
               "example": 100,
               "default": 100
             }
@@ -59,87 +99,158 @@
           {
             "name": "entity_id",
             "in": "query",
-            "description": "Entity ID to filter billing events by",
             "required": false,
+            "description": "Filter billing events by one or more entity IDs (e.g., contract or order IDs)",
             "schema": {
               "type": "array",
               "items": {
-                "type": "string"
+                "type": "string",
+                "example": "5da0a718-c822-403d-9f5d-20d4584e0528"
               }
+            },
+            "example": [
+              "5da0a718-c822-403d-9f5d-20d4584e0528"
+            ]
+          },
+          {
+            "name": "contact_id",
+            "in": "query",
+            "required": false,
+            "description": "Filter billing events by customer contact ID (Kundennummer)",
+            "schema": {
+              "type": "string",
+              "example": "1e3f0d58-69d2-4dbb-9a43-3ee63d862e8e"
             }
           },
           {
             "name": "event_type",
             "in": "query",
+            "description": "Filter by billing event type (Buchungsart):\n- `installment`: Abschlagszahlung (scheduled payment due)\n- `reimbursement`: Rückerstattung (refund to customer)\n",
             "schema": {
               "type": "string",
               "enum": [
                 "installment",
                 "reimbursement"
               ],
-              "description": "Type of billing event to filter by"
+              "example": "installment"
             }
           },
           {
             "name": "date_after",
             "in": "query",
+            "description": "Filter billing events with booking date (Buchungsdatum) after this timestamp",
             "schema": {
               "type": "string",
               "format": "date-time",
-              "description": "List billing events after this date"
+              "example": "2025-01-01T00:00:00Z"
             }
           },
           {
             "name": "date_before",
             "in": "query",
+            "description": "Filter billing events with booking date (Buchungsdatum) before this timestamp",
             "schema": {
               "type": "string",
               "format": "date-time",
-              "description": "List billing events before this date"
+              "example": "2025-12-31T23:59:59Z"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "List of billing events",
+            "description": "Paginated list of billing events matching the filter criteria",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
                   "properties": {
                     "hits": {
-                      "type": "integer"
+                      "type": "integer",
+                      "description": "Total number of billing events matching the query",
+                      "example": 42
                     },
                     "results": {
                       "type": "array",
+                      "description": "List of billing events for the current page",
                       "items": {
                         "$ref": "#/components/schemas/BillingEvent"
                       }
                     }
                   }
+                },
+                "example": {
+                  "hits": 42,
+                  "results": [
+                    {
+                      "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+                      "_schema": "billing_event",
+                      "type": "installment",
+                      "direction": "debit",
+                      "billing_amount": 5000,
+                      "billing_amount_decimal": "50.00",
+                      "billing_currency": "EUR",
+                      "booking_date": "2025-07-10",
+                      "due_date": "2025-07-15",
+                      "status": "open",
+                      "contract": {
+                        "$relation": [
+                          {
+                            "entity_id": "f589786b-3024-43cd-9cb3-5a3c953f2896"
+                          }
+                        ]
+                      }
+                    }
+                  ]
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
           }
         }
       },
       "post": {
         "operationId": "createBillingEvent",
         "summary": "createBillingEvent",
-        "description": "Create a new billing event.",
+        "description": "Create a new billing event (Buchungssatz) such as an installment (Abschlagszahlung),\npayment (Zahlungseingang), or reimbursement (Rückerstattung).\n\nThe billing event will be linked to a contract and will affect the customer's balance.\n",
         "tags": [
           "Billing Events"
         ],
         "requestBody": {
           "required": true,
+          "description": "Billing event data to create",
           "content": {
             "application/json": {
               "schema": {
-                "allOf": [
-                  {
-                    "$ref": "#/components/schemas/BillingEvent"
-                  }
-                ]
+                "$ref": "#/components/schemas/BillingEvent"
+              },
+              "example": {
+                "type": "installment",
+                "direction": "debit",
+                "billing_amount": 5000,
+                "billing_amount_decimal": "50.00",
+                "billing_currency": "EUR",
+                "booking_date": "2025-07-10",
+                "due_date": "2025-07-15",
+                "status": "open",
+                "note": "Monthly installment for July",
+                "contract": {
+                  "$relation": [
+                    {
+                      "entity_id": "f589786b-3024-43cd-9cb3-5a3c953f2896"
+                    }
+                  ]
+                }
               }
             }
           }
@@ -150,14 +261,25 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "allOf": [
-                    {
-                      "$ref": "#/components/schemas/BillingEvent"
-                    }
-                  ]
+                  "$ref": "#/components/schemas/BillingEvent"
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
           }
         }
       }
@@ -166,7 +288,7 @@
       "get": {
         "operationId": "getBillingEvent",
         "summary": "getBillingEvent",
-        "description": "Get a single billing event by ID.",
+        "description": "Retrieve a single billing event (Buchungssatz) by its unique ID.\n",
         "tags": [
           "Billing Events"
         ],
@@ -175,15 +297,16 @@
             "name": "id",
             "in": "path",
             "required": true,
-            "description": "ID of the billing event to get",
+            "description": "Unique identifier of the billing event (Buchungssatz-ID)",
             "schema": {
-              "type": "string"
+              "type": "string",
+              "example": "5da0a718-c822-403d-9f5d-20d4584e0528"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Billing Event",
+            "description": "Billing event details",
             "content": {
               "application/json": {
                 "schema": {
@@ -191,13 +314,25 @@
                 }
               }
             }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
           }
         }
       },
       "patch": {
         "operationId": "updateBillingEvent",
         "summary": "updateBillingEvent",
-        "description": "Update an existing billing event.",
+        "description": "Update an existing billing event (Buchungssatz).\n\nOnly the fields provided in the request body will be updated.\nCommon use cases include updating status from \"open\" to \"closed\" after payment,\nor correcting billing amounts.\n",
         "tags": [
           "Billing Events"
         ],
@@ -206,25 +341,32 @@
             "name": "id",
             "in": "path",
             "required": true,
-            "description": "ID of the billing event to update",
+            "description": "Unique identifier of the billing event to update",
             "schema": {
-              "type": "string"
+              "type": "string",
+              "example": "5da0a718-c822-403d-9f5d-20d4584e0528"
             }
           }
         ],
         "requestBody": {
           "required": true,
+          "description": "Fields to update on the billing event",
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/BillingEvent"
+                "$ref": "#/components/schemas/BillingEventUpdate"
+              },
+              "example": {
+                "status": "closed",
+                "paid_date": "2025-07-12T14:30:00Z",
+                "note": "Payment received via bank transfer"
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "Billing Event updated successfully",
+            "description": "Billing event updated successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -232,13 +374,31 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
           }
         }
       },
       "delete": {
         "operationId": "deleteBillingEvent",
         "summary": "deleteBillingEvent",
-        "description": "Delete an existing billing event.",
+        "description": "Delete an existing billing event (Buchungssatz).\n\n**Warning**: Deleting billing events affects the customer's balance calculation.\nConsider using a correction event (Korrekturbuchung) instead for audit purposes.\n",
         "tags": [
           "Billing Events"
         ],
@@ -247,15 +407,28 @@
             "name": "id",
             "in": "path",
             "required": true,
-            "description": "ID of the billing event to delete",
+            "description": "Unique identifier of the billing event to delete",
             "schema": {
-              "type": "string"
+              "type": "string",
+              "example": "5da0a718-c822-403d-9f5d-20d4584e0528"
             }
           }
         ],
         "responses": {
           "204": {
-            "description": "Billing Event deleted successfully"
+            "description": "Billing event deleted successfully"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
           }
         }
       }
@@ -264,7 +437,7 @@
       "get": {
         "operationId": "getBillingEventByExternalId",
         "summary": "getBillingEventByExternalId",
-        "description": "Get a single billing event by External ID.",
+        "description": "Retrieve a billing event (Buchungssatz) by its external system identifier.\n\nThis endpoint is useful for integrations with external systems such as SAP FI/CA,\nERP systems, or payment processors that maintain their own reference IDs.\n",
         "tags": [
           "Billing Events"
         ],
@@ -273,15 +446,16 @@
             "name": "external_id",
             "in": "path",
             "required": true,
-            "description": "ID of the billing event to get",
+            "description": "External system identifier for the billing event.\nFor example, a SAP document number or payment processor reference ID.\n",
             "schema": {
-              "type": "string"
+              "type": "string",
+              "example": "SAP-54321"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Billing Event",
+            "description": "Billing event details",
             "content": {
               "application/json": {
                 "schema": {
@@ -289,6 +463,18 @@
                 }
               }
             }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
           }
         }
       }
@@ -297,16 +483,28 @@
       "post": {
         "operationId": "createContractEntity",
         "summary": "createContractEntity",
-        "description": "Create a new contract entity.",
+        "description": "Create a new contract entity (Vertrag) for billing purposes.\n\nContracts serve as the parent entity for billing events and contain billing\nsettings such as installment amounts (Abschlagsbeträge), billing periods\n(Abrechnungszeiträume), and customer addresses.\n",
         "tags": [
           "Contracts"
         ],
         "requestBody": {
           "required": true,
+          "description": "Contract data to create",
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/Contract"
+              },
+              "example": {
+                "contract_name": "Stromvertrag Haushalt",
+                "contract_number": "STR-2025-001234",
+                "status": "active",
+                "branch": "power",
+                "billing_period": "monthly",
+                "installment_amount": 8500,
+                "billing_due_day": 15,
+                "start_date": "2025-01-01",
+                "billing_address": "Musterstraße 123, 50667 Köln"
               }
             }
           }
@@ -321,6 +519,21 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
           }
         }
       }
@@ -329,7 +542,7 @@
       "patch": {
         "operationId": "updateContractEntity",
         "summary": "updateContractEntity",
-        "description": "Update an existing contract entity.",
+        "description": "Update an existing contract entity (Vertrag).\n\nOnly the fields provided in the request body will be updated.\nCommon use cases include updating billing settings, changing status,\nor recording termination details.\n",
         "tags": [
           "Contracts"
         ],
@@ -338,18 +551,25 @@
             "name": "id",
             "in": "path",
             "required": true,
-            "description": "ID of the contract entity to update",
+            "description": "Unique identifier of the contract (Vertragsnummer)",
             "schema": {
-              "type": "string"
+              "type": "string",
+              "example": "f589786b-3024-43cd-9cb3-5a3c953f2896"
             }
           }
         ],
         "requestBody": {
           "required": true,
+          "description": "Fields to update on the contract",
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/Contract"
+              },
+              "example": {
+                "status": "terminated",
+                "termination_date": "2025-06-30",
+                "termination_reason": "Kundenkündigung"
               }
             }
           }
@@ -364,13 +584,31 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
           }
         }
       },
       "delete": {
         "operationId": "deleteContractEntity",
         "summary": "deleteContractEntity",
-        "description": "Delete an existing contract entity.",
+        "description": "Delete an existing contract entity (Vertrag).\n\n**Warning**: Deleting a contract will affect all associated billing events.\nConsider setting the contract status to \"terminated\" instead for audit purposes.\n",
         "tags": [
           "Contracts"
         ],
@@ -379,19 +617,175 @@
             "name": "id",
             "in": "path",
             "required": true,
-            "description": "ID of the contract entity to delete",
+            "description": "Unique identifier of the contract to delete",
+            "schema": {
+              "type": "string",
+              "example": "f589786b-3024-43cd-9cb3-5a3c953f2896"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Contract deleted successfully"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/billing/contracts/{id}/pricing_information": {
+      "get": {
+        "operationId": "getContractPricingInformation",
+        "summary": "getContractPricingInformation",
+        "description": "Get current pricing information and recent configuration history for a Contract.",
+        "tags": [
+          "Pricing Information"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "ID of the Contract entity",
             "schema": {
               "type": "string"
             }
           }
         ],
         "responses": {
-          "204": {
-            "description": "Contract deleted successfully",
+          "200": {
+            "description": "Contract pricing information",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ContractItem"
+                  "$ref": "#/components/schemas/ContractPricingInformation"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/billing/billing_accounts/{id}/pricing_information": {
+      "get": {
+        "operationId": "getBillingAccountPricingInformation",
+        "summary": "getBillingAccountPricingInformation",
+        "description": "Get current pricing information for the active Contracts linked to a Billing Account.",
+        "tags": [
+          "Pricing Information"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "ID of the Billing Account entity",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Billing Account pricing information",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BillingAccountPricingInformation"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/billing/contracts/{id}/configuration_history": {
+      "get": {
+        "operationId": "getContractConfigurationHistory",
+        "summary": "getContractConfigurationHistory",
+        "description": "Get billing configuration history for a Contract.",
+        "tags": [
+          "Configuration History"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "ID of the Contract entity",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/ConfigurationHistoryChangeType"
+          },
+          {
+            "$ref": "#/components/parameters/From"
+          },
+          {
+            "$ref": "#/components/parameters/Size"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Contract configuration history",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConfigurationHistoryResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/billing/billing_accounts/{id}/configuration_history": {
+      "get": {
+        "operationId": "getBillingAccountConfigurationHistory",
+        "summary": "getBillingAccountConfigurationHistory",
+        "description": "Get merged billing configuration history for active Contracts linked to a Billing Account.",
+        "tags": [
+          "Configuration History"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "ID of the Billing Account entity",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/ConfigurationHistoryChangeType"
+          },
+          {
+            "$ref": "#/components/parameters/From"
+          },
+          {
+            "$ref": "#/components/parameters/Size"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Billing Account configuration history",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConfigurationHistoryResponse"
                 }
               }
             }
@@ -403,7 +797,7 @@
       "get": {
         "operationId": "getCustomerBalance",
         "summary": "getCustomerBalance",
-        "description": "Get total balance across all contracts and orders of a customer entity.",
+        "description": "Retrieve the total balance (Kontostand) across all contracts and orders for a customer.\n\nThe balance is calculated from the sum of all billing events (Buchungssätze) associated\nwith the customer's contracts. A positive balance indicates the customer owes money;\na negative balance indicates a credit (Guthaben) in the customer's favor.\n",
         "tags": [
           "Balance"
         ],
@@ -411,7 +805,7 @@
           {
             "name": "id",
             "in": "path",
-            "description": "Customer entity ID (contact or account)",
+            "description": "Customer entity ID. This can be either a contact ID (Kontakt-ID) or\nan account ID (Kundenkonto-ID).\n",
             "required": true,
             "schema": {
               "type": "string",
@@ -421,20 +815,75 @@
         ],
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "Customer balance information",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Balance"
+                },
+                "example": {
+                  "balance": 8990,
+                  "balance_decimal": "89.90",
+                  "balance_currency": "EUR"
                 }
               }
             }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
           }
         }
       }
     }
   },
   "components": {
+    "parameters": {
+      "From": {
+        "name": "from",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "integer",
+          "minimum": 0,
+          "default": 0
+        },
+        "description": "Initial offset for paginated results."
+      },
+      "Size": {
+        "name": "size",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100,
+          "default": 25
+        },
+        "description": "Maximum number of results to return."
+      },
+      "ConfigurationHistoryChangeType": {
+        "name": "change_type",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "string",
+          "enum": [
+            "installment_amount_changed"
+          ],
+          "default": "installment_amount_changed"
+        },
+        "description": "Billing configuration change type to return."
+      }
+    },
     "securitySchemes": {
       "EpilotAuth": {
         "type": "http",
@@ -443,9 +892,116 @@
         "bearerFormat": "JWT"
       }
     },
+    "responses": {
+      "BadRequest": {
+        "description": "Bad Request - The request was malformed or contains invalid parameters.\nCheck the request body and query parameters for syntax errors.\n",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "error": "Bad Request",
+              "message": "Invalid date format for 'due_date'. Expected ISO 8601 date format (YYYY-MM-DD)."
+            }
+          }
+        }
+      },
+      "Unauthorized": {
+        "description": "Unauthorized - Authentication credentials are missing or invalid.\nEnsure a valid Bearer token is included in the Authorization header.\n",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "error": "Unauthorized",
+              "message": "Missing or invalid authentication token."
+            }
+          }
+        }
+      },
+      "Forbidden": {
+        "description": "Forbidden - The authenticated user does not have permission to perform this action.\nContact your organization administrator to request access.\n",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "error": "Forbidden",
+              "message": "You do not have permission to access this resource."
+            }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "Not Found - The requested resource does not exist or has been deleted.\nVerify the ID is correct and the resource exists in your organization.\n",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "error": "Not Found",
+              "message": "Billing event with ID '5da0a718-c822-403d-9f5d-20d4584e0528' not found."
+            }
+          }
+        }
+      },
+      "UnprocessableEntity": {
+        "description": "Unprocessable Entity - The request was well-formed but contains semantic errors.\nThis typically indicates validation failures such as missing required fields\nor invalid field values.\n",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "error": "Unprocessable Entity",
+              "message": "Validation failed: 'billing_amount' must be a positive integer."
+            }
+          }
+        }
+      },
+      "InternalServerError": {
+        "description": "Internal Server Error - An unexpected error occurred on the server.\nPlease try again later or contact support if the issue persists.\n",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "error": "Internal Server Error",
+              "message": "An unexpected error occurred. Please try again later."
+            }
+          }
+        }
+      }
+    },
     "schemas": {
+      "Error": {
+        "type": "object",
+        "description": "Standard error response format",
+        "properties": {
+          "error": {
+            "type": "string",
+            "description": "Error type or HTTP status text",
+            "example": "Bad Request"
+          },
+          "message": {
+            "type": "string",
+            "description": "Human-readable error description",
+            "example": "Invalid request parameters."
+          }
+        },
+        "required": [
+          "error",
+          "message"
+        ]
+      },
       "BaseEntity": {
         "type": "object",
+        "description": "Base schema for all epilot entities with common system fields",
         "additionalProperties": true,
         "properties": {
           "_id": {
@@ -453,98 +1009,281 @@
           },
           "_title": {
             "type": "string",
-            "description": "Title of entity"
+            "description": "Display title of the entity (Anzeigetitel)",
+            "example": "Abschlagszahlung Juli 2025"
           },
           "_org": {
             "type": "string",
-            "description": "Organization Id the entity belongs to"
+            "description": "Organization ID the entity belongs to (Organisations-ID)",
+            "example": "123456"
           },
           "_schema": {
             "$ref": "#/components/schemas/EntitySlug"
           },
           "_tags": {
             "type": "array",
+            "description": "Tags for categorization and filtering (Schlagwörter)",
             "items": {
               "type": "string"
-            }
+            },
+            "example": [
+              "billing",
+              "energy"
+            ]
           },
           "_created_at": {
-            "type": "string"
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when the entity was created (Erstellungszeitpunkt)",
+            "example": "2025-06-15T10:30:00Z"
           },
           "_updated_at": {
-            "type": "string"
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when the entity was last updated (Aktualisierungszeitpunkt)",
+            "example": "2025-06-15T14:45:00Z"
           }
         }
       },
       "EntityId": {
         "type": "string",
-        "description": "Entity ID",
+        "description": "Unique entity identifier (UUID format)",
         "example": "5da0a718-c822-403d-9f5d-20d4584e0528"
       },
       "EntitySlug": {
-        "description": "URL-friendly identifier for the entity schema",
         "type": "string",
-        "enum": [
-          "contact",
-          "contract",
-          "file",
-          "order",
-          "opportunity",
-          "product",
-          "price",
-          "meter",
-          "meter_counter",
-          "billing_event"
-        ],
-        "example": "contact"
+        "description": "URL-friendly identifier for the entity schema (Schema-Slug)",
+        "example": "billing_event"
       },
       "EntityRelationItem": {
         "type": "object",
+        "description": "Reference to a related entity",
         "properties": {
           "entity_id": {
             "type": "string",
-            "description": "Entity ID for the related contract.",
+            "description": "Entity ID for the related entity (e.g., contract or order)",
             "example": "f589786b-3024-43cd-9cb3-5a3c953f2896"
           }
         }
       },
       "BaseBillingEvent": {
+        "description": "Represents a single financial transaction entry (Buchungssatz) in the billing ledger.\nEach entry is either a debit or a credit, following double-entry accounting principles.\nCommon types include Abschlagszahlung (installment), Zahlungseingang (payment), Rückerstattung (reimbursement), etc.\n",
         "allOf": [
           {
             "$ref": "#/components/schemas/BaseEntity"
+          },
+          {
+            "type": "object",
+            "required": [
+              "type",
+              "billing_amount",
+              "billing_amount_decimal",
+              "billing_currency",
+              "booking_date",
+              "contract"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "description": "The classification of the billing transaction.\nThis field is used to group financial events for reporting or reconciliation.\nCommon examples:\n  - installment (Abschlagszahlung)\n  - payment (Zahlungseingang)\n  - reimbursement (Rückerstattung)\n  - dunning_fee (Mahngebühr)\n  - chargeback (Lastschrift-Rückgabe)\n  - final_bill (Endabrechnung)\n  - bonus (Gutschrift)\n  - correction (Korrekturbuchung)\n",
+                "example": "installment"
+              },
+              "direction": {
+                "type": "string",
+                "enum": [
+                  "debit",
+                  "credit"
+                ],
+                "description": "The accounting direction of the transaction:\n- debit (Soll): increases the customer’s liability (e.g. invoice issued)\n- credit (Haben): reduces the liability (e.g. payment received)\n\nAutomatically inferred based on event type if not specified.\n",
+                "example": "debit"
+              },
+              "billing_amount": {
+                "type": "integer",
+                "description": "Betrag in Cent (net or gross depending on context)",
+                "example": 10000
+              },
+              "billing_amount_decimal": {
+                "type": "string",
+                "description": "Decimal representation of billing_amount for display or reporting",
+                "example": "100.00"
+              },
+              "billing_currency": {
+                "$ref": "#/components/schemas/Currency"
+              },
+              "external_id": {
+                "type": "string",
+                "description": "External system identifier (e.g. SAP FI/CA document number, Zahlungsavis ID)",
+                "example": "SAP-54321"
+              },
+              "contract": {
+                "type": "object",
+                "description": "Link to the associated Vertragskonto or contract object",
+                "properties": {
+                  "$relation": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/EntityRelationItem"
+                    }
+                  }
+                }
+              },
+              "booking_date": {
+                "type": "string",
+                "format": "date",
+                "description": "General ledger booking date (Buchungsdatum) for the billing event.\nUsed to determine when the entry was accounted for in the system.\nApplies to all event types (debits and credits).\nCan be used together with due_date or paid_date\n",
+                "example": "2025-06-15"
+              },
+              "due_date": {
+                "type": "string",
+                "format": "date",
+                "description": "Due date of the invoice or charge (Fälligkeitsdatum)",
+                "example": "2025-06-30"
+              },
+              "paid_date": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Booking date (Zahlungseingang, Wertstellung)",
+                "example": "2025-06-15T10:00:00Z"
+              },
+              "status": {
+                "type": "string",
+                "description": "Status of the billing event. Defaults to closed.",
+                "enum": [
+                  "closed",
+                  "open"
+                ]
+              },
+              "related_event": {
+                "type": "string",
+                "description": "Optional reference to a previous event e.g. a chargeback or a correction to a previous installment",
+                "example": "d4fb2a4e-3f74-4fc4-8fba-6fdaaaa3b08e",
+                "properties": {
+                  "$relation": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/EntityRelationItem"
+                    }
+                  }
+                }
+              },
+              "external_link": {
+                "type": "object",
+                "description": "Optional link to an external resource e.g. an invoice in a customer portal",
+                "properties": {
+                  "href": {
+                    "type": "string",
+                    "format": "uri",
+                    "description": "URL of the external resource",
+                    "example": "https://billing.example.com/invoices/12345"
+                  },
+                  "title": {
+                    "type": "string",
+                    "description": "Title of the external resource",
+                    "example": "Invoice 12345"
+                  }
+                },
+                "required": [
+                  "url"
+                ]
+              },
+              "attachments": {
+                "type": "object",
+                "description": "Optional reference to e.g. an invoice file associated with the billing event",
+                "properties": {
+                  "$relation": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/EntityRelationItem"
+                    }
+                  }
+                }
+              },
+              "note": {
+                "type": "string",
+                "description": "Öffentliche Notiz sichtbar für den Kunden, z.B. auf der Rechnung oder im Kundenportal",
+                "example": "Teilzahlung für Abschlag Juni"
+              },
+              "internal_note": {
+                "type": "string",
+                "description": "Interne Notiz, nur sichtbar für Sachbearbeiter (nicht für Kunden sichtbar)",
+                "example": "Rückmeldung von SAP: Betrag aus Zahlungsavis 2025-06-14 übernommen"
+              }
+            }
           }
-        ],
-        "description": "A base billing event to be inherited by all billing events.",
+        ]
+      },
+      "BillingEvent": {
+        "description": "Collection of supported billing event types (Buchungsarten).\nEach type represents a different kind of financial transaction\nthat affects the customer's balance.\n",
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/InstallmentEvent"
+          },
+          {
+            "$ref": "#/components/schemas/PaymentEvent"
+          },
+          {
+            "$ref": "#/components/schemas/ReimbursementEvent"
+          },
+          {
+            "$ref": "#/components/schemas/DunningFeeEvent"
+          },
+          {
+            "$ref": "#/components/schemas/InvoiceEvent"
+          },
+          {
+            "$ref": "#/components/schemas/FinalBillEvent"
+          },
+          {
+            "$ref": "#/components/schemas/BonusEvent"
+          },
+          {
+            "$ref": "#/components/schemas/CorrectionEvent"
+          },
+          {
+            "$ref": "#/components/schemas/CustomEvent"
+          }
+        ]
+      },
+      "BillingEventUpdate": {
+        "description": "Fields to update on an existing billing event.",
         "type": "object",
-        "required": [
-          "type",
-          "contract",
-          "billing_amount",
-          "billing_amount_decimal",
-          "billing_currency"
-        ],
-        "additionalProperties": true,
+        "minProperties": 1,
         "properties": {
+          "type": {
+            "type": "string",
+            "description": "Updated billing event type.",
+            "example": "installment"
+          },
+          "direction": {
+            "type": "string",
+            "enum": [
+              "debit",
+              "credit"
+            ],
+            "description": "Updated accounting direction.",
+            "example": "debit"
+          },
           "billing_amount": {
             "type": "integer",
-            "description": "Amount to be paid in cents i.e. precision 2",
-            "example": 10050
+            "description": "Updated amount in cents.",
+            "example": 10000
           },
           "billing_amount_decimal": {
             "type": "string",
-            "description": "Amount to be paid in cents in decimal string representation",
-            "example": "100.50"
+            "description": "Updated decimal representation of billing_amount.",
+            "example": "100.00"
           },
           "billing_currency": {
             "$ref": "#/components/schemas/Currency"
           },
           "external_id": {
             "type": "string",
-            "description": "Unique identifier for event, used to reference the event to a 3rd party resource such as a SAP Installment.",
-            "example": "d4fb2a4e-3f74-4fc4-8fba-6fdaaaa3b08e"
+            "description": "Updated external system identifier.",
+            "example": "SAP-54321"
           },
           "contract": {
             "type": "object",
+            "description": "Updated link to the associated contract object.",
             "properties": {
               "$relation": {
                 "type": "array",
@@ -553,11 +1292,81 @@
                 }
               }
             }
+          },
+          "booking_date": {
+            "type": "string",
+            "format": "date",
+            "description": "Updated general ledger booking date.",
+            "example": "2025-06-15"
+          },
+          "due_date": {
+            "type": "string",
+            "format": "date",
+            "description": "Updated due date.",
+            "example": "2025-06-30"
+          },
+          "paid_date": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Updated payment date.",
+            "example": "2025-06-15T10:00:00Z"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "closed",
+              "open"
+            ],
+            "description": "Updated billing event status."
+          },
+          "related_event": {
+            "type": "string",
+            "description": "Updated reference to a previous event.",
+            "example": "d4fb2a4e-3f74-4fc4-8fba-6fdaaaa3b08e"
+          },
+          "external_link": {
+            "type": "object",
+            "description": "Updated link to an external resource.",
+            "properties": {
+              "href": {
+                "type": "string",
+                "format": "uri",
+                "description": "URL of the external resource",
+                "example": "https://billing.example.com/invoices/12345"
+              },
+              "title": {
+                "type": "string",
+                "description": "Title of the external resource",
+                "example": "Invoice 12345"
+              }
+            }
+          },
+          "attachments": {
+            "type": "object",
+            "description": "Updated invoice file relations associated with the billing event.",
+            "properties": {
+              "$relation": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/EntityRelationItem"
+                }
+              }
+            }
+          },
+          "note": {
+            "type": "string",
+            "description": "Updated public note visible to the customer.",
+            "example": "Teilzahlung für Abschlag Juni"
+          },
+          "internal_note": {
+            "type": "string",
+            "description": "Updated internal note visible to agents only.",
+            "example": "Rückmeldung von SAP: Betrag aus Zahlungsavis 2025-06-14 übernommen"
           }
         }
       },
       "InstallmentEvent": {
-        "description": "An entity that describes an installment billing event.",
+        "description": "Installment billing event (Abschlagszahlung).\nRepresents a scheduled partial payment that the customer owes,\ntypically billed monthly for utilities like electricity or gas.\n",
         "allOf": [
           {
             "$ref": "#/components/schemas/BaseBillingEvent"
@@ -570,19 +1379,19 @@
                 "enum": [
                   "installment"
                 ],
-                "description": "Type of the billing event.",
-                "example": "installment"
-              },
-              "due_date": {
-                "type": "string",
-                "format": "date-time",
-                "description": "Date on which the installment is due."
-              },
-              "paid_date": {
-                "type": "string",
-                "format": "date-time",
-                "description": "Date on which the installment is paid by the customer."
+                "description": "Event type identifier"
               }
+            },
+            "example": {
+              "type": "installment",
+              "direction": "debit",
+              "note": "July power & gas installment payment",
+              "status": "open",
+              "booking_date": "2025-07-10",
+              "due_date": "2025-07-10",
+              "billing_amount": 5000,
+              "billing_amount_decimal": "50.00",
+              "billing_currency": "EUR"
             },
             "required": [
               "due_date"
@@ -590,8 +1399,40 @@
           }
         ]
       },
+      "PaymentEvent": {
+        "description": "Payment received event (Zahlungseingang).\nRepresents money received from the customer, reducing their balance.\nThis is a credit transaction.\n",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseBillingEvent"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "payment"
+                ],
+                "description": "Event type identifier"
+              }
+            },
+            "example": {
+              "type": "payment",
+              "direction": "credit",
+              "note": "Payment reference 001234567",
+              "status": "closed",
+              "booking_date": "2025-06-15",
+              "due_date": "2025-06-15",
+              "paid_date": "2025-06-09T10:00:00Z",
+              "billing_amount": 5000,
+              "billing_amount_decimal": "50.00",
+              "billing_currency": "EUR"
+            }
+          }
+        ]
+      },
       "ReimbursementEvent": {
-        "description": "An entity that describes a reimbursement billing event.",
+        "description": "Reimbursement event (Rückerstattung).\nRepresents a refund to the customer, typically after overpayment\nor billing correction. This is a credit transaction.\n",
         "allOf": [
           {
             "$ref": "#/components/schemas/BaseBillingEvent"
@@ -604,30 +1445,211 @@
                 "enum": [
                   "reimbursement"
                 ],
-                "description": "Type of the billing event.",
-                "example": "reimbursement"
-              },
-              "paid_date": {
-                "type": "string",
-                "format": "date-time",
-                "description": "Date on which the customer is reimbursed."
+                "description": "Event type identifier"
               }
+            },
+            "example": {
+              "type": "reimbursement",
+              "direction": "credit",
+              "billing_amount": 10000,
+              "billing_amount_decimal": "100.00",
+              "billing_currency": "EUR",
+              "note": "Refund due to meter correction",
+              "booking_date": "2025-06-16",
+              "paid_date": "2025-06-18T14:00:00Z"
             }
           }
         ]
       },
-      "BillingEvent": {
-        "description": "An entity that describes a billing event such as a future installment or a reimbursement back to the customer.",
-        "oneOf": [
+      "DunningFeeEvent": {
+        "description": "Dunning fee event (Mahngebühr).\nRepresents a late payment fee charged to the customer\nafter a payment reminder has been sent. This is a debit transaction.\n",
+        "allOf": [
           {
-            "$ref": "#/components/schemas/InstallmentEvent"
+            "$ref": "#/components/schemas/BaseBillingEvent"
           },
           {
-            "$ref": "#/components/schemas/ReimbursementEvent"
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "dunning_fee"
+                ],
+                "description": "Event type identifier"
+              }
+            },
+            "example": {
+              "type": "dunning_fee",
+              "direction": "debit",
+              "note": "Late fee for April invoice",
+              "status": "open",
+              "booking_date": "2025-06-10",
+              "due_date": "2025-06-10",
+              "billing_amount": 1500,
+              "billing_amount_decimal": "15.00",
+              "billing_currency": "EUR"
+            }
+          }
+        ]
+      },
+      "InvoiceEvent": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseBillingEvent"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "invoice"
+                ]
+              }
+            },
+            "example": {
+              "type": "invoice",
+              "direction": "debit",
+              "billing_amount": 8500,
+              "billing_amount_decimal": "85.00",
+              "billing_currency": "EUR",
+              "note": "Einmalige Rechnung für Zusatzleistung",
+              "booking_date": "2025-06-25",
+              "due_date": "2025-07-01"
+            },
+            "required": [
+              "due_date"
+            ]
+          }
+        ]
+      },
+      "FinalBillEvent": {
+        "description": "Final bill event (Endabrechnung/Schlussrechnung).\nRepresents the final settlement when a contract ends,\naccounting for actual consumption vs. paid installments.\nCan be either debit (customer owes more) or credit (customer overpaid).\n",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseBillingEvent"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "final_bill"
+                ],
+                "description": "Event type identifier"
+              }
+            },
+            "example": {
+              "type": "final_bill",
+              "direction": "debit",
+              "billing_amount": 12000,
+              "billing_amount_decimal": "120.00",
+              "billing_currency": "EUR",
+              "note": "Final invoice after contract termination",
+              "booking_date": "2025-06-30"
+            }
+          }
+        ]
+      },
+      "BonusEvent": {
+        "description": "Bonus/credit event (Gutschrift/Bonus).\nRepresents a promotional credit or bonus applied to the customer's account,\nsuch as welcome bonuses or loyalty rewards. This is a credit transaction.\n",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseBillingEvent"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "bonus"
+                ],
+                "description": "Event type identifier"
+              }
+            },
+            "example": {
+              "type": "bonus",
+              "direction": "credit",
+              "billing_amount": 1500,
+              "billing_amount_decimal": "15.00",
+              "billing_currency": "EUR",
+              "note": "Welcome bonus",
+              "booking_date": "2025-06-15"
+            }
+          }
+        ]
+      },
+      "CorrectionEvent": {
+        "description": "Correction event (Korrekturbuchung).\nRepresents an adjustment to a previous billing entry,\nsuch as correcting an overcharge or undercharge.\nCan be either debit or credit depending on the correction.\n",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseBillingEvent"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "correction"
+                ],
+                "description": "Event type identifier"
+              }
+            },
+            "example": {
+              "type": "correction",
+              "direction": "credit",
+              "billing_amount": 200,
+              "billing_amount_decimal": "2.00",
+              "billing_currency": "EUR",
+              "note": "Corrected previous overcharge",
+              "booking_date": "2025-06-22"
+            }
+          }
+        ]
+      },
+      "CustomEvent": {
+        "description": "Custom billing event (Benutzerdefinierte Buchung).\nAllows for organization-specific billing event types not covered\nby the standard types. Use a descriptive type name.\n",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseBillingEvent"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "not": {
+                  "enum": [
+                    "installment",
+                    "payment",
+                    "reimbursement",
+                    "dunning_fee",
+                    "invoice",
+                    "final_bill",
+                    "bonus",
+                    "correction"
+                  ]
+                },
+                "description": "Custom billing event type (Freitext).\nUse a descriptive identifier for your custom event type.\nExamples: grid_fee_adjustment, meter_rental, special_charge\n"
+              }
+            },
+            "example": {
+              "type": "grid_fee_adjustment",
+              "direction": "debit",
+              "billing_amount": 3200,
+              "billing_amount_decimal": "32.00",
+              "billing_currency": "EUR",
+              "note": "Netznachberechnung für Mai",
+              "booking_date": "2025-06-11"
+            }
           }
         ]
       },
       "Contract": {
+        "description": "Represents a customer contract (Vertrag) for billing purposes.\nContracts are the parent entities for billing events and contain\nbilling configuration such as installment amounts and billing cycles.\n",
         "allOf": [
           {
             "$ref": "#/components/schemas/BaseEntity"
@@ -637,13 +1659,13 @@
             "properties": {
               "contract_name": {
                 "type": "string",
-                "description": "The name of the contract.",
-                "example": "Grid Contract"
+                "description": "Display name of the contract (Vertragsname)",
+                "example": "Stromvertrag Haushalt"
               },
               "contract_number": {
                 "type": "string",
-                "description": "The unique identifier of the contract.",
-                "example": "12345"
+                "description": "Unique contract identifier/number (Vertragsnummer)",
+                "example": "STR-2025-001234"
               },
               "status": {
                 "type": "string",
@@ -658,18 +1680,18 @@
                   "expired"
                 ],
                 "default": "draft",
-                "description": "The status of the contract.",
-                "example": "approved"
+                "description": "Current status of the contract (Vertragsstatus):\n- draft (Entwurf): Contract is being prepared\n- in_approval_process (In Prüfung): Awaiting approval\n- approved (Genehmigt): Approved but not yet active\n- active (Aktiv): Contract is currently active\n- deactivated (Deaktiviert): Temporarily suspended\n- revoked (Widerrufen): Cancelled by customer within cooling-off period\n- terminated (Gekündigt): Contract has been terminated\n- expired (Abgelaufen): Contract term has ended\n",
+                "example": "active"
               },
               "description": {
                 "type": "string",
-                "description": "A brief description of the contract.",
-                "example": "This contract is for the supply of widgets."
+                "description": "Brief description of the contract terms (Vertragsbeschreibung)",
+                "example": "Haushaltsstrom-Tarif mit 24 Monaten Preisgarantie"
               },
               "account_number": {
                 "type": "string",
-                "description": "The account number associated with the contract.",
-                "example": "67890"
+                "description": "Customer account number (Kundennummer/Vertragskonto)",
+                "example": "KD-67890"
               },
               "branch": {
                 "type": "string",
@@ -680,33 +1702,34 @@
                   "waste_water",
                   "district_heating"
                 ],
-                "description": "The branch associated with the contract.",
+                "description": "Utility branch/commodity type (Sparte):\n- power (Strom)\n- gas (Gas)\n- water (Wasser)\n- waste_water (Abwasser)\n- district_heating (Fernwärme)\n",
                 "example": "power"
               },
               "billing_address": {
                 "type": "string",
-                "description": "The billing address associated with the contract.",
-                "example": "123 Main St, Anytown"
+                "description": "Billing/invoice address (Rechnungsadresse)",
+                "example": "Musterstraße 123, 50667 Köln"
               },
               "delivery_address": {
                 "type": "string",
-                "description": "The delivery address associated with the contract.",
-                "example": "456 Elm St, Anytown"
+                "description": "Delivery/supply point address (Lieferadresse/Verbrauchsstelle)",
+                "example": "Musterstraße 123, 50667 Köln"
               },
               "additional_addresses": {
                 "type": "string",
-                "description": "Any additional addresses associated with the contract.",
-                "example": "789 Oak St, Anytown"
+                "description": "Additional addresses associated with the contract (Weitere Adressen)",
+                "example": "Postfach 456, 50668 Köln"
               },
               "termination_date": {
                 "type": "string",
-                "description": "The date on which the contract was terminated.",
-                "example": "2022-01-01"
+                "format": "date",
+                "description": "Date when the contract was/will be terminated (Kündigungsdatum)",
+                "example": "2025-12-31"
               },
               "termination_reason": {
                 "type": "string",
-                "description": "The reason for the termination of the contract.",
-                "example": "Non-payment"
+                "description": "Reason for contract termination (Kündigungsgrund)",
+                "example": "Kundenkündigung"
               },
               "billing_period": {
                 "type": "string",
@@ -718,20 +1741,20 @@
                   "yearly"
                 ],
                 "default": "weekly",
-                "description": "The billing period associated with the contract.",
+                "description": "Billing cycle frequency (Abrechnungszeitraum):\n- weekly (Wöchentlich)\n- monthly (Monatlich)\n- every_quarter (Vierteljährlich)\n- every_6_months (Halbjährlich)\n- yearly (Jährlich)\n",
                 "example": "monthly"
               },
               "billing_duration_amount": {
                 "type": "number",
                 "minimum": 0,
-                "description": "The duration of the billing period.",
+                "description": "Duration amount for billing period calculation (Abrechnungsdauer)",
                 "example": 30
               },
               "renewal_duration_amount": {
                 "type": "number",
                 "minimum": 0,
-                "description": "The duration of the renewal period.",
-                "example": 365
+                "description": "Duration of automatic contract renewal (Verlängerungsdauer)",
+                "example": 12
               },
               "renewal_duration_unit": {
                 "type": "string",
@@ -741,8 +1764,8 @@
                   "years"
                 ],
                 "default": "months",
-                "description": "The unit of time for the renewal period.",
-                "example": "years"
+                "description": "Unit for renewal duration (Verlängerungseinheit)",
+                "example": "months"
               },
               "notice_time_amount": {
                 "type": "number",
@@ -758,29 +1781,30 @@
                   "years"
                 ],
                 "default": "months",
-                "description": "The unit of time for the notice period.",
+                "description": "Unit for notice period (Kündigungsfrist-Einheit)",
                 "example": "months"
               },
               "start_date": {
                 "type": "string",
-                "description": "The start date of the contract.",
-                "example": "2021-01-01"
+                "format": "date",
+                "description": "Contract start date (Vertragsbeginn)",
+                "example": "2025-01-01"
               },
               "billing_due_day": {
                 "type": "integer",
-                "description": "Defines the day of the month in which the installments are due.",
-                "minimum": 1,
+                "description": "Day of the month when installments are due (Fälligkeitstag). 0 means no fixed billing day is configured.",
+                "minimum": 0,
                 "maximum": 31,
-                "example": 2
+                "example": 15
               },
               "installment_amount": {
                 "type": "integer",
-                "description": "Set amount for installments in cents. (precision 2)",
-                "example": 10050
+                "description": "Fixed installment amount in cents (Abschlagsbetrag in Cent).\nUses integer representation with 2 decimal precision.\nExample: 10050 = 100.50 EUR\n",
+                "example": 8500
               },
               "balance": {
                 "type": "integer",
-                "description": "Current balance of the contract in cents. (precision 2)",
+                "description": "Current contract balance in cents (Kontostand in Cent).\nPositive value = customer owes money (Forderung).\nNegative value = customer has credit (Guthaben).\n",
                 "example": 8990
               },
               "balance_currency": {
@@ -791,6 +1815,7 @@
         ]
       },
       "ContractItem": {
+        "description": "Contract entity with all required system fields populated",
         "allOf": [
           {
             "$ref": "#/components/schemas/Contract"
@@ -804,17 +1829,365 @@
           "_updated_at"
         ]
       },
+      "InstallmentAmountValue": {
+        "type": "object",
+        "properties": {
+          "amount": {
+            "type": "integer",
+            "description": "Amount in cents when available or derivable.",
+            "example": 10050
+          },
+          "amount_decimal": {
+            "type": "string",
+            "description": "Decimal amount string when available or derivable.",
+            "example": "100.50"
+          },
+          "currency": {
+            "$ref": "#/components/schemas/Currency"
+          }
+        }
+      },
+      "PriceContext": {
+        "type": "object",
+        "properties": {
+          "price_id": {
+            "type": "string"
+          },
+          "price_title": {
+            "type": "string"
+          },
+          "pricing_model": {
+            "type": "string"
+          },
+          "unit_amount_gross_decimal": {
+            "type": "string"
+          },
+          "unit_amount_net_decimal": {
+            "type": "string"
+          },
+          "before_discount_unit_amount_gross_decimal": {
+            "type": "string"
+          },
+          "before_discount_unit_amount_net_decimal": {
+            "type": "string"
+          },
+          "unit_discount_amount_decimal": {
+            "type": "string"
+          },
+          "unit_discount_amount_net_decimal": {
+            "type": "string"
+          },
+          "currency": {
+            "$ref": "#/components/schemas/Currency"
+          },
+          "billing_period": {
+            "type": "string"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "has_discount": {
+            "type": "boolean"
+          },
+          "is_dynamic_tariff": {
+            "type": "boolean"
+          },
+          "dynamic_tariff": {
+            "$ref": "#/components/schemas/DynamicTariffPriceContext"
+          }
+        }
+      },
+      "DynamicTariffPriceContext": {
+        "type": "object",
+        "properties": {
+          "mode": {
+            "type": "string"
+          },
+          "interval": {
+            "type": "string"
+          },
+          "average_price_decimal": {
+            "type": "string"
+          },
+          "markup_amount_decimal": {
+            "type": "string"
+          },
+          "markup_amount_net_decimal": {
+            "type": "string"
+          },
+          "markup_amount_gross_decimal": {
+            "type": "string"
+          },
+          "market_price_decimal": {
+            "type": "string"
+          },
+          "market_price_currency": {
+            "$ref": "#/components/schemas/Currency"
+          },
+          "market": {
+            "type": "string"
+          },
+          "bidding_zone": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "string"
+          }
+        }
+      },
+      "ConfigurationHistoryContext": {
+        "type": "object",
+        "properties": {
+          "base_price": {
+            "$ref": "#/components/schemas/PriceContext"
+          },
+          "working_price": {
+            "$ref": "#/components/schemas/PriceContext"
+          }
+        }
+      },
+      "ConfigurationHistoryRow": {
+        "type": "object",
+        "required": [
+          "event_id",
+          "org_id",
+          "entity_type",
+          "entity_id",
+          "change_type",
+          "schema_version",
+          "changed_at",
+          "created_at",
+          "source",
+          "new_value"
+        ],
+        "properties": {
+          "event_id": {
+            "type": "string"
+          },
+          "org_id": {
+            "type": "string"
+          },
+          "entity_type": {
+            "type": "string",
+            "enum": [
+              "contract",
+              "billing_account"
+            ]
+          },
+          "entity_id": {
+            "type": "string"
+          },
+          "change_type": {
+            "type": "string",
+            "enum": [
+              "installment_amount_changed"
+            ]
+          },
+          "schema_version": {
+            "type": "integer",
+            "example": 1
+          },
+          "effective_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "changed_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "portal",
+              "epilot",
+              "erp",
+              "system",
+              "api",
+              "external",
+              "journey",
+              "automation",
+              "unknown"
+            ]
+          },
+          "source_label": {
+            "type": "string"
+          },
+          "source_system": {
+            "type": "string"
+          },
+          "source_reference": {
+            "type": "string"
+          },
+          "previous_value": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/InstallmentAmountValue"
+              }
+            ]
+          },
+          "new_value": {
+            "$ref": "#/components/schemas/InstallmentAmountValue"
+          },
+          "context": {
+            "$ref": "#/components/schemas/ConfigurationHistoryContext"
+          }
+        }
+      },
+      "ConfigurationHistoryResponse": {
+        "type": "object",
+        "required": [
+          "history",
+          "total"
+        ],
+        "properties": {
+          "history": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ConfigurationHistoryRow"
+            }
+          },
+          "total": {
+            "type": "integer"
+          }
+        }
+      },
+      "PricingInformationBalance": {
+        "type": "object",
+        "properties": {
+          "amount": {
+            "type": "integer",
+            "example": 8990
+          },
+          "amount_decimal": {
+            "type": "string",
+            "example": "89.90"
+          },
+          "currency": {
+            "$ref": "#/components/schemas/Currency"
+          }
+        }
+      },
+      "ContractPricingSchedule": {
+        "type": "object",
+        "required": [
+          "inferred"
+        ],
+        "properties": {
+          "billing_due_day": {
+            "type": "integer",
+            "description": "Day of the month when installments are due. 0 means no fixed billing day is configured.",
+            "minimum": 0,
+            "maximum": 31
+          },
+          "billing_period": {
+            "type": "string",
+            "enum": [
+              "weekly",
+              "monthly",
+              "every_quarter",
+              "every_6_months",
+              "yearly"
+            ]
+          },
+          "installments_per_year": {
+            "type": "integer"
+          },
+          "inferred": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ContractPricingInformation": {
+        "type": "object",
+        "required": [
+          "entity_type",
+          "entity_id",
+          "history"
+        ],
+        "properties": {
+          "entity_type": {
+            "type": "string",
+            "enum": [
+              "contract"
+            ]
+          },
+          "entity_id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "current_installment_amount": {
+            "$ref": "#/components/schemas/InstallmentAmountValue"
+          },
+          "context": {
+            "$ref": "#/components/schemas/ConfigurationHistoryContext"
+          },
+          "balance": {
+            "$ref": "#/components/schemas/PricingInformationBalance"
+          },
+          "schedule": {
+            "$ref": "#/components/schemas/ContractPricingSchedule"
+          },
+          "pending_installment_change": {
+            "type": "boolean"
+          },
+          "history": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ConfigurationHistoryRow"
+            }
+          }
+        }
+      },
+      "BillingAccountPricingInformation": {
+        "type": "object",
+        "required": [
+          "entity_type",
+          "entity_id",
+          "contracts"
+        ],
+        "properties": {
+          "entity_type": {
+            "type": "string",
+            "enum": [
+              "billing_account"
+            ]
+          },
+          "entity_id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "balance": {
+            "$ref": "#/components/schemas/PricingInformationBalance"
+          },
+          "contracts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContractPricingInformation"
+            }
+          }
+        }
+      },
       "Balance": {
         "type": "object",
+        "description": "Customer balance summary (Kontostandübersicht).\nRepresents the aggregated balance across all contracts and orders for a customer.\n",
         "properties": {
           "balance": {
             "type": "integer",
-            "description": "Current balance of the customer in cents. (precision 2)",
+            "description": "Total customer balance in cents (Gesamtkontostand in Cent).\nPositive = customer owes money (Offener Betrag).\nNegative = customer has credit (Guthaben).\n",
             "example": 8990
           },
           "balance_decimal": {
             "type": "string",
-            "description": "Current balance of the customer in decimal string representation.",
+            "description": "Balance as decimal string for display (Kontostand als Dezimalzahl).\nFormatted with 2 decimal places.\n",
             "example": "89.90"
           },
           "balance_currency": {
@@ -824,7 +2197,7 @@
       },
       "Currency": {
         "type": "string",
-        "description": "Currency code in ISO 4217 format",
+        "description": "Currency code in ISO 4217 format (Währungscode).\nCommon values: EUR (Euro), CHF (Swiss Franc)\n",
         "example": "EUR"
       }
     }

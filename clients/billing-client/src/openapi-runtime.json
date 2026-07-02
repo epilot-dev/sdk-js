@@ -10,17 +10,22 @@
         "operationId": "getBillingEvents",
         "parameters": [
           {
-            "in": "query",
             "name": "from",
+            "in": "query",
             "required": false
           },
           {
-            "in": "query",
             "name": "size",
+            "in": "query",
             "required": false
           },
           {
             "name": "entity_id",
+            "in": "query",
+            "required": false
+          },
+          {
+            "name": "contact_id",
             "in": "query",
             "required": false
           },
@@ -36,7 +41,8 @@
             "name": "date_before",
             "in": "query"
           }
-        ]
+        ],
+        "responses": {}
       },
       "post": {
         "operationId": "createBillingEvent",
@@ -45,7 +51,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v1/billing/events/{id}": {
@@ -57,7 +64,8 @@
             "in": "path",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       },
       "patch": {
         "operationId": "updateBillingEvent",
@@ -73,7 +81,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       },
       "delete": {
         "operationId": "deleteBillingEvent",
@@ -83,7 +92,8 @@
             "in": "path",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       }
     },
     "/v1/billing/external/{external_id}": {
@@ -95,7 +105,8 @@
             "in": "path",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       }
     },
     "/v1/billing/contracts": {
@@ -106,7 +117,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v1/billing/contracts/{id}": {
@@ -124,7 +136,8 @@
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       },
       "delete": {
         "operationId": "deleteContractEntity",
@@ -134,7 +147,78 @@
             "in": "path",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/billing/contracts/{id}/pricing_information": {
+      "get": {
+        "operationId": "getContractPricingInformation",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/billing/billing_accounts/{id}/pricing_information": {
+      "get": {
+        "operationId": "getBillingAccountPricingInformation",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/billing/contracts/{id}/configuration_history": {
+      "get": {
+        "operationId": "getContractConfigurationHistory",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "$ref": "#/components/parameters/ConfigurationHistoryChangeType"
+          },
+          {
+            "$ref": "#/components/parameters/From"
+          },
+          {
+            "$ref": "#/components/parameters/Size"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/billing/billing_accounts/{id}/configuration_history": {
+      "get": {
+        "operationId": "getBillingAccountConfigurationHistory",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "$ref": "#/components/parameters/ConfigurationHistoryChangeType"
+          },
+          {
+            "$ref": "#/components/parameters/From"
+          },
+          {
+            "$ref": "#/components/parameters/Size"
+          }
+        ],
+        "responses": {}
       }
     },
     "/v1/billing/customers/{id}/balance": {
@@ -146,11 +230,62 @@
             "in": "path",
             "required": true
           }
-        ]
+        ],
+        "responses": {}
       }
     }
   },
-  "components": {},
+  "components": {
+    "parameters": {
+      "From": {
+        "name": "from",
+        "in": "query",
+        "required": false
+      },
+      "Size": {
+        "name": "size",
+        "in": "query",
+        "required": false
+      },
+      "ConfigurationHistoryChangeType": {
+        "name": "change_type",
+        "in": "query",
+        "required": false
+      }
+    },
+    "responses": {
+      "BadRequest": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "Unauthorized": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "Forbidden": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "NotFound": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "UnprocessableEntity": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "InternalServerError": {
+        "content": {
+          "application/json": {}
+        }
+      }
+    }
+  },
   "servers": [
     {
       "url": "https://billing.sls.epilot.io"
