@@ -1,5 +1,6 @@
 # Metering API
 
+- **Base URL:** `https://metering.sls.epilot.io`
 - **Full API Docs:** [https://docs.epilot.io/api/metering](https://docs.epilot.io/api/metering)
 
 ## Usage
@@ -581,6 +582,7 @@ const { data } = await client.createMeterReadings(
     activity_id: 'example',
     skip_validation: true,
     direct: true,
+    create_ticket: true,
   },
   {
     readings: [
@@ -726,6 +728,7 @@ const { data } = await client.batchWriteMeterReadings(
     skip_validation: true,
     activity_id: 'example',
     direct: true,
+    create_ticket: true,
   },
   {
     identifiers: ['string'],

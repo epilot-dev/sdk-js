@@ -16,6 +16,7 @@ export declare namespace Components {
          */
         Schemas.ActivityId /* ulid */;
         export type CounterIdParam = Schemas.Id;
+        export type CreateTicketQueryParam = boolean;
         export type DirectQueryParam = boolean;
         export type IncludePendingChangesetsQueryParam = boolean;
         export type MeterIdParam = Schemas.Id;
@@ -29,6 +30,7 @@ export declare namespace Components {
         DirectQueryParam?: Parameters.DirectQueryParam;
         IncludePendingChangesetsQueryParam?: Parameters.IncludePendingChangesetsQueryParam;
         ActivityIdQueryParam?: Parameters.ActivityIdQueryParam;
+        CreateTicketQueryParam?: Parameters.CreateTicketQueryParam;
         SkipValidationQueryParam?: Parameters.SkipValidationQueryParam;
     }
     namespace Responses {
@@ -1191,6 +1193,7 @@ export declare namespace Paths {
              */
             Components.Schemas.ActivityId /* ulid */;
             export type Async = boolean;
+            export type CreateTicket = boolean;
             export type Direct = boolean;
             export type SkipValidation = boolean;
         }
@@ -1199,6 +1202,7 @@ export declare namespace Paths {
             skip_validation?: Parameters.SkipValidation;
             activity_id?: Parameters.ActivityId;
             direct?: Parameters.Direct;
+            create_ticket?: Parameters.CreateTicket;
         }
         export interface RequestBody {
             /**
@@ -1285,6 +1289,7 @@ export declare namespace Paths {
              */
             Components.Schemas.ActivityId /* ulid */;
             export type Async = boolean;
+            export type CreateTicket = boolean;
             export type Direct = boolean;
             export type SkipValidation = boolean;
         }
@@ -1293,6 +1298,7 @@ export declare namespace Paths {
             activity_id?: Parameters.ActivityId;
             skip_validation?: Parameters.SkipValidation;
             direct?: Parameters.Direct;
+            create_ticket?: Parameters.CreateTicket;
         }
         export interface RequestBody {
             readings?: Components.Schemas.MeterReading[];
