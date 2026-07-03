@@ -2214,6 +2214,15 @@ declare namespace Components {
                 ...FileProxyStep[]
             ];
             response: FileProxyResponseConfig;
+            /**
+             * When `true`, files that are too large to be served directly in the proxy response
+             * (and would otherwise be served indirectly via a temporary S3 redirect) are not served.
+             * Instead the proxy responds with an error and logs a warning. Use this when files must
+             * never transit epilot's temporary S3 storage. Defaults to `false` (large files are
+             * transparently served via S3).
+             *
+             */
+            prevent_indirect_serving?: boolean;
         }
         export interface FileProxyUseCaseHistoryEntry {
             /**
@@ -2383,9 +2392,13 @@ declare namespace Components {
              */
             to_date?: string; // date-time
             /**
-             * Filter stats by use case type
+             * Filter stats by a single use case type
              */
             use_case_type?: "inbound" | "outbound" | "file_proxy" | "managed_call" | "secure_proxy";
+            /**
+             * Filter stats to this set of use case types (matches any). Takes precedence over `use_case_type` when both are present. Used by the notification producers to scope alerts/digests to the integration's `monitoredUseCases`.
+             */
+            use_case_types?: ("inbound" | "outbound" | "file_proxy" | "managed_call" | "secure_proxy")[];
             /**
              * Field to group the breakdown by
              */
@@ -2907,7 +2920,7 @@ declare namespace Components {
             /**
              * Enabled triggers and their params. A type MAY repeat; capped at 20 rules (enforced at the write boundary).
              */
-            rules: /* A single notification rule. Only the params relevant to a given type are set. The id is a server-minted ULID, preserved across edits. */ NotificationRule[];
+            rules: /* A single notification rule. Only the params relevant to a given type are set. The id is optional on write: the server mints a ULID when omitted and preserves a supplied id verbatim (a stable id keeps a rule's AlertState across config saves). */ NotificationRule[];
             digest: /* Digest schedule and content configuration. */ NotificationDigestConfig;
             /**
              * ISO instant; snooze all non-digest alerts until this time. `null` means not muted.
@@ -3628,21 +3641,21 @@ declare namespace Components {
             user_id: string;
         }
         /**
-         * A single notification rule. Only the params relevant to a given type are set. The id is a server-minted ULID, preserved across edits.
+         * A single notification rule. Only the params relevant to a given type are set. The id is optional on write: the server mints a ULID when omitted and preserves a supplied id verbatim (a stable id keeps a rule's AlertState across config saves).
          */
         export interface NotificationRule {
             /**
-             * Stable server-minted ULID. AlertState + baseline key.
+             * Stable AlertState + baseline key. Optional on write — the server mints a ULID when omitted; a supplied id is preserved verbatim.
              */
-            id: string;
+            id?: string;
             /**
              * Optional human label disambiguating two rules of the same type.
              */
             name?: string;
             /**
-             * Rule trigger type. V1 produces the first six; the remaining values are deferred (V2) catalog types accepted by the data model but not produced by any V1 producer.
+             * Rule trigger type. These are the only supported types; each is produced by a real alerter.
              */
-            type: "critical_error" | "error_threshold" | "warning_threshold" | "success_rate_drop" | "recovery" | "silence" | "consecutive_failures" | "first_error" | "new_error_code" | "auth_expiry" | "ack_timeout" | "validation_surge";
+            type: "critical_error" | "error_threshold" | "warning_threshold" | "success_rate_drop" | "recovery" | "silence";
             enabled: boolean;
             channels?: /* Delivery channel toggles. New channels added in svc-notification-api inherit here. */ NotificationChannelSet;
             /**
@@ -3669,10 +3682,6 @@ declare namespace Components {
              * success_rate_drop minimum sample size guard.
              */
             minSampleSize?: number;
-            /**
-             * consecutive_failures count.
-             */
-            consecutive?: number;
             /**
              * silence quiet period, e.g. '12h'.
              */

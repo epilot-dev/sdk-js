@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Integration Toolkit API",
-    "version": "1.5.3",
+    "version": "1.5.5",
     "description": "API for integrating with external systems in a standardised way."
   },
   "tags": [
@@ -1876,11 +1876,10 @@
             "name": "limit",
             "in": "query",
             "required": false,
-            "description": "Maximum number of items to return (clamped to 100).",
+            "description": "Requested number of items to return. Values above 100 are accepted and clamped server-side to 100 (the enforcement point is the handler, not this schema), so a large value never 400s at the contract layer.",
             "schema": {
               "type": "integer",
               "minimum": 1,
-              "maximum": 100,
               "default": 50
             }
           },
@@ -4645,16 +4644,15 @@
       },
       "NotificationRule": {
         "type": "object",
-        "description": "A single notification rule. Only the params relevant to a given type are set. The id is a server-minted ULID, preserved across edits.",
+        "description": "A single notification rule. Only the params relevant to a given type are set. The id is optional on write: the server mints a ULID when omitted and preserves a supplied id verbatim (a stable id keeps a rule's AlertState across config saves).",
         "required": [
-          "id",
           "type",
           "enabled"
         ],
         "properties": {
           "id": {
             "type": "string",
-            "description": "Stable server-minted ULID. AlertState + baseline key."
+            "description": "Stable AlertState + baseline key. Optional on write — the server mints a ULID when omitted; a supplied id is preserved verbatim."
           },
           "name": {
             "type": "string",
@@ -4662,20 +4660,14 @@
           },
           "type": {
             "type": "string",
-            "description": "Rule trigger type. V1 produces the first six; the remaining values are deferred (V2) catalog types accepted by the data model but not produced by any V1 producer.",
+            "description": "Rule trigger type. These are the only supported types; each is produced by a real alerter.",
             "enum": [
               "critical_error",
               "error_threshold",
               "warning_threshold",
               "success_rate_drop",
               "recovery",
-              "silence",
-              "consecutive_failures",
-              "first_error",
-              "new_error_code",
-              "auth_expiry",
-              "ack_timeout",
-              "validation_surge"
+              "silence"
             ]
           },
           "enabled": {
@@ -4725,10 +4717,6 @@
           "minSampleSize": {
             "type": "integer",
             "description": "success_rate_drop minimum sample size guard."
-          },
-          "consecutive": {
-            "type": "integer",
-            "description": "consecutive_failures count."
           },
           "quietPeriod": {
             "type": "string",
@@ -7082,6 +7070,11 @@
           },
           "response": {
             "$ref": "#/components/schemas/FileProxyResponseConfig"
+          },
+          "prevent_indirect_serving": {
+            "type": "boolean",
+            "default": false,
+            "description": "When `true`, files that are too large to be served directly in the proxy response\n(and would otherwise be served indirectly via a temporary S3 redirect) are not served.\nInstead the proxy responds with an error and logs a warning. Use this when files must\nnever transit epilot's temporary S3 storage. Defaults to `false` (large files are\ntransparently served via S3).\n"
           }
         }
       },
@@ -9366,7 +9359,21 @@
               "managed_call",
               "secure_proxy"
             ],
-            "description": "Filter stats by use case type"
+            "description": "Filter stats by a single use case type"
+          },
+          "use_case_types": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "inbound",
+                "outbound",
+                "file_proxy",
+                "managed_call",
+                "secure_proxy"
+              ]
+            },
+            "description": "Filter stats to this set of use case types (matches any). Takes precedence over `use_case_type` when both are present. Used by the notification producers to scope alerts/digests to the integration's `monitoredUseCases`."
           },
           "group_by": {
             "type": "string",
