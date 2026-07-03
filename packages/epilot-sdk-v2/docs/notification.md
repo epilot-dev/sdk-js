@@ -149,7 +149,8 @@ const { data } = await client.getNotificationsV2({
           "email": false,
           "in_app": false
         }
-      }
+      },
+      "allowed_channels": ["in_app"]
     }
   ]
 }
@@ -230,6 +231,7 @@ const { data } = await client.createNotification(
         in_app: false
       }
     },
+    allowed_channels: ['in_app'],
     read_state: false,
     visibility_user_ids: ['1', '2', '3', '4', '5']
   },
@@ -323,7 +325,8 @@ const { data } = await client.getNotifications({
           "email": false,
           "in_app": false
         }
-      }
+      },
+      "allowed_channels": ["in_app"]
     }
   ]
 }
@@ -412,7 +415,8 @@ const { data } = await client.getNotification({
       "email": false,
       "in_app": false
     }
-  }
+  },
+  "allowed_channels": ["in_app"]
 }
 ```
 
@@ -927,6 +931,7 @@ type NotificationItem = {
     payload?: object
   }>
   force_notify_users?: Record<string, unknown>
+  allowed_channels?: "email" | "in_app"[]
 }
 ```
 
@@ -963,6 +968,7 @@ type Notification = {
     payload?: object
   }>
   force_notify_users?: Record<string, unknown>
+  allowed_channels?: "email" | "in_app"[]
   read_state?: boolean
   visibility_user_ids?: string[]
 }
@@ -1001,6 +1007,7 @@ type NotificationBase = {
     payload?: object
   }>
   force_notify_users?: Record<string, unknown>
+  allowed_channels?: "email" | "in_app"[]
 }
 ```
 

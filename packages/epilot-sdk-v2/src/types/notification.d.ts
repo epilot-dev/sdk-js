@@ -1,6 +1,4 @@
 /* Auto-copied from notification-client */
-/* eslint-disable */
-
 import type {
   OpenAPIClient,
   Parameters,
@@ -213,6 +211,14 @@ export declare namespace Components {
                 [name: string]: any;
             };
             /**
+             * Optional delivery-channel ceiling. When present, delivery is restricted to the intersection of this set and each recipient's own notification preferences — it can only NARROW delivery, never force a channel on. Absent means no restriction (recipient preferences and per-type defaults apply as before). An empty array suppresses all channels.
+             * example:
+             * [
+             *   "in_app"
+             * ]
+             */
+            allowed_channels?: ("email" | "in_app")[];
+            /**
              * example:
              * false
              */
@@ -305,6 +311,14 @@ export declare namespace Components {
             force_notify_users?: {
                 [name: string]: any;
             };
+            /**
+             * Optional delivery-channel ceiling. When present, delivery is restricted to the intersection of this set and each recipient's own notification preferences — it can only NARROW delivery, never force a channel on. Absent means no restriction (recipient preferences and per-type defaults apply as before). An empty array suppresses all channels.
+             * example:
+             * [
+             *   "in_app"
+             * ]
+             */
+            allowed_channels?: ("email" | "in_app")[];
         }
         export interface NotificationCallerContext {
             [name: string]: any;
@@ -451,6 +465,14 @@ export declare namespace Components {
             force_notify_users?: {
                 [name: string]: any;
             };
+            /**
+             * Optional delivery-channel ceiling. When present, delivery is restricted to the intersection of this set and each recipient's own notification preferences — it can only NARROW delivery, never force a channel on. Absent means no restriction (recipient preferences and per-type defaults apply as before). An empty array suppresses all channels.
+             * example:
+             * [
+             *   "in_app"
+             * ]
+             */
+            allowed_channels?: ("email" | "in_app")[];
         }
         export interface NotificationTemplate {
             /**

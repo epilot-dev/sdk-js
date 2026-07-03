@@ -2669,6 +2669,7 @@ const { data } = await client.getMonitoringStatsV2(
     from_date: '2025-01-01T00:00:00Z',
     to_date: '2025-01-31T23:59:59Z',
     use_case_type: 'inbound',
+    use_case_types: ['inbound'],
     group_by: 'use_case_id',
     source: 'monitoring'
   },
@@ -3572,7 +3573,7 @@ type IntegrationSettings = {
     monitoredUseCases?: string[]
     monitoredCodes?: string[]
     rules: Array<{
-      id: { ... }
+      id?: { ... }
       name?: { ... }
       type: { ... }
       enabled: { ... }
@@ -3583,7 +3584,6 @@ type IntegrationSettings = {
       fallbackThreshold?: { ... }
       window?: { ... }
       minSampleSize?: { ... }
-      consecutive?: { ... }
       quietPeriod?: { ... }
     }>
     digest: {
@@ -3629,9 +3629,9 @@ type IntegrationNotificationConfig = {
   monitoredUseCases?: string[]
   monitoredCodes?: string[]
   rules: Array<{
-    id: string
+    id?: string
     name?: string
-    type: "critical_error" | "error_threshold" | "warning_threshold" | "success_rate_drop" | "recovery" | "silence" | "consecutive_failures" | "first_error" | "new_error_code" | "auth_expiry" | "ack_timeout" | "validation_surge"
+    type: "critical_error" | "error_threshold" | "warning_threshold" | "success_rate_drop" | "recovery" | "silence"
     enabled: boolean
     channels?: {
       email: { ... }
@@ -3643,7 +3643,6 @@ type IntegrationNotificationConfig = {
     fallbackThreshold?: number
     window?: string
     minSampleSize?: number
-    consecutive?: number
     quietPeriod?: string
   }>
   digest: {
@@ -3686,13 +3685,13 @@ type NotificationChannelSet = {
 
 ### `NotificationRule`
 
-A single notification rule. Only the params relevant to a given type are set. The id is a server-minted ULID, preserved across edits.
+A single notification rule. Only the params relevant to a given type are set. The id is optional on write: the server mints a ULID when omitted and preserves a supplied id verbatim (a stable id keeps a rule's AlertState across config saves).
 
 ```ts
 type NotificationRule = {
-  id: string
+  id?: string
   name?: string
-  type: "critical_error" | "error_threshold" | "warning_threshold" | "success_rate_drop" | "recovery" | "silence" | "consecutive_failures" | "first_error" | "new_error_code" | "auth_expiry" | "ack_timeout" | "validation_surge"
+  type: "critical_error" | "error_threshold" | "warning_threshold" | "success_rate_drop" | "recovery" | "silence"
   enabled: boolean
   channels?: {
     email: boolean
@@ -3704,7 +3703,6 @@ type NotificationRule = {
   fallbackThreshold?: number
   window?: string
   minSampleSize?: number
-  consecutive?: number
   quietPeriod?: string
 }
 ```
@@ -3805,6 +3803,7 @@ type IntegrationWithUseCases = {
       allowed_origins?: { ... }
       steps: { ... }
       response: { ... }
+      prevent_indirect_serving?: { ... }
     }
   } | {
     id: string // uuid
@@ -3944,11 +3943,11 @@ type UpsertIntegrationWithUseCasesRequest = {
       allowed_origins?: { ... }
       steps: { ... }
       response: { ... }
+      prevent_indirect_serving?: { ... }
     }
   } | {
     id?: string // uuid
     name: string
-    slug?: string
   // ...
 }
 ```
@@ -4554,6 +4553,7 @@ type EmbeddedUseCaseRequest = {
       filename?: { ... }
       content_type?: { ... }
     }
+    prevent_indirect_serving?: boolean
   }
 } | {
   id?: string // uuid
@@ -4563,7 +4563,6 @@ type EmbeddedUseCaseRequest = {
   change_description?: string
   type: "managed_call"
   configuration?: {
-    operation: {
   // ...
 }
 ```
@@ -4685,6 +4684,7 @@ type EmbeddedFileProxyUseCaseRequest = {
       filename?: { ... }
       content_type?: { ... }
     }
+    prevent_indirect_serving?: boolean
   }
 }
 ```
@@ -4861,6 +4861,7 @@ type FileProxyUseCase = {
       filename?: { ... }
       content_type?: { ... }
     }
+    prevent_indirect_serving?: boolean
   }
 }
 ```
@@ -5020,7 +5021,7 @@ type UseCase = {
       filename?: { ... }
       content_type?: { ... }
     }
-  }
+    prevent_indirect_serving?: boolean
   // ...
 }
 ```
@@ -5112,6 +5113,7 @@ type CreateUseCaseRequest = {
       filename?: { ... }
       content_type?: { ... }
     }
+    prevent_indirect_serving?: boolean
   }
 } | {
   name: string
@@ -5127,7 +5129,6 @@ type CreateUseCaseRequest = {
     }
     request_mapping?: string
     response_mapping?: string
-    inbound_use_case_slug?: string
   // ...
 }
 ```
@@ -5241,6 +5242,7 @@ type CreateFileProxyUseCaseRequest = {
       filename?: { ... }
       content_type?: { ... }
     }
+    prevent_indirect_serving?: boolean
   }
 }
 ```
@@ -5373,6 +5375,7 @@ type UpdateUseCaseRequest = {
       filename?: { ... }
       content_type?: { ... }
     }
+    prevent_indirect_serving?: boolean
   }
 } | {
   name?: string
@@ -5385,7 +5388,6 @@ type UpdateUseCaseRequest = {
       method: { ... }
       path: { ... }
       headers?: { ... }
-      query_params?: { ... }
   // ...
 }
 ```
@@ -5503,6 +5505,7 @@ type UpdateFileProxyUseCaseRequest = {
       filename?: { ... }
       content_type?: { ... }
     }
+    prevent_indirect_serving?: boolean
   }
 }
 ```
@@ -5799,6 +5802,7 @@ type FileProxyUseCaseHistoryEntry = {
       filename?: { ... }
       content_type?: { ... }
     }
+    prevent_indirect_serving?: boolean
   }
 }
 ```
@@ -6319,6 +6323,7 @@ type FileProxyUseCaseConfiguration = {
     filename?: string
     content_type?: string
   }
+  prevent_indirect_serving?: boolean
 }
 ```
 
@@ -7268,6 +7273,7 @@ type GetMonitoringStatsV2Request = {
   from_date?: string // date-time
   to_date?: string // date-time
   use_case_type?: "inbound" | "outbound" | "file_proxy" | "managed_call" | "secure_proxy"
+  use_case_types?: "inbound" | "outbound" | "file_proxy" | "managed_call" | "secure_proxy"[]
   group_by?: "use_case_id" | "use_case_type" | "level" | "code" | "date"
   source?: "monitoring" | "incoming"
 }
