@@ -593,6 +593,23 @@
             "description": "Whether this event can be explicitly triggered by automations.\nWhen true, the event will appear in the automation builder as a\n\"Trigger Event\" action option.\nDefaults to false if not specified.\n",
             "default": false,
             "example": true
+          },
+          "success_criteria": {
+            "type": "array",
+            "description": "Org-defined success criteria for this event: the entity attributes that an\norganization considers must be captured for an event change request to be\ntreated as complete (e.g. for telephony / self-service flows).\n\nAdvisory metadata — event-catalog does NOT require an org to define any and\ndoes NOT enforce them when an event is triggered or published. The org may\ndefine none (empty array or omitted). When provided, each entry is validated\nfor well-formedness on write (see SuccessCriterion).\n",
+            "items": {
+              "$ref": "#/components/schemas/SuccessCriterion"
+            },
+            "example": [
+              {
+                "entity_schema": "contract",
+                "attribute": "installment_amount"
+              },
+              {
+                "entity_schema": "billing_account",
+                "attribute": "due_date"
+              }
+            ]
           }
         }
       },
@@ -613,7 +630,7 @@
         ]
       },
       "UpdateEventPayload": {
-        "description": "Payload for updating an event configuration.\nAccepts the same fields as EventConfig (all optional for PATCH).\nCurrently `enabled` and `auto_trigger` fields are processed.\n",
+        "description": "Payload for updating an event configuration.\nAccepts the same fields as EventConfig (all optional for PATCH).\nCurrently `enabled`, `auto_trigger` and `success_criteria` fields are processed.\n",
         "allOf": [
           {
             "$ref": "#/components/schemas/EventConfigBase"
@@ -694,6 +711,26 @@
           {
             "$ref": "#/components/schemas/AttachmentField"
           }
+        ]
+      },
+      "SuccessCriterion": {
+        "type": "object",
+        "description": "A single org-defined success criterion: an entity attribute that must be captured\nfor this event's change request to be considered complete.\n\nIdentity is the entity schema plus the attribute name — mirroring the\nEntityOperationTrigger `schema`/`attribute` vocabulary. On write (PATCH), both\n`attribute` and `entity_schema` are required and `entity_schema` must match the\n`schema` of a node in the event's `entity_graph` (else the request is rejected) —\nthis prevents unsatisfiable criteria. The criteria themselves are advisory and are\nnever enforced when an event is triggered or published.\n",
+        "properties": {
+          "entity_schema": {
+            "type": "string",
+            "description": "Entity schema slug the attribute belongs to (matches a node schema in the event's entity_graph).",
+            "example": "contract"
+          },
+          "attribute": {
+            "type": "string",
+            "description": "Attribute name on the entity schema.",
+            "example": "installment_amount"
+          }
+        },
+        "required": [
+          "entity_schema",
+          "attribute"
         ]
       },
       "CommonEventMetadata": {
@@ -878,6 +915,24 @@
           ]
         }
       },
+      "InlineDowngradeStep": {
+        "type": "object",
+        "description": "One step of an event's inline `_downgrades` chain. Maps the current-version payload to the previous version via a JSONata expression. Stamped by Event Catalog at publish time; executed by consumers during walk-back, never by EC itself.",
+        "properties": {
+          "to": {
+            "type": "string",
+            "description": "Version label this step downgrades to (the previous version)."
+          },
+          "jsonata": {
+            "type": "string",
+            "description": "JSONata expression mapping the current-shape payload to the previous-shape payload."
+          }
+        },
+        "required": [
+          "to",
+          "jsonata"
+        ]
+      },
       "Event": {
         "type": "object",
         "description": "An event instance in the event history",
@@ -920,6 +975,13 @@
           "_ack_id": {
             "type": "string",
             "description": "Unique acknowledgment tracking ID for the event.\nUsed to track event delivery and processing status.\n"
+          },
+          "_downgrades": {
+            "type": "array",
+            "description": "Inline downgrade chain stamped by Event Catalog at publish time, ordered newest-to-oldest. Present ONLY on multi-version events. Internal versioning transport: consumers (e.g. svc-webhooks) walk the payload back to a pinned version using these JSONata steps, then strip the field before delivery -- end customers never receive it.",
+            "items": {
+              "$ref": "#/components/schemas/InlineDowngradeStep"
+            }
           }
         },
         "required": [
