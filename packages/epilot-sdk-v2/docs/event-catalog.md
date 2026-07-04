@@ -44,8 +44,10 @@ const { data } = await eventCatalogClient.listEvents(...)
 - [`ContextEntity`](#contextentity)
 - [`AttachmentField`](#attachmentfield)
 - [`SchemaField`](#schemafield)
+- [`SuccessCriterion`](#successcriterion)
 - [`CommonEventMetadata`](#commoneventmetadata)
 - [`EventJsonSchema`](#eventjsonschema)
+- [`InlineDowngradeStep`](#inlinedowngradestep)
 - [`Event`](#event)
 - [`EventSummary`](#eventsummary)
 - [`GraphDefinition`](#graphdefinition)
@@ -110,7 +112,17 @@ const { data } = await client.listEvents()
       },
       "enabled": true,
       "auto_trigger": true,
-      "automation_trigger": true
+      "automation_trigger": true,
+      "success_criteria": [
+        {
+          "entity_schema": "contract",
+          "attribute": "installment_amount"
+        },
+        {
+          "entity_schema": "billing_account",
+          "attribute": "due_date"
+        }
+      ]
     }
   ]
 }
@@ -168,7 +180,17 @@ const { data } = await client.getEvent({
   },
   "enabled": true,
   "auto_trigger": true,
-  "automation_trigger": true
+  "automation_trigger": true,
+  "success_criteria": [
+    {
+      "entity_schema": "contract",
+      "attribute": "installment_amount"
+    },
+    {
+      "entity_schema": "billing_account",
+      "attribute": "due_date"
+    }
+  ]
 }
 ```
 
@@ -219,7 +241,17 @@ const { data } = await client.patchEvent(
     },
     enabled: true,
     auto_trigger: true,
-    automation_trigger: true
+    automation_trigger: true,
+    success_criteria: [
+      {
+        entity_schema: 'contract',
+        attribute: 'installment_amount'
+      },
+      {
+        entity_schema: 'billing_account',
+        attribute: 'due_date'
+      }
+    ]
   },
 )
 ```
@@ -260,7 +292,17 @@ const { data } = await client.patchEvent(
   },
   "enabled": true,
   "auto_trigger": true,
-  "automation_trigger": true
+  "automation_trigger": true,
+  "success_criteria": [
+    {
+      "entity_schema": "contract",
+      "attribute": "installment_amount"
+    },
+    {
+      "entity_schema": "billing_account",
+      "attribute": "due_date"
+    }
+  ]
 }
 ```
 
@@ -726,6 +768,10 @@ type EventConfigBase = {
   enabled?: boolean
   auto_trigger?: boolean
   automation_trigger?: boolean
+  success_criteria?: Array<{
+    entity_schema: string
+    attribute: string
+  }>
 }
 ```
 
@@ -781,6 +827,10 @@ type EventConfig = {
   enabled?: boolean
   auto_trigger?: boolean
   automation_trigger?: boolean
+  success_criteria?: Array<{
+    entity_schema: string
+    attribute: string
+  }>
 }
 ```
 
@@ -788,7 +838,7 @@ type EventConfig = {
 
 Payload for updating an event configuration.
 Accepts the same fields as EventConfig (all optional for PATCH).
-Currently `enabled` and `auto_trigger` fields are processed.
+Currently `enabled`, `auto_trigger` and `success_criteria` fields are processed.
 
 
 ```ts
@@ -839,6 +889,10 @@ type UpdateEventPayload = {
   enabled?: boolean
   auto_trigger?: boolean
   automation_trigger?: boolean
+  success_criteria?: Array<{
+    entity_schema: string
+    attribute: string
+  }>
 }
 ```
 
@@ -914,6 +968,22 @@ type SchemaField = {
 }
 ```
 
+### `SuccessCriterion`
+
+A single org-defined success criterion: an entity attribute that must be captured
+for this event's change request to be considered complete.
+
+Identity is the entity schema plus the attribute name — mirroring the
+EntityOperationTrigger `schema`/`attribute` vocabulary. On write (PATCH), both
+`attribut
+
+```ts
+type SuccessCriterion = {
+  entity_schema: string
+  attribute: string
+}
+```
+
 ### `CommonEventMetadata`
 
 Common metadata fields present in all event payloads
@@ -928,6 +998,17 @@ JSON Schema declaring the event payload structure
 
 ```ts
 type EventJsonSchema = object
+```
+
+### `InlineDowngradeStep`
+
+One step of an event's inline `_downgrades` chain. Maps the current-version payload to the previous version via a JSONata expression. Stamped by Event Catalog at publish time; executed by consumers during walk-back, never by EC itself.
+
+```ts
+type InlineDowngradeStep = {
+  to: string
+  jsonata: string
+}
 ```
 
 ### `Event`
@@ -945,6 +1026,10 @@ type Event = {
   _trigger_source_type?: string
   _trigger_source?: string
   _ack_id?: string
+  _downgrades?: Array<{
+    to: string
+    jsonata: string
+  }>
 }
 ```
 

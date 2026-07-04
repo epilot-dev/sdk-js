@@ -206,6 +206,10 @@ export declare namespace Components {
              *
              */
             _ack_id?: string;
+            /**
+             * Inline downgrade chain stamped by Event Catalog at publish time, ordered newest-to-oldest. Present ONLY on multi-version events. Internal versioning transport: consumers (e.g. svc-webhooks) walk the payload back to a pinned version using these JSONata steps, then strip the field before delivery -- end customers never receive it.
+             */
+            _downgrades?: /* One step of an event's inline `_downgrades` chain. Maps the current-version payload to the previous version via a JSONata expression. Stamped by Event Catalog at publish time; executed by consumers during walk-back, never by EC itself. */ InlineDowngradeStep[];
         }
         /**
          * A file attachment associated with an event
@@ -398,6 +402,41 @@ export declare namespace Components {
              * true
              */
             automation_trigger?: boolean;
+            /**
+             * Org-defined success criteria for this event: the entity attributes that an
+             * organization considers must be captured for an event change request to be
+             * treated as complete (e.g. for telephony / self-service flows).
+             *
+             * Advisory metadata — event-catalog does NOT require an org to define any and
+             * does NOT enforce them when an event is triggered or published. The org may
+             * define none (empty array or omitted). When provided, each entry is validated
+             * for well-formedness on write (see SuccessCriterion).
+             *
+             * example:
+             * [
+             *   {
+             *     "entity_schema": "contract",
+             *     "attribute": "installment_amount"
+             *   },
+             *   {
+             *     "entity_schema": "billing_account",
+             *     "attribute": "due_date"
+             *   }
+             * ]
+             */
+            success_criteria?: /**
+             * A single org-defined success criterion: an entity attribute that must be captured
+             * for this event's change request to be considered complete.
+             *
+             * Identity is the entity schema plus the attribute name — mirroring the
+             * EntityOperationTrigger `schema`/`attribute` vocabulary. On write (PATCH), both
+             * `attribute` and `entity_schema` are required and `entity_schema` must match the
+             * `schema` of a node in the event's `entity_graph` (else the request is rejected) —
+             * this prevents unsatisfiable criteria. The criteria themselves are advisory and are
+             * never enforced when an event is triggered or published.
+             *
+             */
+            SuccessCriterion[];
         }
         /**
          * Base properties shared between EventConfig and UpdateEventPayload
@@ -548,6 +587,41 @@ export declare namespace Components {
              * true
              */
             automation_trigger?: boolean;
+            /**
+             * Org-defined success criteria for this event: the entity attributes that an
+             * organization considers must be captured for an event change request to be
+             * treated as complete (e.g. for telephony / self-service flows).
+             *
+             * Advisory metadata — event-catalog does NOT require an org to define any and
+             * does NOT enforce them when an event is triggered or published. The org may
+             * define none (empty array or omitted). When provided, each entry is validated
+             * for well-formedness on write (see SuccessCriterion).
+             *
+             * example:
+             * [
+             *   {
+             *     "entity_schema": "contract",
+             *     "attribute": "installment_amount"
+             *   },
+             *   {
+             *     "entity_schema": "billing_account",
+             *     "attribute": "due_date"
+             *   }
+             * ]
+             */
+            success_criteria?: /**
+             * A single org-defined success criterion: an entity attribute that must be captured
+             * for this event's change request to be considered complete.
+             *
+             * Identity is the entity schema plus the attribute name — mirroring the
+             * EntityOperationTrigger `schema`/`attribute` vocabulary. On write (PATCH), both
+             * `attribute` and `entity_schema` are required and `entity_schema` must match the
+             * `schema` of a node in the event's `entity_graph` (else the request is rejected) —
+             * this prevents unsatisfiable criteria. The criteria themselves are advisory and are
+             * never enforced when an event is triggered or published.
+             *
+             */
+            SuccessCriterion[];
         }
         /**
          * JSON Schema declaring the event payload structure
@@ -892,6 +966,19 @@ export declare namespace Components {
             fields?: string[];
         }
         /**
+         * One step of an event's inline `_downgrades` chain. Maps the current-version payload to the previous version via a JSONata expression. Stamped by Event Catalog at publish time; executed by consumers during walk-back, never by EC itself.
+         */
+        export interface InlineDowngradeStep {
+            /**
+             * Version label this step downgrades to (the previous version).
+             */
+            to: string;
+            /**
+             * JSONata expression mapping the current-shape payload to the previous-shape payload.
+             */
+            jsonata: string;
+        }
+        /**
          * A primitive JSON Schema field definition
          */
         export interface PrimitiveField {
@@ -1056,6 +1143,32 @@ export declare namespace Components {
             FieldsParam;
         }
         /**
+         * A single org-defined success criterion: an entity attribute that must be captured
+         * for this event's change request to be considered complete.
+         *
+         * Identity is the entity schema plus the attribute name — mirroring the
+         * EntityOperationTrigger `schema`/`attribute` vocabulary. On write (PATCH), both
+         * `attribute` and `entity_schema` are required and `entity_schema` must match the
+         * `schema` of a node in the event's `entity_graph` (else the request is rejected) —
+         * this prevents unsatisfiable criteria. The criteria themselves are advisory and are
+         * never enforced when an event is triggered or published.
+         *
+         */
+        export interface SuccessCriterion {
+            /**
+             * Entity schema slug the attribute belongs to (matches a node schema in the event's entity_graph).
+             * example:
+             * contract
+             */
+            entity_schema: string;
+            /**
+             * Attribute name on the entity schema.
+             * example:
+             * installment_amount
+             */
+            attribute: string;
+        }
+        /**
          * Payload for explicitly triggering an event via API
          */
         export interface TriggerEventPayload {
@@ -1126,7 +1239,7 @@ export declare namespace Components {
         /**
          * Payload for updating an event configuration.
          * Accepts the same fields as EventConfig (all optional for PATCH).
-         * Currently `enabled` and `auto_trigger` fields are processed.
+         * Currently `enabled`, `auto_trigger` and `success_criteria` fields are processed.
          *
          */
         export interface UpdateEventPayload {
@@ -1275,6 +1388,41 @@ export declare namespace Components {
              * true
              */
             automation_trigger?: boolean;
+            /**
+             * Org-defined success criteria for this event: the entity attributes that an
+             * organization considers must be captured for an event change request to be
+             * treated as complete (e.g. for telephony / self-service flows).
+             *
+             * Advisory metadata — event-catalog does NOT require an org to define any and
+             * does NOT enforce them when an event is triggered or published. The org may
+             * define none (empty array or omitted). When provided, each entry is validated
+             * for well-formedness on write (see SuccessCriterion).
+             *
+             * example:
+             * [
+             *   {
+             *     "entity_schema": "contract",
+             *     "attribute": "installment_amount"
+             *   },
+             *   {
+             *     "entity_schema": "billing_account",
+             *     "attribute": "due_date"
+             *   }
+             * ]
+             */
+            success_criteria?: /**
+             * A single org-defined success criterion: an entity attribute that must be captured
+             * for this event's change request to be considered complete.
+             *
+             * Identity is the entity schema plus the attribute name — mirroring the
+             * EntityOperationTrigger `schema`/`attribute` vocabulary. On write (PATCH), both
+             * `attribute` and `entity_schema` are required and `entity_schema` must match the
+             * `schema` of a node in the event's `entity_graph` (else the request is rejected) —
+             * this prevents unsatisfiable criteria. The criteria themselves are advisory and are
+             * never enforced when an event is triggered or published.
+             *
+             */
+            SuccessCriterion[];
         }
         /**
          * One entry of an event's version timeline.
@@ -1578,7 +1726,7 @@ export declare namespace Paths {
         export type RequestBody = /**
          * Payload for updating an event configuration.
          * Accepts the same fields as EventConfig (all optional for PATCH).
-         * Currently `enabled` and `auto_trigger` fields are processed.
+         * Currently `enabled`, `auto_trigger` and `success_criteria` fields are processed.
          *
          */
         Components.Schemas.UpdateEventPayload;
@@ -2011,10 +2159,12 @@ export type FieldsParam = Components.Schemas.FieldsParam;
 export type GraphDefinition = Components.Schemas.GraphDefinition;
 export type GraphEdge = Components.Schemas.GraphEdge;
 export type GraphNode = Components.Schemas.GraphNode;
+export type InlineDowngradeStep = Components.Schemas.InlineDowngradeStep;
 export type PrimitiveField = Components.Schemas.PrimitiveField;
 export type SchemaField = Components.Schemas.SchemaField;
 export type SearchOptions = Components.Schemas.SearchOptions;
 export type SearchOptionsV2 = Components.Schemas.SearchOptionsV2;
+export type SuccessCriterion = Components.Schemas.SuccessCriterion;
 export type TriggerEventPayload = Components.Schemas.TriggerEventPayload;
 export type TriggerEventResponse = Components.Schemas.TriggerEventResponse;
 export type UpdateEventPayload = Components.Schemas.UpdateEventPayload;
