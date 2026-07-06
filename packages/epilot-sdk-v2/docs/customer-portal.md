@@ -330,6 +330,7 @@ const { data } = await customerPortalClient.upsertPortal(...)
 - [`Page`](#page)
 - [`CommonConfigAttributesV3`](#commonconfigattributesv3)
 - [`PortalId`](#portalid)
+- [`PortalDataExportColumn`](#portaldataexportcolumn)
 - [`UpsertPortalConfigV3`](#upsertportalconfigv3)
 - [`PortalConfigV3`](#portalconfigv3)
 - [`JuiceSettings`](#juicesettings)
@@ -475,7 +476,8 @@ const { data } = await client.upsertPortal(
         require_lowercase: true,
         require_uppercase: true,
         require_numbers: true,
-        require_symbols: true
+        require_symbols: true,
+        password_history_size: 3
       }
     },
     config: 'string',
@@ -702,7 +704,8 @@ const { data } = await client.upsertPortal(
       "require_lowercase": true,
       "require_uppercase": true,
       "require_numbers": true,
-      "require_symbols": true
+      "require_symbols": true,
+      "password_history_size": 3
     }
   },
   "config": "string",
@@ -1066,7 +1069,8 @@ const { data } = await client.getPortalConfigByDomain({
       "require_lowercase": true,
       "require_uppercase": true,
       "require_numbers": true,
-      "require_symbols": true
+      "require_symbols": true,
+      "password_history_size": 3
     }
   },
   "config": "string",
@@ -1333,7 +1337,8 @@ const { data } = await client.getPortalConfig({
       "require_lowercase": true,
       "require_uppercase": true,
       "require_numbers": true,
-      "require_symbols": true
+      "require_symbols": true,
+      "password_history_size": 3
     }
   },
   "config": "string",
@@ -1506,14 +1511,46 @@ const { data } = await client.deletePortal({
 
 ### `createExport`
 
-Request an asynchronous CSV export of the portal user's contracts, delivery points and meters. Returns a job id to poll.
+Request an asynchronous CSV export of the portal user's entities for one schema. Columns come from the request Returns a job id to poll.
 
 `POST /v1/portal/exports`
 
 ```ts
-const { data } = await client.createExport({
-  language: 'example',
-})
+const { data } = await client.createExport(
+  null,
+  {
+    schema: 'string',
+    search: {
+      q: 'string',
+      q_fields: ['string'],
+      filters: [
+        {}
+      ],
+      filters_context: [
+        {}
+      ],
+      sort: {}
+    },
+    columns: [
+      {
+        key: 'vertragsnummer',
+        header: {
+          de: 'Vertragsnummer',
+          en: 'Contract number'
+        },
+        source: {
+          path: ['customer'],
+          attribute: 'customer_number',
+          address_field: 'full'
+        },
+        formatter: 'text',
+        enum_labels: {}
+      }
+    ],
+    expand_over: 'string',
+    language: 'de'
+  },
+)
 ```
 
 ---
@@ -2451,7 +2488,8 @@ const { data } = await client.getPublicPortalConfig({
       "require_lowercase": true,
       "require_uppercase": true,
       "require_numbers": true,
-      "require_symbols": true
+      "require_symbols": true,
+      "password_history_size": 3
     }
   },
   "config": "string",
@@ -2718,7 +2756,8 @@ const { data } = await client.getOrgPortalConfig({
       "require_lowercase": true,
       "require_uppercase": true,
       "require_numbers": true,
-      "require_symbols": true
+      "require_symbols": true,
+      "password_history_size": 3
     }
   },
   "config": "string",
@@ -2994,7 +3033,8 @@ const { data } = await client.getPublicPortalConfigV3({
       "require_lowercase": true,
       "require_uppercase": true,
       "require_numbers": true,
-      "require_symbols": true
+      "require_symbols": true,
+      "password_history_size": 3
     }
   },
   "config": "string",
@@ -3261,7 +3301,8 @@ const { data } = await client.getOrgPortalConfigV3({
       "require_lowercase": true,
       "require_uppercase": true,
       "require_numbers": true,
-      "require_symbols": true
+      "require_symbols": true,
+      "password_history_size": 3
     }
   },
   "config": "string",
@@ -7668,7 +7709,8 @@ const { data } = await client.createPortalConfig(
         require_lowercase: true,
         require_uppercase: true,
         require_numbers: true,
-        require_symbols: true
+        require_symbols: true,
+        password_history_size: 3
       }
     },
     config: 'string',
@@ -7946,7 +7988,8 @@ const { data } = await client.createPortalConfig(
       "require_lowercase": true,
       "require_uppercase": true,
       "require_numbers": true,
-      "require_symbols": true
+      "require_symbols": true,
+      "password_history_size": 3
     }
   },
   "config": "string",
@@ -8259,7 +8302,8 @@ const { data } = await client.getPortalConfigV3({
       "require_lowercase": true,
       "require_uppercase": true,
       "require_numbers": true,
-      "require_symbols": true
+      "require_symbols": true,
+      "password_history_size": 3
     }
   },
   "config": "string",
@@ -8568,7 +8612,8 @@ const { data } = await client.putPortalConfig(
         require_lowercase: true,
         require_uppercase: true,
         require_numbers: true,
-        require_symbols: true
+        require_symbols: true,
+        password_history_size: 3
       }
     },
     config: 'string',
@@ -8867,7 +8912,8 @@ const { data } = await client.putPortalConfig(
       "require_lowercase": true,
       "require_uppercase": true,
       "require_numbers": true,
-      "require_symbols": true
+      "require_symbols": true,
+      "password_history_size": 3
     }
   },
   "config": "string",
@@ -9306,7 +9352,8 @@ const { data } = await client.clonePortalConfig(
       "require_lowercase": true,
       "require_uppercase": true,
       "require_numbers": true,
-      "require_symbols": true
+      "require_symbols": true,
+      "password_history_size": 3
     }
   },
   "config": "string",
@@ -10340,11 +10387,11 @@ type CommonConfigAttributes = {
       require_uppercase?: { ... }
       require_numbers?: { ... }
       require_symbols?: { ... }
+      password_history_size?: { ... }
     }
   }
   config?: string
   contact_identifiers?: string[]
-  approval_state_attributes?: Record<string, string[]>
   // ...
 }
 ```
@@ -10554,11 +10601,11 @@ type PortalConfig = {
       require_uppercase?: { ... }
       require_numbers?: { ... }
       require_symbols?: { ... }
+      password_history_size?: { ... }
     }
   }
   config?: string
   contact_identifiers?: string[]
-  approval_state_attributes?: Record<string, string[]>
   // ...
 }
 ```
@@ -13505,11 +13552,11 @@ type CommonConfigAttributesV3 = {
       require_uppercase?: { ... }
       require_numbers?: { ... }
       require_symbols?: { ... }
+      password_history_size?: { ... }
     }
   }
   config?: string
   contact_identifiers?: string[]
-  approval_state_attributes?: Record<string, string[]>
   // ...
 }
 ```
@@ -13520,6 +13567,24 @@ ID of the portal
 
 ```ts
 type PortalId = string
+```
+
+### `PortalDataExportColumn`
+
+One column of the portal data export CSV.
+
+```ts
+type PortalDataExportColumn = {
+  key: string
+  header: Record<string, string>
+  source: {
+    path?: string[]
+    attribute: string
+    address_field?: "full" | "street" | "street_number" | "postal_code" | "city" | "additional_info" | "country"
+  }
+  formatter?: "text" | "date" | "money_cents" | "enum" | "address"
+  enum_labels?: Record<string, Record<string, string>>
+}
 ```
 
 ### `UpsertPortalConfigV3`
