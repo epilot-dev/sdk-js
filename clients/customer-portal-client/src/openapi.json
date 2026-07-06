@@ -484,25 +484,75 @@
       "post": {
         "operationId": "createExport",
         "summary": "createExport",
-        "description": "Request an asynchronous CSV export of the portal user's contracts, delivery points and meters. Returns a job id to poll.",
+        "description": "Request an asynchronous CSV export of the portal user's entities for one schema. Columns come from the request Returns a job id to poll.\n",
         "tags": [
           "ECP"
         ],
-        "parameters": [
-          {
-            "in": "query",
-            "name": "language",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "enum": [
-                "de",
-                "en"
-              ]
-            },
-            "description": "Output language for headers and value formatting. Defaults to German when omitted or unsupported."
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "schema",
+                  "columns"
+                ],
+                "properties": {
+                  "schema": {
+                    "type": "string",
+                    "description": "Entity schema to export (must be an allowed portal entity)."
+                  },
+                  "search": {
+                    "type": "object",
+                    "description": "Search parameters, same shape the entity list queries with.",
+                    "properties": {
+                      "q": {
+                        "type": "string"
+                      },
+                      "q_fields": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "filters": {
+                        "type": "array",
+                        "items": {
+                          "type": "object"
+                        }
+                      },
+                      "filters_context": {
+                        "type": "array",
+                        "items": {
+                          "type": "object"
+                        }
+                      },
+                      "sort": {}
+                    }
+                  },
+                  "columns": {
+                    "type": "array",
+                    "description": "Ordered column definitions; order is the CSV column order.",
+                    "items": {
+                      "$ref": "#/components/schemas/PortalDataExportColumn"
+                    }
+                  },
+                  "expand_over": {
+                    "type": "string"
+                  },
+                  "language": {
+                    "type": "string",
+                    "enum": [
+                      "de",
+                      "en"
+                    ]
+                  }
+                }
+              }
+            }
           }
-        ],
+        },
         "security": [
           {
             "PortalAuth": []
@@ -540,7 +590,7 @@
             "$ref": "#/components/responses/Forbidden"
           },
           "404": {
-            "description": "No export profile configured for this organization."
+            "description": "Missing or invalid export columns."
           },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
@@ -12013,6 +12063,13 @@
                     "type": "boolean",
                     "example": true,
                     "description": "Require symbols"
+                  },
+                  "password_history_size": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 24,
+                    "example": 3,
+                    "description": "Number of previous passwords a user is prevented from reusing. Set to 0 to disable reuse prevention. Maps to Cognito's PasswordHistorySize and requires the user pool to be on the Essentials or Plus feature plan."
                   }
                 }
               }
@@ -18207,6 +18264,13 @@
                     "type": "boolean",
                     "example": true,
                     "description": "Require symbols"
+                  },
+                  "password_history_size": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 24,
+                    "example": 3,
+                    "description": "Number of previous passwords a user is prevented from reusing. Set to 0 to disable reuse prevention. Maps to Cognito's PasswordHistorySize and requires the user pool to be on the Essentials or Plus feature plan."
                   }
                 }
               }
@@ -18522,6 +18586,90 @@
         "type": "string",
         "description": "ID of the portal",
         "example": "453ad7bf-86d5-46c8-8252-bcc868df5e3c"
+      },
+      "PortalDataExportColumn": {
+        "type": "object",
+        "description": "One column of the portal data export CSV.",
+        "required": [
+          "key",
+          "header",
+          "source"
+        ],
+        "properties": {
+          "key": {
+            "type": "string",
+            "description": "Stable, immutable column id (snake_case). Append-only contract: never rename, reorder semantics, or remove an existing key; new columns are appended.\n",
+            "example": "vertragsnummer"
+          },
+          "header": {
+            "type": "object",
+            "description": "Localized header label, keyed by language (de, en).",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "example": {
+              "de": "Vertragsnummer",
+              "en": "Contract number"
+            }
+          },
+          "source": {
+            "type": "object",
+            "description": "Where the value comes from: relation hops from the anchor entity plus the attribute to read on the resolved entity. An empty path means the anchor itself.\n",
+            "required": [
+              "attribute"
+            ],
+            "properties": {
+              "path": {
+                "type": "array",
+                "description": "Relation hops from the anchor entity (max 3).",
+                "items": {
+                  "type": "string"
+                },
+                "example": [
+                  "customer"
+                ]
+              },
+              "attribute": {
+                "type": "string",
+                "description": "Attribute to read on the resolved entity.",
+                "example": "customer_number"
+              },
+              "address_field": {
+                "type": "string",
+                "description": "Which part of an address-typed attribute to render.",
+                "enum": [
+                  "full",
+                  "street",
+                  "street_number",
+                  "postal_code",
+                  "city",
+                  "additional_info",
+                  "country"
+                ]
+              }
+            }
+          },
+          "formatter": {
+            "type": "string",
+            "enum": [
+              "text",
+              "date",
+              "money_cents",
+              "enum",
+              "address"
+            ]
+          },
+          "enum_labels": {
+            "type": "object",
+            "description": "Localized value maps for the enum formatter, keyed by language then raw value.\n",
+            "additionalProperties": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        }
       },
       "UpsertPortalConfigV3": {
         "allOf": [

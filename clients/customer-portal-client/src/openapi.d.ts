@@ -1170,6 +1170,12 @@ declare namespace Components {
                      * true
                      */
                     require_symbols?: boolean;
+                    /**
+                     * Number of previous passwords a user is prevented from reusing. Set to 0 to disable reuse prevention. Maps to Cognito's PasswordHistorySize and requires the user pool to be on the Essentials or Plus feature plan.
+                     * example:
+                     * 3
+                     */
+                    password_history_size?: number;
                 };
             };
             /**
@@ -1691,6 +1697,12 @@ declare namespace Components {
                      * true
                      */
                     require_symbols?: boolean;
+                    /**
+                     * Number of previous passwords a user is prevented from reusing. Set to 0 to disable reuse prevention. Maps to Cognito's PasswordHistorySize and requires the user pool to be on the Essentials or Plus feature plan.
+                     * example:
+                     * 3
+                     */
+                    password_history_size?: number;
                 };
             };
             /**
@@ -6170,6 +6182,12 @@ declare namespace Components {
                      * true
                      */
                     require_symbols?: boolean;
+                    /**
+                     * Number of previous passwords a user is prevented from reusing. Set to 0 to disable reuse prevention. Maps to Cognito's PasswordHistorySize and requires the user pool to be on the Essentials or Plus feature plan.
+                     * example:
+                     * 3
+                     */
+                    password_history_size?: number;
                 };
             };
             /**
@@ -6783,6 +6801,12 @@ declare namespace Components {
                      * true
                      */
                     require_symbols?: boolean;
+                    /**
+                     * Number of previous passwords a user is prevented from reusing. Set to 0 to disable reuse prevention. Maps to Cognito's PasswordHistorySize and requires the user pool to be on the Essentials or Plus feature plan.
+                     * example:
+                     * 3
+                     */
+                    password_history_size?: number;
                 };
             };
             /**
@@ -7097,6 +7121,63 @@ declare namespace Components {
              */
             grants?: Grant[];
             pages?: Page[];
+        }
+        /**
+         * One column of the portal data export CSV.
+         */
+        export interface PortalDataExportColumn {
+            /**
+             * Stable, immutable column id (snake_case). Append-only contract: never rename, reorder semantics, or remove an existing key; new columns are appended.
+             *
+             * example:
+             * vertragsnummer
+             */
+            key: string;
+            /**
+             * Localized header label, keyed by language (de, en).
+             * example:
+             * {
+             *   "de": "Vertragsnummer",
+             *   "en": "Contract number"
+             * }
+             */
+            header: {
+                [name: string]: string;
+            };
+            /**
+             * Where the value comes from: relation hops from the anchor entity plus the attribute to read on the resolved entity. An empty path means the anchor itself.
+             *
+             */
+            source: {
+                /**
+                 * Relation hops from the anchor entity (max 3).
+                 * example:
+                 * [
+                 *   "customer"
+                 * ]
+                 */
+                path?: string[];
+                /**
+                 * Attribute to read on the resolved entity.
+                 * example:
+                 * customer_number
+                 */
+                attribute: string;
+                /**
+                 * Which part of an address-typed attribute to render.
+                 */
+                address_field?: "full" | "street" | "street_number" | "postal_code" | "city" | "additional_info" | "country";
+            };
+            formatter?: "text" | "date" | "money_cents" | "enum" | "address";
+            /**
+             * Localized value maps for the enum formatter, keyed by language then raw value.
+             *
+             */
+            enum_labels?: {
+                [name: string]: {
+                    [name: string]: string;
+                };
+            };
         }
         /**
          * ID of the portal
@@ -8282,6 +8363,12 @@ declare namespace Components {
                      * true
                      */
                     require_symbols?: boolean;
+                    /**
+                     * Number of previous passwords a user is prevented from reusing. Set to 0 to disable reuse prevention. Maps to Cognito's PasswordHistorySize and requires the user pool to be on the Essentials or Plus feature plan.
+                     * example:
+                     * 3
+                     */
+                    password_history_size?: number;
                 };
             };
             /**
@@ -8863,6 +8950,12 @@ declare namespace Components {
                      * true
                      */
                     require_symbols?: boolean;
+                    /**
+                     * Number of previous passwords a user is prevented from reusing. Set to 0 to disable reuse prevention. Maps to Cognito's PasswordHistorySize and requires the user pool to be on the Essentials or Plus feature plan.
+                     * example:
+                     * 3
+                     */
+                    password_history_size?: number;
                 };
             };
             /**
@@ -9752,11 +9845,31 @@ declare namespace Paths {
         }
     }
     namespace CreateExport {
-        namespace Parameters {
-            export type Language = "de" | "en";
-        }
-        export interface QueryParameters {
-            language?: Parameters.Language;
+        export interface RequestBody {
+            /**
+             * Entity schema to export (must be an allowed portal entity).
+             */
+            schema: string;
+            /**
+             * Search parameters, same shape the entity list queries with.
+             */
+            search?: {
+                q?: string;
+                q_fields?: string[];
+                filters?: {
+                    [key: string]: any;
+                }[];
+                filters_context?: {
+                    [key: string]: any;
+                }[];
+                sort?: any;
+            };
+            /**
+             * Ordered column definitions; order is the CSV column order.
+             */
+            columns: /* One column of the portal data export CSV. */ Components.Schemas.PortalDataExportColumn[];
+            expand_over?: string;
+            language?: "de" | "en";
         }
         namespace Responses {
             export interface $202 {
@@ -11915,6 +12028,12 @@ declare namespace Paths {
                          * true
                          */
                         require_symbols?: boolean;
+                        /**
+                         * Number of previous passwords a user is prevented from reusing. Set to 0 to disable reuse prevention. Maps to Cognito's PasswordHistorySize and requires the user pool to be on the Essentials or Plus feature plan.
+                         * example:
+                         * 3
+                         */
+                        password_history_size?: number;
                     };
                 };
                 /**
@@ -12527,6 +12646,12 @@ declare namespace Paths {
                          * true
                          */
                         require_symbols?: boolean;
+                        /**
+                         * Number of previous passwords a user is prevented from reusing. Set to 0 to disable reuse prevention. Maps to Cognito's PasswordHistorySize and requires the user pool to be on the Essentials or Plus feature plan.
+                         * example:
+                         * 3
+                         */
+                        password_history_size?: number;
                     };
                 };
                 /**
@@ -15861,11 +15986,12 @@ export interface OperationMethods {
   /**
    * createExport - createExport
    * 
-   * Request an asynchronous CSV export of the portal user's contracts, delivery points and meters. Returns a job id to poll.
+   * Request an asynchronous CSV export of the portal user's entities for one schema. Columns come from the request Returns a job id to poll.
+   * 
    */
   'createExport'(
-    parameters?: Parameters<Paths.CreateExport.QueryParameters> | null,
-    data?: any,
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.CreateExport.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CreateExport.Responses.$202>
   /**
@@ -17563,11 +17689,12 @@ export interface PathsDictionary {
     /**
      * createExport - createExport
      * 
-     * Request an asynchronous CSV export of the portal user's contracts, delivery points and meters. Returns a job id to poll.
+     * Request an asynchronous CSV export of the portal user's entities for one schema. Columns come from the request Returns a job id to poll.
+     * 
      */
     'post'(
-      parameters?: Parameters<Paths.CreateExport.QueryParameters> | null,
-      data?: any,
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.CreateExport.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.CreateExport.Responses.$202>
   }
@@ -19535,6 +19662,7 @@ export type PageRequest = Components.Schemas.PageRequest;
 export type PaymentWidget = Components.Schemas.PaymentWidget;
 export type PortalConfig = Components.Schemas.PortalConfig;
 export type PortalConfigV3 = Components.Schemas.PortalConfigV3;
+export type PortalDataExportColumn = Components.Schemas.PortalDataExportColumn;
 export type PortalId = Components.Schemas.PortalId;
 export type PortalUser = Components.Schemas.PortalUser;
 export type PortalUserRegistrationStatus = Components.Schemas.PortalUserRegistrationStatus;
