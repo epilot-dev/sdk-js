@@ -131,13 +131,12 @@
     "/v1/portal/exports": {
       "post": {
         "operationId": "createExport",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "language",
-            "required": false
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
           }
-        ],
+        },
         "responses": {}
       }
     },
