@@ -4,11 +4,6 @@
     "title": "",
     "version": ""
   },
-  "servers": [
-    {
-      "url": "https://workflows-definition.sls.epilot.io"
-    }
-  ],
   "paths": {
     "/v1/workflows/limits/max-allowed": {
       "get": {
@@ -56,6 +51,11 @@
       },
       "post": {
         "operationId": "createFlowTemplate",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EnforceLimitsParam"
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -96,6 +96,9 @@
             "in": "path",
             "name": "flowId",
             "required": true
+          },
+          {
+            "$ref": "#/components/parameters/EnforceLimitsParam"
           }
         ],
         "requestBody": {
@@ -297,5 +300,14 @@
       }
     }
   },
-  "components": {}
+  "components": {
+    "parameters": {
+      "EnforceLimitsParam": {
+        "in": "query",
+        "name": "enforce_limits",
+        "required": false
+      }
+    }
+  },
+  "servers": []
 }

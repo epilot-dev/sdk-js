@@ -3,11 +3,20 @@
   "info": {
     "title": "Workflows Definitions",
     "version": "1.1.0",
-    "description": "Service for Workflow Definitions for different processes inside of an Organization\n"
+    "description": "The Workflows Definitions API enables you to create, manage, and configure reusable workflow templates\nwithin your organization. Workflow definitions serve as blueprints that define the structure and behavior\nof business processes, which can then be instantiated as workflow executions.\n\n## Core Concepts\n\n### Workflow Definition (V1)\nA workflow definition is a template that describes a business process. It consists of:\n- **Sections**: Logical groupings (phases) that organize related steps together\n- **Steps**: Individual tasks or actions that need to be completed within a section\n- **Closing Reasons**: Predefined reasons that can be selected when closing/completing a workflow\n\n### Flow Template (V2)\nThe modern workflow model that provides advanced capabilities:\n- **Phases**: Named stages that group related tasks and track progress through the workflow\n- **Tasks**: Individual units of work that can be manual, automated, AI-powered, or decision points\n- **Edges**: Connections between tasks that define the flow sequence and support conditional branching\n- **Triggers**: Define how a workflow is started (manual, automation, journey submission)\n\n### Task Types (V2)\n- **MANUAL**: Tasks assigned to users that require human action to complete\n- **AUTOMATION**: Tasks that execute automated actions when reached\n- **DECISION**: Conditional branching points that evaluate conditions to determine the next path\n- **AI_AGENT**: Tasks that invoke AI agents to perform intelligent actions\n\n## API Versions\n- **V1 endpoints** (`/v1/workflows/...`): Legacy linear workflow model with sections and steps\n- **V2 endpoints** (`/v2/flows/...`): Modern graph-based flow model with phases, tasks, and edges\n"
   },
-  "servers": [
+  "tags": [
     {
-      "url": "https://workflows-definition.sls.epilot.io"
+      "name": "Workflows",
+      "description": "Manage V1 workflow definitions with sections and steps. These endpoints support the legacy\nlinear workflow model where definitions contain a sequential flow of sections and steps.\n"
+    },
+    {
+      "name": "Flows V2",
+      "description": "Manage V2 flow templates with phases, tasks, and edges. The modern workflow model supports\nadvanced features including conditional branching, multiple trigger types, automation tasks,\nAI agent tasks, and flexible task dependencies.\n"
+    },
+    {
+      "name": "Closing Reason",
+      "description": "Manage closing reasons that can be associated with workflows. Closing reasons provide\npredefined options for users to select when closing or completing a workflow execution,\nenabling better tracking and reporting of workflow outcomes.\n"
     }
   ],
   "security": [
@@ -40,7 +49,7 @@
             }
           },
           "500": {
-            "description": "Other errors",
+            "description": "Internal server error",
             "content": {
               "application/json": {
                 "schema": {
@@ -56,7 +65,7 @@
       "get": {
         "operationId": "getDefinitions",
         "summary": "getDefinitions",
-        "description": "Retrieve all Workflow Definitions from an Organization",
+        "description": "Retrieve all V1 workflow definitions belonging to the authenticated organization.",
         "tags": [
           "Workflows"
         ],
@@ -135,7 +144,7 @@
             }
           },
           "500": {
-            "description": "Other errors",
+            "description": "Internal server error",
             "content": {
               "application/json": {
                 "schema": {
@@ -149,7 +158,7 @@
       "post": {
         "operationId": "createDefinition",
         "summary": "createDefinition",
-        "description": "Create a Workflow Definition.",
+        "description": "Create a new V1 workflow definition. The definition consists of sections and steps\nthat define the structure of the workflow. Once created, the definition can be used\nto start workflow executions.\n",
         "tags": [
           "Workflows"
         ],
@@ -387,17 +396,89 @@
       "post": {
         "operationId": "createFlowTemplate",
         "summary": "createFlowTemplate",
-        "description": "Create a new Flow Template.",
+        "description": "Create a new Flow Template (V2 workflow definition).\n\nA flow template defines the structure of a workflow including its phases, tasks,\nedges (connections between tasks), and trigger configuration. Once created, the\ntemplate can be used to start workflow executions.\n",
         "tags": [
           "Flows V2"
         ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EnforceLimitsParam"
+          }
+        ],
         "requestBody": {
-          "description": "Flow Template payload",
+          "description": "Flow Template payload containing the workflow structure.\n\nRequired fields:\n- `name`: Display name for the workflow\n- `tasks`: Array of task definitions (manual, automation, decision, or AI agent tasks)\n- `edges`: Array of connections defining the flow between tasks\n",
           "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/CreateFlowTemplate"
+              },
+              "example": {
+                "name": "Customer Onboarding",
+                "description": "Standard customer onboarding workflow with verification steps",
+                "version": "v3",
+                "enabled": true,
+                "trigger": {
+                  "type": "manual",
+                  "entity_schema": "contact"
+                },
+                "phases": [
+                  {
+                    "id": "phase_1",
+                    "name": "Verification"
+                  },
+                  {
+                    "id": "phase_2",
+                    "name": "Setup"
+                  }
+                ],
+                "tasks": [
+                  {
+                    "id": "task_1",
+                    "name": "Verify customer identity",
+                    "task_type": "MANUAL",
+                    "phase_id": "phase_1",
+                    "assigned_to": [
+                      "user_123"
+                    ]
+                  },
+                  {
+                    "id": "task_2",
+                    "name": "Send welcome email",
+                    "task_type": "AUTOMATION",
+                    "phase_id": "phase_2",
+                    "automation_config": {
+                      "flow_id": "automation_456"
+                    },
+                    "trigger_mode": "automatic"
+                  },
+                  {
+                    "id": "task_3",
+                    "name": "Schedule follow-up",
+                    "task_type": "MANUAL",
+                    "phase_id": "phase_2"
+                  }
+                ],
+                "edges": [
+                  {
+                    "id": "edge_1",
+                    "from_id": "task_1",
+                    "to_id": "task_2"
+                  },
+                  {
+                    "id": "edge_2",
+                    "from_id": "task_2",
+                    "to_id": "task_3"
+                  }
+                ],
+                "closing_reasons": [
+                  {
+                    "id": "reason_completed"
+                  },
+                  {
+                    "id": "reason_cancelled"
+                  }
+                ]
               }
             }
           }
@@ -512,7 +593,7 @@
       "get": {
         "operationId": "getFlowTemplate",
         "summary": "getFlowTemplate",
-        "description": "Get specific FLow template for a customer",
+        "description": "Retrieve a specific flow template by its unique identifier.",
         "tags": [
           "Flows V2"
         ],
@@ -523,7 +604,8 @@
             "schema": {
               "$ref": "#/components/schemas/FlowTemplateId"
             },
-            "required": true
+            "required": true,
+            "description": "Unique identifier of the flow template to retrieve."
           }
         ],
         "responses": {
@@ -593,11 +675,15 @@
             "schema": {
               "$ref": "#/components/schemas/FlowTemplateId"
             },
-            "required": true
+            "required": true,
+            "description": "Unique identifier of the flow template to update."
+          },
+          {
+            "$ref": "#/components/parameters/EnforceLimitsParam"
           }
         ],
         "requestBody": {
-          "description": "Flow Template payload",
+          "description": "Updated flow template payload containing the full workflow definition.",
           "required": true,
           "content": {
             "application/json": {
@@ -619,7 +705,7 @@
             }
           },
           "400": {
-            "description": "Validation Errors",
+            "description": "Validation errors - request body contains invalid data",
             "content": {
               "application/json": {
                 "schema": {
@@ -629,11 +715,21 @@
             }
           },
           "401": {
-            "description": "Authentication Errors",
+            "description": "Authentication failed - invalid or missing Bearer token",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Flow template not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefinitionNotFoundResp"
                 }
               }
             }
@@ -649,7 +745,7 @@
             }
           },
           "500": {
-            "description": "Other errors",
+            "description": "Internal server error",
             "content": {
               "application/json": {
                 "schema": {
@@ -675,7 +771,7 @@
               "$ref": "#/components/schemas/FlowTemplateId"
             },
             "required": true,
-            "description": "Id of the flow template to de deleted."
+            "description": "Unique identifier of the flow template to be deleted."
           }
         ],
         "responses": {
@@ -693,7 +789,24 @@
             }
           },
           "404": {
-            "description": "No definition found"
+            "description": "Flow template not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefinitionNotFoundResp"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
           }
         }
       }
@@ -702,7 +815,7 @@
       "post": {
         "operationId": "duplicateFlowTemplate",
         "summary": "duplicateFlowTemplate",
-        "description": "Duplicate a Flow Template from an existing workflow.",
+        "description": "Create a copy of an existing flow template. The duplicated template will have a new\nunique identifier and can be modified independently of the original. This is useful\nfor creating variations of existing workflows without starting from scratch.\n",
         "tags": [
           "Flows V2"
         ],
@@ -713,7 +826,8 @@
             "schema": {
               "$ref": "#/components/schemas/FlowTemplateId"
             },
-            "required": true
+            "required": true,
+            "description": "Unique identifier of the flow template to duplicate."
           }
         ],
         "responses": {
@@ -728,7 +842,7 @@
             }
           },
           "400": {
-            "description": "Validation Errors",
+            "description": "Validation errors - source template contains invalid data",
             "content": {
               "application/json": {
                 "schema": {
@@ -738,7 +852,7 @@
             }
           },
           "401": {
-            "description": "Authentication Errors",
+            "description": "Authentication failed - invalid or missing Bearer token",
             "content": {
               "application/json": {
                 "schema": {
@@ -747,8 +861,18 @@
               }
             }
           },
+          "404": {
+            "description": "Source flow template not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefinitionNotFoundResp"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Other errors",
+            "description": "Internal server error",
             "content": {
               "application/json": {
                 "schema": {
@@ -1106,7 +1230,7 @@
               "type": "string"
             },
             "required": true,
-            "description": "Id of the definition to de deleted.",
+            "description": "Unique identifier of the workflow definition to be deleted.",
             "example": "CustomerRequest"
           }
         ],
@@ -1143,7 +1267,7 @@
               "type": "boolean"
             },
             "required": false,
-            "description": "Filter Closing Reasons by status like active inactiv",
+            "description": "When set to true, includes inactive closing reasons in the response. By default, only active closing reasons are returned.",
             "example": true
           }
         ],
@@ -1588,6 +1712,18 @@
     }
   },
   "components": {
+    "parameters": {
+      "EnforceLimitsParam": {
+        "in": "query",
+        "name": "enforce_limits",
+        "required": false,
+        "schema": {
+          "type": "boolean",
+          "default": false
+        },
+        "description": "When true, size/count limit violations (max incoming edges per task, max branches, max entity-sync rules, ...) are enforced as 400 errors. Used by the flow-builder UI for interactive authoring. On update, pre-existing violations are tolerated as long as the request does not worsen them. When false or absent (default for API/system callers such as blueprints, configuration hub and snapshots), limit violations are accepted and returned as `limit_warnings`. Structural errors are always enforced regardless of this flag."
+      }
+    },
     "securitySchemes": {
       "BearerAuth": {
         "type": "http",
@@ -1598,6 +1734,7 @@
     "schemas": {
       "FlowTemplateBase": {
         "type": "object",
+        "description": "Base schema for V2 flow templates. A flow template defines the structure of a workflow\nincluding phases, tasks, edges, triggers, and other configuration. Flow templates serve\nas blueprints that can be instantiated as flow executions.\n",
         "required": [
           "name",
           "tasks",
@@ -1605,16 +1742,22 @@
         ],
         "properties": {
           "id": {
-            "type": "string"
+            "type": "string",
+            "description": "Unique identifier for the flow template, generated by the system."
           },
           "org_id": {
-            "type": "string"
+            "type": "string",
+            "description": "Organization identifier that owns this flow template."
           },
           "name": {
-            "type": "string"
+            "type": "string",
+            "description": "Display name for the workflow, shown to users in the UI.",
+            "minLength": 3
           },
           "description": {
-            "type": "string"
+            "type": "string",
+            "description": "Optional detailed description of the workflow's purpose and behavior.",
+            "maxLength": 5000
           },
           "trigger": {
             "$ref": "#/components/schemas/Trigger"
@@ -1676,6 +1819,7 @@
           },
           "tasks": {
             "type": "array",
+            "minItems": 1,
             "items": {
               "$ref": "#/components/schemas/Task"
             }
@@ -1694,6 +1838,7 @@
           },
           "entity_sync": {
             "type": "array",
+            "maxItems": 30,
             "items": {
               "$ref": "#/components/schemas/EntitySync"
             }
@@ -1715,6 +1860,64 @@
             "items": {
               "type": "string"
             }
+          },
+          "linear": {
+            "type": "boolean",
+            "description": "When true, this is a linear flow: task enablement is computed at runtime from the graph — a task is enabled only when all of its direct predecessor tasks in its branch are done. This fully overrides any explicit per-task requirements."
+          },
+          "limit_warnings": {
+            "type": "array",
+            "description": "Non-blocking warnings for configuration limits the flow exceeds. Returned on read (get-flow) and on create/update responses. Size/count limits are soft: a flow exceeding them is still accepted and stored, and the violations are reported here so the UI can surface an informational banner. The flow is still fully editable and usable.",
+            "items": {
+              "$ref": "#/components/schemas/FlowLimitWarning"
+            }
+          }
+        }
+      },
+      "FlowLimitWarning": {
+        "type": "object",
+        "description": "A configuration limit that the flow currently exceeds. Returned by the get-flow endpoint and by create/update responses so the UI can show a non-blocking banner. Size/count limit violations never cause a 400 — only structural errors do. The flow remains fully usable; users are encouraged to bring values within the limits.",
+        "required": [
+          "i18nKey",
+          "message",
+          "max",
+          "path"
+        ],
+        "properties": {
+          "i18nKey": {
+            "type": "string",
+            "description": "i18n key identifying the exceeded limit (e.g. errors.task_max_incoming_edges)."
+          },
+          "message": {
+            "type": "string",
+            "description": "Human-readable description of the exceeded limit."
+          },
+          "max": {
+            "type": "number",
+            "description": "The configured maximum for this limit."
+          },
+          "current": {
+            "type": "number",
+            "description": "The actual value the flow currently has for this limit (e.g. the actual number of incoming connections)."
+          },
+          "node_id": {
+            "type": "string",
+            "description": "ID of the task/node the limit applies to, when applicable."
+          },
+          "task_name": {
+            "type": "string"
+          },
+          "branch_name": {
+            "type": "string"
+          },
+          "param_name": {
+            "type": "string",
+            "description": "Name of the AI-agent parameter the limit applies to, when applicable."
+          },
+          "path": {
+            "type": "array",
+            "items": {},
+            "description": "JSON path within the flow to the offending value."
           }
         }
       },
@@ -2159,7 +2362,8 @@
             ]
           },
           "duration": {
-            "type": "number"
+            "type": "number",
+            "minimum": 1
           },
           "unit": {
             "$ref": "#/components/schemas/TimeUnit"
@@ -2182,7 +2386,8 @@
             ]
           },
           "duration": {
-            "type": "number"
+            "type": "number",
+            "minimum": 1
           },
           "unit": {
             "$ref": "#/components/schemas/TimeUnit"
@@ -2273,8 +2478,7 @@
                     "type": "integer",
                     "description": "Maximum number of iterations for the loop branch",
                     "default": 3,
-                    "minimum": 1,
-                    "maximum": 100
+                    "minimum": 1
                   }
                 },
                 "required": [
@@ -2473,7 +2677,6 @@
           "branch_name": {
             "type": "string",
             "description": "The name of the branch",
-            "maxLength": 255,
             "example": "Branch 1"
           },
           "logical_operator": {
@@ -2597,6 +2800,22 @@
               "deleted"
             ]
           },
+          "attributes": {
+            "type": "array",
+            "maxItems": 10,
+            "items": {
+              "type": "string"
+            },
+            "description": "Multi-attribute mode. When present and length > 1, the statement is\nevaluated against every listed attribute and combined via\n`attributes_match`. All listed attributes must share the same\n`attribute_type`. Mutually exclusive with `attribute_sub_field`,\n`date_offset`, and `attribute_operation`. When absent or length === 1,\nthe legacy `attribute` field is used.\n"
+          },
+          "attributes_match": {
+            "type": "string",
+            "enum": [
+              "any",
+              "all"
+            ],
+            "description": "Inner connector across `attributes`. `any` (default) means at least\none attribute must satisfy the operator; `all` means every attribute\nmust satisfy it. Ignored when `attributes` is absent or has length < 2.\n"
+          },
           "attribute_sub_field": {
             "type": "string",
             "description": "For complex attribute types, specifies which sub-field to extract (e.g., \"address\", \"name\", \"email_type\")"
@@ -2681,7 +2900,8 @@
           "hours",
           "days",
           "weeks",
-          "months"
+          "months",
+          "years"
         ]
       },
       "EnableRequirement": {
@@ -2710,15 +2930,19 @@
       },
       "WorkflowDefinition": {
         "type": "object",
+        "description": "V1 workflow definition schema. Defines a linear workflow structure with sections\nand steps. Sections group related steps together, and steps represent individual\ntasks that need to be completed. This is the legacy workflow model; for new\nimplementations, consider using V2 flow templates instead.\n",
         "properties": {
           "id": {
-            "type": "string"
+            "type": "string",
+            "description": "Unique identifier for the workflow definition, generated by the system."
           },
           "name": {
-            "type": "string"
+            "type": "string",
+            "description": "Display name for the workflow, shown to users in the UI."
           },
           "description": {
-            "type": "string"
+            "type": "string",
+            "description": "Optional detailed description of the workflow's purpose and behavior."
           },
           "creationTime": {
             "type": "string",
@@ -3029,7 +3253,8 @@
             "type": "boolean"
           },
           "value": {
-            "type": "string"
+            "type": "string",
+            "maxLength": 10000
           }
         }
       },
@@ -3045,18 +3270,24 @@
         }
       },
       "DefinitionNotFoundResp": {
-        "description": "Definition could be not found",
+        "type": "object",
+        "description": "Error response returned when a workflow definition or flow template is not found.",
         "properties": {
           "message": {
-            "type": "string"
+            "type": "string",
+            "description": "Human-readable message indicating the resource was not found.",
+            "example": "Definition with id 'abc123' not found"
           }
         }
       },
       "ClosingReasonNotFoundResp": {
-        "description": "Closing reason could be not found",
+        "type": "object",
+        "description": "Error response returned when a closing reason is not found.",
         "properties": {
           "message": {
-            "type": "string"
+            "type": "string",
+            "description": "Human-readable message indicating the closing reason was not found.",
+            "example": "Closing reason with id 'xyz789' not found"
           }
         }
       },
@@ -3143,9 +3374,12 @@
       },
       "ErrorResp": {
         "type": "object",
+        "description": "Standard error response returned when an API request fails.",
         "properties": {
           "message": {
-            "type": "string"
+            "type": "string",
+            "description": "Human-readable error message describing what went wrong.",
+            "example": "Invalid request body: name is required"
           }
         }
       },
@@ -3296,11 +3530,12 @@
         ]
       },
       "DynamicDueDate": {
-        "description": "set a Duedate for a step then a specific",
+        "description": "Configuration for calculating a due date dynamically based on workflow events.\nThe due date is computed by adding a duration (numberOfUnits + timePeriod) to\na reference point defined by actionTypeCondition (e.g., when workflow started,\nwhen a step closed, or when a phase finished).\n",
         "type": "object",
         "properties": {
           "numberOfUnits": {
-            "type": "number"
+            "type": "number",
+            "description": "Number of time units to add to the reference point."
           },
           "timePeriod": {
             "$ref": "#/components/schemas/TimeUnit"
@@ -3350,5 +3585,6 @@
         ]
       }
     }
-  }
+  },
+  "servers": []
 }
