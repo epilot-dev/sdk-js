@@ -296,10 +296,7 @@ declare namespace Components {
              */
             Trigger[];
             phases?: Phase[];
-            tasks: [
-                Task,
-                ...Task[]
-            ];
+            tasks: Task[];
             edges: Edge[];
             closing_reasons?: /* One Closing reason for a workflow */ ClosingReason[];
             entity_sync?: [
@@ -1176,10 +1173,7 @@ declare namespace Components {
              */
             Trigger[];
             phases?: Phase[];
-            tasks: [
-                Task,
-                ...Task[]
-            ];
+            tasks: Task[];
             edges: Edge[];
             closing_reasons?: /* One Closing reason for a workflow */ ClosingReason[];
             entity_sync?: [
@@ -1766,10 +1760,7 @@ declare namespace Components {
              */
             Trigger[];
             phases?: Phase[];
-            tasks: [
-                Task,
-                ...Task[]
-            ];
+            tasks: Task[];
             edges: Edge[];
             closing_reasons?: /* One Closing reason for a workflow */ ClosingReason[];
             entity_sync?: [
