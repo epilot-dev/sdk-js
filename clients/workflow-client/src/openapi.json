@@ -3507,6 +3507,10 @@
           "singleClosingReasonSelection": {
             "type": "boolean",
             "description": "Indicates whether only a single closing reason can be selected when closing the flow execution"
+          },
+          "linear": {
+            "type": "boolean",
+            "description": "Copied from the flow template at start. When true, task enablement is computed at runtime from the graph (a task is enabled only when all of its direct predecessor tasks in its branch are done) instead of from each task's explicit requirements."
           }
         }
       },
@@ -3751,6 +3755,10 @@
           "scheduled_at": {
             "type": "string",
             "description": "The resolved absolute timestamp (ISO 8601, UTC) at which the task is\narmed to run. Set by the backend when the schedule is armed and the\ntask transitions to SCHEDULED. Absent while the task is still\npending/unscheduled.\n\nNote: intentionally typed as plain `string` (not\n`format: date-time`). `schedule` is embedded in the AutomationTask /\nDecisionTask schemas; if a future request body ever accepts a task\n(or schedule) and `safeParse`s it, `format: date-time` would make\nopenapi-zod-client emit `z.string().datetime({ offset: true })` and\nreject any round-tripped value that is empty or tz-less — the exact\nmechanism behind the May 2026 due_date incident (513ed597 added the\nformat, ee574b43 activated it via an unrelated regen; see commit\n2c91ff35). This field is server-written via `toISOString()` so it is\nalways a valid UTC instant; the datetime validator adds no\nprotection, only latent risk.\n"
+          },
+          "error_reason": {
+            "type": "string",
+            "description": "Set by the backend when scheduling this task FAILED (e.g. the\nreferenced date attribute is empty/unreadable, or the resolved fire\ntime is already in the past). A JSON string\n({ error_code, error_reason, error_info }) describing why, so the UI\ncan show a specific warning and ask the user to fix the date\nattribute and re-schedule. Cleared when the task is successfully\n(re-)armed. This is the decision-task counterpart of\nAutomationInfo.error_reason (decision tasks have no automation_config).\n"
           }
         }
       },
@@ -3812,6 +3820,10 @@
           "scheduled_at": {
             "type": "string",
             "description": "The resolved absolute timestamp (ISO 8601, UTC) at which the task is\narmed to run. Set by the backend when the schedule is armed and the\ntask transitions to SCHEDULED. Absent while the task is still\npending/unscheduled.\n\nNote: intentionally typed as plain `string` (not\n`format: date-time`). `schedule` is embedded in the AutomationTask /\nDecisionTask schemas; if a future request body ever accepts a task\n(or schedule) and `safeParse`s it, `format: date-time` would make\nopenapi-zod-client emit `z.string().datetime({ offset: true })` and\nreject any round-tripped value that is empty or tz-less — the exact\nmechanism behind the May 2026 due_date incident (513ed597 added the\nformat, ee574b43 activated it via an unrelated regen; see commit\n2c91ff35). This field is server-written via `toISOString()` so it is\nalways a valid UTC instant; the datetime validator adds no\nprotection, only latent risk.\n"
+          },
+          "error_reason": {
+            "type": "string",
+            "description": "Set by the backend when scheduling this task FAILED (e.g. the\nreferenced date attribute is empty/unreadable, or the resolved fire\ntime is already in the past). A JSON string\n({ error_code, error_reason, error_info }) describing why, so the UI\ncan show a specific warning and ask the user to fix the date\nattribute and re-schedule. Cleared when the task is successfully\n(re-)armed. This is the decision-task counterpart of\nAutomationInfo.error_reason (decision tasks have no automation_config).\n"
           }
         },
         "required": [
