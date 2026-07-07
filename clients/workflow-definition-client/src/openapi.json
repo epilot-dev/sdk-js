@@ -1837,7 +1837,6 @@
           },
           "entity_sync": {
             "type": "array",
-            "maxItems": 30,
             "items": {
               "$ref": "#/components/schemas/EntitySync"
             }
