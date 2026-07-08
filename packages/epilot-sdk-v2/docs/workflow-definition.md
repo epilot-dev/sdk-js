@@ -1,6 +1,5 @@
 # Workflows Definitions
 
-- **Base URL:** `https://workflows-definition.sls.epilot.io`
 - **Full API Docs:** [https://docs.epilot.io/api/workflow-definition](https://docs.epilot.io/api/workflow-definition)
 
 ## Usage
@@ -53,6 +52,7 @@ const { data } = await workflowDefinitionClient.getMaxAllowedLimit(...)
 
 **Schemas**
 - [`FlowTemplateBase`](#flowtemplatebase)
+- [`FlowLimitWarning`](#flowlimitwarning)
 - [`FlowTemplate`](#flowtemplate)
 - [`Version`](#version)
 - [`Trigger`](#trigger)
@@ -140,7 +140,7 @@ const { data } = await client.getMaxAllowedLimit()
 
 ### `getDefinitions`
 
-Retrieve all Workflow Definitions from an Organization
+Retrieve all V1 workflow definitions belonging to the authenticated organization.
 
 `GET /v1/workflows/definitions`
 
@@ -194,7 +194,9 @@ const { data } = await client.getDefinitions()
 
 ### `createDefinition`
 
-Create a Workflow Definition.
+Create a new V1 workflow definition. The definition consists of sections and steps
+that define the structure of the workflow. Once created, the definition can be used
+to start workflow executions.
 
 `POST /v1/workflows/definitions`
 
@@ -386,7 +388,9 @@ const { data } = await client.listFlowTemplates({
       "entity_sync": [],
       "taxonomies": ["string"],
       "singleClosingReasonSelection": true,
-      "_manifest": ["string"]
+      "_manifest": ["string"],
+      "linear": true,
+      "limit_warnings": []
     }
   ]
 }
@@ -398,13 +402,15 @@ const { data } = await client.listFlowTemplates({
 
 ### `createFlowTemplate`
 
-Create a new Flow Template.
+Create a new Flow Template (V2 workflow definition).
 
 `POST /v2/flows/templates`
 
 ```ts
 const { data } = await client.createFlowTemplate(
-  null,
+  {
+    enforce_limits: true,
+  },
   {
     id: 'string',
     org_id: 'string',
@@ -519,7 +525,21 @@ const { data } = await client.createFlowTemplate(
     ],
     taxonomies: ['string'],
     singleClosingReasonSelection: true,
-    _manifest: ['string']
+    _manifest: ['string'],
+    linear: true,
+    limit_warnings: [
+      {
+        i18nKey: 'string',
+        message: 'string',
+        max: 0,
+        current: 0,
+        node_id: 'string',
+        task_name: 'string',
+        branch_name: 'string',
+        param_name: 'string',
+        path: [ /* ... */ ]
+      }
+    ]
   },
 )
 ```
@@ -640,7 +660,21 @@ const { data } = await client.createFlowTemplate(
   ],
   "taxonomies": ["string"],
   "singleClosingReasonSelection": true,
-  "_manifest": ["string"]
+  "_manifest": ["string"],
+  "linear": true,
+  "limit_warnings": [
+    {
+      "i18nKey": "string",
+      "message": "string",
+      "max": 0,
+      "current": 0,
+      "node_id": "string",
+      "task_name": "string",
+      "branch_name": "string",
+      "param_name": "string",
+      "path": []
+    }
+  ]
 }
 ```
 
@@ -699,7 +733,9 @@ const { data } = await client.searchFlowTemplates(
       "entity_sync": [],
       "taxonomies": ["string"],
       "singleClosingReasonSelection": true,
-      "_manifest": ["string"]
+      "_manifest": ["string"],
+      "linear": true,
+      "limit_warnings": []
     }
   ]
 }
@@ -711,7 +747,7 @@ const { data } = await client.searchFlowTemplates(
 
 ### `getFlowTemplate`
 
-Get specific FLow template for a customer
+Retrieve a specific flow template by its unique identifier.
 
 `GET /v2/flows/templates/{flowId}`
 
@@ -837,7 +873,21 @@ const { data } = await client.getFlowTemplate({
   ],
   "taxonomies": ["string"],
   "singleClosingReasonSelection": true,
-  "_manifest": ["string"]
+  "_manifest": ["string"],
+  "linear": true,
+  "limit_warnings": [
+    {
+      "i18nKey": "string",
+      "message": "string",
+      "max": 0,
+      "current": 0,
+      "node_id": "string",
+      "task_name": "string",
+      "branch_name": "string",
+      "param_name": "string",
+      "path": []
+    }
+  ]
 }
 ```
 
@@ -855,6 +905,7 @@ Update Flow Template.
 const { data } = await client.updateFlowTemplate(
   {
     flowId: 'example',
+    enforce_limits: true,
   },
   {
     id: 'string',
@@ -970,7 +1021,21 @@ const { data } = await client.updateFlowTemplate(
     ],
     taxonomies: ['string'],
     singleClosingReasonSelection: true,
-    _manifest: ['string']
+    _manifest: ['string'],
+    linear: true,
+    limit_warnings: [
+      {
+        i18nKey: 'string',
+        message: 'string',
+        max: 0,
+        current: 0,
+        node_id: 'string',
+        task_name: 'string',
+        branch_name: 'string',
+        param_name: 'string',
+        path: [ /* ... */ ]
+      }
+    ]
   },
 )
 ```
@@ -1091,7 +1156,21 @@ const { data } = await client.updateFlowTemplate(
   ],
   "taxonomies": ["string"],
   "singleClosingReasonSelection": true,
-  "_manifest": ["string"]
+  "_manifest": ["string"],
+  "linear": true,
+  "limit_warnings": [
+    {
+      "i18nKey": "string",
+      "message": "string",
+      "max": 0,
+      "current": 0,
+      "node_id": "string",
+      "task_name": "string",
+      "branch_name": "string",
+      "param_name": "string",
+      "path": []
+    }
+  ]
 }
 ```
 
@@ -1115,7 +1194,9 @@ const { data } = await client.deleteFlowTemplate({
 
 ### `duplicateFlowTemplate`
 
-Duplicate a Flow Template from an existing workflow.
+Create a copy of an existing flow template. The duplicated template will have a new
+unique identifier and can be modified independently of the original. This is useful
+for creating variations of exist
 
 `POST /v2/flows/templates/{flowId}/duplicate`
 
@@ -1241,7 +1322,21 @@ const { data } = await client.duplicateFlowTemplate({
   ],
   "taxonomies": ["string"],
   "singleClosingReasonSelection": true,
-  "_manifest": ["string"]
+  "_manifest": ["string"],
+  "linear": true,
+  "limit_warnings": [
+    {
+      "i18nKey": "string",
+      "message": "string",
+      "max": 0,
+      "current": 0,
+      "node_id": "string",
+      "task_name": "string",
+      "branch_name": "string",
+      "param_name": "string",
+      "path": []
+    }
+  ]
 }
 ```
 
@@ -1729,6 +1824,11 @@ const { data } = await client.setWorkflowClosingReasons(
 
 ### `FlowTemplateBase`
 
+Base schema for V2 flow templates. A flow template defines the structure of a workflow
+including phases, tasks, edges, triggers, and other configuration. Flow templates serve
+as blueprints that can be instantiated as flow executions.
+
+
 ```ts
 type FlowTemplateBase = {
   id?: string
@@ -1766,7 +1866,7 @@ type FlowTemplateBase = {
   due_date?: string
   due_date_config?: {
     duration: number
-    unit: "minutes" | "hours" | "days" | "weeks" | "months"
+    unit: "minutes" | "hours" | "days" | "weeks" | "months" | "years"
     type: "WORKFLOW_STARTED" | "TASK_FINISHED" | "PHASE_FINISHED" | "A_PRECEDING_TASK_COMPLETED" | "ALL_PRECEDING_TASKS_COMPLETED"
     task_id?: string
     phase_id?: string
@@ -1834,6 +1934,24 @@ type FlowTemplateBase = {
 }
 ```
 
+### `FlowLimitWarning`
+
+A configuration limit that the flow currently exceeds. Returned by the get-flow endpoint and by create/update responses so the UI can show a non-blocking banner. Size/count limit violations never cause a 400 — only structural errors do. The flow remains fully usable; users are encouraged to bring va
+
+```ts
+type FlowLimitWarning = {
+  i18nKey: string
+  message: string
+  max: number
+  current?: number
+  node_id?: string
+  task_name?: string
+  branch_name?: string
+  param_name?: string
+  path: unknown[]
+}
+```
+
 ### `FlowTemplate`
 
 ```ts
@@ -1873,7 +1991,7 @@ type FlowTemplate = {
   due_date?: string
   due_date_config?: {
     duration: number
-    unit: "minutes" | "hours" | "days" | "weeks" | "months"
+    unit: "minutes" | "hours" | "days" | "weeks" | "months" | "years"
     type: "WORKFLOW_STARTED" | "TASK_FINISHED" | "PHASE_FINISHED" | "A_PRECEDING_TASK_COMPLETED" | "ALL_PRECEDING_TASKS_COMPLETED"
     task_id?: string
     phase_id?: string
@@ -2068,7 +2186,7 @@ type CreateFlowTemplate = {
   due_date?: string
   due_date_config?: {
     duration: number
-    unit: "minutes" | "hours" | "days" | "weeks" | "months"
+    unit: "minutes" | "hours" | "days" | "weeks" | "months" | "years"
     type: "WORKFLOW_STARTED" | "TASK_FINISHED" | "PHASE_FINISHED" | "A_PRECEDING_TASK_COMPLETED" | "ALL_PRECEDING_TASKS_COMPLETED"
     task_id?: string
     phase_id?: string
@@ -2285,7 +2403,7 @@ type Task = {
   due_date?: string
   due_date_config?: {
     duration: number
-    unit: "minutes" | "hours" | "days" | "weeks" | "months"
+    unit: "minutes" | "hours" | "days" | "weeks" | "months" | "years"
     type: "WORKFLOW_STARTED" | "TASK_FINISHED" | "PHASE_FINISHED" | "A_PRECEDING_TASK_COMPLETED" | "ALL_PRECEDING_TASKS_COMPLETED"
     task_id?: string
     phase_id?: string
@@ -2345,7 +2463,7 @@ type Task = {
   due_date?: string
   due_date_config?: {
     duration: number
-    unit: "minutes" | "hours" | "days" | "weeks" | "months"
+    unit: "minutes" | "hours" | "days" | "weeks" | "months" | "years"
     type: "WORKFLOW_STARTED" | "TASK_FINISHED" | "PHASE_FINISHED" | "A_PRECEDING_TASK_COMPLETED" | "ALL_PRECEDING_TASKS_COMPLETED"
     task_id?: string
     phase_id?: string
@@ -2392,7 +2510,7 @@ type ManualTask = {
   due_date?: string
   due_date_config?: {
     duration: number
-    unit: "minutes" | "hours" | "days" | "weeks" | "months"
+    unit: "minutes" | "hours" | "days" | "weeks" | "months" | "years"
     type: "WORKFLOW_STARTED" | "TASK_FINISHED" | "PHASE_FINISHED" | "A_PRECEDING_TASK_COMPLETED" | "ALL_PRECEDING_TASKS_COMPLETED"
     task_id?: string
     phase_id?: string
@@ -2458,7 +2576,7 @@ type AutomationTask = {
   due_date?: string
   due_date_config?: {
     duration: number
-    unit: "minutes" | "hours" | "days" | "weeks" | "months"
+    unit: "minutes" | "hours" | "days" | "weeks" | "months" | "years"
     type: "WORKFLOW_STARTED" | "TASK_FINISHED" | "PHASE_FINISHED" | "A_PRECEDING_TASK_COMPLETED" | "ALL_PRECEDING_TASKS_COMPLETED"
     task_id?: string
     phase_id?: string
@@ -2520,12 +2638,12 @@ type AutomationTask = {
   } | {
     mode: "delayed"
     duration: number
-    unit: "minutes" | "hours" | "days" | "weeks" | "months"
+    unit: "minutes" | "hours" | "days" | "weeks" | "months" | "years"
   } | {
     mode: "relative"
     direction: "before" | "after"
     duration: number
-    unit: "minutes" | "hours" | "days" | "weeks" | "months"
+    unit: "minutes" | "hours" | "days" | "weeks" | "months" | "years"
     reference: {
       id: { ... }
       origin: { ... }
@@ -2587,7 +2705,7 @@ type AiAgentTask = {
   due_date?: string
   due_date_config?: {
     duration: number
-    unit: "minutes" | "hours" | "days" | "weeks" | "months"
+    unit: "minutes" | "hours" | "days" | "weeks" | "months" | "years"
     type: "WORKFLOW_STARTED" | "TASK_FINISHED" | "PHASE_FINISHED" | "A_PRECEDING_TASK_COMPLETED" | "ALL_PRECEDING_TASKS_COMPLETED"
     task_id?: string
     phase_id?: string
@@ -2661,12 +2779,12 @@ type ActionSchedule = {
 } | {
   mode: "delayed"
   duration: number
-  unit: "minutes" | "hours" | "days" | "weeks" | "months"
+  unit: "minutes" | "hours" | "days" | "weeks" | "months" | "years"
 } | {
   mode: "relative"
   direction: "before" | "after"
   duration: number
-  unit: "minutes" | "hours" | "days" | "weeks" | "months"
+  unit: "minutes" | "hours" | "days" | "weeks" | "months" | "years"
   reference: {
     id: string
     origin: "flow_started" | "task_completed" | "trigger_entity_attribute" | "all_preceding_tasks_completed"
@@ -2690,7 +2808,7 @@ type ImmediateSchedule = {
 type DelayedSchedule = {
   mode: "delayed"
   duration: number
-  unit: "minutes" | "hours" | "days" | "weeks" | "months"
+  unit: "minutes" | "hours" | "days" | "weeks" | "months" | "years"
 }
 ```
 
@@ -2701,7 +2819,7 @@ type RelativeSchedule = {
   mode: "relative"
   direction: "before" | "after"
   duration: number
-  unit: "minutes" | "hours" | "days" | "weeks" | "months"
+  unit: "minutes" | "hours" | "days" | "weeks" | "months" | "years"
   reference: {
     id: string
     origin: "flow_started" | "task_completed" | "trigger_entity_attribute" | "all_preceding_tasks_completed"
@@ -2730,7 +2848,7 @@ type DecisionTask = {
   due_date?: string
   due_date_config?: {
     duration: number
-    unit: "minutes" | "hours" | "days" | "weeks" | "months"
+    unit: "minutes" | "hours" | "days" | "weeks" | "months" | "years"
     type: "WORKFLOW_STARTED" | "TASK_FINISHED" | "PHASE_FINISHED" | "A_PRECEDING_TASK_COMPLETED" | "ALL_PRECEDING_TASKS_COMPLETED"
     task_id?: string
     phase_id?: string
@@ -2791,12 +2909,12 @@ type DecisionTask = {
   schedule?: {
     mode: "delayed"
     duration: number
-    unit: "minutes" | "hours" | "days" | "weeks" | "months"
+    unit: "minutes" | "hours" | "days" | "weeks" | "months" | "years"
   } | {
     mode: "relative"
     direction: "before" | "after"
     duration: number
-    unit: "minutes" | "hours" | "days" | "weeks" | "months"
+    unit: "minutes" | "hours" | "days" | "weeks" | "months" | "years"
     reference: {
       id: { ... }
       origin: { ... }
@@ -2831,7 +2949,7 @@ type TaskBase = {
   due_date?: string
   due_date_config?: {
     duration: number
-    unit: "minutes" | "hours" | "days" | "weeks" | "months"
+    unit: "minutes" | "hours" | "days" | "weeks" | "months" | "years"
     type: "WORKFLOW_STARTED" | "TASK_FINISHED" | "PHASE_FINISHED" | "A_PRECEDING_TASK_COMPLETED" | "ALL_PRECEDING_TASKS_COMPLETED"
     task_id?: string
     phase_id?: string
@@ -2887,7 +3005,7 @@ type Phase = {
   due_date?: string
   due_date_config?: {
     duration: number
-    unit: "minutes" | "hours" | "days" | "weeks" | "months"
+    unit: "minutes" | "hours" | "days" | "weeks" | "months" | "years"
     type: "WORKFLOW_STARTED" | "TASK_FINISHED" | "PHASE_FINISHED" | "A_PRECEDING_TASK_COMPLETED" | "ALL_PRECEDING_TASKS_COMPLETED"
     task_id?: string
     phase_id?: string
@@ -2947,6 +3065,8 @@ type Condition = {
       attribute_type?: { ... }
       attribute_repeatable?: { ... }
       attribute_operation?: { ... }
+      attributes?: { ... }
+      attributes_match?: { ... }
       attribute_sub_field?: { ... }
       date_offset?: { ... }
     }
@@ -2971,6 +3091,8 @@ type Statement = {
     attribute_type?: "string" | "text" | "number" | "boolean" | "date" | "datetime" | "tags" | "country" | "email" | "phone" | "product" | "price" | "status" | "relation" | "multiselect" | "select" | "radio" | "relation_user" | "purpose" | "label" | "message_email_address"
     attribute_repeatable?: boolean
     attribute_operation?: "all" | "updated" | "added" | "deleted"
+    attributes?: string[]
+    attributes_match?: "any" | "all"
     attribute_sub_field?: string
     date_offset?: {
       amount?: { ... }
@@ -2995,6 +3117,8 @@ type EvaluationSource = {
   attribute_type?: "string" | "text" | "number" | "boolean" | "date" | "datetime" | "tags" | "country" | "email" | "phone" | "product" | "price" | "status" | "relation" | "multiselect" | "select" | "radio" | "relation_user" | "purpose" | "label" | "message_email_address"
   attribute_repeatable?: boolean
   attribute_operation?: "all" | "updated" | "added" | "deleted"
+  attributes?: string[]
+  attributes_match?: "any" | "all"
   attribute_sub_field?: string
   date_offset?: {
     amount?: number
@@ -3016,7 +3140,7 @@ Set due date for the task based on a dynamic condition
 ```ts
 type DueDateConfig = {
   duration: number
-  unit: "minutes" | "hours" | "days" | "weeks" | "months"
+  unit: "minutes" | "hours" | "days" | "weeks" | "months" | "years"
   type: "WORKFLOW_STARTED" | "TASK_FINISHED" | "PHASE_FINISHED" | "A_PRECEDING_TASK_COMPLETED" | "ALL_PRECEDING_TASKS_COMPLETED"
   task_id?: string
   phase_id?: string
@@ -3026,7 +3150,7 @@ type DueDateConfig = {
 ### `TimeUnit`
 
 ```ts
-type TimeUnit = "minutes" | "hours" | "days" | "weeks" | "months"
+type TimeUnit = "minutes" | "hours" | "days" | "weeks" | "months" | "years"
 ```
 
 ### `EnableRequirement`
@@ -3043,6 +3167,12 @@ type EnableRequirement = {
 
 ### `WorkflowDefinition`
 
+V1 workflow definition schema. Defines a linear workflow structure with sections
+and steps. Sections group related steps together, and steps represent individual
+tasks that need to be completed. This is the legacy workflow model; for new
+implementations, consider using V2 flow templates instead.
+
+
 ```ts
 type WorkflowDefinition = {
   id?: string
@@ -3054,7 +3184,7 @@ type WorkflowDefinition = {
   dueDate?: string
   dynamicDueDate?: {
     numberOfUnits: number
-    timePeriod: "minutes" | "hours" | "days" | "weeks" | "months"
+    timePeriod: "minutes" | "hours" | "days" | "weeks" | "months" | "years"
     actionTypeCondition: "WORKFLOW_STARTED" | "STEP_CLOSED" | "PHASE_FINISHED"
     stepId?: string
     phaseId?: string
@@ -3174,7 +3304,7 @@ type Step = {
   dueDate?: string
   dynamicDueDate?: {
     numberOfUnits: number
-    timePeriod: "minutes" | "hours" | "days" | "weeks" | "months"
+    timePeriod: "minutes" | "hours" | "days" | "weeks" | "months" | "years"
     actionTypeCondition: "WORKFLOW_STARTED" | "STEP_CLOSED" | "PHASE_FINISHED"
     stepId?: string
     phaseId?: string
@@ -3231,7 +3361,7 @@ type Section = {
   dueDate?: string
   dynamicDueDate?: {
     numberOfUnits: number
-    timePeriod: "minutes" | "hours" | "days" | "weeks" | "months"
+    timePeriod: "minutes" | "hours" | "days" | "weeks" | "months" | "years"
     actionTypeCondition: "WORKFLOW_STARTED" | "STEP_CLOSED" | "PHASE_FINISHED"
     stepId?: string
     phaseId?: string
@@ -3375,7 +3505,7 @@ type MaxAllowedLimit = {
 
 ### `DefinitionNotFoundResp`
 
-Definition could be not found
+Error response returned when a workflow definition or flow template is not found.
 
 ```ts
 type DefinitionNotFoundResp = {
@@ -3385,7 +3515,7 @@ type DefinitionNotFoundResp = {
 
 ### `ClosingReasonNotFoundResp`
 
-Closing reason could be not found
+Error response returned when a closing reason is not found.
 
 ```ts
 type ClosingReasonNotFoundResp = {
@@ -3455,6 +3585,8 @@ type ClosingReasonId = {
 
 ### `ErrorResp`
 
+Standard error response returned when an API request fails.
+
 ```ts
 type ErrorResp = {
   message?: string
@@ -3497,12 +3629,16 @@ type EntitySync = {
 
 ### `DynamicDueDate`
 
-set a Duedate for a step then a specific
+Configuration for calculating a due date dynamically based on workflow events.
+The due date is computed by adding a duration (numberOfUnits + timePeriod) to
+a reference point defined by actionTypeCondition (e.g., when workflow started,
+when a step closed, or when a phase finished).
+
 
 ```ts
 type DynamicDueDate = {
   numberOfUnits: number
-  timePeriod: "minutes" | "hours" | "days" | "weeks" | "months"
+  timePeriod: "minutes" | "hours" | "days" | "weeks" | "months" | "years"
   actionTypeCondition: "WORKFLOW_STARTED" | "STEP_CLOSED" | "PHASE_FINISHED"
   stepId?: string
   phaseId?: string

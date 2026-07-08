@@ -42,6 +42,7 @@ const { data } = await userClient.signUpUser(...)
 - [`getGroupsForUser`](#getgroupsforuser)
 - [`verifyEmailWithToken`](#verifyemailwithtoken)
 - [`requestPasswordReset`](#requestpasswordreset)
+- [`resetPassword`](#resetpassword)
 - [`checkInviteToken`](#checkinvitetoken)
 - [`activateUser`](#activateuser)
 - [`rejectInvite`](#rejectinvite)
@@ -234,6 +235,8 @@ const { data } = await client.getMeV2()
   "email": "user@example.com",
   "draft_email": "user@example.com",
   "draft_email_expires_at": "1970-01-01T00:00:00.000Z",
+  "password_reset_token_hash": "string",
+  "password_reset_token_expires_at": "1970-01-01T00:00:00.000Z",
   "department": "Sales",
   "phone": 1234567890,
   "secondary_phone": 1234567890,
@@ -275,12 +278,19 @@ const { data } = await client.getMeV2()
     "created_opportunity_auto": true,
     "deleted_opportunity": true
   },
+  "in_app_notification_setting": {
+    "integration_critical_error": true,
+    "integration_error_threshold": true,
+    "assigned_opportunity": true,
+    "assigned_task": true
+  },
   "properties": [
     {
       "name": "profileImageName",
       "value": "avatar.png"
     }
-  ]
+  ],
+  "tags": ["non-billable"]
 }
 ```
 
@@ -454,6 +464,8 @@ const { data } = await client.listUsersV2({
       "email": "user@example.com",
       "draft_email": "user@example.com",
       "draft_email_expires_at": "1970-01-01T00:00:00.000Z",
+      "password_reset_token_hash": "string",
+      "password_reset_token_expires_at": "1970-01-01T00:00:00.000Z",
       "department": "Sales",
       "phone": 1234567890,
       "secondary_phone": 1234567890,
@@ -495,12 +507,19 @@ const { data } = await client.listUsersV2({
         "created_opportunity_auto": true,
         "deleted_opportunity": true
       },
+      "in_app_notification_setting": {
+        "integration_critical_error": true,
+        "integration_error_threshold": true,
+        "assigned_opportunity": true,
+        "assigned_task": true
+      },
       "properties": [
         {
           "name": "profileImageName",
           "value": "avatar.png"
         }
-      ]
+      ],
+      "tags": ["non-billable"]
     }
   ]
 }
@@ -536,6 +555,8 @@ const { data } = await client.getUserV2({
   "email": "user@example.com",
   "draft_email": "user@example.com",
   "draft_email_expires_at": "1970-01-01T00:00:00.000Z",
+  "password_reset_token_hash": "string",
+  "password_reset_token_expires_at": "1970-01-01T00:00:00.000Z",
   "department": "Sales",
   "phone": 1234567890,
   "secondary_phone": 1234567890,
@@ -577,12 +598,19 @@ const { data } = await client.getUserV2({
     "created_opportunity_auto": true,
     "deleted_opportunity": true
   },
+  "in_app_notification_setting": {
+    "integration_critical_error": true,
+    "integration_error_threshold": true,
+    "assigned_opportunity": true,
+    "assigned_task": true
+  },
   "properties": [
     {
       "name": "profileImageName",
       "value": "avatar.png"
     }
-  ]
+  ],
+  "tags": ["non-billable"]
 }
 ```
 
@@ -611,6 +639,8 @@ const { data } = await client.updateUserV2(
     email: 'user@example.com',
     draft_email: 'user@example.com',
     draft_email_expires_at: '1970-01-01T00:00:00.000Z',
+    password_reset_token_hash: 'string',
+    password_reset_token_expires_at: '1970-01-01T00:00:00.000Z',
     department: 'Sales',
     phone: 1234567890,
     secondary_phone: 1234567890,
@@ -652,12 +682,19 @@ const { data } = await client.updateUserV2(
       created_opportunity_auto: true,
       deleted_opportunity: true
     },
+    in_app_notification_setting: {
+      integration_critical_error: true,
+      integration_error_threshold: true,
+      assigned_opportunity: true,
+      assigned_task: true
+    },
     properties: [
       {
         name: 'profileImageName',
         value: 'avatar.png'
       }
-    ]
+    ],
+    tags: ['non-billable']
   },
 )
 ```
@@ -676,6 +713,8 @@ const { data } = await client.updateUserV2(
   "email": "user@example.com",
   "draft_email": "user@example.com",
   "draft_email_expires_at": "1970-01-01T00:00:00.000Z",
+  "password_reset_token_hash": "string",
+  "password_reset_token_expires_at": "1970-01-01T00:00:00.000Z",
   "department": "Sales",
   "phone": 1234567890,
   "secondary_phone": 1234567890,
@@ -717,12 +756,19 @@ const { data } = await client.updateUserV2(
     "created_opportunity_auto": true,
     "deleted_opportunity": true
   },
+  "in_app_notification_setting": {
+    "integration_critical_error": true,
+    "integration_error_threshold": true,
+    "assigned_opportunity": true,
+    "assigned_task": true
+  },
   "properties": [
     {
       "name": "profileImageName",
       "value": "avatar.png"
     }
-  ]
+  ],
+  "tags": ["non-billable"]
 }
 ```
 
@@ -804,6 +850,8 @@ const { data } = await client.inviteUser(
   "email": "user@example.com",
   "draft_email": "user@example.com",
   "draft_email_expires_at": "1970-01-01T00:00:00.000Z",
+  "password_reset_token_hash": "string",
+  "password_reset_token_expires_at": "1970-01-01T00:00:00.000Z",
   "department": "Sales",
   "phone": 1234567890,
   "secondary_phone": 1234567890,
@@ -845,12 +893,19 @@ const { data } = await client.inviteUser(
     "created_opportunity_auto": true,
     "deleted_opportunity": true
   },
+  "in_app_notification_setting": {
+    "integration_critical_error": true,
+    "integration_error_threshold": true,
+    "assigned_opportunity": true,
+    "assigned_task": true
+  },
   "properties": [
     {
       "name": "profileImageName",
       "value": "avatar.png"
     }
-  ]
+  ],
+  "tags": ["non-billable"]
 }
 ```
 
@@ -888,6 +943,8 @@ const { data } = await client.resendUserInvitation(
   "email": "user@example.com",
   "draft_email": "user@example.com",
   "draft_email_expires_at": "1970-01-01T00:00:00.000Z",
+  "password_reset_token_hash": "string",
+  "password_reset_token_expires_at": "1970-01-01T00:00:00.000Z",
   "department": "Sales",
   "phone": 1234567890,
   "secondary_phone": 1234567890,
@@ -929,12 +986,19 @@ const { data } = await client.resendUserInvitation(
     "created_opportunity_auto": true,
     "deleted_opportunity": true
   },
+  "in_app_notification_setting": {
+    "integration_critical_error": true,
+    "integration_error_threshold": true,
+    "assigned_opportunity": true,
+    "assigned_task": true
+  },
   "properties": [
     {
       "name": "profileImageName",
       "value": "avatar.png"
     }
-  ]
+  ],
+  "tags": ["non-billable"]
 }
 ```
 
@@ -1005,6 +1069,8 @@ const { data } = await client.getGroupsForUser({
       "email": "user@example.com",
       "draft_email": "user@example.com",
       "draft_email_expires_at": "1970-01-01T00:00:00.000Z",
+      "password_reset_token_hash": "string",
+      "password_reset_token_expires_at": "1970-01-01T00:00:00.000Z",
       "department": "Sales",
       "phone": 1234567890,
       "secondary_phone": 1234567890,
@@ -1022,7 +1088,9 @@ const { data } = await client.getGroupsForUser({
       "image_uri": {},
       "favorites": {},
       "email_notification_setting": {},
+      "in_app_notification_setting": {},
       "properties": [],
+      "tags": ["non-billable"],
       "crt_index": 3
     },
     "users": [
@@ -1123,6 +1191,8 @@ const { data } = await client.createGroup(
     "email": "user@example.com",
     "draft_email": "user@example.com",
     "draft_email_expires_at": "1970-01-01T00:00:00.000Z",
+    "password_reset_token_hash": "string",
+    "password_reset_token_expires_at": "1970-01-01T00:00:00.000Z",
     "department": "Sales",
     "phone": 1234567890,
     "secondary_phone": 1234567890,
@@ -1161,9 +1231,16 @@ const { data } = await client.createGroup(
       "created_opportunity_auto": true,
       "deleted_opportunity": true
     },
+    "in_app_notification_setting": {
+      "integration_critical_error": true,
+      "integration_error_threshold": true,
+      "assigned_opportunity": true,
+      "assigned_task": true
+    },
     "properties": [
       {}
     ],
+    "tags": ["non-billable"],
     "crt_index": 3
   },
   "users": [
@@ -1177,6 +1254,8 @@ const { data } = await client.createGroup(
       "email": "user@example.com",
       "draft_email": "user@example.com",
       "draft_email_expires_at": "1970-01-01T00:00:00.000Z",
+      "password_reset_token_hash": "string",
+      "password_reset_token_expires_at": "1970-01-01T00:00:00.000Z",
       "department": "Sales",
       "phone": 1234567890,
       "secondary_phone": 1234567890,
@@ -1194,7 +1273,9 @@ const { data } = await client.createGroup(
       "image_uri": {},
       "favorites": {},
       "email_notification_setting": {},
-      "properties": []
+      "in_app_notification_setting": {},
+      "properties": [],
+      "tags": ["non-billable"]
     }
   ],
   "image_uri": {
@@ -1242,6 +1323,8 @@ const { data } = await client.getGroup({
     "email": "user@example.com",
     "draft_email": "user@example.com",
     "draft_email_expires_at": "1970-01-01T00:00:00.000Z",
+    "password_reset_token_hash": "string",
+    "password_reset_token_expires_at": "1970-01-01T00:00:00.000Z",
     "department": "Sales",
     "phone": 1234567890,
     "secondary_phone": 1234567890,
@@ -1280,9 +1363,16 @@ const { data } = await client.getGroup({
       "created_opportunity_auto": true,
       "deleted_opportunity": true
     },
+    "in_app_notification_setting": {
+      "integration_critical_error": true,
+      "integration_error_threshold": true,
+      "assigned_opportunity": true,
+      "assigned_task": true
+    },
     "properties": [
       {}
     ],
+    "tags": ["non-billable"],
     "crt_index": 3
   },
   "users": [
@@ -1296,6 +1386,8 @@ const { data } = await client.getGroup({
       "email": "user@example.com",
       "draft_email": "user@example.com",
       "draft_email_expires_at": "1970-01-01T00:00:00.000Z",
+      "password_reset_token_hash": "string",
+      "password_reset_token_expires_at": "1970-01-01T00:00:00.000Z",
       "department": "Sales",
       "phone": 1234567890,
       "secondary_phone": 1234567890,
@@ -1313,7 +1405,9 @@ const { data } = await client.getGroup({
       "image_uri": {},
       "favorites": {},
       "email_notification_setting": {},
-      "properties": []
+      "in_app_notification_setting": {},
+      "properties": [],
+      "tags": ["non-billable"]
     }
   ],
   "image_uri": {
@@ -1370,6 +1464,8 @@ const { data } = await client.updateGroup(
     "email": "user@example.com",
     "draft_email": "user@example.com",
     "draft_email_expires_at": "1970-01-01T00:00:00.000Z",
+    "password_reset_token_hash": "string",
+    "password_reset_token_expires_at": "1970-01-01T00:00:00.000Z",
     "department": "Sales",
     "phone": 1234567890,
     "secondary_phone": 1234567890,
@@ -1408,9 +1504,16 @@ const { data } = await client.updateGroup(
       "created_opportunity_auto": true,
       "deleted_opportunity": true
     },
+    "in_app_notification_setting": {
+      "integration_critical_error": true,
+      "integration_error_threshold": true,
+      "assigned_opportunity": true,
+      "assigned_task": true
+    },
     "properties": [
       {}
     ],
+    "tags": ["non-billable"],
     "crt_index": 3
   },
   "users": [
@@ -1424,6 +1527,8 @@ const { data } = await client.updateGroup(
       "email": "user@example.com",
       "draft_email": "user@example.com",
       "draft_email_expires_at": "1970-01-01T00:00:00.000Z",
+      "password_reset_token_hash": "string",
+      "password_reset_token_expires_at": "1970-01-01T00:00:00.000Z",
       "department": "Sales",
       "phone": 1234567890,
       "secondary_phone": 1234567890,
@@ -1441,7 +1546,9 @@ const { data } = await client.updateGroup(
       "image_uri": {},
       "favorites": {},
       "email_notification_setting": {},
-      "properties": []
+      "in_app_notification_setting": {},
+      "properties": [],
+      "tags": ["non-billable"]
     }
   ],
   "image_uri": {
@@ -1502,6 +1609,8 @@ const { data } = await client.advanceUserAssignment({
     "email": "user@example.com",
     "draft_email": "user@example.com",
     "draft_email_expires_at": "1970-01-01T00:00:00.000Z",
+    "password_reset_token_hash": "string",
+    "password_reset_token_expires_at": "1970-01-01T00:00:00.000Z",
     "department": "Sales",
     "phone": 1234567890,
     "secondary_phone": 1234567890,
@@ -1540,9 +1649,16 @@ const { data } = await client.advanceUserAssignment({
       "created_opportunity_auto": true,
       "deleted_opportunity": true
     },
+    "in_app_notification_setting": {
+      "integration_critical_error": true,
+      "integration_error_threshold": true,
+      "assigned_opportunity": true,
+      "assigned_task": true
+    },
     "properties": [
       {}
     ],
+    "tags": ["non-billable"],
     "crt_index": 3
   },
   "users": [
@@ -1556,6 +1672,8 @@ const { data } = await client.advanceUserAssignment({
       "email": "user@example.com",
       "draft_email": "user@example.com",
       "draft_email_expires_at": "1970-01-01T00:00:00.000Z",
+      "password_reset_token_hash": "string",
+      "password_reset_token_expires_at": "1970-01-01T00:00:00.000Z",
       "department": "Sales",
       "phone": 1234567890,
       "secondary_phone": 1234567890,
@@ -1573,7 +1691,9 @@ const { data } = await client.advanceUserAssignment({
       "image_uri": {},
       "favorites": {},
       "email_notification_setting": {},
-      "properties": []
+      "in_app_notification_setting": {},
+      "properties": [],
+      "tags": ["non-billable"]
     }
   ],
   "image_uri": {
@@ -1763,6 +1883,37 @@ const { data } = await client.requestPasswordReset(
 ```json
 {
   "message": "If an account exists, a password reset email has been sent."
+}
+```
+
+</details>
+
+---
+
+### `resetPassword`
+
+Set a new password using a reset token from the password reset email.
+The token is single-use and time-limited.
+
+`POST /v2/users/public/resetPassword`
+
+```ts
+const { data } = await client.resetPassword(
+  null,
+  {
+    email: 'test@example.com',
+    token: 'string',
+    password: 'string'
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "success": true
 }
 ```
 
@@ -2507,6 +2658,8 @@ type UserV2 = {
   email?: string // email
   draft_email?: string // email
   draft_email_expires_at?: string // date-time
+  password_reset_token_hash?: string
+  password_reset_token_expires_at?: string // date-time
   department?: string
   phone?: string
   secondary_phone?: string
@@ -2527,10 +2680,12 @@ type UserV2 = {
   }
   favorites?: Record<string, unknown>
   email_notification_setting?: Record<string, unknown>
+  in_app_notification_setting?: Record<string, unknown>
   properties?: Array<{
     name: string
     value: string
   }>
+  tags?: string[]
 }
 ```
 
@@ -2641,6 +2796,8 @@ type Group = {
     email?: string // email
     draft_email?: string // email
     draft_email_expires_at?: string // date-time
+    password_reset_token_hash?: string
+    password_reset_token_expires_at?: string // date-time
     department?: string
     phone?: string
     secondary_phone?: string
@@ -2661,10 +2818,12 @@ type Group = {
     }
     favorites?: Record<string, unknown>
     email_notification_setting?: Record<string, unknown>
+    in_app_notification_setting?: Record<string, unknown>
     properties?: Array<{
       name: { ... }
       value: { ... }
     }>
+    tags?: string[]
     crt_index?: number
   }
   users?: Array<{
@@ -2677,6 +2836,8 @@ type Group = {
     email?: string // email
     draft_email?: string // email
     draft_email_expires_at?: string // date-time
+    password_reset_token_hash?: string
+    password_reset_token_expires_at?: string // date-time
     department?: string
     phone?: string
     secondary_phone?: string
@@ -2697,10 +2858,12 @@ type Group = {
     }
     favorites?: Record<string, unknown>
     email_notification_setting?: Record<string, unknown>
+    in_app_notification_setting?: Record<string, unknown>
     properties?: Array<{
       name: { ... }
       value: { ... }
     }>
+    tags?: string[]
   }>
   image_uri?: {
     original?: string // uri

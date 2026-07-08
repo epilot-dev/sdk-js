@@ -497,6 +497,18 @@ export declare namespace Components {
              *
              */
             scheduled_at?: string;
+            /**
+             * Set by the backend when scheduling this task FAILED (e.g. the
+             * referenced date attribute is empty/unreadable, or the resolved fire
+             * time is already in the past). A JSON string
+             * ({ error_code, error_reason, error_info }) describing why, so the UI
+             * can show a specific warning and ask the user to fix the date
+             * attribute and re-schedule. Cleared when the task is successfully
+             * (re-)armed. This is the decision-task counterpart of
+             * AutomationInfo.error_reason (decision tasks have no automation_config).
+             *
+             */
+            error_reason?: string;
         }
         /**
          * Set due date for the task based on a dynamic condition
@@ -811,6 +823,10 @@ export declare namespace Components {
              * Indicates whether only a single closing reason can be selected when closing the flow execution
              */
             singleClosingReasonSelection?: boolean;
+            /**
+             * Copied from the flow template at start. When true, task enablement is computed at runtime from the graph (a task is enabled only when all of its direct predecessor tasks in its branch are done) instead of from each task's explicit requirements.
+             */
+            linear?: boolean;
         }
         export type FlowExecutionId = string;
         export interface FlowSlim {
@@ -1125,6 +1141,18 @@ export declare namespace Components {
              *
              */
             scheduled_at?: string;
+            /**
+             * Set by the backend when scheduling this task FAILED (e.g. the
+             * referenced date attribute is empty/unreadable, or the resolved fire
+             * time is already in the past). A JSON string
+             * ({ error_code, error_reason, error_info }) describing why, so the UI
+             * can show a specific warning and ask the user to fix the date
+             * attribute and re-schedule. Cleared when the task is successfully
+             * (re-)armed. This is the decision-task counterpart of
+             * AutomationInfo.error_reason (decision tasks have no automation_config).
+             *
+             */
+            error_reason?: string;
         }
         export interface SearchExecutionsReq {
             name?: string;

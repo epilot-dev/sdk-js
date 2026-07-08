@@ -870,7 +870,8 @@ const { data } = await client.startFlowExecution(
       "last_heal_attempted_at": "1970-01-01T00:00:00.000Z"
     }
   },
-  "singleClosingReasonSelection": true
+  "singleClosingReasonSelection": true,
+  "linear": true
 }
 ```
 
@@ -1016,7 +1017,8 @@ const { data } = await client.getFlowExecution({
       "last_heal_attempted_at": "1970-01-01T00:00:00.000Z"
     }
   },
-  "singleClosingReasonSelection": true
+  "singleClosingReasonSelection": true,
+  "linear": true
 }
 ```
 
@@ -1198,7 +1200,8 @@ const { data } = await client.patchFlowExecution(
       "last_heal_attempted_at": "1970-01-01T00:00:00.000Z"
     }
   },
-  "singleClosingReasonSelection": true
+  "singleClosingReasonSelection": true,
+  "linear": true
 }
 ```
 
@@ -1266,7 +1269,8 @@ const { data } = await client.searchFlowExecutions(
       "entity_sync": [],
       "taxonomies": ["string"],
       "trigger": {},
-      "singleClosingReasonSelection": true
+      "singleClosingReasonSelection": true,
+      "linear": true
     }
   ]
 }
@@ -2023,7 +2027,8 @@ const { data } = await client.reconcileAutomationTask({
       "last_heal_attempted_at": "1970-01-01T00:00:00.000Z"
     }
   },
-  "singleClosingReasonSelection": true
+  "singleClosingReasonSelection": true,
+  "linear": true
 }
 ```
 
@@ -4108,8 +4113,8 @@ type AutomationTask = {
     unit: "minutes" | "hours" | "days" | "weeks" | "months" | "years"
     schedule_id?: string
     scheduled_at?: string
+    error_reason?: string
   } | {
-    mode: "relative"
   // ...
 }
 ```
@@ -4153,6 +4158,7 @@ type ActionSchedule = {
   unit: "minutes" | "hours" | "days" | "weeks" | "months" | "years"
   schedule_id?: string
   scheduled_at?: string
+  error_reason?: string
 } | {
   mode: "relative"
   direction: "before" | "after"
@@ -4166,6 +4172,7 @@ type ActionSchedule = {
   }
   schedule_id?: string
   scheduled_at?: string
+  error_reason?: string
 }
 ```
 
@@ -4186,6 +4193,7 @@ type DelayedSchedule = {
   unit: "minutes" | "hours" | "days" | "weeks" | "months" | "years"
   schedule_id?: string
   scheduled_at?: string
+  error_reason?: string
 }
 ```
 
@@ -4205,6 +4213,7 @@ type RelativeSchedule = {
   }
   schedule_id?: string
   scheduled_at?: string
+  error_reason?: string
 }
 ```
 
@@ -4309,8 +4318,8 @@ type DecisionTask = {
     unit: "minutes" | "hours" | "days" | "weeks" | "months" | "years"
     schedule_id?: string
     scheduled_at?: string
+    error_reason?: string
   } | {
-    mode: "relative"
   // ...
 }
 ```
