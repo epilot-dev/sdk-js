@@ -1046,6 +1046,117 @@
         }
       }
     },
+    "/v2/users/public/resetPassword": {
+      "post": {
+        "operationId": "resetPassword",
+        "summary": "resetPassword",
+        "description": "Set a new password using a reset token from the password reset email.\nThe token is single-use and time-limited.\n",
+        "security": [],
+        "x-rate-limit": {
+          "limit": 10
+        },
+        "tags": [
+          "User V2"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "email",
+                  "token",
+                  "password"
+                ],
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "description": "Email address of the account",
+                    "example": "test@example.com"
+                  },
+                  "token": {
+                    "type": "string",
+                    "description": "Reset token from the password reset email"
+                  },
+                  "password": {
+                    "type": "string",
+                    "description": "The new password"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Password reset successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "success"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid or expired reset link, or password does not meet the requirements",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "error",
+                    "message"
+                  ],
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "description": "Discriminator distinguishing token errors from policy errors",
+                      "enum": [
+                        "INVALID_RESET_LINK",
+                        "PASSWORD_POLICY"
+                      ]
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Password does not meet the requirements"
+                    },
+                    "violations": {
+                      "type": "array",
+                      "description": "Itemized password-policy violation codes (only present when error is PASSWORD_POLICY)",
+                      "items": {
+                        "type": "string",
+                        "enum": [
+                          "too_short",
+                          "missing_lowercase",
+                          "missing_uppercase",
+                          "missing_number",
+                          "missing_symbol"
+                        ]
+                      },
+                      "example": [
+                        "too_short",
+                        "missing_uppercase"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v2/users/public/checkToken": {
       "get": {
         "operationId": "checkInviteToken",
@@ -1998,6 +2109,19 @@
             "format": "date-time",
             "readOnly": true
           },
+          "password_reset_token_hash": {
+            "description": "Internal: sha256 hash of the active password-reset token. Server-set, never returned in responses.",
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "password_reset_token_expires_at": {
+            "description": "Internal: expiry for the active password-reset token (ISO 8601). Server-set, never returned in responses.",
+            "type": "string",
+            "nullable": true,
+            "format": "date-time",
+            "readOnly": true
+          },
           "department": {
             "type": "string",
             "description": "User's department",
@@ -2130,6 +2254,17 @@
               "deleted_opportunity": true
             }
           },
+          "in_app_notification_setting": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Per-notification-type in-app delivery preferences (notification type key -> enabled). Written by the my-account notification settings UI and honored by svc-notification-api at delivery time. Absent or partial keys fall back to each notification type's configured default. Mirrors email_notification_setting for the in-app channel.",
+            "example": {
+              "integration_critical_error": true,
+              "integration_error_threshold": true,
+              "assigned_opportunity": true,
+              "assigned_task": true
+            }
+          },
           "properties": {
             "type": "array",
             "items": {
@@ -2149,6 +2284,17 @@
                 "value"
               ]
             }
+          },
+          "tags": {
+            "type": "array",
+            "description": "User tags/labels assigned for classification (e.g. label slugs)",
+            "nullable": true,
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "non-billable"
+            ]
           }
         }
       },

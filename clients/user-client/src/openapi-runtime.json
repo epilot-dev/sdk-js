@@ -363,6 +363,18 @@
         "responses": {}
       }
     },
+    "/v2/users/public/resetPassword": {
+      "post": {
+        "operationId": "resetPassword",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v2/users/public/checkToken": {
       "get": {
         "operationId": "checkInviteToken",

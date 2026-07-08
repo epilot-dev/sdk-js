@@ -144,6 +144,14 @@ declare namespace Components {
                  */
                 draft_email_expires_at?: string | null; // date-time
                 /**
+                 * Internal: sha256 hash of the active password-reset token. Server-set, never returned in responses.
+                 */
+                password_reset_token_hash?: string | null;
+                /**
+                 * Internal: expiry for the active password-reset token (ISO 8601). Server-set, never returned in responses.
+                 */
+                password_reset_token_expires_at?: string | null; // date-time
+                /**
                  * User's department
                  * example:
                  * Sales
@@ -268,6 +276,19 @@ declare namespace Components {
                 email_notification_setting?: {
                     [name: string]: any;
                 };
+                /**
+                 * Per-notification-type in-app delivery preferences (notification type key -> enabled). Written by the my-account notification settings UI and honored by svc-notification-api at delivery time. Absent or partial keys fall back to each notification type's configured default. Mirrors email_notification_setting for the in-app channel.
+                 * example:
+                 * {
+                 *   "integration_critical_error": true,
+                 *   "integration_error_threshold": true,
+                 *   "assigned_opportunity": true,
+                 *   "assigned_task": true
+                 * }
+                 */
+                in_app_notification_setting?: {
+                    [name: string]: any;
+                };
                 properties?: {
                     /**
                      * example:
@@ -280,6 +301,14 @@ declare namespace Components {
                      */
                     value: string;
                 }[];
+                /**
+                 * User tags/labels assigned for classification (e.g. label slugs)
+                 * example:
+                 * [
+                 *   "non-billable"
+                 * ]
+                 */
+                tags?: string[] | null;
                 /**
                  * The index of the current assignee in the group's user list.
                  * example:
@@ -974,6 +1003,14 @@ declare namespace Components {
              */
             draft_email_expires_at?: string | null; // date-time
             /**
+             * Internal: sha256 hash of the active password-reset token. Server-set, never returned in responses.
+             */
+            password_reset_token_hash?: string | null;
+            /**
+             * Internal: expiry for the active password-reset token (ISO 8601). Server-set, never returned in responses.
+             */
+            password_reset_token_expires_at?: string | null; // date-time
+            /**
              * User's department
              * example:
              * Sales
@@ -1098,6 +1135,19 @@ declare namespace Components {
             email_notification_setting?: {
                 [name: string]: any;
             };
+            /**
+             * Per-notification-type in-app delivery preferences (notification type key -> enabled). Written by the my-account notification settings UI and honored by svc-notification-api at delivery time. Absent or partial keys fall back to each notification type's configured default. Mirrors email_notification_setting for the in-app channel.
+             * example:
+             * {
+             *   "integration_critical_error": true,
+             *   "integration_error_threshold": true,
+             *   "assigned_opportunity": true,
+             *   "assigned_task": true
+             * }
+             */
+            in_app_notification_setting?: {
+                [name: string]: any;
+            };
             properties?: {
                 /**
                  * example:
@@ -1110,6 +1160,14 @@ declare namespace Components {
                  */
                 value: string;
             }[];
+            /**
+             * User tags/labels assigned for classification (e.g. label slugs)
+             * example:
+             * [
+             *   "non-billable"
+             * ]
+             */
+            tags?: string[] | null;
         }
         export interface UserVerificationPayload {
             /**
@@ -1606,6 +1664,53 @@ declare namespace Paths {
             }
         }
     }
+    namespace ResetPassword {
+        export interface RequestBody {
+            /**
+             * Email address of the account
+             * example:
+             * test@example.com
+             */
+            email: string;
+            /**
+             * Reset token from the password reset email
+             */
+            token: string;
+            /**
+             * The new password
+             */
+            password: string;
+        }
+        namespace Responses {
+            export interface $200 {
+                /**
+                 * example:
+                 * true
+                 */
+                success: boolean;
+            }
+            export interface $400 {
+                /**
+                 * Discriminator distinguishing token errors from policy errors
+                 */
+                error: "INVALID_RESET_LINK" | "PASSWORD_POLICY";
+                /**
+                 * example:
+                 * Password does not meet the requirements
+                 */
+                message: string;
+                /**
+                 * Itemized password-policy violation codes (only present when error is PASSWORD_POLICY)
+                 * example:
+                 * [
+                 *   "too_short",
+                 *   "missing_uppercase"
+                 * ]
+                 */
+                violations?: ("too_short" | "missing_lowercase" | "missing_uppercase" | "missing_number" | "missing_symbol")[];
+            }
+        }
+    }
     namespace ResolveDiscoverableCredential {
         export interface RequestBody {
             /**
@@ -1986,6 +2091,18 @@ export interface OperationMethods {
     data?: Paths.RequestPasswordReset.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.RequestPasswordReset.Responses.$200>
+  /**
+   * resetPassword - resetPassword
+   * 
+   * Set a new password using a reset token from the password reset email.
+   * The token is single-use and time-limited.
+   * 
+   */
+  'resetPassword'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.ResetPassword.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ResetPassword.Responses.$200>
   /**
    * checkInviteToken - checkInviteToken
    * 
@@ -2443,6 +2560,20 @@ export interface PathsDictionary {
       data?: Paths.RequestPasswordReset.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.RequestPasswordReset.Responses.$200>
+  }
+  ['/v2/users/public/resetPassword']: {
+    /**
+     * resetPassword - resetPassword
+     * 
+     * Set a new password using a reset token from the password reset email.
+     * The token is single-use and time-limited.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.ResetPassword.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ResetPassword.Responses.$200>
   }
   ['/v2/users/public/checkToken']: {
     /**
