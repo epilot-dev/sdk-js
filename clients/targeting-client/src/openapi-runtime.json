@@ -84,6 +84,18 @@
         "responses": {}
       }
     },
+    "/v1/campaign:discover": {
+      "post": {
+        "operationId": "discoverCampaigns",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v1/target:match": {
       "post": {
         "operationId": "matchTargets",
@@ -148,6 +160,26 @@
     "/v1/campaign/{campaign_id}/recipient/{recipient_id}/portal:status": {
       "patch": {
         "operationId": "updateRecipientPortalStatus",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CampaignIdPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/RecipientIdPathParam"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/campaign/{campaign_id}/recipient/{recipient_id}/entity_ui:status": {
+      "patch": {
+        "operationId": "updateRecipientEntityUiStatus",
         "parameters": [
           {
             "$ref": "#/components/parameters/CampaignIdPathParam"
@@ -244,6 +276,11 @@
         }
       },
       "MatchCampaignsResponse": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "DiscoverCampaignsResponse": {
         "content": {
           "application/json": {}
         }

@@ -243,6 +243,42 @@
         }
       }
     },
+    "/v1/campaign:discover": {
+      "post": {
+        "operationId": "discoverCampaigns",
+        "summary": "Discover Entity-UI Next Best Actions for an entity",
+        "description": "Given an entity, returns the Next Best Actions it should see on the Entity-UI channel.\n\nEnumerates the organization's **active** campaigns that carry a valid Entity-UI Next Best\nAction, live-matches each against the entity using the existing match engine, and returns\nthe matching NBAs priority-sorted (one per campaign).\n\nThis is a pure read: it writes nothing. An entity that matches no campaigns returns an\nempty list, not an error.\n",
+        "tags": [
+          "Campaign"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DiscoverCampaignsParams"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/DiscoverCampaignsResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/ClientErrorResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerErrorResponse"
+          }
+        }
+      }
+    },
     "/v1/target:match": {
       "post": {
         "operationId": "matchTargets",
@@ -427,6 +463,56 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/UpdatePortalStatusRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/RecipientResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/ClientErrorResponse"
+          },
+          "404": {
+            "$ref": "#/components/responses/ClientErrorResponse"
+          },
+          "409": {
+            "$ref": "#/components/responses/ClientErrorResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerErrorResponse"
+          }
+        }
+      }
+    },
+    "/v1/campaign/{campaign_id}/recipient/{recipient_id}/entity_ui:status": {
+      "patch": {
+        "operationId": "updateRecipientEntityUiStatus",
+        "summary": "Update Entity-UI (Next Best Action) status for a campaign recipient",
+        "description": "Records a Next Best Action interaction for a recipient on the Entity-UI channel.\n\nUnlike the portal channel, an NBA recipient is created lazily: the first `seen` creates\nthe recipient record (and requires `entity_schema`). `seen` is idempotent — re-viewing an\nNBA that is already seen/clicked/dismissed is a no-op success and never regresses the status.\n\nStatus transition rules:\n- `seen`: lazily creates the recipient; a no-op success if a status already exists\n- From `seen`: can change to `clicked` or `dismissed`\n- From `clicked`: can change to `dismissed`\n- From `dismissed`: cannot be changed (final state)\n\n`dismissed` and `clicked` require an existing recipient (404 otherwise, since an NBA is\nborn at `seen`) and reject invalid transitions (409).\n\nThe entity_ui_status_updated_at timestamp is automatically set when the status changes.\n",
+        "tags": [
+          "Campaign Recipient"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CampaignIdPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/RecipientIdPathParam"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateEntityUiStatusRequest"
               }
             }
           }
@@ -918,6 +1004,122 @@
         ],
         "additionalProperties": false
       },
+      "NextBestAction": {
+        "type": "object",
+        "description": "A Next Best Action configured on a campaign's Entity-UI channel.\nThis is the canonical NBA contract shared by discovery (this API), authoring, and rendering.\nNBA content is single-language in v1; text fields may contain `{{placeholders}}` resolved at render time.\n",
+        "properties": {
+          "category": {
+            "type": "string",
+            "description": "Light category label shown above the title. Free-form text."
+          },
+          "icon": {
+            "type": "object",
+            "description": "Curated icon for the NBA.",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Icon name from \"@epilot360/icons\"."
+              },
+              "color": {
+                "type": "string",
+                "description": "Optional icon color."
+              }
+            },
+            "required": [
+              "name"
+            ]
+          },
+          "title": {
+            "type": "string",
+            "description": "Bold action title. Required. Supports `{{placeholders}}`."
+          },
+          "body": {
+            "type": "string",
+            "description": "Optional description. Supports `{{placeholders}}` (incl. relative dates)."
+          },
+          "priority": {
+            "type": "string",
+            "enum": [
+              "low",
+              "medium",
+              "high"
+            ],
+            "default": "medium",
+            "description": "Display priority. NBAs are shown highest-priority first."
+          },
+          "is_dismissable": {
+            "type": "boolean",
+            "default": true,
+            "description": "Whether the agent can dismiss the NBA."
+          },
+          "cta": {
+            "type": "object",
+            "description": "The NBA's single call-to-action.",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "journey",
+                  "workflow",
+                  "url"
+                ]
+              },
+              "target": {
+                "type": "string",
+                "description": "Journey id, workflow definition id, or URL, depending on `type`."
+              },
+              "label": {
+                "type": "string",
+                "description": "Optional CTA button label."
+              },
+              "context_params": {
+                "type": "array",
+                "description": "Journey context parameters (journey CTA only). Maps the journey's declared\ncontext parameters so the journey knows which entity it is about. Discovery\nreturns them verbatim; they are passed to the journey when it launches.\n",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "key": {
+                      "type": "string"
+                    },
+                    "value": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "key",
+                    "value"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "type",
+              "target"
+            ]
+          }
+        },
+        "required": [
+          "title",
+          "cta"
+        ]
+      },
+      "DiscoverCampaignsParams": {
+        "type": "object",
+        "properties": {
+          "entity_id": {
+            "$ref": "#/components/schemas/BaseUUID"
+          },
+          "entity_schema": {
+            "type": "string",
+            "description": "The schema slug of the entity (e.g. \"contact\" or \"account\")."
+          }
+        },
+        "required": [
+          "entity_id",
+          "entity_schema"
+        ],
+        "additionalProperties": false
+      },
       "MatchTargetParams": {
         "type": "object",
         "properties": {
@@ -1022,6 +1224,22 @@
           "clicked"
         ]
       },
+      "EntityUiStatus": {
+        "type": "string",
+        "description": "Lifecycle status of a Next Best Action on the Entity-UI channel. Unlike the portal\nchannel there is no `sent` state: an NBA recipient is born at `seen`, the moment the\naction is first rendered to an agent.\n",
+        "enum": [
+          "seen",
+          "dismissed",
+          "clicked"
+        ]
+      },
+      "Resolution": {
+        "type": "string",
+        "description": "Cross-channel resolution of a campaign for a recipient. Unlike the per-channel `*_status`\nfields (where `dismissed` is channel-local), a resolution suppresses the campaign on EVERY\nchannel — the 360 Entity-UI card and the portal teaser alike. Server-managed and read-only:\nnever sent by a client. Absence means unresolved.\n",
+        "enum": [
+          "accepted"
+        ]
+      },
       "Recipient": {
         "type": "object",
         "properties": {
@@ -1050,6 +1268,16 @@
           "portal_state": {
             "type": "object",
             "additionalProperties": true
+          },
+          "entity_ui_status": {
+            "$ref": "#/components/schemas/EntityUiStatus"
+          },
+          "entity_ui_status_updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "resolution": {
+            "$ref": "#/components/schemas/Resolution"
           },
           "updated_at": {
             "type": "string",
@@ -1215,6 +1443,22 @@
         "required": [
           "status"
         ]
+      },
+      "UpdateEntityUiStatusRequest": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/EntityUiStatus"
+          },
+          "entity_schema": {
+            "type": "string",
+            "description": "Schema slug of the recipient entity (e.g. \"contact\"). Required when recording the\nfirst `seen`, which lazily creates the recipient record; ignored on later transitions.\n"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "additionalProperties": false
       },
       "SetupCampaignRequest": {
         "description": "Discriminated by `type`. Each campaign variant has its own request shape;\nnew variants are added by introducing a new schema and extending the `oneOf` list.\n",
@@ -1557,6 +1801,53 @@
                   }
                 }
               }
+            }
+          }
+        }
+      },
+      "DiscoverCampaignsResponse": {
+        "description": "The Next Best Actions the entity should see on the Entity-UI channel, priority-sorted.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "hits": {
+                  "type": "number",
+                  "description": "Number of matching NBAs."
+                },
+                "results": {
+                  "type": "array",
+                  "description": "Matching NBAs, sorted by priority (desc); one entry per campaign.",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "campaign_id": {
+                        "$ref": "#/components/schemas/BaseUUID"
+                      },
+                      "nba": {
+                        "$ref": "#/components/schemas/NextBestAction"
+                      },
+                      "status": {
+                        "allOf": [
+                          {
+                            "$ref": "#/components/schemas/EntityUiStatus"
+                          }
+                        ],
+                        "description": "The recipient's current Entity-UI status for this campaign, present only\nwhen a recipient record already exists (i.e. the entity has previously seen\nor clicked this NBA). Absent when the entity has not yet interacted with it.\nDismissed NBAs are filtered out server-side, so this is only ever `seen` or\n`clicked`. Lets the client skip a redundant `seen` call for NBAs already seen.\n"
+                      }
+                    },
+                    "required": [
+                      "campaign_id",
+                      "nba"
+                    ]
+                  }
+                }
+              },
+              "required": [
+                "hits",
+                "results"
+              ]
             }
           }
         }
