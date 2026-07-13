@@ -498,7 +498,7 @@ declare namespace Components {
             /**
              * The calibration date of the meter
              * example:
-             * 2022-10-10
+             * 2022-10-10T00:00:00.000Z
              */
             calibration_date?: string;
             /**
@@ -573,7 +573,7 @@ declare namespace Components {
             /**
              * The date as of which the forecast reading value is applicable
              * example:
-             * 2022-12-10
+             * 2022-12-10T00:00:00.000Z
              */
             forecast_as_of?: string;
             /**
@@ -585,7 +585,7 @@ declare namespace Components {
             /**
              * The timestamp of the last reading
              * example:
-             * 2022-10-10
+             * 2022-10-10T00:00:00.000Z
              */
             last_reading?: string;
             /**
@@ -621,7 +621,7 @@ declare namespace Components {
             /**
              * If the value is not provided, the system will be set with the time the request is processed.
              * example:
-             * 2022-10-10
+             * 2022-10-10T00:00:00.000Z
              */
             timestamp?: string; // date-time
             source: Source;
@@ -751,7 +751,7 @@ declare namespace Components {
             /**
              * If the value is not provided, the system will be set with the time the request is processed.
              * example:
-             * 2022-10-10
+             * 2022-10-10T00:00:00.000Z
              */
             timestamp?: string; // date-time
             source: Source;
@@ -833,7 +833,7 @@ declare namespace Components {
             /**
              * If the value is not provided, the system will be set with the time the request is processed.
              * example:
-             * 2022-10-10
+             * 2022-10-10T00:00:00.000Z
              */
             timestamp?: string; // date-time
             /**
@@ -1124,7 +1124,7 @@ declare namespace Components {
             /**
              * If the value is not provided, the system will be set with the time the request is processed.
              * example:
-             * 2022-10-10
+             * 2022-10-10T00:00:00.000Z
              */
             timestamp?: string; // date-time
             /**
@@ -1586,7 +1586,7 @@ declare namespace Paths {
                     /**
                      * The calibration date of the meter
                      * example:
-                     * 2022-10-10
+                     * 2022-10-10T00:00:00.000Z
                      */
                     calibration_date?: string;
                     /**
@@ -1605,7 +1605,7 @@ declare namespace Paths {
                     /**
                      * The timestamp of the last reading
                      * example:
-                     * 2022-10-10
+                     * 2022-10-10T00:00:00.000Z
                      */
                     last_reading?: string;
                     /**
