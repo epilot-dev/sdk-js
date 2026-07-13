@@ -458,11 +458,17 @@ export declare namespace Components {
             message: string;
         }
         export interface TriggerWebhookResp {
+            /**
+             * The HTTP status returned by the customer endpoint (or the upstream gateway). ABSENT for epilot-internal errors (code INTERNAL_ERROR / INTERNAL_RESPONSE_TOO_LARGE), which are not customer HTTP outcomes; PRESENT only for real HTTP/upstream results. When the response was delivered but too large to record, a recovered delivered status may still be present.
+             */
             status_code?: string;
             message?: string;
             body?: {
                 [key: string]: any;
             };
+            /**
+             * Machine-readable classification of the outcome. Known values: OAuthTokenExchangeError (OAuth token exchange / upstream gateway failure), DataLimitExceeded (legacy oversized-response marker), INTERNAL_RESPONSE_TOO_LARGE (request delivered but the response was too large for epilot to record), INTERNAL_ERROR (epilot-internal processing failure — not a customer HTTP outcome).
+             */
             code?: string;
             status?: "succeeded" | "failed";
             start_date?: string;
@@ -689,11 +695,17 @@ export declare namespace Components {
             created_at?: string;
             event_name?: string;
             http_response?: {
+                /**
+                 * The HTTP status returned by the customer endpoint (or the upstream gateway). ABSENT for epilot-internal errors (code INTERNAL_ERROR / INTERNAL_RESPONSE_TOO_LARGE), which are not customer HTTP outcomes; PRESENT only for real HTTP/upstream results. When the response was delivered but too large to record, a recovered delivered status may still be present.
+                 */
                 status_code?: number;
                 message?: string;
                 body?: {
                     [key: string]: any;
                 };
+                /**
+                 * Machine-readable classification of the outcome. Known values: OAuthTokenExchangeError (OAuth token exchange / upstream gateway failure), DataLimitExceeded (legacy oversized-response marker), INTERNAL_RESPONSE_TOO_LARGE (request delivered but the response was too large for epilot to record), INTERNAL_ERROR (epilot-internal processing failure — not a customer HTTP outcome).
+                 */
                 code?: string;
             };
             metadata?: /* Contains the metadata about the configured event */ Metadata;
