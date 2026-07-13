@@ -482,7 +482,10 @@ declare namespace Components {
              * Dot-notation path to the field in the event payload (e.g. "entity.status", "entity.line_items")
              */
             field: string;
-            operation: "equals" | "not_equals" | "any_of" | "none_of" | "contains" | "not_contains" | "starts_with" | "ends_with" | "greater_than" | "less_than" | "greater_than_or_equals" | "less_than_or_equals" | "is_empty" | "is_not_empty";
+            /**
+             * Comparison operator. The length_* operations compare the item count of the field value (an array yields its length, a missing or null field yields 0, and any single non-array value yields 1) against values[0], which must be a non-negative integer.
+             */
+            operation: "equals" | "not_equals" | "any_of" | "none_of" | "contains" | "not_contains" | "starts_with" | "ends_with" | "greater_than" | "less_than" | "greater_than_or_equals" | "less_than_or_equals" | "is_empty" | "is_not_empty" | "length_equals" | "length_not_equals" | "length_greater_than" | "length_less_than" | "length_greater_than_or_equals" | "length_less_than_or_equals";
             /**
              * Values to compare against (not required for is_empty/is_not_empty)
              */

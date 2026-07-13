@@ -1102,6 +1102,7 @@
           },
           "operation": {
             "type": "string",
+            "description": "Comparison operator. The length_* operations compare the item count of the field value (an array yields its length, a missing or null field yields 0, and any single non-array value yields 1) against values[0], which must be a non-negative integer.",
             "enum": [
               "equals",
               "not_equals",
@@ -1116,7 +1117,13 @@
               "greater_than_or_equals",
               "less_than_or_equals",
               "is_empty",
-              "is_not_empty"
+              "is_not_empty",
+              "length_equals",
+              "length_not_equals",
+              "length_greater_than",
+              "length_less_than",
+              "length_greater_than_or_equals",
+              "length_less_than_or_equals"
             ]
           },
           "values": {
