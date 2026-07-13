@@ -214,6 +214,18 @@
         "responses": {}
       }
     },
+    "/v2/message/threads:workload": {
+      "post": {
+        "operationId": "getAssigneeWorkload",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v1/message/threads": {
       "put": {
         "operationId": "updateThread",
