@@ -739,7 +739,7 @@ A condition that must be met for the webhook to fire.
 ```ts
 type WebhookCondition = {
   field: string
-  operation: "equals" | "not_equals" | "any_of" | "none_of" | "contains" | "not_contains" | "starts_with" | "ends_with" | "greater_than" | "less_than" | "greater_than_or_equals" | "less_than_or_equals" | "is_empty" | "is_not_empty"
+  operation: "equals" | "not_equals" | "any_of" | "none_of" | "contains" | "not_contains" | "starts_with" | "ends_with" | "greater_than" | "less_than" | "greater_than_or_equals" | "less_than_or_equals" | "is_empty" | "is_not_empty" | "length_equals" | "length_not_equals" | "length_greater_than" | "length_less_than" | "length_greater_than_or_equals" | "length_less_than_or_equals"
   values?: string[]
   field_type?: "string" | "number" | "boolean" | "date" | "datetime"
   is_array_field?: boolean
@@ -755,7 +755,7 @@ A group of conditions with a logical operator. Multiple conditions are AND-ed by
 type WebhookConditionGroup = {
   conditions?: Array<{
     field: string
-    operation: "equals" | "not_equals" | "any_of" | "none_of" | "contains" | "not_contains" | "starts_with" | "ends_with" | "greater_than" | "less_than" | "greater_than_or_equals" | "less_than_or_equals" | "is_empty" | "is_not_empty"
+    operation: "equals" | "not_equals" | "any_of" | "none_of" | "contains" | "not_contains" | "starts_with" | "ends_with" | "greater_than" | "less_than" | "greater_than_or_equals" | "less_than_or_equals" | "is_empty" | "is_not_empty" | "length_equals" | "length_not_equals" | "length_greater_than" | "length_less_than" | "length_greater_than_or_equals" | "length_less_than_or_equals"
     values?: string[]
     field_type?: "string" | "number" | "boolean" | "date" | "datetime"
     is_array_field?: boolean
