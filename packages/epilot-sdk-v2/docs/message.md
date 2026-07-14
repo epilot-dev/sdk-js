@@ -46,6 +46,7 @@ const { data } = await messageClient.sendMessage(...)
 - [`searchThreads`](#searchthreads)
 - [`searchThreadsV2`](#searchthreadsv2)
 - [`searchIds`](#searchids)
+- [`getAssigneeWorkload`](#getassigneeworkload)
 - [`updateThread`](#updatethread)
 - [`deleteThread`](#deletethread)
 - [`moveThread`](#movethread)
@@ -96,6 +97,9 @@ const { data } = await messageClient.sendMessage(...)
 - [`SearchParamsV2`](#searchparamsv2)
 - [`SearchParams`](#searchparams)
 - [`SearchIDParams`](#searchidparams)
+- [`AssigneeWorkloadParams`](#assigneeworkloadparams)
+- [`AssigneeWorkload`](#assigneeworkload)
+- [`AssigneeWorkloadResults`](#assigneeworkloadresults)
 - [`ReadMessagePayload`](#readmessagepayload)
 - [`ReadingScope`](#readingscope)
 - [`ThreadTimeline`](#threadtimeline)
@@ -157,6 +161,7 @@ const { data } = await client.updateMessage()
   "_updated_at": "2021-02-10T09:14:31.990Z",
   "message_id": "<0102017b97a502f8-a67f01c2-68cc-4928-b91b-45853f34e259-000000@eu-west-1.amazonses.com>",
   "sender": "206801",
+  "updated_by": "206801",
   "subject": "Request for solar panel price",
   "html": "<div>We at ABC GmbH would like to request a price quote for the solar panel.</div>",
   "text": "We at ABC GmbH would like to request a price quote for the solar panel.",
@@ -210,7 +215,8 @@ const { data } = await client.updateMessage()
         "may_be_signature_attachment": true,
         "cid": "fb222496-a1a5-4639-94f2-07b5e35e4068",
         "inline": false,
-        "send_as_link": false
+        "send_as_link": false,
+        "save_to_entity": true
       }
     ]
   },
@@ -254,6 +260,7 @@ const { data } = await client.getMessage({
   "_updated_at": "2021-02-10T09:14:31.990Z",
   "message_id": "<0102017b97a502f8-a67f01c2-68cc-4928-b91b-45853f34e259-000000@eu-west-1.amazonses.com>",
   "sender": "206801",
+  "updated_by": "206801",
   "subject": "Request for solar panel price",
   "html": "<div>We at ABC GmbH would like to request a price quote for the solar panel.</div>",
   "text": "We at ABC GmbH would like to request a price quote for the solar panel.",
@@ -307,7 +314,8 @@ const { data } = await client.getMessage({
         "may_be_signature_attachment": true,
         "cid": "fb222496-a1a5-4639-94f2-07b5e35e4068",
         "inline": false,
-        "send_as_link": false
+        "send_as_link": false,
+        "save_to_entity": true
       }
     ]
   },
@@ -394,6 +402,7 @@ const { data } = await client.searchMessages(
       "_updated_at": "2021-02-10T09:14:31.990Z",
       "message_id": "<0102017b97a502f8-a67f01c2-68cc-4928-b91b-45853f34e259-000000@eu-west-1.amazonses.com>",
       "sender": "206801",
+      "updated_by": "206801",
       "subject": "Request for solar panel price",
       "html": "<div>We at ABC GmbH would like to request a price quote for the solar panel.</div>",
       "text": "We at ABC GmbH would like to request a price quote for the solar panel.",
@@ -447,7 +456,8 @@ const { data } = await client.searchMessages(
             "may_be_signature_attachment": true,
             "cid": "fb222496-a1a5-4639-94f2-07b5e35e4068",
             "inline": false,
-            "send_as_link": false
+            "send_as_link": false,
+            "save_to_entity": true
           }
         ]
       },
@@ -723,6 +733,39 @@ const { data } = await client.searchIds(
 
 ---
 
+### `getAssigneeWorkload`
+
+Return the open-thread workload for a set of user ids.
+
+`POST /v2/message/threads:workload`
+
+```ts
+const { data } = await client.getAssigneeWorkload(
+  null,
+  {
+    user_ids: ['11000902', '11001053']
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "workloads": [
+    {
+      "user_id": "11000902",
+      "open_threads": 2
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
 ### `updateThread`
 
 Modify thread metadata
@@ -752,6 +795,7 @@ const { data } = await client.updateThread()
   "latest_message": {
     "message_id": "<0102017b97a502f8-a67f01c2-68cc-4928-b91b-45853f34e259-000000@eu-west-1.amazonses.com>",
     "sender": "206801",
+    "updated_by": "206801",
     "subject": "Request for solar panel price",
     "html": "<div>We at ABC GmbH would like to request a price quote for the solar panel.</div>",
     "text": "We at ABC GmbH would like to request a price quote for the solar panel.",
@@ -792,6 +836,7 @@ const { data } = await client.updateThread()
   "latest_trash_message": {
     "message_id": "<0102017b97a502f8-a67f01c2-68cc-4928-b91b-45853f34e259-000000@eu-west-1.amazonses.com>",
     "sender": "206801",
+    "updated_by": "206801",
     "subject": "Request for solar panel price",
     "html": "<div>We at ABC GmbH would like to request a price quote for the solar panel.</div>",
     "text": "We at ABC GmbH would like to request a price quote for the solar panel.",
@@ -922,7 +967,7 @@ const { data } = await client.getThreadTimeline({
         "user_id": "123",
         "organization_id": "456"
       },
-      "timestamp": "2024-01-01T00:00:00Z"
+      "timestamp": "2024-01-01T00:00:00.000Z"
     }
   ]
 }
@@ -1423,6 +1468,7 @@ const { data } = await client.createDraft(
   "_updated_at": "2021-02-10T09:14:31.990Z",
   "message_id": "<0102017b97a502f8-a67f01c2-68cc-4928-b91b-45853f34e259-000000@eu-west-1.amazonses.com>",
   "sender": "206801",
+  "updated_by": "206801",
   "subject": "Request for solar panel price",
   "html": "<div>We at ABC GmbH would like to request a price quote for the solar panel.</div>",
   "text": "We at ABC GmbH would like to request a price quote for the solar panel.",
@@ -1476,7 +1522,8 @@ const { data } = await client.createDraft(
         "may_be_signature_attachment": true,
         "cid": "fb222496-a1a5-4639-94f2-07b5e35e4068",
         "inline": false,
-        "send_as_link": false
+        "send_as_link": false,
+        "save_to_entity": true
       }
     ]
   },
@@ -1518,6 +1565,7 @@ const { data } = await client.sendDraft()
   "_updated_at": "2021-02-10T09:14:31.990Z",
   "message_id": "<0102017b97a502f8-a67f01c2-68cc-4928-b91b-45853f34e259-000000@eu-west-1.amazonses.com>",
   "sender": "206801",
+  "updated_by": "206801",
   "subject": "Request for solar panel price",
   "html": "<div>We at ABC GmbH would like to request a price quote for the solar panel.</div>",
   "text": "We at ABC GmbH would like to request a price quote for the solar panel.",
@@ -1571,7 +1619,8 @@ const { data } = await client.sendDraft()
         "may_be_signature_attachment": true,
         "cid": "fb222496-a1a5-4639-94f2-07b5e35e4068",
         "inline": false,
-        "send_as_link": false
+        "send_as_link": false,
+        "save_to_entity": true
       }
     ]
   },
@@ -1622,6 +1671,7 @@ const { data } = await client.getMessageV2({
   "_updated_at": "2021-02-10T09:14:31.990Z",
   "message_id": "<0102017b97a502f8-a67f01c2-68cc-4928-b91b-45853f34e259-000000@eu-west-1.amazonses.com>",
   "sender": "206801",
+  "updated_by": "206801",
   "subject": "Request for solar panel price",
   "html": "<div>We at ABC GmbH would like to request a price quote for the solar panel.</div>",
   "text": "We at ABC GmbH would like to request a price quote for the solar panel.",
@@ -1675,7 +1725,8 @@ const { data } = await client.getMessageV2({
         "may_be_signature_attachment": true,
         "cid": "fb222496-a1a5-4639-94f2-07b5e35e4068",
         "inline": false,
-        "send_as_link": false
+        "send_as_link": false,
+        "save_to_entity": true
       }
     ]
   },
@@ -1738,6 +1789,7 @@ type Thread = {
   latest_message?: {
     message_id?: string
     sender?: string
+    updated_by?: string
     subject: string
     html?: string
     text?: string
@@ -1790,6 +1842,7 @@ type Thread = {
   latest_trash_message?: {
     message_id?: string
     sender?: string
+    updated_by?: string
     subject: string
     html?: string
     text?: string
@@ -1828,8 +1881,6 @@ type Thread = {
       send_status?: { ... }
       send_error?: { ... }
     }>
-    file?: {
-      $relation?: { ... }
   // ...
 }
 ```
@@ -1840,6 +1891,7 @@ type Thread = {
 type Message = {
   message_id?: string
   sender?: string
+  updated_by?: string
   subject: string
   html?: string
   text?: string
@@ -1887,6 +1939,7 @@ type Message = {
       cid?: { ... }
       inline?: { ... }
       send_as_link?: { ... }
+      save_to_entity?: { ... }
     }>
   }
   references?: string
@@ -1912,6 +1965,7 @@ type MessageV2 = {
   _updated_at: string // date-time
   message_id?: string
   sender?: string
+  updated_by?: string
   subject: string
   html?: string
   text?: string
@@ -1959,6 +2013,7 @@ type MessageV2 = {
       cid?: { ... }
       inline?: { ... }
       send_as_link?: { ... }
+      save_to_entity?: { ... }
     }>
   }
   references?: string
@@ -1997,6 +2052,7 @@ type AttachmentsRelation = {
     cid?: string
     inline?: boolean
     send_as_link?: boolean
+    save_to_entity?: boolean
   }>
 }
 ```
@@ -2012,6 +2068,7 @@ type File = {
   cid?: string
   inline?: boolean
   send_as_link?: boolean
+  save_to_entity?: boolean
 }
 ```
 
@@ -2020,6 +2077,7 @@ type File = {
 ```ts
 type MessageRequestParams = {
   complete_thread?: boolean
+  mark_thread_as_read?: boolean
   thread?: {
     topic: string
     assigned_to?: string[]
@@ -2072,9 +2130,11 @@ type MessageRequestParams = {
       cid?: { ... }
       inline?: { ... }
       send_as_link?: { ... }
+      save_to_entity?: { ... }
     }>
   }
   template_id?: string
+  source?: "manual" | "automation" | "workflow" | "partner" | "bulk" | "system"
 }
 ```
 
@@ -2110,6 +2170,34 @@ type SearchParams = {
 ```ts
 type SearchIDParams = {
   q?: string
+}
+```
+
+### `AssigneeWorkloadParams`
+
+```ts
+type AssigneeWorkloadParams = {
+  user_ids: string[]
+}
+```
+
+### `AssigneeWorkload`
+
+```ts
+type AssigneeWorkload = {
+  user_id: string
+  open_threads: number
+}
+```
+
+### `AssigneeWorkloadResults`
+
+```ts
+type AssigneeWorkloadResults = {
+  workloads: Array<{
+    user_id: string
+    open_threads: number
+  }>
 }
 ```
 

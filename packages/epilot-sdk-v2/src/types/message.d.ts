@@ -47,6 +47,40 @@ export declare namespace Components {
                 [key: string]: any;
             };
         }
+        export interface AssigneeWorkload {
+            /**
+             * The user id.
+             * example:
+             * 11000902
+             */
+            user_id: string;
+            /**
+             * Number of open threads assigned directly to the user.
+             * example:
+             * 2
+             */
+            open_threads: number;
+        }
+        export interface AssigneeWorkloadParams {
+            /**
+             * User ids to compute the open-thread workload for. At most 100 per request; larger requests are rejected with 422.
+             * example:
+             * [
+             *   "11000902",
+             *   "11001053"
+             * ]
+             */
+            user_ids: [
+                string,
+                ...string[]
+            ];
+        }
+        export interface AssigneeWorkloadResults {
+            /**
+             * Open-thread workload per requested user id, in request order.
+             */
+            workloads: AssigneeWorkload[];
+        }
         /**
          * Message attachments
          */
@@ -203,6 +237,11 @@ export declare namespace Components {
              *
              */
             send_as_link?: boolean;
+            /**
+             * If false, this file relation is kept on the message (e.g. for CID/inline rendering) but is NOT propagated to the entity the email is sent from. Used for inline images such as logos, signatures and social icons. Defaults to true.
+             *
+             */
+            save_to_entity?: boolean;
         }
         export interface Message {
             /**
@@ -217,6 +256,12 @@ export declare namespace Components {
              * 206801
              */
             sender?: string;
+            /**
+             * User ID of the user who last updated (edited) the message. Set for drafts on each save.
+             * example:
+             * 206801
+             */
+            updated_by?: string;
             /**
              * Subject
              * example:
@@ -305,6 +350,14 @@ export declare namespace Components {
              */
             complete_thread?: boolean;
             /**
+             * Whether to mark the thread as read by the sender's org/user after sending a reply.
+             * Only applies when `parent_id` is set. When false, the thread's `org_read_message` and
+             * `user_read_message` arrays are left unchanged, so the thread remains unread for anyone
+             * who had it unread before. Defaults to true for backward compatibility.
+             *
+             */
+            mark_thread_as_read?: boolean;
+            /**
              * Open new thread when sending the very first message in conversation. Thread should contains context related to all messages in it (eg. topic, brand_id, opportunity_id, assigned_to,...).            Thread properties depend on API caller as it's not pre-defined. We do recommend having at least `topic` property for categorizing.            `thread` or `parent_id` must be provided either.
              *
              * example:
@@ -373,6 +426,17 @@ export declare namespace Components {
              * 3f34ce73-089c-4d45-a5ee-c161234e41c3
              */
             template_id?: string;
+            /**
+             * Identifies who triggered the send so server-side policy can branch on it.
+             * For `manual` sends, the caller's curated `_tags` are trusted as-is and no
+             * server-side enrichment from the referenced `template_id` (e.g. merging the
+             * template's `email_tags`) is performed. Any non-manual value (or omitting the
+             * field) opts into template-derived enrichment.
+             *
+             * example:
+             * manual
+             */
+            source?: "manual" | "automation" | "workflow" | "partner" | "bulk" | "system";
         }
         export interface MessageV2 {
             /**
@@ -430,6 +494,12 @@ export declare namespace Components {
              * 206801
              */
             sender?: string;
+            /**
+             * User ID of the user who last updated (edited) the message. Set for drafts on each save.
+             * example:
+             * 206801
+             */
+            updated_by?: string;
             /**
              * Subject
              * example:
@@ -677,7 +747,7 @@ export declare namespace Components {
             /**
              * Timestamp of the event
              * example:
-             * 2024-01-01T00:00:00Z
+             * 2024-01-01T00:00:00.000Z
              */
             timestamp: string;
         }
@@ -853,6 +923,12 @@ export declare namespace Paths {
                  */
                 sender?: string;
                 /**
+                 * User ID of the user who last updated (edited) the message. Set for drafts on each save.
+                 * example:
+                 * 206801
+                 */
+                updated_by?: string;
+                /**
                  * Subject
                  * example:
                  * Request for solar panel price
@@ -965,6 +1041,14 @@ export declare namespace Paths {
             }
         }
     }
+    namespace GetAssigneeWorkload {
+        export type RequestBody = Components.Schemas.AssigneeWorkloadParams;
+        namespace Responses {
+            export type $200 = Components.Schemas.AssigneeWorkloadResults;
+            export interface $403 {
+            }
+        }
+    }
     namespace GetMessage {
         namespace Parameters {
             /**
@@ -1037,6 +1121,12 @@ export declare namespace Paths {
                  * 206801
                  */
                 sender?: string;
+                /**
+                 * User ID of the user who last updated (edited) the message. Set for drafts on each save.
+                 * example:
+                 * 206801
+                 */
+                updated_by?: string;
                 /**
                  * Subject
                  * example:
@@ -1220,6 +1310,12 @@ export declare namespace Paths {
                  * 206801
                  */
                 sender?: string;
+                /**
+                 * User ID of the user who last updated (edited) the message. Set for drafts on each save.
+                 * example:
+                 * 206801
+                 */
+                updated_by?: string;
                 /**
                  * Subject
                  * example:
@@ -1647,6 +1743,12 @@ export declare namespace Paths {
                      */
                     sender?: string;
                     /**
+                     * User ID of the user who last updated (edited) the message. Set for drafts on each save.
+                     * example:
+                     * 206801
+                     */
+                    updated_by?: string;
+                    /**
                      * Subject
                      * example:
                      * Request for solar panel price
@@ -1992,6 +2094,12 @@ export declare namespace Paths {
                  * 206801
                  */
                 sender?: string;
+                /**
+                 * User ID of the user who last updated (edited) the message. Set for drafts on each save.
+                 * example:
+                 * 206801
+                 */
+                updated_by?: string;
                 /**
                  * Subject
                  * example:
@@ -2406,6 +2514,12 @@ export declare namespace Paths {
                  */
                 sender?: string;
                 /**
+                 * User ID of the user who last updated (edited) the message. Set for drafts on each save.
+                 * example:
+                 * 206801
+                 */
+                updated_by?: string;
+                /**
                  * Subject
                  * example:
                  * Request for solar panel price
@@ -2487,6 +2601,160 @@ export declare namespace Paths {
                 template_id?: string;
             }
             export interface $403 {
+            }
+            export interface $409 {
+                /**
+                 * Human-readable conflict message
+                 * example:
+                 * This draft was edited by someone else. Please reload and try again.
+                 */
+                error?: string;
+                /**
+                 * The current server version of the message (includes updated_by / _updated_at)
+                 */
+                current_message?: {
+                    /**
+                     * Entity ID
+                     * example:
+                     * 3fa85f64-5717-4562-b3fc-2c963f66afa6
+                     */
+                    _id: string;
+                    /**
+                     * Entity title
+                     */
+                    _title: string;
+                    /**
+                     * Organization ID the entity belongs to
+                     * example:
+                     * 206801
+                     */
+                    _org: string;
+                    /**
+                     * URL-friendly identifier for the entity schema
+                     * example:
+                     * message
+                     */
+                    _schema: string;
+                    /**
+                     * Entity tags
+                     * example:
+                     * [
+                     *   "pricing",
+                     *   "INBOX"
+                     * ]
+                     */
+                    _tags?: string[];
+                    /**
+                     * Created date
+                     * example:
+                     * 2021-02-09T12:41:43.662Z
+                     */
+                    _created_at: string; // date-time
+                    /**
+                     * Updated date
+                     * example:
+                     * 2021-02-10T09:14:31.990Z
+                     */
+                    _updated_at: string; // date-time
+                    /**
+                     * Message ID which is from email provider. If you provide `message-id`, API overrides by its own value.
+                     * example:
+                     * <0102017b97a502f8-a67f01c2-68cc-4928-b91b-45853f34e259-000000@eu-west-1.amazonses.com>
+                     */
+                    message_id?: string;
+                    /**
+                     * User ID of user sends the message.
+                     * example:
+                     * 206801
+                     */
+                    sender?: string;
+                    /**
+                     * User ID of the user who last updated (edited) the message. Set for drafts on each save.
+                     * example:
+                     * 206801
+                     */
+                    updated_by?: string;
+                    /**
+                     * Subject
+                     * example:
+                     * Request for solar panel price
+                     */
+                    subject: string;
+                    /**
+                     * HTML body
+                     * example:
+                     * <div>We at ABC GmbH would like to request a price quote for the solar panel.</div>
+                     */
+                    html?: string;
+                    /**
+                     * Text body
+                     * example:
+                     * We at ABC GmbH would like to request a price quote for the solar panel.
+                     */
+                    text?: string;
+                    from: Components.Schemas.Address;
+                    reply_to?: Components.Schemas.Address;
+                    /**
+                     * To email addresses
+                     */
+                    to?: Components.Schemas.Address[];
+                    /**
+                     * Cc email addresses
+                     */
+                    cc?: Components.Schemas.Address[];
+                    /**
+                     * Bcc email addresses
+                     */
+                    bcc?: Components.Schemas.Address[];
+                    file?: /* Message attachments */ Components.Schemas.AttachmentsRelation;
+                    /**
+                     * References header. Value is the series of `message_id` which is reparated by space to indicate that message has parent.            The last message ID in references identifies the parent. The first message ID in references identifies the first message in the thread.            The basic idea is that sender should copy `references` from the parent and append the parent's `message_id` when replying.
+                     *
+                     * example:
+                     * <0102017b97a502f8-a67f01c2-68cc-4928-b91b-45853f34e259-000000@eu-west-1.amazonses.com> <CALHgQpziyxW9NaFUs+nRMykzr6Ljq6vjq4WO9SaihAuMasuDyg@mail.gmail.com>
+                     */
+                    references?: string;
+                    /**
+                     * In-Reply-To header. Value is the `message_id` of parent message.
+                     *
+                     * example:
+                     * <CALHgQpziyxW9NaFUs+nRMykzr6Ljq6vjq4WO9SaihAuMasuDyg@mail.gmail.com>
+                     */
+                    in_reply_to?: string;
+                    /**
+                     * User ID of user read the message.
+                     * example:
+                     * [
+                     *   "206801",
+                     *   "200109"
+                     * ]
+                     */
+                    user_read_message?: string[];
+                    /**
+                     * Organization ID of organization read the message.
+                     * example:
+                     * [
+                     *   "789372",
+                     *   "210291"
+                     * ]
+                     */
+                    org_read_message?: string[];
+                    /**
+                     * Sent message status. The array contains sending message status corresponding to all recipients. For more detail, check `send_status` of each recipient in `to`, `cc`, `bcc`            Reference at <https://docs.aws.amazon.com/ses/latest/DeveloperGuide/monitor-sending-activity.html>
+                     *
+                     */
+                    send_status?: ("SEND" | "DELIVERY" | "REJECT" | "COMPLAINT" | "BOUNCE" | "ERROR")[];
+                    /**
+                     * Message type
+                     */
+                    type?: "SENT" | "RECEIVED";
+                    /**
+                     * Template ID used for sending message.
+                     * example:
+                     * 3f34ce73-089c-4d45-a5ee-c161234e41c3
+                     */
+                    template_id?: string;
+                };
             }
         }
     }
@@ -2583,7 +2851,6 @@ export declare namespace Paths {
         }
     }
 }
-
 
 export interface OperationMethods {
   /**
@@ -2761,6 +3028,27 @@ export interface OperationMethods {
     data?: Paths.SearchIds.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.SearchIds.Responses.$200>
+  /**
+   * getAssigneeWorkload - getAssigneeWorkload
+   * 
+   * Return the open-thread workload for a set of user ids.
+   * 
+   * For each requested user id, returns the number of *open* threads assigned
+   * directly to that user — matching what the user sees in their central-inbox
+   * open view: in inbox, not trashed, not done, and excluding notification-only
+   * and spam threads.
+   * 
+   * Only threads assigned directly to a user are counted; threads assigned to a
+   * group the user belongs to are not. Intended for assignment load-balancing
+   * (e.g. even-distribution automations) that need a consistent, inbox-aligned
+   * workload per user.
+   * 
+   */
+  'getAssigneeWorkload'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.GetAssigneeWorkload.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetAssigneeWorkload.Responses.$200>
   /**
    * updateThread - updateThread
    * 
@@ -3340,6 +3628,29 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.SearchIds.Responses.$200>
   }
+  ['/v2/message/threads:workload']: {
+    /**
+     * getAssigneeWorkload - getAssigneeWorkload
+     * 
+     * Return the open-thread workload for a set of user ids.
+     * 
+     * For each requested user id, returns the number of *open* threads assigned
+     * directly to that user — matching what the user sees in their central-inbox
+     * open view: in inbox, not trashed, not done, and excluding notification-only
+     * and spam threads.
+     * 
+     * Only threads assigned directly to a user are counted; threads assigned to a
+     * group the user belongs to are not. Intended for assignment load-balancing
+     * (e.g. even-distribution automations) that need a consistent, inbox-aligned
+     * workload per user.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.GetAssigneeWorkload.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetAssigneeWorkload.Responses.$200>
+  }
   ['/v1/message/threads']: {
     /**
      * updateThread - updateThread
@@ -3787,8 +4098,10 @@ export interface PathsDictionary {
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
-
 export type Address = Components.Schemas.Address;
+export type AssigneeWorkload = Components.Schemas.AssigneeWorkload;
+export type AssigneeWorkloadParams = Components.Schemas.AssigneeWorkloadParams;
+export type AssigneeWorkloadResults = Components.Schemas.AssigneeWorkloadResults;
 export type AttachmentsRelation = Components.Schemas.AttachmentsRelation;
 export type BaseEntity = Components.Schemas.BaseEntity;
 export type BulkActionsPayload = Components.Schemas.BulkActionsPayload;

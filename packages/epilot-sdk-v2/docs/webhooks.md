@@ -734,16 +734,17 @@ type Filter = {
 
 ### `WebhookCondition`
 
-A condition that must be met for the webhook to fire.
+A condition that must be met for the webhook to fire. A condition is EITHER a classic field + operation comparison OR a single jsonata_expression evaluated against the event payload — the two forms are mutually exclusive.
 
 ```ts
 type WebhookCondition = {
-  field: string
-  operation: "equals" | "not_equals" | "any_of" | "none_of" | "contains" | "not_contains" | "starts_with" | "ends_with" | "greater_than" | "less_than" | "greater_than_or_equals" | "less_than_or_equals" | "is_empty" | "is_not_empty" | "length_equals" | "length_not_equals" | "length_greater_than" | "length_less_than" | "length_greater_than_or_equals" | "length_less_than_or_equals"
+  field?: string
+  operation?: "equals" | "not_equals" | "any_of" | "none_of" | "contains" | "not_contains" | "starts_with" | "ends_with" | "greater_than" | "less_than" | "greater_than_or_equals" | "less_than_or_equals" | "is_empty" | "is_not_empty" | "length_equals" | "length_not_equals" | "length_greater_than" | "length_less_than" | "length_greater_than_or_equals" | "length_less_than_or_equals"
   values?: string[]
   field_type?: "string" | "number" | "boolean" | "date" | "datetime"
   is_array_field?: boolean
   repeatable_item_op?: boolean
+  jsonata_expression?: string
 }
 ```
 
@@ -754,12 +755,13 @@ A group of conditions with a logical operator. Multiple conditions are AND-ed by
 ```ts
 type WebhookConditionGroup = {
   conditions?: Array<{
-    field: string
-    operation: "equals" | "not_equals" | "any_of" | "none_of" | "contains" | "not_contains" | "starts_with" | "ends_with" | "greater_than" | "less_than" | "greater_than_or_equals" | "less_than_or_equals" | "is_empty" | "is_not_empty" | "length_equals" | "length_not_equals" | "length_greater_than" | "length_less_than" | "length_greater_than_or_equals" | "length_less_than_or_equals"
+    field?: string
+    operation?: "equals" | "not_equals" | "any_of" | "none_of" | "contains" | "not_contains" | "starts_with" | "ends_with" | "greater_than" | "less_than" | "greater_than_or_equals" | "less_than_or_equals" | "is_empty" | "is_not_empty" | "length_equals" | "length_not_equals" | "length_greater_than" | "length_less_than" | "length_greater_than_or_equals" | "length_less_than_or_equals"
     values?: string[]
     field_type?: "string" | "number" | "boolean" | "date" | "datetime"
     is_array_field?: boolean
     repeatable_item_op?: boolean
+    jsonata_expression?: string
   }>
   logical_operator?: "AND" | "OR"
 }
@@ -905,12 +907,13 @@ type WebhookConfig = {
   }
   filterConditions?: {
     conditions?: Array<{
-      field: { ... }
-      operation: { ... }
+      field?: { ... }
+      operation?: { ... }
       values?: { ... }
       field_type?: { ... }
       is_array_field?: { ... }
       repeatable_item_op?: { ... }
+      jsonata_expression?: { ... }
     }>
     logical_operator?: "AND" | "OR"
   }
