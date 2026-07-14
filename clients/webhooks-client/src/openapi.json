@@ -1094,11 +1094,11 @@
       },
       "WebhookCondition": {
         "type": "object",
-        "description": "A condition that must be met for the webhook to fire.",
+        "description": "A condition that must be met for the webhook to fire. A condition is EITHER a classic field + operation comparison OR a single jsonata_expression evaluated against the event payload — the two forms are mutually exclusive.",
         "properties": {
           "field": {
             "type": "string",
-            "description": "Dot-notation path to the field in the event payload (e.g. \"entity.status\", \"entity.line_items\")"
+            "description": "Dot-notation path to the field in the event payload (e.g. \"entity.status\", \"entity.line_items\"). Supports array indices in either spelling, which resolve identically: \"meter_readings.1.file_id\" or \"meter_readings[1].file_id\"."
           },
           "operation": {
             "type": "string",
@@ -1154,12 +1154,13 @@
             "type": "boolean",
             "description": "When true, evaluates conditions per-item in repeatable array fields",
             "default": false
+          },
+          "jsonata_expression": {
+            "type": "string",
+            "maxLength": 15000,
+            "description": "JSONata expression evaluated against the event payload; the condition passes when the result is truthy per JSONata $boolean semantics. Mutually exclusive with field/operation."
           }
-        },
-        "required": [
-          "field",
-          "operation"
-        ]
+        }
       },
       "WebhookConditionGroup": {
         "type": "object",

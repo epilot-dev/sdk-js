@@ -475,17 +475,17 @@ declare namespace Components {
             event_id: string;
         }
         /**
-         * A condition that must be met for the webhook to fire.
+         * A condition that must be met for the webhook to fire. A condition is EITHER a classic field + operation comparison OR a single jsonata_expression evaluated against the event payload — the two forms are mutually exclusive.
          */
         export interface WebhookCondition {
             /**
-             * Dot-notation path to the field in the event payload (e.g. "entity.status", "entity.line_items")
+             * Dot-notation path to the field in the event payload (e.g. "entity.status", "entity.line_items"). Supports array indices in either spelling, which resolve identically: "meter_readings.1.file_id" or "meter_readings[1].file_id".
              */
-            field: string;
+            field?: string;
             /**
              * Comparison operator. The length_* operations compare the item count of the field value (an array yields its length, a missing or null field yields 0, and any single non-array value yields 1) against values[0], which must be a non-negative integer.
              */
-            operation: "equals" | "not_equals" | "any_of" | "none_of" | "contains" | "not_contains" | "starts_with" | "ends_with" | "greater_than" | "less_than" | "greater_than_or_equals" | "less_than_or_equals" | "is_empty" | "is_not_empty" | "length_equals" | "length_not_equals" | "length_greater_than" | "length_less_than" | "length_greater_than_or_equals" | "length_less_than_or_equals";
+            operation?: "equals" | "not_equals" | "any_of" | "none_of" | "contains" | "not_contains" | "starts_with" | "ends_with" | "greater_than" | "less_than" | "greater_than_or_equals" | "less_than_or_equals" | "is_empty" | "is_not_empty" | "length_equals" | "length_not_equals" | "length_greater_than" | "length_less_than" | "length_greater_than_or_equals" | "length_less_than_or_equals";
             /**
              * Values to compare against (not required for is_empty/is_not_empty)
              */
@@ -502,22 +502,26 @@ declare namespace Components {
              * When true, evaluates conditions per-item in repeatable array fields
              */
             repeatable_item_op?: boolean;
+            /**
+             * JSONata expression evaluated against the event payload; the condition passes when the result is truthy per JSONata $boolean semantics. Mutually exclusive with field/operation.
+             */
+            jsonata_expression?: string;
         }
         /**
          * A group of conditions with a logical operator. Multiple conditions are AND-ed by default.
          */
         export interface WebhookConditionGroup {
             conditions?: [
-                /* A condition that must be met for the webhook to fire. */ WebhookCondition?,
-                /* A condition that must be met for the webhook to fire. */ WebhookCondition?,
-                /* A condition that must be met for the webhook to fire. */ WebhookCondition?,
-                /* A condition that must be met for the webhook to fire. */ WebhookCondition?,
-                /* A condition that must be met for the webhook to fire. */ WebhookCondition?,
-                /* A condition that must be met for the webhook to fire. */ WebhookCondition?,
-                /* A condition that must be met for the webhook to fire. */ WebhookCondition?,
-                /* A condition that must be met for the webhook to fire. */ WebhookCondition?,
-                /* A condition that must be met for the webhook to fire. */ WebhookCondition?,
-                /* A condition that must be met for the webhook to fire. */ WebhookCondition?
+                /* A condition that must be met for the webhook to fire. A condition is EITHER a classic field + operation comparison OR a single jsonata_expression evaluated against the event payload — the two forms are mutually exclusive. */ WebhookCondition?,
+                /* A condition that must be met for the webhook to fire. A condition is EITHER a classic field + operation comparison OR a single jsonata_expression evaluated against the event payload — the two forms are mutually exclusive. */ WebhookCondition?,
+                /* A condition that must be met for the webhook to fire. A condition is EITHER a classic field + operation comparison OR a single jsonata_expression evaluated against the event payload — the two forms are mutually exclusive. */ WebhookCondition?,
+                /* A condition that must be met for the webhook to fire. A condition is EITHER a classic field + operation comparison OR a single jsonata_expression evaluated against the event payload — the two forms are mutually exclusive. */ WebhookCondition?,
+                /* A condition that must be met for the webhook to fire. A condition is EITHER a classic field + operation comparison OR a single jsonata_expression evaluated against the event payload — the two forms are mutually exclusive. */ WebhookCondition?,
+                /* A condition that must be met for the webhook to fire. A condition is EITHER a classic field + operation comparison OR a single jsonata_expression evaluated against the event payload — the two forms are mutually exclusive. */ WebhookCondition?,
+                /* A condition that must be met for the webhook to fire. A condition is EITHER a classic field + operation comparison OR a single jsonata_expression evaluated against the event payload — the two forms are mutually exclusive. */ WebhookCondition?,
+                /* A condition that must be met for the webhook to fire. A condition is EITHER a classic field + operation comparison OR a single jsonata_expression evaluated against the event payload — the two forms are mutually exclusive. */ WebhookCondition?,
+                /* A condition that must be met for the webhook to fire. A condition is EITHER a classic field + operation comparison OR a single jsonata_expression evaluated against the event payload — the two forms are mutually exclusive. */ WebhookCondition?,
+                /* A condition that must be met for the webhook to fire. A condition is EITHER a classic field + operation comparison OR a single jsonata_expression evaluated against the event payload — the two forms are mutually exclusive. */ WebhookCondition?
             ];
             logical_operator?: "AND" | "OR";
         }
