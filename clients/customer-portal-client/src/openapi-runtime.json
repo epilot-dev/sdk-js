@@ -1423,6 +1423,23 @@
         ],
         "responses": {}
       },
+      "post": {
+        "operationId": "getContractWithTemplates",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
       "patch": {
         "operationId": "updateContract",
         "deprecated": true,

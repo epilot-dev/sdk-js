@@ -11136,6 +11136,183 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace GetContractWithTemplates {
+        namespace Parameters {
+            export type Id = /**
+             * Entity ID
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            Components.Schemas.EntityId /* uuid */;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        export interface RequestBody {
+            /**
+             * Map of content field name to Handlebars template string. Each template is resolved per related meter and returned as templates_output on the meter.
+             */
+            templates?: {
+                [name: string]: string;
+            };
+        }
+        namespace Responses {
+            export interface $200 {
+                entity?: /* The contract entity */ Components.Schemas.Contract;
+                /**
+                 * The related orders of the requested contract
+                 */
+                orders?: /* The order entity */ Components.Schemas.Order[];
+                /**
+                 * The related meters of the requested contract
+                 */
+                meters?: {
+                    [name: string]: any;
+                    _id: /**
+                     * Entity ID
+                     * example:
+                     * 5da0a718-c822-403d-9f5d-20d4584e0528
+                     */
+                    Components.Schemas.EntityId /* uuid */;
+                    /**
+                     * Title of the entity
+                     * example:
+                     * Example Entity
+                     */
+                    _title: string;
+                    /**
+                     * Organization ID the entity belongs to
+                     * example:
+                     * 123
+                     */
+                    _org: string;
+                    /**
+                     * Array of entity tags
+                     * example:
+                     * [
+                     *   "example",
+                     *   "mock"
+                     * ]
+                     */
+                    _tags?: string[];
+                    /**
+                     * Creation timestamp of the entity
+                     * example:
+                     * 2021-02-09T12:41:43.662Z
+                     */
+                    _created_at: string; // date-time
+                    /**
+                     * Last update timestamp of the entity
+                     * example:
+                     * 2021-02-09T12:41:43.662Z
+                     */
+                    _updated_at: string; // date-time
+                    /**
+                     * Template outputs with search highlight <em> tags merged in. Only present when highlight is requested and matches exist.
+                     */
+                    templates_output_highlighted?: {
+                        [name: string]: string | {
+                            [name: string]: string;
+                        };
+                    };
+                    /**
+                     * Highlighted fragments for search matches on fields not shown in template content. Max 1 entry.
+                     */
+                    search_snippets?: {
+                        /**
+                         * Human-readable field label
+                         */
+                        field?: string;
+                        /**
+                         * Highlighted text fragment with <em> tags
+                         */
+                        fragment?: string;
+                    }[];
+                    _schema: "meter";
+                    /**
+                     * Resolved template strings corresponding to the templates parameter. Supports both string values and nested objects of strings.
+                     * example:
+                     * {
+                     *   "content_top_name": "Customer #123456",
+                     *   "main_content_name": "Orange Flexible A2 (654321)",
+                     *   "content_bottom_name": "Porscheplatz 1, 70435 Stuttgart, Germany",
+                     *   "nested_content": {
+                     *     "title": "Orange Flexible A2",
+                     *     "subtitle": "654321"
+                     *   }
+                     * }
+                     */
+                    templates_output?: {
+                        [name: string]: string | {
+                            [name: string]: string;
+                        };
+                    };
+                }[];
+                /**
+                 * The related files of the requested contract
+                 */
+                files?: /* The file entity */ Components.Schemas.File[];
+                /**
+                 * The related entities of the requested contract
+                 */
+                relations?: Components.Schemas.EntityItem[];
+                workflow?: /**
+                 * example:
+                 * {
+                 *   "id": "8gja72h6kas6h",
+                 *   "name": "Lead Qualification",
+                 *   "trigger": "MANUAL",
+                 *   "status": "STARTED",
+                 *   "creationTime": "2021-04-27T12:01:13.000Z",
+                 *   "lastUpdateTime": "2021-04-27T12:01:13.000Z",
+                 *   "dueDate": "2021-04-27T12:01:13.000Z",
+                 *   "assignedTo": [
+                 *     "252",
+                 *     "29052"
+                 *   ],
+                 *   "flow": [
+                 *     {
+                 *       "id": "sectionId1",
+                 *       "name": "Initial Information Gathering",
+                 *       "steps": [
+                 *         {
+                 *           "id": "sada5641f3a21",
+                 *           "name": "Call client and confirm address and product",
+                 *           "status": "ASSIGNED",
+                 *           "assignedTo": [
+                 *             "11"
+                 *           ]
+                 *         },
+                 *         {
+                 *           "id": "sada5641f3a22",
+                 *           "name": "Check product availability",
+                 *           "status": "UNASSIGNED"
+                 *         },
+                 *         {
+                 *           "id": "sada5641f3a23",
+                 *           "name": "Send email confirming contact with the client",
+                 *           "status": "SKIPPED"
+                 *         }
+                 *       ]
+                 *     },
+                 *     {
+                 *       "id": "firstLevelStepId1",
+                 *       "name": "Print and send catalog",
+                 *       "status": "SKIPPED",
+                 *       "dueDate": "2023-01-15T20:00:00"
+                 *     }
+                 *   ]
+                 * }
+                 */
+                Components.Schemas.WorkflowExecution[];
+                journey_actions?: Components.Schemas.JourneyActions[];
+            }
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace GetCosts {
         namespace Parameters {
             export type AppId = string;
@@ -16785,6 +16962,16 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetContract.Responses.$200>
   /**
+   * getContractWithTemplates - getContractWithTemplates
+   * 
+   * Get a contract by id, resolving the provided Handlebars templates against each related meter into templates_output. POST variant of getContract that accepts a request body; the GET remains as a fallback.
+   */
+  'getContractWithTemplates'(
+    parameters?: Parameters<Paths.GetContractWithTemplates.PathParameters> | null,
+    data?: Paths.GetContractWithTemplates.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetContractWithTemplates.Responses.$200>
+  /**
    * updateContract - updateContract
    * 
    * Update a contract by id. Use getPortalUserEntity instead.
@@ -18619,6 +18806,16 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetContract.Responses.$200>
+    /**
+     * getContractWithTemplates - getContractWithTemplates
+     * 
+     * Get a contract by id, resolving the provided Handlebars templates against each related meter into templates_output. POST variant of getContract that accepts a request body; the GET remains as a fallback.
+     */
+    'post'(
+      parameters?: Parameters<Paths.GetContractWithTemplates.PathParameters> | null,
+      data?: Paths.GetContractWithTemplates.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetContractWithTemplates.Responses.$200>
     /**
      * updateContract - updateContract
      * 

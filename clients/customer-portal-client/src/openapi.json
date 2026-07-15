@@ -5929,6 +5929,125 @@
           }
         }
       },
+      "post": {
+        "operationId": "getContractWithTemplates",
+        "summary": "getContractWithTemplates",
+        "description": "Get a contract by id, resolving the provided Handlebars templates against each related meter into templates_output. POST variant of getContract that accepts a request body; the GET remains as a fallback.",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            },
+            "required": true,
+            "description": "The ID of the contract"
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "templates": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "string"
+                    },
+                    "description": "Map of content field name to Handlebars template string. Each template is resolved per related meter and returned as templates_output on the meter."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The requested contract returned successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "entity": {
+                      "$ref": "#/components/schemas/Contract"
+                    },
+                    "orders": {
+                      "type": "array",
+                      "description": "The related orders of the requested contract",
+                      "items": {
+                        "$ref": "#/components/schemas/Order"
+                      }
+                    },
+                    "meters": {
+                      "type": "array",
+                      "description": "The related meters of the requested contract",
+                      "items": {
+                        "allOf": [
+                          {
+                            "$ref": "#/components/schemas/Meter"
+                          },
+                          {
+                            "$ref": "#/components/schemas/EntityTemplates"
+                          }
+                        ]
+                      }
+                    },
+                    "files": {
+                      "type": "array",
+                      "description": "The related files of the requested contract",
+                      "items": {
+                        "$ref": "#/components/schemas/File"
+                      }
+                    },
+                    "relations": {
+                      "type": "array",
+                      "description": "The related entities of the requested contract",
+                      "items": {
+                        "$ref": "#/components/schemas/EntityItem"
+                      }
+                    },
+                    "workflow": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/WorkflowExecution"
+                      }
+                    },
+                    "journey_actions": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/JourneyActions"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
       "patch": {
         "operationId": "updateContract",
         "summary": "updateContract",
