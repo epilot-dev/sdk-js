@@ -124,6 +124,7 @@ const { data } = await customerPortalClient.upsertPortal(...)
 - [`updatePortalUserEmail`](#updateportaluseremail)
 - [`changePortalUserPassword`](#changeportaluserpassword)
 - [`postOrderAcceptance`](#postorderacceptance)
+- [`getContractWithTemplates`](#getcontractwithtemplates)
 - [`addContractByIdentifiers`](#addcontractbyidentifiers)
 - [`validateCadenceEntityEditRules`](#validatecadenceentityeditrules)
 - [`searchPaymentRelationsInEntities`](#searchpaymentrelationsinentities)
@@ -5178,6 +5179,144 @@ const { data } = await client.postOrderAcceptance(
     ],
     "_schema": "order"
   }
+}
+```
+
+</details>
+
+---
+
+### `getContractWithTemplates`
+
+Get a contract by id, resolving the provided Handlebars templates against each related meter into templates_output. POST variant of getContract that accepts a request body; the GET remains as a fallba
+
+`POST /v2/portal/contract/{id}`
+
+```ts
+const { data } = await client.getContractWithTemplates(
+  {
+    id: '123e4567-e89b-12d3-a456-426614174000',
+  },
+  {
+    templates: {}
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "entity": {
+    "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+    "_title": "Example Entity",
+    "_org": "123",
+    "_tags": ["example", "mock"],
+    "_created_at": "2021-02-09T12:41:43.662Z",
+    "_updated_at": "2021-02-09T12:41:43.662Z",
+    "templates_output_highlighted": {},
+    "search_snippets": [
+      {}
+    ],
+    "contract_name": "Grid Contract",
+    "contract_number": "12345",
+    "status": "approved",
+    "description": "This contract is for the supply of widgets.",
+    "account_number": "67890",
+    "branch": "power",
+    "billing_address": "123 Main St, Anytown",
+    "delivery_address": "456 Elm St, Anytown",
+    "additional_addresses": "789 Oak St, Anytown",
+    "termination_date": "2022-01-01",
+    "termination_reason": "Non-payment",
+    "billing_period": "monthly",
+    "billing_duration_amount": 30,
+    "renewal_duration_amount": 365,
+    "renewal_duration_unit": "years",
+    "notice_time_amount": 30,
+    "notice_time_unit": "months",
+    "start_date": "2021-01-01",
+    "billing_due_day": 2,
+    "installment_amount": 10050,
+    "balance": 8990,
+    "balance_currency": "EUR"
+  },
+  "orders": [
+    {
+      "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+      "_title": "Example Entity",
+      "_org": "123",
+      "_tags": ["example", "mock"],
+      "_created_at": "2021-02-09T12:41:43.662Z",
+      "_updated_at": "2021-02-09T12:41:43.662Z",
+      "templates_output_highlighted": {},
+      "search_snippets": [],
+      "_schema": "order"
+    }
+  ],
+  "meters": [
+    {
+      "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+      "_title": "Example Entity",
+      "_org": "123",
+      "_tags": ["example", "mock"],
+      "_created_at": "2021-02-09T12:41:43.662Z",
+      "_updated_at": "2021-02-09T12:41:43.662Z",
+      "templates_output_highlighted": {},
+      "search_snippets": [],
+      "_schema": "meter",
+      "templates_output": {}
+    }
+  ],
+  "files": [
+    {
+      "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+      "_title": "Example Entity",
+      "_org": "123",
+      "_tags": ["example", "mock"],
+      "_created_at": "2021-02-09T12:41:43.662Z",
+      "_updated_at": "2021-02-09T12:41:43.662Z",
+      "templates_output_highlighted": {},
+      "search_snippets": [],
+      "_schema": "file"
+    }
+  ],
+  "relations": [
+    {
+      "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+      "_title": "Example Entity",
+      "_org": "123",
+      "_tags": ["example", "mock"],
+      "_created_at": "2021-02-09T12:41:43.662Z",
+      "_updated_at": "2021-02-09T12:41:43.662Z",
+      "templates_output_highlighted": {},
+      "search_snippets": [],
+      "templates_output": {},
+      "_schema": "contact"
+    }
+  ],
+  "workflow": [
+    {
+      "id": "8gja72h6kas6h",
+      "name": "Lead Qualification",
+      "trigger": "MANUAL",
+      "status": "STARTED",
+      "creationTime": "2021-04-27T12:01:13.000Z",
+      "lastUpdateTime": "2021-04-27T12:01:13.000Z",
+      "dueDate": "2021-04-27T12:01:13.000Z",
+      "assignedTo": ["252", "29052"],
+      "flow": []
+    }
+  ],
+  "journey_actions": [
+    {
+      "journey_id": "string",
+      "action_label": {},
+      "slug": "string",
+      "rules": []
+    }
+  ]
 }
 ```
 

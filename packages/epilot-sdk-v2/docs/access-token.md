@@ -48,6 +48,7 @@ const { data } = await accessTokenClient.createAccessToken(...)
 - [`TokenParameters`](#tokenparameters)
 - [`ExpiresIn`](#expiresin)
 - [`ReadOnly`](#readonly)
+- [`Anonymize`](#anonymize)
 - [`AccessTokenParameters`](#accesstokenparameters)
 - [`JourneyTokenParameters`](#journeytokenparameters)
 - [`PortalTokenParameters`](#portaltokenparameters)
@@ -72,7 +73,8 @@ const { data } = await client.createAccessToken(
     token_type: 'api',
     assignments: ['123:owner'],
     expires_in: 3600,
-    read_only: true
+    read_only: true,
+    anonymize: true
   },
 )
 ```
@@ -92,6 +94,7 @@ const { data } = await client.createAccessToken(
   "portal_user_id": "string",
   "assignments": ["123:owner"],
   "read_only": true,
+  "anonymize": true,
   "last_used": "2026-02-24"
 }
 ```
@@ -127,6 +130,7 @@ const { data } = await client.listAccessTokens({
     "portal_user_id": "string",
     "assignments": ["123:owner"],
     "read_only": true,
+    "anonymize": true,
     "last_used": "2026-02-24"
   }
 ]
@@ -162,6 +166,7 @@ const { data } = await client.revokeAccessToken({
   "portal_user_id": "string",
   "assignments": ["123:owner"],
   "read_only": true,
+  "anonymize": true,
   "last_used": "2026-02-24"
 }
 ```
@@ -403,6 +408,7 @@ type TokenParameters = {
   assignments?: string[]
   expires_in?: number | string
   read_only?: boolean
+  anonymize?: boolean
 } | {
   name: string
   token_type?: "journey"
@@ -418,12 +424,14 @@ type TokenParameters = {
   token_type?: "assume"
   assignments?: string[]
   read_only?: boolean
+  anonymize?: boolean
 } | {
   name: string
   token_type?: "app"
   assignments?: string[]
   expires_in?: number | string
   read_only?: boolean
+  anonymize?: boolean
 } | {
   name: string
   token_type?: "portal_preview"
@@ -446,6 +454,14 @@ When true, the issued token may only perform read-only actions. Any action guard
 type ReadOnly = boolean
 ```
 
+### `Anonymize`
+
+Forces PII anonymization on all entity data returned to this token. Cannot be disabled by the token bearer. See entity-api anonymized responses.
+
+```ts
+type Anonymize = boolean
+```
+
 ### `AccessTokenParameters`
 
 ```ts
@@ -455,6 +471,7 @@ type AccessTokenParameters = {
   assignments?: string[]
   expires_in?: number | string
   read_only?: boolean
+  anonymize?: boolean
 }
 ```
 
@@ -488,6 +505,7 @@ type AssumeTokenParameters = {
   token_type?: "assume"
   assignments?: string[]
   read_only?: boolean
+  anonymize?: boolean
 }
 ```
 
@@ -500,6 +518,7 @@ type AppTokenParameters = {
   assignments?: string[]
   expires_in?: number | string
   read_only?: boolean
+  anonymize?: boolean
 }
 ```
 
@@ -527,6 +546,7 @@ type AccessTokenItem = {
   portal_user_id?: string
   assignments?: string[]
   read_only?: boolean
+  anonymize?: boolean
   last_used?: string // date
 }
 ```

@@ -1,5 +1,6 @@
 # Workflows Definitions
 
+- **Base URL:** `https://workflows-definition.sls.epilot.io`
 - **Full API Docs:** [https://docs.epilot.io/api/workflow-definition](https://docs.epilot.io/api/workflow-definition)
 
 ## Usage
