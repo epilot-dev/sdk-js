@@ -597,6 +597,12 @@
         "description": "When true, the issued token may only perform read-only actions. Any action guarded by permissions that is not read-only (i.e. not a view/export/download action) is denied, regardless of the roles the token carries.",
         "example": true
       },
+      "Anonymize": {
+        "type": "boolean",
+        "default": false,
+        "description": "Forces PII anonymization on all entity data returned to this token. Cannot be disabled by the token bearer. See entity-api anonymized responses.",
+        "example": true
+      },
       "AccessTokenParameters": {
         "type": "object",
         "additionalProperties": false,
@@ -618,6 +624,9 @@
           },
           "read_only": {
             "$ref": "#/components/schemas/ReadOnly"
+          },
+          "anonymize": {
+            "$ref": "#/components/schemas/Anonymize"
           }
         },
         "required": [
@@ -692,6 +701,9 @@
           },
           "read_only": {
             "$ref": "#/components/schemas/ReadOnly"
+          },
+          "anonymize": {
+            "$ref": "#/components/schemas/Anonymize"
           }
         },
         "required": [
@@ -719,6 +731,9 @@
           },
           "read_only": {
             "$ref": "#/components/schemas/ReadOnly"
+          },
+          "anonymize": {
+            "$ref": "#/components/schemas/Anonymize"
           }
         },
         "required": [
@@ -781,6 +796,9 @@
           },
           "read_only": {
             "$ref": "#/components/schemas/ReadOnly"
+          },
+          "anonymize": {
+            "$ref": "#/components/schemas/Anonymize"
           },
           "last_used": {
             "type": "string",

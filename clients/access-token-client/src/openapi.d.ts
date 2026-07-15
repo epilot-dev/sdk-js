@@ -48,6 +48,12 @@ declare namespace Components {
              * true
              */
             ReadOnly;
+            anonymize?: /**
+             * Forces PII anonymization on all entity data returned to this token. Cannot be disabled by the token bearer. See entity-api anonymized responses.
+             * example:
+             * true
+             */
+            Anonymize;
             /**
              * Last date the token was used (YYYY-MM-DD format, 1 day accuracy)
              * example:
@@ -81,6 +87,12 @@ declare namespace Components {
              * true
              */
             ReadOnly;
+            anonymize?: /**
+             * Forces PII anonymization on all entity data returned to this token. Cannot be disabled by the token bearer. See entity-api anonymized responses.
+             * example:
+             * true
+             */
+            Anonymize;
         }
         /**
          * Access token type
@@ -88,6 +100,12 @@ declare namespace Components {
          * api
          */
         export type AccessTokenType = "api" | "journey" | "portal" | "assume" | "app" | "portal_preview";
+        /**
+         * Forces PII anonymization on all entity data returned to this token. Cannot be disabled by the token bearer. See entity-api anonymized responses.
+         * example:
+         * true
+         */
+        export type Anonymize = boolean;
         export interface AppTokenParameters {
             name: /**
              * Human readable name for access token
@@ -104,6 +122,12 @@ declare namespace Components {
              * true
              */
             ReadOnly;
+            anonymize?: /**
+             * Forces PII anonymization on all entity data returned to this token. Cannot be disabled by the token bearer. See entity-api anonymized responses.
+             * example:
+             * true
+             */
+            Anonymize;
         }
         /**
          * List of role ids attached to an user
@@ -129,6 +153,12 @@ declare namespace Components {
              * true
              */
             ReadOnly;
+            anonymize?: /**
+             * Forces PII anonymization on all entity data returned to this token. Cannot be disabled by the token bearer. See entity-api anonymized responses.
+             * example:
+             * true
+             */
+            Anonymize;
         }
         export type ExpiresIn = number /* int32 */ | string /* ^[0-9]+ ?(ms|milliseconds?|s|seconds?|m|minutes?|h|hours?|d|days?|w|weeks?|y|years?)?$ */;
         export interface JourneyTokenParameters {
@@ -226,6 +256,12 @@ declare namespace Paths {
                  * true
                  */
                 Components.Schemas.ReadOnly;
+                anonymize?: /**
+                 * Forces PII anonymization on all entity data returned to this token. Cannot be disabled by the token bearer. See entity-api anonymized responses.
+                 * example:
+                 * true
+                 */
+                Components.Schemas.Anonymize;
                 /**
                  * Last date the token was used (YYYY-MM-DD format, 1 day accuracy)
                  * example:
@@ -699,6 +735,7 @@ export type AccessTokenJourneyId = Components.Schemas.AccessTokenJourneyId;
 export type AccessTokenName = Components.Schemas.AccessTokenName;
 export type AccessTokenParameters = Components.Schemas.AccessTokenParameters;
 export type AccessTokenType = Components.Schemas.AccessTokenType;
+export type Anonymize = Components.Schemas.Anonymize;
 export type AppTokenParameters = Components.Schemas.AppTokenParameters;
 export type Assignments = Components.Schemas.Assignments;
 export type AssumeTokenParameters = Components.Schemas.AssumeTokenParameters;
