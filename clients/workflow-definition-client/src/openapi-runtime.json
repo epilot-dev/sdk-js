@@ -4,6 +4,11 @@
     "title": "",
     "version": ""
   },
+  "servers": [
+    {
+      "url": "https://workflows-definition.sls.epilot.io"
+    }
+  ],
   "paths": {
     "/v1/workflows/limits/max-allowed": {
       "get": {
@@ -308,6 +313,5 @@
         "required": false
       }
     }
-  },
-  "servers": []
+  }
 }

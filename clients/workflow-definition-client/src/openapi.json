@@ -5,6 +5,11 @@
     "version": "1.1.0",
     "description": "The Workflows Definitions API enables you to create, manage, and configure reusable workflow templates\nwithin your organization. Workflow definitions serve as blueprints that define the structure and behavior\nof business processes, which can then be instantiated as workflow executions.\n\n## Core Concepts\n\n### Workflow Definition (V1)\nA workflow definition is a template that describes a business process. It consists of:\n- **Sections**: Logical groupings (phases) that organize related steps together\n- **Steps**: Individual tasks or actions that need to be completed within a section\n- **Closing Reasons**: Predefined reasons that can be selected when closing/completing a workflow\n\n### Flow Template (V2)\nThe modern workflow model that provides advanced capabilities:\n- **Phases**: Named stages that group related tasks and track progress through the workflow\n- **Tasks**: Individual units of work that can be manual, automated, AI-powered, or decision points\n- **Edges**: Connections between tasks that define the flow sequence and support conditional branching\n- **Triggers**: Define how a workflow is started (manual, automation, journey submission)\n\n### Task Types (V2)\n- **MANUAL**: Tasks assigned to users that require human action to complete\n- **AUTOMATION**: Tasks that execute automated actions when reached\n- **DECISION**: Conditional branching points that evaluate conditions to determine the next path\n- **AI_AGENT**: Tasks that invoke AI agents to perform intelligent actions\n\n## API Versions\n- **V1 endpoints** (`/v1/workflows/...`): Legacy linear workflow model with sections and steps\n- **V2 endpoints** (`/v2/flows/...`): Modern graph-based flow model with phases, tasks, and edges\n"
   },
+  "servers": [
+    {
+      "url": "https://workflows-definition.sls.epilot.io"
+    }
+  ],
   "tags": [
     {
       "name": "Workflows",
@@ -3583,6 +3588,5 @@
         ]
       }
     }
-  },
-  "servers": []
+  }
 }
