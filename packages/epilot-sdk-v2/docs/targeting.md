@@ -30,6 +30,7 @@ const { data } = await targetingClient.changeCampaignStatus(...)
 - [`getCampaignPortals`](#getcampaignportals)
 - [`setupCampaign`](#setupcampaign)
 - [`matchCampaigns`](#matchcampaigns)
+- [`discoverCampaigns`](#discovercampaigns)
 
 **Campaign Delivery**
 - [`retriggerCampaignAutomations`](#retriggercampaignautomations)
@@ -42,6 +43,7 @@ const { data } = await targetingClient.changeCampaignStatus(...)
 - [`createRecipient`](#createrecipient)
 - [`updateRecipient`](#updaterecipient)
 - [`updateRecipientPortalStatus`](#updaterecipientportalstatus)
+- [`updateRecipientEntityUiStatus`](#updaterecipiententityuistatus)
 - [`getRecipients`](#getrecipients)
 
 **Schemas**
@@ -63,11 +65,15 @@ const { data } = await targetingClient.changeCampaignStatus(...)
 - [`Campaign`](#campaign)
 - [`Target`](#target)
 - [`MatchCampaignParams`](#matchcampaignparams)
+- [`NextBestAction`](#nextbestaction)
+- [`DiscoverCampaignsParams`](#discovercampaignsparams)
 - [`MatchTargetParams`](#matchtargetparams)
 - [`GetTargetQueriesParams`](#gettargetqueriesparams)
 - [`TargetQueryResult`](#targetqueryresult)
 - [`AutomationStatus`](#automationstatus)
 - [`PortalStatus`](#portalstatus)
+- [`EntityUiStatus`](#entityuistatus)
+- [`Resolution`](#resolution)
 - [`Recipient`](#recipient)
 - [`BaseRecipientPayload`](#baserecipientpayload)
 - [`AutomationRecipientPayload`](#automationrecipientpayload)
@@ -77,6 +83,7 @@ const { data } = await targetingClient.changeCampaignStatus(...)
 - [`RetriggerAutomationsRequest`](#retriggerautomationsrequest)
 - [`RetriggerAutomationsResult`](#retriggerautomationsresult)
 - [`UpdatePortalStatusRequest`](#updateportalstatusrequest)
+- [`UpdateEntityUiStatusRequest`](#updateentityuistatusrequest)
 - [`SetupCampaignRequest`](#setupcampaignrequest)
 - [`SetupTariffChangeCampaignRequest`](#setuptariffchangecampaignrequest)
 - [`SetupTariffChangeCampaignResponse`](#setuptariffchangecampaignresponse)
@@ -389,6 +396,63 @@ const { data } = await client.matchCampaigns(
 
 ---
 
+### `discoverCampaigns`
+
+Discover Entity-UI Next Best Actions for an entity
+
+`POST /v1/campaign:discover`
+
+```ts
+const { data } = await client.discoverCampaigns(
+  null,
+  {
+    entity_id: 'b8c01433-5556-4e2b-aad4-6f5348d1df84',
+    entity_schema: 'string'
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "hits": 0,
+  "results": [
+    {
+      "campaign_id": "b8c01433-5556-4e2b-aad4-6f5348d1df84",
+      "nba": {
+        "category": "string",
+        "icon": {
+          "name": "string",
+          "color": "string"
+        },
+        "title": "string",
+        "body": "string",
+        "priority": "medium",
+        "is_dismissable": true,
+        "cta": {
+          "type": "journey",
+          "target": "string",
+          "label": "string",
+          "context_params": [
+            {
+              "key": "string",
+              "value": "string"
+            }
+          ]
+        }
+      },
+      "status": "seen"
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
 ### `matchTargets`
 
 Match targets
@@ -518,6 +582,9 @@ const { data } = await client.createRecipient(
   "portal_status": "sent",
   "portal_status_updated_at": "1970-01-01T00:00:00.000Z",
   "portal_state": {},
+  "entity_ui_status": "seen",
+  "entity_ui_status_updated_at": "1970-01-01T00:00:00.000Z",
+  "resolution": "accepted",
   "updated_at": "1970-01-01T00:00:00.000Z"
 }
 ```
@@ -560,6 +627,9 @@ const { data } = await client.updateRecipient(
   "portal_status": "sent",
   "portal_status_updated_at": "1970-01-01T00:00:00.000Z",
   "portal_state": {},
+  "entity_ui_status": "seen",
+  "entity_ui_status_updated_at": "1970-01-01T00:00:00.000Z",
+  "resolution": "accepted",
   "updated_at": "1970-01-01T00:00:00.000Z"
 }
 ```
@@ -599,6 +669,52 @@ const { data } = await client.updateRecipientPortalStatus(
   "portal_status": "sent",
   "portal_status_updated_at": "1970-01-01T00:00:00.000Z",
   "portal_state": {},
+  "entity_ui_status": "seen",
+  "entity_ui_status_updated_at": "1970-01-01T00:00:00.000Z",
+  "resolution": "accepted",
+  "updated_at": "1970-01-01T00:00:00.000Z"
+}
+```
+
+</details>
+
+---
+
+### `updateRecipientEntityUiStatus`
+
+Update Entity-UI (Next Best Action) status for a campaign recipient
+
+`PATCH /v1/campaign/{campaign_id}/recipient/{recipient_id}/entity_ui:status`
+
+```ts
+const { data } = await client.updateRecipientEntityUiStatus(
+  {
+    campaign_id: 'example',
+    recipient_id: 'example',
+  },
+  {
+    status: 'seen',
+    entity_schema: 'string'
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "entity_id": "b8c01433-5556-4e2b-aad4-6f5348d1df84",
+  "entity_schema": "string",
+  "title": "string",
+  "automation_status": "pending",
+  "automation_execution_id": "string",
+  "portal_status": "sent",
+  "portal_status_updated_at": "1970-01-01T00:00:00.000Z",
+  "portal_state": {},
+  "entity_ui_status": "seen",
+  "entity_ui_status_updated_at": "1970-01-01T00:00:00.000Z",
+  "resolution": "accepted",
   "updated_at": "1970-01-01T00:00:00.000Z"
 }
 ```
@@ -639,6 +755,9 @@ const { data } = await client.getRecipients({
       "portal_status": "sent",
       "portal_status_updated_at": "1970-01-01T00:00:00.000Z",
       "portal_state": {},
+      "entity_ui_status": "seen",
+      "entity_ui_status_updated_at": "1970-01-01T00:00:00.000Z",
+      "resolution": "accepted",
       "updated_at": "1970-01-01T00:00:00.000Z"
     }
   ],
@@ -883,6 +1002,45 @@ type MatchCampaignParams = {
 }
 ```
 
+### `NextBestAction`
+
+A Next Best Action configured on a campaign's Entity-UI channel.
+This is the canonical NBA contract shared by discovery (this API), authoring, and rendering.
+NBA content is single-language in v1; text fields may contain `{{placeholders}}` resolved at render time.
+
+
+```ts
+type NextBestAction = {
+  category?: string
+  icon?: {
+    name: string
+    color?: string
+  }
+  title: string
+  body?: string
+  priority?: "low" | "medium" | "high"
+  is_dismissable?: boolean
+  cta: {
+    type: "journey" | "workflow" | "url"
+    target: string
+    label?: string
+    context_params?: Array<{
+      key: { ... }
+      value: { ... }
+    }>
+  }
+}
+```
+
+### `DiscoverCampaignsParams`
+
+```ts
+type DiscoverCampaignsParams = {
+  entity_id: string // uuid
+  entity_schema: string
+}
+```
+
 ### `MatchTargetParams`
 
 ```ts
@@ -925,6 +1083,28 @@ type AutomationStatus = "pending" | "in_progress" | "success" | "failed" | "canc
 type PortalStatus = "sent" | "seen" | "dismissed" | "clicked"
 ```
 
+### `EntityUiStatus`
+
+Lifecycle status of a Next Best Action on the Entity-UI channel. Unlike the portal
+channel there is no `sent` state: an NBA recipient is born at `seen`, the moment the
+action is first rendered to an agent.
+
+
+```ts
+type EntityUiStatus = "seen" | "dismissed" | "clicked"
+```
+
+### `Resolution`
+
+Cross-channel resolution of a campaign for a recipient. Unlike the per-channel `*_status`
+fields (where `dismissed` is channel-local), a resolution suppresses the campaign on EVERY
+channel — the 360 Entity-UI card and the portal teaser alike. Server-managed and read-only:
+never sent by a client. Abs
+
+```ts
+type Resolution = "accepted"
+```
+
 ### `Recipient`
 
 ```ts
@@ -937,6 +1117,9 @@ type Recipient = {
   portal_status?: "sent" | "seen" | "dismissed" | "clicked"
   portal_status_updated_at?: string // date-time
   portal_state?: Record<string, unknown>
+  entity_ui_status?: "seen" | "dismissed" | "clicked"
+  entity_ui_status_updated_at?: string // date-time
+  resolution?: "accepted"
   updated_at?: string // date-time
 }
 ```
@@ -1026,6 +1209,15 @@ type RetriggerAutomationsResult = {
 ```ts
 type UpdatePortalStatusRequest = {
   status: "sent" | "seen" | "dismissed" | "clicked"
+}
+```
+
+### `UpdateEntityUiStatusRequest`
+
+```ts
+type UpdateEntityUiStatusRequest = {
+  status: "seen" | "dismissed" | "clicked"
+  entity_schema?: string
 }
 ```
 

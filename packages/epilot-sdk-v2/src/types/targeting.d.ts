@@ -69,6 +69,38 @@ export declare namespace Components {
          *
          */
         Schemas.ClientError;
+        export interface DiscoverCampaignsResponse {
+            /**
+             * Number of matching NBAs.
+             */
+            hits: number;
+            /**
+             * Matching NBAs, sorted by priority (desc); one entry per campaign.
+             */
+            results: {
+                campaign_id: /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                Schemas.BaseUUID /* uuid */;
+                nba: /**
+                 * A Next Best Action configured on a campaign's Entity-UI channel.
+                 * This is the canonical NBA contract shared by discovery (this API), authoring, and rendering.
+                 * NBA content is single-language in v1; text fields may contain `{{placeholders}}` resolved at render time.
+                 *
+                 */
+                Schemas.NextBestAction;
+                /**
+                 * The recipient's current Entity-UI status for this campaign, present only
+                 * when a recipient record already exists (i.e. the entity has previously seen
+                 * or clicked this NBA). Absent when the entity has not yet interacted with it.
+                 * Dismissed NBAs are filtered out server-side, so this is only ever `seen` or
+                 * `clicked`. Lets the client skip a redundant `seen` call for NBAs already seen.
+                 *
+                 */
+                status?: "seen" | "dismissed" | "clicked";
+            }[];
+        }
         export interface GetTargetQueriesResponse {
             /**
              * List of target query results.
@@ -343,6 +375,24 @@ export declare namespace Components {
                 [name: string]: any;
             };
         };
+        export interface DiscoverCampaignsParams {
+            entity_id: /**
+             * example:
+             * b8c01433-5556-4e2b-aad4-6f5348d1df84
+             */
+            BaseUUID /* uuid */;
+            /**
+             * The schema slug of the entity (e.g. "contact" or "account").
+             */
+            entity_schema: string;
+        }
+        /**
+         * Lifecycle status of a Next Best Action on the Entity-UI channel. Unlike the portal
+         * channel there is no `sent` state: an NBA recipient is born at `seen`, the moment the
+         * action is first rendered to an agent.
+         *
+         */
+        export type EntityUiStatus = "seen" | "dismissed" | "clicked";
         export interface ExecutionSummaryItem {
             execution_id?: string;
             execution_status?: string;
@@ -1419,6 +1469,71 @@ export declare namespace Components {
                 BaseUUID /* uuid */?
             ];
         }
+        /**
+         * A Next Best Action configured on a campaign's Entity-UI channel.
+         * This is the canonical NBA contract shared by discovery (this API), authoring, and rendering.
+         * NBA content is single-language in v1; text fields may contain `{{placeholders}}` resolved at render time.
+         *
+         */
+        export interface NextBestAction {
+            /**
+             * Light category label shown above the title. Free-form text.
+             */
+            category?: string;
+            /**
+             * Curated icon for the NBA.
+             */
+            icon?: {
+                /**
+                 * Icon name from "@epilot360/icons".
+                 */
+                name: string;
+                /**
+                 * Optional icon color.
+                 */
+                color?: string;
+            };
+            /**
+             * Bold action title. Required. Supports `{{placeholders}}`.
+             */
+            title: string;
+            /**
+             * Optional description. Supports `{{placeholders}}` (incl. relative dates).
+             */
+            body?: string;
+            /**
+             * Display priority. NBAs are shown highest-priority first.
+             */
+            priority?: "low" | "medium" | "high";
+            /**
+             * Whether the agent can dismiss the NBA.
+             */
+            is_dismissable?: boolean;
+            /**
+             * The NBA's single call-to-action.
+             */
+            cta: {
+                type: "journey" | "workflow" | "url";
+                /**
+                 * Journey id, workflow definition id, or URL, depending on `type`.
+                 */
+                target: string;
+                /**
+                 * Optional CTA button label.
+                 */
+                label?: string;
+                /**
+                 * Journey context parameters (journey CTA only). Maps the journey's declared
+                 * context parameters so the journey knows which entity it is about. Discovery
+                 * returns them verbatim; they are passed to the journey when it launches.
+                 *
+                 */
+                context_params?: {
+                    key: string;
+                    value: string;
+                }[];
+            };
+        }
         export interface PortalRecipientPayload {
             portal_status: PortalStatus;
             portal_state?: {
@@ -1441,8 +1556,32 @@ export declare namespace Components {
             portal_state?: {
                 [name: string]: any;
             };
+            entity_ui_status?: /**
+             * Lifecycle status of a Next Best Action on the Entity-UI channel. Unlike the portal
+             * channel there is no `sent` state: an NBA recipient is born at `seen`, the moment the
+             * action is first rendered to an agent.
+             *
+             */
+            EntityUiStatus;
+            entity_ui_status_updated_at?: string; // date-time
+            resolution?: /**
+             * Cross-channel resolution of a campaign for a recipient. Unlike the per-channel `*_status`
+             * fields (where `dismissed` is channel-local), a resolution suppresses the campaign on EVERY
+             * channel — the 360 Entity-UI card and the portal teaser alike. Server-managed and read-only:
+             * never sent by a client. Absence means unresolved.
+             *
+             */
+            Resolution;
             updated_at?: string; // date-time
         }
+        /**
+         * Cross-channel resolution of a campaign for a recipient. Unlike the per-channel `*_status`
+         * fields (where `dismissed` is channel-local), a resolution suppresses the campaign on EVERY
+         * channel — the 360 Entity-UI card and the portal teaser alike. Server-managed and read-only:
+         * never sent by a client. Absence means unresolved.
+         *
+         */
+        export type Resolution = "accepted";
         export interface RetriggerAutomationsRequest {
             /**
              * List of recipient IDs to retrigger automations for
@@ -1673,6 +1812,21 @@ export declare namespace Components {
              */
             error?: string;
         }
+        export interface UpdateEntityUiStatusRequest {
+            status: /**
+             * Lifecycle status of a Next Best Action on the Entity-UI channel. Unlike the portal
+             * channel there is no `sent` state: an NBA recipient is born at `seen`, the moment the
+             * action is first rendered to an agent.
+             *
+             */
+            EntityUiStatus;
+            /**
+             * Schema slug of the recipient entity (e.g. "contact"). Required when recording the
+             * first `seen`, which lazily creates the recipient record; ignored on later transitions.
+             *
+             */
+            entity_schema?: string;
+        }
         export interface UpdatePortalStatusRequest {
             status: PortalStatus;
         }
@@ -1718,6 +1872,14 @@ export declare namespace Paths {
         export type RequestBody = Components.Schemas.CreateRecipientPayload;
         namespace Responses {
             export type $201 = Components.Responses.RecipientResponse;
+            export type $400 = Components.Responses.ClientErrorResponse;
+            export type $500 = Components.Responses.ServerErrorResponse;
+        }
+    }
+    namespace DiscoverCampaigns {
+        export type RequestBody = Components.Schemas.DiscoverCampaignsParams;
+        namespace Responses {
+            export type $200 = Components.Responses.DiscoverCampaignsResponse;
             export type $400 = Components.Responses.ClientErrorResponse;
             export type $500 = Components.Responses.ServerErrorResponse;
         }
@@ -1865,6 +2027,32 @@ export declare namespace Paths {
             export type $500 = Components.Responses.ServerErrorResponse;
         }
     }
+    namespace UpdateRecipientEntityUiStatus {
+        namespace Parameters {
+            export type CampaignId = /**
+             * example:
+             * b8c01433-5556-4e2b-aad4-6f5348d1df84
+             */
+            Components.Schemas.BaseUUID /* uuid */;
+            export type RecipientId = /**
+             * example:
+             * b8c01433-5556-4e2b-aad4-6f5348d1df84
+             */
+            Components.Schemas.BaseUUID /* uuid */;
+        }
+        export interface PathParameters {
+            campaign_id: Parameters.CampaignId;
+            recipient_id: Parameters.RecipientId;
+        }
+        export type RequestBody = Components.Schemas.UpdateEntityUiStatusRequest;
+        namespace Responses {
+            export type $200 = Components.Responses.RecipientResponse;
+            export type $400 = Components.Responses.ClientErrorResponse;
+            export type $404 = Components.Responses.ClientErrorResponse;
+            export type $409 = Components.Responses.ClientErrorResponse;
+            export type $500 = Components.Responses.ServerErrorResponse;
+        }
+    }
     namespace UpdateRecipientPortalStatus {
         namespace Parameters {
             export type CampaignId = /**
@@ -1974,6 +2162,24 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.MatchCampaigns.Responses.$200>
   /**
+   * discoverCampaigns - Discover Entity-UI Next Best Actions for an entity
+   * 
+   * Given an entity, returns the Next Best Actions it should see on the Entity-UI channel.
+   * 
+   * Enumerates the organization's **active** campaigns that carry a valid Entity-UI Next Best
+   * Action, live-matches each against the entity using the existing match engine, and returns
+   * the matching NBAs priority-sorted (one per campaign).
+   * 
+   * This is a pure read: it writes nothing. An entity that matches no campaigns returns an
+   * empty list, not an error.
+   * 
+   */
+  'discoverCampaigns'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.DiscoverCampaigns.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.DiscoverCampaigns.Responses.$200>
+  /**
    * matchTargets - Match targets
    * 
    * Find targets from the provided list that include the provide entities.
@@ -2033,6 +2239,32 @@ export interface OperationMethods {
     data?: Paths.UpdateRecipientPortalStatus.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UpdateRecipientPortalStatus.Responses.$200>
+  /**
+   * updateRecipientEntityUiStatus - Update Entity-UI (Next Best Action) status for a campaign recipient
+   * 
+   * Records a Next Best Action interaction for a recipient on the Entity-UI channel.
+   * 
+   * Unlike the portal channel, an NBA recipient is created lazily: the first `seen` creates
+   * the recipient record (and requires `entity_schema`). `seen` is idempotent — re-viewing an
+   * NBA that is already seen/clicked/dismissed is a no-op success and never regresses the status.
+   * 
+   * Status transition rules:
+   * - `seen`: lazily creates the recipient; a no-op success if a status already exists
+   * - From `seen`: can change to `clicked` or `dismissed`
+   * - From `clicked`: can change to `dismissed`
+   * - From `dismissed`: cannot be changed (final state)
+   * 
+   * `dismissed` and `clicked` require an existing recipient (404 otherwise, since an NBA is
+   * born at `seen`) and reject invalid transitions (409).
+   * 
+   * The entity_ui_status_updated_at timestamp is automatically set when the status changes.
+   * 
+   */
+  'updateRecipientEntityUiStatus'(
+    parameters?: Parameters<Paths.UpdateRecipientEntityUiStatus.PathParameters> | null,
+    data?: Paths.UpdateRecipientEntityUiStatus.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.UpdateRecipientEntityUiStatus.Responses.$200>
   /**
    * getRecipients - Get campaign recipients
    * 
@@ -2136,6 +2368,26 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.MatchCampaigns.Responses.$200>
   }
+  ['/v1/campaign:discover']: {
+    /**
+     * discoverCampaigns - Discover Entity-UI Next Best Actions for an entity
+     * 
+     * Given an entity, returns the Next Best Actions it should see on the Entity-UI channel.
+     * 
+     * Enumerates the organization's **active** campaigns that carry a valid Entity-UI Next Best
+     * Action, live-matches each against the entity using the existing match engine, and returns
+     * the matching NBAs priority-sorted (one per campaign).
+     * 
+     * This is a pure read: it writes nothing. An entity that matches no campaigns returns an
+     * empty list, not an error.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.DiscoverCampaigns.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.DiscoverCampaigns.Responses.$200>
+  }
   ['/v1/target:match']: {
     /**
      * matchTargets - Match targets
@@ -2206,6 +2458,34 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.UpdateRecipientPortalStatus.Responses.$200>
   }
+  ['/v1/campaign/{campaign_id}/recipient/{recipient_id}/entity_ui:status']: {
+    /**
+     * updateRecipientEntityUiStatus - Update Entity-UI (Next Best Action) status for a campaign recipient
+     * 
+     * Records a Next Best Action interaction for a recipient on the Entity-UI channel.
+     * 
+     * Unlike the portal channel, an NBA recipient is created lazily: the first `seen` creates
+     * the recipient record (and requires `entity_schema`). `seen` is idempotent — re-viewing an
+     * NBA that is already seen/clicked/dismissed is a no-op success and never regresses the status.
+     * 
+     * Status transition rules:
+     * - `seen`: lazily creates the recipient; a no-op success if a status already exists
+     * - From `seen`: can change to `clicked` or `dismissed`
+     * - From `clicked`: can change to `dismissed`
+     * - From `dismissed`: cannot be changed (final state)
+     * 
+     * `dismissed` and `clicked` require an existing recipient (404 otherwise, since an NBA is
+     * born at `seen`) and reject invalid transitions (409).
+     * 
+     * The entity_ui_status_updated_at timestamp is automatically set when the status changes.
+     * 
+     */
+    'patch'(
+      parameters?: Parameters<Paths.UpdateRecipientEntityUiStatus.PathParameters> | null,
+      data?: Paths.UpdateRecipientEntityUiStatus.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.UpdateRecipientEntityUiStatus.Responses.$200>
+  }
   ['/v1/campaign/{campaign_id}/recipients']: {
     /**
      * getRecipients - Get campaign recipients
@@ -2240,14 +2520,18 @@ export type Campaign = Components.Schemas.Campaign;
 export type CampaignStatus = Components.Schemas.CampaignStatus;
 export type ClientError = Components.Schemas.ClientError;
 export type CreateRecipientPayload = Components.Schemas.CreateRecipientPayload;
+export type DiscoverCampaignsParams = Components.Schemas.DiscoverCampaignsParams;
+export type EntityUiStatus = Components.Schemas.EntityUiStatus;
 export type ExecutionSummaryItem = Components.Schemas.ExecutionSummaryItem;
 export type GetTargetQueriesParams = Components.Schemas.GetTargetQueriesParams;
 export type JobStatus = Components.Schemas.JobStatus;
 export type MatchCampaignParams = Components.Schemas.MatchCampaignParams;
 export type MatchTargetParams = Components.Schemas.MatchTargetParams;
+export type NextBestAction = Components.Schemas.NextBestAction;
 export type PortalRecipientPayload = Components.Schemas.PortalRecipientPayload;
 export type PortalStatus = Components.Schemas.PortalStatus;
 export type Recipient = Components.Schemas.Recipient;
+export type Resolution = Components.Schemas.Resolution;
 export type RetriggerAutomationsRequest = Components.Schemas.RetriggerAutomationsRequest;
 export type RetriggerAutomationsResult = Components.Schemas.RetriggerAutomationsResult;
 export type ServerError = Components.Schemas.ServerError;
@@ -2256,5 +2540,6 @@ export type SetupTariffChangeCampaignRequest = Components.Schemas.SetupTariffCha
 export type SetupTariffChangeCampaignResponse = Components.Schemas.SetupTariffChangeCampaignResponse;
 export type Target = Components.Schemas.Target;
 export type TargetQueryResult = Components.Schemas.TargetQueryResult;
+export type UpdateEntityUiStatusRequest = Components.Schemas.UpdateEntityUiStatusRequest;
 export type UpdatePortalStatusRequest = Components.Schemas.UpdatePortalStatusRequest;
 export type UpdateRecipientPayload = Components.Schemas.UpdateRecipientPayload;
