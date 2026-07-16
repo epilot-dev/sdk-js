@@ -33,13 +33,10 @@ const { data } = await blueprintManifestClient.getJob(...)
 - [`listInstalledMarketplaceBlueprints`](#listinstalledmarketplaceblueprints)
 - [`preInstallBlueprint`](#preinstallblueprint)
 - [`getBlueprintPreview`](#getblueprintpreview)
-- [`installBlueprint`](#installblueprint)
 - [`getBlueprint`](#getblueprint)
 - [`updateBlueprint`](#updateblueprint)
 - [`deleteBlueprint`](#deleteblueprint)
-- [`validateBlueprint`](#validateblueprint)
 - [`verifyBlueprint`](#verifyblueprint)
-- [`exportBlueprint`](#exportblueprint)
 - [`listMarketplaceSlugs`](#listmarketplaceslugs)
 - [`publishBlueprint`](#publishblueprint)
 - [`formatBlueprintDescription`](#formatblueprintdescription)
@@ -51,18 +48,15 @@ const { data } = await blueprintManifestClient.getJob(...)
 - [`bulkDeleteBlueprintResources`](#bulkdeleteblueprintresources)
 - [`updateBlueprintResource`](#updateblueprintresource)
 - [`deleteBlueprintResource`](#deleteblueprintresource)
+- [`publishBlueprintV3`](#publishblueprintv3)
 - [`installBlueprintV3`](#installblueprintv3)
 - [`restoreBlueprintDeploymentV3`](#restoreblueprintdeploymentv3)
 - [`getRestorePreview`](#getrestorepreview)
 - [`getBlueprintLineageV3`](#getblueprintlineagev3)
-
-**Patches**
-- [`detectPatchChanges`](#detectpatchchanges)
-- [`createPatch`](#createpatch)
-- [`listPatches`](#listpatches)
-- [`getPatch`](#getpatch)
-- [`applyPatch`](#applypatch)
-- [`retryPatchOrg`](#retrypatchorg)
+- [`createBulkInstallV3`](#createbulkinstallv3)
+- [`getBulkInstallV3`](#getbulkinstallv3)
+- [`listBulkInstallTargetsV3`](#listbulkinstalltargetsv3)
+- [`retryBulkInstallTargetV3`](#retrybulkinstalltargetv3)
 
 **Jobs**
 - [`listBlueprintJobs`](#listblueprintjobs)
@@ -118,6 +112,13 @@ const { data } = await blueprintManifestClient.getJob(...)
 - [`CommonBlueprintJobFields`](#commonblueprintjobfields)
 - [`BlueprintExportJob`](#blueprintexportjob)
 - [`BlueprintInstallationJob`](#blueprintinstallationjob)
+- [`BulkInstallStatus`](#bulkinstallstatus)
+- [`BulkInstallCounts`](#bulkinstallcounts)
+- [`BulkInstall`](#bulkinstall)
+- [`BulkInstallTarget`](#bulkinstalltarget)
+- [`BulkInstallTargetList`](#bulkinstalltargetlist)
+- [`BulkInstallTargetInput`](#bulkinstalltargetinput)
+- [`BulkInstallCreateRequest`](#bulkinstallcreaterequest)
 - [`BlueprintRestoreJob`](#blueprintrestorejob)
 - [`V3ResourceProgressEntry`](#v3resourceprogressentry)
 - [`RestoreOutcomeItem`](#restoreoutcomeitem)
@@ -293,6 +294,8 @@ const { data } = await client.createBlueprint(
       source_blueprint_id: 'c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341',
       destination_org_id: 'string',
       destination_blueprint_id: 'c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341',
+      installation_job_id: 'c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341',
+      sync_engine: 'terraform',
       summary: {
         total_resources: 0,
         matched: 0,
@@ -387,6 +390,8 @@ const { data } = await client.createBlueprint(
     "source_blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
     "destination_org_id": "string",
     "destination_blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+    "installation_job_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+    "sync_engine": "terraform",
     "summary": {
       "total_resources": 0,
       "matched": 0,
@@ -631,36 +636,6 @@ const { data } = await client.getBlueprintPreview({
 
 ---
 
-### `installBlueprint`
-
-Kick off a new blueprint installation job. Returns 202 Accepted with Location header pointing to the job resource
-
-`POST /v2/blueprint-manifest/blueprint:install`
-
-```ts
-const { data } = await client.installBlueprint(
-  null,
-  {
-    source_org_id: 'string',
-    source_blueprint_id: 'c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341',
-    source_blueprint_file: 'string',
-    destination_org_id: 'string',
-    destination_blueprint_id: 'c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341',
-    source_auth_token: 'string',
-    destination_auth_token: 'string',
-    options: {
-      resources_to_ignore: ['string']
-    },
-    mode: 'simple',
-    source_blueprint_type: 'marketplace',
-    slug: 'string',
-    auto_enable_features: true
-  },
-)
-```
-
----
-
 ### `getBlueprint`
 
 Get Blueprint by ID
@@ -711,6 +686,8 @@ const { data } = await client.getBlueprint({
     "source_blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
     "destination_org_id": "string",
     "destination_blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+    "installation_job_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+    "sync_engine": "terraform",
     "summary": {
       "total_resources": 0,
       "matched": 0,
@@ -817,6 +794,8 @@ const { data } = await client.updateBlueprint(
       source_blueprint_id: 'c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341',
       destination_org_id: 'string',
       destination_blueprint_id: 'c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341',
+      installation_job_id: 'c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341',
+      sync_engine: 'terraform',
       summary: {
         total_resources: 0,
         matched: 0,
@@ -911,6 +890,8 @@ const { data } = await client.updateBlueprint(
     "source_blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
     "destination_org_id": "string",
     "destination_blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+    "installation_job_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+    "sync_engine": "terraform",
     "summary": {
       "total_resources": 0,
       "matched": 0,
@@ -1020,6 +1001,8 @@ const { data } = await client.deleteBlueprint({
     "source_blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
     "destination_org_id": "string",
     "destination_blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+    "installation_job_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+    "sync_engine": "terraform",
     "summary": {
       "total_resources": 0,
       "matched": 0,
@@ -1079,21 +1062,6 @@ const { data } = await client.deleteBlueprint({
 
 ---
 
-### `validateBlueprint`
-
-Start a blueprint validation job. Validates Terraform for the blueprint (all types).
-Returns 202 Accepted with job_id. Poll GET /jobs/{job_id} for status, valid, and errors.
-
-`POST /v2/blueprint-manifest/blueprints/{blueprint_id}/validate`
-
-```ts
-const { data } = await client.validateBlueprint({
-  blueprint_id: 'example',
-})
-```
-
----
-
 ### `verifyBlueprint`
 
 Start a blueprint verification job. Compares resource configurations between a source org
@@ -1113,387 +1081,9 @@ const { data } = await client.verifyBlueprint(
     destination_org_id: 'string',
     destination_blueprint_id: 'c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341',
     source_auth_token: 'string',
-    destination_auth_token: 'string'
-  },
-)
-```
-
----
-
-### `detectPatchChanges`
-
-Detect changes between the current state of a blueprint's resources and its tfstate baseline.
-Returns field-level diffs for resources that have been modified since the blueprint was last installed/exp
-
-`POST /v2/blueprint-manifest/blueprints/{blueprint_id}/patches:detect`
-
-```ts
-const { data } = await client.detectPatchChanges(
-  {
-    blueprint_id: 'example',
-  },
-  {
-    source_org_id: 'string',
-    dest_org_id: 'string',
-    dest_blueprint_id: 'string',
-    rollout_id: 'string'
-  },
-)
-```
-
-<details>
-<summary>Response</summary>
-
-```json
-{
-  "resources": [
-    {
-      "type": "string",
-      "source_id": "string",
-      "address": "string",
-      "name": "string",
-      "changes": [
-        {
-          "path": "string",
-          "op": "changed",
-          "baseline_value": {},
-          "current_value": {}
-        }
-      ]
-    }
-  ]
-}
-```
-
-</details>
-
----
-
-### `createPatch`
-
-Create a new patch for a blueprint.
-
-`POST /v2/blueprint-manifest/blueprints/{blueprint_id}/patches`
-
-```ts
-const { data } = await client.createPatch(
-  {
-    blueprint_id: 'example',
-  },
-  {
-    blueprint_id: 'c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341',
-    rollout_id: 'string',
-    source_org_id: 'string',
-    name: 'string',
-    description: 'string',
-    resources: [
-      {
-        type: 'string',
-        source_id: 'string',
-        address: 'string',
-        name: 'string',
-        changes: [
-          {
-            path: 'string',
-            op: 'changed',
-            baseline_value: {},
-            current_value: {}
-          }
-        ]
-      }
-    ],
-    changelog: 'string'
-  },
-)
-```
-
-<details>
-<summary>Response</summary>
-
-```json
-{
-  "patch_id": "string",
-  "version": 0,
-  "blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
-  "rollout_id": "string",
-  "source_org_id": "string",
-  "name": "string",
-  "description": "string",
-  "status": "draft",
-  "resources": [
-    {
-      "type": "string",
-      "source_id": "string",
-      "address": "string",
-      "name": "string",
-      "changes": [
-        {
-          "path": "string",
-          "op": "changed",
-          "baseline_value": {},
-          "current_value": {}
-        }
-      ]
-    }
-  ],
-  "changelog": "string",
-  "created_by": "string",
-  "created_at": "1970-01-01T00:00:00.000Z",
-  "applied_at": "1970-01-01T00:00:00.000Z"
-}
-```
-
-</details>
-
----
-
-### `listPatches`
-
-List all patches for a blueprint.
-
-`GET /v2/blueprint-manifest/blueprints/{blueprint_id}/patches`
-
-```ts
-const { data } = await client.listPatches({
-  blueprint_id: 'example',
-})
-```
-
-<details>
-<summary>Response</summary>
-
-```json
-{
-  "total": 0,
-  "results": [
-    {
-      "patch_id": "string",
-      "version": 0,
-      "blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
-      "rollout_id": "string",
-      "source_org_id": "string",
-      "name": "string",
-      "description": "string",
-      "status": "draft",
-      "resources": [
-        {
-          "type": "string",
-          "source_id": "string",
-          "address": "string",
-          "name": "string",
-          "changes": [
-            {
-              "path": "string",
-              "op": "changed",
-              "baseline_value": {},
-              "current_value": {}
-            }
-          ]
-        }
-      ],
-      "changelog": "string",
-      "created_by": "string",
-      "created_at": "1970-01-01T00:00:00.000Z",
-      "applied_at": "1970-01-01T00:00:00.000Z"
-    }
-  ]
-}
-```
-
-</details>
-
----
-
-### `getPatch`
-
-Get a patch by ID, including per-org execution results.
-
-`GET /v2/blueprint-manifest/blueprints/{blueprint_id}/patches/{patch_id}`
-
-```ts
-const { data } = await client.getPatch({
-  blueprint_id: 'example',
-  patch_id: 'example',
-})
-```
-
-<details>
-<summary>Response</summary>
-
-```json
-{
-  "patch_id": "string",
-  "version": 0,
-  "blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
-  "rollout_id": "string",
-  "source_org_id": "string",
-  "name": "string",
-  "description": "string",
-  "status": "draft",
-  "resources": [
-    {
-      "type": "string",
-      "source_id": "string",
-      "address": "string",
-      "name": "string",
-      "changes": [
-        {
-          "path": "string",
-          "op": "changed",
-          "baseline_value": {},
-          "current_value": {}
-        }
-      ]
-    }
-  ],
-  "changelog": "string",
-  "created_by": "string",
-  "created_at": "1970-01-01T00:00:00.000Z",
-  "applied_at": "1970-01-01T00:00:00.000Z",
-  "org_results": [
-    {
-      "patch_id": "string",
-      "version": 0,
-      "org_id": "string",
-      "org_name": "string",
-      "dest_blueprint_id": "string",
-      "status": "pending",
-      "error": "string",
-      "applied_at": "1970-01-01T00:00:00.000Z",
-      "retries": 0,
-      "changes_applied": [
-        {
-          "path": "string",
-          "op": "changed",
-          "baseline_value": {},
-          "current_value": {}
-        }
-      ]
-    }
-  ]
-}
-```
-
-</details>
-
----
-
-### `applyPatch`
-
-Apply a patch to a single destination org.
-
-`POST /v2/blueprint-manifest/blueprints/{blueprint_id}/patches/{patch_id}:apply`
-
-```ts
-const { data } = await client.applyPatch(
-  {
-    blueprint_id: 'example',
-    patch_id: 'example',
-  },
-  {
-    org_id: 'string',
-    org_name: 'string',
-    dest_blueprint_id: 'string',
-    dest_org_id: 'string',
-    destination_auth_token: 'string'
-  },
-)
-```
-
-<details>
-<summary>Response</summary>
-
-```json
-{
-  "patch_id": "string",
-  "version": 0,
-  "org_id": "string",
-  "org_name": "string",
-  "dest_blueprint_id": "string",
-  "status": "pending",
-  "error": "string",
-  "applied_at": "1970-01-01T00:00:00.000Z",
-  "retries": 0,
-  "changes_applied": [
-    {
-      "path": "string",
-      "op": "changed",
-      "baseline_value": {},
-      "current_value": {}
-    }
-  ]
-}
-```
-
-</details>
-
----
-
-### `retryPatchOrg`
-
-Retry a failed patch execution for a specific org.
-
-`POST /v2/blueprint-manifest/blueprints/{blueprint_id}/patches/{patch_id}/orgs/{org_id}:retry`
-
-```ts
-const { data } = await client.retryPatchOrg(
-  {
-    blueprint_id: 'example',
-    patch_id: 'example',
-    org_id: 'example',
-  },
-  {
-    org_name: 'string',
-    dest_blueprint_id: 'string',
-    destination_auth_token: 'string'
-  },
-)
-```
-
-<details>
-<summary>Response</summary>
-
-```json
-{
-  "patch_id": "string",
-  "version": 0,
-  "org_id": "string",
-  "org_name": "string",
-  "dest_blueprint_id": "string",
-  "status": "pending",
-  "error": "string",
-  "applied_at": "1970-01-01T00:00:00.000Z",
-  "retries": 0,
-  "changes_applied": [
-    {
-      "path": "string",
-      "op": "changed",
-      "baseline_value": {},
-      "current_value": {}
-    }
-  ]
-}
-```
-
-</details>
-
----
-
-### `exportBlueprint`
-
-Kick off a new blueprint export job. Returns 202 Accepted with Location header pointing to the job resource.
-
-`POST /v2/blueprint-manifest/blueprints/{blueprint_id}:export`
-
-```ts
-const { data } = await client.exportBlueprint(
-  {
-    blueprint_id: 'example',
-  },
-  {
-    destination_org_id: 'string',
-    destination_blueprint_id: 'string',
-    validate: true
+    destination_auth_token: 'string',
+    installation_job_id: 'c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341',
+    sync_engine: 'terraform'
   },
 )
 ```
@@ -1698,6 +1288,7 @@ Sync dependencies of all root resources in a Blueprint
 ```ts
 const { data } = await client.syncDependencies({
   blueprint_id: 'example',
+  trigger: 'example',
 })
 ```
 
@@ -2845,6 +2436,20 @@ const { data } = await client.publishMarketplaceListingVersion(
 
 ---
 
+### `publishBlueprintV3`
+
+Publish Blueprint V3
+
+`POST /v3/blueprint-manifest/blueprints/{blueprint_id}:publish`
+
+```ts
+const { data } = await client.publishBlueprintV3({
+  blueprint_id: 'example',
+})
+```
+
+---
+
 ### `installBlueprintV3`
 
 Install Blueprint V3
@@ -2904,9 +2509,17 @@ const { data } = await client.getRestorePreview({
       "reason": "modified",
       "last_synced_at": "1970-01-01T00:00:00.000Z",
       "current_updated_at": "1970-01-01T00:00:00.000Z",
-      "error_message": "string"
+      "error_message": "string",
+      "is_hidden": true,
+      "co_owned_by": [
+        {
+          "blueprint_id": "string",
+          "title": "string"
+        }
+      ]
     }
-  ]
+  ],
+  "has_effective_changes": true
 }
 ```
 
@@ -2949,6 +2562,276 @@ const { data } = await client.getBlueprintLineageV3({
 
 ---
 
+### `createBulkInstallV3`
+
+Create Bulk Install V3
+
+`POST /v3/blueprint-manifest/bulk-installs`
+
+```ts
+const { data } = await client.createBulkInstallV3(
+  null,
+  {
+    source_org_id: 'string',
+    source_blueprint_id: 'c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341',
+    max_concurrency: 2,
+    slug: 'string',
+    options: {
+      resources_to_ignore: ['string']
+    },
+    targets: [
+      {
+        destination_org_id: 'string',
+        destination_blueprint_id: 'c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341',
+        destination_auth_token: 'string'
+      }
+    ]
+  },
+)
+```
+
+---
+
+### `getBulkInstallV3`
+
+Get Bulk Install V3
+
+`GET /v3/blueprint-manifest/bulk-installs/{bulk_job_id}`
+
+```ts
+const { data } = await client.getBulkInstallV3({
+  bulk_job_id: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "bulk_job_id": "string",
+  "source_org_id": "string",
+  "source_blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+  "status": "QUEUED",
+  "target_count": 0,
+  "max_concurrency": 0,
+  "counts": {
+    "queued": 0,
+    "in_progress": 0,
+    "success": 0,
+    "partial_success": 0,
+    "failed": 0
+  },
+  "slug": "string",
+  "options": {
+    "resources_to_ignore": ["string"]
+  },
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "updated_at": "1970-01-01T00:00:00.000Z"
+}
+```
+
+</details>
+
+---
+
+### `listBulkInstallTargetsV3`
+
+List Bulk Install Targets V3
+
+`GET /v3/blueprint-manifest/bulk-installs/{bulk_job_id}/targets`
+
+```ts
+const { data } = await client.listBulkInstallTargetsV3({
+  bulk_job_id: 'example',
+  limit: 1,
+  cursor: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "results": [
+    {
+      "bulk_job_id": "string",
+      "destination_org_id": "string",
+      "destination_blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+      "status": "QUEUED",
+      "job_ids": ["c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341"],
+      "created_at": "1970-01-01T00:00:00.000Z",
+      "updated_at": "1970-01-01T00:00:00.000Z",
+      "job": {
+        "id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+        "events": [
+          {
+            "timestamp": "1970-01-01T00:00:00.000Z",
+            "message": "string",
+            "errors": [
+              {
+                "error": "string",
+                "code": "dependency_extraction",
+                "data": {
+                  "formattedResource": {
+                    "id": "string",
+                    "name": "string",
+                    "type": "string"
+                  },
+                  "resource": "string",
+                  "resourceDependency": "string",
+                  "resources": ["string"],
+                  "addresses": ["string"],
+                  "originalError": "string"
+                }
+              }
+            ],
+            "level": "info",
+            "data": {
+              "installed_blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+              "export_job_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+              "resources": 0
+            }
+          }
+        ],
+        "triggered_at": "1970-01-01T00:00:00.000Z",
+        "created_by": {
+          "name": "manifest@epilot.cloud",
+          "org_id": "911690",
+          "user_id": "11001045",
+          "token_id": "api_5ZugdRXasLfWBypHi93Fk"
+        },
+        "job_type": "install",
+        "source_blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+        "source_blueprint_type": "custom",
+        "source_org_id": "string",
+        "source_blueprint_file": "string",
+        "destination_blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+        "destination_org_id": "string",
+        "slug": "string",
+        "sync_engine": "terraform",
+        "resource_progress": [
+          {
+            "lineage_id": "string",
+            "type": "string",
+            "address": "string",
+            "name": "string",
+            "status": "pending",
+            "target_id": "string",
+            "error_message": "string"
+          }
+        ],
+        "status": "IN_PROGRESS"
+      }
+    }
+  ],
+  "next_cursor": "string"
+}
+```
+
+</details>
+
+---
+
+### `retryBulkInstallTargetV3`
+
+Retry Bulk Install Target V3
+
+`POST /v3/blueprint-manifest/bulk-installs/{bulk_job_id}/targets/{destination_org_id}:retry`
+
+```ts
+const { data } = await client.retryBulkInstallTargetV3(
+  {
+    bulk_job_id: 'example',
+    destination_org_id: 'example',
+  },
+  {
+    destination_auth_token: 'string'
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "bulk_job_id": "string",
+  "destination_org_id": "string",
+  "destination_blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+  "status": "QUEUED",
+  "job_ids": ["c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341"],
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "updated_at": "1970-01-01T00:00:00.000Z",
+  "job": {
+    "id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+    "events": [
+      {
+        "timestamp": "1970-01-01T00:00:00.000Z",
+        "message": "string",
+        "errors": [
+          {
+            "error": "string",
+            "code": "dependency_extraction",
+            "data": {
+              "formattedResource": {
+                "id": "string",
+                "name": "string",
+                "type": "string"
+              },
+              "resource": "string",
+              "resourceDependency": "string",
+              "resources": ["string"],
+              "addresses": ["string"],
+              "originalError": "string"
+            }
+          }
+        ],
+        "level": "info",
+        "data": {
+          "installed_blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+          "export_job_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+          "resources": 0
+        }
+      }
+    ],
+    "triggered_at": "1970-01-01T00:00:00.000Z",
+    "created_by": {
+      "name": "manifest@epilot.cloud",
+      "org_id": "911690",
+      "user_id": "11001045",
+      "token_id": "api_5ZugdRXasLfWBypHi93Fk"
+    },
+    "job_type": "install",
+    "source_blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+    "source_blueprint_type": "custom",
+    "source_org_id": "string",
+    "source_blueprint_file": "string",
+    "destination_blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+    "destination_org_id": "string",
+    "slug": "string",
+    "sync_engine": "terraform",
+    "resource_progress": [
+      {
+        "lineage_id": "string",
+        "type": "string",
+        "address": "string",
+        "name": "string",
+        "status": "pending",
+        "target_id": "string",
+        "error_message": "string"
+      }
+    ],
+    "status": "IN_PROGRESS"
+  }
+}
+```
+
+</details>
+
+---
+
 ### `listUniquenessCriteria`
 
 List all custom uniqueness criteria configured for the caller's organization.
@@ -2971,10 +2854,13 @@ const { data } = await client.listUniquenessCriteria()
       "org_id": "string",
       "resource_type": "emailtemplate",
       "fields": ["string"],
+      "propagated_to": ["string"],
       "updated_at": "1970-01-01T00:00:00.000Z",
       "updated_by": "string"
     }
-  ]
+  ],
+  "defaults": {},
+  "readonly_types": ["string"]
 }
 ```
 
@@ -3002,6 +2888,7 @@ const { data } = await client.getUniquenessCriteria({
   "org_id": "string",
   "resource_type": "emailtemplate",
   "fields": ["string"],
+  "propagated_to": ["string"],
   "updated_at": "1970-01-01T00:00:00.000Z",
   "updated_by": "string"
 }
@@ -3025,7 +2912,8 @@ const { data } = await client.putUniquenessCriteria(
     resource_type: 'example',
   },
   {
-    fields: ['string']
+    fields: ['string'],
+    propagated_to: ['string']
   },
 )
 ```
@@ -3038,6 +2926,7 @@ const { data } = await client.putUniquenessCriteria(
   "org_id": "string",
   "resource_type": "emailtemplate",
   "fields": ["string"],
+  "propagated_to": ["string"],
   "updated_at": "1970-01-01T00:00:00.000Z",
   "updated_by": "string"
 }
@@ -3068,7 +2957,7 @@ const { data } = await client.deleteUniquenessCriteria({
 Resource type for which custom uniqueness criteria can be configured.
 
 ```ts
-type UniquenessCriteriaResourceType = "emailtemplate" | "product" | "price" | "tax" | "coupon" | "product_recommendation" | "file" | "document_template" | "schema" | "taxonomy" | "notification_template" | "family" | "permission" | "journey"
+type UniquenessCriteriaResourceType = "emailtemplate" | "product" | "price" | "tax" | "coupon" | "product_recommendation" | "file" | "document_template" | "notification_template" | "journey"
 ```
 
 ### `UniquenessCriteria`
@@ -3076,8 +2965,9 @@ type UniquenessCriteriaResourceType = "emailtemplate" | "product" | "price" | "t
 ```ts
 type UniquenessCriteria = {
   org_id: string
-  resource_type: "emailtemplate" | "product" | "price" | "tax" | "coupon" | "product_recommendation" | "file" | "document_template" | "schema" | "taxonomy" | "notification_template" | "family" | "permission" | "journey"
+  resource_type: "emailtemplate" | "product" | "price" | "tax" | "coupon" | "product_recommendation" | "file" | "document_template" | "notification_template" | "journey"
   fields: string[]
+  propagated_to?: string[]
   updated_at: string // date-time
   updated_by?: string
 }
@@ -3302,6 +3192,8 @@ type CommonBlueprintFields = {
     source_blueprint_id?: string
     destination_org_id?: string
     destination_blueprint_id?: string
+    installation_job_id?: string
+    sync_engine?: "terraform" | "v3"
     summary?: {
       total_resources?: { ... }
       matched?: { ... }
@@ -3364,7 +3256,7 @@ type SuggestBlueprintResourcesResponse = {
     hard_dependencies?: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"[]
     parent_resource_ids?: string[]
     depends_on_addresses?: string[]
-    impact_on_install?: "create" | "update" | "internal-update" | "no-op" | "delete" | "ignored"[]
+    impact_on_install?: "create" | "update" | "internal-update" | "no-op" | "delete" | "ignored" | "error"[]
     impact_on_install_reason?: string[]
   }>
   suggested_blueprint_name?: string
@@ -3388,7 +3280,7 @@ type BlueprintResource = {
   hard_dependencies?: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"[]
   parent_resource_ids?: string[]
   depends_on_addresses?: string[]
-  impact_on_install?: "create" | "update" | "internal-update" | "no-op" | "delete" | "ignored"[]
+  impact_on_install?: "create" | "update" | "internal-update" | "no-op" | "delete" | "ignored" | "error"[]
   impact_on_install_reason?: string[]
 }
 ```
@@ -3436,7 +3328,7 @@ type BlueprintPreview = {
     hard_dependencies?: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"[]
     parent_resource_ids?: string[]
     depends_on_addresses?: string[]
-    impact_on_install?: "create" | "update" | "internal-update" | "no-op" | "delete" | "ignored"[]
+    impact_on_install?: "create" | "update" | "internal-update" | "no-op" | "delete" | "ignored" | "error"[]
     impact_on_install_reason?: string[]
   }>
 }
@@ -3484,6 +3376,8 @@ type CustomBlueprint = {
     source_blueprint_id?: string
     destination_org_id?: string
     destination_blueprint_id?: string
+    installation_job_id?: string
+    sync_engine?: "terraform" | "v3"
     summary?: {
       total_resources?: { ... }
       matched?: { ... }
@@ -3530,7 +3424,7 @@ type CustomBlueprint = {
     hard_dependencies?: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"[]
     parent_resource_ids?: string[]
     depends_on_addresses?: string[]
-    impact_on_install?: "create" | "update" | "internal-update" | "no-op" | "delete" | "ignored"[]
+    impact_on_install?: "create" | "update" | "internal-update" | "no-op" | "delete" | "ignored" | "error"[]
     impact_on_install_reason?: string[]
   }>
   source_type?: "custom"
@@ -3579,6 +3473,8 @@ type FileBlueprint = {
     source_blueprint_id?: string
     destination_org_id?: string
     destination_blueprint_id?: string
+    installation_job_id?: string
+    sync_engine?: "terraform" | "v3"
     summary?: {
       total_resources?: { ... }
       matched?: { ... }
@@ -3626,7 +3522,7 @@ type FileBlueprint = {
     hard_dependencies?: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"[]
     parent_resource_ids?: string[]
     depends_on_addresses?: string[]
-    impact_on_install?: "create" | "update" | "internal-update" | "no-op" | "delete" | "ignored"[]
+    impact_on_install?: "create" | "update" | "internal-update" | "no-op" | "delete" | "ignored" | "error"[]
     impact_on_install_reason?: string[]
   }>
 }
@@ -3674,6 +3570,8 @@ type MarketplaceBlueprint = {
     source_blueprint_id?: string
     destination_org_id?: string
     destination_blueprint_id?: string
+    installation_job_id?: string
+    sync_engine?: "terraform" | "v3"
     summary?: {
       total_resources?: { ... }
       matched?: { ... }
@@ -3721,7 +3619,7 @@ type MarketplaceBlueprint = {
     hard_dependencies?: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"[]
     parent_resource_ids?: string[]
     depends_on_addresses?: string[]
-    impact_on_install?: "create" | "update" | "internal-update" | "no-op" | "delete" | "ignored"[]
+    impact_on_install?: "create" | "update" | "internal-update" | "no-op" | "delete" | "ignored" | "error"[]
     impact_on_install_reason?: string[]
   }>
   has_update_available?: boolean
@@ -3801,6 +3699,8 @@ type DeployedBlueprint = {
     source_blueprint_id?: string
     destination_org_id?: string
     destination_blueprint_id?: string
+    installation_job_id?: string
+    sync_engine?: "terraform" | "v3"
     summary?: {
       total_resources?: { ... }
       matched?: { ... }
@@ -3848,7 +3748,7 @@ type DeployedBlueprint = {
     hard_dependencies?: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"[]
     parent_resource_ids?: string[]
     depends_on_addresses?: string[]
-    impact_on_install?: "create" | "update" | "internal-update" | "no-op" | "delete" | "ignored"[]
+    impact_on_install?: "create" | "update" | "internal-update" | "no-op" | "delete" | "ignored" | "error"[]
     impact_on_install_reason?: string[]
   }>
 }
@@ -3896,6 +3796,8 @@ type AppBlueprint = {
     source_blueprint_id?: string
     destination_org_id?: string
     destination_blueprint_id?: string
+    installation_job_id?: string
+    sync_engine?: "terraform" | "v3"
     summary?: {
       total_resources?: { ... }
       matched?: { ... }
@@ -3943,7 +3845,7 @@ type AppBlueprint = {
     hard_dependencies?: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"[]
     parent_resource_ids?: string[]
     depends_on_addresses?: string[]
-    impact_on_install?: "create" | "update" | "internal-update" | "no-op" | "delete" | "ignored"[]
+    impact_on_install?: "create" | "update" | "internal-update" | "no-op" | "delete" | "ignored" | "error"[]
     impact_on_install_reason?: string[]
   }>
 }
@@ -3991,6 +3893,8 @@ type Blueprint = {
     source_blueprint_id?: string
     destination_org_id?: string
     destination_blueprint_id?: string
+    installation_job_id?: string
+    sync_engine?: "terraform" | "v3"
     summary?: {
       total_resources?: { ... }
       matched?: { ... }
@@ -4037,7 +3941,7 @@ type Blueprint = {
     hard_dependencies?: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"[]
     parent_resource_ids?: string[]
     depends_on_addresses?: string[]
-    impact_on_install?: "create" | "update" | "internal-update" | "no-op" | "delete" | "ignored"[]
+    impact_on_install?: "create" | "update" | "internal-update" | "no-op" | "delete" | "ignored" | "error"[]
     impact_on_install_reason?: string[]
   }>
   source_type?: "custom"
@@ -4050,8 +3954,6 @@ type Blueprint = {
     postinstall?: string
   }
   version?: string
-  deployments?: Array<{
-    source_org_id?: string
   // ...
 }
 ```
@@ -4180,6 +4082,178 @@ type BlueprintInstallationJob = {
 }
 ```
 
+### `BulkInstallStatus`
+
+Aggregate status for a bulk install or one of its targets.
+- `QUEUED`: not started yet
+- `IN_PROGRESS`: at least one target queued/in-progress, not all done
+- `SUCCESS`: all targets succeeded
+- `PARTIAL_SUCCESS`: all targets terminal with a mix of success/partial/failure
+- `FAILED`: all targets term
+
+```ts
+type BulkInstallStatus = "QUEUED" | "IN_PROGRESS" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED"
+```
+
+### `BulkInstallCounts`
+
+Tally of target rows by status. Recomputed from target rows on each transition.
+
+```ts
+type BulkInstallCounts = {
+  queued?: number
+  in_progress?: number
+  success?: number
+  partial_success?: number
+  failed?: number
+}
+```
+
+### `BulkInstall`
+
+Bulk install parent. Never carries target auth tokens.
+
+```ts
+type BulkInstall = {
+  bulk_job_id?: string
+  source_org_id?: string
+  source_blueprint_id?: string
+  status?: "QUEUED" | "IN_PROGRESS" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED"
+  target_count?: number
+  max_concurrency?: number
+  counts?: {
+    queued?: number
+    in_progress?: number
+    success?: number
+    partial_success?: number
+    failed?: number
+  }
+  slug?: string
+  options?: {
+    resources_to_ignore?: string[]
+  }
+  created_at?: string // date-time
+  updated_at?: string // date-time
+}
+```
+
+### `BulkInstallTarget`
+
+A single destination of a bulk install. `job` is the hydrated latest child
+install job derived from `job_ids.at(-1)`. Auth tokens are never stored or returned.
+
+
+```ts
+type BulkInstallTarget = {
+  bulk_job_id?: string
+  destination_org_id?: string
+  destination_blueprint_id?: string
+  status?: "QUEUED" | "IN_PROGRESS" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED"
+  job_ids?: string[]
+  created_at?: string // date-time
+  updated_at?: string // date-time
+  job?: {
+    id?: string
+    events?: Array<{
+      timestamp?: { ... }
+      message?: { ... }
+      errors?: { ... }
+      level?: { ... }
+      data?: { ... }
+    }>
+    triggered_at?: string // date-time
+    created_by?: {
+      name?: { ... }
+      org_id: { ... }
+      user_id?: { ... }
+      token_id?: { ... }
+    }
+    job_type?: "install"
+    source_blueprint_id?: string
+    source_blueprint_type?: "custom" | "file" | "marketplace" | "deploy" | "app"
+    source_org_id?: string
+    source_blueprint_file?: string
+    destination_blueprint_id?: string
+    destination_org_id?: string
+    slug?: string
+    sync_engine?: "terraform" | "v3"
+    resource_progress?: Array<{
+      lineage_id: { ... }
+      type: { ... }
+      address: { ... }
+      name?: { ... }
+      status: { ... }
+      target_id?: { ... }
+      error_message?: { ... }
+    }>
+    status?: "IN_PROGRESS" | "WAITING_USER_ACTION" | "CANCELED" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED"
+  }
+}
+```
+
+### `BulkInstallTargetList`
+
+```ts
+type BulkInstallTargetList = {
+  results?: Array<{
+    bulk_job_id?: string
+    destination_org_id?: string
+    destination_blueprint_id?: string
+    status?: "QUEUED" | "IN_PROGRESS" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED"
+    job_ids?: string[]
+    created_at?: string // date-time
+    updated_at?: string // date-time
+    job?: {
+      id?: { ... }
+      events?: { ... }
+      triggered_at?: { ... }
+      created_by?: { ... }
+      job_type?: { ... }
+      source_blueprint_id?: { ... }
+      source_blueprint_type?: { ... }
+      source_org_id?: { ... }
+      source_blueprint_file?: { ... }
+      destination_blueprint_id?: { ... }
+      destination_org_id?: { ... }
+      slug?: { ... }
+      sync_engine?: { ... }
+      resource_progress?: { ... }
+      status?: { ... }
+    }
+  }>
+  next_cursor?: string
+}
+```
+
+### `BulkInstallTargetInput`
+
+```ts
+type BulkInstallTargetInput = {
+  destination_org_id: string
+  destination_blueprint_id?: string
+  destination_auth_token: string
+}
+```
+
+### `BulkInstallCreateRequest`
+
+```ts
+type BulkInstallCreateRequest = {
+  source_org_id?: string
+  source_blueprint_id: string
+  max_concurrency?: number
+  slug?: string
+  options?: {
+    resources_to_ignore?: string[]
+  }
+  targets: Array<{
+    destination_org_id: string
+    destination_blueprint_id?: string
+    destination_auth_token: string
+  }>
+}
+```
+
 ### `BlueprintRestoreJob`
 
 ```ts
@@ -4226,7 +4300,10 @@ type BlueprintRestoreJob = {
       last_synced_at?: { ... }
       current_updated_at?: { ... }
       error_message?: { ... }
+      is_hidden?: { ... }
+      co_owned_by?: { ... }
     }>
+    has_effective_changes?: boolean
   }
 }
 ```
@@ -4254,10 +4331,15 @@ type RestoreOutcomeItem = {
   name?: string
   target_id?: string
   action: "restore" | "delete" | "skip" | "failed"
-  reason?: "modified" | "co_owned" | "delete_unsupported" | "heuristic_match"
+  reason?: "modified" | "delete_unsupported" | "heuristic_match" | "co_owned"
   last_synced_at?: string // date-time
   current_updated_at?: string // date-time
   error_message?: string
+  is_hidden?: boolean
+  co_owned_by?: Array<{
+    blueprint_id: string
+    title?: string
+  }>
 }
 ```
 
@@ -4272,11 +4354,17 @@ type RestoreOutcome = {
     name?: string
     target_id?: string
     action: "restore" | "delete" | "skip" | "failed"
-    reason?: "modified" | "co_owned" | "delete_unsupported" | "heuristic_match"
+    reason?: "modified" | "delete_unsupported" | "heuristic_match" | "co_owned"
     last_synced_at?: string // date-time
     current_updated_at?: string // date-time
     error_message?: string
+    is_hidden?: boolean
+    co_owned_by?: Array<{
+      blueprint_id: { ... }
+      title?: { ... }
+    }>
   }>
+  has_effective_changes?: boolean
 }
 ```
 
@@ -4498,6 +4586,8 @@ type BlueprintVerificationJob = {
   source_blueprint_id?: string
   destination_org_id?: string
   destination_blueprint_id?: string
+  installation_job_id?: string
+  sync_engine?: "terraform" | "v3"
   status?: "IN_PROGRESS" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED"
   summary?: {
     total_resources?: number
@@ -4510,8 +4600,14 @@ type BlueprintVerificationJob = {
     resource_type?: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
     resource_name?: string
     source_resource_id?: string
+    source_resource_address?: string
     destination_resource_id?: string
+    destination_resource_address?: string
     status?: "matched" | "mismatched" | "missing_in_destination" | "fetch_error"
+    failure_context?: "depends_on_failed_resource" | "may_be_caused_by_failed_dependency"
+    failed_dependency_resource_ids?: string[]
+    failed_dependency_resource_names?: string[]
+    failed_dependency_addresses?: string[]
     field_diffs?: Array<{
       path?: { ... }
       source_value?: { ... }
@@ -4535,6 +4631,8 @@ type LatestBlueprintVerification = {
   source_blueprint_id?: string
   destination_org_id?: string
   destination_blueprint_id?: string
+  installation_job_id?: string
+  sync_engine?: "terraform" | "v3"
   summary?: {
     total_resources?: number
     matched?: number
@@ -4564,8 +4662,14 @@ type ResourceVerificationResult = {
   resource_type?: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
   resource_name?: string
   source_resource_id?: string
+  source_resource_address?: string
   destination_resource_id?: string
+  destination_resource_address?: string
   status?: "matched" | "mismatched" | "missing_in_destination" | "fetch_error"
+  failure_context?: "depends_on_failed_resource" | "may_be_caused_by_failed_dependency"
+  failed_dependency_resource_ids?: string[]
+  failed_dependency_resource_names?: string[]
+  failed_dependency_addresses?: string[]
   field_diffs?: Array<{
     path?: string
     source_value?: unknown

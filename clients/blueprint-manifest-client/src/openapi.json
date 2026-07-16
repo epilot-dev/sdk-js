@@ -904,6 +904,7 @@
     "/v2/blueprint-manifest/blueprint:install": {
       "post": {
         "operationId": "installBlueprint",
+        "deprecated": true,
         "summary": "installBlueprint",
         "description": "Kick off a new blueprint installation job. Returns 202 Accepted with Location header pointing to the job resource\n",
         "tags": [
@@ -1107,6 +1108,7 @@
     "/v2/blueprint-manifest/blueprints/{blueprint_id}/validate": {
       "post": {
         "operationId": "validateBlueprint",
+        "deprecated": true,
         "summary": "validateBlueprint",
         "description": "Start a blueprint validation job. Validates Terraform for the blueprint (all types).\nReturns 202 Accepted with job_id. Poll GET /jobs/{job_id} for status, valid, and errors.\n",
         "tags": [
@@ -1204,6 +1206,18 @@
                   "destination_auth_token": {
                     "type": "string",
                     "description": "Auth token with access to the destination org. Required for cross-org verification when the caller token only has access to the source org. If not provided, the caller's bearer token is used for both orgs."
+                  },
+                  "installation_job_id": {
+                    "$ref": "#/components/schemas/BlueprintJobID",
+                    "description": "Optional install job this verification is checking. If omitted, the latest destination blueprint installation job is used when available."
+                  },
+                  "sync_engine": {
+                    "type": "string",
+                    "enum": [
+                      "terraform",
+                      "v3"
+                    ],
+                    "description": "Optional install engine hint. Usually inferred from installation_job_id."
                   }
                 }
               }
@@ -1243,6 +1257,7 @@
     "/v2/blueprint-manifest/blueprints/{blueprint_id}/patches:detect": {
       "post": {
         "operationId": "detectPatchChanges",
+        "deprecated": true,
         "summary": "detectPatchChanges",
         "description": "Detect changes between the current state of a blueprint's resources and its tfstate baseline.\nReturns field-level diffs for resources that have been modified since the blueprint was last installed/exported.\n",
         "tags": [
@@ -1302,6 +1317,7 @@
     "/v2/blueprint-manifest/blueprints/{blueprint_id}/patches": {
       "post": {
         "operationId": "createPatch",
+        "deprecated": true,
         "summary": "createPatch",
         "description": "Create a new patch for a blueprint.",
         "tags": [
@@ -1375,6 +1391,7 @@
       },
       "get": {
         "operationId": "listPatches",
+        "deprecated": true,
         "summary": "listPatches",
         "description": "List all patches for a blueprint.",
         "tags": [
@@ -1418,6 +1435,7 @@
     "/v2/blueprint-manifest/blueprints/{blueprint_id}/patches/{patch_id}": {
       "get": {
         "operationId": "getPatch",
+        "deprecated": true,
         "summary": "getPatch",
         "description": "Get a patch by ID, including per-org execution results.",
         "tags": [
@@ -1461,6 +1479,7 @@
     "/v2/blueprint-manifest/blueprints/{blueprint_id}/patches/{patch_id}:apply": {
       "post": {
         "operationId": "applyPatch",
+        "deprecated": true,
         "summary": "applyPatch",
         "description": "Apply a patch to a single destination org.",
         "tags": [
@@ -1534,6 +1553,7 @@
     "/v2/blueprint-manifest/blueprints/{blueprint_id}/patches/{patch_id}/orgs/{org_id}:retry": {
       "post": {
         "operationId": "retryPatchOrg",
+        "deprecated": true,
         "summary": "retryPatchOrg",
         "description": "Retry a failed patch execution for a specific org.",
         "tags": [
@@ -1602,6 +1622,7 @@
     "/v2/blueprint-manifest/blueprints/{blueprint_id}:export": {
       "post": {
         "operationId": "exportBlueprint",
+        "deprecated": true,
         "summary": "exportBlueprint",
         "description": "Kick off a new blueprint export job. Returns 202 Accepted with Location header pointing to the job resource.\n",
         "tags": [
@@ -1949,6 +1970,21 @@
             "schema": {
               "$ref": "#/components/schemas/BlueprintID"
             }
+          },
+          {
+            "in": "query",
+            "required": false,
+            "name": "trigger",
+            "description": "What initiated the sync. Automated triggers (`pre_sync`,\n`post_revert`) are side effects of an operation the activity\nfeed already shows on its own row, so they are excluded from\nthe audit log — same policy as validate/verify.\n",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "manual",
+                "pre_sync",
+                "post_revert"
+              ],
+              "default": "manual"
+            }
           }
         ],
         "responses": {
@@ -2280,7 +2316,7 @@
       "get": {
         "operationId": "getBlueprintJob",
         "summary": "Get Job",
-        "description": "Poll current state of a job.",
+        "description": "Poll the current state of a job. Serves both Terraform (v2) and V3-engine jobs —\ncheck `sync_engine` (`terraform` | `v3`) to tell them apart. V3 jobs additionally\nexpose live `resource_progress[]`. V3 single-install and bulk-install child jobs\nare polled here.\n",
         "tags": [
           "Jobs"
         ],
@@ -2312,7 +2348,7 @@
       "post": {
         "operationId": "continueInstallationJob",
         "summary": "Continue Installation Job",
-        "description": "Continue an installation job if it is waiting for user action.",
+        "description": "Resume an installation job that is paused at `status: \"WAITING_USER_ACTION\"` after\nplanning. Works for both Terraform and V3 jobs. Not needed for V3 installs created\nwith `auto_apply: true` (including all bulk-install child jobs), which apply\nwithout pausing.\n",
         "tags": [
           "Jobs"
         ],
@@ -2861,11 +2897,58 @@
         }
       }
     },
+    "/v3/blueprint-manifest/blueprints/{blueprint_id}:publish": {
+      "post": {
+        "operationId": "publishBlueprintV3",
+        "summary": "Publish Blueprint V3",
+        "description": "Starts an asynchronous V3 publication. The result is a signed, portable package; poll the existing blueprint job endpoint for completion.",
+        "tags": [
+          "Blueprints"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id",
+            "schema": {
+              "$ref": "#/components/schemas/BlueprintID"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Blueprint export job started",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "job_id"
+                  ],
+                  "properties": {
+                    "job_id": {
+                      "$ref": "#/components/schemas/BlueprintJobID"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v3/blueprint-manifest/blueprint:install": {
       "post": {
         "operationId": "installBlueprintV3",
         "summary": "Install Blueprint V3",
-        "description": "Install a blueprint using the V3 engine (direct API calls, no Terraform).\nCreates resources in topological order with global ID replacement.\nSupports checkpoint-based resume on failure.\n",
+        "description": "Install a blueprint into a single destination org using the V3 engine (direct API\ncalls, no Terraform). Creates resources in topological order with global ID\nreplacement and supports checkpoint-based resume on failure.\n\n**Lifecycle (how to drive an install to completion):**\n1. `POST /v3/blueprint-manifest/blueprint:install` returns `{ job_id }` (202).\n2. Poll the job with `GET /v2/blueprint-manifest/jobs/{job_id}` — V3 jobs are\n   served by the same v2 jobs endpoints as Terraform jobs and are identified by\n   `sync_engine: \"v3\"`. Watch `status` and `resource_progress[]`.\n3. If `auto_apply` is `false` (default), the job pauses at\n   `status: \"WAITING_USER_ACTION\"` after planning. Resume it with\n   `POST /v2/blueprint-manifest/jobs/{job_id}:continue`.\n4. If `auto_apply` is `true`, the engine applies automatically after plan +\n   snapshot — no `:continue` call is needed. This is what the bulk-install worker\n   uses; to install into many orgs at once prefer `POST .../bulk-installs`.\n\nFor cross-org installs, pass `destination_auth_token` (the destination org's\ntoken); reads use the caller's bearer token, writes use that token.\n",
         "tags": [
           "Blueprints"
         ],
@@ -2917,6 +3000,29 @@
                   "slug": {
                     "type": "string",
                     "description": "Slug for marketplace blueprint consistency"
+                  },
+                  "auto_apply": {
+                    "type": "boolean",
+                    "description": "When `true`, the install skips the manual plan-approval step and applies\nstraight after plan + snapshot succeed (no `:continue` call needed).\nDefaults to `false`. Used internally by the bulk-install worker.\n",
+                    "default": false
+                  }
+                }
+              },
+              "examples": {
+                "sameOrgPlanThenContinue": {
+                  "summary": "Same-org install, manual approval (default)",
+                  "value": {
+                    "source_blueprint_id": "11111111-1111-1111-1111-111111111111"
+                  }
+                },
+                "crossOrgAutoApply": {
+                  "summary": "Cross-org install, applied automatically",
+                  "value": {
+                    "source_org_id": "source-org-id",
+                    "source_blueprint_id": "11111111-1111-1111-1111-111111111111",
+                    "destination_org_id": "dest-org-id",
+                    "destination_auth_token": "destination-org-token",
+                    "auto_apply": true
                   }
                 }
               }
@@ -2928,7 +3034,7 @@
             "description": "V3 install job started",
             "headers": {
               "Location": {
-                "description": "URL to poll the job",
+                "description": "Path to poll the resulting job: GET /v2/blueprint-manifest/jobs/{job_id}",
                 "schema": {
                   "type": "string"
                 }
@@ -3123,6 +3229,244 @@
         }
       }
     },
+    "/v3/blueprint-manifest/bulk-installs": {
+      "post": {
+        "operationId": "createBulkInstallV3",
+        "summary": "Create Bulk Install V3",
+        "description": "Install one source blueprint into many destination organizations in a single\nrequest. The server schedules child V3 installs with `auto_apply=true` and caps\nactive installs at `max_concurrency`. Per-target failures are isolated and\nretryable; they do not stop the remaining targets.\n\nEach target carries its own write-only `destination_auth_token` (org-scoped).\nTokens are passed to the worker via Step Functions input only — they are never\npersisted in DynamoDB nor returned by any endpoint.\n",
+        "tags": [
+          "Blueprints"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkInstallCreateRequest"
+              },
+              "examples": {
+                "twoTargets": {
+                  "summary": "Install one blueprint into two orgs",
+                  "value": {
+                    "source_org_id": "source-org-id",
+                    "source_blueprint_id": "11111111-1111-1111-1111-111111111111",
+                    "max_concurrency": 2,
+                    "options": {
+                      "resources_to_ignore": [
+                        "epilot-product_product.foo"
+                      ]
+                    },
+                    "targets": [
+                      {
+                        "destination_org_id": "dest-org-1",
+                        "destination_auth_token": "token-for-org-1"
+                      },
+                      {
+                        "destination_org_id": "dest-org-2",
+                        "destination_blueprint_id": "22222222-2222-2222-2222-222222222222",
+                        "destination_auth_token": "token-for-org-2"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Bulk install accepted and scheduled",
+            "headers": {
+              "Location": {
+                "description": "URL to poll the bulk install",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BulkInstall"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error — missing `source_blueprint_id`, empty/oversized `targets`\n(1–100), duplicate `destination_org_id`, missing per-target\n`destination_auth_token`, or `max_concurrency` out of range (1–5).\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v3/blueprint-manifest/bulk-installs/{bulk_job_id}": {
+      "get": {
+        "operationId": "getBulkInstallV3",
+        "summary": "Get Bulk Install V3",
+        "description": "Returns the bulk install parent with aggregate status and counts. Scoped by the\ncaller org as `source_org_id`. Target rows are not included — use the targets\nendpoint to page through them.\n",
+        "tags": [
+          "Blueprints"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "bulk_job_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Bulk install parent",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BulkInstall"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Bulk install not found for the caller org"
+          }
+        }
+      }
+    },
+    "/v3/blueprint-manifest/bulk-installs/{bulk_job_id}/targets": {
+      "get": {
+        "operationId": "listBulkInstallTargetsV3",
+        "summary": "List Bulk Install Targets V3",
+        "description": "Pages through the bulk install's target rows. Each row hydrates its latest child\ninstall job (`job_ids.at(-1)`) with the standard V3 job shape (`events[]`,\n`resource_progress[]`) so callers can inspect per-resource progress and errors.\n",
+        "tags": [
+          "Blueprints"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "bulk_job_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 25,
+              "default": 10
+            }
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A page of target rows",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BulkInstallTargetList"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Bulk install not found for the caller org"
+          }
+        }
+      }
+    },
+    "/v3/blueprint-manifest/bulk-installs/{bulk_job_id}/targets/{destination_org_id}:retry": {
+      "post": {
+        "operationId": "retryBulkInstallTargetV3",
+        "summary": "Retry Bulk Install Target V3",
+        "description": "Retries a single failed target. Allowed only for `FAILED` and `PARTIAL_SUCCESS`\ntargets. Starts a new child install with `auto_apply=true`, appends its job id to\n`job_ids`, and reuses the same target row. Only the destination auth token may be\nsupplied for the new attempt; source/destination identifiers are immutable.\n",
+        "tags": [
+          "Blueprints"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "bulk_job_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "destination_org_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "destination_auth_token"
+                ],
+                "properties": {
+                  "destination_auth_token": {
+                    "type": "string",
+                    "description": "Write-only auth token for the destination org used for the new attempt."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated target row with hydrated latest child job",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BulkInstallTarget"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Target is not in a retryable (`FAILED`/`PARTIAL_SUCCESS`) state."
+          },
+          "404": {
+            "description": "Bulk install or target not found for the caller org."
+          },
+          "409": {
+            "description": "The target was concurrently claimed by another retry (already in progress)."
+          }
+        }
+      }
+    },
     "/v1/blueprint-manifest/uniqueness-criteria": {
       "get": {
         "operationId": "listUniquenessCriteria",
@@ -3143,6 +3487,23 @@
                       "type": "array",
                       "items": {
                         "$ref": "#/components/schemas/UniquenessCriteria"
+                      }
+                    },
+                    "defaults": {
+                      "type": "object",
+                      "description": "Built-in default uniqueness fields per resource type, as used by\nthe install engines when no custom criteria are configured.\n",
+                      "additionalProperties": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "readonly_types": {
+                      "type": "array",
+                      "description": "Resource types whose criteria are fixed by epilot and cannot be\ncustomized (writes are rejected). Shown read-only in the UI.\n",
+                      "items": {
+                        "type": "string"
                       }
                     }
                   }
@@ -3210,6 +3571,13 @@
                     "items": {
                       "type": "string"
                     }
+                  },
+                  "propagated_to": {
+                    "type": "array",
+                    "description": "Org IDs this rule was also applied to (the UI's \"Also apply to\"\nselection). Stored so the selection survives reloads; each target\norg still holds its own criteria row.\n",
+                    "items": {
+                      "type": "string"
+                    }
                   }
                 }
               }
@@ -3261,11 +3629,7 @@
           "product_recommendation",
           "file",
           "document_template",
-          "schema",
-          "taxonomy",
           "notification_template",
-          "family",
-          "permission",
           "journey"
         ]
       },
@@ -3287,6 +3651,12 @@
           "fields": {
             "type": "array",
             "minItems": 1,
+            "items": {
+              "type": "string"
+            }
+          },
+          "propagated_to": {
+            "type": "array",
             "items": {
               "type": "string"
             }
@@ -3892,7 +4262,8 @@
                 "internal-update",
                 "no-op",
                 "delete",
-                "ignored"
+                "ignored",
+                "error"
               ]
             }
           },
@@ -4370,6 +4741,191 @@
           }
         ]
       },
+      "BulkInstallStatus": {
+        "type": "string",
+        "description": "Aggregate status for a bulk install or one of its targets.\n- `QUEUED`: not started yet\n- `IN_PROGRESS`: at least one target queued/in-progress, not all done\n- `SUCCESS`: all targets succeeded\n- `PARTIAL_SUCCESS`: all targets terminal with a mix of success/partial/failure\n- `FAILED`: all targets terminal and none succeeded or partially succeeded\n",
+        "enum": [
+          "QUEUED",
+          "IN_PROGRESS",
+          "SUCCESS",
+          "PARTIAL_SUCCESS",
+          "FAILED"
+        ]
+      },
+      "BulkInstallCounts": {
+        "type": "object",
+        "description": "Tally of target rows by status. Recomputed from target rows on each transition.",
+        "properties": {
+          "queued": {
+            "type": "integer"
+          },
+          "in_progress": {
+            "type": "integer"
+          },
+          "success": {
+            "type": "integer"
+          },
+          "partial_success": {
+            "type": "integer"
+          },
+          "failed": {
+            "type": "integer"
+          }
+        }
+      },
+      "BulkInstall": {
+        "type": "object",
+        "description": "Bulk install parent. Never carries target auth tokens.",
+        "properties": {
+          "bulk_job_id": {
+            "type": "string"
+          },
+          "source_org_id": {
+            "type": "string"
+          },
+          "source_blueprint_id": {
+            "$ref": "#/components/schemas/BlueprintID"
+          },
+          "status": {
+            "$ref": "#/components/schemas/BulkInstallStatus"
+          },
+          "target_count": {
+            "type": "integer"
+          },
+          "max_concurrency": {
+            "type": "integer"
+          },
+          "counts": {
+            "$ref": "#/components/schemas/BulkInstallCounts"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "options": {
+            "$ref": "#/components/schemas/BlueprintInstallationJobOptions"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "BulkInstallTarget": {
+        "type": "object",
+        "description": "A single destination of a bulk install. `job` is the hydrated latest child\ninstall job derived from `job_ids.at(-1)`. Auth tokens are never stored or returned.\n",
+        "properties": {
+          "bulk_job_id": {
+            "type": "string"
+          },
+          "destination_org_id": {
+            "type": "string"
+          },
+          "destination_blueprint_id": {
+            "$ref": "#/components/schemas/BlueprintID"
+          },
+          "status": {
+            "$ref": "#/components/schemas/BulkInstallStatus"
+          },
+          "job_ids": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BlueprintJobID"
+            }
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "job": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/BlueprintInstallationJob"
+              }
+            ],
+            "nullable": true,
+            "description": "The hydrated latest child install job (`job_ids.at(-1)`), when present."
+          }
+        }
+      },
+      "BulkInstallTargetList": {
+        "type": "object",
+        "properties": {
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BulkInstallTarget"
+            }
+          },
+          "next_cursor": {
+            "type": "string",
+            "description": "Opaque cursor for the next page. Absent on the last page."
+          }
+        }
+      },
+      "BulkInstallTargetInput": {
+        "type": "object",
+        "required": [
+          "destination_org_id",
+          "destination_auth_token"
+        ],
+        "properties": {
+          "destination_org_id": {
+            "type": "string"
+          },
+          "destination_blueprint_id": {
+            "$ref": "#/components/schemas/BlueprintID"
+          },
+          "destination_auth_token": {
+            "type": "string",
+            "description": "Write-only org-scoped token for the destination org. Never persisted or returned."
+          }
+        }
+      },
+      "BulkInstallCreateRequest": {
+        "type": "object",
+        "required": [
+          "source_blueprint_id",
+          "targets"
+        ],
+        "properties": {
+          "source_org_id": {
+            "type": "string",
+            "description": "The org that owns the source blueprint. Optional; defaults to the caller org and,\nif provided, must equal it — source reads use the caller's token, and the bulk job\nis owned/polled by the caller org. A different value is rejected with 400.\n"
+          },
+          "source_blueprint_id": {
+            "$ref": "#/components/schemas/BlueprintID"
+          },
+          "max_concurrency": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5,
+            "default": 2,
+            "description": "Maximum number of concurrently active child installs."
+          },
+          "slug": {
+            "type": "string"
+          },
+          "options": {
+            "$ref": "#/components/schemas/BlueprintInstallationJobOptions"
+          },
+          "targets": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 100,
+            "items": {
+              "$ref": "#/components/schemas/BulkInstallTargetInput"
+            }
+          }
+        }
+      },
       "BlueprintRestoreJob": {
         "allOf": [
           {
@@ -4505,9 +5061,9 @@
             "description": "Only set when `action == skip`.",
             "enum": [
               "modified",
-              "co_owned",
               "delete_unsupported",
-              "heuristic_match"
+              "heuristic_match",
+              "co_owned"
             ]
           },
           "last_synced_at": {
@@ -4526,6 +5082,29 @@
             "type": "string",
             "nullable": true,
             "description": "Only set when `action == failed`."
+          },
+          "is_hidden": {
+            "type": "boolean",
+            "description": "Mirrors the install manifest's `is_hidden` for this resource —\nhelper resources (entity mappings, datasources, flow-template\nautomations) the UI hides on every other resources view. Absent\non rows from legacy installs without a persisted manifest.\n"
+          },
+          "co_owned_by": {
+            "type": "array",
+            "description": "Only set when `reason == co_owned`. The other live blueprint\ninstances that still own this resource's lineage row — the\n\"another sync\" the skip refers to.\n",
+            "items": {
+              "type": "object",
+              "required": [
+                "blueprint_id"
+              ],
+              "properties": {
+                "blueprint_id": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string",
+                  "nullable": true
+                }
+              }
+            }
           }
         }
       },
@@ -4542,6 +5121,10 @@
             "items": {
               "$ref": "#/components/schemas/RestoreOutcomeItem"
             }
+          },
+          "has_effective_changes": {
+            "type": "boolean",
+            "description": "`true` iff at least one entry in `resources` has an effective\naction (`action` is `restore` or `delete`). `false` when every\nresource would be skipped (all `skip` / `failed`). Consumers\ncan gate the \"Revert sync\" confirm button on this — if false,\nexecuting the revert is a no-op.\n"
           }
         }
       },
@@ -4674,6 +5257,18 @@
               "destination_blueprint_id": {
                 "$ref": "#/components/schemas/BlueprintID"
               },
+              "installation_job_id": {
+                "$ref": "#/components/schemas/BlueprintJobID",
+                "description": "Install job this verification is checking, when known."
+              },
+              "sync_engine": {
+                "type": "string",
+                "enum": [
+                  "terraform",
+                  "v3"
+                ],
+                "description": "Install engine used by the linked installation job, when known."
+              },
               "status": {
                 "type": "string",
                 "enum": [
@@ -4731,6 +5326,16 @@
           "destination_blueprint_id": {
             "$ref": "#/components/schemas/BlueprintID"
           },
+          "installation_job_id": {
+            "$ref": "#/components/schemas/BlueprintJobID"
+          },
+          "sync_engine": {
+            "type": "string",
+            "enum": [
+              "terraform",
+              "v3"
+            ]
+          },
           "summary": {
             "$ref": "#/components/schemas/VerificationSummary"
           }
@@ -4768,7 +5373,13 @@
           "source_resource_id": {
             "type": "string"
           },
+          "source_resource_address": {
+            "type": "string"
+          },
           "destination_resource_id": {
+            "type": "string"
+          },
+          "destination_resource_address": {
             "type": "string"
           },
           "status": {
@@ -4779,6 +5390,32 @@
               "missing_in_destination",
               "fetch_error"
             ]
+          },
+          "failure_context": {
+            "type": "string",
+            "enum": [
+              "depends_on_failed_resource",
+              "may_be_caused_by_failed_dependency"
+            ],
+            "description": "Explains whether this result is likely downstream of another failed resource."
+          },
+          "failed_dependency_resource_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "failed_dependency_resource_names": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "failed_dependency_addresses": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           },
           "field_diffs": {
             "type": "array",

@@ -447,7 +447,7 @@ declare namespace Components {
              * Terraform addresses this resource references (for dependency-aware ignore)
              */
             depends_on_addresses?: string[];
-            impact_on_install?: ("create" | "update" | "internal-update" | "no-op" | "delete" | "ignored")[];
+            impact_on_install?: ("create" | "update" | "internal-update" | "no-op" | "delete" | "ignored" | "error")[];
             /**
              * Fields causing the updates / internal updates on a resource install
              */
@@ -503,6 +503,15 @@ declare namespace Components {
                  */
                 snapshot_id?: string | null;
                 resources?: RestoreOutcomeItem[];
+                /**
+                 * `true` iff at least one entry in `resources` has an effective
+                 * action (`action` is `restore` or `delete`). `false` when every
+                 * resource would be skipped (all `skip` / `failed`). Consumers
+                 * can gate the "Revert sync" confirm button on this — if false,
+                 * executing the revert is a no-op.
+                 *
+                 */
+                has_effective_changes?: boolean;
             } | null;
         }
         export interface BlueprintValidateJob {
@@ -557,6 +566,16 @@ declare namespace Components {
              * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
              */
             BlueprintID;
+            installation_job_id?: /**
+             * ID of a job
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            BlueprintJobID;
+            /**
+             * Install engine used by the linked installation job, when known.
+             */
+            sync_engine?: "terraform" | "v3";
             status?: "IN_PROGRESS" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED";
             summary?: VerificationSummary;
             resource_results?: ResourceVerificationResult[];
@@ -564,6 +583,281 @@ declare namespace Components {
              * S3 key for detailed results when too large for inline storage.
              */
             resource_results_s3_key?: string;
+        }
+        /**
+         * Bulk install parent. Never carries target auth tokens.
+         */
+        export interface BulkInstall {
+            bulk_job_id?: string;
+            source_org_id?: string;
+            source_blueprint_id?: /**
+             * ID of a blueprint
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            BlueprintID;
+            status?: /**
+             * Aggregate status for a bulk install or one of its targets.
+             * - `QUEUED`: not started yet
+             * - `IN_PROGRESS`: at least one target queued/in-progress, not all done
+             * - `SUCCESS`: all targets succeeded
+             * - `PARTIAL_SUCCESS`: all targets terminal with a mix of success/partial/failure
+             * - `FAILED`: all targets terminal and none succeeded or partially succeeded
+             *
+             */
+            BulkInstallStatus;
+            target_count?: number;
+            max_concurrency?: number;
+            counts?: /* Tally of target rows by status. Recomputed from target rows on each transition. */ BulkInstallCounts;
+            slug?: string;
+            options?: BlueprintInstallationJobOptions;
+            created_at?: string; // date-time
+            updated_at?: string; // date-time
+        }
+        /**
+         * Tally of target rows by status. Recomputed from target rows on each transition.
+         */
+        export interface BulkInstallCounts {
+            queued?: number;
+            in_progress?: number;
+            success?: number;
+            partial_success?: number;
+            failed?: number;
+        }
+        export interface BulkInstallCreateRequest {
+            /**
+             * The org that owns the source blueprint. Optional; defaults to the caller org and,
+             * if provided, must equal it — source reads use the caller's token, and the bulk job
+             * is owned/polled by the caller org. A different value is rejected with 400.
+             *
+             */
+            source_org_id?: string;
+            source_blueprint_id: /**
+             * ID of a blueprint
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            BlueprintID;
+            /**
+             * Maximum number of concurrently active child installs.
+             */
+            max_concurrency?: number;
+            slug?: string;
+            options?: BlueprintInstallationJobOptions;
+            targets: [
+                BulkInstallTargetInput,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?,
+                BulkInstallTargetInput?
+            ];
+        }
+        /**
+         * Aggregate status for a bulk install or one of its targets.
+         * - `QUEUED`: not started yet
+         * - `IN_PROGRESS`: at least one target queued/in-progress, not all done
+         * - `SUCCESS`: all targets succeeded
+         * - `PARTIAL_SUCCESS`: all targets terminal with a mix of success/partial/failure
+         * - `FAILED`: all targets terminal and none succeeded or partially succeeded
+         *
+         */
+        export type BulkInstallStatus = "QUEUED" | "IN_PROGRESS" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED";
+        /**
+         * A single destination of a bulk install. `job` is the hydrated latest child
+         * install job derived from `job_ids.at(-1)`. Auth tokens are never stored or returned.
+         *
+         */
+        export interface BulkInstallTarget {
+            bulk_job_id?: string;
+            destination_org_id?: string;
+            destination_blueprint_id?: /**
+             * ID of a blueprint
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            BlueprintID;
+            status?: /**
+             * Aggregate status for a bulk install or one of its targets.
+             * - `QUEUED`: not started yet
+             * - `IN_PROGRESS`: at least one target queued/in-progress, not all done
+             * - `SUCCESS`: all targets succeeded
+             * - `PARTIAL_SUCCESS`: all targets terminal with a mix of success/partial/failure
+             * - `FAILED`: all targets terminal and none succeeded or partially succeeded
+             *
+             */
+            BulkInstallStatus;
+            job_ids?: /**
+             * ID of a job
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            BlueprintJobID[];
+            created_at?: string; // date-time
+            updated_at?: string; // date-time
+            /**
+             * The hydrated latest child install job (`job_ids.at(-1)`), when present.
+             */
+            job?: {
+                id?: /**
+                 * ID of a job
+                 * example:
+                 * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+                 */
+                BlueprintJobID;
+                events?: BlueprintJobEvent[];
+                triggered_at?: string; // date-time
+                created_by?: CallerIdentity;
+                job_type?: "install";
+                source_blueprint_id?: /**
+                 * ID of a blueprint
+                 * example:
+                 * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+                 */
+                BlueprintID;
+                source_blueprint_type?: "custom" | "file" | "marketplace" | "deploy" | "app";
+                source_org_id?: string;
+                source_blueprint_file?: string;
+                destination_blueprint_id?: /**
+                 * ID of a blueprint
+                 * example:
+                 * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+                 */
+                BlueprintID;
+                destination_org_id?: string;
+                /**
+                 * Blueprint slug for marketplace blueprints
+                 */
+                slug?: string;
+                /**
+                 * Engine used for this install job
+                 */
+                sync_engine?: "terraform" | "v3";
+                /**
+                 * Per-resource live status. Populated only for V3 installs.
+                 */
+                resource_progress?: V3ResourceProgressEntry[];
+                status?: "IN_PROGRESS" | "WAITING_USER_ACTION" | "CANCELED" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED";
+            } | null;
+        }
+        export interface BulkInstallTargetInput {
+            destination_org_id: string;
+            destination_blueprint_id?: /**
+             * ID of a blueprint
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            BlueprintID;
+            /**
+             * Write-only org-scoped token for the destination org. Never persisted or returned.
+             */
+            destination_auth_token: string;
+        }
+        export interface BulkInstallTargetList {
+            results?: /**
+             * A single destination of a bulk install. `job` is the hydrated latest child
+             * install job derived from `job_ids.at(-1)`. Auth tokens are never stored or returned.
+             *
+             */
+            BulkInstallTarget[];
+            /**
+             * Opaque cursor for the next page. Absent on the last page.
+             */
+            next_cursor?: string;
         }
         export interface CallerIdentity {
             /**
@@ -1814,6 +2108,13 @@ declare namespace Components {
              * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
              */
             BlueprintID;
+            installation_job_id?: /**
+             * ID of a job
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            BlueprintJobID;
+            sync_engine?: "terraform" | "v3";
             summary?: VerificationSummary;
         }
         export interface LineageEntry {
@@ -2556,8 +2857,17 @@ declare namespace Components {
             resource_type?: /* Type of the resource */ ResourceNodeType;
             resource_name?: string;
             source_resource_id?: string;
+            source_resource_address?: string;
             destination_resource_id?: string;
+            destination_resource_address?: string;
             status?: "matched" | "mismatched" | "missing_in_destination" | "fetch_error";
+            /**
+             * Explains whether this result is likely downstream of another failed resource.
+             */
+            failure_context?: "depends_on_failed_resource" | "may_be_caused_by_failed_dependency";
+            failed_dependency_resource_ids?: string[];
+            failed_dependency_resource_names?: string[];
+            failed_dependency_addresses?: string[];
             field_diffs?: FieldDiff[];
             error?: string;
         }
@@ -2570,6 +2880,15 @@ declare namespace Components {
              */
             snapshot_id?: string | null;
             resources?: RestoreOutcomeItem[];
+            /**
+             * `true` iff at least one entry in `resources` has an effective
+             * action (`action` is `restore` or `delete`). `false` when every
+             * resource would be skipped (all `skip` / `failed`). Consumers
+             * can gate the "Revert sync" confirm button on this — if false,
+             * executing the revert is a no-op.
+             *
+             */
+            has_effective_changes?: boolean;
         }
         export interface RestoreOutcomeItem {
             lineage_id: string;
@@ -2586,7 +2905,7 @@ declare namespace Components {
             /**
              * Only set when `action == skip`.
              */
-            reason?: "modified" | "co_owned" | "delete_unsupported" | "heuristic_match";
+            reason?: "modified" | "delete_unsupported" | "heuristic_match" | "co_owned";
             /**
              * Only set when `reason == modified`. From the lineage row's last install write.
              */
@@ -2599,6 +2918,24 @@ declare namespace Components {
              * Only set when `action == failed`.
              */
             error_message?: string | null;
+            /**
+             * Mirrors the install manifest's `is_hidden` for this resource —
+             * helper resources (entity mappings, datasources, flow-template
+             * automations) the UI hides on every other resources view. Absent
+             * on rows from legacy installs without a persisted manifest.
+             *
+             */
+            is_hidden?: boolean;
+            /**
+             * Only set when `reason == co_owned`. The other live blueprint
+             * instances that still own this resource's lineage row — the
+             * "another sync" the skip refers to.
+             *
+             */
+            co_owned_by?: {
+                blueprint_id: string;
+                title?: string | null;
+            }[];
         }
         export interface RootResourceNode {
             /**
@@ -2708,13 +3045,14 @@ declare namespace Components {
                 string,
                 ...string[]
             ];
+            propagated_to?: string[];
             updated_at: string; // date-time
             updated_by?: string;
         }
         /**
          * Resource type for which custom uniqueness criteria can be configured.
          */
-        export type UniquenessCriteriaResourceType = "emailtemplate" | "product" | "price" | "tax" | "coupon" | "product_recommendation" | "file" | "document_template" | "schema" | "taxonomy" | "notification_template" | "family" | "permission" | "journey";
+        export type UniquenessCriteriaResourceType = "emailtemplate" | "product" | "price" | "tax" | "coupon" | "product_recommendation" | "file" | "document_template" | "notification_template" | "journey";
         export interface UploadFilePayload {
             /**
              * example:
@@ -2954,6 +3292,15 @@ declare namespace Paths {
         export type RequestBody = Components.Schemas.Blueprint;
         namespace Responses {
             export type $200 = Components.Schemas.Blueprint;
+        }
+    }
+    namespace CreateBulkInstallV3 {
+        export type RequestBody = Components.Schemas.BulkInstallCreateRequest;
+        namespace Responses {
+            export type $202 = /* Bulk install parent. Never carries target auth tokens. */ Components.Schemas.BulkInstall;
+            export interface $400 {
+                message?: string;
+            }
         }
     }
     namespace CreateExport {
@@ -3433,6 +3780,19 @@ declare namespace Paths {
             }
         }
     }
+    namespace GetBulkInstallV3 {
+        namespace Parameters {
+            export type BulkJobId = string;
+        }
+        export interface PathParameters {
+            bulk_job_id: Parameters.BulkJobId;
+        }
+        namespace Responses {
+            export type $200 = /* Bulk install parent. Never carries target auth tokens. */ Components.Schemas.BulkInstall;
+            export interface $404 {
+            }
+        }
+    }
     namespace GetJob {
         namespace Parameters {
             export type JobId = /**
@@ -3716,6 +4076,13 @@ declare namespace Paths {
              * Slug for marketplace blueprint consistency
              */
             slug?: string;
+            /**
+             * When `true`, the install skips the manual plan-approval step and applies
+             * straight after plan + snapshot succeed (no `:continue` call needed).
+             * Defaults to `false`. Used internally by the bulk-install worker.
+             *
+             */
+            auto_apply?: boolean;
         } | {
             source_org_id?: string;
             source_blueprint_id?: /**
@@ -3744,6 +4111,13 @@ declare namespace Paths {
              * Slug for marketplace blueprint consistency
              */
             slug?: string;
+            /**
+             * When `true`, the install skips the manual plan-approval step and applies
+             * straight after plan + snapshot succeed (no `:continue` call needed).
+             * Defaults to `false`. Used internally by the bulk-install worker.
+             *
+             */
+            auto_apply?: boolean;
         };
         namespace Responses {
             export interface $202 {
@@ -3792,6 +4166,25 @@ declare namespace Paths {
                  */
                 total?: number;
                 results?: Components.Schemas.Blueprint[];
+            }
+        }
+    }
+    namespace ListBulkInstallTargetsV3 {
+        namespace Parameters {
+            export type BulkJobId = string;
+            export type Cursor = string;
+            export type Limit = number;
+        }
+        export interface PathParameters {
+            bulk_job_id: Parameters.BulkJobId;
+        }
+        export interface QueryParameters {
+            limit?: Parameters.Limit;
+            cursor?: Parameters.Cursor;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.BulkInstallTargetList;
+            export interface $404 {
             }
         }
     }
@@ -3897,6 +4290,20 @@ declare namespace Paths {
         namespace Responses {
             export interface $200 {
                 results?: Components.Schemas.UniquenessCriteria[];
+                /**
+                 * Built-in default uniqueness fields per resource type, as used by
+                 * the install engines when no custom criteria are configured.
+                 *
+                 */
+                defaults?: {
+                    [name: string]: string[];
+                };
+                /**
+                 * Resource types whose criteria are fixed by epilot and cannot be
+                 * customized (writes are rejected). Shown read-only in the UI.
+                 *
+                 */
+                readonly_types?: string[];
             }
         }
     }
@@ -3948,6 +4355,29 @@ declare namespace Paths {
             }
         }
     }
+    namespace PublishBlueprintV3 {
+        namespace Parameters {
+            export type BlueprintId = /**
+             * ID of a blueprint
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            Components.Schemas.BlueprintID;
+        }
+        export interface PathParameters {
+            blueprint_id: Parameters.BlueprintId;
+        }
+        namespace Responses {
+            export interface $202 {
+                job_id: /**
+                 * ID of a job
+                 * example:
+                 * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+                 */
+                Components.Schemas.BlueprintJobID;
+            }
+        }
+    }
     namespace PublishMarketplaceListingVersion {
         namespace Parameters {
             export type ListingId = string;
@@ -3975,6 +4405,13 @@ declare namespace Paths {
                 string,
                 ...string[]
             ];
+            /**
+             * Org IDs this rule was also applied to (the UI's "Also apply to"
+             * selection). Stored so the selection survives reloads; each target
+             * org still holds its own criteria row.
+             *
+             */
+            propagated_to?: string[];
         }
         namespace Responses {
             export type $200 = Components.Schemas.UniquenessCriteria;
@@ -4025,6 +4462,36 @@ declare namespace Paths {
             }
         }
     }
+    namespace RetryBulkInstallTargetV3 {
+        namespace Parameters {
+            export type BulkJobId = string;
+            export type DestinationOrgId = string;
+        }
+        export interface PathParameters {
+            bulk_job_id: Parameters.BulkJobId;
+            destination_org_id: Parameters.DestinationOrgId;
+        }
+        export interface RequestBody {
+            /**
+             * Write-only auth token for the destination org used for the new attempt.
+             */
+            destination_auth_token: string;
+        }
+        namespace Responses {
+            export type $200 = /**
+             * A single destination of a bulk install. `job` is the hydrated latest child
+             * install job derived from `job_ids.at(-1)`. Auth tokens are never stored or returned.
+             *
+             */
+            Components.Schemas.BulkInstallTarget;
+            export interface $400 {
+            }
+            export interface $404 {
+            }
+            export interface $409 {
+            }
+        }
+    }
     namespace RetryPatchOrg {
         namespace Parameters {
             export type BlueprintId = /**
@@ -4064,9 +4531,13 @@ declare namespace Paths {
              * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
              */
             Components.Schemas.BlueprintID;
+            export type Trigger = "manual" | "pre_sync" | "post_revert";
         }
         export interface PathParameters {
             blueprint_id: Parameters.BlueprintId;
+        }
+        export interface QueryParameters {
+            trigger?: Parameters.Trigger;
         }
         namespace Responses {
             export interface $202 {
@@ -4262,6 +4733,19 @@ declare namespace Paths {
              * Auth token with access to the destination org. Required for cross-org verification when the caller token only has access to the source org. If not provided, the caller's bearer token is used for both orgs.
              */
             destination_auth_token?: string;
+            /**
+             * Optional install job this verification is checking. If omitted, the latest destination blueprint installation job is used when available.
+             */
+            installation_job_id?: /**
+             * ID of a job
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            Components.Schemas.BlueprintJobID;
+            /**
+             * Optional install engine hint. Usually inferred from installation_job_id.
+             */
+            sync_engine?: "terraform" | "v3";
         }
         namespace Responses {
             export interface $202 {
@@ -4654,7 +5138,7 @@ export interface OperationMethods {
    * Sync dependencies of all root resources in a Blueprint
    */
   'syncDependencies'(
-    parameters?: Parameters<Paths.SyncDependencies.PathParameters> | null,
+    parameters?: Parameters<Paths.SyncDependencies.QueryParameters & Paths.SyncDependencies.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.SyncDependencies.Responses.$202>
@@ -4721,7 +5205,11 @@ export interface OperationMethods {
   /**
    * getBlueprintJob - Get Job
    * 
-   * Poll current state of a job.
+   * Poll the current state of a job. Serves both Terraform (v2) and V3-engine jobs —
+   * check `sync_engine` (`terraform` | `v3`) to tell them apart. V3 jobs additionally
+   * expose live `resource_progress[]`. V3 single-install and bulk-install child jobs
+   * are polled here.
+   *
    */
   'getBlueprintJob'(
     parameters?: Parameters<Paths.GetBlueprintJob.PathParameters> | null,
@@ -4731,7 +5219,11 @@ export interface OperationMethods {
   /**
    * continueInstallationJob - Continue Installation Job
    * 
-   * Continue an installation job if it is waiting for user action.
+   * Resume an installation job that is paused at `status: "WAITING_USER_ACTION"` after
+   * planning. Works for both Terraform and V3 jobs. Not needed for V3 installs created
+   * with `auto_apply: true` (including all bulk-install child jobs), which apply
+   * without pausing.
+   *
    */
   'continueInstallationJob'(
     parameters?: Parameters<Paths.ContinueInstallationJob.PathParameters> | null,
@@ -4849,11 +5341,36 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.PublishMarketplaceListingVersion.Responses.$200>
   /**
+   * publishBlueprintV3 - Publish Blueprint V3
+   *
+   * Starts an asynchronous V3 publication. The result is a signed, portable package; poll the existing blueprint job endpoint for completion.
+   */
+  'publishBlueprintV3'(
+    parameters?: Parameters<Paths.PublishBlueprintV3.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig
+  ): OperationResponse<Paths.PublishBlueprintV3.Responses.$202>
+  /**
    * installBlueprintV3 - Install Blueprint V3
    * 
-   * Install a blueprint using the V3 engine (direct API calls, no Terraform).
-   * Creates resources in topological order with global ID replacement.
-   * Supports checkpoint-based resume on failure.
+   * Install a blueprint into a single destination org using the V3 engine (direct API
+   * calls, no Terraform). Creates resources in topological order with global ID
+   * replacement and supports checkpoint-based resume on failure.
+   *
+   * **Lifecycle (how to drive an install to completion):**
+   * 1. `POST /v3/blueprint-manifest/blueprint:install` returns `{ job_id }` (202).
+   * 2. Poll the job with `GET /v2/blueprint-manifest/jobs/{job_id}` — V3 jobs are
+   *    served by the same v2 jobs endpoints as Terraform jobs and are identified by
+   *    `sync_engine: "v3"`. Watch `status` and `resource_progress[]`.
+   * 3. If `auto_apply` is `false` (default), the job pauses at
+   *    `status: "WAITING_USER_ACTION"` after planning. Resume it with
+   *    `POST /v2/blueprint-manifest/jobs/{job_id}:continue`.
+   * 4. If `auto_apply` is `true`, the engine applies automatically after plan +
+   *    snapshot — no `:continue` call is needed. This is what the bulk-install worker
+   *    uses; to install into many orgs at once prefer `POST .../bulk-installs`.
+   *
+   * For cross-org installs, pass `destination_auth_token` (the destination org's
+   * token); reads use the caller's bearer token, writes use that token.
    * 
    */
   'installBlueprintV3'(
@@ -4922,6 +5439,64 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetBlueprintLineageV3.Responses.$200>
+  /**
+   * createBulkInstallV3 - Create Bulk Install V3
+   *
+   * Install one source blueprint into many destination organizations in a single
+   * request. The server schedules child V3 installs with `auto_apply=true` and caps
+   * active installs at `max_concurrency`. Per-target failures are isolated and
+   * retryable; they do not stop the remaining targets.
+   *
+   * Each target carries its own write-only `destination_auth_token` (org-scoped).
+   * Tokens are passed to the worker via Step Functions input only — they are never
+   * persisted in DynamoDB nor returned by any endpoint.
+   *
+   */
+  'createBulkInstallV3'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.CreateBulkInstallV3.RequestBody,
+    config?: AxiosRequestConfig
+  ): OperationResponse<Paths.CreateBulkInstallV3.Responses.$202>
+  /**
+   * getBulkInstallV3 - Get Bulk Install V3
+   *
+   * Returns the bulk install parent with aggregate status and counts. Scoped by the
+   * caller org as `source_org_id`. Target rows are not included — use the targets
+   * endpoint to page through them.
+   *
+   */
+  'getBulkInstallV3'(
+    parameters?: Parameters<Paths.GetBulkInstallV3.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig
+  ): OperationResponse<Paths.GetBulkInstallV3.Responses.$200>
+  /**
+   * listBulkInstallTargetsV3 - List Bulk Install Targets V3
+   *
+   * Pages through the bulk install's target rows. Each row hydrates its latest child
+   * install job (`job_ids.at(-1)`) with the standard V3 job shape (`events[]`,
+   * `resource_progress[]`) so callers can inspect per-resource progress and errors.
+   *
+   */
+  'listBulkInstallTargetsV3'(
+    parameters?: Parameters<Paths.ListBulkInstallTargetsV3.QueryParameters & Paths.ListBulkInstallTargetsV3.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig
+  ): OperationResponse<Paths.ListBulkInstallTargetsV3.Responses.$200>
+  /**
+   * retryBulkInstallTargetV3 - Retry Bulk Install Target V3
+   *
+   * Retries a single failed target. Allowed only for `FAILED` and `PARTIAL_SUCCESS`
+   * targets. Starts a new child install with `auto_apply=true`, appends its job id to
+   * `job_ids`, and reuses the same target row. Only the destination auth token may be
+   * supplied for the new attempt; source/destination identifiers are immutable.
+   *
+   */
+  'retryBulkInstallTargetV3'(
+    parameters?: Parameters<Paths.RetryBulkInstallTargetV3.PathParameters> | null,
+    data?: Paths.RetryBulkInstallTargetV3.RequestBody,
+    config?: AxiosRequestConfig
+  ): OperationResponse<Paths.RetryBulkInstallTargetV3.Responses.$200>
   /**
    * listUniquenessCriteria - listUniquenessCriteria
    * 
@@ -5401,7 +5976,7 @@ export interface PathsDictionary {
      * Sync dependencies of all root resources in a Blueprint
      */
     'post'(
-      parameters?: Parameters<Paths.SyncDependencies.PathParameters> | null,
+      parameters?: Parameters<Paths.SyncDependencies.QueryParameters & Paths.SyncDependencies.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.SyncDependencies.Responses.$202>
@@ -5476,7 +6051,11 @@ export interface PathsDictionary {
     /**
      * getBlueprintJob - Get Job
      * 
-     * Poll current state of a job.
+     * Poll the current state of a job. Serves both Terraform (v2) and V3-engine jobs —
+     * check `sync_engine` (`terraform` | `v3`) to tell them apart. V3 jobs additionally
+     * expose live `resource_progress[]`. V3 single-install and bulk-install child jobs
+     * are polled here.
+     *
      */
     'get'(
       parameters?: Parameters<Paths.GetBlueprintJob.PathParameters> | null,
@@ -5488,7 +6067,11 @@ export interface PathsDictionary {
     /**
      * continueInstallationJob - Continue Installation Job
      * 
-     * Continue an installation job if it is waiting for user action.
+     * Resume an installation job that is paused at `status: "WAITING_USER_ACTION"` after
+     * planning. Works for both Terraform and V3 jobs. Not needed for V3 installs created
+     * with `auto_apply: true` (including all bulk-install child jobs), which apply
+     * without pausing.
+     *
      */
     'post'(
       parameters?: Parameters<Paths.ContinueInstallationJob.PathParameters> | null,
@@ -5620,13 +6203,40 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.PublishMarketplaceListingVersion.Responses.$200>
   }
+  ['/v3/blueprint-manifest/blueprints/{blueprint_id}:publish']: {
+    /**
+     * publishBlueprintV3 - Publish Blueprint V3
+     *
+     * Starts an asynchronous V3 publication. The result is a signed, portable package; poll the existing blueprint job endpoint for completion.
+     */
+    'post'(
+      parameters?: Parameters<Paths.PublishBlueprintV3.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig
+    ): OperationResponse<Paths.PublishBlueprintV3.Responses.$202>
+  }
   ['/v3/blueprint-manifest/blueprint:install']: {
     /**
      * installBlueprintV3 - Install Blueprint V3
      * 
-     * Install a blueprint using the V3 engine (direct API calls, no Terraform).
-     * Creates resources in topological order with global ID replacement.
-     * Supports checkpoint-based resume on failure.
+     * Install a blueprint into a single destination org using the V3 engine (direct API
+     * calls, no Terraform). Creates resources in topological order with global ID
+     * replacement and supports checkpoint-based resume on failure.
+     *
+     * **Lifecycle (how to drive an install to completion):**
+     * 1. `POST /v3/blueprint-manifest/blueprint:install` returns `{ job_id }` (202).
+     * 2. Poll the job with `GET /v2/blueprint-manifest/jobs/{job_id}` — V3 jobs are
+     *    served by the same v2 jobs endpoints as Terraform jobs and are identified by
+     *    `sync_engine: "v3"`. Watch `status` and `resource_progress[]`.
+     * 3. If `auto_apply` is `false` (default), the job pauses at
+     *    `status: "WAITING_USER_ACTION"` after planning. Resume it with
+     *    `POST /v2/blueprint-manifest/jobs/{job_id}:continue`.
+     * 4. If `auto_apply` is `true`, the engine applies automatically after plan +
+     *    snapshot — no `:continue` call is needed. This is what the bulk-install worker
+     *    uses; to install into many orgs at once prefer `POST .../bulk-installs`.
+     *
+     * For cross-org installs, pass `destination_auth_token` (the destination org's
+     * token); reads use the caller's bearer token, writes use that token.
      * 
      */
     'post'(
@@ -5701,6 +6311,72 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetBlueprintLineageV3.Responses.$200>
+  }
+  ['/v3/blueprint-manifest/bulk-installs']: {
+    /**
+     * createBulkInstallV3 - Create Bulk Install V3
+     *
+     * Install one source blueprint into many destination organizations in a single
+     * request. The server schedules child V3 installs with `auto_apply=true` and caps
+     * active installs at `max_concurrency`. Per-target failures are isolated and
+     * retryable; they do not stop the remaining targets.
+     *
+     * Each target carries its own write-only `destination_auth_token` (org-scoped).
+     * Tokens are passed to the worker via Step Functions input only — they are never
+     * persisted in DynamoDB nor returned by any endpoint.
+     *
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.CreateBulkInstallV3.RequestBody,
+      config?: AxiosRequestConfig
+    ): OperationResponse<Paths.CreateBulkInstallV3.Responses.$202>
+  }
+  ['/v3/blueprint-manifest/bulk-installs/{bulk_job_id}']: {
+    /**
+     * getBulkInstallV3 - Get Bulk Install V3
+     *
+     * Returns the bulk install parent with aggregate status and counts. Scoped by the
+     * caller org as `source_org_id`. Target rows are not included — use the targets
+     * endpoint to page through them.
+     *
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetBulkInstallV3.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig
+    ): OperationResponse<Paths.GetBulkInstallV3.Responses.$200>
+  }
+  ['/v3/blueprint-manifest/bulk-installs/{bulk_job_id}/targets']: {
+    /**
+     * listBulkInstallTargetsV3 - List Bulk Install Targets V3
+     *
+     * Pages through the bulk install's target rows. Each row hydrates its latest child
+     * install job (`job_ids.at(-1)`) with the standard V3 job shape (`events[]`,
+     * `resource_progress[]`) so callers can inspect per-resource progress and errors.
+     *
+     */
+    'get'(
+      parameters?: Parameters<Paths.ListBulkInstallTargetsV3.QueryParameters & Paths.ListBulkInstallTargetsV3.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig
+    ): OperationResponse<Paths.ListBulkInstallTargetsV3.Responses.$200>
+  }
+  ['/v3/blueprint-manifest/bulk-installs/{bulk_job_id}/targets/{destination_org_id}:retry']: {
+    /**
+     * retryBulkInstallTargetV3 - Retry Bulk Install Target V3
+     *
+     * Retries a single failed target. Allowed only for `FAILED` and `PARTIAL_SUCCESS`
+     * targets. Starts a new child install with `auto_apply=true`, appends its job id to
+     * `job_ids`, and reuses the same target row. Only the destination auth token may be
+     * supplied for the new attempt; source/destination identifiers are immutable.
+     *
+     */
+    'post'(
+      parameters?: Parameters<Paths.RetryBulkInstallTargetV3.PathParameters> | null,
+      data?: Paths.RetryBulkInstallTargetV3.RequestBody,
+      config?: AxiosRequestConfig
+    ): OperationResponse<Paths.RetryBulkInstallTargetV3.Responses.$200>
   }
   ['/v1/blueprint-manifest/uniqueness-criteria']: {
     /**
@@ -5777,6 +6453,13 @@ export type BlueprintResourceID = Components.Schemas.BlueprintResourceID;
 export type BlueprintRestoreJob = Components.Schemas.BlueprintRestoreJob;
 export type BlueprintValidateJob = Components.Schemas.BlueprintValidateJob;
 export type BlueprintVerificationJob = Components.Schemas.BlueprintVerificationJob;
+export type BulkInstall = Components.Schemas.BulkInstall;
+export type BulkInstallCounts = Components.Schemas.BulkInstallCounts;
+export type BulkInstallCreateRequest = Components.Schemas.BulkInstallCreateRequest;
+export type BulkInstallStatus = Components.Schemas.BulkInstallStatus;
+export type BulkInstallTarget = Components.Schemas.BulkInstallTarget;
+export type BulkInstallTargetInput = Components.Schemas.BulkInstallTargetInput;
+export type BulkInstallTargetList = Components.Schemas.BulkInstallTargetList;
 export type CallerIdentity = Components.Schemas.CallerIdentity;
 export type CommonBlueprintFields = Components.Schemas.CommonBlueprintFields;
 export type CommonBlueprintJobFields = Components.Schemas.CommonBlueprintJobFields;

@@ -196,6 +196,7 @@
     "/v2/blueprint-manifest/blueprint:install": {
       "post": {
         "operationId": "installBlueprint",
+        "deprecated": true,
         "requestBody": {
           "required": true,
           "content": {
@@ -248,6 +249,7 @@
     "/v2/blueprint-manifest/blueprints/{blueprint_id}/validate": {
       "post": {
         "operationId": "validateBlueprint",
+        "deprecated": true,
         "parameters": [
           {
             "in": "path",
@@ -280,6 +282,7 @@
     "/v2/blueprint-manifest/blueprints/{blueprint_id}/patches:detect": {
       "post": {
         "operationId": "detectPatchChanges",
+        "deprecated": true,
         "parameters": [
           {
             "in": "path",
@@ -298,6 +301,7 @@
     "/v2/blueprint-manifest/blueprints/{blueprint_id}/patches": {
       "post": {
         "operationId": "createPatch",
+        "deprecated": true,
         "parameters": [
           {
             "in": "path",
@@ -315,6 +319,7 @@
       },
       "get": {
         "operationId": "listPatches",
+        "deprecated": true,
         "parameters": [
           {
             "in": "path",
@@ -328,6 +333,7 @@
     "/v2/blueprint-manifest/blueprints/{blueprint_id}/patches/{patch_id}": {
       "get": {
         "operationId": "getPatch",
+        "deprecated": true,
         "parameters": [
           {
             "in": "path",
@@ -346,6 +352,7 @@
     "/v2/blueprint-manifest/blueprints/{blueprint_id}/patches/{patch_id}:apply": {
       "post": {
         "operationId": "applyPatch",
+        "deprecated": true,
         "parameters": [
           {
             "in": "path",
@@ -370,6 +377,7 @@
     "/v2/blueprint-manifest/blueprints/{blueprint_id}/patches/{patch_id}/orgs/{org_id}:retry": {
       "post": {
         "operationId": "retryPatchOrg",
+        "deprecated": true,
         "parameters": [
           {
             "in": "path",
@@ -398,6 +406,7 @@
     "/v2/blueprint-manifest/blueprints/{blueprint_id}:export": {
       "post": {
         "operationId": "exportBlueprint",
+        "deprecated": true,
         "parameters": [
           {
             "in": "path",
@@ -493,6 +502,11 @@
             "in": "path",
             "required": true,
             "name": "blueprint_id"
+          },
+          {
+            "in": "query",
+            "required": false,
+            "name": "trigger"
           }
         ],
         "responses": {}
@@ -791,6 +805,19 @@
         "responses": {}
       }
     },
+    "/v3/blueprint-manifest/blueprints/{blueprint_id}:publish": {
+      "post": {
+        "operationId": "publishBlueprintV3",
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id"
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v3/blueprint-manifest/blueprint:install": {
       "post": {
         "operationId": "installBlueprintV3",
@@ -849,6 +876,78 @@
             "name": "blueprint_id"
           }
         ],
+        "responses": {}
+      }
+    },
+    "/v3/blueprint-manifest/bulk-installs": {
+      "post": {
+        "operationId": "createBulkInstallV3",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v3/blueprint-manifest/bulk-installs/{bulk_job_id}": {
+      "get": {
+        "operationId": "getBulkInstallV3",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "bulk_job_id",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v3/blueprint-manifest/bulk-installs/{bulk_job_id}/targets": {
+      "get": {
+        "operationId": "listBulkInstallTargetsV3",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "bulk_job_id",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "required": false
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v3/blueprint-manifest/bulk-installs/{bulk_job_id}/targets/{destination_org_id}:retry": {
+      "post": {
+        "operationId": "retryBulkInstallTargetV3",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "bulk_job_id",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "destination_org_id",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
         "responses": {}
       }
     },
