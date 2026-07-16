@@ -5188,9 +5188,9 @@ const { data } = await client.postOrderAcceptance(
 
 ### `getContractWithTemplates`
 
-Get a contract by id, resolving the provided Handlebars templates against each related meter into templates_output. POST variant of getContract that accepts a request body; the GET remains as a fallba
+Resolve Handlebars templates against a contract's related meters and return the contract with templates_output populated per meter. This is a read-only operation — it does not modify the contract. It 
 
-`POST /v2/portal/contract/{id}`
+`POST /v2/portal/contract/{id}/resolve-templates`
 
 ```ts
 const { data } = await client.getContractWithTemplates(
