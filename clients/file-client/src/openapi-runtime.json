@@ -286,6 +286,19 @@
         "responses": {}
       }
     },
+    "/v1/files/{id}/text": {
+      "get": {
+        "operationId": "getFileText",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v1/files/{id}/preview": {
       "get": {
         "operationId": "previewFile",

@@ -2448,6 +2448,12 @@ declare namespace Components {
              * 1.2 MB
              */
             readable_size?: string;
+            /**
+             * Content hash (S3 ETag) of the latest file version. For single-part uploads this is the hex MD5 of the content and is stable across orgs, so identical content yields an identical etag. Used to detect real content changes without re-downloading the bytes.
+             * example:
+             * 9bb58f26192e4ba00f01e2e7b136bbd8
+             */
+            etag?: string;
             access_control?: "private" | "public-read";
             /**
              * Direct URL for file (public only if file access control is public-read)
@@ -2669,6 +2675,12 @@ declare namespace Components {
              * 1.2 MB
              */
             readable_size?: string;
+            /**
+             * Content hash (S3 ETag) of the latest file version. For single-part uploads this is the hex MD5 of the content and is stable across orgs, so identical content yields an identical etag. Used to detect real content changes without re-downloading the bytes.
+             * example:
+             * 9bb58f26192e4ba00f01e2e7b136bbd8
+             */
+            etag?: string;
             access_control: "private" | "public-read";
             /**
              * Direct URL for file (public only if file access control is public-read)
@@ -2760,6 +2772,12 @@ declare namespace Components {
              * image/jpeg
              */
             mime_type?: string;
+            /**
+             * Content hash (S3 ETag) of this file version
+             * example:
+             * 9bb58f26192e4ba00f01e2e7b136bbd8
+             */
+            etag?: string;
         }
         export interface FileRelationItem {
             entity_id: /**
@@ -2821,6 +2839,37 @@ declare namespace Components {
          * Current state of a file summary job.
          */
         export type FileSummaryJobStatus = "queued" | "waiting_for_extraction" | "processing" | "completed" | "failed" | "unsupported" | "stale";
+        export type FileText = {
+            status: /* Availability of the plain-text representation for a file entity. */ FileTextStatus;
+            text?: string;
+            truncated?: boolean;
+            total_chars?: number;
+        } & (FileTextReady | FileTextNotReady | FileTextUnsupported);
+        export interface FileTextNotReady {
+            status: "not_ready";
+        }
+        export interface FileTextReady {
+            status: "ready";
+            /**
+             * Plain-text representation, trimmed and truncated to a server-side limit of 50000 characters.
+             */
+            text: string;
+            /**
+             * True when the returned text was cut off by the character limit.
+             */
+            truncated: boolean;
+            /**
+             * Length of the full text before truncation.
+             */
+            total_chars: number;
+        }
+        /**
+         * Availability of the plain-text representation for a file entity.
+         */
+        export type FileTextStatus = "ready" | "not_ready" | "unsupported";
+        export interface FileTextUnsupported {
+            status: "unsupported";
+        }
         export type FileType = "document" | "document_template" | "text" | "image" | "video" | "audio" | "spreadsheet" | "presentation" | "font" | "archive" | "application" | "unknown";
         export interface FileUpload {
             s3ref?: S3Reference;
@@ -2932,6 +2981,12 @@ declare namespace Components {
              * 1.2 MB
              */
             readable_size?: string;
+            /**
+             * Content hash (S3 ETag) of the latest file version. For single-part uploads this is the hex MD5 of the content and is stable across orgs, so identical content yields an identical etag. Used to detect real content changes without re-downloading the bytes.
+             * example:
+             * 9bb58f26192e4ba00f01e2e7b136bbd8
+             */
+            etag?: string;
             access_control?: "private" | "public-read";
             /**
              * Direct URL for file (public only if file access control is public-read)
@@ -3033,6 +3088,12 @@ declare namespace Components {
              * 1.2 MB
              */
             readable_size?: string;
+            /**
+             * Content hash (S3 ETag) of the latest file version. For single-part uploads this is the hex MD5 of the content and is stable across orgs, so identical content yields an identical etag. Used to detect real content changes without re-downloading the bytes.
+             * example:
+             * 9bb58f26192e4ba00f01e2e7b136bbd8
+             */
+            etag?: string;
             access_control?: "private" | "public-read";
             /**
              * Direct URL for file (public only if file access control is public-read)
@@ -3142,6 +3203,12 @@ declare namespace Components {
              * 1.2 MB
              */
             readable_size?: string;
+            /**
+             * Content hash (S3 ETag) of the latest file version. For single-part uploads this is the hex MD5 of the content and is stable across orgs, so identical content yields an identical etag. Used to detect real content changes without re-downloading the bytes.
+             * example:
+             * 9bb58f26192e4ba00f01e2e7b136bbd8
+             */
+            etag?: string;
             access_control?: "private" | "public-read";
             /**
              * Direct URL for file (public only if file access control is public-read)
@@ -3744,6 +3811,15 @@ declare namespace Paths {
              * }
              */
             Components.Responses.UnauthorizedError;
+            export type $403 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 403,
+             *   "error": "Forbidden: You do not have permission to access this file"
+             * }
+             */
+            Components.Responses.ForbiddenError;
             export type $404 = /**
              * A generic error returned by the API
              * example:
@@ -4122,6 +4198,66 @@ declare namespace Paths {
             Components.Responses.InternalServerError;
         }
     }
+    namespace GetFileText {
+        namespace Parameters {
+            export type Id = /**
+             * example:
+             * ef7d985c-2385-44f4-9c71-ae06a52264f8
+             */
+            Components.Schemas.FileEntityId;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.FileText;
+            export type $400 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 400,
+             *   "error": "Bad Request: filename is required"
+             * }
+             */
+            Components.Responses.BadRequestError;
+            export type $401 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 401,
+             *   "error": "Unauthorized: Invalid or expired token"
+             * }
+             */
+            Components.Responses.UnauthorizedError;
+            export type $403 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 403,
+             *   "error": "Forbidden: You do not have permission to access this file"
+             * }
+             */
+            Components.Responses.ForbiddenError;
+            export type $404 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 404,
+             *   "error": "Not Found: File entity not found"
+             * }
+             */
+            Components.Responses.NotFoundError;
+            export type $500 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 500,
+             *   "error": "Internal Server Error"
+             * }
+             */
+            Components.Responses.InternalServerError;
+        }
+    }
     namespace GetFilesInCollection {
         namespace Parameters {
             export type CollectionSlug = string;
@@ -4357,6 +4493,10 @@ declare namespace Paths {
         }
         namespace Responses {
             export type $200 = string; // binary
+            export interface $204 {
+            }
+            export interface $302 {
+            }
             export interface $304 {
             }
             export type $403 = /* A generic error returned by the API */ Components.Schemas.ErrorObject;
@@ -5079,6 +5219,16 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GenerateFileSummary.Responses.$202>
   /**
+   * getFileText - getFileText
+   * 
+   * Get the plain-text representation of a file entity. Returns status `not_ready` while text is being prepared and `unsupported` when text is unavailable for the file or organization.
+   */
+  'getFileText'(
+    parameters?: Parameters<Paths.GetFileText.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetFileText.Responses.$200>
+  /**
    * previewFile - previewFile
    * 
    * Generate a thumbnail preview for a file entity.
@@ -5132,7 +5282,7 @@ export interface OperationMethods {
     parameters?: Parameters<Paths.PreviewPublicFile.QueryParameters & Paths.PreviewPublicFile.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.PreviewPublicFile.Responses.$200>
+  ): OperationResponse<Paths.PreviewPublicFile.Responses.$200 | Paths.PreviewPublicFile.Responses.$204>
   /**
    * getSession - getSession
    * 
@@ -5589,6 +5739,18 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GenerateFileSummary.Responses.$202>
   }
+  ['/v1/files/{id}/text']: {
+    /**
+     * getFileText - getFileText
+     * 
+     * Get the plain-text representation of a file entity. Returns status `not_ready` while text is being prepared and `unsupported` when text is unavailable for the file or organization.
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetFileText.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetFileText.Responses.$200>
+  }
   ['/v1/files/{id}/preview']: {
     /**
      * previewFile - previewFile
@@ -5648,7 +5810,7 @@ export interface PathsDictionary {
       parameters?: Parameters<Paths.PreviewPublicFile.QueryParameters & Paths.PreviewPublicFile.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.PreviewPublicFile.Responses.$200>
+    ): OperationResponse<Paths.PreviewPublicFile.Responses.$200 | Paths.PreviewPublicFile.Responses.$204>
   }
   ['/v1/files/session']: {
     /**
@@ -5901,6 +6063,11 @@ export type FileRelationItem = Components.Schemas.FileRelationItem;
 export type FileSummary = Components.Schemas.FileSummary;
 export type FileSummaryJob = Components.Schemas.FileSummaryJob;
 export type FileSummaryJobStatus = Components.Schemas.FileSummaryJobStatus;
+export type FileText = Components.Schemas.FileText;
+export type FileTextNotReady = Components.Schemas.FileTextNotReady;
+export type FileTextReady = Components.Schemas.FileTextReady;
+export type FileTextStatus = Components.Schemas.FileTextStatus;
+export type FileTextUnsupported = Components.Schemas.FileTextUnsupported;
 export type FileType = Components.Schemas.FileType;
 export type FileUpload = Components.Schemas.FileUpload;
 export type PublicLink = Components.Schemas.PublicLink;

@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "File API",
-    "version": "1.12.0",
+    "version": "1.13.0",
     "description": "The File API enables you to upload, store, manage, and share files within the epilot platform.\n\n## Key Features\n- **Upload files** to temporary storage and save them permanently as File entities\n- **Generate previews** (thumbnails) for images and documents\n- **Create public links** to share private files externally\n- **Organize files** into collections for better management\n- **Version control** with automatic file versioning on updates\n\n## File Upload Workflow\n1. Call `uploadFileV2` to get a pre-signed S3 URL\n2. Upload your file directly to S3 using the pre-signed URL (PUT request)\n3. Call `saveFileV2` with the S3 reference to create a permanent File entity\n\n## Changelog\n<a href=\"changelog\">View API Changelog</a>\n"
   },
   "tags": [
@@ -640,11 +640,11 @@
             "name": "s3_key",
             "in": "query",
             "required": true,
-            "description": "The S3 object key",
+            "description": "The S3 object key, as returned in `s3ref.key` of the file entity.\n\nNote: object keys store the filename segment percent-encoded. For example, a file named\n`Straße 1.pdf` is stored under the key `.../Stra%C3%9Fe%201.pdf`, and that is the value\n`s3ref.key` contains. Pass it exactly as returned by the API and make sure your HTTP client\nURL-encodes the query parameter value, so a literal `%` arrives encoded as `%25`.\n",
             "schema": {
               "type": "string"
             },
-            "example": "123/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf"
+            "example": "123/4d689aeb-1497-4410-a9fe-b36ca9ac4389/Stra%C3%9Fe%201.pdf"
           },
           {
             "name": "s3_bucket",
@@ -690,6 +690,9 @@
           },
           "401": {
             "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
           },
           "404": {
             "$ref": "#/components/responses/NotFoundError"
@@ -1125,6 +1128,54 @@
         }
       }
     },
+    "/v1/files/{id}/text": {
+      "get": {
+        "operationId": "getFileText",
+        "summary": "getFileText",
+        "description": "Get the plain-text representation of a file entity. Returns status `not_ready` while text is being prepared and `unsupported` when text is unavailable for the file or organization.",
+        "tags": [
+          "File"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "The UUID of the file entity",
+            "schema": {
+              "$ref": "#/components/schemas/FileEntityId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Text state for the file entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FileText"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/v1/files/{id}/preview": {
       "get": {
         "operationId": "previewFile",
@@ -1442,6 +1493,27 @@
                 "schema": {
                   "type": "string",
                   "format": "binary"
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "No preview could be generated and no redirect target is available\n(the file has no public URL). No body is returned.\n"
+          },
+          "302": {
+            "description": "The preview could not be optimized (e.g. image dimensions above the input\npixel limit, an oversized file, or an unsupported/undecodable format).\nSince the file is public, the client is redirected to the original file,\nwhich the browser can render directly.\n",
+            "headers": {
+              "Location": {
+                "description": "URL of the original public file",
+                "schema": {
+                  "type": "string",
+                  "format": "uri"
+                }
+              },
+              "Cache-Control": {
+                "description": "Caching policy for the redirect",
+                "schema": {
+                  "type": "string"
                 }
               }
             }
@@ -2377,6 +2449,12 @@
             "description": "Human readable file size",
             "readOnly": true
           },
+          "etag": {
+            "type": "string",
+            "description": "Content hash (S3 ETag) of the latest file version. For single-part uploads this is the hex MD5 of the content and is stable across orgs, so identical content yields an identical etag. Used to detect real content changes without re-downloading the bytes.",
+            "example": "9bb58f26192e4ba00f01e2e7b136bbd8",
+            "readOnly": true
+          },
           "access_control": {
             "type": "string",
             "default": "private",
@@ -2522,6 +2600,109 @@
             "description": "Short English paragraph summary for file preview surfaces."
           }
         }
+      },
+      "FileTextStatus": {
+        "type": "string",
+        "description": "Availability of the plain-text representation for a file entity.",
+        "enum": [
+          "ready",
+          "not_ready",
+          "unsupported"
+        ],
+        "readOnly": true
+      },
+      "FileText": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/FileTextStatus"
+          },
+          "text": {
+            "type": "string"
+          },
+          "truncated": {
+            "type": "boolean"
+          },
+          "total_chars": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/FileTextReady"
+          },
+          {
+            "$ref": "#/components/schemas/FileTextNotReady"
+          },
+          {
+            "$ref": "#/components/schemas/FileTextUnsupported"
+          }
+        ]
+      },
+      "FileTextReady": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "ready"
+            ]
+          },
+          "text": {
+            "type": "string",
+            "description": "Plain-text representation, trimmed and truncated to a server-side limit of 50000 characters."
+          },
+          "truncated": {
+            "type": "boolean",
+            "description": "True when the returned text was cut off by the character limit."
+          },
+          "total_chars": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Length of the full text before truncation."
+          }
+        },
+        "required": [
+          "status",
+          "text",
+          "truncated",
+          "total_chars"
+        ]
+      },
+      "FileTextNotReady": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "not_ready"
+            ]
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "FileTextUnsupported": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "unsupported"
+            ]
+          }
+        },
+        "required": [
+          "status"
+        ]
       },
       "CustomDownloadUrl": {
         "description": "Custom external download url used for the file",
@@ -3094,6 +3275,11 @@
           "mime_type": {
             "type": "string",
             "example": "image/jpeg"
+          },
+          "etag": {
+            "type": "string",
+            "description": "Content hash (S3 ETag) of this file version",
+            "example": "9bb58f26192e4ba00f01e2e7b136bbd8"
           }
         }
       },
