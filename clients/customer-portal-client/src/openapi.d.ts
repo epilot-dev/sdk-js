@@ -16962,16 +16962,6 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetContract.Responses.$200>
   /**
-   * getContractWithTemplates - getContractWithTemplates
-   * 
-   * Get a contract by id, resolving the provided Handlebars templates against each related meter into templates_output. POST variant of getContract that accepts a request body; the GET remains as a fallback.
-   */
-  'getContractWithTemplates'(
-    parameters?: Parameters<Paths.GetContractWithTemplates.PathParameters> | null,
-    data?: Paths.GetContractWithTemplates.RequestBody,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.GetContractWithTemplates.Responses.$200>
-  /**
    * updateContract - updateContract
    * 
    * Update a contract by id. Use getPortalUserEntity instead.
@@ -16981,6 +16971,16 @@ export interface OperationMethods {
     data?: Paths.UpdateContract.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UpdateContract.Responses.$200>
+  /**
+   * getContractWithTemplates - getContractWithTemplates
+   * 
+   * Resolve Handlebars templates against a contract's related meters and return the contract with templates_output populated per meter. This is a read-only operation — it does not modify the contract. It uses POST only so the templates can be passed in the request body. Prefer getPortalUserEntity / getContract for reads that don't need templates.
+   */
+  'getContractWithTemplates'(
+    parameters?: Parameters<Paths.GetContractWithTemplates.PathParameters> | null,
+    data?: Paths.GetContractWithTemplates.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetContractWithTemplates.Responses.$200>
   /**
    * addContractByIdentifiers - addContractByIdentifiers
    * 
@@ -18807,16 +18807,6 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetContract.Responses.$200>
     /**
-     * getContractWithTemplates - getContractWithTemplates
-     * 
-     * Get a contract by id, resolving the provided Handlebars templates against each related meter into templates_output. POST variant of getContract that accepts a request body; the GET remains as a fallback.
-     */
-    'post'(
-      parameters?: Parameters<Paths.GetContractWithTemplates.PathParameters> | null,
-      data?: Paths.GetContractWithTemplates.RequestBody,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.GetContractWithTemplates.Responses.$200>
-    /**
      * updateContract - updateContract
      * 
      * Update a contract by id. Use getPortalUserEntity instead.
@@ -18826,6 +18816,18 @@ export interface PathsDictionary {
       data?: Paths.UpdateContract.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.UpdateContract.Responses.$200>
+  }
+  ['/v2/portal/contract/{id}/resolve-templates']: {
+    /**
+     * getContractWithTemplates - getContractWithTemplates
+     * 
+     * Resolve Handlebars templates against a contract's related meters and return the contract with templates_output populated per meter. This is a read-only operation — it does not modify the contract. It uses POST only so the templates can be passed in the request body. Prefer getPortalUserEntity / getContract for reads that don't need templates.
+     */
+    'post'(
+      parameters?: Parameters<Paths.GetContractWithTemplates.PathParameters> | null,
+      data?: Paths.GetContractWithTemplates.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetContractWithTemplates.Responses.$200>
   }
   ['/v2/portal/contract/by-identifiers']: {
     /**

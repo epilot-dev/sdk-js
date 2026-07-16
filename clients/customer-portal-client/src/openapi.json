@@ -5929,10 +5929,77 @@
           }
         }
       },
+      "patch": {
+        "operationId": "updateContract",
+        "summary": "updateContract",
+        "description": "Update a contract by id. Use getPortalUserEntity instead.",
+        "deprecated": true,
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            },
+            "required": true,
+            "description": "The ID of the contract"
+          }
+        ],
+        "requestBody": {
+          "description": "Requested contract body to update",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Entity"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated the contract successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Contract"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenByRule"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/contract/{id}/resolve-templates": {
       "post": {
         "operationId": "getContractWithTemplates",
         "summary": "getContractWithTemplates",
-        "description": "Get a contract by id, resolving the provided Handlebars templates against each related meter into templates_output. POST variant of getContract that accepts a request body; the GET remains as a fallback.",
+        "description": "Resolve Handlebars templates against a contract's related meters and return the contract with templates_output populated per meter. This is a read-only operation — it does not modify the contract. It uses POST only so the templates can be passed in the request body. Prefer getPortalUserEntity / getContract for reads that don't need templates.",
         "tags": [
           "ECP"
         ],
@@ -6039,71 +6106,6 @@
           },
           "403": {
             "$ref": "#/components/responses/Forbidden"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFound"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalServerError"
-          }
-        }
-      },
-      "patch": {
-        "operationId": "updateContract",
-        "summary": "updateContract",
-        "description": "Update a contract by id. Use getPortalUserEntity instead.",
-        "deprecated": true,
-        "tags": [
-          "ECP"
-        ],
-        "security": [
-          {
-            "PortalAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "schema": {
-              "$ref": "#/components/schemas/EntityId"
-            },
-            "required": true,
-            "description": "The ID of the contract"
-          }
-        ],
-        "requestBody": {
-          "description": "Requested contract body to update",
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/Entity"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Updated the contract successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data": {
-                      "$ref": "#/components/schemas/Contract"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/ForbiddenByRule"
           },
           "404": {
             "$ref": "#/components/responses/NotFound"
