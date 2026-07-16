@@ -39,6 +39,7 @@ const { data } = await fileClient.uploadFileV2(...)
 - [`getCurrentFileSummaryJob`](#getcurrentfilesummaryjob)
 - [`getFileSummaryJob`](#getfilesummaryjob)
 - [`generateFileSummary`](#generatefilesummary)
+- [`getFileText`](#getfiletext)
 - [`verifyCustomDownloadUrl`](#verifycustomdownloadurl)
 - [`uploadFilePublic`](#uploadfilepublic)
 
@@ -76,6 +77,11 @@ const { data } = await fileClient.uploadFileV2(...)
 - [`FileSummaryJobStatus`](#filesummaryjobstatus)
 - [`FileSummaryJob`](#filesummaryjob)
 - [`FileSummary`](#filesummary)
+- [`FileTextStatus`](#filetextstatus)
+- [`FileText`](#filetext)
+- [`FileTextReady`](#filetextready)
+- [`FileTextNotReady`](#filetextnotready)
+- [`FileTextUnsupported`](#filetextunsupported)
 - [`CustomDownloadUrl`](#customdownloadurl)
 - [`CustomDownloadUrlAuth`](#customdownloadurlauth)
 - [`FileEntity`](#fileentity)
@@ -179,6 +185,7 @@ const { data } = await client.saveFileV2(
     mime_type: 'application/pdf',
     size_bytes: 1234,
     readable_size: '1.2 MB',
+    etag: '9bb58f26192e4ba00f01e2e7b136bbd8',
     access_control: 'private',
     public_url: 'https://epilot-prod-user-content.s3.eu-central-1.amazonaws.com/123/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf',
     custom_download_url: 'https://some-api-url.com/download?file_id=123',
@@ -209,6 +216,7 @@ const { data } = await client.saveFileV2(
   "mime_type": "application/pdf",
   "size_bytes": 1234,
   "readable_size": "1.2 MB",
+  "etag": "9bb58f26192e4ba00f01e2e7b136bbd8",
   "access_control": "private",
   "public_url": "https://epilot-prod-user-content.s3.eu-central-1.amazonaws.com/123/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf",
   "custom_download_url": "https://some-api-url.com/download?file_id=123",
@@ -225,7 +233,8 @@ const { data } = await client.saveFileV2(
       "filename": "document.pdf",
       "size_bytes": 1234,
       "readable_size": "1.2 MB",
-      "mime_type": "image/jpeg"
+      "mime_type": "image/jpeg",
+      "etag": "9bb58f26192e4ba00f01e2e7b136bbd8"
     }
   ],
   "_updated_at": "1970-01-01T00:00:00.000Z",
@@ -281,6 +290,7 @@ const { data } = await client.getFile({
   "mime_type": "application/pdf",
   "size_bytes": 1234,
   "readable_size": "1.2 MB",
+  "etag": "9bb58f26192e4ba00f01e2e7b136bbd8",
   "access_control": "private",
   "public_url": "https://epilot-prod-user-content.s3.eu-central-1.amazonaws.com/123/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf",
   "custom_download_url": "https://some-api-url.com/download?file_id=123",
@@ -297,7 +307,8 @@ const { data } = await client.getFile({
       "filename": "document.pdf",
       "size_bytes": 1234,
       "readable_size": "1.2 MB",
-      "mime_type": "image/jpeg"
+      "mime_type": "image/jpeg",
+      "etag": "9bb58f26192e4ba00f01e2e7b136bbd8"
     }
   ],
   "_updated_at": "1970-01-01T00:00:00.000Z",
@@ -353,6 +364,7 @@ const { data } = await client.deleteFile({
   "mime_type": "application/pdf",
   "size_bytes": 1234,
   "readable_size": "1.2 MB",
+  "etag": "9bb58f26192e4ba00f01e2e7b136bbd8",
   "access_control": "private",
   "public_url": "https://epilot-prod-user-content.s3.eu-central-1.amazonaws.com/123/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf",
   "custom_download_url": "https://some-api-url.com/download?file_id=123",
@@ -369,7 +381,8 @@ const { data } = await client.deleteFile({
       "filename": "document.pdf",
       "size_bytes": 1234,
       "readable_size": "1.2 MB",
-      "mime_type": "image/jpeg"
+      "mime_type": "image/jpeg",
+      "etag": "9bb58f26192e4ba00f01e2e7b136bbd8"
     }
   ],
   "_updated_at": "1970-01-01T00:00:00.000Z",
@@ -656,6 +669,34 @@ const { data } = await client.generateFileSummary({
   id: '123e4567-e89b-12d3-a456-426614174000',
 })
 ```
+
+---
+
+### `getFileText`
+
+Get the plain-text representation of a file entity. Returns status `not_ready` while text is being prepared and `unsupported` when text is unavailable for the file or organization.
+
+`GET /v1/files/{id}/text`
+
+```ts
+const { data } = await client.getFileText({
+  id: '123e4567-e89b-12d3-a456-426614174000',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "status": "ready",
+  "text": "string",
+  "truncated": true,
+  "total_chars": 0
+}
+```
+
+</details>
 
 ---
 
@@ -1072,6 +1113,7 @@ const { data } = await client.getFilesInCollection({
     "mime_type": "application/pdf",
     "size_bytes": 1234,
     "readable_size": "1.2 MB",
+    "etag": "9bb58f26192e4ba00f01e2e7b136bbd8",
     "access_control": "private",
     "public_url": "https://epilot-prod-user-content.s3.eu-central-1.amazonaws.com/123/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf",
     "custom_download_url": "https://some-api-url.com/download?file_id=123",
@@ -1088,7 +1130,8 @@ const { data } = await client.getFilesInCollection({
         "filename": "document.pdf",
         "size_bytes": 1234,
         "readable_size": "1.2 MB",
-        "mime_type": "image/jpeg"
+        "mime_type": "image/jpeg",
+        "etag": "9bb58f26192e4ba00f01e2e7b136bbd8"
       }
     ],
     "_updated_at": "1970-01-01T00:00:00.000Z",
@@ -1191,6 +1234,7 @@ type FileAttributes = {
   mime_type?: string
   size_bytes?: number
   readable_size?: string
+  etag?: string
   access_control?: "private" | "public-read"
   public_url?: string // url
   custom_download_url?: string // uri
@@ -1243,6 +1287,56 @@ type FileSummary = {
 }
 ```
 
+### `FileTextStatus`
+
+Availability of the plain-text representation for a file entity.
+
+```ts
+type FileTextStatus = "ready" | "not_ready" | "unsupported"
+```
+
+### `FileText`
+
+```ts
+type FileText = {
+  status: "ready"
+  text: string
+  truncated: boolean
+  total_chars: number
+} | {
+  status: "not_ready"
+} | {
+  status: "unsupported"
+}
+```
+
+### `FileTextReady`
+
+```ts
+type FileTextReady = {
+  status: "ready"
+  text: string
+  truncated: boolean
+  total_chars: number
+}
+```
+
+### `FileTextNotReady`
+
+```ts
+type FileTextNotReady = {
+  status: "not_ready"
+}
+```
+
+### `FileTextUnsupported`
+
+```ts
+type FileTextUnsupported = {
+  status: "unsupported"
+}
+```
+
 ### `CustomDownloadUrl`
 
 Custom external download url used for the file
@@ -1275,6 +1369,7 @@ type FileEntity = {
   mime_type?: string
   size_bytes?: number
   readable_size?: string
+  etag?: string
   access_control: "private" | "public-read"
   public_url?: string // url
   custom_download_url?: string // uri
@@ -1291,6 +1386,7 @@ type FileEntity = {
     size_bytes?: number
     readable_size?: string
     mime_type?: string
+    etag?: string
   }>
   _updated_at?: string // date-time
   _created_at?: string // date-time
@@ -1340,6 +1436,7 @@ type SaveS3FilePayload = {
   mime_type?: string
   size_bytes?: number
   readable_size?: string
+  etag?: string
   access_control?: "private" | "public-read"
   public_url?: string // url
   custom_download_url?: string // uri
@@ -1371,6 +1468,7 @@ type SaveFileFromSourceURLPayload = {
   mime_type?: string
   size_bytes?: number
   readable_size?: string
+  etag?: string
   access_control?: "private" | "public-read"
   public_url?: string // url
   custom_download_url?: string // uri
@@ -1402,6 +1500,7 @@ type SaveCustomFilePayload = {
   mime_type?: string
   size_bytes?: number
   readable_size?: string
+  etag?: string
   access_control?: "private" | "public-read"
   public_url?: string // url
   custom_download_url?: string // uri
@@ -1432,6 +1531,7 @@ type SaveFilePayload = {
   mime_type?: string
   size_bytes?: number
   readable_size?: string
+  etag?: string
   access_control?: "private" | "public-read"
   public_url?: string // url
   custom_download_url?: string // uri
@@ -1457,6 +1557,7 @@ type SaveFilePayload = {
   mime_type?: string
   size_bytes?: number
   readable_size?: string
+  etag?: string
   access_control?: "private" | "public-read"
   public_url?: string // url
   custom_download_url?: string // uri
@@ -1482,6 +1583,7 @@ type SaveFilePayload = {
   mime_type?: string
   size_bytes?: number
   readable_size?: string
+  etag?: string
   access_control?: "private" | "public-read"
   public_url?: string // url
   custom_download_url?: string // uri
@@ -1512,6 +1614,7 @@ type SaveFilePayloadV2 = {
   mime_type?: string
   size_bytes?: number
   readable_size?: string
+  etag?: string
   access_control?: "private" | "public-read"
   public_url?: string // url
   custom_download_url?: string // uri
@@ -1537,6 +1640,7 @@ type SaveFilePayloadV2 = {
   mime_type?: string
   size_bytes?: number
   readable_size?: string
+  etag?: string
   access_control?: "private" | "public-read"
   public_url?: string // url
   custom_download_url?: string // uri
@@ -1562,6 +1666,7 @@ type SaveFilePayloadV2 = {
   mime_type?: string
   size_bytes?: number
   readable_size?: string
+  etag?: string
   access_control?: "private" | "public-read"
   public_url?: string // url
   custom_download_url?: string // uri
@@ -1691,6 +1796,7 @@ type FileItem = {
   size_bytes?: number
   readable_size?: string
   mime_type?: string
+  etag?: string
 }
 ```
 
