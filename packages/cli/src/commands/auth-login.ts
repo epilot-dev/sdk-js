@@ -11,6 +11,10 @@ export default defineCommand({
     token: { type: 'string', description: 'Manually provide a token instead of browser login' },
     profile: { type: 'string', description: 'Save credentials to this profile' },
     readonly: { type: 'boolean', description: 'Generate a read-only token (cannot perform write actions)' },
+    anonymize: {
+      type: 'boolean',
+      description: 'Generate an anonymized token (personal data is masked in all API responses)',
+    },
     'use-dev': { type: 'boolean', description: 'Use dev environment (portal.dev.epilot.cloud)' },
     'use-staging': { type: 'boolean', description: 'Use staging environment (portal.staging.epilot.cloud)' },
   },
@@ -18,6 +22,7 @@ export default defineCommand({
     const profileName = args.profile || process.env.EPILOT_PROFILE;
     const env = resolveEnvironment(args['use-dev'], args['use-staging']);
     const readonly = Boolean(args.readonly);
+    const anonymize = Boolean(args.anonymize);
 
     // Manual token input
     if (args.token) {
@@ -35,7 +40,7 @@ export default defineCommand({
       process.exit(1);
     }
 
-    const token = await browserLogin(profileName, env, readonly);
+    const token = await browserLogin(profileName, env, readonly, anonymize);
     if (token) {
       process.stdout.write(`${GREEN}${BOLD}Login successful!${RESET}\n`);
     } else {
@@ -49,6 +54,7 @@ const browserLogin = async (
   profileName?: string,
   env: Environment = 'production',
   readonly = false,
+  anonymize = false,
 ): Promise<string | null> => {
   // Generate a cryptographic state parameter to prevent CSRF
   const state = randomBytes(32).toString('hex');
@@ -63,6 +69,11 @@ const browserLogin = async (
   if (readonly) {
     process.stdout.write(
       `${YELLOW}Read-only mode: the CLI session will not be able to perform write actions.${RESET}\n`,
+    );
+  }
+  if (anonymize) {
+    process.stdout.write(
+      `${YELLOW}Anonymize mode: personal data will be masked in all API responses for this CLI session.${RESET}\n`,
     );
   }
   process.stdout.write('\n');
@@ -111,7 +122,8 @@ const browserLogin = async (
         `${portalUrl}/login?cli_callback=${encodeURIComponent(callbackUrl)}` +
         `&state=${state}` +
         `&code=${verificationCode}` +
-        (readonly ? `&readonly=true` : '');
+        (readonly ? `&readonly=true` : '') +
+        (anonymize ? `&anonymize=true` : '');
 
       process.stdout.write(`\n${DIM}Login URL: ${loginUrl}${RESET}\n\n`);
 
