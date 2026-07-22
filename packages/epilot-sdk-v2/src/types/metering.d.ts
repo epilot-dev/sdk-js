@@ -499,7 +499,7 @@ export declare namespace Components {
             /**
              * The calibration date of the meter
              * example:
-             * 2022-10-10T00:00:00.000Z
+             * 2022-10-10
              */
             calibration_date?: string;
             /**
@@ -574,7 +574,7 @@ export declare namespace Components {
             /**
              * The date as of which the forecast reading value is applicable
              * example:
-             * 2022-12-10T00:00:00.000Z
+             * 2022-12-10
              */
             forecast_as_of?: string;
             /**
@@ -586,7 +586,7 @@ export declare namespace Components {
             /**
              * The timestamp of the last reading
              * example:
-             * 2022-10-10T00:00:00.000Z
+             * 2022-10-10
              */
             last_reading?: string;
             /**
@@ -622,7 +622,7 @@ export declare namespace Components {
             /**
              * If the value is not provided, the system will be set with the time the request is processed.
              * example:
-             * 2022-10-10T00:00:00.000Z
+             * 2022-10-10
              */
             timestamp?: string; // date-time
             source: Source;
@@ -752,7 +752,7 @@ export declare namespace Components {
             /**
              * If the value is not provided, the system will be set with the time the request is processed.
              * example:
-             * 2022-10-10T00:00:00.000Z
+             * 2022-10-10
              */
             timestamp?: string; // date-time
             source: Source;
@@ -794,6 +794,32 @@ export declare namespace Components {
             status?: "valid" | "in-validation" | "implausible";
             external_id?: string;
         }
+        export interface PruneMeterReadingsPayload {
+            /**
+             * The ID of the meter whose readings are pruned
+             */
+            meter_id: EntityId /* uuid */;
+            /**
+             * Optionally narrows the prune scope to a single counter of the meter
+             */
+            counter_id?: EntityId /* uuid */;
+            /**
+             * Optionally only prune readings with this source (e.g. `ERP`)
+             */
+            source?: Source;
+            /**
+             * Readings whose `external_id` is contained in this list are kept; every other reading in scope is deleted.
+             * An empty array deletes all readings in scope (subject to the no-external-id rule described on the endpoint).
+             * Limited to 10000 entries.
+             *
+             * example:
+             * [
+             *   "erp-reading-1",
+             *   "erp-reading-2"
+             * ]
+             */
+            keep_external_ids: string[];
+        }
         /**
          * The person who recorded the reading
          * example:
@@ -834,7 +860,7 @@ export declare namespace Components {
             /**
              * If the value is not provided, the system will be set with the time the request is processed.
              * example:
-             * 2022-10-10T00:00:00.000Z
+             * 2022-10-10
              */
             timestamp?: string; // date-time
             /**
@@ -1125,7 +1151,7 @@ export declare namespace Components {
             /**
              * If the value is not provided, the system will be set with the time the request is processed.
              * example:
-             * 2022-10-10T00:00:00.000Z
+             * 2022-10-10
              */
             timestamp?: string; // date-time
             /**
@@ -1587,7 +1613,7 @@ export declare namespace Paths {
                     /**
                      * The calibration date of the meter
                      * example:
-                     * 2022-10-10T00:00:00.000Z
+                     * 2022-10-10
                      */
                     calibration_date?: string;
                     /**
@@ -1606,7 +1632,7 @@ export declare namespace Paths {
                     /**
                      * The timestamp of the last reading
                      * example:
-                     * 2022-10-10T00:00:00.000Z
+                     * 2022-10-10
                      */
                     last_reading?: string;
                     /**
@@ -1768,6 +1794,48 @@ export declare namespace Paths {
                  * 2022-10-01T20:00:00.000Z
                  */
                 firstRecordCreatedAt?: string;
+            }
+            export type $400 = Components.Responses.InvalidRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace PruneMeterReadings {
+        namespace Parameters {
+            export type ActivityId = /**
+             * See https://github.com/ulid/spec
+             * example:
+             * 01F130Q52Q6MWSNS8N2AVXV4JN
+             */
+            Components.Schemas.ActivityId /* ulid */;
+            export type Async = boolean;
+            export type CreateTicket = boolean;
+            export type DryRun = boolean;
+        }
+        export interface QueryParameters {
+            async?: Parameters.Async;
+            activity_id?: Parameters.ActivityId;
+            create_ticket?: Parameters.CreateTicket;
+            dry_run?: Parameters.DryRun;
+        }
+        export type RequestBody = Components.Schemas.PruneMeterReadingsPayload;
+        namespace Responses {
+            export interface $200 {
+                data?: {
+                    /**
+                     * Number of readings deleted (or that would be deleted when `dry_run=true`).
+                     * example:
+                     * 42
+                     */
+                    deleted_count?: number;
+                    /**
+                     * Number of readings in scope that were kept.
+                     * example:
+                     * 12
+                     */
+                    kept_count?: number;
+                };
             }
             export type $400 = Components.Responses.InvalidRequest;
             export type $401 = Components.Responses.Unauthorized;
@@ -1986,6 +2054,32 @@ export interface OperationMethods {
     data?: Paths.BatchWriteMeterReadings.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.BatchWriteMeterReadings.Responses.$200>
+  /**
+   * pruneMeterReadings - pruneMeterReadings
+   * 
+   * Deletes every reading of a meter whose `external_id` is NOT in the provided keep list — in a single request.
+   * 
+   * The prune scope can optionally be narrowed to a single counter (`counter_id`) and/or a reading `source` (e.g. `ERP`).
+   * Replaces the client-side pattern of paginating the full reading history and issuing chunked batch deletes.
+   * 
+   * Readings without an `external_id`:
+   * - when a `source` filter is provided, they are **deleted** — they cannot be referenced by any keep list
+   * - when no `source` filter is provided, they are **kept** (conservative default)
+   * 
+   * Deletions reuse the same internal path as `batchWriteMeterReadings` with `operation: delete`: the same
+   * per-reading lifecycle events are emitted, and providing `activity_id` suppresses the per-reading delete
+   * activities and attaches the given activity to the affected meter and counters instead. Delete operations
+   * never create manual-intervention tickets; `create_ticket` is accepted for call-site parity with
+   * `batchWriteMeterReadings`.
+   * 
+   * `keep_external_ids` is limited to 10000 entries.
+   * 
+   */
+  'pruneMeterReadings'(
+    parameters?: Parameters<Paths.PruneMeterReadings.QueryParameters> | null,
+    data?: Paths.PruneMeterReadings.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.PruneMeterReadings.Responses.$200>
   /**
    * createMeterReadingFromSubmission - createMeterReadingFromSubmission
    * 
@@ -2258,6 +2352,34 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.BatchWriteMeterReadings.Responses.$200>
   }
+  ['/v2/metering/readings/prune']: {
+    /**
+     * pruneMeterReadings - pruneMeterReadings
+     * 
+     * Deletes every reading of a meter whose `external_id` is NOT in the provided keep list — in a single request.
+     * 
+     * The prune scope can optionally be narrowed to a single counter (`counter_id`) and/or a reading `source` (e.g. `ERP`).
+     * Replaces the client-side pattern of paginating the full reading history and issuing chunked batch deletes.
+     * 
+     * Readings without an `external_id`:
+     * - when a `source` filter is provided, they are **deleted** — they cannot be referenced by any keep list
+     * - when no `source` filter is provided, they are **kept** (conservative default)
+     * 
+     * Deletions reuse the same internal path as `batchWriteMeterReadings` with `operation: delete`: the same
+     * per-reading lifecycle events are emitted, and providing `activity_id` suppresses the per-reading delete
+     * activities and attaches the given activity to the affected meter and counters instead. Delete operations
+     * never create manual-intervention tickets; `create_ticket` is accepted for call-site parity with
+     * `batchWriteMeterReadings`.
+     * 
+     * `keep_external_ids` is limited to 10000 entries.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.PruneMeterReadings.QueryParameters> | null,
+      data?: Paths.PruneMeterReadings.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.PruneMeterReadings.Responses.$200>
+  }
   ['/v1/metering/reading/submission']: {
     /**
      * createMeterReadingFromSubmission - createMeterReadingFromSubmission
@@ -2422,6 +2544,7 @@ export type MeterReading = Components.Schemas.MeterReading;
 export type MeterReadingChangeset = Components.Schemas.MeterReadingChangeset;
 export type PortalMeterReading = Components.Schemas.PortalMeterReading;
 export type ProposedReading = Components.Schemas.ProposedReading;
+export type PruneMeterReadingsPayload = Components.Schemas.PruneMeterReadingsPayload;
 export type ReadBy = Components.Schemas.ReadBy;
 export type Reading = Components.Schemas.Reading;
 export type ReadingStatus = Components.Schemas.ReadingStatus;

@@ -37,6 +37,7 @@ const { data } = await meteringClient.getCustomerMeters(...)
 - [`createMeterReading`](#createmeterreading)
 - [`createMeterReadings`](#createmeterreadings)
 - [`batchWriteMeterReadings`](#batchwritemeterreadings)
+- [`pruneMeterReadings`](#prunemeterreadings)
 - [`createMeterReadingFromSubmission`](#createmeterreadingfromsubmission)
 - [`getAllowedReadingForMeter`](#getallowedreadingformeter)
 - [`createReadingWithMeter`](#createreadingwithmeter)
@@ -73,6 +74,7 @@ const { data } = await meteringClient.getCustomerMeters(...)
 - [`CreateOrUpdateBatchReading`](#createorupdatebatchreading)
 - [`DeleteBatchReading`](#deletebatchreading)
 - [`BatchReading`](#batchreading)
+- [`PruneMeterReadingsPayload`](#prunemeterreadingspayload)
 - [`UpdateMeterReading`](#updatemeterreading)
 - [`MeterCounter`](#metercounter)
 - [`CounterReadingOnSubmission`](#counterreadingonsubmission)
@@ -135,7 +137,7 @@ const { data } = await client.getCustomerMeters({
       ],
       "used_for": "Domestic Usage",
       "manufacturer": "Energy One",
-      "calibration_date": "2022-10-10T00:00:00.000Z",
+      "calibration_date": "2022-10-10",
       "contract": {
         "$relation": [
           {
@@ -167,7 +169,7 @@ const { data } = await client.getCustomerMeters({
           }
         ]
       },
-      "last_reading": "2022-10-10T00:00:00.000Z",
+      "last_reading": "2022-10-10",
       "current_consumption": 100.5
     }
   ]
@@ -223,7 +225,7 @@ const { data } = await client.getMetersByContractId({
       ],
       "used_for": "Domestic Usage",
       "manufacturer": "Energy One",
-      "calibration_date": "2022-10-10T00:00:00.000Z",
+      "calibration_date": "2022-10-10",
       "contract": {
         "$relation": [
           {
@@ -296,7 +298,7 @@ const { data } = await client.updateMeter(
     ],
     "used_for": "Domestic Usage",
     "manufacturer": "Energy One",
-    "calibration_date": "2022-10-10T00:00:00.000Z",
+    "calibration_date": "2022-10-10",
     "contract": {
       "$relation": [
         {
@@ -366,7 +368,7 @@ const { data } = await client.getMeter({
       ],
       "used_for": "Domestic Usage",
       "manufacturer": "Energy One",
-      "calibration_date": "2022-10-10T00:00:00.000Z",
+      "calibration_date": "2022-10-10",
       "contract": {
         "$relation": [
           {
@@ -448,9 +450,9 @@ const { data } = await client.getMeterCounters({
       "transformer_ratio": 70,
       "unit": "string",
       "forecast_reading_value": 270,
-      "forecast_as_of": "2022-12-10T00:00:00.000Z",
+      "forecast_as_of": "2022-12-10",
       "current_consumption": 240,
-      "last_reading": "2022-10-10T00:00:00.000Z",
+      "last_reading": "2022-10-10",
       "conversion_factor": 3,
       "tariff_type": "ht"
     }
@@ -492,9 +494,9 @@ const { data } = await client.getCounterDetails({
     "transformer_ratio": 70,
     "unit": "string",
     "forecast_reading_value": 270,
-    "forecast_as_of": "2022-12-10T00:00:00.000Z",
+    "forecast_as_of": "2022-12-10",
     "current_consumption": 240,
-    "last_reading": "2022-10-10T00:00:00.000Z",
+    "last_reading": "2022-10-10",
     "conversion_factor": 3,
     "tariff_type": "ht"
   }
@@ -523,7 +525,7 @@ const { data } = await client.createMeterReading(
     meter_id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
     counter_id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
     direction: 'feed-in',
-    timestamp: '2022-10-10T00:00:00.000Z',
+    timestamp: '2022-10-10',
     source: 'ECP',
     status: 'valid',
     external_id: 'string',
@@ -550,7 +552,7 @@ const { data } = await client.createMeterReading(
     "meter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
     "counter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
     "direction": "feed-in",
-    "timestamp": "2022-10-10T00:00:00.000Z",
+    "timestamp": "2022-10-10",
     "source": "ECP",
     "status": "valid",
     "external_id": "string",
@@ -593,7 +595,7 @@ const { data } = await client.createMeterReadings(
         meter_id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
         counter_id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
         direction: 'feed-in',
-        timestamp: '2022-10-10T00:00:00.000Z',
+        timestamp: '2022-10-10',
         source: 'ECP',
         status: 'valid',
         external_id: 'string',
@@ -623,7 +625,7 @@ const { data } = await client.createMeterReadings(
       "meter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
       "counter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
       "direction": "feed-in",
-      "timestamp": "2022-10-10T00:00:00.000Z",
+      "timestamp": "2022-10-10",
       "source": "ECP",
       "status": "valid",
       "external_id": "string",
@@ -665,7 +667,7 @@ const { data } = await client.createPortalMeterReadings(
         meter_id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
         counter_id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
         direction: 'feed-in',
-        timestamp: '2022-10-10T00:00:00.000Z',
+        timestamp: '2022-10-10',
         source: 'ECP',
         status: 'valid',
         external_id: 'string',
@@ -695,7 +697,7 @@ const { data } = await client.createPortalMeterReadings(
       "meter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
       "counter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
       "direction": "feed-in",
-      "timestamp": "2022-10-10T00:00:00.000Z",
+      "timestamp": "2022-10-10",
       "source": "ECP",
       "status": "valid",
       "external_id": "string",
@@ -771,7 +773,7 @@ const { data } = await client.batchWriteMeterReadings(
       "meter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
       "counter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
       "direction": "feed-in",
-      "timestamp": "2022-10-10T00:00:00.000Z",
+      "timestamp": "2022-10-10",
       "source": "ECP",
       "status": "valid",
       "external_id": "string",
@@ -784,6 +786,45 @@ const { data } = await client.batchWriteMeterReadings(
       "unit": "string"
     }
   ]
+}
+```
+
+</details>
+
+---
+
+### `pruneMeterReadings`
+
+Deletes every reading of a meter whose `external_id` is NOT in the provided keep list — in a single request.
+
+`POST /v2/metering/readings/prune`
+
+```ts
+const { data } = await client.pruneMeterReadings(
+  {
+    async: true,
+    activity_id: 'example',
+    create_ticket: true,
+    dry_run: true,
+  },
+  {
+    meter_id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+    counter_id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+    source: 'ECP',
+    keep_external_ids: ['erp-reading-1', 'erp-reading-2']
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "data": {
+    "deleted_count": 42,
+    "kept_count": 12
+  }
 }
 ```
 
@@ -916,7 +957,7 @@ const { data } = await client.createReadingWithMeter(
     "meter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
     "counter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
     "direction": "feed-in",
-    "timestamp": "2022-10-10T00:00:00.000Z",
+    "timestamp": "2022-10-10",
     "source": "ECP",
     "status": "valid",
     "external_id": "string",
@@ -971,7 +1012,7 @@ const { data } = await client.getReadingsByInterval({
       "meter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
       "counter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
       "direction": "feed-in",
-      "timestamp": "2022-10-10T00:00:00.000Z",
+      "timestamp": "2022-10-10",
       "source": "ECP",
       "status": "valid",
       "external_id": "string",
@@ -1013,7 +1054,7 @@ const { data } = await client.updateMeterReading(
     meter_id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
     counter_id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
     direction: 'feed-in',
-    timestamp: '2022-10-10T00:00:00.000Z',
+    timestamp: '2022-10-10',
     source: 'ECP',
     status: 'valid',
     external_id: 'string',
@@ -1038,7 +1079,7 @@ const { data } = await client.updateMeterReading(
     "meter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
     "counter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
     "direction": "feed-in",
-    "timestamp": "2022-10-10T00:00:00.000Z",
+    "timestamp": "2022-10-10",
     "source": "ECP",
     "status": "valid",
     "external_id": "string",
@@ -1181,7 +1222,7 @@ const { data } = await client.applyReadingChangeset({
     "meter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
     "counter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
     "direction": "feed-in",
-    "timestamp": "2022-10-10T00:00:00.000Z",
+    "timestamp": "2022-10-10",
     "source": "ECP",
     "status": "valid",
     "external_id": "string",
@@ -1689,6 +1730,17 @@ type BatchReading = {
   external_id?: string
   metadata?: Record<string, string>
   operation: "delete"
+}
+```
+
+### `PruneMeterReadingsPayload`
+
+```ts
+type PruneMeterReadingsPayload = {
+  meter_id: string // uuid
+  counter_id?: string // uuid
+  source?: "ECP" | "ERP" | "360" | "journey-submission"
+  keep_external_ids: string[]
 }
 ```
 
