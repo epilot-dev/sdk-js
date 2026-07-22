@@ -2745,6 +2745,26 @@
       "SearchIDParams": {
         "type": "object",
         "properties": {
+          "inbox_id": {
+            "oneOf": [
+              {
+                "type": "string",
+                "description": "Inbox ID",
+                "example": "3f34ce73-089c-4d45-a5ee-c161234e41c3"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Inbox IDs",
+                "example": [
+                  "3f34ce73-089c-4d45-a5ee-c161234e41c3",
+                  "3f34ce73-089c-4d45-a5ee-c161234e41c4"
+                ]
+              }
+            ]
+          },
           "q": {
             "description": "Lucene query syntax supported with ElasticSearch",
             "type": "string",

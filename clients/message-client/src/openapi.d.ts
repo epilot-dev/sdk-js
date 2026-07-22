@@ -614,6 +614,7 @@ declare namespace Components {
          */
         export type ReadingScope = "organization" | "user";
         export interface SearchIDParams {
+            inbox_id?: string | string[];
             /**
              * Lucene query syntax supported with ElasticSearch
              * example:
@@ -2851,6 +2852,7 @@ declare namespace Paths {
     }
 }
 
+
 export interface OperationMethods {
   /**
    * updateMessage - updateMessage
@@ -4096,6 +4098,7 @@ export interface PathsDictionary {
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
+
 
 export type Address = Components.Schemas.Address;
 export type AssigneeWorkload = Components.Schemas.AssigneeWorkload;
