@@ -714,6 +714,7 @@ Search threads and return all id's
 const { data } = await client.searchIds(
   null,
   {
+    inbox_id: '3f34ce73-089c-4d45-a5ee-c161234e41c3',
     q: 'subject:"Request for solar panel price" AND _tags:INBOX'
   },
 )
@@ -2169,6 +2170,7 @@ type SearchParams = {
 
 ```ts
 type SearchIDParams = {
+  inbox_id?: string | string[]
   q?: string
 }
 ```
