@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.30.0
+
+### Minor Changes
+
+- "Add inbox_id to searchIds"
+
 ## 1.28.0
 
 - Added `unlink_mapped_entities` query param to `unassignThread` to also remove unassigned entities from `mapped_entities` on related source entities
