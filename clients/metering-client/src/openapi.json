@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Metering API",
-    "version": "1.1.0",
+    "version": "1.2.0",
     "description": "The Metering API manages smart meter data, meter counters, and meter readings for epilot customers and administrators.\n\nIt supports two audiences:\n- **ECP (End Customer Portal)**: Portal users can view their meters, counters, and submit readings via the customer portal.\n- **ECP Admin**: Internal epilot users and ERP integrations can create, update, and bulk-manage meter readings.\n\nKey capabilities:\n- Retrieve meters and counters associated with a customer or contract\n- Submit individual or bulk meter readings (with optional validation skip)\n- Batch upsert/delete readings using the v2 endpoint\n- Query historical readings by date interval with cumulative or relative consumption modes\n- Retrieve allowed reading ranges to guide end customers entering readings\n"
   },
   "tags": [
@@ -104,7 +104,7 @@
                             "properties": {
                               "last_reading": {
                                 "type": "string",
-                                "example": "2022-10-10T00:00:00.000Z",
+                                "example": "2022-10-10",
                                 "description": "The timestamp of the last reading"
                               },
                               "current_consumption": {
@@ -778,6 +778,101 @@
           },
           "400": {
             "$ref": "#/components/responses/InvalidRequestCreateMeterReadings"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/metering/readings/prune": {
+      "post": {
+        "operationId": "pruneMeterReadings",
+        "summary": "pruneMeterReadings",
+        "description": "Deletes every reading of a meter whose `external_id` is NOT in the provided keep list — in a single request.\n\nThe prune scope can optionally be narrowed to a single counter (`counter_id`) and/or a reading `source` (e.g. `ERP`).\nReplaces the client-side pattern of paginating the full reading history and issuing chunked batch deletes.\n\nReadings without an `external_id`:\n- when a `source` filter is provided, they are **deleted** — they cannot be referenced by any keep list\n- when no `source` filter is provided, they are **kept** (conservative default)\n\nDeletions reuse the same internal path as `batchWriteMeterReadings` with `operation: delete`: the same\nper-reading lifecycle events are emitted, and providing `activity_id` suppresses the per-reading delete\nactivities and attaches the given activity to the affected meter and counters instead. Delete operations\nnever create manual-intervention tickets; `create_ticket` is accepted for call-site parity with\n`batchWriteMeterReadings`.\n\n`keep_external_ids` is limited to 10000 entries.\n",
+        "tags": [
+          "ECP Admin"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "async",
+            "description": "Don't wait for the deletions to become visible in GetReadings API. Useful for large prunes",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": true
+            }
+          },
+          {
+            "$ref": "#/components/parameters/ActivityIdQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/CreateTicketQueryParam"
+          },
+          {
+            "in": "query",
+            "name": "dry_run",
+            "description": "When true, computes and returns the deleted/kept counts without deleting anything.",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Prune scope and keep list.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PruneMeterReadingsPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Meter readings pruned successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "deleted_count": {
+                          "type": "integer",
+                          "description": "Number of readings deleted (or that would be deleted when `dry_run=true`).",
+                          "example": 42
+                        },
+                        "kept_count": {
+                          "type": "integer",
+                          "description": "Number of readings in scope that were kept.",
+                          "example": 12
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
@@ -2035,7 +2130,7 @@
               },
               "calibration_date": {
                 "type": "string",
-                "example": "2022-10-10T00:00:00.000Z",
+                "example": "2022-10-10",
                 "description": "The calibration date of the meter"
               },
               "contract": {
@@ -2151,7 +2246,7 @@
           "timestamp": {
             "type": "string",
             "description": "If the value is not provided, the system will be set with the time the request is processed.",
-            "example": "2022-10-10T00:00:00.000Z",
+            "example": "2022-10-10",
             "format": "date-time"
           },
           "source": {
@@ -2353,6 +2448,38 @@
           "propertyName": "operation"
         }
       },
+      "PruneMeterReadingsPayload": {
+        "type": "object",
+        "required": [
+          "meter_id",
+          "keep_external_ids"
+        ],
+        "properties": {
+          "meter_id": {
+            "$ref": "#/components/schemas/EntityId",
+            "description": "The ID of the meter whose readings are pruned"
+          },
+          "counter_id": {
+            "$ref": "#/components/schemas/EntityId",
+            "description": "Optionally narrows the prune scope to a single counter of the meter"
+          },
+          "source": {
+            "$ref": "#/components/schemas/Source",
+            "description": "Optionally only prune readings with this source (e.g. `ERP`)"
+          },
+          "keep_external_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Readings whose `external_id` is contained in this list are kept; every other reading in scope is deleted.\nAn empty array deletes all readings in scope (subject to the no-external-id rule described on the endpoint).\nLimited to 10000 entries.\n",
+            "example": [
+              "erp-reading-1",
+              "erp-reading-2"
+            ]
+          }
+        }
+      },
       "UpdateMeterReading": {
         "type": "object",
         "required": [
@@ -2387,7 +2514,7 @@
           "timestamp": {
             "type": "string",
             "description": "If the value is not provided, the system will be set with the time the request is processed.",
-            "example": "2022-10-10T00:00:00.000Z",
+            "example": "2022-10-10",
             "format": "date-time"
           },
           "source": {
@@ -2466,7 +2593,7 @@
               },
               "forecast_as_of": {
                 "type": "string",
-                "example": "2022-12-10T00:00:00.000Z",
+                "example": "2022-12-10",
                 "description": "The date as of which the forecast reading value is applicable"
               },
               "current_consumption": {
@@ -2476,7 +2603,7 @@
               },
               "last_reading": {
                 "type": "string",
-                "example": "2022-10-10T00:00:00.000Z",
+                "example": "2022-10-10",
                 "description": "The timestamp of the last reading"
               },
               "conversion_factor": {
