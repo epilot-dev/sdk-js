@@ -158,6 +158,22 @@
         "responses": {}
       }
     },
+    "/v2/outlook/calendar/admin-consent-status": {
+      "get": {
+        "operationId": "getCalendarAdminConsentStatus",
+        "responses": {}
+      }
+    },
+    "/v2/outlook/calendar/me": {
+      "get": {
+        "operationId": "getMyCalendarConnection",
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "disconnectMyCalendar",
+        "responses": {}
+      }
+    },
     "/v2/outlook/connection/disconnect": {
       "post": {
         "operationId": "disconnectOutlook",
@@ -270,6 +286,91 @@
         "responses": {}
       }
     },
+    "/v2/smtp/connections": {
+      "get": {
+        "operationId": "listSmtpConnections",
+        "responses": {}
+      },
+      "post": {
+        "operationId": "createSmtpConnection",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/smtp/connections/{connectionId}": {
+      "parameters": [
+        {
+          "name": "connectionId",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "get": {
+        "operationId": "getSmtpConnection",
+        "responses": {}
+      },
+      "put": {
+        "operationId": "updateSmtpConnection",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteSmtpConnection",
+        "responses": {}
+      }
+    },
+    "/v2/smtp/connections/{connectionId}/test": {
+      "parameters": [
+        {
+          "name": "connectionId",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "post": {
+        "operationId": "testSmtpConnection",
+        "responses": {}
+      }
+    },
+    "/v2/smtp/senders": {
+      "get": {
+        "operationId": "listSmtpSenders",
+        "responses": {}
+      },
+      "post": {
+        "operationId": "connectSmtpSender",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/smtp/senders/{email}": {
+      "parameters": [
+        {
+          "name": "email",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "delete": {
+        "operationId": "disconnectSmtpSender",
+        "responses": {}
+      }
+    },
     "/v2/outlook/oauth/callback": {
       "get": {
         "operationId": "outlookOAuthCallback",
@@ -321,6 +422,11 @@
           },
           {
             "name": "tenant",
+            "in": "query",
+            "required": false
+          },
+          {
+            "name": "clientdata",
             "in": "query",
             "required": false
           }

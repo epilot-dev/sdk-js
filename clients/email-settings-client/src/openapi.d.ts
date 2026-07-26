@@ -37,6 +37,43 @@ declare namespace Components {
         export type UpdateSharedInboxSuccessResponse = /* Shared inbox configuration with all associated metadata. */ Schemas.SharedInboxResponse;
     }
     namespace Schemas {
+        export interface CalendarAdminConsentStatus {
+            /**
+             * True when the tenant admin has consented to epilot's Microsoft 365
+             * app, so users in this organization can connect personal calendars.
+             *
+             */
+            admin_consented: boolean;
+            /**
+             * Microsoft admin-consent URL for an administrator to open. Present
+             * only when `admin_consented` is false.
+             *
+             */
+            admin_consent_url?: string; // uri
+        }
+        export interface CalendarConnectionInfo {
+            /**
+             * Azure AD Object ID of the connected user
+             */
+            user_id: string;
+            /**
+             * Microsoft Azure AD tenant ID
+             */
+            tenant_id: string;
+            /**
+             * Token health for this calendar connection
+             */
+            status: "connected" | "expired";
+            /**
+             * Granted permission scopes on the user's token
+             */
+            scopes?: string[];
+            connected_by_display_name?: string;
+            connected_by_email?: string; // email
+            connected_at?: string; // date-time
+            updated_at?: string; // date-time
+            expires_at?: string; // date-time
+        }
         /**
          * Feature flags selecting which Microsoft Graph scopes to request.
          * At least one flag must be true. Passing a superset of previously
@@ -52,6 +89,47 @@ declare namespace Components {
              * Request 'calendar' specific scopes.
              */
             calendar?: boolean;
+            /**
+             * Optional same-origin frontend path to redirect to after the OAuth
+             * round-trip. Must start with a single "/" — protocol-relative
+             * and absolute URLs are rejected.
+             *
+             */
+            return_to?: string; // ^/[^/\\].*$
+        }
+        export interface ConnectSmtpSenderRequest {
+            /**
+             * Address to send from. Must be one the SMTP server accepts as a From.
+             */
+            email: string; // email
+            /**
+             * SMTP connection to send through
+             */
+            connection_id: string;
+            /**
+             * Sender name shown on outgoing messages.
+             */
+            name?: string;
+            /**
+             * Email address, or a `{{ env.your_key }}` template resolving to one.
+             */
+            reply_to_email?: string;
+            /**
+             * Shared inbox to associate with the address. Defaults to the default shared inbox.
+             */
+            shared_inbox_id?: string;
+            /**
+             * User IDs for which this address should be available by default.
+             */
+            user_ids?: string[];
+            /**
+             * Group IDs for which this address should be available by default.
+             */
+            group_ids?: string[];
+            /**
+             * Default signature ID to use for this address.
+             */
+            default_signature_id?: string;
         }
         /**
          * Mapping between an Outlook email and its Outlook Connection.
@@ -162,6 +240,21 @@ declare namespace Components {
              * Inbound sales and pricing requests
              */
             description?: string;
+        }
+        export interface CreateSmtpConnectionRequest {
+            smtp_host: string;
+            smtp_port: number;
+            smtp_secure: "tls" | "starttls";
+            smtp_username: string;
+            /**
+             * May contain `{{ env.your_key }}` templates referencing the organization's
+             * environment variables (including secrets), resolved at send time. Stored as
+             * entered, so the settings UI edits the template rather than a resolved value.
+             *
+             * example:
+             * {{ env.smtp_password }}
+             */
+            smtp_password: string;
         }
         /**
          * Custom email domain configuration.
@@ -334,6 +427,36 @@ declare namespace Components {
         }
         export type MailboxSyncStatuses = "RUNNING" | "COMPLETED" | "COMPLETED_WITH_ERRORS" | "FAILED" | "CANCELLED";
         export type MailboxSyncTimeframePeriods = "5m" | "1w" | "2w" | "1m";
+        /**
+         * Per-user calendar connection metadata, or null when the caller has
+         * not connected their personal calendar yet.
+         *
+         */
+        export interface MyCalendarConnectionResponse {
+            connection?: {
+                /**
+                 * Azure AD Object ID of the connected user
+                 */
+                user_id: string;
+                /**
+                 * Microsoft Azure AD tenant ID
+                 */
+                tenant_id: string;
+                /**
+                 * Token health for this calendar connection
+                 */
+                status: "connected" | "expired";
+                /**
+                 * Granted permission scopes on the user's token
+                 */
+                scopes?: string[];
+                connected_by_display_name?: string;
+                connected_by_email?: string; // email
+                connected_at?: string; // date-time
+                updated_at?: string; // date-time
+                expires_at?: string; // date-time
+            } | null;
+        }
         export interface OutlookConnectionError {
             /**
              * Error code or message from the OAuth flow.
@@ -667,6 +790,83 @@ declare namespace Components {
          * Setting that allows to add a signature.
          */
         export type SignatureSetting = "signature";
+        export interface SmtpConnection {
+            /**
+             * Stable identifier for this SMTP connection
+             */
+            connection_id: string;
+            /**
+             * Hostname of the SMTP server (e.g. smtp.mailgun.org)
+             */
+            smtp_host: string;
+            /**
+             * SMTP port (typically 587 for STARTTLS or 465 for TLS)
+             */
+            smtp_port: number;
+            /**
+             * Connection security mode. Plaintext SMTP is not offered: it would put the
+             * SMTP password on the wire in the clear.
+             * - tls: Implicit TLS (port 465)
+             * - starttls: STARTTLS upgrade (port 587)
+             *
+             */
+            smtp_secure: "tls" | "starttls";
+            /**
+             * SMTP auth username
+             */
+            smtp_username: string;
+            /**
+             * Only returned when the stored value is exactly one `{{ env.your_key }}`
+             * reference, which names a secret rather than being one — that lets the
+             * settings UI edit the reference without dropping it. A literal password, or a
+             * partly templated one, is omitted entirely: submit an update without this
+             * field to keep the stored value.
+             *
+             */
+            smtp_password?: string;
+            connected_by_display_name?: string;
+            connected_by_email?: string; // email
+            connected_by_user_id?: string;
+            connected_at?: string; // date-time
+            updated_at?: string; // date-time
+            last_tested_at?: string; // date-time
+            last_test_status?: "ok" | "auth_failed" | "tls_failed" | "host_unreachable" | "timeout" | "secret_missing" | "unknown";
+            /**
+             * Latest test error message, if any
+             */
+            last_test_error?: string;
+        }
+        /**
+         * An address allowed to send through a custom SMTP connection. Mirrors an Outlook
+         * mailbox: the address, its display name and its assignees live on the shared
+         * email-address record, while this row binds it to a set of SMTP credentials.
+         *
+         */
+        export interface SmtpSender {
+            /**
+             * The sender address. Stored lower-cased.
+             */
+            email: string; // email
+            /**
+             * SMTP connection this address sends through
+             */
+            connection_id: string;
+            /**
+             * Default Reply-To for messages from this address. Custom SMTP is send-only, so
+             * point this at a mailbox someone actually monitors. May contain a
+             * `{{ env.your_key }}` template, so this is not constrained to `format: email`.
+             * A per-message Reply-To still wins.
+             *
+             */
+            reply_to_email?: string;
+            connected_at?: string; // date-time
+            connected_by_user_id?: string;
+        }
+        export interface SmtpTestResult {
+            status: "ok" | "auth_failed" | "tls_failed" | "host_unreachable" | "timeout" | "secret_missing" | "unknown";
+            error?: string;
+            tested_at: string; // date-time
+        }
         /**
          * Request payload for updating an email address configuration.
          * All fields are optional; only provided fields will be updated.
@@ -748,6 +948,16 @@ declare namespace Components {
              * Incoming customer support requests
              */
             description?: string;
+        }
+        /**
+         * Partial update; omitted fields keep their existing values.
+         */
+        export interface UpdateSmtpConnectionRequest {
+            smtp_host?: string;
+            smtp_port?: number;
+            smtp_secure?: "tls" | "starttls";
+            smtp_username?: string;
+            smtp_password?: string;
         }
         /**
          * - Setting that specifies a list of addresses exempt from being flagged as duplicate emails.
@@ -842,6 +1052,22 @@ declare namespace Paths {
              */
             shared_inbox_id?: string;
             /**
+             * Sender name to use for the Outlook mailbox email address.
+             */
+            name?: string;
+            /**
+             * User IDs for which this email address should be available by default.
+             */
+            user_ids?: string[];
+            /**
+             * Group IDs for which this email address should be available by default.
+             */
+            group_ids?: string[];
+            /**
+             * Default signature ID to use for this Outlook mailbox email address.
+             */
+            default_signature_id?: string;
+            /**
              * Optional timeframe for initial mailbox sync. When provided, triggers an automatic
              * mailbox sync after connecting the mailbox, syncing emails from the specified period.
              *
@@ -874,6 +1100,40 @@ declare namespace Paths {
             }
             export interface $500 {
             }
+        }
+    }
+    namespace ConnectSmtpSender {
+        export type RequestBody = Components.Schemas.ConnectSmtpSenderRequest;
+        namespace Responses {
+            export interface $201 {
+                email_address: /* Email address configuration with all associated metadata. */ Components.Schemas.EmailAddressResponse;
+                sender: /**
+                 * An address allowed to send through a custom SMTP connection. Mirrors an Outlook
+                 * mailbox: the address, its display name and its assignees live on the shared
+                 * email-address record, while this row binds it to a set of SMTP credentials.
+                 *
+                 */
+                Components.Schemas.SmtpSender;
+            }
+            export interface $400 {
+            }
+            export type $403 = Components.Responses.Forbidden;
+            export interface $404 {
+            }
+            export interface $409 {
+            }
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace CreateSmtpConnection {
+        export type RequestBody = Components.Schemas.CreateSmtpConnectionRequest;
+        namespace Responses {
+            export type $201 = Components.Schemas.SmtpConnection;
+            export interface $400 {
+            }
+            export type $403 = Components.Responses.Forbidden;
+            export type $409 = Components.Responses.Conflict;
+            export type $500 = Components.Responses.InternalServerError;
         }
     }
     namespace DeleteDomain {
@@ -943,10 +1203,30 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace DeleteSmtpConnection {
+        namespace Responses {
+            export interface $200 {
+                success?: boolean;
+                connection_id?: string;
+            }
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+        }
+    }
     namespace DisconnectMsTeams {
         namespace Responses {
             export interface $200 {
                 connected?: boolean;
+            }
+        }
+    }
+    namespace DisconnectMyCalendar {
+        namespace Responses {
+            export interface $204 {
+            }
+            export interface $404 {
+            }
+            export interface $500 {
             }
         }
     }
@@ -993,6 +1273,26 @@ declare namespace Paths {
                 email: string; // email
             }
             export interface $404 {
+            }
+            export interface $500 {
+            }
+        }
+    }
+    namespace DisconnectSmtpSender {
+        namespace Responses {
+            export interface $200 {
+                success: boolean;
+                email: string; // email
+            }
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace GetCalendarAdminConsentStatus {
+        namespace Responses {
+            export type $200 = Components.Schemas.CalendarAdminConsentStatus;
+            export interface $401 {
             }
             export interface $500 {
             }
@@ -1072,6 +1372,20 @@ declare namespace Paths {
             }
         }
     }
+    namespace GetMyCalendarConnection {
+        namespace Responses {
+            export type $200 = /**
+             * Per-user calendar connection metadata, or null when the caller has
+             * not connected their personal calendar yet.
+             *
+             */
+            Components.Schemas.MyCalendarConnectionResponse;
+            export interface $401 {
+            }
+            export interface $500 {
+            }
+        }
+    }
     namespace GetOutlookConnectionStatus {
         namespace Responses {
             export interface $200 {
@@ -1123,6 +1437,13 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace GetSmtpConnection {
+        namespace Responses {
+            export type $200 = Components.Schemas.SmtpConnection;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+        }
+    }
     namespace ListEmailAddresses {
         namespace Responses {
             export type $200 = Components.Responses.ListEmailAddressesSuccessResponse;
@@ -1144,10 +1465,36 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace ListSmtpConnections {
+        namespace Responses {
+            export interface $200 {
+                connections: Components.Schemas.SmtpConnection[];
+                has_connections: boolean;
+            }
+            export type $403 = Components.Responses.Forbidden;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace ListSmtpSenders {
+        namespace Responses {
+            export interface $200 {
+                senders: /**
+                 * An address allowed to send through a custom SMTP connection. Mirrors an Outlook
+                 * mailbox: the address, its display name and its assignees live on the shared
+                 * email-address record, while this row binds it to a set of SMTP credentials.
+                 *
+                 */
+                Components.Schemas.SmtpSender[];
+            }
+            export type $403 = Components.Responses.Forbidden;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace OutlookOAuthCallback {
         namespace Parameters {
             export type AdminConsent = string;
             export type ClientInfo = string;
+            export type Clientdata = string;
             export type Code = string;
             export type Error = string;
             export type ErrorDescription = string;
@@ -1168,6 +1515,7 @@ declare namespace Paths {
             error_uri?: Parameters.ErrorUri;
             admin_consent?: Parameters.AdminConsent;
             tenant?: Parameters.Tenant;
+            clientdata?: Parameters.Clientdata;
         }
         namespace Responses {
             export interface $200 {
@@ -1252,7 +1600,7 @@ declare namespace Paths {
              * - 1m: 1 month
              *
              */
-            timeframe: Components.Schemas.MailboxSyncTimeframePeriods;
+            timeframe: "5m" | "1w" | "2w" | "1m";
         }
         namespace Responses {
             export interface $202 {
@@ -1271,6 +1619,13 @@ declare namespace Paths {
             }
             export interface $500 {
             }
+        }
+    }
+    namespace TestSmtpConnection {
+        namespace Responses {
+            export type $200 = Components.Schemas.SmtpTestResult;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
         }
     }
     namespace UpdateEmailAddress {
@@ -1347,6 +1702,41 @@ declare namespace Paths {
             export type $404 = Components.Responses.NotFound;
             export type $409 = Components.Responses.Conflict;
             export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace UpdateSmtpConnection {
+        export type RequestBody = /* Partial update; omitted fields keep their existing values. */ Components.Schemas.UpdateSmtpConnectionRequest;
+        namespace Responses {
+            export type $200 = Components.Schemas.SmtpConnection;
+            export interface $400 {
+            }
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $409 = Components.Responses.Conflict;
+        }
+    }
+    namespace V2SmtpConnections$ConnectionId {
+        namespace Parameters {
+            export type ConnectionId = string;
+        }
+        export interface PathParameters {
+            connectionId: Parameters.ConnectionId;
+        }
+    }
+    namespace V2SmtpConnections$ConnectionIdTest {
+        namespace Parameters {
+            export type ConnectionId = string;
+        }
+        export interface PathParameters {
+            connectionId: Parameters.ConnectionId;
+        }
+    }
+    namespace V2SmtpSenders$Email {
+        namespace Parameters {
+            export type Email = string; // email
+        }
+        export interface PathParameters {
+            email: Parameters.Email /* email */;
         }
     }
     namespace VerifyDnsRecords {
@@ -1605,6 +1995,54 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetOutlookConnectionStatus.Responses.$200>
   /**
+   * getCalendarAdminConsentStatus - getCalendarAdminConsentStatus
+   * 
+   * Reports whether the caller's organization can connect personal Outlook
+   * calendars.
+   * 
+   * Connecting a personal calendar requires the tenant admin to have
+   * consented to epilot's Microsoft 365 app. That consent is tenant-wide,
+   * one-time, and granted for the full scope set (mail + calendar), so the
+   * org-level Outlook connection set up during onboarding is the gate.
+   * 
+   * When consent is missing the response includes `admin_consent_url` for
+   * the admin to open, and the UI should ask the user to involve their IT
+   * instead of starting an OAuth flow that would fail.
+   * 
+   */
+  'getCalendarAdminConsentStatus'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetCalendarAdminConsentStatus.Responses.$200>
+  /**
+   * getMyCalendarConnection - getMyCalendarConnection
+   * 
+   * Returns the calling user's personal Outlook calendar connection,
+   * or null when the user hasn't connected yet.
+   * 
+   * Per-user calendar connections are distinct from the org-level
+   * shared-mailbox connection (`/v2/outlook/connection/status`): each
+   * user connects their own delegated token because reading user A's
+   * calendar requires user A's consent.
+   * 
+   */
+  'getMyCalendarConnection'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetMyCalendarConnection.Responses.$200>
+  /**
+   * disconnectMyCalendar - disconnectMyCalendar
+   * 
+   * Removes the calling user's personal calendar connection.
+   */
+  'disconnectMyCalendar'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.DisconnectMyCalendar.Responses.$204>
+  /**
    * disconnectOutlook - disconnectOutlook
    * 
    * Removes the Microsoft 365 / Outlook connection for a specific tenant.
@@ -1725,6 +2163,111 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetConnectedOutlookEmails.Responses.$200>
+  /**
+   * listSmtpConnections - listSmtpConnections
+   * 
+   * Returns all custom SMTP connections configured for the organization.
+   * Passwords are never returned.
+   * 
+   */
+  'listSmtpConnections'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ListSmtpConnections.Responses.$200>
+  /**
+   * createSmtpConnection - createSmtpConnection
+   * 
+   * Creates a new custom SMTP connection. Runs a live verify against the SMTP server
+   * before persisting; on failure the request is rejected and nothing is saved.
+   * The password is encrypted via KMS before being written to DynamoDB.
+   * 
+   */
+  'createSmtpConnection'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.CreateSmtpConnection.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CreateSmtpConnection.Responses.$201>
+  /**
+   * getSmtpConnection - getSmtpConnection
+   * 
+   * Returns a single custom SMTP connection by id. The password is never returned.
+   */
+  'getSmtpConnection'(
+    parameters?: Parameters<Paths.V2SmtpConnections$ConnectionId.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetSmtpConnection.Responses.$200>
+  /**
+   * updateSmtpConnection - updateSmtpConnection
+   * 
+   * Partial update; omitted fields keep their existing values. The merged
+   * configuration is verified against the SMTP server before persisting.
+   * 
+   */
+  'updateSmtpConnection'(
+    parameters?: Parameters<Paths.V2SmtpConnections$ConnectionId.PathParameters> | null,
+    data?: Paths.UpdateSmtpConnection.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.UpdateSmtpConnection.Responses.$200>
+  /**
+   * deleteSmtpConnection - deleteSmtpConnection
+   * 
+   * Deletes a custom SMTP connection. Messages already sent are unaffected.
+   */
+  'deleteSmtpConnection'(
+    parameters?: Parameters<Paths.V2SmtpConnections$ConnectionId.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.DeleteSmtpConnection.Responses.$200>
+  /**
+   * testSmtpConnection - testSmtpConnection
+   * 
+   * Re-runs a live SMTP verify against the saved configuration (EHLO + AUTH + NOOP + QUIT)
+   * and updates `last_test_status` / `last_tested_at` on the connection.
+   * 
+   */
+  'testSmtpConnection'(
+    parameters?: Parameters<Paths.V2SmtpConnections$ConnectionIdTest.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.TestSmtpConnection.Responses.$200>
+  /**
+   * listSmtpSenders - listSmtpSenders
+   * 
+   * Returns every address registered to send through a custom SMTP connection.
+   */
+  'listSmtpSenders'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ListSmtpSenders.Responses.$200>
+  /**
+   * connectSmtpSender - connectSmtpSender
+   * 
+   * Registers an address as a sender on a custom SMTP connection:
+   *   1. Creates the email address so it can be picked in the composer
+   *   2. Binds it to the connection, so outgoing mail from it is routed there
+   * The SMTP server still has the final say on which From addresses it accepts.
+   * 
+   */
+  'connectSmtpSender'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.ConnectSmtpSender.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ConnectSmtpSender.Responses.$201>
+  /**
+   * disconnectSmtpSender - disconnectSmtpSender
+   * 
+   * Removes a sender address: deletes the email address and its binding to the SMTP
+   * connection. The connection itself and messages already sent are unaffected.
+   * 
+   */
+  'disconnectSmtpSender'(
+    parameters?: Parameters<Paths.V2SmtpSenders$Email.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.DisconnectSmtpSender.Responses.$200>
   /**
    * outlookOAuthCallback - outlookOAuthCallback
    * 
@@ -2150,6 +2693,58 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetOutlookConnectionStatus.Responses.$200>
   }
+  ['/v2/outlook/calendar/admin-consent-status']: {
+    /**
+     * getCalendarAdminConsentStatus - getCalendarAdminConsentStatus
+     * 
+     * Reports whether the caller's organization can connect personal Outlook
+     * calendars.
+     * 
+     * Connecting a personal calendar requires the tenant admin to have
+     * consented to epilot's Microsoft 365 app. That consent is tenant-wide,
+     * one-time, and granted for the full scope set (mail + calendar), so the
+     * org-level Outlook connection set up during onboarding is the gate.
+     * 
+     * When consent is missing the response includes `admin_consent_url` for
+     * the admin to open, and the UI should ask the user to involve their IT
+     * instead of starting an OAuth flow that would fail.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetCalendarAdminConsentStatus.Responses.$200>
+  }
+  ['/v2/outlook/calendar/me']: {
+    /**
+     * getMyCalendarConnection - getMyCalendarConnection
+     * 
+     * Returns the calling user's personal Outlook calendar connection,
+     * or null when the user hasn't connected yet.
+     * 
+     * Per-user calendar connections are distinct from the org-level
+     * shared-mailbox connection (`/v2/outlook/connection/status`): each
+     * user connects their own delegated token because reading user A's
+     * calendar requires user A's consent.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetMyCalendarConnection.Responses.$200>
+    /**
+     * disconnectMyCalendar - disconnectMyCalendar
+     * 
+     * Removes the calling user's personal calendar connection.
+     */
+    'delete'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.DisconnectMyCalendar.Responses.$204>
+  }
   ['/v2/outlook/connection/disconnect']: {
     /**
      * disconnectOutlook - disconnectOutlook
@@ -2290,6 +2885,121 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetConnectedOutlookEmails.Responses.$200>
+  }
+  ['/v2/smtp/connections']: {
+    /**
+     * listSmtpConnections - listSmtpConnections
+     * 
+     * Returns all custom SMTP connections configured for the organization.
+     * Passwords are never returned.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ListSmtpConnections.Responses.$200>
+    /**
+     * createSmtpConnection - createSmtpConnection
+     * 
+     * Creates a new custom SMTP connection. Runs a live verify against the SMTP server
+     * before persisting; on failure the request is rejected and nothing is saved.
+     * The password is encrypted via KMS before being written to DynamoDB.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.CreateSmtpConnection.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CreateSmtpConnection.Responses.$201>
+  }
+  ['/v2/smtp/connections/{connectionId}']: {
+    /**
+     * getSmtpConnection - getSmtpConnection
+     * 
+     * Returns a single custom SMTP connection by id. The password is never returned.
+     */
+    'get'(
+      parameters?: Parameters<Paths.V2SmtpConnections$ConnectionId.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetSmtpConnection.Responses.$200>
+    /**
+     * updateSmtpConnection - updateSmtpConnection
+     * 
+     * Partial update; omitted fields keep their existing values. The merged
+     * configuration is verified against the SMTP server before persisting.
+     * 
+     */
+    'put'(
+      parameters?: Parameters<Paths.V2SmtpConnections$ConnectionId.PathParameters> | null,
+      data?: Paths.UpdateSmtpConnection.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.UpdateSmtpConnection.Responses.$200>
+    /**
+     * deleteSmtpConnection - deleteSmtpConnection
+     * 
+     * Deletes a custom SMTP connection. Messages already sent are unaffected.
+     */
+    'delete'(
+      parameters?: Parameters<Paths.V2SmtpConnections$ConnectionId.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.DeleteSmtpConnection.Responses.$200>
+  }
+  ['/v2/smtp/connections/{connectionId}/test']: {
+    /**
+     * testSmtpConnection - testSmtpConnection
+     * 
+     * Re-runs a live SMTP verify against the saved configuration (EHLO + AUTH + NOOP + QUIT)
+     * and updates `last_test_status` / `last_tested_at` on the connection.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.V2SmtpConnections$ConnectionIdTest.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.TestSmtpConnection.Responses.$200>
+  }
+  ['/v2/smtp/senders']: {
+    /**
+     * listSmtpSenders - listSmtpSenders
+     * 
+     * Returns every address registered to send through a custom SMTP connection.
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ListSmtpSenders.Responses.$200>
+    /**
+     * connectSmtpSender - connectSmtpSender
+     * 
+     * Registers an address as a sender on a custom SMTP connection:
+     *   1. Creates the email address so it can be picked in the composer
+     *   2. Binds it to the connection, so outgoing mail from it is routed there
+     * The SMTP server still has the final say on which From addresses it accepts.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.ConnectSmtpSender.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ConnectSmtpSender.Responses.$201>
+  }
+  ['/v2/smtp/senders/{email}']: {
+    /**
+     * disconnectSmtpSender - disconnectSmtpSender
+     * 
+     * Removes a sender address: deletes the email address and its binding to the SMTP
+     * connection. The connection itself and messages already sent are unaffected.
+     * 
+     */
+    'delete'(
+      parameters?: Parameters<Paths.V2SmtpSenders$Email.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.DisconnectSmtpSender.Responses.$200>
   }
   ['/v2/outlook/oauth/callback']: {
     /**
@@ -2487,10 +3197,14 @@ export interface PathsDictionary {
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
 
+export type CalendarAdminConsentStatus = Components.Schemas.CalendarAdminConsentStatus;
+export type CalendarConnectionInfo = Components.Schemas.CalendarConnectionInfo;
 export type ConnectOutlookRequest = Components.Schemas.ConnectOutlookRequest;
+export type ConnectSmtpSenderRequest = Components.Schemas.ConnectSmtpSenderRequest;
 export type ConnectedOutlookEmail = Components.Schemas.ConnectedOutlookEmail;
 export type CreateEmailAddressPayload = Components.Schemas.CreateEmailAddressPayload;
 export type CreateSharedInboxPayload = Components.Schemas.CreateSharedInboxPayload;
+export type CreateSmtpConnectionRequest = Components.Schemas.CreateSmtpConnectionRequest;
 export type Domain = Components.Schemas.Domain;
 export type EmailAddressResponse = Components.Schemas.EmailAddressResponse;
 export type EmailAddressSetting = Components.Schemas.EmailAddressSetting;
@@ -2501,6 +3215,7 @@ export type MailboxSyncFolderStatuses = Components.Schemas.MailboxSyncFolderStat
 export type MailboxSyncStatus = Components.Schemas.MailboxSyncStatus;
 export type MailboxSyncStatuses = Components.Schemas.MailboxSyncStatuses;
 export type MailboxSyncTimeframePeriods = Components.Schemas.MailboxSyncTimeframePeriods;
+export type MyCalendarConnectionResponse = Components.Schemas.MyCalendarConnectionResponse;
 export type OutlookConnectionError = Components.Schemas.OutlookConnectionError;
 export type OutlookConnectionStatus = Components.Schemas.OutlookConnectionStatus;
 export type ProvisionEpilotEmailAddressPayload = Components.Schemas.ProvisionEpilotEmailAddressPayload;
@@ -2512,6 +3227,10 @@ export type SettingType = Components.Schemas.SettingType;
 export type SettingsResponse = Components.Schemas.SettingsResponse;
 export type SharedInboxResponse = Components.Schemas.SharedInboxResponse;
 export type SignatureSetting = Components.Schemas.SignatureSetting;
+export type SmtpConnection = Components.Schemas.SmtpConnection;
+export type SmtpSender = Components.Schemas.SmtpSender;
+export type SmtpTestResult = Components.Schemas.SmtpTestResult;
 export type UpdateEmailAddressPayload = Components.Schemas.UpdateEmailAddressPayload;
 export type UpdateSharedInboxPayload = Components.Schemas.UpdateSharedInboxPayload;
+export type UpdateSmtpConnectionRequest = Components.Schemas.UpdateSmtpConnectionRequest;
 export type WhitelistEmailAddressSetting = Components.Schemas.WhitelistEmailAddressSetting;
