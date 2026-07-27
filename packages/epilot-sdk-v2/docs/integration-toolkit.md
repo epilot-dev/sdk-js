@@ -79,6 +79,8 @@ const { data } = await integrationToolkitClient.acknowledgeTracking(...)
 - [`getMonitoringStatsV2`](#getmonitoringstatsv2)
 - [`getMonitoringTimeSeriesV2`](#getmonitoringtimeseriesv2)
 - [`getAssociatedMonitoringEvents`](#getassociatedmonitoringevents)
+- [`ingestExternalMonitoringEvents`](#ingestexternalmonitoringevents)
+- [`getMonitoringTraceByCorrelation`](#getmonitoringtracebycorrelation)
 
 **proxy**
 - [`secureProxy`](#secureproxy)
@@ -249,6 +251,10 @@ const { data } = await integrationToolkitClient.acknowledgeTracking(...)
 - [`MonitoringStats`](#monitoringstats)
 - [`InboundMonitoringEvent`](#inboundmonitoringevent)
 - [`QueryMonitoringEventsV2Request`](#querymonitoringeventsv2request)
+- [`ExternalMonitoringSpan`](#externalmonitoringspan)
+- [`IngestExternalMonitoringEventsRequest`](#ingestexternalmonitoringeventsrequest)
+- [`IngestExternalMonitoringEventsResponse`](#ingestexternalmonitoringeventsresponse)
+- [`MonitoringTraceResponse`](#monitoringtraceresponse)
 - [`MonitoringEventV2`](#monitoringeventv2)
 - [`GetMonitoringStatsV2Request`](#getmonitoringstatsv2request)
 - [`MonitoringStatsV2`](#monitoringstatsv2)
@@ -909,6 +915,7 @@ const { data } = await client.queryEvents(
       "format": "json",
       "payload": "string",
       "deduplication_id": "evt-2025-05-01-12345-create-bp",
+      "correlation_id": "bp-8f3a2c-7d4e-4b1a-9c2f-1e6d5a4b3c21",
       "use_case_id": "string"
     }
   ],
@@ -2801,6 +2808,86 @@ const { data } = await client.getAssociatedMonitoringEvents({
 
 ---
 
+### `ingestExternalMonitoringEvents`
+
+Ingest monitoring spans produced by an EXTERNAL system (e.g. an integration
+middleware), so the Integration Hub is the central monitoring point and the
+cross-system event trace spans both the external
+
+`POST /v2/integrations/{integrationId}/monitoring/external-events`
+
+```ts
+const { data } = await client.ingestExternalMonitoringEvents(
+  {
+    integrationId: 'example',
+  },
+  {
+    events: [
+      {
+        correlation_id: 'string',
+        level: 'string',
+        use_case_slug: 'string',
+        occurred_at: '1970-01-01T00:00:00.000Z',
+        message: 'string',
+        detail: {}
+      }
+    ]
+  },
+)
+```
+
+---
+
+### `getMonitoringTraceByCorrelation`
+
+Returns the cross-system event trace for a `correlation_id`: every monitoring
+span sharing it — external spans (middleware) plus epilot's own processing spans
+— ordered chronologically, with a rolled-
+
+`GET /v2/integrations/{integrationId}/monitoring/traces/{correlationId}`
+
+```ts
+const { data } = await client.getMonitoringTraceByCorrelation({
+  integrationId: 'example',
+  correlationId: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "correlation_id": "string",
+  "status": "success",
+  "started_at": "1970-01-01T00:00:00.000Z",
+  "ended_at": "1970-01-01T00:00:00.000Z",
+  "span_count": 0,
+  "truncated": true,
+  "spans": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "org_id": "string",
+      "integration_id": "string",
+      "event_id": "string",
+      "correlation_id": "string",
+      "use_case_id": "string",
+      "use_case_type": "inbound",
+      "level": "success",
+      "code": "string",
+      "message": "string",
+      "detail": {},
+      "created_at": "1970-01-01T00:00:00.000Z"
+    }
+  ],
+  "inbound_event": {}
+}
+```
+
+</details>
+
+---
+
 ### `listSecureProxies`
 
 List all secure proxy use cases
@@ -3147,6 +3234,7 @@ type ErpEvent = {
   format: "json" | "xml"
   payload: string | Record<string, unknown>
   deduplication_id?: string
+  correlation_id?: string
   use_case_id?: string
 }
 ```
@@ -3164,6 +3252,7 @@ type ErpUpdatesEventsV2Request = {
     format: "json" | "xml"
     payload: string | Record<string, unknown>
     deduplication_id?: string
+    correlation_id?: string
     use_case_id?: string
   }>
 }
@@ -7244,6 +7333,78 @@ type QueryMonitoringEventsV2Request = {
     created_at?: string // date-time
     id?: string // uuid
   }
+}
+```
+
+### `ExternalMonitoringSpan`
+
+A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malfor
+
+```ts
+type ExternalMonitoringSpan = {
+  correlation_id?: string
+  level?: string
+  use_case_slug?: string
+  occurred_at?: string // date-time
+  message?: string
+  detail?: Record<string, unknown>
+}
+```
+
+### `IngestExternalMonitoringEventsRequest`
+
+```ts
+type IngestExternalMonitoringEventsRequest = {
+  events: Array<{
+    correlation_id?: string
+    level?: string
+    use_case_slug?: string
+    occurred_at?: string // date-time
+    message?: string
+    detail?: Record<string, unknown>
+  }>
+}
+```
+
+### `IngestExternalMonitoringEventsResponse`
+
+```ts
+type IngestExternalMonitoringEventsResponse = {
+  accepted: number
+  rejected: number
+  results?: Array<{
+    index: number
+    status: "accepted" | "rejected"
+    reason?: string
+  }>
+}
+```
+
+### `MonitoringTraceResponse`
+
+```ts
+type MonitoringTraceResponse = {
+  correlation_id: string
+  status: "success" | "error" | "warning" | "info"
+  started_at?: string // date-time
+  ended_at?: string // date-time
+  span_count: number
+  truncated: boolean
+  spans: Array<{
+    id: string // uuid
+    org_id: string
+    integration_id: string
+    event_id: string
+    correlation_id?: string
+    use_case_id?: string
+    use_case_type: "inbound" | "outbound" | "file_proxy" | "managed_call" | "secure_proxy" | ""
+    level: "success" | "error" | "skipped" | "warning"
+    code?: string
+    message?: string
+    detail?: Record<string, unknown>
+    created_at: string // date-time
+  }>
+  inbound_event?: Record<string, unknown>
 }
 ```
 
