@@ -1565,6 +1565,105 @@
             "description": "Bad gateway - proxy target unreachable or error"
           }
         }
+      },
+      "put": {
+        "summary": "publicProxyPut",
+        "operationId": "publicProxyPut",
+        "description": "Forward a PUT request to a registered proxy target from a public-facing component",
+        "tags": [
+          "App Proxy"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Proxied response from the target API"
+          },
+          "403": {
+            "description": "Forbidden - app not installed or no public component uses this proxy"
+          },
+          "404": {
+            "description": "Proxy target not found"
+          },
+          "502": {
+            "description": "Bad gateway - proxy target unreachable or error"
+          }
+        }
+      },
+      "patch": {
+        "summary": "publicProxyPatch",
+        "operationId": "publicProxyPatch",
+        "description": "Forward a PATCH request to a registered proxy target from a public-facing component",
+        "tags": [
+          "App Proxy"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Proxied response from the target API"
+          },
+          "403": {
+            "description": "Forbidden - app not installed or no public component uses this proxy"
+          },
+          "404": {
+            "description": "Proxy target not found"
+          },
+          "502": {
+            "description": "Bad gateway - proxy target unreachable or error"
+          }
+        }
+      },
+      "delete": {
+        "summary": "publicProxyDelete",
+        "operationId": "publicProxyDelete",
+        "description": "Forward a DELETE request to a registered proxy target from a public-facing component",
+        "tags": [
+          "App Proxy"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Proxied response from the target API"
+          },
+          "403": {
+            "description": "Forbidden - app not installed or no public component uses this proxy"
+          },
+          "404": {
+            "description": "Proxy target not found"
+          },
+          "502": {
+            "description": "Bad gateway - proxy target unreachable or error"
+          }
+        }
       }
     }
   },
@@ -2651,7 +2750,10 @@
                   "dataExport": "#/components/schemas/PortalExtensionHookDataExport",
                   "costDataRetrieval": "#/components/schemas/PortalExtensionHookCostDataRetrieval",
                   "meterReadingPlausibilityCheck": "#/components/schemas/PortalExtensionHookMeterReadingPlausibilityCheck",
-                  "visualizationMetadata": "#/components/schemas/PortalExtensionHookVisualizationMetadata"
+                  "visualizationMetadata": "#/components/schemas/PortalExtensionHookVisualizationMetadata",
+                  "changeEmail": "#/components/schemas/PortalExtensionHookChangeEmail",
+                  "changePassword": "#/components/schemas/PortalExtensionHookChangePassword",
+                  "deleteAccount": "#/components/schemas/PortalExtensionHookDeleteAccount"
                 }
               },
               "oneOf": [
@@ -2678,6 +2780,15 @@
                 },
                 {
                   "$ref": "#/components/schemas/PortalExtensionHookVisualizationMetadata"
+                },
+                {
+                  "$ref": "#/components/schemas/PortalExtensionHookChangeEmail"
+                },
+                {
+                  "$ref": "#/components/schemas/PortalExtensionHookChangePassword"
+                },
+                {
+                  "$ref": "#/components/schemas/PortalExtensionHookDeleteAccount"
                 }
               ]
             }
@@ -3571,6 +3682,344 @@
         ],
         "additionalProperties": false
       },
+      "PortalExtensionHookChangeEmail": {
+        "description": "Hook that replaces the built-in change email functionality for portal users. When configured, the portal does not run its own change email flow. Instead, this hook makes an HTTP call to the third-party system, which is expected to handle the email change.\nThe `change_mode` controls what the portal does after the call:\n  - `asynchronous`: The third-party system takes the email change over entirely (most likely by sending the user instructions to confirm the new email address). The portal does not change the login email itself.\n  - `synchronous`: The third-party system applies the email change immediately. The portal waits for a successful (2xx) response and then also changes the portal user's login email right away, without sending a confirmation email. The user has to sign in again with the new email address afterwards.\n\nThe expected response http status code to the call is:\n  - 2xx if the request was accepted\n  - non-2xx if the request failed (optionally with a human-readable message resolved via `resolved.error_message_path`)\n",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9_-]+$",
+            "description": "Identifier of the hook. Should not change between updates."
+          },
+          "name": {
+            "$ref": "#/components/schemas/TranslatedString"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "changeEmail"
+            ]
+          },
+          "change_mode": {
+            "type": "string",
+            "enum": [
+              "synchronous",
+              "asynchronous"
+            ],
+            "description": "Controls how the email change is handled once the third-party system accepted it. `asynchronous` hands the email change over entirely to the third-party system and the portal does not change the login email itself. `synchronous` waits for the third-party system to respond and then changes the portal user's login email immediately, without a confirmation email.\n",
+            "default": "asynchronous"
+          },
+          "require_password_confirmation": {
+            "type": "boolean",
+            "description": "Whether the portal user must confirm their current password before the change email request is handed over to the third-party system. When true, the portal collects and verifies the current password before calling the hook. Treated as true when `change_mode` is `synchronous`, since the portal re-creates the login with the confirmed password. Skipped either way for portal users whose identity is managed by an identity provider: an SSO login has no password to confirm.\n",
+            "default": true
+          },
+          "explanation": {
+            "type": "object",
+            "properties": {
+              "en": {
+                "type": "string",
+                "description": "Explanation of the functionality shown to the end user.",
+                "example": "You will receive an email with instructions to confirm your new email address."
+              }
+            },
+            "additionalProperties": {
+              "type": "string",
+              "description": "Explanation of the functionality in language denoted by ISO 3166-1 alpha-2 code."
+            },
+            "required": [
+              "en"
+            ],
+            "description": "Optional explanation shown to the user in the change email confirmation dialog."
+          },
+          "auth": {
+            "$ref": "#/components/schemas/PortalExtensionAuthBlock"
+          },
+          "call": {
+            "type": "object",
+            "properties": {
+              "method": {
+                "type": "string",
+                "description": "HTTP method to use for the call",
+                "default": "POST"
+              },
+              "url": {
+                "type": "string",
+                "description": "URL to call. Supports variable interpolation."
+              },
+              "params": {
+                "type": "object",
+                "description": "Parameters to append to the URL. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              },
+              "headers": {
+                "type": "object",
+                "description": "Headers to use. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              },
+              "body": {
+                "type": "object",
+                "description": "Optional JSON body to use for the call. Defaults to an object with the requested new email and portal user context, e.g. `{\"new_email\": \"...\", \"old_email\": \"...\", \"portal_user_id\": \"...\"}`. The requested new email is available as `{{Input.new_email}}` and the current account email as `{{Input.old_email}}`. Supports variable interpolation."
+              }
+            },
+            "required": [
+              "url",
+              "headers"
+            ],
+            "additionalProperties": false
+          },
+          "resolved": {
+            "type": "object",
+            "properties": {
+              "error_message_path": {
+                "type": "string",
+                "description": "Optional path to a human-readable error message in the third-party response body, used when the call fails (non-2xx status).\nIf specified and the path resolves to a string, that message is forwarded to the end user instead of a generic error.\n",
+                "example": "error.message"
+              }
+            },
+            "additionalProperties": false
+          },
+          "secure_proxy": {
+            "$ref": "#/components/schemas/PortalExtensionSecureProxy"
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "call"
+        ],
+        "additionalProperties": false
+      },
+      "PortalExtensionHookChangePassword": {
+        "description": "Hook that replaces the built-in change password functionality for portal users. When configured, the portal does not change the user's password itself. Instead, this hook makes an HTTP call to the third-party system, which is expected to handle the password change (most likely by sending the user instructions to complete the process).\nThe expected response http status code to the call is:\n  - 2xx if the request was accepted\n  - non-2xx if the request failed (optionally with a human-readable message resolved via `resolved.error_message_path`)\n",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9_-]+$",
+            "description": "Identifier of the hook. Should not change between updates."
+          },
+          "name": {
+            "$ref": "#/components/schemas/TranslatedString"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "changePassword"
+            ]
+          },
+          "require_new_password": {
+            "type": "boolean",
+            "description": "Whether the portal user must provide a new password. When false, the portal only asks the user to confirm (showing the configured explanation) and no new password is collected; the third-party system is expected to handle the password change. When true, the portal collects a new password and passes it to the third-party system as `{{Input.new_password}}`.\n",
+            "default": false
+          },
+          "explanation": {
+            "type": "object",
+            "properties": {
+              "en": {
+                "type": "string",
+                "description": "Explanation of the functionality shown to the end user.",
+                "example": "You will receive an email with instructions to reset your password."
+              }
+            },
+            "additionalProperties": {
+              "type": "string",
+              "description": "Explanation of the functionality in language denoted by ISO 3166-1 alpha-2 code."
+            },
+            "required": [
+              "en"
+            ],
+            "description": "Optional explanation shown to the user in the change password confirmation dialog."
+          },
+          "auth": {
+            "$ref": "#/components/schemas/PortalExtensionAuthBlock"
+          },
+          "call": {
+            "type": "object",
+            "properties": {
+              "method": {
+                "type": "string",
+                "description": "HTTP method to use for the call",
+                "default": "POST"
+              },
+              "url": {
+                "type": "string",
+                "description": "URL to call. Supports variable interpolation."
+              },
+              "params": {
+                "type": "object",
+                "description": "Parameters to append to the URL. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              },
+              "headers": {
+                "type": "object",
+                "description": "Headers to use. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              },
+              "body": {
+                "type": "object",
+                "description": "Optional JSON body to use for the call. Defaults to an object with portal user context (and the new password as `{{Input.new_password}}` when `require_new_password` is true). Supports variable interpolation."
+              }
+            },
+            "required": [
+              "url",
+              "headers"
+            ],
+            "additionalProperties": false
+          },
+          "resolved": {
+            "type": "object",
+            "properties": {
+              "error_message_path": {
+                "type": "string",
+                "description": "Optional path to a human-readable error message in the third-party response body, used when the call fails (non-2xx status).\nIf specified and the path resolves to a string, that message is forwarded to the end user instead of a generic error.\n",
+                "example": "error.message"
+              }
+            },
+            "additionalProperties": false
+          },
+          "secure_proxy": {
+            "$ref": "#/components/schemas/PortalExtensionSecureProxy"
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "call"
+        ],
+        "additionalProperties": false
+      },
+      "PortalExtensionHookDeleteAccount": {
+        "description": "Hook that replaces the built-in delete account functionality for portal users. When configured, the portal does not delete the user itself. Instead, this hook makes an HTTP call to the third-party system, which is expected to handle the deletion.\nThe `deletion_mode` controls what the portal does after the call:\n  - `synchronous`: The third-party system deletes the user immediately. The portal waits for a successful (2xx) response and then also deletes the corresponding epilot Cognito user.\n  - `asynchronous`: The third-party system handles deletion out-of-band. The portal does not delete anything immediately; cleanup is expected to happen later (e.g. via the user deletion API or webhooks).\n\nThe optional `delete_contact` additionally deletes the contact related to the portal user, once the portal user itself was deleted (`synchronous` mode only).\n\nThe expected response http status code to the call is:\n  - 2xx if the request was accepted\n  - non-2xx if the request failed (optionally with a human-readable message resolved via `resolved.error_message_path`)\n",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9_-]+$",
+            "description": "Identifier of the hook. Should not change between updates."
+          },
+          "name": {
+            "$ref": "#/components/schemas/TranslatedString"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "deleteAccount"
+            ]
+          },
+          "deletion_mode": {
+            "type": "string",
+            "enum": [
+              "synchronous",
+              "asynchronous"
+            ],
+            "description": "Controls how the account deletion is handled. `synchronous` waits for the third-party system to respond and then also deletes the epilot user. `asynchronous` hands the deletion over entirely to the third-party system and the portal does not delete anything immediately.\n",
+            "default": "synchronous"
+          },
+          "delete_contact": {
+            "type": "string",
+            "enum": [
+              "none",
+              "soft",
+              "hard"
+            ],
+            "description": "Opt-in deletion of the contact related to the portal user, applied after the portal user itself was deleted. `none` (default) leaves the contact untouched. `soft` deletes the contact, so it can still be restored from the trash. `hard` permanently purges the contact. Only applied in `synchronous` deletion mode, as `asynchronous` mode hands the cleanup over to the third-party system.\n",
+            "default": "none"
+          },
+          "explanation": {
+            "type": "object",
+            "properties": {
+              "en": {
+                "type": "string",
+                "description": "Explanation of the functionality shown to the end user.",
+                "example": "Your account deletion will be processed by our system. This may take a few days."
+              }
+            },
+            "additionalProperties": {
+              "type": "string",
+              "description": "Explanation of the functionality in language denoted by ISO 3166-1 alpha-2 code."
+            },
+            "required": [
+              "en"
+            ],
+            "description": "Optional explanation shown to the user in the delete account confirmation dialog."
+          },
+          "auth": {
+            "$ref": "#/components/schemas/PortalExtensionAuthBlock"
+          },
+          "call": {
+            "type": "object",
+            "properties": {
+              "method": {
+                "type": "string",
+                "description": "HTTP method to use for the call",
+                "default": "POST"
+              },
+              "url": {
+                "type": "string",
+                "description": "URL to call. Supports variable interpolation."
+              },
+              "params": {
+                "type": "object",
+                "description": "Parameters to append to the URL. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              },
+              "headers": {
+                "type": "object",
+                "description": "Headers to use. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              },
+              "body": {
+                "type": "object",
+                "description": "Optional JSON body to use for the call. Defaults to an object with portal user context, e.g. `{\"portal_user_id\": \"...\", \"email\": \"...\"}`. Supports variable interpolation."
+              }
+            },
+            "required": [
+              "url",
+              "headers"
+            ],
+            "additionalProperties": false
+          },
+          "resolved": {
+            "type": "object",
+            "properties": {
+              "error_message_path": {
+                "type": "string",
+                "description": "Optional path to a human-readable error message in the third-party response body, used when the call fails (non-2xx status).\nIf specified and the path resolves to a string, that message is forwarded to the end user instead of a generic error.\n",
+                "example": "error.message"
+              }
+            },
+            "additionalProperties": false
+          },
+          "secure_proxy": {
+            "$ref": "#/components/schemas/PortalExtensionSecureProxy"
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "call"
+        ],
+        "additionalProperties": false
+      },
       "PortalExtensionSeamlessLink": {
         "type": "object",
         "properties": {
@@ -4358,8 +4807,7 @@
           },
           "target": {
             "type": "string",
-            "format": "uri",
-            "description": "Base URL of the target API. Must be HTTPS.",
+            "description": "Base URL of the target API. Must be HTTPS. May reference component options via {{option_key}} interpolation (resolved from decrypted values), e.g. \"https://{{cluster}}.example.com/api\" for a per-installation host. The fully-resolved URL is validated at request time (SSRF protection).",
             "pattern": "^https://"
           },
           "auth_type": {
@@ -4381,6 +4829,13 @@
             "format": "uri",
             "description": "OAuth2 token endpoint URL",
             "pattern": "^https://"
+          },
+          "headers": {
+            "type": "object",
+            "description": "Additional request headers injected server-side on every proxied request. Values may reference component options via {{option_key}} interpolation (resolved from decrypted secrets), so credentials are never exposed to the client. Applied in addition to auth_type.",
+            "additionalProperties": {
+              "type": "string"
+            }
           }
         }
       },

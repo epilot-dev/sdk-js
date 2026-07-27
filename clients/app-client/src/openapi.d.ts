@@ -151,9 +151,9 @@ declare namespace Components {
              */
             name: string; // ^[a-zA-Z0-9_-]+$
             /**
-             * Base URL of the target API. Must be HTTPS.
+             * Base URL of the target API. Must be HTTPS. May reference component options via {{option_key}} interpolation (resolved from decrypted values), e.g. "https://{{cluster}}.example.com/api" for a per-installation host. The fully-resolved URL is validated at request time (SSRF protection).
              */
-            target: string; // uri ^https://
+            target: string; // ^https://
             /**
              * Authentication strategy
              */
@@ -166,6 +166,12 @@ declare namespace Components {
              * OAuth2 token endpoint URL
              */
             token_url?: string; // uri ^https://
+            /**
+             * Additional request headers injected server-side on every proxied request. Values may reference component options via {{option_key}} interpolation (resolved from decrypted secrets), so credentials are never exposed to the client. Applied in addition to auth_type.
+             */
+            headers?: {
+                [name: string]: string;
+            };
         }
         export interface AppBridgeSurfaceConfig {
             /**
@@ -1595,7 +1601,38 @@ declare namespace Components {
              * The portal looks up this hook implicitly per extension (one `visualizationMetadata` hook per extension) — there is no need for a data-retrieval hook to reference it explicitly.
              *
              */
-            PortalExtensionHookVisualizationMetadata)[];
+            PortalExtensionHookVisualizationMetadata | /**
+             * Hook that replaces the built-in change email functionality for portal users. When configured, the portal does not run its own change email flow. Instead, this hook makes an HTTP call to the third-party system, which is expected to handle the email change.
+             * The `change_mode` controls what the portal does after the call:
+             *   - `asynchronous`: The third-party system takes the email change over entirely (most likely by sending the user instructions to confirm the new email address). The portal does not change the login email itself.
+             *   - `synchronous`: The third-party system applies the email change immediately. The portal waits for a successful (2xx) response and then also changes the portal user's login email right away, without sending a confirmation email. The user has to sign in again with the new email address afterwards.
+             *
+             * The expected response http status code to the call is:
+             *   - 2xx if the request was accepted
+             *   - non-2xx if the request failed (optionally with a human-readable message resolved via `resolved.error_message_path`)
+             *
+             */
+            PortalExtensionHookChangeEmail | /**
+             * Hook that replaces the built-in change password functionality for portal users. When configured, the portal does not change the user's password itself. Instead, this hook makes an HTTP call to the third-party system, which is expected to handle the password change (most likely by sending the user instructions to complete the process).
+             * The expected response http status code to the call is:
+             *   - 2xx if the request was accepted
+             *   - non-2xx if the request failed (optionally with a human-readable message resolved via `resolved.error_message_path`)
+             *
+             */
+            PortalExtensionHookChangePassword | /**
+             * Hook that replaces the built-in delete account functionality for portal users. When configured, the portal does not delete the user itself. Instead, this hook makes an HTTP call to the third-party system, which is expected to handle the deletion.
+             * The `deletion_mode` controls what the portal does after the call:
+             *   - `synchronous`: The third-party system deletes the user immediately. The portal waits for a successful (2xx) response and then also deletes the corresponding epilot Cognito user.
+             *   - `asynchronous`: The third-party system handles deletion out-of-band. The portal does not delete anything immediately; cleanup is expected to happen later (e.g. via the user deletion API or webhooks).
+             *
+             * The optional `delete_contact` additionally deletes the contact related to the portal user, once the portal user itself was deleted (`synchronous` mode only).
+             *
+             * The expected response http status code to the call is:
+             *   - 2xx if the request was accepted
+             *   - non-2xx if the request failed (optionally with a human-readable message resolved via `resolved.error_message_path`)
+             *
+             */
+            PortalExtensionHookDeleteAccount)[];
             links?: {
                 /**
                  * Identifier of the link. Should not change between updates.
@@ -1624,6 +1661,159 @@ declare namespace Components {
                     };
                 };
             }[];
+        }
+        /**
+         * Hook that replaces the built-in change email functionality for portal users. When configured, the portal does not run its own change email flow. Instead, this hook makes an HTTP call to the third-party system, which is expected to handle the email change.
+         * The `change_mode` controls what the portal does after the call:
+         *   - `asynchronous`: The third-party system takes the email change over entirely (most likely by sending the user instructions to confirm the new email address). The portal does not change the login email itself.
+         *   - `synchronous`: The third-party system applies the email change immediately. The portal waits for a successful (2xx) response and then also changes the portal user's login email right away, without sending a confirmation email. The user has to sign in again with the new email address afterwards.
+         *
+         * The expected response http status code to the call is:
+         *   - 2xx if the request was accepted
+         *   - non-2xx if the request failed (optionally with a human-readable message resolved via `resolved.error_message_path`)
+         *
+         */
+        export interface PortalExtensionHookChangeEmail {
+            /**
+             * Identifier of the hook. Should not change between updates.
+             */
+            id: string; // ^[a-zA-Z0-9_-]+$
+            name?: TranslatedString;
+            type: "changeEmail";
+            /**
+             * Controls how the email change is handled once the third-party system accepted it. `asynchronous` hands the email change over entirely to the third-party system and the portal does not change the login email itself. `synchronous` waits for the third-party system to respond and then changes the portal user's login email immediately, without a confirmation email.
+             *
+             */
+            change_mode?: "synchronous" | "asynchronous";
+            /**
+             * Whether the portal user must confirm their current password before the change email request is handed over to the third-party system. When true, the portal collects and verifies the current password before calling the hook. Treated as true when `change_mode` is `synchronous`, since the portal re-creates the login with the confirmed password. Skipped either way for portal users whose identity is managed by an identity provider: an SSO login has no password to confirm.
+             *
+             */
+            require_password_confirmation?: boolean;
+            /**
+             * Optional explanation shown to the user in the change email confirmation dialog.
+             */
+            explanation?: {
+                [name: string]: string;
+                /**
+                 * Explanation of the functionality shown to the end user.
+                 * example:
+                 * You will receive an email with instructions to confirm your new email address.
+                 */
+                en: string;
+            };
+            auth?: PortalExtensionAuthBlock;
+            call: {
+                /**
+                 * HTTP method to use for the call
+                 */
+                method?: string;
+                /**
+                 * URL to call. Supports variable interpolation.
+                 */
+                url: string;
+                /**
+                 * Parameters to append to the URL. Supports variable interpolation.
+                 */
+                params?: {
+                    [name: string]: string;
+                };
+                /**
+                 * Headers to use. Supports variable interpolation.
+                 */
+                headers: {
+                    [name: string]: string;
+                };
+                /**
+                 * Optional JSON body to use for the call. Defaults to an object with the requested new email and portal user context, e.g. `{"new_email": "...", "old_email": "...", "portal_user_id": "..."}`. The requested new email is available as `{{Input.new_email}}` and the current account email as `{{Input.old_email}}`. Supports variable interpolation.
+                 */
+                body?: {
+                    [key: string]: any;
+                };
+            };
+            resolved?: {
+                /**
+                 * Optional path to a human-readable error message in the third-party response body, used when the call fails (non-2xx status).
+                 * If specified and the path resolves to a string, that message is forwarded to the end user instead of a generic error.
+                 *
+                 * example:
+                 * error.message
+                 */
+                error_message_path?: string;
+            };
+            secure_proxy?: /* If set, requests are routed through the ERP Integration secure proxy. Mutually exclusive with use_static_ips. */ PortalExtensionSecureProxy;
+        }
+        /**
+         * Hook that replaces the built-in change password functionality for portal users. When configured, the portal does not change the user's password itself. Instead, this hook makes an HTTP call to the third-party system, which is expected to handle the password change (most likely by sending the user instructions to complete the process).
+         * The expected response http status code to the call is:
+         *   - 2xx if the request was accepted
+         *   - non-2xx if the request failed (optionally with a human-readable message resolved via `resolved.error_message_path`)
+         *
+         */
+        export interface PortalExtensionHookChangePassword {
+            /**
+             * Identifier of the hook. Should not change between updates.
+             */
+            id: string; // ^[a-zA-Z0-9_-]+$
+            name?: TranslatedString;
+            type: "changePassword";
+            /**
+             * Whether the portal user must provide a new password. When false, the portal only asks the user to confirm (showing the configured explanation) and no new password is collected; the third-party system is expected to handle the password change. When true, the portal collects a new password and passes it to the third-party system as `{{Input.new_password}}`.
+             *
+             */
+            require_new_password?: boolean;
+            /**
+             * Optional explanation shown to the user in the change password confirmation dialog.
+             */
+            explanation?: {
+                [name: string]: string;
+                /**
+                 * Explanation of the functionality shown to the end user.
+                 * example:
+                 * You will receive an email with instructions to reset your password.
+                 */
+                en: string;
+            };
+            auth?: PortalExtensionAuthBlock;
+            call: {
+                /**
+                 * HTTP method to use for the call
+                 */
+                method?: string;
+                /**
+                 * URL to call. Supports variable interpolation.
+                 */
+                url: string;
+                /**
+                 * Parameters to append to the URL. Supports variable interpolation.
+                 */
+                params?: {
+                    [name: string]: string;
+                };
+                /**
+                 * Headers to use. Supports variable interpolation.
+                 */
+                headers: {
+                    [name: string]: string;
+                };
+                /**
+                 * Optional JSON body to use for the call. Defaults to an object with portal user context (and the new password as `{{Input.new_password}}` when `require_new_password` is true). Supports variable interpolation.
+                 */
+                body?: {
+                    [key: string]: any;
+                };
+            };
+            resolved?: {
+                /**
+                 * Optional path to a human-readable error message in the third-party response body, used when the call fails (non-2xx status).
+                 * If specified and the path resolves to a string, that message is forwarded to the end user instead of a generic error.
+                 *
+                 * example:
+                 * error.message
+                 */
+                error_message_path?: string;
+            };
+            secure_proxy?: /* If set, requests are routed through the ERP Integration secure proxy. Mutually exclusive with use_static_ips. */ PortalExtensionSecureProxy;
         }
         /**
          * Hook that will allow using the specified source as data for consumption visualizations. This hook is triggered to fetch the data. Format of the request and response has to follow the following specification: TBD. The expected response to the call is:
@@ -1934,6 +2124,89 @@ declare namespace Components {
              *
              */
             use_static_ips?: boolean;
+            secure_proxy?: /* If set, requests are routed through the ERP Integration secure proxy. Mutually exclusive with use_static_ips. */ PortalExtensionSecureProxy;
+        }
+        /**
+         * Hook that replaces the built-in delete account functionality for portal users. When configured, the portal does not delete the user itself. Instead, this hook makes an HTTP call to the third-party system, which is expected to handle the deletion.
+         * The `deletion_mode` controls what the portal does after the call:
+         *   - `synchronous`: The third-party system deletes the user immediately. The portal waits for a successful (2xx) response and then also deletes the corresponding epilot Cognito user.
+         *   - `asynchronous`: The third-party system handles deletion out-of-band. The portal does not delete anything immediately; cleanup is expected to happen later (e.g. via the user deletion API or webhooks).
+         *
+         * The optional `delete_contact` additionally deletes the contact related to the portal user, once the portal user itself was deleted (`synchronous` mode only).
+         *
+         * The expected response http status code to the call is:
+         *   - 2xx if the request was accepted
+         *   - non-2xx if the request failed (optionally with a human-readable message resolved via `resolved.error_message_path`)
+         *
+         */
+        export interface PortalExtensionHookDeleteAccount {
+            /**
+             * Identifier of the hook. Should not change between updates.
+             */
+            id: string; // ^[a-zA-Z0-9_-]+$
+            name?: TranslatedString;
+            type: "deleteAccount";
+            /**
+             * Controls how the account deletion is handled. `synchronous` waits for the third-party system to respond and then also deletes the epilot user. `asynchronous` hands the deletion over entirely to the third-party system and the portal does not delete anything immediately.
+             *
+             */
+            deletion_mode?: "synchronous" | "asynchronous";
+            /**
+             * Opt-in deletion of the contact related to the portal user, applied after the portal user itself was deleted. `none` (default) leaves the contact untouched. `soft` deletes the contact, so it can still be restored from the trash. `hard` permanently purges the contact. Only applied in `synchronous` deletion mode, as `asynchronous` mode hands the cleanup over to the third-party system.
+             *
+             */
+            delete_contact?: "none" | "soft" | "hard";
+            /**
+             * Optional explanation shown to the user in the delete account confirmation dialog.
+             */
+            explanation?: {
+                [name: string]: string;
+                /**
+                 * Explanation of the functionality shown to the end user.
+                 * example:
+                 * Your account deletion will be processed by our system. This may take a few days.
+                 */
+                en: string;
+            };
+            auth?: PortalExtensionAuthBlock;
+            call: {
+                /**
+                 * HTTP method to use for the call
+                 */
+                method?: string;
+                /**
+                 * URL to call. Supports variable interpolation.
+                 */
+                url: string;
+                /**
+                 * Parameters to append to the URL. Supports variable interpolation.
+                 */
+                params?: {
+                    [name: string]: string;
+                };
+                /**
+                 * Headers to use. Supports variable interpolation.
+                 */
+                headers: {
+                    [name: string]: string;
+                };
+                /**
+                 * Optional JSON body to use for the call. Defaults to an object with portal user context, e.g. `{"portal_user_id": "...", "email": "..."}`. Supports variable interpolation.
+                 */
+                body?: {
+                    [key: string]: any;
+                };
+            };
+            resolved?: {
+                /**
+                 * Optional path to a human-readable error message in the third-party response body, used when the call fails (non-2xx status).
+                 * If specified and the path resolves to a string, that message is forwarded to the end user instead of a generic error.
+                 *
+                 * example:
+                 * error.message
+                 */
+                error_message_path?: string;
+            };
             secure_proxy?: /* If set, requests are routed through the ERP Integration secure proxy. Mutually exclusive with use_static_ips. */ PortalExtensionSecureProxy;
         }
         /**
@@ -2987,6 +3260,18 @@ declare namespace Paths {
             }
         }
     }
+    namespace PublicProxyDelete {
+        namespace Responses {
+            export interface $200 {
+            }
+            export interface $403 {
+            }
+            export interface $404 {
+            }
+            export interface $502 {
+            }
+        }
+    }
     namespace PublicProxyGet {
         namespace Responses {
             export interface $200 {
@@ -2999,7 +3284,35 @@ declare namespace Paths {
             }
         }
     }
+    namespace PublicProxyPatch {
+        export interface RequestBody {
+        }
+        namespace Responses {
+            export interface $200 {
+            }
+            export interface $403 {
+            }
+            export interface $404 {
+            }
+            export interface $502 {
+            }
+        }
+    }
     namespace PublicProxyPost {
+        export interface RequestBody {
+        }
+        namespace Responses {
+            export interface $200 {
+            }
+            export interface $403 {
+            }
+            export interface $404 {
+            }
+            export interface $502 {
+            }
+        }
+    }
+    namespace PublicProxyPut {
         export interface RequestBody {
         }
         namespace Responses {
@@ -3405,6 +3718,16 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.PublicProxyGet.Responses.$200>
   /**
+   * publicProxyPut - publicProxyPut
+   * 
+   * Forward a PUT request to a registered proxy target from a public-facing component
+   */
+  'publicProxyPut'(
+    parameters?: Parameters<Paths.V1PublicApp$AppIdProxy$ProxyName$Path.PathParameters> | null,
+    data?: Paths.PublicProxyPut.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.PublicProxyPut.Responses.$200>
+  /**
    * publicProxyPost - publicProxyPost
    * 
    * Forward a POST request to a registered proxy target from a public-facing component (e.g. journey blocks)
@@ -3414,6 +3737,26 @@ export interface OperationMethods {
     data?: Paths.PublicProxyPost.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.PublicProxyPost.Responses.$200>
+  /**
+   * publicProxyPatch - publicProxyPatch
+   * 
+   * Forward a PATCH request to a registered proxy target from a public-facing component
+   */
+  'publicProxyPatch'(
+    parameters?: Parameters<Paths.V1PublicApp$AppIdProxy$ProxyName$Path.PathParameters> | null,
+    data?: Paths.PublicProxyPatch.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.PublicProxyPatch.Responses.$200>
+  /**
+   * publicProxyDelete - publicProxyDelete
+   * 
+   * Forward a DELETE request to a registered proxy target from a public-facing component
+   */
+  'publicProxyDelete'(
+    parameters?: Parameters<Paths.V1PublicApp$AppIdProxy$ProxyName$Path.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.PublicProxyDelete.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -3777,6 +4120,36 @@ export interface PathsDictionary {
       data?: Paths.PublicProxyPost.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.PublicProxyPost.Responses.$200>
+    /**
+     * publicProxyPut - publicProxyPut
+     * 
+     * Forward a PUT request to a registered proxy target from a public-facing component
+     */
+    'put'(
+      parameters?: Parameters<Paths.V1PublicApp$AppIdProxy$ProxyName$Path.PathParameters> | null,
+      data?: Paths.PublicProxyPut.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.PublicProxyPut.Responses.$200>
+    /**
+     * publicProxyPatch - publicProxyPatch
+     * 
+     * Forward a PATCH request to a registered proxy target from a public-facing component
+     */
+    'patch'(
+      parameters?: Parameters<Paths.V1PublicApp$AppIdProxy$ProxyName$Path.PathParameters> | null,
+      data?: Paths.PublicProxyPatch.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.PublicProxyPatch.Responses.$200>
+    /**
+     * publicProxyDelete - publicProxyDelete
+     * 
+     * Forward a DELETE request to a registered proxy target from a public-facing component
+     */
+    'delete'(
+      parameters?: Parameters<Paths.V1PublicApp$AppIdProxy$ProxyName$Path.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.PublicProxyDelete.Responses.$200>
   }
 }
 
@@ -3837,10 +4210,13 @@ export type PortalBlockSurfaceConfig = Components.Schemas.PortalBlockSurfaceConf
 export type PortalExtensionAuthBlock = Components.Schemas.PortalExtensionAuthBlock;
 export type PortalExtensionComponent = Components.Schemas.PortalExtensionComponent;
 export type PortalExtensionConfig = Components.Schemas.PortalExtensionConfig;
+export type PortalExtensionHookChangeEmail = Components.Schemas.PortalExtensionHookChangeEmail;
+export type PortalExtensionHookChangePassword = Components.Schemas.PortalExtensionHookChangePassword;
 export type PortalExtensionHookConsumptionDataRetrieval = Components.Schemas.PortalExtensionHookConsumptionDataRetrieval;
 export type PortalExtensionHookContractIdentification = Components.Schemas.PortalExtensionHookContractIdentification;
 export type PortalExtensionHookCostDataRetrieval = Components.Schemas.PortalExtensionHookCostDataRetrieval;
 export type PortalExtensionHookDataExport = Components.Schemas.PortalExtensionHookDataExport;
+export type PortalExtensionHookDeleteAccount = Components.Schemas.PortalExtensionHookDeleteAccount;
 export type PortalExtensionHookMeterReadingPlausibilityCheck = Components.Schemas.PortalExtensionHookMeterReadingPlausibilityCheck;
 export type PortalExtensionHookPriceDataRetrieval = Components.Schemas.PortalExtensionHookPriceDataRetrieval;
 export type PortalExtensionHookRegistrationIdentifiersCheck = Components.Schemas.PortalExtensionHookRegistrationIdentifiersCheck;

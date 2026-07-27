@@ -535,6 +535,28 @@
           }
         },
         "responses": {}
+      },
+      "put": {
+        "operationId": "publicProxyPut",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "patch": {
+        "operationId": "publicProxyPatch",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "publicProxyDelete",
+        "responses": {}
       }
     }
   },
