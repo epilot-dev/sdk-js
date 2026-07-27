@@ -799,6 +799,43 @@
         "responses": {}
       }
     },
+    "/v2/integrations/{integrationId}/monitoring/external-events": {
+      "post": {
+        "operationId": "ingestExternalMonitoringEvents",
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/integrations/{integrationId}/monitoring/traces/{correlationId}": {
+      "get": {
+        "operationId": "getMonitoringTraceByCorrelation",
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "correlationId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v1/integrations/secure-proxies": {
       "get": {
         "operationId": "listSecureProxies",

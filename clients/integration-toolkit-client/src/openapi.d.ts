@@ -1802,6 +1802,13 @@ declare namespace Components {
              */
             deduplication_id?: string; // ^[a-zA-Z0-9_-]+$
             /**
+             * Optional per-event trace id for cross-system tracing (unique per business operation). Overrides the request-level meta.correlation_id for THIS event. When absent, the event inherits the request-level correlation_id; when both are absent, epilot mints its own event_id and the trace is epilot-only. Orthogonal to deduplication_id (idempotency).
+             *
+             * example:
+             * bp-8f3a2c-7d4e-4b1a-9c2f-1e6d5a4b3c21
+             */
+            correlation_id?: string;
+            /**
              * Resolved use case ID for the inbound event. Null when no use case matched or for events ingested before this field was introduced. Server-populated only — ignored if supplied on inbound requests.
              *
              */
@@ -1854,6 +1861,13 @@ declare namespace Components {
              * evt-2025-05-01-12345-bp
              */
             deduplication_id?: string; // ^[a-zA-Z0-9_-]+$
+            /**
+             * Optional per-event ordering group. Overrides the request-level `group_id` for THIS event; when absent, the event inherits the request-level `group_id` (or the default strict per-integration ordering). Use it when a single batch carries events for unrelated business objects that may be processed in parallel. See the request-level `group_id` for semantics.
+             *
+             * example:
+             * customer-42
+             */
+            group_id?: string;
         } | {
             /**
              * Event name from integration mapping (e.g., business_partner, contract_account). Required when use_case_slug is not provided.
@@ -1901,6 +1915,13 @@ declare namespace Components {
              * evt-2025-05-01-12345-bp
              */
             deduplication_id?: string; // ^[a-zA-Z0-9_-]+$
+            /**
+             * Optional per-event ordering group. Overrides the request-level `group_id` for THIS event; when absent, the event inherits the request-level `group_id` (or the default strict per-integration ordering). Use it when a single batch carries events for unrelated business objects that may be processed in parallel. See the request-level `group_id` for semantics.
+             *
+             * example:
+             * customer-42
+             */
+            group_id?: string;
         };
         export interface ErpUpdatesEventsV2Request {
             /**
@@ -1942,6 +1963,8 @@ declare namespace Components {
              * objects are processed concurrently.
              *
              * Notes:
+             * - Individual events may set their own `group_id`, which overrides this
+             *   request-level value for that event only.
              * - Up to 20 groups per integration are processed concurrently. Using
              *   more distinct values than that yields no additional parallelism.
              * - Omit this field if strict per-integration ordering is required.
@@ -1964,6 +1987,41 @@ declare namespace Components {
              * Error message
              */
             message?: string;
+        }
+        /**
+         * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+         *
+         */
+        export interface ExternalMonitoringSpan {
+            /**
+             * Trace id — links this span to the epilot trace. Unique per business operation. Required.
+             */
+            correlation_id?: string;
+            /**
+             * Span outcome level — one of success | error | warning | info. Drives the server-assigned EXTERNAL_* code, coloring, and alerting. Required.
+             *
+             */
+            level?: string;
+            /**
+             * Business use case slug (e.g. "business_partner"). Resolved server-side against the integration's configured use cases to a use_case_id/use_case_type; stored as the grouping dimension. Portable — no epilot-internal UUIDs required.
+             *
+             */
+            use_case_slug?: string;
+            /**
+             * External clock time the span occurred; stored as created_at.
+             */
+            occurred_at?: string; // date-time
+            /**
+             * Human-readable line shown in the trace and event tables.
+             */
+            message?: string;
+            /**
+             * Free-form context (step, http_status, reason, …). The place for external-system specificity — the taxonomy code stays clean (EXTERNAL_*).
+             *
+             */
+            detail?: {
+                [name: string]: any;
+            } | null;
         }
         export interface FileProxyAuth {
             /**
@@ -2215,11 +2273,12 @@ declare namespace Components {
             ];
             response: FileProxyResponseConfig;
             /**
-             * When `true`, files that are too large to be served directly in the proxy response
-             * (and would otherwise be served indirectly via a temporary S3 redirect) are not served.
-             * Instead the proxy responds with an error and logs a warning. Use this when files must
-             * never transit epilot's temporary S3 storage. Defaults to `false` (large files are
-             * transparently served via S3).
+             * When `true`, this use case is served via the streaming endpoint: mapped file URLs
+             * are built as `/stream/download`, files of any size are streamed inline over HTTP
+             * response streaming, and buffered `/download` requests for oversize files are
+             * 307-redirected to `/stream`. Files never transit epilot's temporary S3 storage on
+             * the streaming path. Defaults to `false` (small files are served directly and large
+             * files are transparently served via a temporary S3 redirect).
              *
              */
             prevent_indirect_serving?: boolean;
@@ -2623,6 +2682,537 @@ declare namespace Components {
              */
             type: "inbound";
             configuration?: /* Configuration for inbound use cases (ERP to epilot) */ InboundIntegrationEventConfiguration;
+        }
+        export interface IngestExternalMonitoringEventsRequest {
+            /**
+             * Batch of external monitoring spans (max 100 per request).
+             */
+            events: [
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?,
+                /**
+                 * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
+                 *
+                 */
+                ExternalMonitoringSpan?
+            ];
+        }
+        export interface IngestExternalMonitoringEventsResponse {
+            /**
+             * Number of spans accepted and republished onto the monitoring bus.
+             */
+            accepted: number;
+            /**
+             * Number of spans rejected in validation. See `results` for reasons.
+             */
+            rejected: number;
+            /**
+             * Per-span results; present for rejections in a mixed batch.
+             */
+            results?: {
+                /**
+                 * Zero-based index of the span in the request `events` array.
+                 */
+                index: number;
+                status: "accepted" | "rejected";
+                /**
+                 * Rejection reason (present when status is rejected).
+                 */
+                reason?: string;
+            }[];
         }
         export interface Integration {
             /**
@@ -3534,6 +4124,44 @@ declare namespace Components {
             breakdown?: {
                 [name: string]: any;
             }[];
+        }
+        export interface MonitoringTraceResponse {
+            /**
+             * The trace id these spans share.
+             */
+            correlation_id: string;
+            /**
+             * Rolled-up status across all spans (error > warning > success > info).
+             */
+            status: "success" | "error" | "warning" | "info";
+            /**
+             * created_at of the earliest span (null when the trace is empty).
+             */
+            started_at?: string | null; // date-time
+            /**
+             * created_at of the latest returned span (null when the trace is empty).
+             */
+            ended_at?: string | null; // date-time
+            /**
+             * Number of spans RETURNED (== spans.length; capped).
+             */
+            span_count: number;
+            /**
+             * True when the trace has more spans than the cap; the returned window is the earliest spans, so ended_at/status reflect only that window.
+             *
+             */
+            truncated: boolean;
+            /**
+             * All spans sharing the correlation_id, chronological. External-origin spans carry an EXTERNAL_* code; epilot spans carry an epilot code or empty (success).
+             *
+             */
+            spans: MonitoringEventV2[];
+            /**
+             * The epilot inbound event "head" (raw payload), when present.
+             */
+            inbound_event?: {
+                [name: string]: any;
+            } | null;
         }
         /**
          * Delivery channel toggles. New channels added in svc-notification-api inherit here.
@@ -6137,6 +6765,23 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace GetMonitoringTraceByCorrelation {
+        namespace Parameters {
+            export type CorrelationId = string;
+            export type IntegrationId = string; // uuid
+        }
+        export interface PathParameters {
+            integrationId: Parameters.IntegrationId /* uuid */;
+            correlationId: Parameters.CorrelationId;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.MonitoringTraceResponse;
+            export type $400 = Components.Responses.BadRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace GetNotificationStatus {
         namespace Parameters {
             export type Include = "baseline_series";
@@ -6208,6 +6853,23 @@ declare namespace Paths {
             export type $401 = Components.Responses.Unauthorized;
             export interface $404 {
             }
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace IngestExternalMonitoringEvents {
+        namespace Parameters {
+            export type IntegrationId = string; // uuid
+        }
+        export interface PathParameters {
+            integrationId: Parameters.IntegrationId /* uuid */;
+        }
+        export type RequestBody = Components.Schemas.IngestExternalMonitoringEventsRequest;
+        namespace Responses {
+            export type $202 = Components.Schemas.IngestExternalMonitoringEventsResponse;
+            export type $400 = Components.Responses.BadRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -6441,6 +7103,7 @@ declare namespace Paths {
             export type $200 = Components.Responses.ERPUpdatesResponse;
             export type $400 = Components.Responses.BadRequest;
             export type $401 = Components.Responses.Unauthorized;
+            export type $404 = Components.Responses.NotFound;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -6450,6 +7113,7 @@ declare namespace Paths {
             export type $200 = Components.Responses.ERPUpdatesResponse;
             export type $400 = Components.Responses.BadRequest;
             export type $401 = Components.Responses.Unauthorized;
+            export type $404 = Components.Responses.NotFound;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -7380,6 +8044,49 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetAssociatedMonitoringEvents.Responses.$200>
   /**
+   * ingestExternalMonitoringEvents - ingestExternalMonitoringEvents
+   * 
+   * Ingest monitoring spans produced by an EXTERNAL system (e.g. an integration
+   * middleware), so the Integration Hub is the central monitoring point and the
+   * cross-system event trace spans both the external system and epilot's own
+   * processing.
+   * 
+   * Each span is validated, assigned a server-controlled `EXTERNAL_*` taxonomy code
+   * derived from its `level` (the client never supplies a code — this marks
+   * provenance and prevents spoofing an epilot code), has its `use_case_slug`
+   * resolved against the integration's configured use cases, and is republished onto
+   * the same monitoring event bus as epilot's own spans — so external spans are
+   * first-class to the trace view, stats, alerting and digests.
+   * 
+   * Spans link to the epilot trace via `correlation_id` (the trace id): the middleware
+   * must stamp the same `correlation_id` here and on the event it forwards to the
+   * inbound endpoint. Invalid spans in a batch are reported per-item and do not fail
+   * the whole batch.
+   * 
+   */
+  'ingestExternalMonitoringEvents'(
+    parameters?: Parameters<Paths.IngestExternalMonitoringEvents.PathParameters> | null,
+    data?: Paths.IngestExternalMonitoringEvents.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.IngestExternalMonitoringEvents.Responses.$202>
+  /**
+   * getMonitoringTraceByCorrelation - getMonitoringTraceByCorrelation
+   * 
+   * Returns the cross-system event trace for a `correlation_id`: every monitoring
+   * span sharing it — external spans (middleware) plus epilot's own processing spans
+   * — ordered chronologically, with a rolled-up status and the epilot inbound event
+   * "head" attached. This is the correlation-grouped counterpart to
+   * `…/events/{eventId}/associated` (which groups a single epilot event's fan-out by
+   * event_id). Origin is distinguished by the `EXTERNAL_*` code prefix on external
+   * spans. Freshness is near-real-time (spans land as they are produced/ingested).
+   * 
+   */
+  'getMonitoringTraceByCorrelation'(
+    parameters?: Parameters<Paths.GetMonitoringTraceByCorrelation.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetMonitoringTraceByCorrelation.Responses.$200>
+  /**
    * listSecureProxies - List all secure proxy use cases
    * 
    * Lists all secure_proxy use cases across all integrations for the authenticated organization.
@@ -8140,6 +8847,53 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetAssociatedMonitoringEvents.Responses.$200>
   }
+  ['/v2/integrations/{integrationId}/monitoring/external-events']: {
+    /**
+     * ingestExternalMonitoringEvents - ingestExternalMonitoringEvents
+     * 
+     * Ingest monitoring spans produced by an EXTERNAL system (e.g. an integration
+     * middleware), so the Integration Hub is the central monitoring point and the
+     * cross-system event trace spans both the external system and epilot's own
+     * processing.
+     * 
+     * Each span is validated, assigned a server-controlled `EXTERNAL_*` taxonomy code
+     * derived from its `level` (the client never supplies a code — this marks
+     * provenance and prevents spoofing an epilot code), has its `use_case_slug`
+     * resolved against the integration's configured use cases, and is republished onto
+     * the same monitoring event bus as epilot's own spans — so external spans are
+     * first-class to the trace view, stats, alerting and digests.
+     * 
+     * Spans link to the epilot trace via `correlation_id` (the trace id): the middleware
+     * must stamp the same `correlation_id` here and on the event it forwards to the
+     * inbound endpoint. Invalid spans in a batch are reported per-item and do not fail
+     * the whole batch.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.IngestExternalMonitoringEvents.PathParameters> | null,
+      data?: Paths.IngestExternalMonitoringEvents.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.IngestExternalMonitoringEvents.Responses.$202>
+  }
+  ['/v2/integrations/{integrationId}/monitoring/traces/{correlationId}']: {
+    /**
+     * getMonitoringTraceByCorrelation - getMonitoringTraceByCorrelation
+     * 
+     * Returns the cross-system event trace for a `correlation_id`: every monitoring
+     * span sharing it — external spans (middleware) plus epilot's own processing spans
+     * — ordered chronologically, with a rolled-up status and the epilot inbound event
+     * "head" attached. This is the correlation-grouped counterpart to
+     * `…/events/{eventId}/associated` (which groups a single epilot event's fan-out by
+     * event_id). Origin is distinguished by the `EXTERNAL_*` code prefix on external
+     * spans. Freshness is near-real-time (spans land as they are produced/ingested).
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetMonitoringTraceByCorrelation.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetMonitoringTraceByCorrelation.Responses.$200>
+  }
   ['/v1/integrations/secure-proxies']: {
     /**
      * listSecureProxies - List all secure proxy use cases
@@ -8260,6 +9014,7 @@ export type ErpEventV3 = Components.Schemas.ErpEventV3;
 export type ErpUpdatesEventsV2Request = Components.Schemas.ErpUpdatesEventsV2Request;
 export type ErpUpdatesEventsV3Request = Components.Schemas.ErpUpdatesEventsV3Request;
 export type ErrorResponseBase = Components.Schemas.ErrorResponseBase;
+export type ExternalMonitoringSpan = Components.Schemas.ExternalMonitoringSpan;
 export type FileProxyAuth = Components.Schemas.FileProxyAuth;
 export type FileProxyParam = Components.Schemas.FileProxyParam;
 export type FileProxyResponseConfig = Components.Schemas.FileProxyResponseConfig;
@@ -8282,6 +9037,8 @@ export type InboundIntegrationEventConfiguration = Components.Schemas.InboundInt
 export type InboundMonitoringEvent = Components.Schemas.InboundMonitoringEvent;
 export type InboundUseCase = Components.Schemas.InboundUseCase;
 export type InboundUseCaseHistoryEntry = Components.Schemas.InboundUseCaseHistoryEntry;
+export type IngestExternalMonitoringEventsRequest = Components.Schemas.IngestExternalMonitoringEventsRequest;
+export type IngestExternalMonitoringEventsResponse = Components.Schemas.IngestExternalMonitoringEventsResponse;
 export type Integration = Components.Schemas.Integration;
 export type IntegrationAppMapping = Components.Schemas.IntegrationAppMapping;
 export type IntegrationConfigurationV1 = Components.Schemas.IntegrationConfigurationV1;
@@ -8313,6 +9070,7 @@ export type MeterUniqueIdsConfig = Components.Schemas.MeterUniqueIdsConfig;
 export type MonitoringEventV2 = Components.Schemas.MonitoringEventV2;
 export type MonitoringStats = Components.Schemas.MonitoringStats;
 export type MonitoringStatsV2 = Components.Schemas.MonitoringStatsV2;
+export type MonitoringTraceResponse = Components.Schemas.MonitoringTraceResponse;
 export type NotificationChannelSet = Components.Schemas.NotificationChannelSet;
 export type NotificationDigestConfig = Components.Schemas.NotificationDigestConfig;
 export type NotificationHistoryItem = Components.Schemas.NotificationHistoryItem;

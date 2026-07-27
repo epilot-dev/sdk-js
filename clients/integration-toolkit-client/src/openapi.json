@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Integration Toolkit API",
-    "version": "1.5.5",
+    "version": "1.5.12",
     "description": "API for integrating with external systems in a standardised way."
   },
   "tags": [
@@ -279,6 +279,9 @@
           "401": {
             "$ref": "#/components/responses/Unauthorized"
           },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
           }
@@ -331,6 +334,9 @@
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
           },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
@@ -3228,6 +3234,122 @@
         }
       }
     },
+    "/v2/integrations/{integrationId}/monitoring/external-events": {
+      "post": {
+        "operationId": "ingestExternalMonitoringEvents",
+        "summary": "ingestExternalMonitoringEvents",
+        "description": "Ingest monitoring spans produced by an EXTERNAL system (e.g. an integration\nmiddleware), so the Integration Hub is the central monitoring point and the\ncross-system event trace spans both the external system and epilot's own\nprocessing.\n\nEach span is validated, assigned a server-controlled `EXTERNAL_*` taxonomy code\nderived from its `level` (the client never supplies a code — this marks\nprovenance and prevents spoofing an epilot code), has its `use_case_slug`\nresolved against the integration's configured use cases, and is republished onto\nthe same monitoring event bus as epilot's own spans — so external spans are\nfirst-class to the trace view, stats, alerting and digests.\n\nSpans link to the epilot trace via `correlation_id` (the trace id): the middleware\nmust stamp the same `correlation_id` here and on the event it forwards to the\ninbound endpoint. Invalid spans in a batch are reported per-item and do not fail\nthe whole batch.\n",
+        "tags": [
+          "monitoring",
+          "integrations"
+        ],
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true,
+            "description": "The integration ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IngestExternalMonitoringEventsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Batch accepted (some spans may have been rejected — see counts).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IngestExternalMonitoringEventsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/integrations/{integrationId}/monitoring/traces/{correlationId}": {
+      "get": {
+        "operationId": "getMonitoringTraceByCorrelation",
+        "summary": "getMonitoringTraceByCorrelation",
+        "description": "Returns the cross-system event trace for a `correlation_id`: every monitoring\nspan sharing it — external spans (middleware) plus epilot's own processing spans\n— ordered chronologically, with a rolled-up status and the epilot inbound event\n\"head\" attached. This is the correlation-grouped counterpart to\n`…/events/{eventId}/associated` (which groups a single epilot event's fan-out by\nevent_id). Origin is distinguished by the `EXTERNAL_*` code prefix on external\nspans. Freshness is near-real-time (spans land as they are produced/ingested).\n",
+        "tags": [
+          "monitoring",
+          "integrations"
+        ],
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true,
+            "description": "The integration ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "correlationId",
+            "in": "path",
+            "required": true,
+            "description": "The trace id (correlation_id) shared across systems",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The assembled cross-system trace.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MonitoringTraceResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/v1/integrations/secure-proxies": {
       "get": {
         "operationId": "listSecureProxies",
@@ -4003,6 +4125,11 @@
             "description": "Optional unique identifier for idempotency - prevents duplicate processing of the same event within 24 hours in context of the same integration. Must contain only alphanumeric characters, hyphens, and underscores.\n",
             "example": "evt-2025-05-01-12345-create-bp"
           },
+          "correlation_id": {
+            "type": "string",
+            "description": "Optional per-event trace id for cross-system tracing (unique per business operation). Overrides the request-level meta.correlation_id for THIS event. When absent, the event inherits the request-level correlation_id; when both are absent, epilot mints its own event_id and the trace is epilot-only. Orthogonal to deduplication_id (idempotency).\n",
+            "example": "bp-8f3a2c-7d4e-4b1a-9c2f-1e6d5a4b3c21"
+          },
           "use_case_id": {
             "type": "string",
             "nullable": true,
@@ -4109,6 +4236,12 @@
             "maxLength": 255,
             "description": "Optional unique identifier for idempotency - prevents duplicate processing of the same event within 24 hours in context of the same integration. Must contain only alphanumeric characters, hyphens, and underscores.\n",
             "example": "evt-2025-05-01-12345-bp"
+          },
+          "group_id": {
+            "type": "string",
+            "description": "Optional per-event ordering group. Overrides the request-level `group_id` for THIS event; when absent, the event inherits the request-level `group_id` (or the default strict per-integration ordering). Use it when a single batch carries events for unrelated business objects that may be processed in parallel. See the request-level `group_id` for semantics.\n",
+            "maxLength": 128,
+            "example": "customer-42"
           }
         }
       },
@@ -4130,7 +4263,7 @@
           },
           "group_id": {
             "type": "string",
-            "description": "Controls ordering and parallelism for this request's events.\n\nBy default, all events for a given `integration_id` are processed\n**strictly in order, one at a time**. For high-volume integrations this\ncan become a throughput bottleneck.\n\nSet `group_id` to opt into **parallel processing**:\n- Events sharing the same `group_id` are processed in the order received.\n- Events with different `group_id` values are processed in parallel.\n\nTypical usage is to derive `group_id` from a logical partition key in\nyour payload — for example the customer ID, contract ID, or meter ID —\nso updates to the same business object remain ordered while unrelated\nobjects are processed concurrently.\n\nNotes:\n- Up to 20 groups per integration are processed concurrently. Using\n  more distinct values than that yields no additional parallelism.\n- Omit this field if strict per-integration ordering is required.\n",
+            "description": "Controls ordering and parallelism for this request's events.\n\nBy default, all events for a given `integration_id` are processed\n**strictly in order, one at a time**. For high-volume integrations this\ncan become a throughput bottleneck.\n\nSet `group_id` to opt into **parallel processing**:\n- Events sharing the same `group_id` are processed in the order received.\n- Events with different `group_id` values are processed in parallel.\n\nTypical usage is to derive `group_id` from a logical partition key in\nyour payload — for example the customer ID, contract ID, or meter ID —\nso updates to the same business object remain ordered while unrelated\nobjects are processed concurrently.\n\nNotes:\n- Individual events may set their own `group_id`, which overrides this\n  request-level value for that event only.\n- Up to 20 groups per integration are processed concurrently. Using\n  more distinct values than that yields no additional parallelism.\n- Omit this field if strict per-integration ordering is required.\n",
             "maxLength": 128,
             "example": "customer-42"
           },
@@ -7074,7 +7207,7 @@
           "prevent_indirect_serving": {
             "type": "boolean",
             "default": false,
-            "description": "When `true`, files that are too large to be served directly in the proxy response\n(and would otherwise be served indirectly via a temporary S3 redirect) are not served.\nInstead the proxy responds with an error and logs a warning. Use this when files must\nnever transit epilot's temporary S3 storage. Defaults to `false` (large files are\ntransparently served via S3).\n"
+            "description": "When `true`, this use case is served via the streaming endpoint: mapped file URLs\nare built as `/stream/download`, files of any size are streamed inline over HTTP\nresponse streaming, and buffered `/download` requests for oversize files are\n307-redirected to `/stream`. Files never transit epilot's temporary S3 storage on\nthe streaming path. Defaults to `false` (small files are served directly and large\nfiles are transparently served via a temporary S3 redirect).\n"
           }
         }
       },
@@ -9252,6 +9385,160 @@
                 "format": "uuid"
               }
             }
+          }
+        }
+      },
+      "ExternalMonitoringSpan": {
+        "type": "object",
+        "properties": {
+          "correlation_id": {
+            "type": "string",
+            "description": "Trace id — links this span to the epilot trace. Unique per business operation. Required."
+          },
+          "level": {
+            "type": "string",
+            "description": "Span outcome level — one of success | error | warning | info. Drives the server-assigned EXTERNAL_* code, coloring, and alerting. Required.\n"
+          },
+          "use_case_slug": {
+            "type": "string",
+            "description": "Business use case slug (e.g. \"business_partner\"). Resolved server-side against the integration's configured use cases to a use_case_id/use_case_type; stored as the grouping dimension. Portable — no epilot-internal UUIDs required.\n"
+          },
+          "occurred_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "External clock time the span occurred; stored as created_at."
+          },
+          "message": {
+            "type": "string",
+            "description": "Human-readable line shown in the trace and event tables."
+          },
+          "detail": {
+            "type": "object",
+            "additionalProperties": true,
+            "nullable": true,
+            "description": "Free-form context (step, http_status, reason, …). The place for external-system specificity — the taxonomy code stays clean (EXTERNAL_*).\n"
+          }
+        },
+        "description": "A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).\n"
+      },
+      "IngestExternalMonitoringEventsRequest": {
+        "type": "object",
+        "required": [
+          "events"
+        ],
+        "properties": {
+          "events": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 100,
+            "items": {
+              "$ref": "#/components/schemas/ExternalMonitoringSpan"
+            },
+            "description": "Batch of external monitoring spans (max 100 per request)."
+          }
+        }
+      },
+      "IngestExternalMonitoringEventsResponse": {
+        "type": "object",
+        "required": [
+          "accepted",
+          "rejected"
+        ],
+        "properties": {
+          "accepted": {
+            "type": "integer",
+            "description": "Number of spans accepted and republished onto the monitoring bus."
+          },
+          "rejected": {
+            "type": "integer",
+            "description": "Number of spans rejected in validation. See `results` for reasons."
+          },
+          "results": {
+            "type": "array",
+            "description": "Per-span results; present for rejections in a mixed batch.",
+            "items": {
+              "type": "object",
+              "required": [
+                "index",
+                "status"
+              ],
+              "properties": {
+                "index": {
+                  "type": "integer",
+                  "description": "Zero-based index of the span in the request `events` array."
+                },
+                "status": {
+                  "type": "string",
+                  "enum": [
+                    "accepted",
+                    "rejected"
+                  ]
+                },
+                "reason": {
+                  "type": "string",
+                  "description": "Rejection reason (present when status is rejected)."
+                }
+              }
+            }
+          }
+        }
+      },
+      "MonitoringTraceResponse": {
+        "type": "object",
+        "required": [
+          "correlation_id",
+          "status",
+          "span_count",
+          "truncated",
+          "spans"
+        ],
+        "properties": {
+          "correlation_id": {
+            "type": "string",
+            "description": "The trace id these spans share."
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "success",
+              "error",
+              "warning",
+              "info"
+            ],
+            "description": "Rolled-up status across all spans (error > warning > success > info)."
+          },
+          "started_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "created_at of the earliest span (null when the trace is empty)."
+          },
+          "ended_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "created_at of the latest returned span (null when the trace is empty)."
+          },
+          "span_count": {
+            "type": "integer",
+            "description": "Number of spans RETURNED (== spans.length; capped)."
+          },
+          "truncated": {
+            "type": "boolean",
+            "description": "True when the trace has more spans than the cap; the returned window is the earliest spans, so ended_at/status reflect only that window.\n"
+          },
+          "spans": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MonitoringEventV2"
+            },
+            "description": "All spans sharing the correlation_id, chronological. External-origin spans carry an EXTERNAL_* code; epilot spans carry an epilot code or empty (success).\n"
+          },
+          "inbound_event": {
+            "type": "object",
+            "nullable": true,
+            "additionalProperties": true,
+            "description": "The epilot inbound event \"head\" (raw payload), when present."
           }
         }
       },
