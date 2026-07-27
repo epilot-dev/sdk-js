@@ -63,6 +63,9 @@ const { data } = await appClient.getPublicFacingComponent(...)
 **App Proxy**
 - [`publicProxyGet`](#publicproxyget)
 - [`publicProxyPost`](#publicproxypost)
+- [`publicProxyPut`](#publicproxyput)
+- [`publicProxyPatch`](#publicproxypatch)
+- [`publicProxyDelete`](#publicproxydelete)
 
 **Schemas**
 - [`Role`](#role)
@@ -103,6 +106,9 @@ const { data } = await appClient.getPublicFacingComponent(...)
 - [`PortalExtensionHookDataExport`](#portalextensionhookdataexport)
 - [`PortalExtensionHookVisualizationMetadata`](#portalextensionhookvisualizationmetadata)
 - [`PortalExtensionHookCostDataRetrieval`](#portalextensionhookcostdataretrieval)
+- [`PortalExtensionHookChangeEmail`](#portalextensionhookchangeemail)
+- [`PortalExtensionHookChangePassword`](#portalextensionhookchangepassword)
+- [`PortalExtensionHookDeleteAccount`](#portalextensionhookdeleteaccount)
 - [`PortalExtensionSeamlessLink`](#portalextensionseamlesslink)
 - [`PortalExtensionAuthBlock`](#portalextensionauthblock)
 - [`PortalExtensionSecureProxy`](#portalextensionsecureproxy)
@@ -1713,6 +1719,60 @@ const { data } = await client.publicProxyPost(
 
 ---
 
+### `publicProxyPut`
+
+Forward a PUT request to a registered proxy target from a public-facing component
+
+`PUT /v1/public/app/{appId}/proxy/{proxyName}/{path}`
+
+```ts
+const { data } = await client.publicProxyPut(
+  {
+    appId: 'example',
+    proxyName: 'example',
+    path: 'example',
+  },
+  {},
+)
+```
+
+---
+
+### `publicProxyPatch`
+
+Forward a PATCH request to a registered proxy target from a public-facing component
+
+`PATCH /v1/public/app/{appId}/proxy/{proxyName}/{path}`
+
+```ts
+const { data } = await client.publicProxyPatch(
+  {
+    appId: 'example',
+    proxyName: 'example',
+    path: 'example',
+  },
+  {},
+)
+```
+
+---
+
+### `publicProxyDelete`
+
+Forward a DELETE request to a registered proxy target from a public-facing component
+
+`DELETE /v1/public/app/{appId}/proxy/{proxyName}/{path}`
+
+```ts
+const { data } = await client.publicProxyDelete({
+  appId: 'example',
+  proxyName: 'example',
+  path: 'example',
+})
+```
+
+---
+
 ## Schemas
 
 ### `Role`
@@ -1902,10 +1962,11 @@ type ApiProxyComponent = {
   component_type: "API_PROXY"
   configuration: {
     name: string
-    target: string // uri
+    target: string
     auth_type: "header" | "bearer" | "oauth2" | "none"
     auth_header?: string
     token_url?: string // uri
+    headers?: Record<string, string>
   }
 }
 ```
@@ -2327,17 +2388,24 @@ type PortalExtensionComponent = {
       resolved?: { ... }
       use_static_ips?: { ... }
       secure_proxy?: { ... }
-    }>
-    links?: Array<{
+    } | {
       id: { ... }
-      name: { ... }
-      description?: { ... }
+      name?: { ... }
       type: { ... }
-      condition?: { ... }
+      change_mode?: { ... }
+      require_password_confirmation?: { ... }
+      explanation?: { ... }
       auth?: { ... }
-      redirect: { ... }
-    }>
-  }
+      call: { ... }
+      resolved?: { ... }
+      secure_proxy?: { ... }
+    } | {
+      id: { ... }
+      name?: { ... }
+      type: { ... }
+      require_new_password?: { ... }
+      explanation?: { ... }
+  // ...
 }
 ```
 
@@ -2819,6 +2887,142 @@ type PortalExtensionHookCostDataRetrieval = {
 }
 ```
 
+### `PortalExtensionHookChangeEmail`
+
+Hook that replaces the built-in change email functionality for portal users. When configured, the portal does not run its own change email flow. Instead, this hook makes an HTTP call to the third-party system, which is expected to handle the email change.
+The `change_mode` controls what the portal d
+
+```ts
+type PortalExtensionHookChangeEmail = {
+  id: string
+  name?: {
+    en?: string
+    de: string
+  }
+  type: "changeEmail"
+  change_mode?: "synchronous" | "asynchronous"
+  require_password_confirmation?: boolean
+  explanation?: {
+    en: string
+  }
+  auth?: {
+    method?: string
+    url: string
+    params?: Record<string, string>
+    headers?: Record<string, string>
+    body?: Record<string, unknown>
+    cache?: {
+      key: { ... }
+      ttl: { ... }
+    }
+  }
+  call: {
+    method?: string
+    url: string
+    params?: Record<string, string>
+    headers: Record<string, string>
+    body?: object
+  }
+  resolved?: {
+    error_message_path?: string
+  }
+  secure_proxy?: {
+    integration_id: string // uuid
+    use_case_slug: string
+  }
+}
+```
+
+### `PortalExtensionHookChangePassword`
+
+Hook that replaces the built-in change password functionality for portal users. When configured, the portal does not change the user's password itself. Instead, this hook makes an HTTP call to the third-party system, which is expected to handle the password change (most likely by sending the user in
+
+```ts
+type PortalExtensionHookChangePassword = {
+  id: string
+  name?: {
+    en?: string
+    de: string
+  }
+  type: "changePassword"
+  require_new_password?: boolean
+  explanation?: {
+    en: string
+  }
+  auth?: {
+    method?: string
+    url: string
+    params?: Record<string, string>
+    headers?: Record<string, string>
+    body?: Record<string, unknown>
+    cache?: {
+      key: { ... }
+      ttl: { ... }
+    }
+  }
+  call: {
+    method?: string
+    url: string
+    params?: Record<string, string>
+    headers: Record<string, string>
+    body?: object
+  }
+  resolved?: {
+    error_message_path?: string
+  }
+  secure_proxy?: {
+    integration_id: string // uuid
+    use_case_slug: string
+  }
+}
+```
+
+### `PortalExtensionHookDeleteAccount`
+
+Hook that replaces the built-in delete account functionality for portal users. When configured, the portal does not delete the user itself. Instead, this hook makes an HTTP call to the third-party system, which is expected to handle the deletion.
+The `deletion_mode` controls what the portal does aft
+
+```ts
+type PortalExtensionHookDeleteAccount = {
+  id: string
+  name?: {
+    en?: string
+    de: string
+  }
+  type: "deleteAccount"
+  deletion_mode?: "synchronous" | "asynchronous"
+  delete_contact?: "none" | "soft" | "hard"
+  explanation?: {
+    en: string
+  }
+  auth?: {
+    method?: string
+    url: string
+    params?: Record<string, string>
+    headers?: Record<string, string>
+    body?: Record<string, unknown>
+    cache?: {
+      key: { ... }
+      ttl: { ... }
+    }
+  }
+  call: {
+    method?: string
+    url: string
+    params?: Record<string, string>
+    headers: Record<string, string>
+    body?: object
+  }
+  resolved?: {
+    error_message_path?: string
+  }
+  secure_proxy?: {
+    integration_id: string // uuid
+    use_case_slug: string
+  }
+}
+```
+
 ### `PortalExtensionSeamlessLink`
 
 ```ts
@@ -3174,10 +3378,11 @@ Configuration for an API proxy component
 ```ts
 type ApiProxyConfig = {
   name: string
-  target: string // uri
+  target: string
   auth_type: "header" | "bearer" | "oauth2" | "none"
   auth_header?: string
   token_url?: string // uri
+  headers?: Record<string, string>
 }
 ```
 
