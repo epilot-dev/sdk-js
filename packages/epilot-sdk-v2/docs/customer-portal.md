@@ -1774,6 +1774,7 @@ const { data } = await client.getPublicPortalExtensionDetails({
     },
     "hook": {
       "id": "string",
+      "change_mode": "asynchronous",
       "require_password_confirmation": true,
       "explanation": {}
     }
@@ -2008,6 +2009,7 @@ const { data } = await client.getPublicPortalExtensionDetailsV3({
     },
     "hook": {
       "id": "string",
+      "change_mode": "asynchronous",
       "require_password_confirmation": true,
       "explanation": {}
     }
@@ -12302,8 +12304,8 @@ type PublicExtensionCapabilities = {
     }
     hook?: {
       id?: { ... }
+      change_mode?: { ... }
       require_password_confirmation?: { ... }
-      explanation?: { ... }
   // ...
 }
 ```
@@ -12323,6 +12325,7 @@ type PublicSelfManagementExplanation = {
 ```ts
 type PublicChangeEmailDetails = {
   id?: string
+  change_mode?: "synchronous" | "asynchronous"
   require_password_confirmation?: boolean
   explanation?: {
     en: string
@@ -12907,11 +12910,13 @@ type ExtensionHookCostDataRetrieval = {
 
 ### `ExtensionHookChangeEmail`
 
-Hook that replaces the built-in change email functionality for portal users. When configured, the portal does not change the user's login email itself. Instead, this hook makes an HTTP call to the third-party system, which is expected to handle the email change (most likely by sending the user instr
+Hook that replaces the built-in change email functionality for portal users. When configured, the portal does not run its own change email flow. Instead, this hook makes an HTTP call to the third-party system, which is expected to handle the email change.
+The `change_mode` controls what the portal d
 
 ```ts
 type ExtensionHookChangeEmail = {
   type: "changeEmail"
+  change_mode?: "synchronous" | "asynchronous"
   require_password_confirmation?: boolean
   explanation?: {
     en: string
@@ -12992,6 +12997,7 @@ The `deletion_mode` controls what the portal does aft
 type ExtensionHookDeleteAccount = {
   type: "deleteAccount"
   deletion_mode?: "synchronous" | "asynchronous"
+  delete_contact?: "none" | "soft" | "hard"
   explanation?: {
     en: string
   }

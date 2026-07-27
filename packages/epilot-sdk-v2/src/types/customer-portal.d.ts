@@ -1052,7 +1052,7 @@ export declare namespace Components {
                  * example:
                  * office-365-login
                  */
-                ProviderSlug /* [0-9a-z-]+ */[];
+                ProviderSlug /* [0-9a-z_-]+ */[];
                 /**
                  * Decide whether to automatically redirect to the provider page during login, which would completely bypass showing the portal authentication page.
                  */
@@ -1579,7 +1579,7 @@ export declare namespace Components {
                  * example:
                  * office-365-login
                  */
-                ProviderSlug /* [0-9a-z-]+ */[];
+                ProviderSlug /* [0-9a-z_-]+ */[];
                 /**
                  * Decide whether to automatically redirect to the provider page during login, which would completely bypass showing the portal authentication page.
                  */
@@ -3507,7 +3507,11 @@ export declare namespace Components {
              *
              */
             ExtensionHookVisualizationMetadata | /**
-             * Hook that replaces the built-in change email functionality for portal users. When configured, the portal does not change the user's login email itself. Instead, this hook makes an HTTP call to the third-party system, which is expected to handle the email change (most likely by sending the user instructions to confirm the new email address).
+             * Hook that replaces the built-in change email functionality for portal users. When configured, the portal does not run its own change email flow. Instead, this hook makes an HTTP call to the third-party system, which is expected to handle the email change.
+             * The `change_mode` controls what the portal does after the call:
+             *   - `asynchronous`: The third-party system takes the email change over entirely (most likely by sending the user instructions to confirm the new email address). The portal does not change the login email itself.
+             *   - `synchronous`: The third-party system applies the email change immediately. The portal waits for a successful (2xx) response and then also changes the portal user's login email right away, without sending a confirmation email. The user has to sign in again with the new email address afterwards.
+             *
              * The expected response http status code to the call is:
              *   - 2xx if the request was accepted
              *   - non-2xx if the request failed (optionally with a human-readable message resolved via `resolved.error_message_path`)
@@ -3525,6 +3529,8 @@ export declare namespace Components {
              * The `deletion_mode` controls what the portal does after the call:
              *   - `synchronous`: The third-party system deletes the user immediately. The portal waits for a successful (2xx) response and then also deletes the epilot user.
              *   - `asynchronous`: The third-party system handles deletion out-of-band. The portal does not delete anything immediately; cleanup is expected to happen later (e.g. via the user deletion API or webhooks).
+             *
+             * The optional `delete_contact` additionally deletes the contact related to the portal user, once the portal user itself was deleted (`synchronous` mode only).
              *
              * The expected response http status code to the call is:
              *   - 2xx if the request was accepted
@@ -3598,7 +3604,11 @@ export declare namespace Components {
             id?: string;
         }
         /**
-         * Hook that replaces the built-in change email functionality for portal users. When configured, the portal does not change the user's login email itself. Instead, this hook makes an HTTP call to the third-party system, which is expected to handle the email change (most likely by sending the user instructions to confirm the new email address).
+         * Hook that replaces the built-in change email functionality for portal users. When configured, the portal does not run its own change email flow. Instead, this hook makes an HTTP call to the third-party system, which is expected to handle the email change.
+         * The `change_mode` controls what the portal does after the call:
+         *   - `asynchronous`: The third-party system takes the email change over entirely (most likely by sending the user instructions to confirm the new email address). The portal does not change the login email itself.
+         *   - `synchronous`: The third-party system applies the email change immediately. The portal waits for a successful (2xx) response and then also changes the portal user's login email right away, without sending a confirmation email. The user has to sign in again with the new email address afterwards.
+         *
          * The expected response http status code to the call is:
          *   - 2xx if the request was accepted
          *   - non-2xx if the request failed (optionally with a human-readable message resolved via `resolved.error_message_path`)
@@ -3607,7 +3617,12 @@ export declare namespace Components {
         export interface ExtensionHookChangeEmail {
             type: "changeEmail";
             /**
-             * Whether the portal user must confirm their current password before the change email request is handed over to the third-party system. When true, the portal collects and verifies the current password before calling the hook.
+             * Controls how the email change is handled once the third-party system accepted it. `asynchronous` hands the email change over entirely to the third-party system and the portal does not change the login email itself. `synchronous` waits for the third-party system to respond and then changes the portal user's login email immediately, without a confirmation email.
+             *
+             */
+            change_mode?: "synchronous" | "asynchronous";
+            /**
+             * Whether the portal user must confirm their current password before the change email request is handed over to the third-party system. When true, the portal collects and verifies the current password before calling the hook. Treated as true when `change_mode` is `synchronous`, since the portal re-creates the login with the confirmed password. Skipped either way for portal users whose identity is managed by an identity provider: an SSO login has no password to confirm.
              *
              */
             require_password_confirmation?: boolean;
@@ -4016,6 +4031,8 @@ export declare namespace Components {
          *   - `synchronous`: The third-party system deletes the user immediately. The portal waits for a successful (2xx) response and then also deletes the epilot user.
          *   - `asynchronous`: The third-party system handles deletion out-of-band. The portal does not delete anything immediately; cleanup is expected to happen later (e.g. via the user deletion API or webhooks).
          *
+         * The optional `delete_contact` additionally deletes the contact related to the portal user, once the portal user itself was deleted (`synchronous` mode only).
+         *
          * The expected response http status code to the call is:
          *   - 2xx if the request was accepted
          *   - non-2xx if the request failed (optionally with a human-readable message resolved via `resolved.error_message_path`)
@@ -4028,6 +4045,11 @@ export declare namespace Components {
              *
              */
             deletion_mode?: "synchronous" | "asynchronous";
+            /**
+             * Opt-in deletion of the contact related to the portal user, applied after the portal user itself was deleted. `none` (default) leaves the contact untouched. `soft` deletes the contact, so it can still be restored from the trash. `hard` permanently purges the contact. Only applied in `synchronous` deletion mode, as `asynchronous` mode hands the cleanup over to the third-party system.
+             *
+             */
+            delete_contact?: "none" | "soft" | "hard";
             /**
              * Optional explanation shown to the user in the delete account confirmation dialog.
              */
@@ -6064,7 +6086,7 @@ export declare namespace Components {
                  * example:
                  * office-365-login
                  */
-                ProviderSlug /* [0-9a-z-]+ */[];
+                ProviderSlug /* [0-9a-z_-]+ */[];
                 /**
                  * Decide whether to automatically redirect to the provider page during login, which would completely bypass showing the portal authentication page.
                  */
@@ -6683,7 +6705,7 @@ export declare namespace Components {
                  * example:
                  * office-365-login
                  */
-                ProviderSlug /* [0-9a-z-]+ */[];
+                ProviderSlug /* [0-9a-z_-]+ */[];
                 /**
                  * Decide whether to automatically redirect to the provider page during login, which would completely bypass showing the portal authentication page.
                  */
@@ -7370,7 +7392,7 @@ export declare namespace Components {
              * example:
              * office-365-login
              */
-            ProviderSlug /* [0-9a-z-]+ */;
+            ProviderSlug /* [0-9a-z_-]+ */;
             display_name: /**
              * Human-readable display name for identity provider shown in login
              * example:
@@ -7422,7 +7444,7 @@ export declare namespace Components {
              * example:
              * office-365-login
              */
-            ProviderSlug /* [0-9a-z-]+ */;
+            ProviderSlug /* [0-9a-z_-]+ */;
             display_name: /**
              * Human-readable display name for identity provider shown in login
              * example:
@@ -7452,7 +7474,7 @@ export declare namespace Components {
          * example:
          * office-365-login
          */
-        export type ProviderSlug = string; // [0-9a-z-]+
+        export type ProviderSlug = string; // [0-9a-z_-]+
         export interface PublicAppDetails {
             /**
              * Identifier of the app.
@@ -7472,7 +7494,15 @@ export declare namespace Components {
              */
             id?: string;
             /**
+             * Whether the third-party system applies the email change immediately (`synchronous`) or takes it over entirely (`asynchronous`).
+             * In synchronous mode the login email is changed as soon as the request succeeds and the portal user has to sign in again with the new address.
+             *
+             */
+            change_mode?: "synchronous" | "asynchronous";
+            /**
              * Whether the portal user must confirm their current password before the email change is handed over to the third-party system.
+             * Also required when `change_mode` is `synchronous`, except for portal users whose identity is managed by an identity provider - an SSO login has no password to confirm.
+             *
              */
             require_password_confirmation?: boolean;
             explanation?: /* Explanation of the hook. */ PublicSelfManagementExplanation;
@@ -7749,7 +7779,7 @@ export declare namespace Components {
              * example:
              * office-365-login
              */
-            ProviderSlug /* [0-9a-z-]+ */;
+            ProviderSlug /* [0-9a-z_-]+ */;
             /**
              * URL of the authorization endpoint
              * example:
@@ -8245,7 +8275,7 @@ export declare namespace Components {
                  * example:
                  * office-365-login
                  */
-                ProviderSlug /* [0-9a-z-]+ */[];
+                ProviderSlug /* [0-9a-z_-]+ */[];
                 /**
                  * Decide whether to automatically redirect to the provider page during login, which would completely bypass showing the portal authentication page.
                  */
@@ -8832,7 +8862,7 @@ export declare namespace Components {
                  * example:
                  * office-365-login
                  */
-                ProviderSlug /* [0-9a-z-]+ */[];
+                ProviderSlug /* [0-9a-z_-]+ */[];
                 /**
                  * Decide whether to automatically redirect to the provider page during login, which would completely bypass showing the portal authentication page.
                  */
@@ -12087,7 +12117,7 @@ export declare namespace Paths {
                      * example:
                      * office-365-login
                      */
-                    Components.Schemas.ProviderSlug /* [0-9a-z-]+ */[];
+                    Components.Schemas.ProviderSlug /* [0-9a-z_-]+ */[];
                     /**
                      * Decide whether to automatically redirect to the provider page during login, which would completely bypass showing the portal authentication page.
                      */
@@ -12705,7 +12735,7 @@ export declare namespace Paths {
                      * example:
                      * office-365-login
                      */
-                    Components.Schemas.ProviderSlug /* [0-9a-z-]+ */[];
+                    Components.Schemas.ProviderSlug /* [0-9a-z_-]+ */[];
                     /**
                      * Decide whether to automatically redirect to the provider page during login, which would completely bypass showing the portal authentication page.
                      */
@@ -14056,7 +14086,7 @@ export declare namespace Paths {
              * example:
              * office-365-login
              */
-            Components.Schemas.ProviderSlug /* [0-9a-z-]+ */;
+            Components.Schemas.ProviderSlug /* [0-9a-z_-]+ */;
         }
         export interface PathParameters {
             provider_slug: Parameters.ProviderSlug;
@@ -14285,7 +14315,7 @@ export declare namespace Paths {
                  * example:
                  * office-365-login
                  */
-                Components.Schemas.ProviderSlug /* [0-9a-z-]+ */[];
+                Components.Schemas.ProviderSlug /* [0-9a-z_-]+ */[];
                 /**
                  * Whether the user is soft deleted
                  * example:
@@ -15116,7 +15146,7 @@ export declare namespace Paths {
              * example:
              * office-365-login
              */
-            Components.Schemas.ProviderSlug /* [0-9a-z-]+ */;
+            Components.Schemas.ProviderSlug /* [0-9a-z_-]+ */;
         }
         namespace Responses {
             export interface $200 {
@@ -15170,7 +15200,7 @@ export declare namespace Paths {
              * example:
              * office-365-login
              */
-            Components.Schemas.ProviderSlug /* [0-9a-z-]+ */;
+            Components.Schemas.ProviderSlug /* [0-9a-z_-]+ */;
         }
         namespace Responses {
             export interface $200 {
@@ -15569,6 +15599,7 @@ export declare namespace Paths {
             /**
              * Password of the portal user for confirmation.
              * Required unless a `changeEmail` portal extension hook with `require_password_confirmation` disabled is configured for the portal.
+             * Also required by a `changeEmail` hook with `change_mode` set to `synchronous`, except for portal users whose identity is managed by an identity provider - an SSO login has no password to confirm.
              *
              */
             password?: string;
@@ -15577,8 +15608,10 @@ export declare namespace Paths {
             export interface $200 {
                 /**
                  * `You will receive a confirmation mail soon on your updated email address.` for the built-in flow,
-                 * or `Your email change request has been received.` when a changeEmail portal extension hook handed
-                 * the change over to a third party.
+                 * `Your email change request has been received.` when a changeEmail portal extension hook handed
+                 * the change over to a third party, or `Your email has been changed.` when a synchronous changeEmail
+                 * portal extension hook changed the login email immediately - the portal user has to sign in again
+                 * with the new email address in that case.
                  *
                  * example:
                  * You will receive a confirmation mail soon on your updated email address.
