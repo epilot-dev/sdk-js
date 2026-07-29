@@ -1954,6 +1954,24 @@
         "responses": {}
       }
     },
+    "/v2/portal/entity/{slug}/{id}/workflows/linearized": {
+      "get": {
+        "operationId": "getEntityPortalWorkflows",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v2/portal/metering/reading/photo": {
       "post": {
         "operationId": "uploadMeterReadingPhoto",

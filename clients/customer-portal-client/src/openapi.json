@@ -4252,7 +4252,7 @@
                   },
                   "password": {
                     "type": "string",
-                    "description": "Password of the portal user for confirmation.\nRequired unless a `changeEmail` portal extension hook with `require_password_confirmation` disabled is configured for the portal.\nAlso required by a `changeEmail` hook with `change_mode` set to `synchronous`, except for portal users whose identity is managed by an identity provider - an SSO login has no password to confirm.\n"
+                    "description": "Password of the portal user for confirmation.\nRequired unless a `changeEmail` portal extension hook with `require_password_confirmation` disabled is configured for the portal,\nor the portal user's identity is managed by an identity provider - an SSO login has no password to confirm.\n"
                   }
                 }
               }
@@ -7955,6 +7955,75 @@
                       "type": "array",
                       "items": {
                         "$ref": "#/components/schemas/WorkflowExecution"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/entity/{slug}/{id}/workflows/linearized": {
+      "get": {
+        "operationId": "getEntityPortalWorkflows",
+        "summary": "Get linearized workflows for an entity",
+        "description": "Get all portal-relevant workflows associated with an entity (requires access to the entity),\nlinearized by the Workflows API into a flat, ordered list of portal-visible tasks.\n\nUnlike `getEntityWorkflows`, this endpoint returns a single uniform shape for both legacy\n(V1) workflow executions and graph-based (V2) flow executions — the execution graph is\nalready resolved server-side (active path, task reachability, chronological ordering), so\nclients can render a timeline without any graph traversal logic.\n\nTasks carry the config of both portal audiences (`ecp` and `installer`); clients filter\nper their configured audience, so one response serves every block on a page.\n",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Schema slug of the entity",
+              "example": "opportunity"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "ID of the entity",
+              "example": "abc123"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Portal-relevant workflows for the entity, each with linearized tasks",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "portal_workflows": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/PortalWorkflow"
                       }
                     }
                   }
@@ -14623,6 +14692,214 @@
           "completedTime": "2024-01-13T05:18:43.827Z"
         }
       },
+      "PortalWorkflow": {
+        "type": "object",
+        "description": "A portal-facing projection of a workflow execution (V1 or V2), with the execution\ngraph already linearized by the Workflows API into a flat, ordered list of\nportal-visible tasks.\n",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Id of the workflow / flow execution"
+          },
+          "definition_id": {
+            "type": "string",
+            "description": "Id of the workflow definition / flow template this execution was created from"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "STARTED",
+              "DONE",
+              "CLOSED"
+            ]
+          },
+          "version": {
+            "type": "integer",
+            "description": "2 = legacy V1 workflow execution (linear model), 3 = V2 flow execution (graph model)",
+            "enum": [
+              2,
+              3
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "description": "Creation timestamp, doubles as started time"
+          },
+          "updated_at": {
+            "type": "string",
+            "description": "Last update timestamp"
+          },
+          "completed_at": {
+            "type": "string",
+            "description": "Timestamp when the execution was completed, if it is"
+          },
+          "due_date": {
+            "type": "string"
+          },
+          "assigned_to": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "contexts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "entity_id": {
+                  "type": "string"
+                },
+                "entity_schema": {
+                  "type": "string"
+                },
+                "is_primary": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "is_path_complete": {
+            "type": "boolean",
+            "description": "True when the linearized path reached the end of the execution graph. False when an\nunevaluated decision task was encountered, meaning additional tasks may appear once\nthe decision is resolved (the returned tasks are still the guaranteed active path).\nAlways true for V1 executions.\n"
+          },
+          "tasks": {
+            "type": "array",
+            "description": "Portal-visible tasks in linear (timeline) order",
+            "items": {
+              "$ref": "#/components/schemas/PortalWorkflowTask"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "status",
+          "version",
+          "is_path_complete",
+          "tasks"
+        ]
+      },
+      "PortalWorkflowTask": {
+        "type": "object",
+        "description": "A single portal-visible task of a linearized workflow execution",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Id of the underlying task (V2) or step (V1)"
+          },
+          "name": {
+            "type": "string",
+            "description": "Internal task/step name (fallback label when the portal config has none)"
+          },
+          "order": {
+            "type": "integer",
+            "description": "Zero-based position of the task in the linearized timeline"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "COMPLETED",
+              "SKIPPED",
+              "IN_PROGRESS",
+              "PENDING"
+            ],
+            "description": "Normalized task status:\n- COMPLETED / SKIPPED: the task is done (skipped tasks count as done for progress)\n- IN_PROGRESS: the task has been reached and work has started\n- PENDING: the task has not been completed yet\n"
+          },
+          "is_active": {
+            "type": "boolean",
+            "description": "True when the task has been reached in the execution — all predecessor tasks on its\npath are completed/skipped — so the portal user can act on it (e.g. start its journey).\nTasks that are only part of the projected future path are returned with is_active false.\n"
+          },
+          "ecp": {
+            "$ref": "#/components/schemas/PortalTaskConfig"
+          },
+          "installer": {
+            "$ref": "#/components/schemas/PortalTaskConfig"
+          },
+          "journey": {
+            "type": "object",
+            "description": "Journey linked to the task, if any",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "journeyId": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "complete_task_automatically": {
+                "type": "boolean",
+                "description": "If true, the task is auto completed when the journey is completed"
+              }
+            }
+          },
+          "assigned_to": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "phase_id": {
+            "type": "string",
+            "description": "Id of the phase the underlying task belongs to, if any (V2 only)"
+          },
+          "phase_name": {
+            "type": "string",
+            "description": "Name of the phase the underlying task belongs to, if any (V2 only)"
+          },
+          "completed_at": {
+            "type": "string",
+            "description": "Timestamp when the task was completed or skipped"
+          },
+          "updated_at": {
+            "type": "string",
+            "description": "Last update timestamp of the underlying task/step"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "order",
+          "status",
+          "is_active"
+        ]
+      },
+      "PortalTaskConfig": {
+        "type": "object",
+        "description": "Portal-specific (ECP / installer) display config of a workflow task",
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "label": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "journey": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "journeyId": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "complete_task_automatically": {
+                "type": "boolean"
+              }
+            }
+          }
+        }
+      },
       "BaseBillingEvent": {
         "allOf": [
           {
@@ -15492,7 +15769,7 @@
           },
           "require_password_confirmation": {
             "type": "boolean",
-            "description": "Whether the portal user must confirm their current password before the email change is handed over to the third-party system.\nAlso required when `change_mode` is `synchronous`, except for portal users whose identity is managed by an identity provider - an SSO login has no password to confirm.\n",
+            "description": "Whether the portal user must confirm their current password before the email change is handed over to the third-party system.\nNot required for portal users whose identity is managed by an identity provider - an SSO login has no password to confirm.\n",
             "default": true
           },
           "explanation": {
@@ -16832,7 +17109,7 @@
           },
           "require_password_confirmation": {
             "type": "boolean",
-            "description": "Whether the portal user must confirm their current password before the change email request is handed over to the third-party system. When true, the portal collects and verifies the current password before calling the hook. Treated as true when `change_mode` is `synchronous`, since the portal re-creates the login with the confirmed password. Skipped either way for portal users whose identity is managed by an identity provider: an SSO login has no password to confirm.\n",
+            "description": "Whether the portal user must confirm their current password before the change email request is handed over to the third-party system. When true, the portal collects and verifies the current password before calling the hook. Skipped for portal users whose identity is managed by an identity provider: an SSO login has no password to confirm. When no password is confirmed and `change_mode` is `synchronous`, the re-created login gets a random password and the portal user signs in through their identity provider, or sets a new password via the email code flow.\n",
             "default": true
           },
           "explanation": {

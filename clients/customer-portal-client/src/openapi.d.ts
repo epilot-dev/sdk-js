@@ -3621,7 +3621,7 @@ declare namespace Components {
              */
             change_mode?: "synchronous" | "asynchronous";
             /**
-             * Whether the portal user must confirm their current password before the change email request is handed over to the third-party system. When true, the portal collects and verifies the current password before calling the hook. Treated as true when `change_mode` is `synchronous`, since the portal re-creates the login with the confirmed password. Skipped either way for portal users whose identity is managed by an identity provider: an SSO login has no password to confirm.
+             * Whether the portal user must confirm their current password before the change email request is handed over to the third-party system. When true, the portal collects and verifies the current password before calling the hook. Skipped for portal users whose identity is managed by an identity provider: an SSO login has no password to confirm. When no password is confirmed and `change_mode` is `synchronous`, the re-created login gets a random password and the portal user signs in through their identity provider, or sets a new password via the email code flow.
              *
              */
             require_password_confirmation?: boolean;
@@ -7208,6 +7208,20 @@ declare namespace Components {
          */
         export type PortalId = string;
         /**
+         * Portal-specific (ECP / installer) display config of a workflow task
+         */
+        export interface PortalTaskConfig {
+            enabled?: boolean;
+            label?: string;
+            description?: string;
+            journey?: {
+                id?: string;
+                journeyId?: string;
+                name?: string;
+                complete_task_automatically?: boolean;
+            };
+        }
+        /**
          * The portal user entity
          */
         export interface PortalUser {
@@ -7276,6 +7290,122 @@ declare namespace Components {
         }
         export type PortalUserRegistrationStatus = "Registration Pending" | "Confirmation Email Sent" | "Registered" | "Email Update In Progress";
         export type PortalWidget = EntityWidget | ContentWidget | ActionWidget | TeaserWidget | DocumentWidget | PaymentWidget | MeterReadingWidget | MeterChartWidget | CampaignWidget | ProductRecommendationsWidget;
+        /**
+         * A portal-facing projection of a workflow execution (V1 or V2), with the execution
+         * graph already linearized by the Workflows API into a flat, ordered list of
+         * portal-visible tasks.
+         *
+         */
+        export interface PortalWorkflow {
+            /**
+             * Id of the workflow / flow execution
+             */
+            id: string;
+            /**
+             * Id of the workflow definition / flow template this execution was created from
+             */
+            definition_id?: string;
+            name: string;
+            status: "STARTED" | "DONE" | "CLOSED";
+            /**
+             * 2 = legacy V1 workflow execution (linear model), 3 = V2 flow execution (graph model)
+             */
+            version: 2 | 3;
+            /**
+             * Creation timestamp, doubles as started time
+             */
+            created_at?: string;
+            /**
+             * Last update timestamp
+             */
+            updated_at?: string;
+            /**
+             * Timestamp when the execution was completed, if it is
+             */
+            completed_at?: string;
+            due_date?: string;
+            assigned_to?: string[];
+            contexts?: {
+                entity_id?: string;
+                entity_schema?: string;
+                is_primary?: boolean;
+            }[];
+            /**
+             * True when the linearized path reached the end of the execution graph. False when an
+             * unevaluated decision task was encountered, meaning additional tasks may appear once
+             * the decision is resolved (the returned tasks are still the guaranteed active path).
+             * Always true for V1 executions.
+             *
+             */
+            is_path_complete: boolean;
+            /**
+             * Portal-visible tasks in linear (timeline) order
+             */
+            tasks: /* A single portal-visible task of a linearized workflow execution */ PortalWorkflowTask[];
+        }
+        /**
+         * A single portal-visible task of a linearized workflow execution
+         */
+        export interface PortalWorkflowTask {
+            /**
+             * Id of the underlying task (V2) or step (V1)
+             */
+            id: string;
+            /**
+             * Internal task/step name (fallback label when the portal config has none)
+             */
+            name: string;
+            /**
+             * Zero-based position of the task in the linearized timeline
+             */
+            order: number;
+            /**
+             * Normalized task status:
+             * - COMPLETED / SKIPPED: the task is done (skipped tasks count as done for progress)
+             * - IN_PROGRESS: the task has been reached and work has started
+             * - PENDING: the task has not been completed yet
+             *
+             */
+            status: "COMPLETED" | "SKIPPED" | "IN_PROGRESS" | "PENDING";
+            /**
+             * True when the task has been reached in the execution — all predecessor tasks on its
+             * path are completed/skipped — so the portal user can act on it (e.g. start its journey).
+             * Tasks that are only part of the projected future path are returned with is_active false.
+             *
+             */
+            is_active: boolean;
+            ecp?: /* Portal-specific (ECP / installer) display config of a workflow task */ PortalTaskConfig;
+            installer?: /* Portal-specific (ECP / installer) display config of a workflow task */ PortalTaskConfig;
+            /**
+             * Journey linked to the task, if any
+             */
+            journey?: {
+                id?: string;
+                journeyId?: string;
+                name?: string;
+                /**
+                 * If true, the task is auto completed when the journey is completed
+                 */
+                complete_task_automatically?: boolean;
+            };
+            assigned_to?: string[];
+            /**
+             * Id of the phase the underlying task belongs to, if any (V2 only)
+             */
+            phase_id?: string;
+            /**
+             * Name of the phase the underlying task belongs to, if any (V2 only)
+             */
+            phase_name?: string;
+            /**
+             * Timestamp when the task was completed or skipped
+             */
+            completed_at?: string;
+            /**
+             * Last update timestamp of the underlying task/step
+             */
+            updated_at?: string;
+        }
         /**
          * The product entity
          */
@@ -7500,7 +7630,7 @@ declare namespace Components {
             change_mode?: "synchronous" | "asynchronous";
             /**
              * Whether the portal user must confirm their current password before the email change is handed over to the third-party system.
-             * Also required when `change_mode` is `synchronous`, except for portal users whose identity is managed by an identity provider - an SSO login has no password to confirm.
+             * Not required for portal users whose identity is managed by an identity provider - an SSO login has no password to confirm.
              *
              */
             require_password_confirmation?: boolean;
@@ -11568,6 +11698,51 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace GetEntityPortalWorkflows {
+        namespace Parameters {
+            /**
+             * ID of the entity
+             * example:
+             * abc123
+             */
+            export type Id = string;
+            /**
+             * Schema slug of the entity
+             * example:
+             * opportunity
+             */
+            export type Slug = string;
+        }
+        export interface PathParameters {
+            slug: /**
+             * Schema slug of the entity
+             * example:
+             * opportunity
+             */
+            Parameters.Slug;
+            id: /**
+             * ID of the entity
+             * example:
+             * abc123
+             */
+            Parameters.Id;
+        }
+        namespace Responses {
+            export interface $200 {
+                portal_workflows?: /**
+                 * A portal-facing projection of a workflow execution (V1 or V2), with the execution
+                 * graph already linearized by the Workflows API into a flat, ordered list of
+                 * portal-visible tasks.
+                 *
+                 */
+                Components.Schemas.PortalWorkflow[];
+            }
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace GetEntityWorkflows {
         namespace Parameters {
             /**
@@ -15597,8 +15772,8 @@ declare namespace Paths {
             email: string;
             /**
              * Password of the portal user for confirmation.
-             * Required unless a `changeEmail` portal extension hook with `require_password_confirmation` disabled is configured for the portal.
-             * Also required by a `changeEmail` hook with `change_mode` set to `synchronous`, except for portal users whose identity is managed by an identity provider - an SSO login has no password to confirm.
+             * Required unless a `changeEmail` portal extension hook with `require_password_confirmation` disabled is configured for the portal,
+             * or the portal user's identity is managed by an identity provider - an SSO login has no password to confirm.
              *
              */
             password?: string;
@@ -17311,6 +17486,26 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetEntityWorkflows.Responses.$200>
+  /**
+   * getEntityPortalWorkflows - Get linearized workflows for an entity
+   * 
+   * Get all portal-relevant workflows associated with an entity (requires access to the entity),
+   * linearized by the Workflows API into a flat, ordered list of portal-visible tasks.
+   * 
+   * Unlike `getEntityWorkflows`, this endpoint returns a single uniform shape for both legacy
+   * (V1) workflow executions and graph-based (V2) flow executions — the execution graph is
+   * already resolved server-side (active path, task reachability, chronological ordering), so
+   * clients can render a timeline without any graph traversal logic.
+   * 
+   * Tasks carry the config of both portal audiences (`ecp` and `installer`); clients filter
+   * per their configured audience, so one response serves every block on a page.
+   * 
+   */
+  'getEntityPortalWorkflows'(
+    parameters?: Parameters<Paths.GetEntityPortalWorkflows.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetEntityPortalWorkflows.Responses.$200>
   /**
    * uploadMeterReadingPhoto - Upload Meter Reading Photo
    * 
@@ -19213,6 +19408,28 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetEntityWorkflows.Responses.$200>
   }
+  ['/v2/portal/entity/{slug}/{id}/workflows/linearized']: {
+    /**
+     * getEntityPortalWorkflows - Get linearized workflows for an entity
+     * 
+     * Get all portal-relevant workflows associated with an entity (requires access to the entity),
+     * linearized by the Workflows API into a flat, ordered list of portal-visible tasks.
+     * 
+     * Unlike `getEntityWorkflows`, this endpoint returns a single uniform shape for both legacy
+     * (V1) workflow executions and graph-based (V2) flow executions — the execution graph is
+     * already resolved server-side (active path, task reachability, chronological ordering), so
+     * clients can render a timeline without any graph traversal logic.
+     * 
+     * Tasks carry the config of both portal audiences (`ecp` and `installer`); clients filter
+     * per their configured audience, so one response serves every block on a page.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetEntityPortalWorkflows.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetEntityPortalWorkflows.Responses.$200>
+  }
   ['/v2/portal/metering/reading/photo']: {
     /**
      * uploadMeterReadingPhoto - Upload Meter Reading Photo
@@ -19896,9 +20113,12 @@ export type PortalConfig = Components.Schemas.PortalConfig;
 export type PortalConfigV3 = Components.Schemas.PortalConfigV3;
 export type PortalDataExportColumn = Components.Schemas.PortalDataExportColumn;
 export type PortalId = Components.Schemas.PortalId;
+export type PortalTaskConfig = Components.Schemas.PortalTaskConfig;
 export type PortalUser = Components.Schemas.PortalUser;
 export type PortalUserRegistrationStatus = Components.Schemas.PortalUserRegistrationStatus;
 export type PortalWidget = Components.Schemas.PortalWidget;
+export type PortalWorkflow = Components.Schemas.PortalWorkflow;
+export type PortalWorkflowTask = Components.Schemas.PortalWorkflowTask;
 export type Product = Components.Schemas.Product;
 export type ProductRecommendationsWidget = Components.Schemas.ProductRecommendationsWidget;
 export type ProviderConfig = Components.Schemas.ProviderConfig;
