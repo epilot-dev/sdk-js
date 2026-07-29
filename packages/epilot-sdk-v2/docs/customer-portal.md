@@ -140,6 +140,7 @@ const { data } = await customerPortalClient.upsertPortal(...)
 - [`getAutomationContext`](#getautomationcontext)
 - [`updateWorkflowStepAsDone`](#updateworkflowstepasdone)
 - [`getEntityWorkflows`](#getentityworkflows)
+- [`getEntityPortalWorkflows`](#getentityportalworkflows)
 - [`uploadMeterReadingPhoto`](#uploadmeterreadingphoto)
 - [`createMeterReading`](#createmeterreading)
 - [`getAllowedMeterReadingRange`](#getallowedmeterreadingrange)
@@ -253,6 +254,9 @@ const { data } = await customerPortalClient.upsertPortal(...)
 - [`ExternalLink`](#externallink)
 - [`WorkflowExecution`](#workflowexecution)
 - [`WorkflowStep`](#workflowstep)
+- [`PortalWorkflow`](#portalworkflow)
+- [`PortalWorkflowTask`](#portalworkflowtask)
+- [`PortalTaskConfig`](#portaltaskconfig)
 - [`BaseBillingEvent`](#basebillingevent)
 - [`InstallmentEvent`](#installmentevent)
 - [`ReimbursementEvent`](#reimbursementevent)
@@ -6442,6 +6446,95 @@ const { data } = await client.getEntityWorkflows({
 
 ---
 
+### `getEntityPortalWorkflows`
+
+Get linearized workflows for an entity
+
+`GET /v2/portal/entity/{slug}/{id}/workflows/linearized`
+
+```ts
+const { data } = await client.getEntityPortalWorkflows({
+  slug: 'example',
+  id: '123e4567-e89b-12d3-a456-426614174000',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "portal_workflows": [
+    {
+      "id": "string",
+      "definition_id": "string",
+      "name": "string",
+      "status": "STARTED",
+      "version": 2,
+      "created_at": "string",
+      "updated_at": "string",
+      "completed_at": "string",
+      "due_date": "string",
+      "assigned_to": ["string"],
+      "contexts": [
+        {
+          "entity_id": "string",
+          "entity_schema": "string",
+          "is_primary": true
+        }
+      ],
+      "is_path_complete": true,
+      "tasks": [
+        {
+          "id": "string",
+          "name": "string",
+          "order": 0,
+          "status": "COMPLETED",
+          "is_active": true,
+          "ecp": {
+            "enabled": true,
+            "label": "string",
+            "description": "string",
+            "journey": {
+              "id": "string",
+              "journeyId": "string",
+              "name": "string",
+              "complete_task_automatically": true
+            }
+          },
+          "installer": {
+            "enabled": true,
+            "label": "string",
+            "description": "string",
+            "journey": {
+              "id": "string",
+              "journeyId": "string",
+              "name": "string",
+              "complete_task_automatically": true
+            }
+          },
+          "journey": {
+            "id": "string",
+            "journeyId": "string",
+            "name": "string",
+            "complete_task_automatically": true
+          },
+          "assigned_to": ["string"],
+          "phase_id": "string",
+          "phase_name": "string",
+          "completed_at": "string",
+          "updated_at": "string"
+        }
+      ]
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
 ### `uploadMeterReadingPhoto`
 
 Upload Meter Reading Photo
@@ -11938,6 +12031,129 @@ type WorkflowExecution = Record<string, unknown>
 
 ```ts
 type WorkflowStep = Record<string, unknown>
+```
+
+### `PortalWorkflow`
+
+A portal-facing projection of a workflow execution (V1 or V2), with the execution
+graph already linearized by the Workflows API into a flat, ordered list of
+portal-visible tasks.
+
+
+```ts
+type PortalWorkflow = {
+  id: string
+  definition_id?: string
+  name: string
+  status: "STARTED" | "DONE" | "CLOSED"
+  version: 2 | 3
+  created_at?: string
+  updated_at?: string
+  completed_at?: string
+  due_date?: string
+  assigned_to?: string[]
+  contexts?: Array<{
+    entity_id?: string
+    entity_schema?: string
+    is_primary?: boolean
+  }>
+  is_path_complete: boolean
+  tasks: Array<{
+    id: string
+    name: string
+    order: number
+    status: "COMPLETED" | "SKIPPED" | "IN_PROGRESS" | "PENDING"
+    is_active: boolean
+    ecp?: {
+      enabled?: { ... }
+      label?: { ... }
+      description?: { ... }
+      journey?: { ... }
+    }
+    installer?: {
+      enabled?: { ... }
+      label?: { ... }
+      description?: { ... }
+      journey?: { ... }
+    }
+    journey?: {
+      id?: { ... }
+      journeyId?: { ... }
+      name?: { ... }
+      complete_task_automatically?: { ... }
+    }
+    assigned_to?: string[]
+    phase_id?: string
+    phase_name?: string
+    completed_at?: string
+    updated_at?: string
+  }>
+}
+```
+
+### `PortalWorkflowTask`
+
+A single portal-visible task of a linearized workflow execution
+
+```ts
+type PortalWorkflowTask = {
+  id: string
+  name: string
+  order: number
+  status: "COMPLETED" | "SKIPPED" | "IN_PROGRESS" | "PENDING"
+  is_active: boolean
+  ecp?: {
+    enabled?: boolean
+    label?: string
+    description?: string
+    journey?: {
+      id?: { ... }
+      journeyId?: { ... }
+      name?: { ... }
+      complete_task_automatically?: { ... }
+    }
+  }
+  installer?: {
+    enabled?: boolean
+    label?: string
+    description?: string
+    journey?: {
+      id?: { ... }
+      journeyId?: { ... }
+      name?: { ... }
+      complete_task_automatically?: { ... }
+    }
+  }
+  journey?: {
+    id?: string
+    journeyId?: string
+    name?: string
+    complete_task_automatically?: boolean
+  }
+  assigned_to?: string[]
+  phase_id?: string
+  phase_name?: string
+  completed_at?: string
+  updated_at?: string
+}
+```
+
+### `PortalTaskConfig`
+
+Portal-specific (ECP / installer) display config of a workflow task
+
+```ts
+type PortalTaskConfig = {
+  enabled?: boolean
+  label?: string
+  description?: string
+  journey?: {
+    id?: string
+    journeyId?: string
+    name?: string
+    complete_task_automatically?: boolean
+  }
+}
 ```
 
 ### `BaseBillingEvent`
