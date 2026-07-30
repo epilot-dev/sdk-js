@@ -106,6 +106,7 @@ epilot entity listSchemas
 **Import-Export**
 - [`exportEntities`](#exportentities) — Export entity data in a CSV-format. The export will export data as close as possible to what is visible on Entity UI tab
 - [`importEntities`](#importentities) — This endpoint enables the import of entities into the platform.
+- [`abortEntityImport`](#abortentityimport) — Asks a running import to stop. Rows already imported are **kept** - this is a stop, not a
 
 **Saved Views**
 - [`listSavedViews`](#listsavedviews) — Get the Saved Views based on the schema
@@ -201,7 +202,8 @@ epilot entity listSchemas --jsonata 'results[0]'
       "_purpose": ["string"],
       "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
       "explicit_search_mappings": {},
-      "group_headlines": []
+      "group_headlines": [],
+      "conditions": []
     }
   ]
 }
@@ -277,7 +279,8 @@ epilot entity listSchemasV2 --jsonata 'results[0]'
       "_purpose": ["string"],
       "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
       "explicit_search_mappings": {},
-      "group_headlines": []
+      "group_headlines": [],
+      "conditions": []
     }
   ]
 }
@@ -379,7 +382,13 @@ epilot entity getSchema -p slug=contact --jsonata '$'
     },
     "sharing": {
       "show_sharing_button": true
-    }
+    },
+    "grid_layout": {
+      "id": "string",
+      "columns": 0,
+      "cells": [0]
+    },
+    "widget_order": ["string"]
   },
   "capabilities": [
     {
@@ -451,6 +460,14 @@ epilot entity getSchema -p slug=contact --jsonata '$'
       "divider": "top_divider",
       "_purpose": ["taxonomy-slug:classification-slug"],
       "_manifest": ["123e4567-e89b-12d3-a456-426614174000"]
+    }
+  ],
+  "conditions": [
+    {
+      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
+      "name": "delivery_area",
+      "label": "Delivery Area",
+      "type": "string"
     }
   ]
 }
@@ -531,7 +548,13 @@ epilot entity putSchema \
     },
     "sharing": {
       "show_sharing_button": true
-    }
+    },
+    "grid_layout": {
+      "id": "string",
+      "columns": 0,
+      "cells": [0]
+    },
+    "widget_order": ["string"]
   },
   "capabilities": [
     {
@@ -603,6 +626,14 @@ epilot entity putSchema \
       "divider": "top_divider",
       "_purpose": ["taxonomy-slug:classification-slug"],
       "_manifest": ["123e4567-e89b-12d3-a456-426614174000"]
+    }
+  ],
+  "conditions": [
+    {
+      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
+      "name": "delivery_area",
+      "label": "Delivery Area",
+      "type": "string"
     }
   ]
 }'
@@ -685,7 +716,13 @@ epilot entity putSchema -p slug=contact --jsonata '$'
     },
     "sharing": {
       "show_sharing_button": true
-    }
+    },
+    "grid_layout": {
+      "id": "string",
+      "columns": 0,
+      "cells": [0]
+    },
+    "widget_order": ["string"]
   },
   "capabilities": [
     {
@@ -757,6 +794,14 @@ epilot entity putSchema -p slug=contact --jsonata '$'
       "divider": "top_divider",
       "_purpose": ["taxonomy-slug:classification-slug"],
       "_manifest": ["123e4567-e89b-12d3-a456-426614174000"]
+    }
+  ],
+  "conditions": [
+    {
+      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
+      "name": "delivery_area",
+      "label": "Delivery Area",
+      "type": "string"
     }
   ]
 }
@@ -1062,7 +1107,8 @@ epilot entity getSchemaVersions -p slug=contact --jsonata 'versions'
       "_purpose": ["string"],
       "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
       "explicit_search_mappings": {},
-      "group_headlines": []
+      "group_headlines": [],
+      "conditions": []
     }
   ],
   "drafts": [
@@ -1098,7 +1144,8 @@ epilot entity getSchemaVersions -p slug=contact --jsonata 'versions'
       "_purpose": ["string"],
       "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
       "explicit_search_mappings": {},
-      "group_headlines": []
+      "group_headlines": [],
+      "conditions": []
     }
   ],
   "versions_more": true,
@@ -1210,7 +1257,13 @@ epilot entity freezeSchema -p slug=contact --jsonata '$'
     },
     "sharing": {
       "show_sharing_button": true
-    }
+    },
+    "grid_layout": {
+      "id": "string",
+      "columns": 0,
+      "cells": [0]
+    },
+    "widget_order": ["string"]
   },
   "capabilities": [
     {
@@ -1282,6 +1335,14 @@ epilot entity freezeSchema -p slug=contact --jsonata '$'
       "divider": "top_divider",
       "_purpose": ["taxonomy-slug:classification-slug"],
       "_manifest": ["123e4567-e89b-12d3-a456-426614174000"]
+    }
+  ],
+  "conditions": [
+    {
+      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
+      "name": "delivery_area",
+      "label": "Delivery Area",
+      "type": "string"
     }
   ]
 }
@@ -1381,7 +1442,13 @@ epilot entity unfreezeSchema -p slug=contact --jsonata '$'
     },
     "sharing": {
       "show_sharing_button": true
-    }
+    },
+    "grid_layout": {
+      "id": "string",
+      "columns": 0,
+      "cells": [0]
+    },
+    "widget_order": ["string"]
   },
   "capabilities": [
     {
@@ -1453,6 +1520,14 @@ epilot entity unfreezeSchema -p slug=contact --jsonata '$'
       "divider": "top_divider",
       "_purpose": ["taxonomy-slug:classification-slug"],
       "_manifest": ["123e4567-e89b-12d3-a456-426614174000"]
+    }
+  ],
+  "conditions": [
+    {
+      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
+      "name": "delivery_area",
+      "label": "Delivery Area",
+      "type": "string"
     }
   ]
 }
@@ -1577,7 +1652,8 @@ epilot entity listSchemaBlueprints --jsonata 'results[0]'
       "_purpose": ["string"],
       "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
       "explicit_search_mappings": {},
-      "group_headlines": []
+      "group_headlines": [],
+      "conditions": []
     }
   ]
 }
@@ -1612,6 +1688,7 @@ epilot entity searchEntities \
   "from": 0,
   "size": 10,
   "hydrate": false,
+  "anonymize": false,
   "fields": ["_id", "_title", "first_name", "account", "!account.*._files", "**._product"],
   "aggs": {
     "contact-count-per-tag": {
@@ -1737,6 +1814,7 @@ epilot entity listEntities \
   "from": 0,
   "size": 10,
   "hydrate": false,
+  "anonymize": false,
   "fields": ["_id", "_title", "first_name", "account", "!account.*._files", "**._product"],
   "aggs": {
     "contact-count-per-tag": {
@@ -2333,6 +2411,8 @@ Gets Entity by id.
 | `id` | path | string (uuid) | Yes | Entity id |
 | `slug` | path | string | Yes | Entity Type |
 | `hydrate` | query | boolean | No | When true, enables entity hydration to resolve nested $relation & $relation_ref references in-place. |
+| `anonymize` | query | boolean | No | When true, anonymizes PII in the response: identifiers (names, emails, phone numbers, IBANs) are replaced
+with deterministic pseudonyms (stable within an org), addresses are generalized to postal code |
 | `fields` | query | string[] | No | List of entity fields to include in results |
 | `apply_changesets` | query | boolean | No | When true, applies pending changeset proposed values in-place on the response entity.
 The response includes both the hydrated values and the raw _changesets field.
@@ -2546,6 +2626,8 @@ Gets Entity and relations by id.
 | `id` | path | string (uuid) | Yes | Entity id |
 | `slug` | path | string | Yes | Entity Type |
 | `hydrate` | query | boolean | No | When true, enables entity hydration to resolve nested $relation & $relation_ref references in-place. |
+| `anonymize` | query | boolean | No | When true, anonymizes PII in the response: identifiers (names, emails, phone numbers, IBANs) are replaced
+with deterministic pseudonyms (stable within an org), addresses are generalized to postal code |
 
 **Sample Call**
 
@@ -2885,6 +2967,8 @@ Autocomplete entity attributes
 
 | Name | In | Type | Required | Description |
 | ---- | -- | ---- | -------- | ----------- |
+| `anonymize` | query | boolean | No | When true, anonymizes PII in the response: identifiers (names, emails, phone numbers, IBANs) are replaced
+with deterministic pseudonyms (stable within an org), addresses are generalized to postal code |
 | `input` | query | string | No | Input to autocomplete |
 | `attribute` | query | string | Yes | Autocomplete attribute |
 | `slug` | query | string | No | Limit results to entity schema |
@@ -3051,6 +3135,8 @@ Get activity by id
 
 | Name | In | Type | Required | Description |
 | ---- | -- | ---- | -------- | ----------- |
+| `anonymize` | query | boolean | No | When true, anonymizes PII in the response: identifiers (names, emails, phone numbers, IBANs) are replaced
+with deterministic pseudonyms (stable within an org), addresses are generalized to postal code |
 | `id` | path | string (ulid) | Yes | Activity Id |
 | `operations_size` | query | number | No | Maximum number of operations to include in response (default: 10)
  |
@@ -3109,7 +3195,9 @@ epilot entity getActivity -p id=01F130Q52Q6MWSNS8N2AVXV4JN --jsonata '$'
       "params": {},
       "payload": {},
       "diff": {},
-      "_workflow_origin": {}
+      "source_context": {},
+      "_workflow_origin": {},
+      "_automation_chain": ["string"]
     }
   ]
 }
@@ -3345,6 +3433,8 @@ Returns all pending changesets for an entity.
 
 | Name | In | Type | Required | Description |
 | ---- | -- | ---- | -------- | ----------- |
+| `anonymize` | query | boolean | No | When true, anonymizes PII in the response: identifiers (names, emails, phone numbers, IBANs) are replaced
+with deterministic pseudonyms (stable within an org), addresses are generalized to postal code |
 | `slug` | path | string | Yes | Entity Type |
 | `id` | path | string (uuid) | Yes | Entity id |
 
@@ -3389,6 +3479,8 @@ Get activity feed for an entity
 
 | Name | In | Type | Required | Description |
 | ---- | -- | ---- | -------- | ----------- |
+| `anonymize` | query | boolean | No | When true, anonymizes PII in the response: identifiers (names, emails, phone numbers, IBANs) are replaced
+with deterministic pseudonyms (stable within an org), addresses are generalized to postal code |
 | `slug` | path | string | Yes | Entity Type |
 | `id` | path | string (uuid) | Yes | Entity id |
 | `after` | query | string (date-time) | No | Get activities strictly after this timestamp. Cannot be used with 'before', 'start_date', 'end_date', or 'preset_range'. |
@@ -3462,6 +3554,8 @@ Returns 1st level direct relations for an entity.
 | `slug` | path | string | Yes | Entity Type |
 | `id` | path | string (uuid) | Yes | Entity id |
 | `hydrate` | query | boolean | No | When true, enables entity hydration to resolve nested $relation & $relation_ref references in-place. |
+| `anonymize` | query | boolean | No | When true, anonymizes PII in the response: identifiers (names, emails, phone numbers, IBANs) are replaced
+with deterministic pseudonyms (stable within an org), addresses are generalized to postal code |
 | `include_reverse` | query | boolean | No | When true, includes reverse relations in response (other entities pointing to this entity) |
 | `from` | query | number | No | Starting page number |
 | `size` | query | number | No | Number of results to return per page |
@@ -3683,6 +3777,8 @@ Returns 1st level direct relations for an entity with pagination.
 | `slug` | path | string | Yes | Entity Type |
 | `id` | path | string (uuid) | Yes | Entity id |
 | `hydrate` | query | boolean | No | When true, enables entity hydration to resolve nested $relation & $relation_ref references in-place. |
+| `anonymize` | query | boolean | No | When true, anonymizes PII in the response: identifiers (names, emails, phone numbers, IBANs) are replaced
+with deterministic pseudonyms (stable within an org), addresses are generalized to postal code |
 | `query` | query | string | No | Input to filter search results |
 | `include_reverse` | query | boolean | No | When true, includes reverse relations in response (other entities pointing to this entity) |
 | `from` | query | number | No | Starting page number |
@@ -3765,6 +3861,8 @@ Returns 1st level direct relations for an entity with pagination.
 | `slug` | path | string | Yes | Entity Type |
 | `id` | path | string (uuid) | Yes | Entity id |
 | `hydrate` | query | boolean | No | When true, enables entity hydration to resolve nested $relation & $relation_ref references in-place. |
+| `anonymize` | query | boolean | No | When true, anonymizes PII in the response: identifiers (names, emails, phone numbers, IBANs) are replaced
+with deterministic pseudonyms (stable within an org), addresses are generalized to postal code |
 | `include_reverse` | query | boolean | No | When true, includes reverse relations in response (other entities pointing to this entity)
 *It gets overriden by mode query parameter.*
  |
@@ -4032,6 +4130,7 @@ epilot entity exportEntities \
   "from": 0,
   "size": 10,
   "hydrate": false,
+  "anonymize": false,
   "fields": ["_id", "_title", "first_name", "account", "!account.*._files", "**._product"],
   "aggs": {
     "contact-count-per-tag": {
@@ -4097,6 +4196,35 @@ epilot entity importEntities --jsonata '$'
 
 ---
 
+### `abortEntityImport`
+
+Asks a running import to stop. Rows already imported are **kept** - this is a stop, not a
+
+`POST /v1/entity:abortImport`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `job_id` | query | string | Yes | The ID of the import job to stop. |
+| `schema` | query | string | Yes | Slug of the schema being imported, used to authorize the caller. |
+
+**Sample Call**
+
+```bash
+epilot entity abortEntityImport \
+  -p job_id=abc123 \
+  -p schema=example
+```
+
+With JSONata filter:
+
+```bash
+epilot entity abortEntityImport -p job_id=abc123 -p schema=example --jsonata '$'
+```
+
+---
+
 ### `listSavedViews`
 
 Get the Saved Views based on the schema
@@ -4111,6 +4239,7 @@ Get the Saved Views based on the schema
 | `sort` | query | string | No | The sort key to use if present |
 | `from` | query | number | No |  |
 | `size` | query | number | No | Number of saved views to return |
+| `q` | query | string | No | Free-text search on the saved view name (case-insensitive) |
 | `fields` | query | string[] | No |  |
 
 **Sample Call**
@@ -4142,7 +4271,8 @@ epilot entity listSavedViews --jsonata 'results[0]'
       "shared": true,
       "isFavoritedBy": ["11701"],
       "created_by": {
-        "user_id": "10598"
+        "user_id": "10598",
+        "org_id": "739224"
       },
       "ui_config": {
         "filters": {
@@ -4193,7 +4323,8 @@ epilot entity createSavedView \
   "shared": true,
   "isFavoritedBy": ["11701"],
   "created_by": {
-    "user_id": "10598"
+    "user_id": "10598",
+    "org_id": "739224"
   },
   "ui_config": {
     "filters": {
@@ -4239,7 +4370,8 @@ epilot entity createSavedView --jsonata '$'
   "shared": true,
   "isFavoritedBy": ["11701"],
   "created_by": {
-    "user_id": "10598"
+    "user_id": "10598",
+    "org_id": "739224"
   },
   "ui_config": {
     "filters": {
@@ -4308,7 +4440,8 @@ epilot entity getSavedView -p id=123e4567-e89b-12d3-a456-426614174000 --jsonata 
   "shared": true,
   "isFavoritedBy": ["11701"],
   "created_by": {
-    "user_id": "10598"
+    "user_id": "10598",
+    "org_id": "739224"
   },
   "ui_config": {
     "filters": {
@@ -4368,7 +4501,8 @@ epilot entity updateSavedView \
   "shared": true,
   "isFavoritedBy": ["11701"],
   "created_by": {
-    "user_id": "10598"
+    "user_id": "10598",
+    "org_id": "739224"
   },
   "ui_config": {
     "filters": {
@@ -4420,7 +4554,8 @@ epilot entity updateSavedView -p id=123e4567-e89b-12d3-a456-426614174000 --jsona
   "shared": true,
   "isFavoritedBy": ["11701"],
   "created_by": {
-    "user_id": "10598"
+    "user_id": "10598",
+    "org_id": "739224"
   },
   "ui_config": {
     "filters": {
@@ -4477,7 +4612,8 @@ epilot entity patchSavedView \
   "shared": true,
   "isFavoritedBy": ["11701"],
   "created_by": {
-    "user_id": "10598"
+    "user_id": "10598",
+    "org_id": "739224"
   },
   "ui_config": {
     "filters": {
@@ -4529,7 +4665,8 @@ epilot entity patchSavedView -p id=123e4567-e89b-12d3-a456-426614174000 --jsonat
   "shared": true,
   "isFavoritedBy": ["11701"],
   "created_by": {
-    "user_id": "10598"
+    "user_id": "10598",
+    "org_id": "739224"
   },
   "ui_config": {
     "filters": {
@@ -4620,7 +4757,8 @@ epilot entity listFavoriteViewsForUser --jsonata 'results[0]'
       "shared": true,
       "isFavoritedBy": ["11701"],
       "created_by": {
-        "user_id": "10598"
+        "user_id": "10598",
+        "org_id": "739224"
       },
       "ui_config": {
         "filters": {
@@ -5837,6 +5975,7 @@ epilot entity createSchemaAttribute \
   "required": false,
   "readonly": false,
   "deprecated": false,
+  "variant_overridable": false,
   "default_value": {},
   "group": "string",
   "order": 0,
@@ -5844,6 +5983,7 @@ epilot entity createSchemaAttribute \
   "hide_label": true,
   "icon": "string",
   "render_condition": "string",
+  "data_classification": "public",
   "_purpose": ["taxonomy-slug:classification-slug"],
   "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
   "constraints": {
@@ -5921,6 +6061,7 @@ epilot entity createSchemaAttribute --jsonata '$'
   "required": false,
   "readonly": false,
   "deprecated": false,
+  "variant_overridable": false,
   "default_value": {},
   "group": "string",
   "order": 0,
@@ -5928,6 +6069,7 @@ epilot entity createSchemaAttribute --jsonata '$'
   "hide_label": true,
   "icon": "string",
   "render_condition": "string",
+  "data_classification": "public",
   "_purpose": ["taxonomy-slug:classification-slug"],
   "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
   "constraints": {
@@ -6028,6 +6170,7 @@ epilot entity getSchemaAttribute -p composite_id=contact:97644baa-083f-4e49-9188
   "required": false,
   "readonly": false,
   "deprecated": false,
+  "variant_overridable": false,
   "default_value": {},
   "group": "string",
   "order": 0,
@@ -6035,6 +6178,7 @@ epilot entity getSchemaAttribute -p composite_id=contact:97644baa-083f-4e49-9188
   "hide_label": true,
   "icon": "string",
   "render_condition": "string",
+  "data_classification": "public",
   "_purpose": ["taxonomy-slug:classification-slug"],
   "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
   "constraints": {
@@ -6126,6 +6270,7 @@ epilot entity putSchemaAttribute \
   "required": false,
   "readonly": false,
   "deprecated": false,
+  "variant_overridable": false,
   "default_value": {},
   "group": "string",
   "order": 0,
@@ -6133,6 +6278,7 @@ epilot entity putSchemaAttribute \
   "hide_label": true,
   "icon": "string",
   "render_condition": "string",
+  "data_classification": "public",
   "_purpose": ["taxonomy-slug:classification-slug"],
   "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
   "constraints": {
@@ -6216,6 +6362,7 @@ epilot entity putSchemaAttribute -p composite_id=contact:97644baa-083f-4e49-9188
   "required": false,
   "readonly": false,
   "deprecated": false,
+  "variant_overridable": false,
   "default_value": {},
   "group": "string",
   "order": 0,
@@ -6223,6 +6370,7 @@ epilot entity putSchemaAttribute -p composite_id=contact:97644baa-083f-4e49-9188
   "hide_label": true,
   "icon": "string",
   "render_condition": "string",
+  "data_classification": "public",
   "_purpose": ["taxonomy-slug:classification-slug"],
   "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
   "constraints": {
@@ -6323,6 +6471,7 @@ epilot entity deleteSchemaAttribute -p composite_id=contact:97644baa-083f-4e49-9
   "required": false,
   "readonly": false,
   "deprecated": false,
+  "variant_overridable": false,
   "default_value": {},
   "group": "string",
   "order": 0,
@@ -6330,6 +6479,7 @@ epilot entity deleteSchemaAttribute -p composite_id=contact:97644baa-083f-4e49-9
   "hide_label": true,
   "icon": "string",
   "render_condition": "string",
+  "data_classification": "public",
   "_purpose": ["taxonomy-slug:classification-slug"],
   "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
   "constraints": {
@@ -6418,6 +6568,7 @@ epilot entity createSchemaCapability \
       "required": false,
       "readonly": false,
       "deprecated": false,
+      "variant_overridable": false,
       "default_value": {},
       "group": "string",
       "order": 0,
@@ -6425,6 +6576,7 @@ epilot entity createSchemaCapability \
       "hide_label": true,
       "icon": "string",
       "render_condition": "string",
+      "data_classification": "public",
       "_purpose": ["taxonomy-slug:classification-slug"],
       "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
       "constraints": {},
@@ -6457,6 +6609,7 @@ epilot entity createSchemaCapability \
       "required": false,
       "readonly": false,
       "deprecated": false,
+      "variant_overridable": false,
       "default_value": {},
       "group": "string",
       "order": 0,
@@ -6464,6 +6617,7 @@ epilot entity createSchemaCapability \
       "hide_label": true,
       "icon": "string",
       "render_condition": "string",
+      "data_classification": "public",
       "_purpose": ["taxonomy-slug:classification-slug"],
       "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
       "constraints": {},
@@ -6554,6 +6708,7 @@ epilot entity createSchemaCapability --jsonata '$'
       "required": false,
       "readonly": false,
       "deprecated": false,
+      "variant_overridable": false,
       "default_value": {},
       "group": "string",
       "order": 0,
@@ -6561,6 +6716,7 @@ epilot entity createSchemaCapability --jsonata '$'
       "hide_label": true,
       "icon": "string",
       "render_condition": "string",
+      "data_classification": "public",
       "_purpose": ["taxonomy-slug:classification-slug"],
       "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
       "constraints": {},
@@ -6593,6 +6749,7 @@ epilot entity createSchemaCapability --jsonata '$'
       "required": false,
       "readonly": false,
       "deprecated": false,
+      "variant_overridable": false,
       "default_value": {},
       "group": "string",
       "order": 0,
@@ -6600,6 +6757,7 @@ epilot entity createSchemaCapability --jsonata '$'
       "hide_label": true,
       "icon": "string",
       "render_condition": "string",
+      "data_classification": "public",
       "_purpose": ["taxonomy-slug:classification-slug"],
       "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
       "constraints": {},
@@ -6713,6 +6871,7 @@ epilot entity getSchemaCapability -p composite_id=contact:97644baa-083f-4e49-918
       "required": false,
       "readonly": false,
       "deprecated": false,
+      "variant_overridable": false,
       "default_value": {},
       "group": "string",
       "order": 0,
@@ -6720,6 +6879,7 @@ epilot entity getSchemaCapability -p composite_id=contact:97644baa-083f-4e49-918
       "hide_label": true,
       "icon": "string",
       "render_condition": "string",
+      "data_classification": "public",
       "_purpose": ["taxonomy-slug:classification-slug"],
       "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
       "constraints": {},
@@ -6752,6 +6912,7 @@ epilot entity getSchemaCapability -p composite_id=contact:97644baa-083f-4e49-918
       "required": false,
       "readonly": false,
       "deprecated": false,
+      "variant_overridable": false,
       "default_value": {},
       "group": "string",
       "order": 0,
@@ -6759,6 +6920,7 @@ epilot entity getSchemaCapability -p composite_id=contact:97644baa-083f-4e49-918
       "hide_label": true,
       "icon": "string",
       "render_condition": "string",
+      "data_classification": "public",
       "_purpose": ["taxonomy-slug:classification-slug"],
       "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
       "constraints": {},
@@ -6863,6 +7025,7 @@ epilot entity putSchemaCapability \
       "required": false,
       "readonly": false,
       "deprecated": false,
+      "variant_overridable": false,
       "default_value": {},
       "group": "string",
       "order": 0,
@@ -6870,6 +7033,7 @@ epilot entity putSchemaCapability \
       "hide_label": true,
       "icon": "string",
       "render_condition": "string",
+      "data_classification": "public",
       "_purpose": ["taxonomy-slug:classification-slug"],
       "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
       "constraints": {},
@@ -6902,6 +7066,7 @@ epilot entity putSchemaCapability \
       "required": false,
       "readonly": false,
       "deprecated": false,
+      "variant_overridable": false,
       "default_value": {},
       "group": "string",
       "order": 0,
@@ -6909,6 +7074,7 @@ epilot entity putSchemaCapability \
       "hide_label": true,
       "icon": "string",
       "render_condition": "string",
+      "data_classification": "public",
       "_purpose": ["taxonomy-slug:classification-slug"],
       "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
       "constraints": {},
@@ -7005,6 +7171,7 @@ epilot entity putSchemaCapability -p composite_id=contact:97644baa-083f-4e49-918
       "required": false,
       "readonly": false,
       "deprecated": false,
+      "variant_overridable": false,
       "default_value": {},
       "group": "string",
       "order": 0,
@@ -7012,6 +7179,7 @@ epilot entity putSchemaCapability -p composite_id=contact:97644baa-083f-4e49-918
       "hide_label": true,
       "icon": "string",
       "render_condition": "string",
+      "data_classification": "public",
       "_purpose": ["taxonomy-slug:classification-slug"],
       "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
       "constraints": {},
@@ -7044,6 +7212,7 @@ epilot entity putSchemaCapability -p composite_id=contact:97644baa-083f-4e49-918
       "required": false,
       "readonly": false,
       "deprecated": false,
+      "variant_overridable": false,
       "default_value": {},
       "group": "string",
       "order": 0,
@@ -7051,6 +7220,7 @@ epilot entity putSchemaCapability -p composite_id=contact:97644baa-083f-4e49-918
       "hide_label": true,
       "icon": "string",
       "render_condition": "string",
+      "data_classification": "public",
       "_purpose": ["taxonomy-slug:classification-slug"],
       "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
       "constraints": {},
@@ -7164,6 +7334,7 @@ epilot entity deleteSchemaCapability -p composite_id=contact:97644baa-083f-4e49-
       "required": false,
       "readonly": false,
       "deprecated": false,
+      "variant_overridable": false,
       "default_value": {},
       "group": "string",
       "order": 0,
@@ -7171,6 +7342,7 @@ epilot entity deleteSchemaCapability -p composite_id=contact:97644baa-083f-4e49-
       "hide_label": true,
       "icon": "string",
       "render_condition": "string",
+      "data_classification": "public",
       "_purpose": ["taxonomy-slug:classification-slug"],
       "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
       "constraints": {},
@@ -7203,6 +7375,7 @@ epilot entity deleteSchemaCapability -p composite_id=contact:97644baa-083f-4e49-
       "required": false,
       "readonly": false,
       "deprecated": false,
+      "variant_overridable": false,
       "default_value": {},
       "group": "string",
       "order": 0,
@@ -7210,6 +7383,7 @@ epilot entity deleteSchemaCapability -p composite_id=contact:97644baa-083f-4e49-
       "hide_label": true,
       "icon": "string",
       "render_condition": "string",
+      "data_classification": "public",
       "_purpose": ["taxonomy-slug:classification-slug"],
       "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
       "constraints": {},

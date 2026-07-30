@@ -1420,6 +1420,9 @@
             "$ref": "#/components/parameters/HydrateEntitiesQueryParam"
           },
           {
+            "$ref": "#/components/parameters/AnonymizeQueryParam"
+          },
+          {
             "in": "query",
             "name": "fields",
             "description": "List of entity fields to include in results",
@@ -1568,6 +1571,9 @@
           },
           {
             "$ref": "#/components/parameters/HydrateEntitiesQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/AnonymizeQueryParam"
           }
         ],
         "responses": {
@@ -1777,6 +1783,9 @@
         ],
         "parameters": [
           {
+            "$ref": "#/components/parameters/AnonymizeQueryParam"
+          },
+          {
             "name": "input",
             "in": "query",
             "description": "Input to autocomplete",
@@ -1944,6 +1953,9 @@
           "Activity"
         ],
         "parameters": [
+          {
+            "$ref": "#/components/parameters/AnonymizeQueryParam"
+          },
           {
             "$ref": "#/components/parameters/ActivityIdPathParam"
           },
@@ -2141,6 +2153,9 @@
         ],
         "parameters": [
           {
+            "$ref": "#/components/parameters/AnonymizeQueryParam"
+          },
+          {
             "$ref": "#/components/parameters/EntitySlugPathParam"
           },
           {
@@ -2173,6 +2188,9 @@
           "Activity"
         ],
         "parameters": [
+          {
+            "$ref": "#/components/parameters/AnonymizeQueryParam"
+          },
           {
             "$ref": "#/components/parameters/EntitySlugPathParam"
           },
@@ -2324,6 +2342,9 @@
           },
           {
             "$ref": "#/components/parameters/HydrateEntitiesQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/AnonymizeQueryParam"
           },
           {
             "$ref": "#/components/parameters/IncludeReverseQueryParam"
@@ -2552,6 +2573,9 @@
             "$ref": "#/components/parameters/HydrateEntitiesQueryParam"
           },
           {
+            "$ref": "#/components/parameters/AnonymizeQueryParam"
+          },
+          {
             "in": "query",
             "name": "query",
             "description": "Input to filter search results",
@@ -2619,6 +2643,9 @@
           },
           {
             "$ref": "#/components/parameters/HydrateEntitiesQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/AnonymizeQueryParam"
           },
           {
             "$ref": "#/components/parameters/IncludeReverseDeprecatedQueryParam"
@@ -2940,6 +2967,69 @@
         }
       }
     },
+    "/v1/entity:abortImport": {
+      "post": {
+        "operationId": "abortEntityImport",
+        "summary": "Abort a running entity import",
+        "description": "Asks a running import to stop. Rows already imported are **kept** - this is a stop, not a\nrollback - and the job still produces its result reports for everything that landed before\nthe stop, then reaches the terminal status `CANCELLED`.\n\nThe stop is cooperative: the worker notices the request at its next batch boundary, so the\njob typically reaches `CANCELLED` within seconds. Poll `POST /v1/entity:import` with the\n`job_id` as usual to observe it.\n\nIdempotent - aborting an already-aborted or already-finished job is not an error.\n",
+        "tags": [
+          "Import-Export"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "job_id",
+            "required": true,
+            "description": "The ID of the import job to stop.",
+            "schema": {
+              "$ref": "#/components/schemas/ExportJobId"
+            }
+          },
+          {
+            "in": "query",
+            "name": "schema",
+            "required": true,
+            "description": "Slug of the schema being imported, used to authorize the caller.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "The stop was requested. The job is still running until the worker picks the request up.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "description": "The job status at the time of the request."
+                    },
+                    "jobPollId": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "No such import job"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequestsError"
+          }
+        }
+      }
+    },
     "/v1/entity/views": {
       "get": {
         "operationId": "listSavedViews",
@@ -2988,6 +3078,15 @@
               "default": 80,
               "minimum": 1,
               "maximum": 250
+            }
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "description": "Free-text search on the saved view name (case-insensitive)",
+            "required": false,
+            "schema": {
+              "type": "string"
             }
           },
           {
@@ -3158,7 +3257,10 @@
         ],
         "responses": {
           "200": {
-            "description": "List of all available saved views"
+            "description": "The saved view was deleted"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
           },
           "429": {
             "$ref": "#/components/responses/TooManyRequestsError"
@@ -3845,7 +3947,7 @@
               "description": "ISO 8601 timestamp to filter jobs created after this time (e.g., 2023-01-01T00:00:00Z).",
               "type": "string",
               "format": "date-time",
-              "example": "2023-01-01T00:00:00Z"
+              "example": "2023-01-01T00:00:00.000Z"
             }
           },
           {
@@ -4967,6 +5069,34 @@
                     "example": true
                   }
                 }
+              },
+              "grid_layout": {
+                "type": "object",
+                "description": "Widget-grid layout for the entity-details page (builder-authored); columns/cells drive the grid geometry.",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "Identifier of the chosen grid-layout preset."
+                  },
+                  "columns": {
+                    "type": "number",
+                    "description": "Number of columns in the widget grid."
+                  },
+                  "cells": {
+                    "type": "array",
+                    "description": "Per-cell column span, positionally paired with the widgets in order.",
+                    "items": {
+                      "type": "number"
+                    }
+                  }
+                }
+              },
+              "widget_order": {
+                "type": "array",
+                "description": "Ordered list of widget ids controlling the entity-details widget-grid order. Each id is a capability widget's `component` (or `summary` for the synthesized summary card); widgets absent from the list keep their natural order at the end.",
+                "items": {
+                  "type": "string"
+                }
               }
             }
           },
@@ -5093,6 +5223,14 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/GroupHeadline"
+            }
+          },
+          "conditions": {
+            "type": "array",
+            "nullable": true,
+            "description": "Dimensions that conditional variants of this entity type are keyed by.\n\nAbsent or `null` means entities of this type are not conditional. Attributes whose\nvalues a variant may override are marked with `variant_overridable`.\n",
+            "items": {
+              "$ref": "#/components/schemas/ConditionDefinition"
             }
           }
         },
@@ -5523,6 +5661,11 @@
             "type": "boolean",
             "default": false
           },
+          "variant_overridable": {
+            "type": "boolean",
+            "default": false,
+            "description": "Allow conditional variants of the entity to override this attribute's value.\nOnly meaningful on schemas that declare `conditions`. Unflagged attributes stay\nfixed on the base entity.\n"
+          },
           "default_value": {},
           "group": {
             "description": "Which group the attribute should appear in. Accepts group ID or group name",
@@ -5548,6 +5691,14 @@
           "render_condition": {
             "type": "string",
             "description": "Defines the conditional rendering expression for showing this field.\nWhen a valid expression is parsed, their evaluation defines the visibility of this attribute.\nNote: Empty or invalid expression have no effect on the field visibility.\n"
+          },
+          "data_classification": {
+            "type": "string",
+            "enum": [
+              "public",
+              "pii"
+            ],
+            "description": "Data classification of the attribute, used by anonymized responses (`?anonymize=true` or tokens minted with `anonymize: true`).\n\n- `pii`: the attribute value is always anonymized in anonymized responses (use to opt in free-text fields containing personal data)\n- `public`: the attribute value is never anonymized (use to opt out fields matched by built-in defaults, e.g. non-personal identifiers)\n\nWhen unset, built-in defaults apply based on the attribute type (email, phone, address, payment) and a curated list of well-known PII fields.\n"
           },
           "_purpose": {
             "type": "array",
@@ -7115,6 +7266,139 @@
           }
         ]
       },
+      "BaseConditionDefinition": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Stable identity of the condition, generated by the client when the condition is\ncreated. It is what makes a rename distinguishable from a remove + add, so it must\nbe round-tripped unchanged for the lifetime of the condition.\n",
+            "example": "d5839b94-ba20-4225-a78e-76951d352bd6"
+          },
+          "name": {
+            "type": "string",
+            "pattern": "^[a-z0-9_]+$",
+            "description": "The key variant values are stored under. Unique within the schema and immutable\nonce the condition has been saved.\n",
+            "example": "delivery_area"
+          },
+          "label": {
+            "type": "string",
+            "description": "Display label. Always editable.",
+            "example": "Delivery Area"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "label"
+        ]
+      },
+      "ScalarConditionDefinition": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseConditionDefinition"
+          },
+          {
+            "type": "object",
+            "description": "A condition whose value is a plain scalar, with no further configuration.",
+            "properties": {
+              "type": {
+                "type": "string",
+                "description": "Immutable once the condition has been saved.",
+                "enum": [
+                  "string",
+                  "number",
+                  "date",
+                  "daterange",
+                  "boolean"
+                ]
+              }
+            },
+            "required": [
+              "type"
+            ]
+          }
+        ]
+      },
+      "SelectConditionDefinition": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseConditionDefinition"
+          },
+          {
+            "type": "object",
+            "description": "A condition whose value is one of a fixed set of options.",
+            "properties": {
+              "type": {
+                "type": "string",
+                "description": "Immutable once the condition has been saved.",
+                "enum": [
+                  "select"
+                ]
+              },
+              "values": {
+                "type": "array",
+                "description": "Selectable options. May be empty while the condition is being configured.",
+                "items": {
+                  "type": "string"
+                },
+                "example": [
+                  "12_months",
+                  "24_months"
+                ]
+              }
+            },
+            "required": [
+              "type"
+            ]
+          }
+        ]
+      },
+      "LocationConditionDefinition": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseConditionDefinition"
+          },
+          {
+            "type": "object",
+            "description": "A condition whose value identifies a place.",
+            "properties": {
+              "type": {
+                "type": "string",
+                "description": "Immutable once the condition has been saved.",
+                "enum": [
+                  "location"
+                ]
+              },
+              "format": {
+                "type": "string",
+                "description": "The shape of the location value. Immutable once the condition has been saved.",
+                "enum": [
+                  "zipcode",
+                  "zipcode_town"
+                ]
+              }
+            },
+            "required": [
+              "type"
+            ]
+          }
+        ]
+      },
+      "ConditionDefinition": {
+        "description": "One dimension that conditional variants of an entity type are keyed by. `type`\ndiscriminates the variants: only a `select` condition carries `values`, and only a\n`location` condition carries `format`.\n",
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/ScalarConditionDefinition"
+          },
+          {
+            "$ref": "#/components/schemas/SelectConditionDefinition"
+          },
+          {
+            "$ref": "#/components/schemas/LocationConditionDefinition"
+          }
+        ]
+      },
       "EntitySlug": {
         "description": "URL-friendly identifier for the entity schema",
         "type": "string",
@@ -8090,6 +8374,7 @@
               "from": {},
               "size": {},
               "hydrate": {},
+              "anonymize": {},
               "fields": {},
               "aggs": {},
               "include_deleted": {},
@@ -8174,6 +8459,7 @@
               "from": {},
               "size": {},
               "hydrate": {},
+              "anonymize": {},
               "fields": {},
               "aggs": {},
               "include_deleted": {},
@@ -8396,6 +8682,11 @@
           "hydrate": {
             "type": "boolean",
             "description": "When true, enables entity hydration to resolve nested $relation & $relation_ref references in-place.",
+            "default": false
+          },
+          "anonymize": {
+            "type": "boolean",
+            "description": "When true, anonymizes PII in the response: identifiers are replaced with deterministic pseudonyms,\naddresses are generalized and well-known free-text fields are redacted.\nAnonymization is forced (regardless of this parameter) when the access token was created with `anonymize: true`.\n",
             "default": false
           },
           "fields": {
@@ -9030,6 +9321,9 @@
               }
             }
           },
+          "source_context": {
+            "$ref": "#/components/schemas/EntityOperationSourceContext"
+          },
           "_workflow_origin": {
             "type": "object",
             "description": "Internal property for workflow origin tracking and infinite loop prevention.\nPopulated when an entity update originates from a workflow execution.\nThis allows downstream automation services to prevent circular triggering.\n",
@@ -9043,12 +9337,72 @@
                 "description": "The flow template ID - used to detect and prevent circular triggering"
               }
             }
+          },
+          "_automation_chain": {
+            "type": "array",
+            "description": "Ordered automation flow ids that caused this change; used to break multi-automation trigger loops.",
+            "items": {
+              "type": "string"
+            }
           }
         },
         "required": [
           "entity",
           "org",
           "operation"
+        ]
+      },
+      "EntityOperationSourceContext": {
+        "type": "object",
+        "description": "Billing and audit source context for the operation event.",
+        "properties": {
+          "source": {
+            "type": "string",
+            "description": "Normalized source bucket for the operation.",
+            "enum": [
+              "portal",
+              "epilot",
+              "erp",
+              "system",
+              "api",
+              "external",
+              "journey",
+              "automation",
+              "unknown"
+            ]
+          },
+          "source_label": {
+            "type": "string",
+            "description": "Original free-form source label from the caller or changeset, when available."
+          },
+          "source_system": {
+            "type": "string",
+            "description": "Optional upstream system label, for example an ERP system name."
+          },
+          "source_reference": {
+            "type": "string",
+            "description": "Optional upstream change reference."
+          },
+          "actor_type": {
+            "type": "string",
+            "enum": [
+              "user",
+              "portal_user",
+              "api_client",
+              "automation",
+              "system"
+            ]
+          },
+          "actor_id": {
+            "type": "string"
+          },
+          "effective_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "source"
         ]
       },
       "BaseActivityItem": {
@@ -9192,6 +9546,11 @@
                   "user_id": {
                     "type": "string",
                     "example": "10598"
+                  },
+                  "org_id": {
+                    "type": "string",
+                    "description": "The organization ID of the user who created the view. Used for partner access control.",
+                    "example": "739224"
                   }
                 }
               },
@@ -9372,7 +9731,8 @@
           "message",
           "portal_user",
           "request",
-          "comment"
+          "comment",
+          "user"
         ]
       },
       "TaxonomySearchIncludeArchivedParam": {
@@ -10052,6 +10412,16 @@
       }
     },
     "parameters": {
+      "AnonymizeQueryParam": {
+        "name": "anonymize",
+        "description": "When true, anonymizes PII in the response: identifiers (names, emails, phone numbers, IBANs) are replaced\nwith deterministic pseudonyms (stable within an org), addresses are generalized to postal code / city / country,\nand well-known free-text fields (e.g. note content) are redacted.\n\nUseful for AI agents and data analysis use cases that must not access personal data.\n\nAnonymization is forced (regardless of this parameter) when the access token was created with `anonymize: true`.\n",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "boolean",
+          "default": false
+        }
+      },
       "EntityIdPathParam": {
         "name": "id",
         "description": "Entity id",
