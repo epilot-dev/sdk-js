@@ -11402,7 +11402,7 @@
   },
   "servers": [
     {
-      "url": "https://entity.dev.sls.epilot.io"
+      "url": "https://entity.sls.epilot.io"
     }
   ]
 }

@@ -95,6 +95,7 @@ const { data } = await entityClient.listSchemas(...)
 **Import-Export**
 - [`exportEntities`](#exportentities)
 - [`importEntities`](#importentities)
+- [`abortEntityImport`](#abortentityimport)
 
 **Saved Views**
 - [`listSavedViews`](#listsavedviews)
@@ -183,6 +184,11 @@ const { data } = await entityClient.listSchemas(...)
 - [`SummaryAttribute`](#summaryattribute)
 - [`GroupHeadline`](#groupheadline)
 - [`GroupHeadlineWithCompositeID`](#groupheadlinewithcompositeid)
+- [`BaseConditionDefinition`](#baseconditiondefinition)
+- [`ScalarConditionDefinition`](#scalarconditiondefinition)
+- [`SelectConditionDefinition`](#selectconditiondefinition)
+- [`LocationConditionDefinition`](#locationconditiondefinition)
+- [`ConditionDefinition`](#conditiondefinition)
 - [`EntitySlug`](#entityslug)
 - [`EntityCapability`](#entitycapability)
 - [`EntityCapabilityWithCompositeID`](#entitycapabilitywithcompositeid)
@@ -234,6 +240,7 @@ const { data } = await entityClient.listSchemas(...)
 - [`ActivityType`](#activitytype)
 - [`Activity`](#activity)
 - [`EntityOperation`](#entityoperation)
+- [`EntityOperationSourceContext`](#entityoperationsourcecontext)
 - [`BaseActivityItem`](#baseactivityitem)
 - [`ActivityItem`](#activityitem)
 - [`BlueprintEntityId`](#blueprintentityid)
@@ -320,7 +327,8 @@ const { data } = await client.listSchemas({
       "_purpose": ["string"],
       "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
       "explicit_search_mappings": {},
-      "group_headlines": []
+      "group_headlines": [],
+      "conditions": []
     }
   ]
 }
@@ -386,7 +394,8 @@ const { data } = await client.listSchemasV2({
       "_purpose": ["string"],
       "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
       "explicit_search_mappings": {},
-      "group_headlines": []
+      "group_headlines": [],
+      "conditions": []
     }
   ]
 }
@@ -471,7 +480,13 @@ const { data } = await client.getSchema({
     },
     "sharing": {
       "show_sharing_button": true
-    }
+    },
+    "grid_layout": {
+      "id": "string",
+      "columns": 0,
+      "cells": [0]
+    },
+    "widget_order": ["string"]
   },
   "capabilities": [
     {
@@ -544,6 +559,14 @@ const { data } = await client.getSchema({
       "_purpose": ["taxonomy-slug:classification-slug"],
       "_manifest": ["123e4567-e89b-12d3-a456-426614174000"]
     }
+  ],
+  "conditions": [
+    {
+      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
+      "name": "delivery_area",
+      "label": "Delivery Area",
+      "type": "string"
+    }
   ]
 }
 ```
@@ -609,7 +632,13 @@ const { data } = await client.putSchema(
       },
       sharing: {
         show_sharing_button: true
-      }
+      },
+      grid_layout: {
+        id: 'string',
+        columns: 0,
+        cells: [0]
+      },
+      widget_order: ['string']
     },
     capabilities: [
       {
@@ -683,6 +712,14 @@ const { data } = await client.putSchema(
         _purpose: ['taxonomy-slug:classification-slug'],
         _manifest: ['123e4567-e89b-12d3-a456-426614174000']
       }
+    ],
+    conditions: [
+      {
+        id: 'd5839b94-ba20-4225-a78e-76951d352bd6',
+        name: 'delivery_area',
+        label: 'Delivery Area',
+        type: 'string'
+      }
     ]
   },
 )
@@ -747,7 +784,13 @@ const { data } = await client.putSchema(
     },
     "sharing": {
       "show_sharing_button": true
-    }
+    },
+    "grid_layout": {
+      "id": "string",
+      "columns": 0,
+      "cells": [0]
+    },
+    "widget_order": ["string"]
   },
   "capabilities": [
     {
@@ -819,6 +862,14 @@ const { data } = await client.putSchema(
       "divider": "top_divider",
       "_purpose": ["taxonomy-slug:classification-slug"],
       "_manifest": ["123e4567-e89b-12d3-a456-426614174000"]
+    }
+  ],
+  "conditions": [
+    {
+      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
+      "name": "delivery_area",
+      "label": "Delivery Area",
+      "type": "string"
     }
   ]
 }
@@ -1048,7 +1099,8 @@ const { data } = await client.getSchemaVersions({
       "_purpose": ["string"],
       "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
       "explicit_search_mappings": {},
-      "group_headlines": []
+      "group_headlines": [],
+      "conditions": []
     }
   ],
   "drafts": [
@@ -1084,7 +1136,8 @@ const { data } = await client.getSchemaVersions({
       "_purpose": ["string"],
       "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
       "explicit_search_mappings": {},
-      "group_headlines": []
+      "group_headlines": [],
+      "conditions": []
     }
   ],
   "versions_more": true,
@@ -1175,7 +1228,13 @@ const { data } = await client.freezeSchema(
     },
     "sharing": {
       "show_sharing_button": true
-    }
+    },
+    "grid_layout": {
+      "id": "string",
+      "columns": 0,
+      "cells": [0]
+    },
+    "widget_order": ["string"]
   },
   "capabilities": [
     {
@@ -1247,6 +1306,14 @@ const { data } = await client.freezeSchema(
       "divider": "top_divider",
       "_purpose": ["taxonomy-slug:classification-slug"],
       "_manifest": ["123e4567-e89b-12d3-a456-426614174000"]
+    }
+  ],
+  "conditions": [
+    {
+      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
+      "name": "delivery_area",
+      "label": "Delivery Area",
+      "type": "string"
     }
   ]
 }
@@ -1327,7 +1394,13 @@ const { data } = await client.unfreezeSchema({
     },
     "sharing": {
       "show_sharing_button": true
-    }
+    },
+    "grid_layout": {
+      "id": "string",
+      "columns": 0,
+      "cells": [0]
+    },
+    "widget_order": ["string"]
   },
   "capabilities": [
     {
@@ -1399,6 +1472,14 @@ const { data } = await client.unfreezeSchema({
       "divider": "top_divider",
       "_purpose": ["taxonomy-slug:classification-slug"],
       "_manifest": ["123e4567-e89b-12d3-a456-426614174000"]
+    }
+  ],
+  "conditions": [
+    {
+      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
+      "name": "delivery_area",
+      "label": "Delivery Area",
+      "type": "string"
     }
   ]
 }
@@ -1496,7 +1577,8 @@ const { data } = await client.listSchemaBlueprints()
       "_purpose": ["string"],
       "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
       "explicit_search_mappings": {},
-      "group_headlines": []
+      "group_headlines": [],
+      "conditions": []
     }
   ]
 }
@@ -1522,6 +1604,7 @@ const { data } = await client.searchEntities(
     from: 0,
     size: 10,
     hydrate: false,
+    anonymize: false,
     fields: ['_id', '_title', 'first_name', 'account', '!account.*._files', '**._product'],
     aggs: {
       'contact-count-per-tag': {
@@ -1627,6 +1710,7 @@ const { data } = await client.listEntities(
     from: 0,
     size: 10,
     hydrate: false,
+    anonymize: false,
     fields: ['_id', '_title', 'first_name', 'account', '!account.*._files', '**._product'],
     aggs: {
       'contact-count-per-tag': {
@@ -2059,6 +2143,7 @@ const { data } = await client.getEntityV2({
   id: '123e4567-e89b-12d3-a456-426614174000',
   slug: 'example',
   hydrate: true,
+  anonymize: true,
   fields: ['...'],
   apply_changesets: true,
 })
@@ -2198,6 +2283,7 @@ const { data } = await client.getEntity({
   id: '123e4567-e89b-12d3-a456-426614174000',
   slug: 'example',
   hydrate: true,
+  anonymize: true,
 })
 ```
 
@@ -2421,6 +2507,7 @@ Autocomplete entity attributes
 
 ```ts
 const { data } = await client.autocomplete({
+  anonymize: true,
   input: 'example',
   attribute: 'example',
   slug: 'example',
@@ -2538,6 +2625,7 @@ Get activity by id
 
 ```ts
 const { data } = await client.getActivity({
+  anonymize: true,
   id: '123e4567-e89b-12d3-a456-426614174000',
   operations_size: 1,
   operations_from: 1,
@@ -2577,7 +2665,9 @@ const { data } = await client.getActivity({
       "params": {},
       "payload": {},
       "diff": {},
-      "_workflow_origin": {}
+      "source_context": {},
+      "_workflow_origin": {},
+      "_automation_chain": ["string"]
     }
   ]
 }
@@ -2747,6 +2837,7 @@ Returns all pending changesets for an entity.
 
 ```ts
 const { data } = await client.listChangesets({
+  anonymize: true,
   slug: 'example',
   id: '123e4567-e89b-12d3-a456-426614174000',
 })
@@ -2771,6 +2862,7 @@ Get activity feed for an entity
 
 ```ts
 const { data } = await client.getEntityActivityFeed({
+  anonymize: true,
   slug: 'example',
   id: '123e4567-e89b-12d3-a456-426614174000',
   after: 'example',
@@ -2824,6 +2916,7 @@ const { data } = await client.getRelations({
   slug: 'example',
   id: '123e4567-e89b-12d3-a456-426614174000',
   hydrate: true,
+  anonymize: true,
   include_reverse: true,
   from: 1,
   size: 1,
@@ -2957,6 +3050,7 @@ const { data } = await client.getRelationsV2({
   slug: 'example',
   id: '123e4567-e89b-12d3-a456-426614174000',
   hydrate: true,
+  anonymize: true,
   query: 'example',
   include_reverse: true,
   from: 1,
@@ -3019,6 +3113,7 @@ const { data } = await client.getRelationsV3({
   slug: 'example',
   id: '123e4567-e89b-12d3-a456-426614174000',
   hydrate: true,
+  anonymize: true,
   include_reverse: true,
   from: 1,
   size: 1,
@@ -3180,6 +3275,7 @@ const { data } = await client.exportEntities(
     from: 0,
     size: 10,
     hydrate: false,
+    anonymize: false,
     fields: ['_id', '_title', 'first_name', 'account', '!account.*._files', '**._product'],
     aggs: {
       'contact-count-per-tag': {
@@ -3222,6 +3318,21 @@ const { data } = await client.importEntities(
 
 ---
 
+### `abortEntityImport`
+
+Abort a running entity import
+
+`POST /v1/entity:abortImport`
+
+```ts
+const { data } = await client.abortEntityImport({
+  job_id: 'example',
+  schema: 'example',
+})
+```
+
+---
+
 ### `listSavedViews`
 
 Get the Saved Views based on the schema
@@ -3234,6 +3345,7 @@ const { data } = await client.listSavedViews({
   sort: 'example',
   from: 1,
   size: 1,
+  q: 'example',
   fields: ['...'],
 })
 ```
@@ -3255,7 +3367,8 @@ const { data } = await client.listSavedViews({
       "shared": true,
       "isFavoritedBy": ["11701"],
       "created_by": {
-        "user_id": "10598"
+        "user_id": "10598",
+        "org_id": "739224"
       },
       "ui_config": {
         "filters": {
@@ -3297,7 +3410,8 @@ const { data } = await client.createSavedView(
     shared: true,
     isFavoritedBy: ['11701'],
     created_by: {
-      user_id: '10598'
+      user_id: '10598',
+      org_id: '739224'
     },
     ui_config: {
       filters: {
@@ -3332,7 +3446,8 @@ const { data } = await client.createSavedView(
   "shared": true,
   "isFavoritedBy": ["11701"],
   "created_by": {
-    "user_id": "10598"
+    "user_id": "10598",
+    "org_id": "739224"
   },
   "ui_config": {
     "filters": {
@@ -3382,7 +3497,8 @@ const { data } = await client.getSavedView({
   "shared": true,
   "isFavoritedBy": ["11701"],
   "created_by": {
-    "user_id": "10598"
+    "user_id": "10598",
+    "org_id": "739224"
   },
   "ui_config": {
     "filters": {
@@ -3427,7 +3543,8 @@ const { data } = await client.updateSavedView(
     shared: true,
     isFavoritedBy: ['11701'],
     created_by: {
-      user_id: '10598'
+      user_id: '10598',
+      org_id: '739224'
     },
     ui_config: {
       filters: {
@@ -3462,7 +3579,8 @@ const { data } = await client.updateSavedView(
   "shared": true,
   "isFavoritedBy": ["11701"],
   "created_by": {
-    "user_id": "10598"
+    "user_id": "10598",
+    "org_id": "739224"
   },
   "ui_config": {
     "filters": {
@@ -3504,7 +3622,8 @@ const { data } = await client.patchSavedView(
     shared: true,
     isFavoritedBy: ['11701'],
     created_by: {
-      user_id: '10598'
+      user_id: '10598',
+      org_id: '739224'
     },
     ui_config: {
       filters: {
@@ -3539,7 +3658,8 @@ const { data } = await client.patchSavedView(
   "shared": true,
   "isFavoritedBy": ["11701"],
   "created_by": {
-    "user_id": "10598"
+    "user_id": "10598",
+    "org_id": "739224"
   },
   "ui_config": {
     "filters": {
@@ -3603,7 +3723,8 @@ const { data } = await client.listFavoriteViewsForUser()
       "shared": true,
       "isFavoritedBy": ["11701"],
       "created_by": {
-        "user_id": "10598"
+        "user_id": "10598",
+        "org_id": "739224"
       },
       "ui_config": {
         "filters": {
@@ -4463,6 +4584,7 @@ const { data } = await client.createSchemaAttribute(
     required: false,
     readonly: false,
     deprecated: false,
+    variant_overridable: false,
     default_value: {},
     group: 'string',
     order: 0,
@@ -4470,6 +4592,7 @@ const { data } = await client.createSchemaAttribute(
     hide_label: true,
     icon: 'string',
     render_condition: 'string',
+    data_classification: 'public',
     _purpose: ['taxonomy-slug:classification-slug'],
     _manifest: ['123e4567-e89b-12d3-a456-426614174000'],
     constraints: {
@@ -4536,6 +4659,7 @@ const { data } = await client.createSchemaAttribute(
   "required": false,
   "readonly": false,
   "deprecated": false,
+  "variant_overridable": false,
   "default_value": {},
   "group": "string",
   "order": 0,
@@ -4543,6 +4667,7 @@ const { data } = await client.createSchemaAttribute(
   "hide_label": true,
   "icon": "string",
   "render_condition": "string",
+  "data_classification": "public",
   "_purpose": ["taxonomy-slug:classification-slug"],
   "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
   "constraints": {
@@ -4624,6 +4749,7 @@ const { data } = await client.getSchemaAttribute({
   "required": false,
   "readonly": false,
   "deprecated": false,
+  "variant_overridable": false,
   "default_value": {},
   "group": "string",
   "order": 0,
@@ -4631,6 +4757,7 @@ const { data } = await client.getSchemaAttribute({
   "hide_label": true,
   "icon": "string",
   "render_condition": "string",
+  "data_classification": "public",
   "_purpose": ["taxonomy-slug:classification-slug"],
   "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
   "constraints": {
@@ -4707,6 +4834,7 @@ const { data } = await client.putSchemaAttribute(
     required: false,
     readonly: false,
     deprecated: false,
+    variant_overridable: false,
     default_value: {},
     group: 'string',
     order: 0,
@@ -4714,6 +4842,7 @@ const { data } = await client.putSchemaAttribute(
     hide_label: true,
     icon: 'string',
     render_condition: 'string',
+    data_classification: 'public',
     _purpose: ['taxonomy-slug:classification-slug'],
     _manifest: ['123e4567-e89b-12d3-a456-426614174000'],
     constraints: {
@@ -4780,6 +4909,7 @@ const { data } = await client.putSchemaAttribute(
   "required": false,
   "readonly": false,
   "deprecated": false,
+  "variant_overridable": false,
   "default_value": {},
   "group": "string",
   "order": 0,
@@ -4787,6 +4917,7 @@ const { data } = await client.putSchemaAttribute(
   "hide_label": true,
   "icon": "string",
   "render_condition": "string",
+  "data_classification": "public",
   "_purpose": ["taxonomy-slug:classification-slug"],
   "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
   "constraints": {
@@ -4868,6 +4999,7 @@ const { data } = await client.deleteSchemaAttribute({
   "required": false,
   "readonly": false,
   "deprecated": false,
+  "variant_overridable": false,
   "default_value": {},
   "group": "string",
   "order": 0,
@@ -4875,6 +5007,7 @@ const { data } = await client.deleteSchemaAttribute({
   "hide_label": true,
   "icon": "string",
   "render_condition": "string",
+  "data_classification": "public",
   "_purpose": ["taxonomy-slug:classification-slug"],
   "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
   "constraints": {
@@ -4954,6 +5087,7 @@ const { data } = await client.createSchemaCapability(
         required: false,
         readonly: false,
         deprecated: false,
+        variant_overridable: false,
         default_value: {},
         group: 'string',
         order: 0,
@@ -4961,6 +5095,7 @@ const { data } = await client.createSchemaCapability(
         hide_label: true,
         icon: 'string',
         render_condition: 'string',
+        data_classification: 'public',
         _purpose: ['taxonomy-slug:classification-slug'],
         _manifest: ['123e4567-e89b-12d3-a456-426614174000'],
         constraints: { /* ... */ },
@@ -4993,6 +5128,7 @@ const { data } = await client.createSchemaCapability(
         required: false,
         readonly: false,
         deprecated: false,
+        variant_overridable: false,
         default_value: {},
         group: 'string',
         order: 0,
@@ -5000,6 +5136,7 @@ const { data } = await client.createSchemaCapability(
         hide_label: true,
         icon: 'string',
         render_condition: 'string',
+        data_classification: 'public',
         _purpose: ['taxonomy-slug:classification-slug'],
         _manifest: ['123e4567-e89b-12d3-a456-426614174000'],
         constraints: { /* ... */ },
@@ -5080,6 +5217,7 @@ const { data } = await client.createSchemaCapability(
       "required": false,
       "readonly": false,
       "deprecated": false,
+      "variant_overridable": false,
       "default_value": {},
       "group": "string",
       "order": 0,
@@ -5087,6 +5225,7 @@ const { data } = await client.createSchemaCapability(
       "hide_label": true,
       "icon": "string",
       "render_condition": "string",
+      "data_classification": "public",
       "_purpose": ["taxonomy-slug:classification-slug"],
       "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
       "constraints": {},
@@ -5119,6 +5258,7 @@ const { data } = await client.createSchemaCapability(
       "required": false,
       "readonly": false,
       "deprecated": false,
+      "variant_overridable": false,
       "default_value": {},
       "group": "string",
       "order": 0,
@@ -5126,6 +5266,7 @@ const { data } = await client.createSchemaCapability(
       "hide_label": true,
       "icon": "string",
       "render_condition": "string",
+      "data_classification": "public",
       "_purpose": ["taxonomy-slug:classification-slug"],
       "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
       "constraints": {},
@@ -5220,6 +5361,7 @@ const { data } = await client.getSchemaCapability({
       "required": false,
       "readonly": false,
       "deprecated": false,
+      "variant_overridable": false,
       "default_value": {},
       "group": "string",
       "order": 0,
@@ -5227,6 +5369,7 @@ const { data } = await client.getSchemaCapability({
       "hide_label": true,
       "icon": "string",
       "render_condition": "string",
+      "data_classification": "public",
       "_purpose": ["taxonomy-slug:classification-slug"],
       "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
       "constraints": {},
@@ -5259,6 +5402,7 @@ const { data } = await client.getSchemaCapability({
       "required": false,
       "readonly": false,
       "deprecated": false,
+      "variant_overridable": false,
       "default_value": {},
       "group": "string",
       "order": 0,
@@ -5266,6 +5410,7 @@ const { data } = await client.getSchemaCapability({
       "hide_label": true,
       "icon": "string",
       "render_condition": "string",
+      "data_classification": "public",
       "_purpose": ["taxonomy-slug:classification-slug"],
       "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
       "constraints": {},
@@ -5355,6 +5500,7 @@ const { data } = await client.putSchemaCapability(
         required: false,
         readonly: false,
         deprecated: false,
+        variant_overridable: false,
         default_value: {},
         group: 'string',
         order: 0,
@@ -5362,6 +5508,7 @@ const { data } = await client.putSchemaCapability(
         hide_label: true,
         icon: 'string',
         render_condition: 'string',
+        data_classification: 'public',
         _purpose: ['taxonomy-slug:classification-slug'],
         _manifest: ['123e4567-e89b-12d3-a456-426614174000'],
         constraints: { /* ... */ },
@@ -5394,6 +5541,7 @@ const { data } = await client.putSchemaCapability(
         required: false,
         readonly: false,
         deprecated: false,
+        variant_overridable: false,
         default_value: {},
         group: 'string',
         order: 0,
@@ -5401,6 +5549,7 @@ const { data } = await client.putSchemaCapability(
         hide_label: true,
         icon: 'string',
         render_condition: 'string',
+        data_classification: 'public',
         _purpose: ['taxonomy-slug:classification-slug'],
         _manifest: ['123e4567-e89b-12d3-a456-426614174000'],
         constraints: { /* ... */ },
@@ -5481,6 +5630,7 @@ const { data } = await client.putSchemaCapability(
       "required": false,
       "readonly": false,
       "deprecated": false,
+      "variant_overridable": false,
       "default_value": {},
       "group": "string",
       "order": 0,
@@ -5488,6 +5638,7 @@ const { data } = await client.putSchemaCapability(
       "hide_label": true,
       "icon": "string",
       "render_condition": "string",
+      "data_classification": "public",
       "_purpose": ["taxonomy-slug:classification-slug"],
       "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
       "constraints": {},
@@ -5520,6 +5671,7 @@ const { data } = await client.putSchemaCapability(
       "required": false,
       "readonly": false,
       "deprecated": false,
+      "variant_overridable": false,
       "default_value": {},
       "group": "string",
       "order": 0,
@@ -5527,6 +5679,7 @@ const { data } = await client.putSchemaCapability(
       "hide_label": true,
       "icon": "string",
       "render_condition": "string",
+      "data_classification": "public",
       "_purpose": ["taxonomy-slug:classification-slug"],
       "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
       "constraints": {},
@@ -5621,6 +5774,7 @@ const { data } = await client.deleteSchemaCapability({
       "required": false,
       "readonly": false,
       "deprecated": false,
+      "variant_overridable": false,
       "default_value": {},
       "group": "string",
       "order": 0,
@@ -5628,6 +5782,7 @@ const { data } = await client.deleteSchemaCapability({
       "hide_label": true,
       "icon": "string",
       "render_condition": "string",
+      "data_classification": "public",
       "_purpose": ["taxonomy-slug:classification-slug"],
       "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
       "constraints": {},
@@ -5660,6 +5815,7 @@ const { data } = await client.deleteSchemaCapability({
       "required": false,
       "readonly": false,
       "deprecated": false,
+      "variant_overridable": false,
       "default_value": {},
       "group": "string",
       "order": 0,
@@ -5667,6 +5823,7 @@ const { data } = await client.deleteSchemaCapability({
       "hide_label": true,
       "icon": "string",
       "render_condition": "string",
+      "data_classification": "public",
       "_purpose": ["taxonomy-slug:classification-slug"],
       "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
       "constraints": {},
@@ -6235,6 +6392,12 @@ type EntitySchema = {
     sharing?: {
       show_sharing_button?: { ... }
     }
+    grid_layout?: {
+      id?: { ... }
+      columns?: { ... }
+      cells?: { ... }
+    }
+    widget_order?: string[]
   }
   capabilities: Array<{
     id?: string
@@ -6251,6 +6414,7 @@ type EntitySchema = {
       required?: { ... }
       readonly?: { ... }
       deprecated?: { ... }
+      variant_overridable?: { ... }
       default_value?: { ... }
       group?: { ... }
       order?: { ... }
@@ -6258,18 +6422,11 @@ type EntitySchema = {
       hide_label?: { ... }
       icon?: { ... }
       render_condition?: { ... }
+      data_classification?: { ... }
       _purpose?: { ... }
       _manifest?: { ... }
       constraints?: { ... }
       feature_flag?: { ... }
-      settings_flag?: { ... }
-      value_formatter?: { ... }
-      preview_value_formatter?: { ... }
-      entity_builder_disable_edit?: { ... }
-      protected?: { ... }
-      info_helpers?: { ... }
-      explicit_searchable?: { ... }
-      exclude_from_search?: { ... }
   // ...
 }
 ```
@@ -6353,6 +6510,12 @@ type EntitySchemaItem = {
     sharing?: {
       show_sharing_button?: { ... }
     }
+    grid_layout?: {
+      id?: { ... }
+      columns?: { ... }
+      cells?: { ... }
+    }
+    widget_order?: string[]
   }
   capabilities: Array<{
     id?: string
@@ -6369,14 +6532,8 @@ type EntitySchemaItem = {
       required?: { ... }
       readonly?: { ... }
       deprecated?: { ... }
+      variant_overridable?: { ... }
       default_value?: { ... }
-      group?: { ... }
-      order?: { ... }
-      layout?: { ... }
-      hide_label?: { ... }
-      icon?: { ... }
-      render_condition?: { ... }
-      _purpose?: { ... }
   // ...
 }
 ```
@@ -6519,6 +6676,7 @@ type Attribute = {
   required?: boolean
   readonly?: boolean
   deprecated?: boolean
+  variant_overridable?: boolean
   default_value?: unknown
   group?: string
   order?: number
@@ -6526,6 +6684,7 @@ type Attribute = {
   hide_label?: boolean
   icon?: string
   render_condition?: string
+  data_classification?: "public" | "pii"
   _purpose?: string[]
   _manifest?: string // uuid[]
   constraints?: object
@@ -6580,6 +6739,7 @@ type Attribute = {
   required?: boolean
   readonly?: boolean
   deprecated?: boolean
+  variant_overridable?: boolean
   default_value?: unknown
   group?: string
   order?: number
@@ -6587,6 +6747,7 @@ type Attribute = {
   hide_label?: boolean
   icon?: string
   render_condition?: string
+  data_classification?: "public" | "pii"
   _purpose?: string[]
   _manifest?: string // uuid[]
   constraints?: object
@@ -6604,10 +6765,6 @@ type Attribute = {
     hint_text_key?: string
     hint_custom_component?: string
     hint_tooltip_placement?: string
-  }
-  explicit_searchable?: boolean
-  exclude_from_search?: boolean
-  repeatable?: boolean
   // ...
 }
 ```
@@ -6635,6 +6792,7 @@ type BaseAttribute = {
   required?: boolean
   readonly?: boolean
   deprecated?: boolean
+  variant_overridable?: boolean
   default_value?: unknown
   group?: string
   order?: number
@@ -6642,6 +6800,7 @@ type BaseAttribute = {
   hide_label?: boolean
   icon?: string
   render_condition?: string
+  data_classification?: "public" | "pii"
   _purpose?: string[]
   _manifest?: string // uuid[]
   constraints?: object
@@ -6698,6 +6857,7 @@ type TextAttribute = {
   required?: boolean
   readonly?: boolean
   deprecated?: boolean
+  variant_overridable?: boolean
   default_value?: unknown
   group?: string
   order?: number
@@ -6705,6 +6865,7 @@ type TextAttribute = {
   hide_label?: boolean
   icon?: string
   render_condition?: string
+  data_classification?: "public" | "pii"
   _purpose?: string[]
   _manifest?: string // uuid[]
   constraints?: object
@@ -6765,6 +6926,7 @@ type LinkAttribute = {
   required?: boolean
   readonly?: boolean
   deprecated?: boolean
+  variant_overridable?: boolean
   default_value?: unknown
   group?: string
   order?: number
@@ -6772,6 +6934,7 @@ type LinkAttribute = {
   hide_label?: boolean
   icon?: string
   render_condition?: string
+  data_classification?: "public" | "pii"
   _purpose?: string[]
   _manifest?: string // uuid[]
   constraints?: object
@@ -6829,6 +6992,7 @@ type InternalAttribute = {
   required?: boolean
   readonly?: boolean
   deprecated?: boolean
+  variant_overridable?: boolean
   default_value?: unknown
   group?: string
   order?: number
@@ -6836,6 +7000,7 @@ type InternalAttribute = {
   hide_label?: boolean
   icon?: string
   render_condition?: string
+  data_classification?: "public" | "pii"
   _purpose?: string[]
   _manifest?: string // uuid[]
   constraints?: object
@@ -6893,6 +7058,7 @@ type BooleanAttribute = {
   required?: boolean
   readonly?: boolean
   deprecated?: boolean
+  variant_overridable?: boolean
   default_value?: unknown
   group?: string
   order?: number
@@ -6900,6 +7066,7 @@ type BooleanAttribute = {
   hide_label?: boolean
   icon?: string
   render_condition?: string
+  data_classification?: "public" | "pii"
   _purpose?: string[]
   _manifest?: string // uuid[]
   constraints?: object
@@ -6958,6 +7125,7 @@ type DateAttribute = {
   required?: boolean
   readonly?: boolean
   deprecated?: boolean
+  variant_overridable?: boolean
   default_value?: unknown
   group?: string
   order?: number
@@ -6965,6 +7133,7 @@ type DateAttribute = {
   hide_label?: boolean
   icon?: string
   render_condition?: string
+  data_classification?: "public" | "pii"
   _purpose?: string[]
   _manifest?: string // uuid[]
   constraints?: object
@@ -7022,6 +7191,7 @@ type CountryAttribute = {
   required?: boolean
   readonly?: boolean
   deprecated?: boolean
+  variant_overridable?: boolean
   default_value?: unknown
   group?: string
   order?: number
@@ -7029,6 +7199,7 @@ type CountryAttribute = {
   hide_label?: boolean
   icon?: string
   render_condition?: string
+  data_classification?: "public" | "pii"
   _purpose?: string[]
   _manifest?: string // uuid[]
   constraints?: object
@@ -7086,6 +7257,7 @@ type SelectAttribute = {
   required?: boolean
   readonly?: boolean
   deprecated?: boolean
+  variant_overridable?: boolean
   default_value?: unknown
   group?: string
   order?: number
@@ -7093,6 +7265,7 @@ type SelectAttribute = {
   hide_label?: boolean
   icon?: string
   render_condition?: string
+  data_classification?: "public" | "pii"
   _purpose?: string[]
   _manifest?: string // uuid[]
   constraints?: object
@@ -7155,6 +7328,7 @@ type MultiSelectAttribute = {
   required?: boolean
   readonly?: boolean
   deprecated?: boolean
+  variant_overridable?: boolean
   default_value?: unknown
   group?: string
   order?: number
@@ -7162,6 +7336,7 @@ type MultiSelectAttribute = {
   hide_label?: boolean
   icon?: string
   render_condition?: string
+  data_classification?: "public" | "pii"
   _purpose?: string[]
   _manifest?: string // uuid[]
   constraints?: object
@@ -7226,6 +7401,7 @@ type StatusAttribute = {
   required?: boolean
   readonly?: boolean
   deprecated?: boolean
+  variant_overridable?: boolean
   default_value?: unknown
   group?: string
   order?: number
@@ -7233,6 +7409,7 @@ type StatusAttribute = {
   hide_label?: boolean
   icon?: string
   render_condition?: string
+  data_classification?: "public" | "pii"
   _purpose?: string[]
   _manifest?: string // uuid[]
   constraints?: object
@@ -7294,6 +7471,7 @@ type SequenceAttribute = {
   required?: boolean
   readonly?: boolean
   deprecated?: boolean
+  variant_overridable?: boolean
   default_value?: unknown
   group?: string
   order?: number
@@ -7301,6 +7479,7 @@ type SequenceAttribute = {
   hide_label?: boolean
   icon?: string
   render_condition?: string
+  data_classification?: "public" | "pii"
   _purpose?: string[]
   _manifest?: string // uuid[]
   constraints?: object
@@ -7360,6 +7539,7 @@ type FileAttribute = {
   required?: boolean
   readonly?: boolean
   deprecated?: boolean
+  variant_overridable?: boolean
   default_value?: unknown
   group?: string
   order?: number
@@ -7367,6 +7547,7 @@ type FileAttribute = {
   hide_label?: boolean
   icon?: string
   render_condition?: string
+  data_classification?: "public" | "pii"
   _purpose?: string[]
   _manifest?: string // uuid[]
   constraints?: object
@@ -7430,6 +7611,7 @@ type CurrencyAttribute = {
   required?: boolean
   readonly?: boolean
   deprecated?: boolean
+  variant_overridable?: boolean
   default_value?: unknown
   group?: string
   order?: number
@@ -7437,6 +7619,7 @@ type CurrencyAttribute = {
   hide_label?: boolean
   icon?: string
   render_condition?: string
+  data_classification?: "public" | "pii"
   _purpose?: string[]
   _manifest?: string // uuid[]
   constraints?: object
@@ -7525,6 +7708,7 @@ type RelationAttribute = {
   required?: boolean
   readonly?: boolean
   deprecated?: boolean
+  variant_overridable?: boolean
   default_value?: unknown
   group?: string
   order?: number
@@ -7532,6 +7716,7 @@ type RelationAttribute = {
   hide_label?: boolean
   icon?: string
   render_condition?: string
+  data_classification?: "public" | "pii"
   _purpose?: string[]
   _manifest?: string // uuid[]
   constraints?: object
@@ -7617,6 +7802,7 @@ type UserRelationAttribute = {
   required?: boolean
   readonly?: boolean
   deprecated?: boolean
+  variant_overridable?: boolean
   default_value?: unknown
   group?: string
   order?: number
@@ -7624,6 +7810,7 @@ type UserRelationAttribute = {
   hide_label?: boolean
   icon?: string
   render_condition?: string
+  data_classification?: "public" | "pii"
   _purpose?: string[]
   _manifest?: string // uuid[]
   constraints?: object
@@ -7682,6 +7869,7 @@ type PartnerOrganisationAttribute = {
   required?: boolean
   readonly?: boolean
   deprecated?: boolean
+  variant_overridable?: boolean
   default_value?: unknown
   group?: string
   order?: number
@@ -7689,6 +7877,7 @@ type PartnerOrganisationAttribute = {
   hide_label?: boolean
   icon?: string
   render_condition?: string
+  data_classification?: "public" | "pii"
   _purpose?: string[]
   _manifest?: string // uuid[]
   constraints?: object
@@ -7746,6 +7935,7 @@ type PortalAccessAttribute = {
   required?: boolean
   readonly?: boolean
   deprecated?: boolean
+  variant_overridable?: boolean
   default_value?: unknown
   group?: string
   order?: number
@@ -7753,6 +7943,7 @@ type PortalAccessAttribute = {
   hide_label?: boolean
   icon?: string
   render_condition?: string
+  data_classification?: "public" | "pii"
   _purpose?: string[]
   _manifest?: string // uuid[]
   constraints?: object
@@ -7835,6 +8026,7 @@ type AddressAttribute = {
   required?: boolean
   readonly?: boolean
   deprecated?: boolean
+  variant_overridable?: boolean
   default_value?: unknown
   group?: string
   order?: number
@@ -7842,6 +8034,7 @@ type AddressAttribute = {
   hide_label?: boolean
   icon?: string
   render_condition?: string
+  data_classification?: "public" | "pii"
   _purpose?: string[]
   _manifest?: string // uuid[]
   constraints?: object
@@ -7900,6 +8093,7 @@ type AddressRelationAttribute = {
   required?: boolean
   readonly?: boolean
   deprecated?: boolean
+  variant_overridable?: boolean
   default_value?: unknown
   group?: string
   order?: number
@@ -7907,6 +8101,7 @@ type AddressRelationAttribute = {
   hide_label?: boolean
   icon?: string
   render_condition?: string
+  data_classification?: "public" | "pii"
   _purpose?: string[]
   _manifest?: string // uuid[]
   constraints?: object
@@ -7965,6 +8160,7 @@ type PaymentMethodRelationAttribute = {
   required?: boolean
   readonly?: boolean
   deprecated?: boolean
+  variant_overridable?: boolean
   default_value?: unknown
   group?: string
   order?: number
@@ -7972,6 +8168,7 @@ type PaymentMethodRelationAttribute = {
   hide_label?: boolean
   icon?: string
   render_condition?: string
+  data_classification?: "public" | "pii"
   _purpose?: string[]
   _manifest?: string // uuid[]
   constraints?: object
@@ -8029,6 +8226,7 @@ type InvitationEmailAttribute = {
   required?: boolean
   readonly?: boolean
   deprecated?: boolean
+  variant_overridable?: boolean
   default_value?: unknown
   group?: string
   order?: number
@@ -8036,6 +8234,7 @@ type InvitationEmailAttribute = {
   hide_label?: boolean
   icon?: string
   render_condition?: string
+  data_classification?: "public" | "pii"
   _purpose?: string[]
   _manifest?: string // uuid[]
   constraints?: object
@@ -8093,6 +8292,7 @@ type AutomationAttribute = {
   required?: boolean
   readonly?: boolean
   deprecated?: boolean
+  variant_overridable?: boolean
   default_value?: unknown
   group?: string
   order?: number
@@ -8100,6 +8300,7 @@ type AutomationAttribute = {
   hide_label?: boolean
   icon?: string
   render_condition?: string
+  data_classification?: "public" | "pii"
   _purpose?: string[]
   _manifest?: string // uuid[]
   constraints?: object
@@ -8157,6 +8358,7 @@ type InternalUserAttribute = {
   required?: boolean
   readonly?: boolean
   deprecated?: boolean
+  variant_overridable?: boolean
   default_value?: unknown
   group?: string
   order?: number
@@ -8164,6 +8366,7 @@ type InternalUserAttribute = {
   hide_label?: boolean
   icon?: string
   render_condition?: string
+  data_classification?: "public" | "pii"
   _purpose?: string[]
   _manifest?: string // uuid[]
   constraints?: object
@@ -8221,6 +8424,7 @@ type PurposeAttribute = {
   required?: boolean
   readonly?: boolean
   deprecated?: boolean
+  variant_overridable?: boolean
   default_value?: unknown
   group?: string
   order?: number
@@ -8228,6 +8432,7 @@ type PurposeAttribute = {
   hide_label?: boolean
   icon?: string
   render_condition?: string
+  data_classification?: "public" | "pii"
   _purpose?: string[]
   _manifest?: string // uuid[]
   constraints?: object
@@ -8285,6 +8490,7 @@ type RepeatableAttribute = {
   required?: boolean
   readonly?: boolean
   deprecated?: boolean
+  variant_overridable?: boolean
   default_value?: unknown
   group?: string
   order?: number
@@ -8292,6 +8498,7 @@ type RepeatableAttribute = {
   hide_label?: boolean
   icon?: string
   render_condition?: string
+  data_classification?: "public" | "pii"
   _purpose?: string[]
   _manifest?: string // uuid[]
   constraints?: object
@@ -8348,6 +8555,7 @@ type TagsAttribute = {
   required?: boolean
   readonly?: boolean
   deprecated?: boolean
+  variant_overridable?: boolean
   default_value?: unknown
   group?: string
   order?: number
@@ -8355,6 +8563,7 @@ type TagsAttribute = {
   hide_label?: boolean
   icon?: string
   render_condition?: string
+  data_classification?: "public" | "pii"
   _purpose?: string[]
   _manifest?: string // uuid[]
   constraints?: object
@@ -8414,6 +8623,7 @@ type MessageEmailAddressAttribute = {
   required?: boolean
   readonly?: boolean
   deprecated?: boolean
+  variant_overridable?: boolean
   default_value?: unknown
   group?: string
   order?: number
@@ -8421,6 +8631,7 @@ type MessageEmailAddressAttribute = {
   hide_label?: boolean
   icon?: string
   render_condition?: string
+  data_classification?: "public" | "pii"
   _purpose?: string[]
   _manifest?: string // uuid[]
   constraints?: object
@@ -8481,6 +8692,7 @@ type NumberAttribute = {
   required?: boolean
   readonly?: boolean
   deprecated?: boolean
+  variant_overridable?: boolean
   default_value?: unknown
   group?: string
   order?: number
@@ -8488,6 +8700,7 @@ type NumberAttribute = {
   hide_label?: boolean
   icon?: string
   render_condition?: string
+  data_classification?: "public" | "pii"
   _purpose?: string[]
   _manifest?: string // uuid[]
   constraints?: object
@@ -8548,6 +8761,7 @@ type TableAttribute = {
   required?: boolean
   readonly?: boolean
   deprecated?: boolean
+  variant_overridable?: boolean
   default_value?: unknown
   group?: string
   order?: number
@@ -8555,6 +8769,7 @@ type TableAttribute = {
   hide_label?: boolean
   icon?: string
   render_condition?: string
+  data_classification?: "public" | "pii"
   _purpose?: string[]
   _manifest?: string // uuid[]
   constraints?: object
@@ -8627,6 +8842,7 @@ type ConsentAttribute = {
   required?: boolean
   readonly?: boolean
   deprecated?: boolean
+  variant_overridable?: boolean
   default_value?: unknown
   group?: string
   order?: number
@@ -8634,6 +8850,7 @@ type ConsentAttribute = {
   hide_label?: boolean
   icon?: string
   render_condition?: string
+  data_classification?: "public" | "pii"
   _purpose?: string[]
   _manifest?: string // uuid[]
   constraints?: object
@@ -8693,6 +8910,7 @@ type OrderedListAttribute = {
   required?: boolean
   readonly?: boolean
   deprecated?: boolean
+  variant_overridable?: boolean
   default_value?: unknown
   group?: string
   order?: number
@@ -8700,6 +8918,7 @@ type OrderedListAttribute = {
   hide_label?: boolean
   icon?: string
   render_condition?: string
+  data_classification?: "public" | "pii"
   _purpose?: string[]
   _manifest?: string // uuid[]
   constraints?: object
@@ -8757,6 +8976,7 @@ type EmailAttribute = {
   required?: boolean
   readonly?: boolean
   deprecated?: boolean
+  variant_overridable?: boolean
   default_value?: unknown
   group?: string
   order?: number
@@ -8764,6 +8984,7 @@ type EmailAttribute = {
   hide_label?: boolean
   icon?: string
   render_condition?: string
+  data_classification?: "public" | "pii"
   _purpose?: string[]
   _manifest?: string // uuid[]
   constraints?: object
@@ -8821,6 +9042,7 @@ type PhoneAttribute = {
   required?: boolean
   readonly?: boolean
   deprecated?: boolean
+  variant_overridable?: boolean
   default_value?: unknown
   group?: string
   order?: number
@@ -8828,6 +9050,7 @@ type PhoneAttribute = {
   hide_label?: boolean
   icon?: string
   render_condition?: string
+  data_classification?: "public" | "pii"
   _purpose?: string[]
   _manifest?: string // uuid[]
   constraints?: object
@@ -8885,6 +9108,7 @@ type PaymentAttribute = {
   required?: boolean
   readonly?: boolean
   deprecated?: boolean
+  variant_overridable?: boolean
   default_value?: unknown
   group?: string
   order?: number
@@ -8892,6 +9116,7 @@ type PaymentAttribute = {
   hide_label?: boolean
   icon?: string
   render_condition?: string
+  data_classification?: "public" | "pii"
   _purpose?: string[]
   _manifest?: string // uuid[]
   constraints?: object
@@ -8949,6 +9174,7 @@ type PriceComponentAttribute = {
   required?: boolean
   readonly?: boolean
   deprecated?: boolean
+  variant_overridable?: boolean
   default_value?: unknown
   group?: string
   order?: number
@@ -8956,6 +9182,7 @@ type PriceComponentAttribute = {
   hide_label?: boolean
   icon?: string
   render_condition?: string
+  data_classification?: "public" | "pii"
   _purpose?: string[]
   _manifest?: string // uuid[]
   constraints?: object
@@ -9013,6 +9240,7 @@ type ComputedAttribute = {
   required?: boolean
   readonly?: boolean
   deprecated?: boolean
+  variant_overridable?: boolean
   default_value?: unknown
   group?: string
   order?: number
@@ -9020,6 +9248,7 @@ type ComputedAttribute = {
   hide_label?: boolean
   icon?: string
   render_condition?: string
+  data_classification?: "public" | "pii"
   _purpose?: string[]
   _manifest?: string // uuid[]
   constraints?: object
@@ -9080,6 +9309,7 @@ type PartnerStatusAttribute = {
   required?: boolean
   readonly?: boolean
   deprecated?: boolean
+  variant_overridable?: boolean
   default_value?: unknown
   group?: string
   order?: number
@@ -9087,6 +9317,7 @@ type PartnerStatusAttribute = {
   hide_label?: boolean
   icon?: string
   render_condition?: string
+  data_classification?: "public" | "pii"
   _purpose?: string[]
   _manifest?: string // uuid[]
   constraints?: object
@@ -9199,6 +9430,79 @@ type GroupHeadlineWithCompositeID = {
 }
 ```
 
+### `BaseConditionDefinition`
+
+```ts
+type BaseConditionDefinition = {
+  id: string // uuid
+  name: string
+  label: string
+}
+```
+
+### `ScalarConditionDefinition`
+
+```ts
+type ScalarConditionDefinition = {
+  id: string // uuid
+  name: string
+  label: string
+  type: "string" | "number" | "date" | "daterange" | "boolean"
+}
+```
+
+### `SelectConditionDefinition`
+
+```ts
+type SelectConditionDefinition = {
+  id: string // uuid
+  name: string
+  label: string
+  type: "select"
+  values?: string[]
+}
+```
+
+### `LocationConditionDefinition`
+
+```ts
+type LocationConditionDefinition = {
+  id: string // uuid
+  name: string
+  label: string
+  type: "location"
+  format?: "zipcode" | "zipcode_town"
+}
+```
+
+### `ConditionDefinition`
+
+One dimension that conditional variants of an entity type are keyed by. `type`
+discriminates the variants: only a `select` condition carries `values`, and only a
+`location` condition carries `format`.
+
+
+```ts
+type ConditionDefinition = {
+  id: string // uuid
+  name: string
+  label: string
+  type: "string" | "number" | "date" | "daterange" | "boolean"
+} | {
+  id: string // uuid
+  name: string
+  label: string
+  type: "select"
+  values?: string[]
+} | {
+  id: string // uuid
+  name: string
+  label: string
+  type: "location"
+  format?: "zipcode" | "zipcode_town"
+}
+```
+
 ### `EntitySlug`
 
 URL-friendly identifier for the entity schema
@@ -9227,6 +9531,7 @@ type EntityCapability = {
     required?: boolean
     readonly?: boolean
     deprecated?: boolean
+    variant_overridable?: boolean
     default_value?: unknown
     group?: string
     order?: number
@@ -9234,6 +9539,7 @@ type EntityCapability = {
     hide_label?: boolean
     icon?: string
     render_condition?: string
+    data_classification?: "public" | "pii"
     _purpose?: string[]
     _manifest?: string // uuid[]
     constraints?: object
@@ -9276,6 +9582,7 @@ type EntityCapability = {
     required?: boolean
     readonly?: boolean
     deprecated?: boolean
+    variant_overridable?: boolean
     default_value?: unknown
     group?: string
     order?: number
@@ -9283,6 +9590,7 @@ type EntityCapability = {
     hide_label?: boolean
     icon?: string
     render_condition?: string
+    data_classification?: "public" | "pii"
     _purpose?: string[]
     _manifest?: string // uuid[]
     constraints?: object
@@ -9308,10 +9616,6 @@ type EntityCapability = {
     edit_mode?: "direct" | "external" | "approval"
     edit_mode_config?: {
       match_strategy?: { ... }
-      fuzzy_config?: { ... }
-    }
-    type: "link"
-  } | {
   // ...
 }
 ```
@@ -9334,6 +9638,7 @@ type EntityCapabilityWithCompositeID = {
     required?: boolean
     readonly?: boolean
     deprecated?: boolean
+    variant_overridable?: boolean
     default_value?: unknown
     group?: string
     order?: number
@@ -9341,6 +9646,7 @@ type EntityCapabilityWithCompositeID = {
     hide_label?: boolean
     icon?: string
     render_condition?: string
+    data_classification?: "public" | "pii"
     _purpose?: string[]
     _manifest?: string // uuid[]
     constraints?: object
@@ -9383,6 +9689,7 @@ type EntityCapabilityWithCompositeID = {
     required?: boolean
     readonly?: boolean
     deprecated?: boolean
+    variant_overridable?: boolean
     default_value?: unknown
     group?: string
     order?: number
@@ -9390,6 +9697,7 @@ type EntityCapabilityWithCompositeID = {
     hide_label?: boolean
     icon?: string
     render_condition?: string
+    data_classification?: "public" | "pii"
     _purpose?: string[]
     _manifest?: string // uuid[]
     constraints?: object
@@ -9415,10 +9723,6 @@ type EntityCapabilityWithCompositeID = {
     edit_mode?: "direct" | "external" | "approval"
     edit_mode_config?: {
       match_strategy?: { ... }
-      fuzzy_config?: { ... }
-    }
-    type: "link"
-  } | {
   // ...
 }
 ```
@@ -9987,6 +10291,7 @@ type EntitySearchParams = {
   from?: number
   size?: number
   hydrate?: boolean
+  anonymize?: boolean
   fields?: string[]
   aggs?: object
   include_deleted?: "true" | "false" | "only"
@@ -10063,6 +10368,7 @@ type EntityListParams = {
   from?: number
   size?: number
   hydrate?: boolean
+  anonymize?: boolean
   fields?: string[]
   aggs?: object
   include_deleted?: "true" | "false" | "only"
@@ -10199,6 +10505,7 @@ type EntitySearchOptions = {
   from?: number
   size?: number
   hydrate?: boolean
+  anonymize?: boolean
   fields?: string[]
   aggs?: object
   include_deleted?: "true" | "false" | "only"
@@ -10586,10 +10893,31 @@ type EntityOperation = {
       _changesets?: { ... }
     }
   }
-  _workflow_origin?: {
-    workflow_exec_id?: string
-    flow_template_id?: string
-  }
+  source_context?: {
+    source: "portal" | "epilot" | "erp" | "system" | "api" | "external" | "journey" | "automation" | "unknown"
+    source_label?: string
+    source_system?: string
+    source_reference?: string
+    actor_type?: "user" | "portal_user" | "api_client" | "automation" | "system"
+    actor_id?: string
+    effective_at?: string // date-time
+  // ...
+}
+```
+
+### `EntityOperationSourceContext`
+
+Billing and audit source context for the operation event.
+
+```ts
+type EntityOperationSourceContext = {
+  source: "portal" | "epilot" | "erp" | "system" | "api" | "external" | "journey" | "automation" | "unknown"
+  source_label?: string
+  source_system?: string
+  source_reference?: string
+  actor_type?: "user" | "portal_user" | "api_client" | "automation" | "system"
+  actor_id?: string
+  effective_at?: string // date-time
 }
 ```
 
@@ -10648,10 +10976,20 @@ type ActivityItem = {
       updated?: { ... }
       deleted?: { ... }
     }
+    source_context?: {
+      source: { ... }
+      source_label?: { ... }
+      source_system?: { ... }
+      source_reference?: { ... }
+      actor_type?: { ... }
+      actor_id?: { ... }
+      effective_at?: { ... }
+    }
     _workflow_origin?: {
       workflow_exec_id?: { ... }
       flow_template_id?: { ... }
     }
+    _automation_chain?: string[]
   }>
 }
 ```
@@ -10708,6 +11046,7 @@ type SavedViewPartial = {
   isFavoritedBy?: string[]
   created_by?: {
     user_id?: string
+    org_id?: string
   } | {
     source?: "SYSTEM" | "BLUEPRINT"
   }
@@ -10729,6 +11068,7 @@ type SavedView = {
   isFavoritedBy?: string[]
   created_by?: {
     user_id?: string
+    org_id?: string
   } | {
     source?: "SYSTEM" | "BLUEPRINT"
   }
@@ -10754,14 +11094,14 @@ type Taxonomy = {
   created_by?: string
   enabled?: boolean
   order?: number
-  enabled_locations?: "account" | "contact" | "contract" | "email_template" | "file" | "journey" | "meter_counter" | "meter" | "opportunity" | "order" | "partner" | "price" | "product" | "submission" | "tax" | "message" | "portal_user" | "request" | "comment" | string[]
+  enabled_locations?: "account" | "contact" | "contract" | "email_template" | "file" | "journey" | "meter_counter" | "meter" | "opportunity" | "order" | "partner" | "price" | "product" | "submission" | "tax" | "message" | "portal_user" | "request" | "comment" | "user" | string[]
 }
 ```
 
 ### `TaxonomyLocationId`
 
 ```ts
-type TaxonomyLocationId = "account" | "contact" | "contract" | "email_template" | "file" | "journey" | "meter_counter" | "meter" | "opportunity" | "order" | "partner" | "price" | "product" | "submission" | "tax" | "message" | "portal_user" | "request" | "comment"
+type TaxonomyLocationId = "account" | "contact" | "contract" | "email_template" | "file" | "journey" | "meter_counter" | "meter" | "opportunity" | "order" | "partner" | "price" | "product" | "submission" | "tax" | "message" | "portal_user" | "request" | "comment" | "user"
 ```
 
 ### `TaxonomySearchIncludeArchivedParam`
@@ -10791,7 +11131,7 @@ type TaxonomyClassification = {
   updated_at?: string // date-time
   archived?: boolean
   starred?: boolean
-  enabled_locations?: "account" | "contact" | "contract" | "email_template" | "file" | "journey" | "meter_counter" | "meter" | "opportunity" | "order" | "partner" | "price" | "product" | "submission" | "tax" | "message" | "portal_user" | "request" | "comment" | string[]
+  enabled_locations?: "account" | "contact" | "contract" | "email_template" | "file" | "journey" | "meter_counter" | "meter" | "opportunity" | "order" | "partner" | "price" | "product" | "submission" | "tax" | "message" | "portal_user" | "request" | "comment" | "user" | string[]
   enabled_purposes?: string[]
   _manifest?: string // uuid[]
 }
@@ -10841,7 +11181,7 @@ type ClassificationsUpdate = {
     updated_at?: string // date-time
     archived?: boolean
     starred?: boolean
-    enabled_locations?: "account" | "contact" | "contract" | "email_template" | "file" | "journey" | "meter_counter" | "meter" | "opportunity" | "order" | "partner" | "price" | "product" | "submission" | "tax" | "message" | "portal_user" | "request" | "comment" | string[]
+    enabled_locations?: "account" | "contact" | "contract" | "email_template" | "file" | "journey" | "meter_counter" | "meter" | "opportunity" | "order" | "partner" | "price" | "product" | "submission" | "tax" | "message" | "portal_user" | "request" | "comment" | "user" | string[]
     enabled_purposes?: string[]
     _manifest?: string // uuid[]
   }>
@@ -10855,7 +11195,7 @@ type ClassificationsUpdate = {
     updated_at?: string // date-time
     archived?: boolean
     starred?: boolean
-    enabled_locations?: "account" | "contact" | "contract" | "email_template" | "file" | "journey" | "meter_counter" | "meter" | "opportunity" | "order" | "partner" | "price" | "product" | "submission" | "tax" | "message" | "portal_user" | "request" | "comment" | string[]
+    enabled_locations?: "account" | "contact" | "contract" | "email_template" | "file" | "journey" | "meter_counter" | "meter" | "opportunity" | "order" | "partner" | "price" | "product" | "submission" | "tax" | "message" | "portal_user" | "request" | "comment" | "user" | string[]
     enabled_purposes?: string[]
     _manifest?: string // uuid[]
   }>
