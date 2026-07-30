@@ -362,6 +362,9 @@
             "$ref": "#/components/parameters/HydrateEntitiesQueryParam"
           },
           {
+            "$ref": "#/components/parameters/AnonymizeQueryParam"
+          },
+          {
             "in": "query",
             "name": "fields",
             "style": "form",
@@ -427,6 +430,9 @@
           },
           {
             "$ref": "#/components/parameters/HydrateEntitiesQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/AnonymizeQueryParam"
           }
         ],
         "responses": {}
@@ -524,6 +530,9 @@
         "operationId": "autocomplete",
         "parameters": [
           {
+            "$ref": "#/components/parameters/AnonymizeQueryParam"
+          },
+          {
             "name": "input",
             "in": "query"
           },
@@ -578,6 +587,9 @@
       "get": {
         "operationId": "getActivity",
         "parameters": [
+          {
+            "$ref": "#/components/parameters/AnonymizeQueryParam"
+          },
           {
             "$ref": "#/components/parameters/ActivityIdPathParam"
           },
@@ -658,6 +670,9 @@
         "operationId": "listChangesets",
         "parameters": [
           {
+            "$ref": "#/components/parameters/AnonymizeQueryParam"
+          },
+          {
             "$ref": "#/components/parameters/EntitySlugPathParam"
           },
           {
@@ -671,6 +686,9 @@
       "get": {
         "operationId": "getEntityActivityFeed",
         "parameters": [
+          {
+            "$ref": "#/components/parameters/AnonymizeQueryParam"
+          },
           {
             "$ref": "#/components/parameters/EntitySlugPathParam"
           },
@@ -734,6 +752,9 @@
           },
           {
             "$ref": "#/components/parameters/HydrateEntitiesQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/AnonymizeQueryParam"
           },
           {
             "$ref": "#/components/parameters/IncludeReverseQueryParam"
@@ -816,6 +837,9 @@
             "$ref": "#/components/parameters/HydrateEntitiesQueryParam"
           },
           {
+            "$ref": "#/components/parameters/AnonymizeQueryParam"
+          },
+          {
             "in": "query",
             "name": "query"
           },
@@ -849,6 +873,9 @@
           },
           {
             "$ref": "#/components/parameters/HydrateEntitiesQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/AnonymizeQueryParam"
           },
           {
             "$ref": "#/components/parameters/IncludeReverseDeprecatedQueryParam"
@@ -1005,6 +1032,24 @@
         "responses": {}
       }
     },
+    "/v1/entity:abortImport": {
+      "post": {
+        "operationId": "abortEntityImport",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "job_id",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "schema",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v1/entity/views": {
       "get": {
         "operationId": "listSavedViews",
@@ -1027,6 +1072,11 @@
           {
             "in": "query",
             "name": "size",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "q",
             "required": false
           },
           {
@@ -1596,6 +1646,11 @@
   },
   "components": {
     "parameters": {
+      "AnonymizeQueryParam": {
+        "name": "anonymize",
+        "in": "query",
+        "required": false
+      },
       "EntityIdPathParam": {
         "name": "id",
         "in": "path",
@@ -1734,7 +1789,7 @@
   },
   "servers": [
     {
-      "url": "https://entity.sls.epilot.io"
+      "url": "https://entity.dev.sls.epilot.io"
     }
   ]
 }

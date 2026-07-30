@@ -21,6 +21,7 @@ export declare namespace Components {
          * 01F130Q52Q6MWSNS8N2AVXV4JN
          */
         Schemas.ActivityId /* ulid ^01[0-9a-zA-Z]{24}$ */ | ("" | null);
+        export type AnonymizeQueryParam = boolean;
         export type ApplyChangesetsQueryParam = boolean;
         export type AsyncOperationQueryParam = boolean;
         export type DirectQueryParam = boolean;
@@ -78,6 +79,7 @@ export declare namespace Components {
         ActivityIdPathParam?: Parameters.ActivityIdPathParam;
     }
     export interface QueryParameters {
+        AnonymizeQueryParam?: Parameters.AnonymizeQueryParam;
         TaxonomySlugQueryParam?: Parameters.TaxonomySlugQueryParam;
         TaxonomySlugQueryParamOptional?: Parameters.TaxonomySlugQueryParamOptional;
         AsyncOperationQueryParam?: Parameters.AsyncOperationQueryParam;
@@ -391,6 +393,13 @@ export declare namespace Components {
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
+            /**
+             * Allow conditional variants of the entity to override this attribute's value.
+             * Only meaningful on schemas that declare `conditions`. Unflagged attributes stay
+             * fixed on the base entity.
+             *
+             */
+            variant_overridable?: boolean;
             default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
@@ -424,6 +433,16 @@ export declare namespace Components {
              *
              */
             render_condition?: string;
+            /**
+             * Data classification of the attribute, used by anonymized responses (`?anonymize=true` or tokens minted with `anonymize: true`).
+             *
+             * - `pii`: the attribute value is always anonymized in anonymized responses (use to opt in free-text fields containing personal data)
+             * - `public`: the attribute value is never anonymized (use to opt out fields matched by built-in defaults, e.g. non-personal identifiers)
+             *
+             * When unset, built-in defaults apply based on the attribute type (email, phone, address, payment) and a curated list of well-known PII fields.
+             *
+             */
+            data_classification?: "public" | "pii";
             _purpose?: /**
              * example:
              * taxonomy-slug:classification-slug
@@ -609,6 +628,13 @@ export declare namespace Components {
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
+            /**
+             * Allow conditional variants of the entity to override this attribute's value.
+             * Only meaningful on schemas that declare `conditions`. Unflagged attributes stay
+             * fixed on the base entity.
+             *
+             */
+            variant_overridable?: boolean;
             default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
@@ -642,6 +668,16 @@ export declare namespace Components {
              *
              */
             render_condition?: string;
+            /**
+             * Data classification of the attribute, used by anonymized responses (`?anonymize=true` or tokens minted with `anonymize: true`).
+             *
+             * - `pii`: the attribute value is always anonymized in anonymized responses (use to opt in free-text fields containing personal data)
+             * - `public`: the attribute value is never anonymized (use to opt out fields matched by built-in defaults, e.g. non-personal identifiers)
+             *
+             * When unset, built-in defaults apply based on the attribute type (email, phone, address, payment) and a curated list of well-known PII fields.
+             *
+             */
+            data_classification?: "public" | "pii";
             _purpose?: /**
              * example:
              * taxonomy-slug:classification-slug
@@ -844,6 +880,13 @@ export declare namespace Components {
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
+            /**
+             * Allow conditional variants of the entity to override this attribute's value.
+             * Only meaningful on schemas that declare `conditions`. Unflagged attributes stay
+             * fixed on the base entity.
+             *
+             */
+            variant_overridable?: boolean;
             default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
@@ -877,6 +920,16 @@ export declare namespace Components {
              *
              */
             render_condition?: string;
+            /**
+             * Data classification of the attribute, used by anonymized responses (`?anonymize=true` or tokens minted with `anonymize: true`).
+             *
+             * - `pii`: the attribute value is always anonymized in anonymized responses (use to opt in free-text fields containing personal data)
+             * - `public`: the attribute value is never anonymized (use to opt out fields matched by built-in defaults, e.g. non-personal identifiers)
+             *
+             * When unset, built-in defaults apply based on the attribute type (email, phone, address, payment) and a curated list of well-known PII fields.
+             *
+             */
+            data_classification?: "public" | "pii";
             _purpose?: /**
              * example:
              * taxonomy-slug:classification-slug
@@ -1094,6 +1147,13 @@ export declare namespace Components {
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
+            /**
+             * Allow conditional variants of the entity to override this attribute's value.
+             * Only meaningful on schemas that declare `conditions`. Unflagged attributes stay
+             * fixed on the base entity.
+             *
+             */
+            variant_overridable?: boolean;
             default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
@@ -1127,6 +1187,16 @@ export declare namespace Components {
              *
              */
             render_condition?: string;
+            /**
+             * Data classification of the attribute, used by anonymized responses (`?anonymize=true` or tokens minted with `anonymize: true`).
+             *
+             * - `pii`: the attribute value is always anonymized in anonymized responses (use to opt in free-text fields containing personal data)
+             * - `public`: the attribute value is never anonymized (use to opt out fields matched by built-in defaults, e.g. non-personal identifiers)
+             *
+             * When unset, built-in defaults apply based on the attribute type (email, phone, address, payment) and a curated list of well-known PII fields.
+             *
+             */
+            data_classification?: "public" | "pii";
             _purpose?: /**
              * example:
              * taxonomy-slug:classification-slug
@@ -1257,6 +1327,31 @@ export declare namespace Components {
                 FuzzyConfig;
             };
         }
+        export interface BaseConditionDefinition {
+            /**
+             * Stable identity of the condition, generated by the client when the condition is
+             * created. It is what makes a rename distinguishable from a remove + add, so it must
+             * be round-tripped unchanged for the lifetime of the condition.
+             *
+             * example:
+             * d5839b94-ba20-4225-a78e-76951d352bd6
+             */
+            id: string; // uuid
+            /**
+             * The key variant values are stored under. Unique within the schema and immutable
+             * once the condition has been saved.
+             *
+             * example:
+             * delivery_area
+             */
+            name: string; // ^[a-z0-9_]+$
+            /**
+             * Display label. Always editable.
+             * example:
+             * Delivery Area
+             */
+            label: string;
+        }
         /**
          * example:
          * {
@@ -1384,6 +1479,13 @@ export declare namespace Components {
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
+            /**
+             * Allow conditional variants of the entity to override this attribute's value.
+             * Only meaningful on schemas that declare `conditions`. Unflagged attributes stay
+             * fixed on the base entity.
+             *
+             */
+            variant_overridable?: boolean;
             default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
@@ -1417,6 +1519,16 @@ export declare namespace Components {
              *
              */
             render_condition?: string;
+            /**
+             * Data classification of the attribute, used by anonymized responses (`?anonymize=true` or tokens minted with `anonymize: true`).
+             *
+             * - `pii`: the attribute value is always anonymized in anonymized responses (use to opt in free-text fields containing personal data)
+             * - `public`: the attribute value is never anonymized (use to opt out fields matched by built-in defaults, e.g. non-personal identifiers)
+             *
+             * When unset, built-in defaults apply based on the attribute type (email, phone, address, payment) and a curated list of well-known PII fields.
+             *
+             */
+            data_classification?: "public" | "pii";
             _purpose?: /**
              * example:
              * taxonomy-slug:classification-slug
@@ -1679,6 +1791,13 @@ export declare namespace Components {
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
+            /**
+             * Allow conditional variants of the entity to override this attribute's value.
+             * Only meaningful on schemas that declare `conditions`. Unflagged attributes stay
+             * fixed on the base entity.
+             *
+             */
+            variant_overridable?: boolean;
             default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
@@ -1712,6 +1831,16 @@ export declare namespace Components {
              *
              */
             render_condition?: string;
+            /**
+             * Data classification of the attribute, used by anonymized responses (`?anonymize=true` or tokens minted with `anonymize: true`).
+             *
+             * - `pii`: the attribute value is always anonymized in anonymized responses (use to opt in free-text fields containing personal data)
+             * - `public`: the attribute value is never anonymized (use to opt out fields matched by built-in defaults, e.g. non-personal identifiers)
+             *
+             * When unset, built-in defaults apply based on the attribute type (email, phone, address, payment) and a curated list of well-known PII fields.
+             *
+             */
+            data_classification?: "public" | "pii";
             _purpose?: /**
              * example:
              * taxonomy-slug:classification-slug
@@ -1863,6 +1992,19 @@ export declare namespace Components {
             currency_field?: string;
         }
         /**
+         * One dimension that conditional variants of an entity type are keyed by. `type`
+         * discriminates the variants: only a `select` condition carries `values`, and only a
+         * `location` condition carries `format`.
+         *
+         */
+        export type ConditionDefinition = /**
+         * One dimension that conditional variants of an entity type are keyed by. `type`
+         * discriminates the variants: only a `select` condition carries `values`, and only a
+         * `location` condition carries `format`.
+         *
+         */
+        /* A condition whose value is a plain scalar, with no further configuration. */ ScalarConditionDefinition | /* A condition whose value is one of a fixed set of options. */ SelectConditionDefinition | /* A condition whose value identifies a place. */ LocationConditionDefinition;
+        /**
          * Consent Management
          */
         export interface ConsentAttribute {
@@ -1890,6 +2032,13 @@ export declare namespace Components {
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
+            /**
+             * Allow conditional variants of the entity to override this attribute's value.
+             * Only meaningful on schemas that declare `conditions`. Unflagged attributes stay
+             * fixed on the base entity.
+             *
+             */
+            variant_overridable?: boolean;
             default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
@@ -1923,6 +2072,16 @@ export declare namespace Components {
              *
              */
             render_condition?: string;
+            /**
+             * Data classification of the attribute, used by anonymized responses (`?anonymize=true` or tokens minted with `anonymize: true`).
+             *
+             * - `pii`: the attribute value is always anonymized in anonymized responses (use to opt in free-text fields containing personal data)
+             * - `public`: the attribute value is never anonymized (use to opt out fields matched by built-in defaults, e.g. non-personal identifiers)
+             *
+             * When unset, built-in defaults apply based on the attribute type (email, phone, address, payment) and a curated list of well-known PII fields.
+             *
+             */
+            data_classification?: "public" | "pii";
             _purpose?: /**
              * example:
              * taxonomy-slug:classification-slug
@@ -2084,6 +2243,13 @@ export declare namespace Components {
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
+            /**
+             * Allow conditional variants of the entity to override this attribute's value.
+             * Only meaningful on schemas that declare `conditions`. Unflagged attributes stay
+             * fixed on the base entity.
+             *
+             */
+            variant_overridable?: boolean;
             default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
@@ -2117,6 +2283,16 @@ export declare namespace Components {
              *
              */
             render_condition?: string;
+            /**
+             * Data classification of the attribute, used by anonymized responses (`?anonymize=true` or tokens minted with `anonymize: true`).
+             *
+             * - `pii`: the attribute value is always anonymized in anonymized responses (use to opt in free-text fields containing personal data)
+             * - `public`: the attribute value is never anonymized (use to opt out fields matched by built-in defaults, e.g. non-personal identifiers)
+             *
+             * When unset, built-in defaults apply based on the attribute type (email, phone, address, payment) and a curated list of well-known PII fields.
+             *
+             */
+            data_classification?: "public" | "pii";
             _purpose?: /**
              * example:
              * taxonomy-slug:classification-slug
@@ -2276,6 +2452,13 @@ export declare namespace Components {
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
+            /**
+             * Allow conditional variants of the entity to override this attribute's value.
+             * Only meaningful on schemas that declare `conditions`. Unflagged attributes stay
+             * fixed on the base entity.
+             *
+             */
+            variant_overridable?: boolean;
             default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
@@ -2309,6 +2492,16 @@ export declare namespace Components {
              *
              */
             render_condition?: string;
+            /**
+             * Data classification of the attribute, used by anonymized responses (`?anonymize=true` or tokens minted with `anonymize: true`).
+             *
+             * - `pii`: the attribute value is always anonymized in anonymized responses (use to opt in free-text fields containing personal data)
+             * - `public`: the attribute value is never anonymized (use to opt out fields matched by built-in defaults, e.g. non-personal identifiers)
+             *
+             * When unset, built-in defaults apply based on the attribute type (email, phone, address, payment) and a curated list of well-known PII fields.
+             *
+             */
+            data_classification?: "public" | "pii";
             _purpose?: /**
              * example:
              * taxonomy-slug:classification-slug
@@ -2478,6 +2671,13 @@ export declare namespace Components {
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
+            /**
+             * Allow conditional variants of the entity to override this attribute's value.
+             * Only meaningful on schemas that declare `conditions`. Unflagged attributes stay
+             * fixed on the base entity.
+             *
+             */
+            variant_overridable?: boolean;
             default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
@@ -2511,6 +2711,16 @@ export declare namespace Components {
              *
              */
             render_condition?: string;
+            /**
+             * Data classification of the attribute, used by anonymized responses (`?anonymize=true` or tokens minted with `anonymize: true`).
+             *
+             * - `pii`: the attribute value is always anonymized in anonymized responses (use to opt in free-text fields containing personal data)
+             * - `public`: the attribute value is never anonymized (use to opt out fields matched by built-in defaults, e.g. non-personal identifiers)
+             *
+             * When unset, built-in defaults apply based on the attribute type (email, phone, address, payment) and a curated list of well-known PII fields.
+             *
+             */
+            data_classification?: "public" | "pii";
             _purpose?: /**
              * example:
              * taxonomy-slug:classification-slug
@@ -2751,6 +2961,13 @@ export declare namespace Components {
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
+            /**
+             * Allow conditional variants of the entity to override this attribute's value.
+             * Only meaningful on schemas that declare `conditions`. Unflagged attributes stay
+             * fixed on the base entity.
+             *
+             */
+            variant_overridable?: boolean;
             default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
@@ -2784,6 +3001,16 @@ export declare namespace Components {
              *
              */
             render_condition?: string;
+            /**
+             * Data classification of the attribute, used by anonymized responses (`?anonymize=true` or tokens minted with `anonymize: true`).
+             *
+             * - `pii`: the attribute value is always anonymized in anonymized responses (use to opt in free-text fields containing personal data)
+             * - `public`: the attribute value is never anonymized (use to opt out fields matched by built-in defaults, e.g. non-personal identifiers)
+             *
+             * When unset, built-in defaults apply based on the attribute type (email, phone, address, payment) and a curated list of well-known PII fields.
+             *
+             */
+            data_classification?: "public" | "pii";
             _purpose?: /**
              * example:
              * taxonomy-slug:classification-slug
@@ -3594,6 +3821,13 @@ export declare namespace Components {
              * When true, enables entity hydration to resolve nested $relation & $relation_ref references in-place.
              */
             hydrate?: boolean;
+            /**
+             * When true, anonymizes PII in the response: identifiers are replaced with deterministic pseudonyms,
+             * addresses are generalized and well-known free-text fields are redacted.
+             * Anonymization is forced (regardless of this parameter) when the access token was created with `anonymize: true`.
+             *
+             */
+            anonymize?: boolean;
             fields?: /**
              * List of entity fields to include or exclude in the response
              *
@@ -4103,6 +4337,7 @@ export declare namespace Components {
                     } | null;
                 };
             };
+            source_context?: /* Billing and audit source context for the operation event. */ EntityOperationSourceContext;
             /**
              * Internal property for workflow origin tracking and infinite loop prevention.
              * Populated when an entity update originates from a workflow execution.
@@ -4119,6 +4354,34 @@ export declare namespace Components {
                  */
                 flow_template_id?: string;
             };
+            /**
+             * Ordered automation flow ids that caused this change; used to break multi-automation trigger loops.
+             */
+            _automation_chain?: string[];
+        }
+        /**
+         * Billing and audit source context for the operation event.
+         */
+        export interface EntityOperationSourceContext {
+            /**
+             * Normalized source bucket for the operation.
+             */
+            source: "portal" | "epilot" | "erp" | "system" | "api" | "external" | "journey" | "automation" | "unknown";
+            /**
+             * Original free-form source label from the caller or changeset, when available.
+             */
+            source_label?: string;
+            /**
+             * Optional upstream system label, for example an ERP system name.
+             */
+            source_system?: string;
+            /**
+             * Optional upstream change reference.
+             */
+            source_reference?: string;
+            actor_type?: "user" | "portal_user" | "api_client" | "automation" | "system";
+            actor_id?: string;
+            effective_at?: string; // date-time
         }
         /**
          * The user / organization owning this entity.
@@ -4272,6 +4535,27 @@ export declare namespace Components {
                      */
                     show_sharing_button?: boolean;
                 };
+                /**
+                 * Widget-grid layout for the entity-details page (builder-authored); columns/cells drive the grid geometry.
+                 */
+                grid_layout?: {
+                    /**
+                     * Identifier of the chosen grid-layout preset.
+                     */
+                    id?: string;
+                    /**
+                     * Number of columns in the widget grid.
+                     */
+                    columns?: number;
+                    /**
+                     * Per-cell column span, positionally paired with the widgets in order.
+                     */
+                    cells?: number[];
+                };
+                /**
+                 * Ordered list of widget ids controlling the entity-details widget-grid order. Each id is a capability widget's `component` (or `summary` for the synthesized summary card); widgets absent from the list keep their natural order at the end.
+                 */
+                widget_order?: string[];
             };
             capabilities: /* Capabilities the Entity has. Turn features on/off for entities. */ EntityCapability[];
             /**
@@ -4383,6 +4667,20 @@ export declare namespace Components {
              */
             SearchMappings;
             group_headlines?: GroupHeadline[];
+            /**
+             * Dimensions that conditional variants of this entity type are keyed by.
+             *
+             * Absent or `null` means entities of this type are not conditional. Attributes whose
+             * values a variant may override are marked with `variant_overridable`.
+             *
+             */
+            conditions?: /**
+             * One dimension that conditional variants of an entity type are keyed by. `type`
+             * discriminates the variants: only a `select` condition carries `values`, and only a
+             * `location` condition carries `format`.
+             *
+             */
+            ConditionDefinition[] | null;
         }
         export interface EntitySchemaGroup {
             /**
@@ -4668,6 +4966,27 @@ export declare namespace Components {
                      */
                     show_sharing_button?: boolean;
                 };
+                /**
+                 * Widget-grid layout for the entity-details page (builder-authored); columns/cells drive the grid geometry.
+                 */
+                grid_layout?: {
+                    /**
+                     * Identifier of the chosen grid-layout preset.
+                     */
+                    id?: string;
+                    /**
+                     * Number of columns in the widget grid.
+                     */
+                    columns?: number;
+                    /**
+                     * Per-cell column span, positionally paired with the widgets in order.
+                     */
+                    cells?: number[];
+                };
+                /**
+                 * Ordered list of widget ids controlling the entity-details widget-grid order. Each id is a capability widget's `component` (or `summary` for the synthesized summary card); widgets absent from the list keep their natural order at the end.
+                 */
+                widget_order?: string[];
             };
             capabilities: /* Capabilities the Entity has. Turn features on/off for entities. */ EntityCapability[];
             /**
@@ -4779,6 +5098,20 @@ export declare namespace Components {
              */
             SearchMappings;
             group_headlines?: GroupHeadline[];
+            /**
+             * Dimensions that conditional variants of this entity type are keyed by.
+             *
+             * Absent or `null` means entities of this type are not conditional. Attributes whose
+             * values a variant may override are marked with `variant_overridable`.
+             *
+             */
+            conditions?: /**
+             * One dimension that conditional variants of an entity type are keyed by. `type`
+             * discriminates the variants: only a `select` condition carries `values`, and only a
+             * `location` condition carries `format`.
+             *
+             */
+            ConditionDefinition[] | null;
         }
         /**
          * Whether to include deleted entities in the search results
@@ -4809,6 +5142,13 @@ export declare namespace Components {
              * When true, enables entity hydration to resolve nested $relation & $relation_ref references in-place.
              */
             hydrate?: boolean;
+            /**
+             * When true, anonymizes PII in the response: identifiers are replaced with deterministic pseudonyms,
+             * addresses are generalized and well-known free-text fields are redacted.
+             * Anonymization is forced (regardless of this parameter) when the access token was created with `anonymize: true`.
+             *
+             */
+            anonymize?: boolean;
             fields?: /**
              * List of entity fields to include or exclude in the response
              *
@@ -4909,6 +5249,13 @@ export declare namespace Components {
              * When true, enables entity hydration to resolve nested $relation & $relation_ref references in-place.
              */
             hydrate?: boolean;
+            /**
+             * When true, anonymizes PII in the response: identifiers are replaced with deterministic pseudonyms,
+             * addresses are generalized and well-known free-text fields are redacted.
+             * Anonymization is forced (regardless of this parameter) when the access token was created with `anonymize: true`.
+             *
+             */
+            anonymize?: boolean;
             fields?: /**
              * List of entity fields to include or exclude in the response
              *
@@ -5309,6 +5656,13 @@ export declare namespace Components {
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
+            /**
+             * Allow conditional variants of the entity to override this attribute's value.
+             * Only meaningful on schemas that declare `conditions`. Unflagged attributes stay
+             * fixed on the base entity.
+             *
+             */
+            variant_overridable?: boolean;
             default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
@@ -5342,6 +5696,16 @@ export declare namespace Components {
              *
              */
             render_condition?: string;
+            /**
+             * Data classification of the attribute, used by anonymized responses (`?anonymize=true` or tokens minted with `anonymize: true`).
+             *
+             * - `pii`: the attribute value is always anonymized in anonymized responses (use to opt in free-text fields containing personal data)
+             * - `public`: the attribute value is never anonymized (use to opt out fields matched by built-in defaults, e.g. non-personal identifiers)
+             *
+             * When unset, built-in defaults apply based on the attribute type (email, phone, address, payment) and a curated list of well-known PII fields.
+             *
+             */
+            data_classification?: "public" | "pii";
             _purpose?: /**
              * example:
              * taxonomy-slug:classification-slug
@@ -6186,6 +6550,13 @@ export declare namespace Components {
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
+            /**
+             * Allow conditional variants of the entity to override this attribute's value.
+             * Only meaningful on schemas that declare `conditions`. Unflagged attributes stay
+             * fixed on the base entity.
+             *
+             */
+            variant_overridable?: boolean;
             default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
@@ -6219,6 +6590,16 @@ export declare namespace Components {
              *
              */
             render_condition?: string;
+            /**
+             * Data classification of the attribute, used by anonymized responses (`?anonymize=true` or tokens minted with `anonymize: true`).
+             *
+             * - `pii`: the attribute value is always anonymized in anonymized responses (use to opt in free-text fields containing personal data)
+             * - `public`: the attribute value is never anonymized (use to opt out fields matched by built-in defaults, e.g. non-personal identifiers)
+             *
+             * When unset, built-in defaults apply based on the attribute type (email, phone, address, payment) and a curated list of well-known PII fields.
+             *
+             */
+            data_classification?: "public" | "pii";
             _purpose?: /**
              * example:
              * taxonomy-slug:classification-slug
@@ -6378,6 +6759,13 @@ export declare namespace Components {
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
+            /**
+             * Allow conditional variants of the entity to override this attribute's value.
+             * Only meaningful on schemas that declare `conditions`. Unflagged attributes stay
+             * fixed on the base entity.
+             *
+             */
+            variant_overridable?: boolean;
             default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
@@ -6411,6 +6799,16 @@ export declare namespace Components {
              *
              */
             render_condition?: string;
+            /**
+             * Data classification of the attribute, used by anonymized responses (`?anonymize=true` or tokens minted with `anonymize: true`).
+             *
+             * - `pii`: the attribute value is always anonymized in anonymized responses (use to opt in free-text fields containing personal data)
+             * - `public`: the attribute value is never anonymized (use to opt out fields matched by built-in defaults, e.g. non-personal identifiers)
+             *
+             * When unset, built-in defaults apply based on the attribute type (email, phone, address, payment) and a curated list of well-known PII fields.
+             *
+             */
+            data_classification?: "public" | "pii";
             _purpose?: /**
              * example:
              * taxonomy-slug:classification-slug
@@ -6570,6 +6968,13 @@ export declare namespace Components {
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
+            /**
+             * Allow conditional variants of the entity to override this attribute's value.
+             * Only meaningful on schemas that declare `conditions`. Unflagged attributes stay
+             * fixed on the base entity.
+             *
+             */
+            variant_overridable?: boolean;
             default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
@@ -6603,6 +7008,16 @@ export declare namespace Components {
              *
              */
             render_condition?: string;
+            /**
+             * Data classification of the attribute, used by anonymized responses (`?anonymize=true` or tokens minted with `anonymize: true`).
+             *
+             * - `pii`: the attribute value is always anonymized in anonymized responses (use to opt in free-text fields containing personal data)
+             * - `public`: the attribute value is never anonymized (use to opt out fields matched by built-in defaults, e.g. non-personal identifiers)
+             *
+             * When unset, built-in defaults apply based on the attribute type (email, phone, address, payment) and a curated list of well-known PII fields.
+             *
+             */
+            data_classification?: "public" | "pii";
             _purpose?: /**
              * example:
              * taxonomy-slug:classification-slug
@@ -6770,6 +7185,13 @@ export declare namespace Components {
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
+            /**
+             * Allow conditional variants of the entity to override this attribute's value.
+             * Only meaningful on schemas that declare `conditions`. Unflagged attributes stay
+             * fixed on the base entity.
+             *
+             */
+            variant_overridable?: boolean;
             default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
@@ -6803,6 +7225,16 @@ export declare namespace Components {
              *
              */
             render_condition?: string;
+            /**
+             * Data classification of the attribute, used by anonymized responses (`?anonymize=true` or tokens minted with `anonymize: true`).
+             *
+             * - `pii`: the attribute value is always anonymized in anonymized responses (use to opt in free-text fields containing personal data)
+             * - `public`: the attribute value is never anonymized (use to opt out fields matched by built-in defaults, e.g. non-personal identifiers)
+             *
+             * When unset, built-in defaults apply based on the attribute type (email, phone, address, payment) and a curated list of well-known PII fields.
+             *
+             */
+            data_classification?: "public" | "pii";
             _purpose?: /**
              * example:
              * taxonomy-slug:classification-slug
@@ -6943,6 +7375,42 @@ export declare namespace Components {
             results?: /* A saved entity view */ SavedViewItem[];
         }
         /**
+         * A condition whose value identifies a place.
+         */
+        export interface LocationConditionDefinition {
+            /**
+             * Stable identity of the condition, generated by the client when the condition is
+             * created. It is what makes a rename distinguishable from a remove + add, so it must
+             * be round-tripped unchanged for the lifetime of the condition.
+             *
+             * example:
+             * d5839b94-ba20-4225-a78e-76951d352bd6
+             */
+            id: string; // uuid
+            /**
+             * The key variant values are stored under. Unique within the schema and immutable
+             * once the condition has been saved.
+             *
+             * example:
+             * delivery_area
+             */
+            name: string; // ^[a-z0-9_]+$
+            /**
+             * Display label. Always editable.
+             * example:
+             * Delivery Area
+             */
+            label: string;
+            /**
+             * Immutable once the condition has been saved.
+             */
+            type: "location";
+            /**
+             * The shape of the location value. Immutable once the condition has been saved.
+             */
+            format?: "zipcode" | "zipcode_town";
+        }
+        /**
          * Strategy for auto-clearing a changeset on an `edit_mode: external` attribute
          * when a direct write (`?direct=true`) arrives — typically an ERP inbound sync.
          * Ignored for `edit_mode: approval`, which does not auto-clear and is resolved
@@ -6981,6 +7449,13 @@ export declare namespace Components {
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
+            /**
+             * Allow conditional variants of the entity to override this attribute's value.
+             * Only meaningful on schemas that declare `conditions`. Unflagged attributes stay
+             * fixed on the base entity.
+             *
+             */
+            variant_overridable?: boolean;
             default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
@@ -7014,6 +7489,16 @@ export declare namespace Components {
              *
              */
             render_condition?: string;
+            /**
+             * Data classification of the attribute, used by anonymized responses (`?anonymize=true` or tokens minted with `anonymize: true`).
+             *
+             * - `pii`: the attribute value is always anonymized in anonymized responses (use to opt in free-text fields containing personal data)
+             * - `public`: the attribute value is never anonymized (use to opt out fields matched by built-in defaults, e.g. non-personal identifiers)
+             *
+             * When unset, built-in defaults apply based on the attribute type (email, phone, address, payment) and a curated list of well-known PII fields.
+             *
+             */
+            data_classification?: "public" | "pii";
             _purpose?: /**
              * example:
              * taxonomy-slug:classification-slug
@@ -7260,6 +7745,13 @@ export declare namespace Components {
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
+            /**
+             * Allow conditional variants of the entity to override this attribute's value.
+             * Only meaningful on schemas that declare `conditions`. Unflagged attributes stay
+             * fixed on the base entity.
+             *
+             */
+            variant_overridable?: boolean;
             default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
@@ -7293,6 +7785,16 @@ export declare namespace Components {
              *
              */
             render_condition?: string;
+            /**
+             * Data classification of the attribute, used by anonymized responses (`?anonymize=true` or tokens minted with `anonymize: true`).
+             *
+             * - `pii`: the attribute value is always anonymized in anonymized responses (use to opt in free-text fields containing personal data)
+             * - `public`: the attribute value is never anonymized (use to opt out fields matched by built-in defaults, e.g. non-personal identifiers)
+             *
+             * When unset, built-in defaults apply based on the attribute type (email, phone, address, payment) and a curated list of well-known PII fields.
+             *
+             */
+            data_classification?: "public" | "pii";
             _purpose?: /**
              * example:
              * taxonomy-slug:classification-slug
@@ -7563,6 +8065,13 @@ export declare namespace Components {
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
+            /**
+             * Allow conditional variants of the entity to override this attribute's value.
+             * Only meaningful on schemas that declare `conditions`. Unflagged attributes stay
+             * fixed on the base entity.
+             *
+             */
+            variant_overridable?: boolean;
             default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
@@ -7596,6 +8105,16 @@ export declare namespace Components {
              *
              */
             render_condition?: string;
+            /**
+             * Data classification of the attribute, used by anonymized responses (`?anonymize=true` or tokens minted with `anonymize: true`).
+             *
+             * - `pii`: the attribute value is always anonymized in anonymized responses (use to opt in free-text fields containing personal data)
+             * - `public`: the attribute value is never anonymized (use to opt out fields matched by built-in defaults, e.g. non-personal identifiers)
+             *
+             * When unset, built-in defaults apply based on the attribute type (email, phone, address, payment) and a curated list of well-known PII fields.
+             *
+             */
+            data_classification?: "public" | "pii";
             _purpose?: /**
              * example:
              * taxonomy-slug:classification-slug
@@ -7764,6 +8283,13 @@ export declare namespace Components {
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
+            /**
+             * Allow conditional variants of the entity to override this attribute's value.
+             * Only meaningful on schemas that declare `conditions`. Unflagged attributes stay
+             * fixed on the base entity.
+             *
+             */
+            variant_overridable?: boolean;
             default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
@@ -7797,6 +8323,16 @@ export declare namespace Components {
              *
              */
             render_condition?: string;
+            /**
+             * Data classification of the attribute, used by anonymized responses (`?anonymize=true` or tokens minted with `anonymize: true`).
+             *
+             * - `pii`: the attribute value is always anonymized in anonymized responses (use to opt in free-text fields containing personal data)
+             * - `public`: the attribute value is never anonymized (use to opt out fields matched by built-in defaults, e.g. non-personal identifiers)
+             *
+             * When unset, built-in defaults apply based on the attribute type (email, phone, address, payment) and a curated list of well-known PII fields.
+             *
+             */
+            data_classification?: "public" | "pii";
             _purpose?: /**
              * example:
              * taxonomy-slug:classification-slug
@@ -7956,6 +8492,13 @@ export declare namespace Components {
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
+            /**
+             * Allow conditional variants of the entity to override this attribute's value.
+             * Only meaningful on schemas that declare `conditions`. Unflagged attributes stay
+             * fixed on the base entity.
+             *
+             */
+            variant_overridable?: boolean;
             default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
@@ -7989,6 +8532,16 @@ export declare namespace Components {
              *
              */
             render_condition?: string;
+            /**
+             * Data classification of the attribute, used by anonymized responses (`?anonymize=true` or tokens minted with `anonymize: true`).
+             *
+             * - `pii`: the attribute value is always anonymized in anonymized responses (use to opt in free-text fields containing personal data)
+             * - `public`: the attribute value is never anonymized (use to opt out fields matched by built-in defaults, e.g. non-personal identifiers)
+             *
+             * When unset, built-in defaults apply based on the attribute type (email, phone, address, payment) and a curated list of well-known PII fields.
+             *
+             */
+            data_classification?: "public" | "pii";
             _purpose?: /**
              * example:
              * taxonomy-slug:classification-slug
@@ -8148,6 +8701,13 @@ export declare namespace Components {
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
+            /**
+             * Allow conditional variants of the entity to override this attribute's value.
+             * Only meaningful on schemas that declare `conditions`. Unflagged attributes stay
+             * fixed on the base entity.
+             *
+             */
+            variant_overridable?: boolean;
             default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
@@ -8181,6 +8741,16 @@ export declare namespace Components {
              *
              */
             render_condition?: string;
+            /**
+             * Data classification of the attribute, used by anonymized responses (`?anonymize=true` or tokens minted with `anonymize: true`).
+             *
+             * - `pii`: the attribute value is always anonymized in anonymized responses (use to opt in free-text fields containing personal data)
+             * - `public`: the attribute value is never anonymized (use to opt out fields matched by built-in defaults, e.g. non-personal identifiers)
+             *
+             * When unset, built-in defaults apply based on the attribute type (email, phone, address, payment) and a curated list of well-known PII fields.
+             *
+             */
+            data_classification?: "public" | "pii";
             _purpose?: /**
              * example:
              * taxonomy-slug:classification-slug
@@ -8340,6 +8910,13 @@ export declare namespace Components {
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
+            /**
+             * Allow conditional variants of the entity to override this attribute's value.
+             * Only meaningful on schemas that declare `conditions`. Unflagged attributes stay
+             * fixed on the base entity.
+             *
+             */
+            variant_overridable?: boolean;
             default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
@@ -8373,6 +8950,16 @@ export declare namespace Components {
              *
              */
             render_condition?: string;
+            /**
+             * Data classification of the attribute, used by anonymized responses (`?anonymize=true` or tokens minted with `anonymize: true`).
+             *
+             * - `pii`: the attribute value is always anonymized in anonymized responses (use to opt in free-text fields containing personal data)
+             * - `public`: the attribute value is never anonymized (use to opt out fields matched by built-in defaults, e.g. non-personal identifiers)
+             *
+             * When unset, built-in defaults apply based on the attribute type (email, phone, address, payment) and a curated list of well-known PII fields.
+             *
+             */
+            data_classification?: "public" | "pii";
             _purpose?: /**
              * example:
              * taxonomy-slug:classification-slug
@@ -8532,6 +9119,13 @@ export declare namespace Components {
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
+            /**
+             * Allow conditional variants of the entity to override this attribute's value.
+             * Only meaningful on schemas that declare `conditions`. Unflagged attributes stay
+             * fixed on the base entity.
+             *
+             */
+            variant_overridable?: boolean;
             default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
@@ -8565,6 +9159,16 @@ export declare namespace Components {
              *
              */
             render_condition?: string;
+            /**
+             * Data classification of the attribute, used by anonymized responses (`?anonymize=true` or tokens minted with `anonymize: true`).
+             *
+             * - `pii`: the attribute value is always anonymized in anonymized responses (use to opt in free-text fields containing personal data)
+             * - `public`: the attribute value is never anonymized (use to opt out fields matched by built-in defaults, e.g. non-personal identifiers)
+             *
+             * When unset, built-in defaults apply based on the attribute type (email, phone, address, payment) and a curated list of well-known PII fields.
+             *
+             */
+            data_classification?: "public" | "pii";
             _purpose?: /**
              * example:
              * taxonomy-slug:classification-slug
@@ -8724,6 +9328,13 @@ export declare namespace Components {
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
+            /**
+             * Allow conditional variants of the entity to override this attribute's value.
+             * Only meaningful on schemas that declare `conditions`. Unflagged attributes stay
+             * fixed on the base entity.
+             *
+             */
+            variant_overridable?: boolean;
             default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
@@ -8757,6 +9368,16 @@ export declare namespace Components {
              *
              */
             render_condition?: string;
+            /**
+             * Data classification of the attribute, used by anonymized responses (`?anonymize=true` or tokens minted with `anonymize: true`).
+             *
+             * - `pii`: the attribute value is always anonymized in anonymized responses (use to opt in free-text fields containing personal data)
+             * - `public`: the attribute value is never anonymized (use to opt out fields matched by built-in defaults, e.g. non-personal identifiers)
+             *
+             * When unset, built-in defaults apply based on the attribute type (email, phone, address, payment) and a curated list of well-known PII fields.
+             *
+             */
+            data_classification?: "public" | "pii";
             _purpose?: /**
              * example:
              * taxonomy-slug:classification-slug
@@ -8916,6 +9537,13 @@ export declare namespace Components {
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
+            /**
+             * Allow conditional variants of the entity to override this attribute's value.
+             * Only meaningful on schemas that declare `conditions`. Unflagged attributes stay
+             * fixed on the base entity.
+             *
+             */
+            variant_overridable?: boolean;
             default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
@@ -8949,6 +9577,16 @@ export declare namespace Components {
              *
              */
             render_condition?: string;
+            /**
+             * Data classification of the attribute, used by anonymized responses (`?anonymize=true` or tokens minted with `anonymize: true`).
+             *
+             * - `pii`: the attribute value is always anonymized in anonymized responses (use to opt in free-text fields containing personal data)
+             * - `public`: the attribute value is never anonymized (use to opt out fields matched by built-in defaults, e.g. non-personal identifiers)
+             *
+             * When unset, built-in defaults apply based on the attribute type (email, phone, address, payment) and a curated list of well-known PII fields.
+             *
+             */
+            data_classification?: "public" | "pii";
             _purpose?: /**
              * example:
              * taxonomy-slug:classification-slug
@@ -9108,6 +9746,13 @@ export declare namespace Components {
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
+            /**
+             * Allow conditional variants of the entity to override this attribute's value.
+             * Only meaningful on schemas that declare `conditions`. Unflagged attributes stay
+             * fixed on the base entity.
+             *
+             */
+            variant_overridable?: boolean;
             default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
@@ -9141,6 +9786,16 @@ export declare namespace Components {
              *
              */
             render_condition?: string;
+            /**
+             * Data classification of the attribute, used by anonymized responses (`?anonymize=true` or tokens minted with `anonymize: true`).
+             *
+             * - `pii`: the attribute value is always anonymized in anonymized responses (use to opt in free-text fields containing personal data)
+             * - `public`: the attribute value is never anonymized (use to opt out fields matched by built-in defaults, e.g. non-personal identifiers)
+             *
+             * When unset, built-in defaults apply based on the attribute type (email, phone, address, payment) and a curated list of well-known PII fields.
+             *
+             */
+            data_classification?: "public" | "pii";
             _purpose?: /**
              * example:
              * taxonomy-slug:classification-slug
@@ -9300,6 +9955,13 @@ export declare namespace Components {
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
+            /**
+             * Allow conditional variants of the entity to override this attribute's value.
+             * Only meaningful on schemas that declare `conditions`. Unflagged attributes stay
+             * fixed on the base entity.
+             *
+             */
+            variant_overridable?: boolean;
             default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
@@ -9333,6 +9995,16 @@ export declare namespace Components {
              *
              */
             render_condition?: string;
+            /**
+             * Data classification of the attribute, used by anonymized responses (`?anonymize=true` or tokens minted with `anonymize: true`).
+             *
+             * - `pii`: the attribute value is always anonymized in anonymized responses (use to opt in free-text fields containing personal data)
+             * - `public`: the attribute value is never anonymized (use to opt out fields matched by built-in defaults, e.g. non-personal identifiers)
+             *
+             * When unset, built-in defaults apply based on the attribute type (email, phone, address, payment) and a curated list of well-known PII fields.
+             *
+             */
+            data_classification?: "public" | "pii";
             _purpose?: /**
              * example:
              * taxonomy-slug:classification-slug
@@ -9507,6 +10179,13 @@ export declare namespace Components {
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
+            /**
+             * Allow conditional variants of the entity to override this attribute's value.
+             * Only meaningful on schemas that declare `conditions`. Unflagged attributes stay
+             * fixed on the base entity.
+             *
+             */
+            variant_overridable?: boolean;
             default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
@@ -9540,6 +10219,16 @@ export declare namespace Components {
              *
              */
             render_condition?: string;
+            /**
+             * Data classification of the attribute, used by anonymized responses (`?anonymize=true` or tokens minted with `anonymize: true`).
+             *
+             * - `pii`: the attribute value is always anonymized in anonymized responses (use to opt in free-text fields containing personal data)
+             * - `public`: the attribute value is never anonymized (use to opt out fields matched by built-in defaults, e.g. non-personal identifiers)
+             *
+             * When unset, built-in defaults apply based on the attribute type (email, phone, address, payment) and a curated list of well-known PII fields.
+             *
+             */
+            data_classification?: "public" | "pii";
             _purpose?: /**
              * example:
              * taxonomy-slug:classification-slug
@@ -9925,6 +10614,13 @@ export declare namespace Components {
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
+            /**
+             * Allow conditional variants of the entity to override this attribute's value.
+             * Only meaningful on schemas that declare `conditions`. Unflagged attributes stay
+             * fixed on the base entity.
+             *
+             */
+            variant_overridable?: boolean;
             default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
@@ -9958,6 +10654,16 @@ export declare namespace Components {
              *
              */
             render_condition?: string;
+            /**
+             * Data classification of the attribute, used by anonymized responses (`?anonymize=true` or tokens minted with `anonymize: true`).
+             *
+             * - `pii`: the attribute value is always anonymized in anonymized responses (use to opt in free-text fields containing personal data)
+             * - `public`: the attribute value is never anonymized (use to opt out fields matched by built-in defaults, e.g. non-personal identifiers)
+             *
+             * When unset, built-in defaults apply based on the attribute type (email, phone, address, payment) and a curated list of well-known PII fields.
+             *
+             */
+            data_classification?: "public" | "pii";
             _purpose?: /**
              * example:
              * taxonomy-slug:classification-slug
@@ -10129,6 +10835,12 @@ export declare namespace Components {
                  * 10598
                  */
                 user_id?: string;
+                /**
+                 * The organization ID of the user who created the view. Used for partner access control.
+                 * example:
+                 * 739224
+                 */
+                org_id?: string;
             } | {
                 [name: string]: any;
                 source?: "SYSTEM" | "BLUEPRINT";
@@ -10206,6 +10918,12 @@ export declare namespace Components {
                  * 10598
                  */
                 user_id?: string;
+                /**
+                 * The organization ID of the user who created the view. Used for partner access control.
+                 * example:
+                 * 739224
+                 */
+                org_id?: string;
             } | {
                 [name: string]: any;
                 source?: "SYSTEM" | "BLUEPRINT";
@@ -10276,6 +10994,12 @@ export declare namespace Components {
                  * 10598
                  */
                 user_id?: string;
+                /**
+                 * The organization ID of the user who created the view. Used for partner access control.
+                 * example:
+                 * 739224
+                 */
+                org_id?: string;
             } | {
                 [name: string]: any;
                 source?: "SYSTEM" | "BLUEPRINT";
@@ -10304,6 +11028,38 @@ export declare namespace Components {
              * List of users ('${userId}'), user groups ('group_${groupId}'), or partner users ('${partnerOrgId}_${partnerUserId}') that the view is shared with
              */
             shared_with?: string[];
+        }
+        /**
+         * A condition whose value is a plain scalar, with no further configuration.
+         */
+        export interface ScalarConditionDefinition {
+            /**
+             * Stable identity of the condition, generated by the client when the condition is
+             * created. It is what makes a rename distinguishable from a remove + add, so it must
+             * be round-tripped unchanged for the lifetime of the condition.
+             *
+             * example:
+             * d5839b94-ba20-4225-a78e-76951d352bd6
+             */
+            id: string; // uuid
+            /**
+             * The key variant values are stored under. Unique within the schema and immutable
+             * once the condition has been saved.
+             *
+             * example:
+             * delivery_area
+             */
+            name: string; // ^[a-z0-9_]+$
+            /**
+             * Display label. Always editable.
+             * example:
+             * Delivery Area
+             */
+            label: string;
+            /**
+             * Immutable once the condition has been saved.
+             */
+            type: "string" | "number" | "date" | "daterange" | "boolean";
         }
         /**
          * Generated uuid for schema
@@ -10521,6 +11277,13 @@ export declare namespace Components {
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
+            /**
+             * Allow conditional variants of the entity to override this attribute's value.
+             * Only meaningful on schemas that declare `conditions`. Unflagged attributes stay
+             * fixed on the base entity.
+             *
+             */
+            variant_overridable?: boolean;
             default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
@@ -10554,6 +11317,16 @@ export declare namespace Components {
              *
              */
             render_condition?: string;
+            /**
+             * Data classification of the attribute, used by anonymized responses (`?anonymize=true` or tokens minted with `anonymize: true`).
+             *
+             * - `pii`: the attribute value is always anonymized in anonymized responses (use to opt in free-text fields containing personal data)
+             * - `public`: the attribute value is never anonymized (use to opt out fields matched by built-in defaults, e.g. non-personal identifiers)
+             *
+             * When unset, built-in defaults apply based on the attribute type (email, phone, address, payment) and a curated list of well-known PII fields.
+             *
+             */
+            data_classification?: "public" | "pii";
             _purpose?: /**
              * example:
              * taxonomy-slug:classification-slug
@@ -10694,6 +11467,47 @@ export declare namespace Components {
             allow_any?: boolean;
         }
         /**
+         * A condition whose value is one of a fixed set of options.
+         */
+        export interface SelectConditionDefinition {
+            /**
+             * Stable identity of the condition, generated by the client when the condition is
+             * created. It is what makes a rename distinguishable from a remove + add, so it must
+             * be round-tripped unchanged for the lifetime of the condition.
+             *
+             * example:
+             * d5839b94-ba20-4225-a78e-76951d352bd6
+             */
+            id: string; // uuid
+            /**
+             * The key variant values are stored under. Unique within the schema and immutable
+             * once the condition has been saved.
+             *
+             * example:
+             * delivery_area
+             */
+            name: string; // ^[a-z0-9_]+$
+            /**
+             * Display label. Always editable.
+             * example:
+             * Delivery Area
+             */
+            label: string;
+            /**
+             * Immutable once the condition has been saved.
+             */
+            type: "select";
+            /**
+             * Selectable options. May be empty while the condition is being configured.
+             * example:
+             * [
+             *   "12_months",
+             *   "24_months"
+             * ]
+             */
+            values?: string[];
+        }
+        /**
          * Sequence of unique identifiers
          */
         export interface SequenceAttribute {
@@ -10721,6 +11535,13 @@ export declare namespace Components {
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
+            /**
+             * Allow conditional variants of the entity to override this attribute's value.
+             * Only meaningful on schemas that declare `conditions`. Unflagged attributes stay
+             * fixed on the base entity.
+             *
+             */
+            variant_overridable?: boolean;
             default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
@@ -10754,6 +11575,16 @@ export declare namespace Components {
              *
              */
             render_condition?: string;
+            /**
+             * Data classification of the attribute, used by anonymized responses (`?anonymize=true` or tokens minted with `anonymize: true`).
+             *
+             * - `pii`: the attribute value is always anonymized in anonymized responses (use to opt in free-text fields containing personal data)
+             * - `public`: the attribute value is never anonymized (use to opt out fields matched by built-in defaults, e.g. non-personal identifiers)
+             *
+             * When unset, built-in defaults apply based on the attribute type (email, phone, address, payment) and a curated list of well-known PII fields.
+             *
+             */
+            data_classification?: "public" | "pii";
             _purpose?: /**
              * example:
              * taxonomy-slug:classification-slug
@@ -10930,6 +11761,13 @@ export declare namespace Components {
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
+            /**
+             * Allow conditional variants of the entity to override this attribute's value.
+             * Only meaningful on schemas that declare `conditions`. Unflagged attributes stay
+             * fixed on the base entity.
+             *
+             */
+            variant_overridable?: boolean;
             default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
@@ -10963,6 +11801,16 @@ export declare namespace Components {
              *
              */
             render_condition?: string;
+            /**
+             * Data classification of the attribute, used by anonymized responses (`?anonymize=true` or tokens minted with `anonymize: true`).
+             *
+             * - `pii`: the attribute value is always anonymized in anonymized responses (use to opt in free-text fields containing personal data)
+             * - `public`: the attribute value is never anonymized (use to opt out fields matched by built-in defaults, e.g. non-personal identifiers)
+             *
+             * When unset, built-in defaults apply based on the attribute type (email, phone, address, payment) and a curated list of well-known PII fields.
+             *
+             */
+            data_classification?: "public" | "pii";
             _purpose?: /**
              * example:
              * taxonomy-slug:classification-slug
@@ -11218,6 +12066,13 @@ export declare namespace Components {
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
+            /**
+             * Allow conditional variants of the entity to override this attribute's value.
+             * Only meaningful on schemas that declare `conditions`. Unflagged attributes stay
+             * fixed on the base entity.
+             *
+             */
+            variant_overridable?: boolean;
             default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
@@ -11251,6 +12106,16 @@ export declare namespace Components {
              *
              */
             render_condition?: string;
+            /**
+             * Data classification of the attribute, used by anonymized responses (`?anonymize=true` or tokens minted with `anonymize: true`).
+             *
+             * - `pii`: the attribute value is always anonymized in anonymized responses (use to opt in free-text fields containing personal data)
+             * - `public`: the attribute value is never anonymized (use to opt out fields matched by built-in defaults, e.g. non-personal identifiers)
+             *
+             * When unset, built-in defaults apply based on the attribute type (email, phone, address, payment) and a curated list of well-known PII fields.
+             *
+             */
+            data_classification?: "public" | "pii";
             _purpose?: /**
              * example:
              * taxonomy-slug:classification-slug
@@ -11466,6 +12331,13 @@ export declare namespace Components {
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
+            /**
+             * Allow conditional variants of the entity to override this attribute's value.
+             * Only meaningful on schemas that declare `conditions`. Unflagged attributes stay
+             * fixed on the base entity.
+             *
+             */
+            variant_overridable?: boolean;
             default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
@@ -11499,6 +12371,16 @@ export declare namespace Components {
              *
              */
             render_condition?: string;
+            /**
+             * Data classification of the attribute, used by anonymized responses (`?anonymize=true` or tokens minted with `anonymize: true`).
+             *
+             * - `pii`: the attribute value is always anonymized in anonymized responses (use to opt in free-text fields containing personal data)
+             * - `public`: the attribute value is never anonymized (use to opt out fields matched by built-in defaults, e.g. non-personal identifiers)
+             *
+             * When unset, built-in defaults apply based on the attribute type (email, phone, address, payment) and a curated list of well-known PII fields.
+             *
+             */
+            data_classification?: "public" | "pii";
             _purpose?: /**
              * example:
              * taxonomy-slug:classification-slug
@@ -11815,7 +12697,7 @@ export declare namespace Components {
              */
             _manifest?: string /* uuid */[] | null;
         }
-        export type TaxonomyLocationId = "account" | "contact" | "contract" | "email_template" | "file" | "journey" | "meter_counter" | "meter" | "opportunity" | "order" | "partner" | "price" | "product" | "submission" | "tax" | "message" | "portal_user" | "request" | "comment";
+        export type TaxonomyLocationId = "account" | "contact" | "contract" | "email_template" | "file" | "journey" | "meter_counter" | "meter" | "opportunity" | "order" | "partner" | "price" | "product" | "submission" | "tax" | "message" | "portal_user" | "request" | "comment" | "user";
         /**
          * Whether to include archived labels in the search results
          * - `true`: include archived labels
@@ -11860,6 +12742,13 @@ export declare namespace Components {
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
+            /**
+             * Allow conditional variants of the entity to override this attribute's value.
+             * Only meaningful on schemas that declare `conditions`. Unflagged attributes stay
+             * fixed on the base entity.
+             *
+             */
+            variant_overridable?: boolean;
             default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
@@ -11893,6 +12782,16 @@ export declare namespace Components {
              *
              */
             render_condition?: string;
+            /**
+             * Data classification of the attribute, used by anonymized responses (`?anonymize=true` or tokens minted with `anonymize: true`).
+             *
+             * - `pii`: the attribute value is always anonymized in anonymized responses (use to opt in free-text fields containing personal data)
+             * - `public`: the attribute value is never anonymized (use to opt out fields matched by built-in defaults, e.g. non-personal identifiers)
+             *
+             * When unset, built-in defaults apply based on the attribute type (email, phone, address, payment) and a curated list of well-known PII fields.
+             *
+             */
+            data_classification?: "public" | "pii";
             _purpose?: /**
              * example:
              * taxonomy-slug:classification-slug
@@ -12065,6 +12964,13 @@ export declare namespace Components {
             required?: boolean;
             readonly?: boolean;
             deprecated?: boolean;
+            /**
+             * Allow conditional variants of the entity to override this attribute's value.
+             * Only meaningful on schemas that declare `conditions`. Unflagged attributes stay
+             * fixed on the base entity.
+             *
+             */
+            variant_overridable?: boolean;
             default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
@@ -12098,6 +13004,16 @@ export declare namespace Components {
              *
              */
             render_condition?: string;
+            /**
+             * Data classification of the attribute, used by anonymized responses (`?anonymize=true` or tokens minted with `anonymize: true`).
+             *
+             * - `pii`: the attribute value is always anonymized in anonymized responses (use to opt in free-text fields containing personal data)
+             * - `public`: the attribute value is never anonymized (use to opt out fields matched by built-in defaults, e.g. non-personal identifiers)
+             *
+             * When unset, built-in defaults apply based on the attribute type (email, phone, address, payment) and a curated list of well-known PII fields.
+             *
+             */
+            data_classification?: "public" | "pii";
             _purpose?: /**
              * example:
              * taxonomy-slug:classification-slug
@@ -12233,6 +13149,45 @@ export declare namespace Components {
     }
 }
 export declare namespace Paths {
+    namespace AbortEntityImport {
+        namespace Parameters {
+            export type JobId = /**
+             * The unique identifier of the import job.
+             * example:
+             * abc123
+             */
+            Components.Schemas.ExportJobId;
+            export type Schema = string;
+        }
+        export interface QueryParameters {
+            job_id: Parameters.JobId;
+            schema: Parameters.Schema;
+        }
+        namespace Responses {
+            export interface $202 {
+                /**
+                 * The job status at the time of the request.
+                 */
+                status?: string;
+                jobPollId?: string;
+            }
+            export interface $400 {
+            }
+            export interface $403 {
+            }
+            export interface $404 {
+            }
+            export type $429 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 429,
+             *   "error": "Too many requests. Try again later."
+             * }
+             */
+            Components.Responses.TooManyRequestsError;
+        }
+    }
     namespace AddRelations {
         namespace Parameters {
             export type ActivityId = /**
@@ -12387,6 +13342,7 @@ export declare namespace Paths {
     }
     namespace Autocomplete {
         namespace Parameters {
+            export type Anonymize = boolean;
             /**
              * example:
              * _tags
@@ -12402,6 +13358,7 @@ export declare namespace Paths {
             Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */;
         }
         export interface QueryParameters {
+            anonymize?: Parameters.Anonymize;
             input?: Parameters.Input;
             attribute: /**
              * example:
@@ -12917,6 +13874,15 @@ export declare namespace Paths {
         namespace Responses {
             export interface $200 {
             }
+            export type $404 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 404,
+             *   "error": "Not Found"
+             * }
+             */
+            Components.Responses.NotFoundError;
             export type $429 = /**
              * A generic error returned by the API
              * example:
@@ -13258,6 +14224,7 @@ export declare namespace Paths {
     }
     namespace GetActivity {
         namespace Parameters {
+            export type Anonymize = boolean;
             export type Id = /**
              * See https://github.com/ulid/spec
              * example:
@@ -13271,6 +14238,7 @@ export declare namespace Paths {
             id: Parameters.Id;
         }
         export interface QueryParameters {
+            anonymize?: Parameters.Anonymize;
             operations_size?: Parameters.OperationsSize;
             operations_from?: Parameters.OperationsFrom;
         }
@@ -13289,6 +14257,7 @@ export declare namespace Paths {
     }
     namespace GetEntity {
         namespace Parameters {
+            export type Anonymize = boolean;
             export type Hydrate = boolean;
             export type Id = Components.Schemas.EntityId /* uuid */;
             export type Slug = /**
@@ -13304,6 +14273,7 @@ export declare namespace Paths {
         }
         export interface QueryParameters {
             hydrate?: Parameters.Hydrate;
+            anonymize?: Parameters.Anonymize;
         }
         namespace Responses {
             export interface $200 {
@@ -13416,6 +14386,7 @@ export declare namespace Paths {
     namespace GetEntityActivityFeed {
         namespace Parameters {
             export type After = string; // date-time
+            export type Anonymize = boolean;
             export type Before = string; // date-time
             export type EndDate = string; // date-time
             /**
@@ -13453,6 +14424,7 @@ export declare namespace Paths {
             id: Parameters.Id;
         }
         export interface QueryParameters {
+            anonymize?: Parameters.Anonymize;
             after?: Parameters.After /* date-time */;
             before?: Parameters.Before /* date-time */;
             start_date?: Parameters.StartDate /* date-time */;
@@ -13501,6 +14473,7 @@ export declare namespace Paths {
     }
     namespace GetEntityV2 {
         namespace Parameters {
+            export type Anonymize = boolean;
             export type ApplyChangesets = boolean;
             export type Fields = /**
              * List of entity fields to include or exclude in the response
@@ -13535,6 +14508,7 @@ export declare namespace Paths {
         }
         export interface QueryParameters {
             hydrate?: Parameters.Hydrate;
+            anonymize?: Parameters.Anonymize;
             fields?: Parameters.Fields;
             apply_changesets?: Parameters.ApplyChangesets;
         }
@@ -13955,6 +14929,7 @@ export declare namespace Paths {
     }
     namespace GetRelations {
         namespace Parameters {
+            export type Anonymize = boolean;
             export type ExcludeSchemas = /**
              * URL-friendly identifier for the entity schema
              * example:
@@ -13985,6 +14960,7 @@ export declare namespace Paths {
         }
         export interface QueryParameters {
             hydrate?: Parameters.Hydrate;
+            anonymize?: Parameters.Anonymize;
             include_reverse?: Parameters.IncludeReverse;
             from?: Parameters.From;
             size?: Parameters.Size;
@@ -14006,6 +14982,7 @@ export declare namespace Paths {
     }
     namespace GetRelationsV2 {
         namespace Parameters {
+            export type Anonymize = boolean;
             export type Fields = /**
              * List of entity fields to include or exclude in the response
              *
@@ -14043,6 +15020,7 @@ export declare namespace Paths {
         }
         export interface QueryParameters {
             hydrate?: Parameters.Hydrate;
+            anonymize?: Parameters.Anonymize;
             query?: Parameters.Query;
             include_reverse?: Parameters.IncludeReverse;
             from?: Parameters.From;
@@ -14064,6 +15042,7 @@ export declare namespace Paths {
     }
     namespace GetRelationsV3 {
         namespace Parameters {
+            export type Anonymize = boolean;
             export type ExcludeSchemas = /**
              * URL-friendly identifier for the entity schema
              * example:
@@ -14123,6 +15102,7 @@ export declare namespace Paths {
         }
         export interface QueryParameters {
             hydrate?: Parameters.Hydrate;
+            anonymize?: Parameters.Anonymize;
             include_reverse?: Parameters.IncludeReverse;
             from?: Parameters.From;
             size?: Parameters.Size;
@@ -14441,7 +15421,7 @@ export declare namespace Paths {
             /**
              * ISO 8601 timestamp to filter jobs created after this time (e.g., 2023-01-01T00:00:00Z).
              * example:
-             * 2023-01-01T00:00:00Z
+             * 2023-01-01T00:00:00.000Z
              */
             export type CreatedAfter = string; // date-time
             /**
@@ -14467,7 +15447,7 @@ export declare namespace Paths {
             created_after?: /**
              * ISO 8601 timestamp to filter jobs created after this time (e.g., 2023-01-01T00:00:00Z).
              * example:
-             * 2023-01-01T00:00:00Z
+             * 2023-01-01T00:00:00.000Z
              */
             Parameters.CreatedAfter /* date-time */;
             sort_pending_first?: /* When true, sorts PENDING status jobs to the top of the results. */ Parameters.SortPendingFirst;
@@ -14556,6 +15536,7 @@ export declare namespace Paths {
     }
     namespace ListChangesets {
         namespace Parameters {
+            export type Anonymize = boolean;
             export type Id = Components.Schemas.EntityId /* uuid */;
             export type Slug = /**
              * URL-friendly identifier for the entity schema
@@ -14567,6 +15548,9 @@ export declare namespace Paths {
         export interface PathParameters {
             slug: Parameters.Slug;
             id: Parameters.Id;
+        }
+        export interface QueryParameters {
+            anonymize?: Parameters.Anonymize;
         }
         namespace Responses {
             export type $200 = /* Map of attribute name to pending changeset. At most one changeset per attribute. */ Components.Schemas.ChangesetMap;
@@ -14624,6 +15608,7 @@ export declare namespace Paths {
              */
             Components.Schemas.FieldsParam;
             export type From = number;
+            export type Q = string;
             export type Size = number;
             export type Slug = /**
              * URL-friendly identifier for the entity schema
@@ -14638,6 +15623,7 @@ export declare namespace Paths {
             sort?: Parameters.Sort;
             from?: Parameters.From;
             size?: Parameters.Size;
+            q?: Parameters.Q;
             fields?: Parameters.Fields;
         }
         namespace Responses {
@@ -16520,7 +17506,7 @@ export interface OperationMethods {
    * Returns all pending changesets for an entity.
    */
   'listChangesets'(
-    parameters?: Parameters<Paths.ListChangesets.PathParameters> | null,
+    parameters?: Parameters<Paths.ListChangesets.QueryParameters & Paths.ListChangesets.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ListChangesets.Responses.$200>
@@ -16658,6 +17644,25 @@ export interface OperationMethods {
     data?: Paths.ImportEntities.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ImportEntities.Responses.$201>
+  /**
+   * abortEntityImport - Abort a running entity import
+   * 
+   * Asks a running import to stop. Rows already imported are **kept** - this is a stop, not a
+   * rollback - and the job still produces its result reports for everything that landed before
+   * the stop, then reaches the terminal status `CANCELLED`.
+   * 
+   * The stop is cooperative: the worker notices the request at its next batch boundary, so the
+   * job typically reaches `CANCELLED` within seconds. Poll `POST /v1/entity:import` with the
+   * `job_id` as usual to observe it.
+   * 
+   * Idempotent - aborting an already-aborted or already-finished job is not an error.
+   * 
+   */
+  'abortEntityImport'(
+    parameters?: Parameters<Paths.AbortEntityImport.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.AbortEntityImport.Responses.$202>
   /**
    * listSavedViews - listSavedViews
    * 
@@ -17754,7 +18759,7 @@ export interface PathsDictionary {
      * Returns all pending changesets for an entity.
      */
     'get'(
-      parameters?: Parameters<Paths.ListChangesets.PathParameters> | null,
+      parameters?: Parameters<Paths.ListChangesets.QueryParameters & Paths.ListChangesets.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ListChangesets.Responses.$200>
@@ -17908,6 +18913,27 @@ export interface PathsDictionary {
       data?: Paths.ImportEntities.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ImportEntities.Responses.$201>
+  }
+  ['/v1/entity:abortImport']: {
+    /**
+     * abortEntityImport - Abort a running entity import
+     * 
+     * Asks a running import to stop. Rows already imported are **kept** - this is a stop, not a
+     * rollback - and the job still produces its result reports for everything that landed before
+     * the stop, then reaches the terminal status `CANCELLED`.
+     * 
+     * The stop is cooperative: the worker notices the request at its next batch boundary, so the
+     * job typically reaches `CANCELLED` within seconds. Poll `POST /v1/entity:import` with the
+     * `job_id` as usual to observe it.
+     * 
+     * Idempotent - aborting an already-aborted or already-finished job is not an error.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.AbortEntityImport.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.AbortEntityImport.Responses.$202>
   }
   ['/v1/entity/views']: {
     /**
@@ -18416,6 +19442,7 @@ export type AttributeWithCompositeID = Components.Schemas.AttributeWithComposite
 export type AutomationAttribute = Components.Schemas.AutomationAttribute;
 export type BaseActivityItem = Components.Schemas.BaseActivityItem;
 export type BaseAttribute = Components.Schemas.BaseAttribute;
+export type BaseConditionDefinition = Components.Schemas.BaseConditionDefinition;
 export type BaseEntity = Components.Schemas.BaseEntity;
 export type BlueprintEntityId = Components.Schemas.BlueprintEntityId;
 export type BooleanAttribute = Components.Schemas.BooleanAttribute;
@@ -18427,6 +19454,7 @@ export type ClassificationIdOrPattern = Components.Schemas.ClassificationIdOrPat
 export type ClassificationSlug = Components.Schemas.ClassificationSlug;
 export type ClassificationsUpdate = Components.Schemas.ClassificationsUpdate;
 export type ComputedAttribute = Components.Schemas.ComputedAttribute;
+export type ConditionDefinition = Components.Schemas.ConditionDefinition;
 export type ConsentAttribute = Components.Schemas.ConsentAttribute;
 export type CountryAttribute = Components.Schemas.CountryAttribute;
 export type CurrencyAttribute = Components.Schemas.CurrencyAttribute;
@@ -18449,6 +19477,7 @@ export type EntityImportParams = Components.Schemas.EntityImportParams;
 export type EntityItem = Components.Schemas.EntityItem;
 export type EntityListParams = Components.Schemas.EntityListParams;
 export type EntityOperation = Components.Schemas.EntityOperation;
+export type EntityOperationSourceContext = Components.Schemas.EntityOperationSourceContext;
 export type EntityOwner = Components.Schemas.EntityOwner;
 export type EntitySchema = Components.Schemas.EntitySchema;
 export type EntitySchemaGroup = Components.Schemas.EntitySchemaGroup;
@@ -18497,6 +19526,7 @@ export type IsTemplate = Components.Schemas.IsTemplate;
 export type Language = Components.Schemas.Language;
 export type LinkAttribute = Components.Schemas.LinkAttribute;
 export type ListSavedViewsResults = Components.Schemas.ListSavedViewsResults;
+export type LocationConditionDefinition = Components.Schemas.LocationConditionDefinition;
 export type MatchStrategy = Components.Schemas.MatchStrategy;
 export type MessageEmailAddressAttribute = Components.Schemas.MessageEmailAddressAttribute;
 export type MeterReadingChangesetEntry = Components.Schemas.MeterReadingChangesetEntry;
@@ -18521,11 +19551,13 @@ export type SavedView = Components.Schemas.SavedView;
 export type SavedViewId = Components.Schemas.SavedViewId;
 export type SavedViewItem = Components.Schemas.SavedViewItem;
 export type SavedViewPartial = Components.Schemas.SavedViewPartial;
+export type ScalarConditionDefinition = Components.Schemas.ScalarConditionDefinition;
 export type SchemaId = Components.Schemas.SchemaId;
 export type SearchFilter = Components.Schemas.SearchFilter;
 export type SearchFilterValue = Components.Schemas.SearchFilterValue;
 export type SearchMappings = Components.Schemas.SearchMappings;
 export type SelectAttribute = Components.Schemas.SelectAttribute;
+export type SelectConditionDefinition = Components.Schemas.SelectConditionDefinition;
 export type SequenceAttribute = Components.Schemas.SequenceAttribute;
 export type SettingFlag = Components.Schemas.SettingFlag;
 export type StatusAttribute = Components.Schemas.StatusAttribute;
