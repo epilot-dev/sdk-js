@@ -86,6 +86,7 @@ const { data } = await pricingClient.$calculatePricingDetails(...)
 - [`ExternalFeeMappings`](#externalfeemappings)
 - [`ExternalFeeMapping`](#externalfeemapping)
 - [`CatalogSearch`](#catalogsearch)
+- [`CatalogFieldsParam`](#catalogfieldsparam)
 - [`CatalogSearchResult`](#catalogsearchresult)
 - [`SearchProvidersParams`](#searchprovidersparams)
 - [`SearchStreetsParams`](#searchstreetsparams)
@@ -2363,6 +2364,7 @@ type CatalogSearch = {
   from?: number
   size?: number
   hydrate?: boolean
+  fields?: string[]
   availability?: {
     location: {
       street?: { ... }
@@ -2374,6 +2376,15 @@ type CatalogSearch = {
     available_date?: string // date
   }
 }
+```
+
+### `CatalogFieldsParam`
+
+List of entity fields to include or exclude from the results.
+
+
+```ts
+type CatalogFieldsParam = string[]
 ```
 
 ### `CatalogSearchResult`

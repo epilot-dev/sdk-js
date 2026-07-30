@@ -1640,6 +1640,16 @@ export declare namespace Components {
          */
         export type CashbackPeriod = "0" | "12";
         /**
+         * List of entity fields to include or exclude from the results.
+         *
+         * example:
+         * [
+         *   "!_files",
+         *   "!**.versions"
+         * ]
+         */
+        export type CatalogFieldsParam = string[];
+        /**
          * A catalog search payload
          * example:
          * {
@@ -1670,6 +1680,16 @@ export declare namespace Components {
              * When true, enables entity hydration to resolve nested $relation references in-place.
              */
             hydrate?: boolean;
+            fields?: /**
+             * List of entity fields to include or exclude from the results.
+             *
+             * example:
+             * [
+             *   "!_files",
+             *   "!**.versions"
+             * ]
+             */
+            CatalogFieldsParam;
             availability?: /* Availability filters dimensions */ AvailabilityFilters;
         }
         /**
@@ -12001,6 +12021,7 @@ export type CartDto = Components.Schemas.CartDto;
 export type CashbackAmount = Components.Schemas.CashbackAmount;
 export type CashbackAmounts = Components.Schemas.CashbackAmounts;
 export type CashbackPeriod = Components.Schemas.CashbackPeriod;
+export type CatalogFieldsParam = Components.Schemas.CatalogFieldsParam;
 export type CatalogSearch = Components.Schemas.CatalogSearch;
 export type CatalogSearchResult = Components.Schemas.CatalogSearchResult;
 export type CheckoutCart = Components.Schemas.CheckoutCart;
