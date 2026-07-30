@@ -5569,6 +5569,9 @@
             "description": "When true, enables entity hydration to resolve nested $relation references in-place.",
             "default": false
           },
+          "fields": {
+            "$ref": "#/components/schemas/CatalogFieldsParam"
+          },
           "availability": {
             "$ref": "#/components/schemas/AvailabilityFilters"
           }
@@ -5581,6 +5584,17 @@
         },
         "required": [
           "q"
+        ]
+      },
+      "CatalogFieldsParam": {
+        "type": "array",
+        "description": "List of entity fields to include or exclude from the results.\n",
+        "items": {
+          "type": "string"
+        },
+        "example": [
+          "!_files",
+          "!**.versions"
         ]
       },
       "CatalogSearchResult": {
