@@ -45,6 +45,21 @@ export declare namespace Components {
                  */
                 postinstall?: string;
             };
+            /**
+             * Internal collaboration notes, oldest first. Append-only: each entry is
+             * stamped with its author and creation time server-side and is never
+             * rewritten, so the history of who noted what stays intact. Written via
+             * `addBlueprintNote` / `deleteBlueprintNote`, not by `updateBlueprint`.
+             *
+             * Available on every blueprint including marketplace ones (whose
+             * `description` is read-only), and never included in the published
+             * marketplace package — see `buildMetadata` in
+             * `services/blueprint-v3/published-blueprint.ts`. Carried to a
+             * destination org only when an install/sync passes
+             * `options.sync_notes: true`.
+             *
+             */
+            notes?: /* A single internal note on a blueprint. */ BlueprintNote[];
             version?: string;
             deployments?: {
                 source_org_id?: string;
@@ -300,6 +315,13 @@ export declare namespace Components {
              * List of resource addresses to ignore changes for. When a resource is marked as create, it will be ignored and not created.
              */
             resources_to_ignore?: string[];
+            /**
+             * When `true`, the source blueprint's `notes` overwrite the destination
+             * blueprint's `notes`. Defaults to `false`, which leaves the
+             * destination's notes untouched.
+             *
+             */
+            sync_notes?: boolean;
         }
         export type BlueprintJob = BlueprintExportJob | BlueprintInstallationJob | BlueprintRestoreJob | BlueprintDependenciesSyncJob | BlueprintValidateJob | BlueprintVerificationJob;
         export interface BlueprintJobEvent {
@@ -329,6 +351,25 @@ export declare namespace Components {
          * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
          */
         export type BlueprintJobID = string;
+        /**
+         * A single internal note on a blueprint.
+         */
+        export interface BlueprintNote {
+            /**
+             * Server-generated note id.
+             * example:
+             * 3f1c9b0e-2f3a-4a1f-9a3e-6f2b8c7d1e40
+             */
+            id: string;
+            /**
+             * Plain-text note body.
+             * example:
+             * Adjusted the meter-reading journey for the §14a rollout.
+             */
+            text: string;
+            created_at: string; // date-time
+            created_by?: CallerIdentity;
+        }
         export interface BlueprintPatch {
             patch_id?: string;
             version?: number;
@@ -567,12 +608,12 @@ export declare namespace Components {
              * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
              */
             BlueprintID;
-            installation_job_id?: /**
-             * ID of a job
+            /**
+             * Install job this verification is checking, when known.
              * example:
              * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
              */
-            BlueprintJobID;
+            installation_job_id?: string;
             /**
              * Install engine used by the linked installation job, when known.
              */
@@ -911,6 +952,21 @@ export declare namespace Components {
                  */
                 postinstall?: string;
             };
+            /**
+             * Internal collaboration notes, oldest first. Append-only: each entry is
+             * stamped with its author and creation time server-side and is never
+             * rewritten, so the history of who noted what stays intact. Written via
+             * `addBlueprintNote` / `deleteBlueprintNote`, not by `updateBlueprint`.
+             *
+             * Available on every blueprint including marketplace ones (whose
+             * `description` is read-only), and never included in the published
+             * marketplace package — see `buildMetadata` in
+             * `services/blueprint-v3/published-blueprint.ts`. Carried to a
+             * destination org only when an install/sync passes
+             * `options.sync_notes: true`.
+             *
+             */
+            notes?: /* A single internal note on a blueprint. */ BlueprintNote[];
             version?: string;
             deployments?: {
                 source_org_id?: string;
@@ -1282,6 +1338,21 @@ export declare namespace Components {
                  */
                 postinstall?: string;
             };
+            /**
+             * Internal collaboration notes, oldest first. Append-only: each entry is
+             * stamped with its author and creation time server-side and is never
+             * rewritten, so the history of who noted what stays intact. Written via
+             * `addBlueprintNote` / `deleteBlueprintNote`, not by `updateBlueprint`.
+             *
+             * Available on every blueprint including marketplace ones (whose
+             * `description` is read-only), and never included in the published
+             * marketplace package — see `buildMetadata` in
+             * `services/blueprint-v3/published-blueprint.ts`. Carried to a
+             * destination org only when an install/sync passes
+             * `options.sync_notes: true`.
+             *
+             */
+            notes?: /* A single internal note on a blueprint. */ BlueprintNote[];
             version?: string;
             deployments?: {
                 source_org_id?: string;
@@ -1469,6 +1540,21 @@ export declare namespace Components {
                  */
                 postinstall?: string;
             };
+            /**
+             * Internal collaboration notes, oldest first. Append-only: each entry is
+             * stamped with its author and creation time server-side and is never
+             * rewritten, so the history of who noted what stays intact. Written via
+             * `addBlueprintNote` / `deleteBlueprintNote`, not by `updateBlueprint`.
+             *
+             * Available on every blueprint including marketplace ones (whose
+             * `description` is read-only), and never included in the published
+             * marketplace package — see `buildMetadata` in
+             * `services/blueprint-v3/published-blueprint.ts`. Carried to a
+             * destination org only when an install/sync passes
+             * `options.sync_notes: true`.
+             *
+             */
+            notes?: /* A single internal note on a blueprint. */ BlueprintNote[];
             version?: string;
             deployments?: {
                 source_org_id?: string;
@@ -1631,6 +1717,40 @@ export declare namespace Components {
             source_type: "deploy";
             resources?: BlueprintResource[];
         }
+        export interface DeploymentHealthReport {
+            status: "running" | "completed" | "failed";
+            job_id: /**
+             * ID of a job
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            BlueprintJobID;
+            blueprint_instance_id: /**
+             * ID of a blueprint
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            BlueprintID;
+            destination_org_id: string;
+            generated_at: string; // date-time
+            /**
+             * Presigned link to the rendered HTML report (present once the check completed)
+             */
+            html_url?: string;
+            summary?: {
+                resources_scanned?: number;
+                unchecked?: number;
+                errors?: number;
+                warnings?: number;
+                infos?: number;
+            };
+            findings?: HealthFinding[];
+            coverage?: HealthScanCoverage;
+            /**
+             * Failure reason when status is `failed`.
+             */
+            error?: string;
+        }
         export interface DetectChangesResult {
             resources?: PatchResourceDiff[];
         }
@@ -1668,6 +1788,21 @@ export declare namespace Components {
                  */
                 postinstall?: string;
             };
+            /**
+             * Internal collaboration notes, oldest first. Append-only: each entry is
+             * stamped with its author and creation time server-side and is never
+             * rewritten, so the history of who noted what stays intact. Written via
+             * `addBlueprintNote` / `deleteBlueprintNote`, not by `updateBlueprint`.
+             *
+             * Available on every blueprint including marketplace ones (whose
+             * `description` is read-only), and never included in the published
+             * marketplace package — see `buildMetadata` in
+             * `services/blueprint-v3/published-blueprint.ts`. Carried to a
+             * destination org only when an install/sync passes
+             * `options.sync_notes: true`.
+             *
+             */
+            notes?: /* A single internal note on a blueprint. */ BlueprintNote[];
             version?: string;
             deployments?: {
                 source_org_id?: string;
@@ -1849,6 +1984,75 @@ export declare namespace Components {
             id?: string;
             name?: string;
             type?: string;
+        }
+        export interface HealthCheckCoverage {
+            check_id: "live_readability" | "referential_integrity" | "install_completeness" | "schema_consistency" | "mapping_integrity" | "execution_readiness" | "spec_conformance";
+            status: "completed" | "partial" | "skipped" | "not_applicable";
+            scope: "tracked_resources" | "org_wide" | "source_comparison";
+            resources_considered: number;
+            details: string[];
+        }
+        export interface HealthFinding {
+            check_id: "live_readability" | "referential_integrity" | "install_completeness" | "schema_consistency" | "mapping_integrity" | "execution_readiness" | "catalog_hygiene" | "spec_conformance";
+            code: "missing_in_destination" | "fetch_error" | "no_readback" | "unreplaced_source_reference" | "broken_internal_reference" | "dropped_at_install" | "orphaned_group_reference" | "uuid_group_label" | "unreachable_attribute_purpose" | "duplicate_attribute_name" | "duplicate_headline" | "broken_mapping_reference" | "stale_mapping_version" | "mapping_slot_mismatch" | "mapping_parity_mismatch" | "stale_lineage" | "broken_trigger_reference" | "broken_action_reference" | "broken_workflow_step" | "invalid_mapping_target" | "invalid_mapping_source" | "invalid_mapping_version" | "unknown_mapping_attribute" | "workflow_edge_limit" | "dead_purpose_reference" | "broken_portal_reference" | "orphaned_portal_block" | "broken_closing_reason" | "broken_journey_settings" | "unresolved_assignee" | "current_write_invalid" | "duplicate_live_resource" | "missing_file_content" | "file_etag_mismatch" | "incomplete_webhook" | "broken_template_reference" | "orphaned_price" | "duplicate_price" | "inactive_price_in_use" | "cross_org_reference";
+            severity: "error" | "warning" | "info";
+            resource_type: string;
+            lineage_id: string;
+            target_id?: string;
+            /**
+             * Human-readable name of the affected resource
+             */
+            resource_name?: string;
+            message: string;
+            /**
+             * Mechanical root-cause classification and suggested fix, when determinable
+             */
+            verdict?: string;
+            /**
+             * Check-specific evidence, e.g. the JSON path and referenced id of a broken reference.
+             */
+            evidence?: {
+                path?: string;
+                referenced_id?: string;
+                referenced_type?: string;
+                /**
+                 * Human-readable name or logical slug of the referenced source resource
+                 */
+                referenced_name?: string;
+                /**
+                 * Logical source lineage identity of the referenced resource
+                 */
+                referenced_lineage_id?: string;
+                /**
+                 * Destination id that should have replaced the source reference
+                 */
+                expected_target_id?: string;
+                /**
+                 * Human-readable description of the exact field carrying the reference
+                 */
+                reference_kind?: string;
+                operation?: string;
+                rejection_reason?: string;
+                error_message?: string;
+                response_status?: number;
+            };
+        }
+        export interface HealthResourceTypeCoverage {
+            resource_type: string;
+            tracked: number;
+            readable_by_lineage: number;
+            missing_by_lineage: number;
+            read_errors: number;
+            unchecked: number;
+            specialized_checks: ("live_readability" | "referential_integrity" | "install_completeness" | "schema_consistency" | "mapping_integrity" | "execution_readiness" | "spec_conformance")[];
+            /**
+             * Type-specific contracts the current scanner explicitly does not claim to validate.
+             */
+            known_blind_spots: string[];
+        }
+        export interface HealthScanCoverage {
+            checks: HealthCheckCoverage[];
+            resource_types: HealthResourceTypeCoverage[];
         }
         /**
          * Summary of an installed marketplace blueprint for version tracking
@@ -2470,6 +2674,21 @@ export declare namespace Components {
                  */
                 postinstall?: string;
             };
+            /**
+             * Internal collaboration notes, oldest first. Append-only: each entry is
+             * stamped with its author and creation time server-side and is never
+             * rewritten, so the history of who noted what stays intact. Written via
+             * `addBlueprintNote` / `deleteBlueprintNote`, not by `updateBlueprint`.
+             *
+             * Available on every blueprint including marketplace ones (whose
+             * `description` is read-only), and never included in the published
+             * marketplace package — see `buildMetadata` in
+             * `services/blueprint-v3/published-blueprint.ts`. Carried to a
+             * destination org only when an install/sync passes
+             * `options.sync_notes: true`.
+             *
+             */
+            notes?: /* A single internal note on a blueprint. */ BlueprintNote[];
             version?: string;
             deployments?: {
                 source_org_id?: string;
@@ -3100,6 +3319,31 @@ export declare namespace Components {
     }
 }
 export declare namespace Paths {
+    namespace AddBlueprintNote {
+        namespace Parameters {
+            export type BlueprintId = /**
+             * ID of a blueprint
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            Components.Schemas.BlueprintID;
+        }
+        export interface PathParameters {
+            blueprint_id: Parameters.BlueprintId;
+        }
+        export interface RequestBody {
+            /**
+             * Plain-text note body. Must not be blank.
+             */
+            text: string;
+        }
+        namespace Responses {
+            export type $201 = /* A single internal note on a blueprint. */ Components.Schemas.BlueprintNote;
+            export interface $400 {
+                message?: string;
+            }
+        }
+    }
     namespace AddBlueprintResource {
         namespace Parameters {
             /**
@@ -3513,6 +3757,29 @@ export declare namespace Paths {
             export type $200 = Components.Schemas.Blueprint;
         }
     }
+    namespace DeleteBlueprintNote {
+        namespace Parameters {
+            export type BlueprintId = /**
+             * ID of a blueprint
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            Components.Schemas.BlueprintID;
+            export type NoteId = string;
+        }
+        export interface PathParameters {
+            blueprint_id: Parameters.BlueprintId;
+            note_id: Parameters.NoteId;
+        }
+        namespace Responses {
+            export interface $200 {
+                notes?: /* A single internal note on a blueprint. */ Components.Schemas.BlueprintNote[];
+            }
+            export interface $404 {
+                message?: string;
+            }
+        }
+    }
     namespace DeleteBlueprintResource {
         namespace Parameters {
             export type BlueprintId = /**
@@ -3790,6 +4057,31 @@ export declare namespace Paths {
         }
         namespace Responses {
             export type $200 = /* Bulk install parent. Never carries target auth tokens. */ Components.Schemas.BulkInstall;
+            export interface $404 {
+            }
+        }
+    }
+    namespace GetDeploymentHealthReportV3 {
+        namespace Parameters {
+            export type BlueprintId = /**
+             * ID of a blueprint
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            Components.Schemas.BlueprintID;
+            export type JobId = /**
+             * ID of a job
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            Components.Schemas.BlueprintJobID;
+        }
+        export interface PathParameters {
+            blueprint_id: Parameters.BlueprintId;
+            job_id: Parameters.JobId;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.DeploymentHealthReport;
             export interface $404 {
             }
         }
@@ -4072,6 +4364,7 @@ export declare namespace Paths {
              * Auth token for the destination org. Required for cross-org installs where the caller's token belongs to the source org. Defaults to the caller's bearer token.
              */
             destination_auth_token?: string;
+            source_blueprint_type?: "marketplace";
             options?: Components.Schemas.BlueprintInstallationJobOptions;
             /**
              * Slug for marketplace blueprint consistency
@@ -4107,6 +4400,7 @@ export declare namespace Paths {
              * Auth token for the destination org. Required for cross-org installs where the caller's token belongs to the source org. Defaults to the caller's bearer token.
              */
             destination_auth_token?: string;
+            source_blueprint_type?: "marketplace";
             options?: Components.Schemas.BlueprintInstallationJobOptions;
             /**
              * Slug for marketplace blueprint consistency
@@ -4322,6 +4616,26 @@ export declare namespace Paths {
         }
         namespace Responses {
             export type $200 = /* Preview data for a blueprint before installation. Stored temporarily with TTL. */ Components.Schemas.BlueprintPreview;
+        }
+    }
+    namespace PreInstallBlueprintV3 {
+        export interface RequestBody {
+            /**
+             * S3 key of a V3 blueprint package previously uploaded through uploadManifest
+             */
+            blueprint_file: string;
+            source_blueprint_type?: "marketplace";
+            /**
+             * Marketplace slug to preserve across updates
+             */
+            slug?: string;
+        }
+        namespace Responses {
+            export type $200 = /* Preview data for a blueprint before installation. Stored temporarily with TTL. */ Components.Schemas.BlueprintPreview;
+            export interface $400 {
+            }
+            export interface $404 {
+            }
         }
     }
     namespace PublishBlueprint {
@@ -4551,6 +4865,41 @@ export declare namespace Paths {
             }
         }
     }
+    namespace TriggerDeploymentHealthCheckV3 {
+        namespace Parameters {
+            export type BlueprintId = /**
+             * ID of a blueprint
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            Components.Schemas.BlueprintID;
+            export type JobId = /**
+             * ID of a job
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            Components.Schemas.BlueprintJobID;
+        }
+        export interface PathParameters {
+            blueprint_id: Parameters.BlueprintId;
+            job_id: Parameters.JobId;
+        }
+        export interface RequestBody {
+            /**
+             * Source/sandbox org to deep-compare entity mappings against.
+             */
+            source_org_id?: string;
+            /**
+             * Read token for the source org. Never persisted; used only for this scan.
+             */
+            source_auth_token?: string;
+        }
+        namespace Responses {
+            export type $202 = Components.Schemas.DeploymentHealthReport;
+            export interface $404 {
+            }
+        }
+    }
     namespace UpdateBlueprint {
         namespace Parameters {
             export type BlueprintId = /**
@@ -4736,13 +5085,10 @@ export declare namespace Paths {
             destination_auth_token?: string;
             /**
              * Optional install job this verification is checking. If omitted, the latest destination blueprint installation job is used when available.
-             */
-            installation_job_id?: /**
-             * ID of a job
              * example:
              * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
              */
-            Components.Schemas.BlueprintJobID;
+            installation_job_id?: string;
             /**
              * Optional install engine hint. Usually inferred from installation_job_id.
              */
@@ -4969,6 +5315,29 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteBlueprint.Responses.$200>
+  /**
+   * addBlueprintNote - addBlueprintNote
+   * 
+   * Append an internal note to a blueprint. `id`, `created_at` and `created_by`
+   * are stamped server-side from the caller, so notes cannot be backdated or
+   * attributed to someone else. Existing notes are never modified.
+   * 
+   */
+  'addBlueprintNote'(
+    parameters?: Parameters<Paths.AddBlueprintNote.PathParameters> | null,
+    data?: Paths.AddBlueprintNote.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.AddBlueprintNote.Responses.$201>
+  /**
+   * deleteBlueprintNote - deleteBlueprintNote
+   * 
+   * Remove a single internal note from a blueprint.
+   */
+  'deleteBlueprintNote'(
+    parameters?: Parameters<Paths.DeleteBlueprintNote.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.DeleteBlueprintNote.Responses.$200>
   /**
    * validateBlueprint - validateBlueprint
    * 
@@ -5210,7 +5579,7 @@ export interface OperationMethods {
    * check `sync_engine` (`terraform` | `v3`) to tell them apart. V3 jobs additionally
    * expose live `resource_progress[]`. V3 single-install and bulk-install child jobs
    * are polled here.
-   *
+   * 
    */
   'getBlueprintJob'(
     parameters?: Parameters<Paths.GetBlueprintJob.PathParameters> | null,
@@ -5224,7 +5593,7 @@ export interface OperationMethods {
    * planning. Works for both Terraform and V3 jobs. Not needed for V3 installs created
    * with `auto_apply: true` (including all bulk-install child jobs), which apply
    * without pausing.
-   *
+   * 
    */
   'continueInstallationJob'(
     parameters?: Parameters<Paths.ContinueInstallationJob.PathParameters> | null,
@@ -5343,21 +5712,31 @@ export interface OperationMethods {
   ): OperationResponse<Paths.PublishMarketplaceListingVersion.Responses.$200>
   /**
    * publishBlueprintV3 - Publish Blueprint V3
-   *
+   * 
    * Starts an asynchronous V3 publication. The result is a signed, portable package; poll the existing blueprint job endpoint for completion.
    */
   'publishBlueprintV3'(
     parameters?: Parameters<Paths.PublishBlueprintV3.PathParameters> | null,
     data?: any,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.PublishBlueprintV3.Responses.$202>
+  /**
+   * preInstallBlueprintV3 - Preview a V3 blueprint package before installation
+   * 
+   * Validates a signed V3 package and returns the destination-specific resource plan used by the install UI.
+   */
+  'preInstallBlueprintV3'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.PreInstallBlueprintV3.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.PreInstallBlueprintV3.Responses.$200>
   /**
    * installBlueprintV3 - Install Blueprint V3
    * 
    * Install a blueprint into a single destination org using the V3 engine (direct API
    * calls, no Terraform). Creates resources in topological order with global ID
    * replacement and supports checkpoint-based resume on failure.
-   *
+   * 
    * **Lifecycle (how to drive an install to completion):**
    * 1. `POST /v3/blueprint-manifest/blueprint:install` returns `{ job_id }` (202).
    * 2. Poll the job with `GET /v2/blueprint-manifest/jobs/{job_id}` — V3 jobs are
@@ -5369,7 +5748,7 @@ export interface OperationMethods {
    * 4. If `auto_apply` is `true`, the engine applies automatically after plan +
    *    snapshot — no `:continue` call is needed. This is what the bulk-install worker
    *    uses; to install into many orgs at once prefer `POST .../bulk-installs`.
-   *
+   * 
    * For cross-org installs, pass `destination_auth_token` (the destination org's
    * token); reads use the caller's bearer token, writes use that token.
    * 
@@ -5429,6 +5808,43 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetRestorePreview.Responses.$200>
   /**
+   * triggerDeploymentHealthCheckV3 - Run a health check on a deployment
+   * 
+   * Starts a read-only health scan of the resources this deployment's
+   * blueprint instance tracks in the destination org (see
+   * docs/rfcs/RFC-org-health-check.md, Phase 0). Checks:
+   * 
+   *   - live readability — every lineage-tracked resource is read back
+   *     via its adapter; tracked-but-unreadable resources are flagged.
+   *   - referential integrity — destination payloads containing
+   *     unreplaced source-org ids, or references to tracked resources
+   *     that are not readable.
+   *   - install completeness — install operations whose final attempt
+   *     ended `failed` or `skipped`, with their rejection reasons.
+   * 
+   * Async — returns 202 immediately with a `running` report stub. Poll
+   * the health-report endpoint until `status` is `completed` or
+   * `failed`. Never mutates any resource.
+   * 
+   */
+  'triggerDeploymentHealthCheckV3'(
+    parameters?: Parameters<Paths.TriggerDeploymentHealthCheckV3.PathParameters> | null,
+    data?: Paths.TriggerDeploymentHealthCheckV3.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.TriggerDeploymentHealthCheckV3.Responses.$202>
+  /**
+   * getDeploymentHealthReportV3 - Get the latest health report of a deployment
+   * 
+   * Returns the most recent health report produced for this deployment
+   * by the `:health-check` endpoint. Idempotent and side-effect free.
+   * 
+   */
+  'getDeploymentHealthReportV3'(
+    parameters?: Parameters<Paths.GetDeploymentHealthReportV3.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetDeploymentHealthReportV3.Responses.$200>
+  /**
    * getBlueprintLineageV3 - Get Blueprint Lineage V3
    * 
    * Returns the lineage registry entries for a blueprint's resources in the current org.
@@ -5442,61 +5858,61 @@ export interface OperationMethods {
   ): OperationResponse<Paths.GetBlueprintLineageV3.Responses.$200>
   /**
    * createBulkInstallV3 - Create Bulk Install V3
-   *
+   * 
    * Install one source blueprint into many destination organizations in a single
    * request. The server schedules child V3 installs with `auto_apply=true` and caps
    * active installs at `max_concurrency`. Per-target failures are isolated and
    * retryable; they do not stop the remaining targets.
-   *
+   * 
    * Each target carries its own write-only `destination_auth_token` (org-scoped).
    * Tokens are passed to the worker via Step Functions input only — they are never
    * persisted in DynamoDB nor returned by any endpoint.
-   *
+   * 
    */
   'createBulkInstallV3'(
     parameters?: Parameters<UnknownParamsObject> | null,
     data?: Paths.CreateBulkInstallV3.RequestBody,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CreateBulkInstallV3.Responses.$202>
   /**
    * getBulkInstallV3 - Get Bulk Install V3
-   *
+   * 
    * Returns the bulk install parent with aggregate status and counts. Scoped by the
    * caller org as `source_org_id`. Target rows are not included — use the targets
    * endpoint to page through them.
-   *
+   * 
    */
   'getBulkInstallV3'(
     parameters?: Parameters<Paths.GetBulkInstallV3.PathParameters> | null,
     data?: any,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetBulkInstallV3.Responses.$200>
   /**
    * listBulkInstallTargetsV3 - List Bulk Install Targets V3
-   *
+   * 
    * Pages through the bulk install's target rows. Each row hydrates its latest child
    * install job (`job_ids.at(-1)`) with the standard V3 job shape (`events[]`,
    * `resource_progress[]`) so callers can inspect per-resource progress and errors.
-   *
+   * 
    */
   'listBulkInstallTargetsV3'(
     parameters?: Parameters<Paths.ListBulkInstallTargetsV3.QueryParameters & Paths.ListBulkInstallTargetsV3.PathParameters> | null,
     data?: any,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ListBulkInstallTargetsV3.Responses.$200>
   /**
    * retryBulkInstallTargetV3 - Retry Bulk Install Target V3
-   *
+   * 
    * Retries a single failed target. Allowed only for `FAILED` and `PARTIAL_SUCCESS`
    * targets. Starts a new child install with `auto_apply=true`, appends its job id to
    * `job_ids`, and reuses the same target row. Only the destination auth token may be
    * supplied for the new attempt; source/destination identifiers are immutable.
-   *
+   * 
    */
   'retryBulkInstallTargetV3'(
     parameters?: Parameters<Paths.RetryBulkInstallTargetV3.PathParameters> | null,
     data?: Paths.RetryBulkInstallTargetV3.RequestBody,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.RetryBulkInstallTargetV3.Responses.$200>
   /**
    * listUniquenessCriteria - listUniquenessCriteria
@@ -5780,6 +6196,33 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteBlueprint.Responses.$200>
   }
+  ['/v2/blueprint-manifest/blueprints/{blueprint_id}/notes']: {
+    /**
+     * addBlueprintNote - addBlueprintNote
+     * 
+     * Append an internal note to a blueprint. `id`, `created_at` and `created_by`
+     * are stamped server-side from the caller, so notes cannot be backdated or
+     * attributed to someone else. Existing notes are never modified.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.AddBlueprintNote.PathParameters> | null,
+      data?: Paths.AddBlueprintNote.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.AddBlueprintNote.Responses.$201>
+  }
+  ['/v2/blueprint-manifest/blueprints/{blueprint_id}/notes/{note_id}']: {
+    /**
+     * deleteBlueprintNote - deleteBlueprintNote
+     * 
+     * Remove a single internal note from a blueprint.
+     */
+    'delete'(
+      parameters?: Parameters<Paths.DeleteBlueprintNote.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.DeleteBlueprintNote.Responses.$200>
+  }
   ['/v2/blueprint-manifest/blueprints/{blueprint_id}/validate']: {
     /**
      * validateBlueprint - validateBlueprint
@@ -6056,7 +6499,7 @@ export interface PathsDictionary {
      * check `sync_engine` (`terraform` | `v3`) to tell them apart. V3 jobs additionally
      * expose live `resource_progress[]`. V3 single-install and bulk-install child jobs
      * are polled here.
-     *
+     * 
      */
     'get'(
       parameters?: Parameters<Paths.GetBlueprintJob.PathParameters> | null,
@@ -6072,7 +6515,7 @@ export interface PathsDictionary {
      * planning. Works for both Terraform and V3 jobs. Not needed for V3 installs created
      * with `auto_apply: true` (including all bulk-install child jobs), which apply
      * without pausing.
-     *
+     * 
      */
     'post'(
       parameters?: Parameters<Paths.ContinueInstallationJob.PathParameters> | null,
@@ -6207,14 +6650,26 @@ export interface PathsDictionary {
   ['/v3/blueprint-manifest/blueprints/{blueprint_id}:publish']: {
     /**
      * publishBlueprintV3 - Publish Blueprint V3
-     *
+     * 
      * Starts an asynchronous V3 publication. The result is a signed, portable package; poll the existing blueprint job endpoint for completion.
      */
     'post'(
       parameters?: Parameters<Paths.PublishBlueprintV3.PathParameters> | null,
       data?: any,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.PublishBlueprintV3.Responses.$202>
+  }
+  ['/v3/blueprint-manifest/blueprints:pre-install']: {
+    /**
+     * preInstallBlueprintV3 - Preview a V3 blueprint package before installation
+     * 
+     * Validates a signed V3 package and returns the destination-specific resource plan used by the install UI.
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.PreInstallBlueprintV3.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.PreInstallBlueprintV3.Responses.$200>
   }
   ['/v3/blueprint-manifest/blueprint:install']: {
     /**
@@ -6223,7 +6678,7 @@ export interface PathsDictionary {
      * Install a blueprint into a single destination org using the V3 engine (direct API
      * calls, no Terraform). Creates resources in topological order with global ID
      * replacement and supports checkpoint-based resume on failure.
-     *
+     * 
      * **Lifecycle (how to drive an install to completion):**
      * 1. `POST /v3/blueprint-manifest/blueprint:install` returns `{ job_id }` (202).
      * 2. Poll the job with `GET /v2/blueprint-manifest/jobs/{job_id}` — V3 jobs are
@@ -6235,7 +6690,7 @@ export interface PathsDictionary {
      * 4. If `auto_apply` is `true`, the engine applies automatically after plan +
      *    snapshot — no `:continue` call is needed. This is what the bulk-install worker
      *    uses; to install into many orgs at once prefer `POST .../bulk-installs`.
-     *
+     * 
      * For cross-org installs, pass `destination_auth_token` (the destination org's
      * token); reads use the caller's bearer token, writes use that token.
      * 
@@ -6299,6 +6754,47 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetRestorePreview.Responses.$200>
   }
+  ['/v3/blueprint-manifest/blueprints/{blueprint_id}/deployments/{job_id}:health-check']: {
+    /**
+     * triggerDeploymentHealthCheckV3 - Run a health check on a deployment
+     * 
+     * Starts a read-only health scan of the resources this deployment's
+     * blueprint instance tracks in the destination org (see
+     * docs/rfcs/RFC-org-health-check.md, Phase 0). Checks:
+     * 
+     *   - live readability — every lineage-tracked resource is read back
+     *     via its adapter; tracked-but-unreadable resources are flagged.
+     *   - referential integrity — destination payloads containing
+     *     unreplaced source-org ids, or references to tracked resources
+     *     that are not readable.
+     *   - install completeness — install operations whose final attempt
+     *     ended `failed` or `skipped`, with their rejection reasons.
+     * 
+     * Async — returns 202 immediately with a `running` report stub. Poll
+     * the health-report endpoint until `status` is `completed` or
+     * `failed`. Never mutates any resource.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.TriggerDeploymentHealthCheckV3.PathParameters> | null,
+      data?: Paths.TriggerDeploymentHealthCheckV3.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.TriggerDeploymentHealthCheckV3.Responses.$202>
+  }
+  ['/v3/blueprint-manifest/blueprints/{blueprint_id}/deployments/{job_id}/health-report']: {
+    /**
+     * getDeploymentHealthReportV3 - Get the latest health report of a deployment
+     * 
+     * Returns the most recent health report produced for this deployment
+     * by the `:health-check` endpoint. Idempotent and side-effect free.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetDeploymentHealthReportV3.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetDeploymentHealthReportV3.Responses.$200>
+  }
   ['/v3/blueprint-manifest/blueprints/{blueprint_id}/lineage']: {
     /**
      * getBlueprintLineageV3 - Get Blueprint Lineage V3
@@ -6316,67 +6812,67 @@ export interface PathsDictionary {
   ['/v3/blueprint-manifest/bulk-installs']: {
     /**
      * createBulkInstallV3 - Create Bulk Install V3
-     *
+     * 
      * Install one source blueprint into many destination organizations in a single
      * request. The server schedules child V3 installs with `auto_apply=true` and caps
      * active installs at `max_concurrency`. Per-target failures are isolated and
      * retryable; they do not stop the remaining targets.
-     *
+     * 
      * Each target carries its own write-only `destination_auth_token` (org-scoped).
      * Tokens are passed to the worker via Step Functions input only — they are never
      * persisted in DynamoDB nor returned by any endpoint.
-     *
+     * 
      */
     'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
       data?: Paths.CreateBulkInstallV3.RequestBody,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.CreateBulkInstallV3.Responses.$202>
   }
   ['/v3/blueprint-manifest/bulk-installs/{bulk_job_id}']: {
     /**
      * getBulkInstallV3 - Get Bulk Install V3
-     *
+     * 
      * Returns the bulk install parent with aggregate status and counts. Scoped by the
      * caller org as `source_org_id`. Target rows are not included — use the targets
      * endpoint to page through them.
-     *
+     * 
      */
     'get'(
       parameters?: Parameters<Paths.GetBulkInstallV3.PathParameters> | null,
       data?: any,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetBulkInstallV3.Responses.$200>
   }
   ['/v3/blueprint-manifest/bulk-installs/{bulk_job_id}/targets']: {
     /**
      * listBulkInstallTargetsV3 - List Bulk Install Targets V3
-     *
+     * 
      * Pages through the bulk install's target rows. Each row hydrates its latest child
      * install job (`job_ids.at(-1)`) with the standard V3 job shape (`events[]`,
      * `resource_progress[]`) so callers can inspect per-resource progress and errors.
-     *
+     * 
      */
     'get'(
       parameters?: Parameters<Paths.ListBulkInstallTargetsV3.QueryParameters & Paths.ListBulkInstallTargetsV3.PathParameters> | null,
       data?: any,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ListBulkInstallTargetsV3.Responses.$200>
   }
   ['/v3/blueprint-manifest/bulk-installs/{bulk_job_id}/targets/{destination_org_id}:retry']: {
     /**
      * retryBulkInstallTargetV3 - Retry Bulk Install Target V3
-     *
+     * 
      * Retries a single failed target. Allowed only for `FAILED` and `PARTIAL_SUCCESS`
      * targets. Starts a new child install with `auto_apply=true`, appends its job id to
      * `job_ids`, and reuses the same target row. Only the destination auth token may be
      * supplied for the new attempt; source/destination identifiers are immutable.
-     *
+     * 
      */
     'post'(
       parameters?: Parameters<Paths.RetryBulkInstallTargetV3.PathParameters> | null,
       data?: Paths.RetryBulkInstallTargetV3.RequestBody,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.RetryBulkInstallTargetV3.Responses.$200>
   }
   ['/v1/blueprint-manifest/uniqueness-criteria']: {
@@ -6446,6 +6942,7 @@ export type BlueprintInstallationJobOptions = Components.Schemas.BlueprintInstal
 export type BlueprintJob = Components.Schemas.BlueprintJob;
 export type BlueprintJobEvent = Components.Schemas.BlueprintJobEvent;
 export type BlueprintJobID = Components.Schemas.BlueprintJobID;
+export type BlueprintNote = Components.Schemas.BlueprintNote;
 export type BlueprintPatch = Components.Schemas.BlueprintPatch;
 export type BlueprintPatchWithResults = Components.Schemas.BlueprintPatchWithResults;
 export type BlueprintPreview = Components.Schemas.BlueprintPreview;
@@ -6470,12 +6967,17 @@ export type CommonMarkdownFields = Components.Schemas.CommonMarkdownFields;
 export type CommonResourceNode = Components.Schemas.CommonResourceNode;
 export type CustomBlueprint = Components.Schemas.CustomBlueprint;
 export type DeployedBlueprint = Components.Schemas.DeployedBlueprint;
+export type DeploymentHealthReport = Components.Schemas.DeploymentHealthReport;
 export type DetectChangesResult = Components.Schemas.DetectChangesResult;
 export type FieldDiff = Components.Schemas.FieldDiff;
 export type FileBlueprint = Components.Schemas.FileBlueprint;
 export type FormattedError = Components.Schemas.FormattedError;
 export type FormattedErrorCodes = Components.Schemas.FormattedErrorCodes;
 export type FormattedErrorData = Components.Schemas.FormattedErrorData;
+export type HealthCheckCoverage = Components.Schemas.HealthCheckCoverage;
+export type HealthFinding = Components.Schemas.HealthFinding;
+export type HealthResourceTypeCoverage = Components.Schemas.HealthResourceTypeCoverage;
+export type HealthScanCoverage = Components.Schemas.HealthScanCoverage;
 export type InstalledMarketplaceBlueprintItem = Components.Schemas.InstalledMarketplaceBlueprintItem;
 export type Job = Components.Schemas.Job;
 export type JobID = Components.Schemas.JobID;

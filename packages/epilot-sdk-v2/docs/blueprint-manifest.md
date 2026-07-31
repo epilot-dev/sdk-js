@@ -36,6 +36,8 @@ const { data } = await blueprintManifestClient.getJob(...)
 - [`getBlueprint`](#getblueprint)
 - [`updateBlueprint`](#updateblueprint)
 - [`deleteBlueprint`](#deleteblueprint)
+- [`addBlueprintNote`](#addblueprintnote)
+- [`deleteBlueprintNote`](#deleteblueprintnote)
 - [`verifyBlueprint`](#verifyblueprint)
 - [`listMarketplaceSlugs`](#listmarketplaceslugs)
 - [`publishBlueprint`](#publishblueprint)
@@ -49,9 +51,12 @@ const { data } = await blueprintManifestClient.getJob(...)
 - [`updateBlueprintResource`](#updateblueprintresource)
 - [`deleteBlueprintResource`](#deleteblueprintresource)
 - [`publishBlueprintV3`](#publishblueprintv3)
+- [`preInstallBlueprintV3`](#preinstallblueprintv3)
 - [`installBlueprintV3`](#installblueprintv3)
 - [`restoreBlueprintDeploymentV3`](#restoreblueprintdeploymentv3)
 - [`getRestorePreview`](#getrestorepreview)
+- [`triggerDeploymentHealthCheckV3`](#triggerdeploymenthealthcheckv3)
+- [`getDeploymentHealthReportV3`](#getdeploymenthealthreportv3)
 - [`getBlueprintLineageV3`](#getblueprintlineagev3)
 - [`createBulkInstallV3`](#createbulkinstallv3)
 - [`getBulkInstallV3`](#getbulkinstallv3)
@@ -94,6 +99,7 @@ const { data } = await blueprintManifestClient.getJob(...)
 - [`BlueprintPatch`](#blueprintpatch)
 - [`OrgPatchExecution`](#orgpatchexecution)
 - [`BlueprintPatchWithResults`](#blueprintpatchwithresults)
+- [`BlueprintNote`](#blueprintnote)
 - [`BlueprintID`](#blueprintid)
 - [`BlueprintResourceID`](#blueprintresourceid)
 - [`CommonBlueprintFields`](#commonblueprintfields)
@@ -122,6 +128,11 @@ const { data } = await blueprintManifestClient.getJob(...)
 - [`BlueprintRestoreJob`](#blueprintrestorejob)
 - [`V3ResourceProgressEntry`](#v3resourceprogressentry)
 - [`RestoreOutcomeItem`](#restoreoutcomeitem)
+- [`HealthFinding`](#healthfinding)
+- [`HealthCheckCoverage`](#healthcheckcoverage)
+- [`HealthResourceTypeCoverage`](#healthresourcetypecoverage)
+- [`HealthScanCoverage`](#healthscancoverage)
+- [`DeploymentHealthReport`](#deploymenthealthreport)
 - [`RestoreOutcome`](#restoreoutcome)
 - [`BlueprintJob`](#blueprintjob)
 - [`BlueprintDependenciesSyncJob`](#blueprintdependenciessyncjob)
@@ -221,6 +232,7 @@ const { data } = await client.listBlueprints({
       "title": "string",
       "slug": "string",
       "description": {},
+      "notes": [],
       "version": "string",
       "deployments": [],
       "is_verified": true,
@@ -268,6 +280,14 @@ const { data } = await client.createBlueprint(
       postinstall: 'This is the content of the postinstall.md file
   '
     },
+    notes: [
+      {
+        id: '3f1c9b0e-2f3a-4a1f-9a3e-6f2b8c7d1e40',
+        text: 'Adjusted the meter-reading journey for the §14a rollout.',
+        created_at: '1970-01-01T00:00:00.000Z',
+        created_by: { /* ... */ }
+      }
+    ],
     version: 'string',
     deployments: [
       {
@@ -364,6 +384,14 @@ const { data } = await client.createBlueprint(
     "preinstall": "This is the content of the preinstall.md file which contains the blueprint description.\n",
     "postinstall": "This is the content of the postinstall.md file\n"
   },
+  "notes": [
+    {
+      "id": "3f1c9b0e-2f3a-4a1f-9a3e-6f2b8c7d1e40",
+      "text": "Adjusted the meter-reading journey for the §14a rollout.",
+      "created_at": "1970-01-01T00:00:00.000Z",
+      "created_by": {}
+    }
+  ],
   "version": "string",
   "deployments": [
     {
@@ -660,6 +688,14 @@ const { data } = await client.getBlueprint({
     "preinstall": "This is the content of the preinstall.md file which contains the blueprint description.\n",
     "postinstall": "This is the content of the postinstall.md file\n"
   },
+  "notes": [
+    {
+      "id": "3f1c9b0e-2f3a-4a1f-9a3e-6f2b8c7d1e40",
+      "text": "Adjusted the meter-reading journey for the §14a rollout.",
+      "created_at": "1970-01-01T00:00:00.000Z",
+      "created_by": {}
+    }
+  ],
   "version": "string",
   "deployments": [
     {
@@ -768,6 +804,14 @@ const { data } = await client.updateBlueprint(
       postinstall: 'This is the content of the postinstall.md file
   '
     },
+    notes: [
+      {
+        id: '3f1c9b0e-2f3a-4a1f-9a3e-6f2b8c7d1e40',
+        text: 'Adjusted the meter-reading journey for the §14a rollout.',
+        created_at: '1970-01-01T00:00:00.000Z',
+        created_by: { /* ... */ }
+      }
+    ],
     version: 'string',
     deployments: [
       {
@@ -864,6 +908,14 @@ const { data } = await client.updateBlueprint(
     "preinstall": "This is the content of the preinstall.md file which contains the blueprint description.\n",
     "postinstall": "This is the content of the postinstall.md file\n"
   },
+  "notes": [
+    {
+      "id": "3f1c9b0e-2f3a-4a1f-9a3e-6f2b8c7d1e40",
+      "text": "Adjusted the meter-reading journey for the §14a rollout.",
+      "created_at": "1970-01-01T00:00:00.000Z",
+      "created_by": {}
+    }
+  ],
   "version": "string",
   "deployments": [
     {
@@ -975,6 +1027,14 @@ const { data } = await client.deleteBlueprint({
     "preinstall": "This is the content of the preinstall.md file which contains the blueprint description.\n",
     "postinstall": "This is the content of the postinstall.md file\n"
   },
+  "notes": [
+    {
+      "id": "3f1c9b0e-2f3a-4a1f-9a3e-6f2b8c7d1e40",
+      "text": "Adjusted the meter-reading journey for the §14a rollout.",
+      "created_at": "1970-01-01T00:00:00.000Z",
+      "created_by": {}
+    }
+  ],
   "version": "string",
   "deployments": [
     {
@@ -1055,6 +1115,84 @@ const { data } = await client.deleteBlueprint({
     }
   ],
   "source_type": "custom"
+}
+```
+
+</details>
+
+---
+
+### `addBlueprintNote`
+
+Append an internal note to a blueprint. `id`, `created_at` and `created_by`
+are stamped server-side from the caller, so notes cannot be backdated or
+attributed to someone else. Existing notes are neve
+
+`POST /v2/blueprint-manifest/blueprints/{blueprint_id}/notes`
+
+```ts
+const { data } = await client.addBlueprintNote(
+  {
+    blueprint_id: 'example',
+  },
+  {
+    text: 'string'
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "id": "3f1c9b0e-2f3a-4a1f-9a3e-6f2b8c7d1e40",
+  "text": "Adjusted the meter-reading journey for the §14a rollout.",
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "created_by": {
+    "name": "manifest@epilot.cloud",
+    "org_id": "911690",
+    "user_id": "11001045",
+    "token_id": "api_5ZugdRXasLfWBypHi93Fk"
+  }
+}
+```
+
+</details>
+
+---
+
+### `deleteBlueprintNote`
+
+Remove a single internal note from a blueprint.
+
+`DELETE /v2/blueprint-manifest/blueprints/{blueprint_id}/notes/{note_id}`
+
+```ts
+const { data } = await client.deleteBlueprintNote({
+  blueprint_id: 'example',
+  note_id: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "notes": [
+    {
+      "id": "3f1c9b0e-2f3a-4a1f-9a3e-6f2b8c7d1e40",
+      "text": "Adjusted the meter-reading journey for the §14a rollout.",
+      "created_at": "1970-01-01T00:00:00.000Z",
+      "created_by": {
+        "name": "manifest@epilot.cloud",
+        "org_id": "911690",
+        "user_id": "11001045",
+        "token_id": "api_5ZugdRXasLfWBypHi93Fk"
+      }
+    }
+  ]
 }
 ```
 
@@ -1713,7 +1851,8 @@ const { data } = await client.continueInstallationJob(
     job_id: 'example',
   },
   {
-    resources_to_ignore: ['string']
+    resources_to_ignore: ['string'],
+    sync_notes: false
   },
 )
 ```
@@ -2450,6 +2589,77 @@ const { data } = await client.publishBlueprintV3({
 
 ---
 
+### `preInstallBlueprintV3`
+
+Preview a V3 blueprint package before installation
+
+`POST /v3/blueprint-manifest/blueprints:pre-install`
+
+```ts
+const { data } = await client.preInstallBlueprintV3(
+  null,
+  {
+    blueprint_file: 'string',
+    source_blueprint_type: 'marketplace',
+    slug: 'string'
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "id": "string",
+  "org_id": "string",
+  "title": "string",
+  "description": {
+    "preinstall": "string"
+  },
+  "version": "string",
+  "slug": "string",
+  "source_type": "marketplace",
+  "blueprint_file_s3_key": "string",
+  "is_verified": true,
+  "docs_url": "string",
+  "recommended_apps": ["string"],
+  "required_features": {
+    "enabled": ["string"],
+    "disabled": ["string"]
+  },
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "created_by": {
+    "name": "manifest@epilot.cloud",
+    "org_id": "911690",
+    "user_id": "11001045",
+    "token_id": "api_5ZugdRXasLfWBypHi93Fk"
+  },
+  "is_updating": true,
+  "resources": [
+    {
+      "id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+      "name": "string",
+      "type": "designbuilder",
+      "address": "string",
+      "is_root": true,
+      "is_ready": true,
+      "is_hidden": true,
+      "is_disabled": false,
+      "hard_dependencies": ["designbuilder"],
+      "parent_resource_ids": ["c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341"],
+      "depends_on_addresses": ["string"],
+      "impact_on_install": ["create"],
+      "impact_on_install_reason": ["string"]
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
 ### `installBlueprintV3`
 
 Install Blueprint V3
@@ -2527,6 +2737,115 @@ const { data } = await client.getRestorePreview({
 
 ---
 
+### `triggerDeploymentHealthCheckV3`
+
+Run a health check on a deployment
+
+`POST /v3/blueprint-manifest/blueprints/{blueprint_id}/deployments/{job_id}:health-check`
+
+```ts
+const { data } = await client.triggerDeploymentHealthCheckV3(
+  {
+    blueprint_id: 'example',
+    job_id: 'example',
+  },
+  {
+    source_org_id: 'string',
+    source_auth_token: 'string'
+  },
+)
+```
+
+---
+
+### `getDeploymentHealthReportV3`
+
+Get the latest health report of a deployment
+
+`GET /v3/blueprint-manifest/blueprints/{blueprint_id}/deployments/{job_id}/health-report`
+
+```ts
+const { data } = await client.getDeploymentHealthReportV3({
+  blueprint_id: 'example',
+  job_id: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "status": "running",
+  "job_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+  "blueprint_instance_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+  "destination_org_id": "string",
+  "generated_at": "1970-01-01T00:00:00.000Z",
+  "html_url": "string",
+  "summary": {
+    "resources_scanned": 0,
+    "unchecked": 0,
+    "errors": 0,
+    "warnings": 0,
+    "infos": 0
+  },
+  "findings": [
+    {
+      "check_id": "live_readability",
+      "code": "missing_in_destination",
+      "severity": "error",
+      "resource_type": "string",
+      "lineage_id": "string",
+      "target_id": "string",
+      "resource_name": "string",
+      "message": "string",
+      "verdict": "string",
+      "evidence": {
+        "path": "string",
+        "referenced_id": "string",
+        "referenced_type": "string",
+        "referenced_name": "string",
+        "referenced_lineage_id": "string",
+        "expected_target_id": "string",
+        "reference_kind": "string",
+        "operation": "string",
+        "rejection_reason": "string",
+        "error_message": "string",
+        "response_status": 0
+      }
+    }
+  ],
+  "coverage": {
+    "checks": [
+      {
+        "check_id": "live_readability",
+        "status": "completed",
+        "scope": "tracked_resources",
+        "resources_considered": 0,
+        "details": ["string"]
+      }
+    ],
+    "resource_types": [
+      {
+        "resource_type": "string",
+        "tracked": 0,
+        "readable_by_lineage": 0,
+        "missing_by_lineage": 0,
+        "read_errors": 0,
+        "unchecked": 0,
+        "specialized_checks": ["live_readability"],
+        "known_blind_spots": ["string"]
+      }
+    ]
+  },
+  "error": "string"
+}
+```
+
+</details>
+
+---
+
 ### `getBlueprintLineageV3`
 
 Get Blueprint Lineage V3
@@ -2577,7 +2896,8 @@ const { data } = await client.createBulkInstallV3(
     max_concurrency: 2,
     slug: 'string',
     options: {
-      resources_to_ignore: ['string']
+      resources_to_ignore: ['string'],
+      sync_notes: false
     },
     targets: [
       {
@@ -2624,7 +2944,8 @@ const { data } = await client.getBulkInstallV3({
   },
   "slug": "string",
   "options": {
-    "resources_to_ignore": ["string"]
+    "resources_to_ignore": ["string"],
+    "sync_notes": false
   },
   "created_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z"
@@ -3134,6 +3455,24 @@ type BlueprintPatchWithResults = {
 }
 ```
 
+### `BlueprintNote`
+
+A single internal note on a blueprint.
+
+```ts
+type BlueprintNote = {
+  id: string
+  text: string
+  created_at: string // date-time
+  created_by?: {
+    name?: unknown
+    org_id: string
+    user_id?: string
+    token_id?: string
+  }
+}
+```
+
 ### `BlueprintID`
 
 ID of a blueprint
@@ -3161,6 +3500,17 @@ type CommonBlueprintFields = {
     preinstall?: string
     postinstall?: string
   }
+  notes?: Array<{
+    id: string
+    text: string
+    created_at: string // date-time
+    created_by?: {
+      name?: { ... }
+      org_id: { ... }
+      user_id?: { ... }
+      token_id?: { ... }
+    }
+  }>
   version?: string
   deployments?: Array<{
     source_org_id?: string
@@ -3345,6 +3695,17 @@ type CustomBlueprint = {
     preinstall?: string
     postinstall?: string
   }
+  notes?: Array<{
+    id: string
+    text: string
+    created_at: string // date-time
+    created_by?: {
+      name?: { ... }
+      org_id: { ... }
+      user_id?: { ... }
+      token_id?: { ... }
+    }
+  }>
   version?: string
   deployments?: Array<{
     source_org_id?: string
@@ -3426,8 +3787,7 @@ type CustomBlueprint = {
     depends_on_addresses?: string[]
     impact_on_install?: "create" | "update" | "internal-update" | "no-op" | "delete" | "ignored" | "error"[]
     impact_on_install_reason?: string[]
-  }>
-  source_type?: "custom"
+  // ...
 }
 ```
 
@@ -3442,6 +3802,17 @@ type FileBlueprint = {
     preinstall?: string
     postinstall?: string
   }
+  notes?: Array<{
+    id: string
+    text: string
+    created_at: string // date-time
+    created_by?: {
+      name?: { ... }
+      org_id: { ... }
+      user_id?: { ... }
+      token_id?: { ... }
+    }
+  }>
   version?: string
   deployments?: Array<{
     source_org_id?: string
@@ -3523,8 +3894,7 @@ type FileBlueprint = {
     parent_resource_ids?: string[]
     depends_on_addresses?: string[]
     impact_on_install?: "create" | "update" | "internal-update" | "no-op" | "delete" | "ignored" | "error"[]
-    impact_on_install_reason?: string[]
-  }>
+  // ...
 }
 ```
 
@@ -3539,6 +3909,17 @@ type MarketplaceBlueprint = {
     preinstall?: string
     postinstall?: string
   }
+  notes?: Array<{
+    id: string
+    text: string
+    created_at: string // date-time
+    created_by?: {
+      name?: { ... }
+      org_id: { ... }
+      user_id?: { ... }
+      token_id?: { ... }
+    }
+  }>
   version?: string
   deployments?: Array<{
     source_org_id?: string
@@ -3620,11 +4001,7 @@ type MarketplaceBlueprint = {
     parent_resource_ids?: string[]
     depends_on_addresses?: string[]
     impact_on_install?: "create" | "update" | "internal-update" | "no-op" | "delete" | "ignored" | "error"[]
-    impact_on_install_reason?: string[]
-  }>
-  has_update_available?: boolean
-  latest_marketplace_version?: string
-  installation_link?: string
+  // ...
 }
 ```
 
@@ -3668,6 +4045,17 @@ type DeployedBlueprint = {
     preinstall?: string
     postinstall?: string
   }
+  notes?: Array<{
+    id: string
+    text: string
+    created_at: string // date-time
+    created_by?: {
+      name?: { ... }
+      org_id: { ... }
+      user_id?: { ... }
+      token_id?: { ... }
+    }
+  }>
   version?: string
   deployments?: Array<{
     source_org_id?: string
@@ -3749,8 +4137,7 @@ type DeployedBlueprint = {
     parent_resource_ids?: string[]
     depends_on_addresses?: string[]
     impact_on_install?: "create" | "update" | "internal-update" | "no-op" | "delete" | "ignored" | "error"[]
-    impact_on_install_reason?: string[]
-  }>
+  // ...
 }
 ```
 
@@ -3765,6 +4152,17 @@ type AppBlueprint = {
     preinstall?: string
     postinstall?: string
   }
+  notes?: Array<{
+    id: string
+    text: string
+    created_at: string // date-time
+    created_by?: {
+      name?: { ... }
+      org_id: { ... }
+      user_id?: { ... }
+      token_id?: { ... }
+    }
+  }>
   version?: string
   deployments?: Array<{
     source_org_id?: string
@@ -3846,8 +4244,7 @@ type AppBlueprint = {
     parent_resource_ids?: string[]
     depends_on_addresses?: string[]
     impact_on_install?: "create" | "update" | "internal-update" | "no-op" | "delete" | "ignored" | "error"[]
-    impact_on_install_reason?: string[]
-  }>
+  // ...
 }
 ```
 
@@ -3862,6 +4259,17 @@ type Blueprint = {
     preinstall?: string
     postinstall?: string
   }
+  notes?: Array<{
+    id: string
+    text: string
+    created_at: string // date-time
+    created_by?: {
+      name?: { ... }
+      org_id: { ... }
+      user_id?: { ... }
+      token_id?: { ... }
+    }
+  }>
   version?: string
   deployments?: Array<{
     source_org_id?: string
@@ -3943,17 +4351,6 @@ type Blueprint = {
     depends_on_addresses?: string[]
     impact_on_install?: "create" | "update" | "internal-update" | "no-op" | "delete" | "ignored" | "error"[]
     impact_on_install_reason?: string[]
-  }>
-  source_type?: "custom"
-} | {
-  id?: string
-  title: string
-  slug?: string
-  description?: {
-    preinstall?: string
-    postinstall?: string
-  }
-  version?: string
   // ...
 }
 ```
@@ -4131,6 +4528,7 @@ type BulkInstall = {
   slug?: string
   options?: {
     resources_to_ignore?: string[]
+    sync_notes?: boolean
   }
   created_at?: string // date-time
   updated_at?: string // date-time
@@ -4245,6 +4643,7 @@ type BulkInstallCreateRequest = {
   slug?: string
   options?: {
     resources_to_ignore?: string[]
+    sync_notes?: boolean
   }
   targets: Array<{
     destination_org_id: string
@@ -4340,6 +4739,150 @@ type RestoreOutcomeItem = {
     blueprint_id: string
     title?: string
   }>
+}
+```
+
+### `HealthFinding`
+
+```ts
+type HealthFinding = {
+  check_id: "live_readability" | "referential_integrity" | "install_completeness" | "schema_consistency" | "mapping_integrity" | "execution_readiness" | "catalog_hygiene" | "spec_conformance"
+  code: "missing_in_destination" | "fetch_error" | "no_readback" | "unreplaced_source_reference" | "broken_internal_reference" | "dropped_at_install" | "orphaned_group_reference" | "uuid_group_label" | "unreachable_attribute_purpose" | "duplicate_attribute_name" | "duplicate_headline" | "broken_mapping_reference" | "stale_mapping_version" | "mapping_slot_mismatch" | "mapping_parity_mismatch" | "stale_lineage" | "broken_trigger_reference" | "broken_action_reference" | "broken_workflow_step" | "invalid_mapping_target" | "invalid_mapping_source" | "invalid_mapping_version" | "unknown_mapping_attribute" | "workflow_edge_limit" | "dead_purpose_reference" | "broken_portal_reference" | "orphaned_portal_block" | "broken_closing_reason" | "broken_journey_settings" | "unresolved_assignee" | "current_write_invalid" | "duplicate_live_resource" | "missing_file_content" | "file_etag_mismatch" | "incomplete_webhook" | "broken_template_reference" | "orphaned_price" | "duplicate_price" | "inactive_price_in_use" | "cross_org_reference"
+  severity: "error" | "warning" | "info"
+  resource_type: string
+  lineage_id: string
+  target_id?: string
+  resource_name?: string
+  message: string
+  verdict?: string
+  evidence?: {
+    path?: string
+    referenced_id?: string
+    referenced_type?: string
+    referenced_name?: string
+    referenced_lineage_id?: string
+    expected_target_id?: string
+    reference_kind?: string
+    operation?: string
+    rejection_reason?: string
+    error_message?: string
+    response_status?: number
+  }
+}
+```
+
+### `HealthCheckCoverage`
+
+```ts
+type HealthCheckCoverage = {
+  check_id: "live_readability" | "referential_integrity" | "install_completeness" | "schema_consistency" | "mapping_integrity" | "execution_readiness" | "spec_conformance"
+  status: "completed" | "partial" | "skipped" | "not_applicable"
+  scope: "tracked_resources" | "org_wide" | "source_comparison"
+  resources_considered: number
+  details: string[]
+}
+```
+
+### `HealthResourceTypeCoverage`
+
+```ts
+type HealthResourceTypeCoverage = {
+  resource_type: string
+  tracked: number
+  readable_by_lineage: number
+  missing_by_lineage: number
+  read_errors: number
+  unchecked: number
+  specialized_checks: "live_readability" | "referential_integrity" | "install_completeness" | "schema_consistency" | "mapping_integrity" | "execution_readiness" | "spec_conformance"[]
+  known_blind_spots: string[]
+}
+```
+
+### `HealthScanCoverage`
+
+```ts
+type HealthScanCoverage = {
+  checks: Array<{
+    check_id: "live_readability" | "referential_integrity" | "install_completeness" | "schema_consistency" | "mapping_integrity" | "execution_readiness" | "spec_conformance"
+    status: "completed" | "partial" | "skipped" | "not_applicable"
+    scope: "tracked_resources" | "org_wide" | "source_comparison"
+    resources_considered: number
+    details: string[]
+  }>
+  resource_types: Array<{
+    resource_type: string
+    tracked: number
+    readable_by_lineage: number
+    missing_by_lineage: number
+    read_errors: number
+    unchecked: number
+    specialized_checks: "live_readability" | "referential_integrity" | "install_completeness" | "schema_consistency" | "mapping_integrity" | "execution_readiness" | "spec_conformance"[]
+    known_blind_spots: string[]
+  }>
+}
+```
+
+### `DeploymentHealthReport`
+
+```ts
+type DeploymentHealthReport = {
+  status: "running" | "completed" | "failed"
+  job_id: string
+  blueprint_instance_id: string
+  destination_org_id: string
+  generated_at: string // date-time
+  html_url?: string
+  summary?: {
+    resources_scanned?: number
+    unchecked?: number
+    errors?: number
+    warnings?: number
+    infos?: number
+  }
+  findings?: Array<{
+    check_id: "live_readability" | "referential_integrity" | "install_completeness" | "schema_consistency" | "mapping_integrity" | "execution_readiness" | "catalog_hygiene" | "spec_conformance"
+    code: "missing_in_destination" | "fetch_error" | "no_readback" | "unreplaced_source_reference" | "broken_internal_reference" | "dropped_at_install" | "orphaned_group_reference" | "uuid_group_label" | "unreachable_attribute_purpose" | "duplicate_attribute_name" | "duplicate_headline" | "broken_mapping_reference" | "stale_mapping_version" | "mapping_slot_mismatch" | "mapping_parity_mismatch" | "stale_lineage" | "broken_trigger_reference" | "broken_action_reference" | "broken_workflow_step" | "invalid_mapping_target" | "invalid_mapping_source" | "invalid_mapping_version" | "unknown_mapping_attribute" | "workflow_edge_limit" | "dead_purpose_reference" | "broken_portal_reference" | "orphaned_portal_block" | "broken_closing_reason" | "broken_journey_settings" | "unresolved_assignee" | "current_write_invalid" | "duplicate_live_resource" | "missing_file_content" | "file_etag_mismatch" | "incomplete_webhook" | "broken_template_reference" | "orphaned_price" | "duplicate_price" | "inactive_price_in_use" | "cross_org_reference"
+    severity: "error" | "warning" | "info"
+    resource_type: string
+    lineage_id: string
+    target_id?: string
+    resource_name?: string
+    message: string
+    verdict?: string
+    evidence?: {
+      path?: { ... }
+      referenced_id?: { ... }
+      referenced_type?: { ... }
+      referenced_name?: { ... }
+      referenced_lineage_id?: { ... }
+      expected_target_id?: { ... }
+      reference_kind?: { ... }
+      operation?: { ... }
+      rejection_reason?: { ... }
+      error_message?: { ... }
+      response_status?: { ... }
+    }
+  }>
+  coverage?: {
+    checks: Array<{
+      check_id: { ... }
+      status: { ... }
+      scope: { ... }
+      resources_considered: { ... }
+      details: { ... }
+    }>
+    resource_types: Array<{
+      resource_type: { ... }
+      tracked: { ... }
+      readable_by_lineage: { ... }
+      missing_by_lineage: { ... }
+      read_errors: { ... }
+      unchecked: { ... }
+      specialized_checks: { ... }
+      known_blind_spots: { ... }
+    }>
+  }
+  error?: string
 }
 ```
 
@@ -4723,6 +5266,7 @@ type BlueprintJobEvent = {
 ```ts
 type BlueprintInstallationJobOptions = {
   resources_to_ignore?: string[]
+  sync_notes?: boolean
 }
 ```
 
