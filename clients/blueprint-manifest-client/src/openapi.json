@@ -1105,6 +1105,136 @@
         }
       }
     },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}/notes": {
+      "post": {
+        "operationId": "addBlueprintNote",
+        "summary": "addBlueprintNote",
+        "description": "Append an internal note to a blueprint. `id`, `created_at` and `created_by`\nare stamped server-side from the caller, so notes cannot be backdated or\nattributed to someone else. Existing notes are never modified.\n",
+        "tags": [
+          "Blueprints"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id",
+            "schema": {
+              "$ref": "#/components/schemas/BlueprintID"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "text"
+                ],
+                "properties": {
+                  "text": {
+                    "type": "string",
+                    "description": "Plain-text note body. Must not be blank.",
+                    "minLength": 1
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The created note",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintNote"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Blank note text",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}/notes/{note_id}": {
+      "delete": {
+        "operationId": "deleteBlueprintNote",
+        "summary": "deleteBlueprintNote",
+        "description": "Remove a single internal note from a blueprint.",
+        "tags": [
+          "Blueprints"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id",
+            "schema": {
+              "$ref": "#/components/schemas/BlueprintID"
+            }
+          },
+          {
+            "in": "path",
+            "required": true,
+            "name": "note_id",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The blueprint's remaining notes",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "notes": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/BlueprintNote"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Blueprint or note not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v2/blueprint-manifest/blueprints/{blueprint_id}/validate": {
       "post": {
         "operationId": "validateBlueprint",
@@ -1208,7 +1338,11 @@
                     "description": "Auth token with access to the destination org. Required for cross-org verification when the caller token only has access to the source org. If not provided, the caller's bearer token is used for both orgs."
                   },
                   "installation_job_id": {
-                    "$ref": "#/components/schemas/BlueprintJobID",
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/BlueprintJobID"
+                      }
+                    ],
                     "description": "Optional install job this verification is checking. If omitted, the latest destination blueprint installation job is used when available."
                   },
                   "sync_engine": {
@@ -2944,6 +3078,63 @@
         }
       }
     },
+    "/v3/blueprint-manifest/blueprints:pre-install": {
+      "post": {
+        "operationId": "preInstallBlueprintV3",
+        "summary": "Preview a V3 blueprint package before installation",
+        "description": "Validates a signed V3 package and returns the destination-specific resource plan used by the install UI.",
+        "tags": [
+          "Blueprints"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "blueprint_file"
+                ],
+                "properties": {
+                  "blueprint_file": {
+                    "type": "string",
+                    "description": "S3 key of a V3 blueprint package previously uploaded through uploadManifest"
+                  },
+                  "source_blueprint_type": {
+                    "type": "string",
+                    "enum": [
+                      "marketplace"
+                    ]
+                  },
+                  "slug": {
+                    "type": "string",
+                    "description": "Marketplace slug to preserve across updates"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Destination-specific V3 blueprint preview",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintPreview"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request or unsupported V3 package"
+          },
+          "404": {
+            "description": "Blueprint package not found"
+          }
+        }
+      }
+    },
     "/v3/blueprint-manifest/blueprint:install": {
       "post": {
         "operationId": "installBlueprintV3",
@@ -2994,6 +3185,12 @@
                     "type": "string",
                     "description": "Auth token for the destination org. Required for cross-org installs where the caller's token belongs to the source org. Defaults to the caller's bearer token."
                   },
+                  "source_blueprint_type": {
+                    "type": "string",
+                    "enum": [
+                      "marketplace"
+                    ]
+                  },
                   "options": {
                     "$ref": "#/components/schemas/BlueprintInstallationJobOptions"
                   },
@@ -3012,7 +3209,9 @@
                 "sameOrgPlanThenContinue": {
                   "summary": "Same-org install, manual approval (default)",
                   "value": {
-                    "source_blueprint_id": "11111111-1111-1111-1111-111111111111"
+                    "source_org_id": "source-org-id",
+                    "source_blueprint_id": "11111111-1111-1111-1111-111111111111",
+                    "destination_org_id": "source-org-id"
                   }
                 },
                 "crossOrgAutoApply": {
@@ -3182,6 +3381,121 @@
           },
           "404": {
             "description": "Blueprint or deployment not found."
+          }
+        }
+      }
+    },
+    "/v3/blueprint-manifest/blueprints/{blueprint_id}/deployments/{job_id}:health-check": {
+      "post": {
+        "operationId": "triggerDeploymentHealthCheckV3",
+        "summary": "Run a health check on a deployment",
+        "description": "Starts a read-only health scan of the resources this deployment's\nblueprint instance tracks in the destination org (see\ndocs/rfcs/RFC-org-health-check.md, Phase 0). Checks:\n\n  - live readability — every lineage-tracked resource is read back\n    via its adapter; tracked-but-unreadable resources are flagged.\n  - referential integrity — destination payloads containing\n    unreplaced source-org ids, or references to tracked resources\n    that are not readable.\n  - install completeness — install operations whose final attempt\n    ended `failed` or `skipped`, with their rejection reasons.\n\nAsync — returns 202 immediately with a `running` report stub. Poll\nthe health-report endpoint until `status` is `completed` or\n`failed`. Never mutates any resource.\n",
+        "tags": [
+          "Blueprints"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "blueprint_id",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/BlueprintID"
+            }
+          },
+          {
+            "in": "path",
+            "name": "job_id",
+            "required": true,
+            "description": "The install job whose deployment is being checked.",
+            "schema": {
+              "$ref": "#/components/schemas/BlueprintJobID"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "source_org_id": {
+                    "type": "string",
+                    "description": "Source/sandbox org to deep-compare entity mappings against."
+                  },
+                  "source_auth_token": {
+                    "type": "string",
+                    "description": "Read token for the source org. Never persisted; used only for this scan."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Health check started",
+            "headers": {
+              "Location": {
+                "description": "URL to poll the health report",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeploymentHealthReport"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Blueprint not found, or no deployment with the given job_id on this blueprint."
+          }
+        }
+      }
+    },
+    "/v3/blueprint-manifest/blueprints/{blueprint_id}/deployments/{job_id}/health-report": {
+      "get": {
+        "operationId": "getDeploymentHealthReportV3",
+        "summary": "Get the latest health report of a deployment",
+        "description": "Returns the most recent health report produced for this deployment\nby the `:health-check` endpoint. Idempotent and side-effect free.\n",
+        "tags": [
+          "Blueprints"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "blueprint_id",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/BlueprintID"
+            }
+          },
+          {
+            "in": "path",
+            "name": "job_id",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/BlueprintJobID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Latest health report",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeploymentHealthReport"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No health report exists for this deployment yet."
           }
         }
       }
@@ -3874,6 +4188,34 @@
           }
         ]
       },
+      "BlueprintNote": {
+        "type": "object",
+        "description": "A single internal note on a blueprint.",
+        "required": [
+          "id",
+          "text",
+          "created_at"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Server-generated note id.",
+            "example": "3f1c9b0e-2f3a-4a1f-9a3e-6f2b8c7d1e40"
+          },
+          "text": {
+            "type": "string",
+            "description": "Plain-text note body.",
+            "example": "Adjusted the meter-reading journey for the §14a rollout."
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "created_by": {
+            "$ref": "#/components/schemas/CallerIdentity"
+          }
+        }
+      },
       "BlueprintID": {
         "type": "string",
         "description": "ID of a blueprint",
@@ -3909,6 +4251,13 @@
                 "description": "Markdown content to be displayed when showing the plan to install blueprint",
                 "example": "This is the content of the postinstall.md file\n"
               }
+            }
+          },
+          "notes": {
+            "type": "array",
+            "description": "Internal collaboration notes, oldest first. Append-only: each entry is\nstamped with its author and creation time server-side and is never\nrewritten, so the history of who noted what stays intact. Written via\n`addBlueprintNote` / `deleteBlueprintNote`, not by `updateBlueprint`.\n\nAvailable on every blueprint including marketplace ones (whose\n`description` is read-only), and never included in the published\nmarketplace package — see `buildMetadata` in\n`services/blueprint-v3/published-blueprint.ts`. Carried to a\ndestination org only when an install/sync passes\n`options.sync_notes: true`.\n",
+            "items": {
+              "$ref": "#/components/schemas/BlueprintNote"
             }
           },
           "version": {
@@ -5108,6 +5457,344 @@
           }
         }
       },
+      "HealthFinding": {
+        "type": "object",
+        "required": [
+          "check_id",
+          "code",
+          "severity",
+          "resource_type",
+          "lineage_id",
+          "message"
+        ],
+        "properties": {
+          "check_id": {
+            "type": "string",
+            "enum": [
+              "live_readability",
+              "referential_integrity",
+              "install_completeness",
+              "schema_consistency",
+              "mapping_integrity",
+              "execution_readiness",
+              "catalog_hygiene",
+              "spec_conformance"
+            ]
+          },
+          "code": {
+            "type": "string",
+            "enum": [
+              "missing_in_destination",
+              "fetch_error",
+              "no_readback",
+              "unreplaced_source_reference",
+              "broken_internal_reference",
+              "dropped_at_install",
+              "orphaned_group_reference",
+              "uuid_group_label",
+              "unreachable_attribute_purpose",
+              "duplicate_attribute_name",
+              "duplicate_headline",
+              "broken_mapping_reference",
+              "stale_mapping_version",
+              "mapping_slot_mismatch",
+              "mapping_parity_mismatch",
+              "stale_lineage",
+              "broken_trigger_reference",
+              "broken_action_reference",
+              "broken_workflow_step",
+              "invalid_mapping_target",
+              "invalid_mapping_source",
+              "invalid_mapping_version",
+              "unknown_mapping_attribute",
+              "workflow_edge_limit",
+              "dead_purpose_reference",
+              "broken_portal_reference",
+              "orphaned_portal_block",
+              "broken_closing_reason",
+              "broken_journey_settings",
+              "unresolved_assignee",
+              "current_write_invalid",
+              "duplicate_live_resource",
+              "missing_file_content",
+              "file_etag_mismatch",
+              "incomplete_webhook",
+              "broken_template_reference",
+              "orphaned_price",
+              "duplicate_price",
+              "inactive_price_in_use",
+              "cross_org_reference"
+            ]
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "error",
+              "warning",
+              "info"
+            ]
+          },
+          "resource_type": {
+            "type": "string"
+          },
+          "lineage_id": {
+            "type": "string"
+          },
+          "target_id": {
+            "type": "string"
+          },
+          "resource_name": {
+            "type": "string",
+            "description": "Human-readable name of the affected resource"
+          },
+          "message": {
+            "type": "string"
+          },
+          "verdict": {
+            "type": "string",
+            "description": "Mechanical root-cause classification and suggested fix, when determinable"
+          },
+          "evidence": {
+            "type": "object",
+            "description": "Check-specific evidence, e.g. the JSON path and referenced id of a broken reference.",
+            "properties": {
+              "path": {
+                "type": "string"
+              },
+              "referenced_id": {
+                "type": "string"
+              },
+              "referenced_type": {
+                "type": "string"
+              },
+              "referenced_name": {
+                "type": "string",
+                "description": "Human-readable name or logical slug of the referenced source resource"
+              },
+              "referenced_lineage_id": {
+                "type": "string",
+                "description": "Logical source lineage identity of the referenced resource"
+              },
+              "expected_target_id": {
+                "type": "string",
+                "description": "Destination id that should have replaced the source reference"
+              },
+              "reference_kind": {
+                "type": "string",
+                "description": "Human-readable description of the exact field carrying the reference"
+              },
+              "operation": {
+                "type": "string"
+              },
+              "rejection_reason": {
+                "type": "string"
+              },
+              "error_message": {
+                "type": "string"
+              },
+              "response_status": {
+                "type": "integer"
+              }
+            }
+          }
+        }
+      },
+      "HealthCheckCoverage": {
+        "type": "object",
+        "required": [
+          "check_id",
+          "status",
+          "scope",
+          "resources_considered",
+          "details"
+        ],
+        "properties": {
+          "check_id": {
+            "type": "string",
+            "enum": [
+              "live_readability",
+              "referential_integrity",
+              "install_completeness",
+              "schema_consistency",
+              "mapping_integrity",
+              "execution_readiness",
+              "spec_conformance"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "completed",
+              "partial",
+              "skipped",
+              "not_applicable"
+            ]
+          },
+          "scope": {
+            "type": "string",
+            "enum": [
+              "tracked_resources",
+              "org_wide",
+              "source_comparison"
+            ]
+          },
+          "resources_considered": {
+            "type": "integer"
+          },
+          "details": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "HealthResourceTypeCoverage": {
+        "type": "object",
+        "required": [
+          "resource_type",
+          "tracked",
+          "readable_by_lineage",
+          "missing_by_lineage",
+          "read_errors",
+          "unchecked",
+          "specialized_checks",
+          "known_blind_spots"
+        ],
+        "properties": {
+          "resource_type": {
+            "type": "string"
+          },
+          "tracked": {
+            "type": "integer"
+          },
+          "readable_by_lineage": {
+            "type": "integer"
+          },
+          "missing_by_lineage": {
+            "type": "integer"
+          },
+          "read_errors": {
+            "type": "integer"
+          },
+          "unchecked": {
+            "type": "integer"
+          },
+          "specialized_checks": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "live_readability",
+                "referential_integrity",
+                "install_completeness",
+                "schema_consistency",
+                "mapping_integrity",
+                "execution_readiness",
+                "spec_conformance"
+              ]
+            }
+          },
+          "known_blind_spots": {
+            "type": "array",
+            "description": "Type-specific contracts the current scanner explicitly does not claim to validate.",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "HealthScanCoverage": {
+        "type": "object",
+        "required": [
+          "checks",
+          "resource_types"
+        ],
+        "properties": {
+          "checks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HealthCheckCoverage"
+            }
+          },
+          "resource_types": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HealthResourceTypeCoverage"
+            }
+          }
+        }
+      },
+      "DeploymentHealthReport": {
+        "type": "object",
+        "required": [
+          "status",
+          "job_id",
+          "blueprint_instance_id",
+          "destination_org_id",
+          "generated_at"
+        ],
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "running",
+              "completed",
+              "failed"
+            ]
+          },
+          "job_id": {
+            "$ref": "#/components/schemas/BlueprintJobID"
+          },
+          "blueprint_instance_id": {
+            "$ref": "#/components/schemas/BlueprintID"
+          },
+          "destination_org_id": {
+            "type": "string"
+          },
+          "generated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "html_url": {
+            "type": "string",
+            "description": "Presigned link to the rendered HTML report (present once the check completed)"
+          },
+          "summary": {
+            "type": "object",
+            "properties": {
+              "resources_scanned": {
+                "type": "integer"
+              },
+              "unchecked": {
+                "type": "integer"
+              },
+              "errors": {
+                "type": "integer"
+              },
+              "warnings": {
+                "type": "integer"
+              },
+              "infos": {
+                "type": "integer"
+              }
+            }
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HealthFinding"
+            }
+          },
+          "coverage": {
+            "$ref": "#/components/schemas/HealthScanCoverage"
+          },
+          "error": {
+            "type": "string",
+            "description": "Failure reason when status is `failed`."
+          }
+        }
+      },
       "RestoreOutcome": {
         "type": "object",
         "properties": {
@@ -5258,7 +5945,11 @@
                 "$ref": "#/components/schemas/BlueprintID"
               },
               "installation_job_id": {
-                "$ref": "#/components/schemas/BlueprintJobID",
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/BlueprintJobID"
+                  }
+                ],
                 "description": "Install job this verification is checking, when known."
               },
               "sync_engine": {
@@ -5497,6 +6188,11 @@
             "items": {
               "type": "string"
             }
+          },
+          "sync_notes": {
+            "description": "When `true`, the source blueprint's `notes` overwrite the destination\nblueprint's `notes`. Defaults to `false`, which leaves the\ndestination's notes untouched.\n",
+            "type": "boolean",
+            "default": false
           }
         }
       },

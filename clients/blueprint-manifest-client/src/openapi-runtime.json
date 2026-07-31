@@ -246,6 +246,43 @@
         "responses": {}
       }
     },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}/notes": {
+      "post": {
+        "operationId": "addBlueprintNote",
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}/notes/{note_id}": {
+      "delete": {
+        "operationId": "deleteBlueprintNote",
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id"
+          },
+          {
+            "in": "path",
+            "required": true,
+            "name": "note_id"
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v2/blueprint-manifest/blueprints/{blueprint_id}/validate": {
       "post": {
         "operationId": "validateBlueprint",
@@ -818,6 +855,18 @@
         "responses": {}
       }
     },
+    "/v3/blueprint-manifest/blueprints:pre-install": {
+      "post": {
+        "operationId": "preInstallBlueprintV3",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v3/blueprint-manifest/blueprint:install": {
       "post": {
         "operationId": "installBlueprintV3",
@@ -851,6 +900,48 @@
     "/v3/blueprint-manifest/blueprints/{blueprint_id}/deployments/{job_id}/restore-preview": {
       "get": {
         "operationId": "getRestorePreview",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "blueprint_id",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "job_id",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v3/blueprint-manifest/blueprints/{blueprint_id}/deployments/{job_id}:health-check": {
+      "post": {
+        "operationId": "triggerDeploymentHealthCheckV3",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "blueprint_id",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "job_id",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v3/blueprint-manifest/blueprints/{blueprint_id}/deployments/{job_id}/health-report": {
+      "get": {
+        "operationId": "getDeploymentHealthReportV3",
         "parameters": [
           {
             "in": "path",
