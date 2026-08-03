@@ -1,7 +1,8 @@
 import { readFileSync, writeFileSync, existsSync, statSync } from 'node:fs';
 import { resolve, extname } from 'node:path';
 import { execSync } from 'node:child_process';
-import { resolveToken } from '../../lib/auth-store.js';
+import { resolveToken, loadCredentials } from '../../lib/auth-store.js';
+import { getResolvedProfile } from '../../lib/profiles.js';
 import { BOLD, RESET, GREEN, RED, YELLOW, DIM } from '../../lib/utils.js';
 
 export interface AppManifest {
@@ -166,6 +167,49 @@ async function request(baseUrl: string, token: string, method: string, path: str
   return text;
 }
 
+/**
+ * Decode a JWT payload without verifying the signature.
+ * Returns null if the token is not a valid JWT.
+ */
+const parseJwtPayload = (token: string): Record<string, unknown> | null => {
+  try {
+    const parts = token.split('.');
+    if (parts.length !== 3) return null;
+    const payload = Buffer.from(parts[1], 'base64url').toString('utf-8');
+    return JSON.parse(payload);
+  } catch {
+    return null;
+  }
+};
+
+/**
+ * Resolve the caller's organization id: token claims first (works for
+ * --token / EPILOT_TOKEN), then the active profile / stored credentials.
+ */
+export function resolveOrgId(tokenFlag?: string, profile?: string): string | undefined {
+  const token = resolveToken(tokenFlag, profile);
+  const claims = token ? parseJwtPayload(token) : null;
+  const fromToken = (claims?.org_id ?? claims?.['custom:ivy_org_id']) as string | undefined;
+  if (fromToken) return fromToken;
+  return getResolvedProfile(profile)?.org_id ?? loadCredentials()?.org_id;
+}
+
+/**
+ * Derive the Permissions API base URL from the App API base URL
+ * (e.g. https://app.sls.epilot.io -> https://permissions.sls.epilot.io).
+ * Returns null if the URL doesn't follow the epilot service naming scheme.
+ */
+export function derivePermissionsBaseUrl(appBaseUrl: string): string | null {
+  try {
+    const url = new URL(appBaseUrl);
+    if (!url.hostname.startsWith('app.')) return null;
+    url.hostname = url.hostname.replace(/^app\./, 'permissions.');
+    return url.origin;
+  } catch {
+    return null;
+  }
+}
+
 export function createAppApiClient(opts: ApiClientOptions) {
   const baseUrl = opts.server ?? DEFAULT_BASE_URL;
 
@@ -207,6 +251,33 @@ export function createAppApiClient(opts: ApiClientOptions) {
     },
     async patchVersion(appId: string, version: string, payload: Record<string, unknown>) {
       await request(baseUrl, getToken(), 'PATCH', `/v1/app-configurations/${appId}/versions/${version}`, payload);
+    },
+    /**
+     * Upsert the app's role in the developer's own organization with the
+     * manifest grants. The role id is attached to the app version via
+     * `role_id`; on installation the App API creates a copy of it (from the
+     * version's grants) in the installer's organization.
+     */
+    async upsertAppRole(params: {
+      orgId: string;
+      appId: string;
+      appName: string;
+      grants: { action: string; resource?: string }[];
+    }): Promise<string> {
+      const permissionsBaseUrl = derivePermissionsBaseUrl(baseUrl);
+      if (!permissionsBaseUrl) {
+        throw new Error(`Cannot derive permissions API URL from ${baseUrl}`);
+      }
+      const roleId = `${params.orgId}:${params.appId}`;
+      await request(permissionsBaseUrl, getToken(), 'PUT', `/v1/permissions/roles/${roleId}`, {
+        id: roleId,
+        organization_id: params.orgId,
+        type: 'user_role',
+        slug: params.appId,
+        name: `Automatically created by App ${params.appName}`,
+        grants: params.grants,
+      });
+      return roleId;
     },
     async cloneVersion(appId: string, version: string) {
       return request(

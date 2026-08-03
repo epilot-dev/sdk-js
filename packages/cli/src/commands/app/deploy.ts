@@ -6,6 +6,7 @@ import {
   writeManifest,
   log,
   createAppApiClient,
+  resolveOrgId,
   uploadFileToPresignedUrl,
   uploadDirectoryAsZip,
   formatFileSize,
@@ -111,12 +112,40 @@ export default defineCommand({
     }
 
     // Step 4: Patch version (permissions, blueprint)
+    // Permissions flow: a role with the manifest grants is upserted in the
+    // developer's own org and attached to the version via role_id. On
+    // installation, the App API creates a copy of the role (from the
+    // version's grants) in the installer's org, subject to their consent.
     if (manifest.permissions?.length || manifest.blueprint?.manifest_id) {
       if (dryRun) {
+        if (manifest.permissions?.length) {
+          log.info('[dry-run] Would upsert app role in developer org');
+        }
         log.info('[dry-run] Would update version permissions/blueprint');
       } else {
+        let roleId: string | undefined;
+        if (manifest.permissions?.length) {
+          const orgId = resolveOrgId(args.token, args.profile);
+          if (orgId) {
+            try {
+              roleId = await client.upsertAppRole({
+                orgId,
+                appId: appId!,
+                appName: manifest.name,
+                grants: manifest.permissions,
+              });
+              log.success(`Upserted app role ${roleId}`);
+            } catch (err) {
+              log.warn(`Could not upsert app role: ${(err as Error).message}`);
+            }
+          } else {
+            log.warn('Could not resolve org id — attaching grants without a developer-org role');
+          }
+        }
         await client.patchVersion(appId!, targetVersion, {
-          ...(manifest.permissions?.length ? { grants: manifest.permissions } : {}),
+          ...(manifest.permissions?.length
+            ? { grants: manifest.permissions, ...(roleId ? { role_id: roleId } : {}) }
+            : {}),
           ...(manifest.blueprint?.manifest_id ? { manifest_id: manifest.blueprint.manifest_id } : {}),
         });
         log.success(`Updated version ${targetVersion} (permissions/blueprint)`);
