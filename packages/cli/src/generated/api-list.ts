@@ -560,7 +560,7 @@ export const API_LIST: ApiInfo[] = [
     kebabName: 'entity',
     title: 'Entity API',
     serverUrl: 'https://entity.sls.epilot.io',
-    operationCount: 87,
+    operationCount: 88,
     operationIds: [
       'listSchemas',
       'listSchemasV2',
@@ -607,6 +607,7 @@ export const API_LIST: ApiInfo[] = [
       'deleteRelation',
       'exportEntities',
       'importEntities',
+      'abortEntityImport',
       'listSavedViews',
       'createSavedView',
       'getSavedView',
