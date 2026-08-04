@@ -1314,6 +1314,7 @@ const { data } = await client.listInstallations({
       "owner_org_id": "string",
       "enabled": true,
       "name": "string",
+      "icon_url": "string",
       "option_values": [
         {
           "component_id": "string",
@@ -1394,6 +1395,7 @@ const { data } = await client.getInstallation({
   "owner_org_id": "string",
   "enabled": true,
   "name": "string",
+  "icon_url": "string",
   "option_values": [
     {
       "component_id": "string",
@@ -1484,6 +1486,7 @@ const { data } = await client.install(
   "owner_org_id": "string",
   "enabled": true,
   "name": "string",
+  "icon_url": "string",
   "option_values": [
     {
       "component_id": "string",
@@ -1603,6 +1606,7 @@ const { data } = await client.promoteVersion({
   "owner_org_id": "string",
   "enabled": true,
   "name": "string",
+  "icon_url": "string",
   "option_values": [
     {
       "component_id": "string",
@@ -3418,6 +3422,7 @@ type Installation = {
   owner_org_id?: string
   enabled: boolean
   name: string
+  icon_url?: string
   option_values?: Array<{
     component_id: string
     options: Array<{

@@ -1215,6 +1215,10 @@ export declare namespace Components {
              */
             name: string;
             /**
+             * Public URL of the app logo, if one has been uploaded
+             */
+            icon_url?: string;
+            /**
              * Configuration values for the app components
              */
             option_values?: OptionsRef[];
