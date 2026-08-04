@@ -4114,6 +4114,84 @@ declare namespace Components {
         export interface ComputedPriceComponents {
             [name: string]: /* The computed price */ ComputedBasePrice;
         }
+        /**
+         * An error from a conditional-pricing operation, carrying a machine-readable `code`
+         * from the conditional-pricing vocabulary plus any structured data about the failure,
+         * so a client can branch on the kind of failure rather than parse the message.
+         * Referenced only by the operations that emit these codes; every other operation
+         * keeps the plain `Error` shape.
+         *
+         */
+        export interface ConditionalPricingError {
+            /**
+             * Error message
+             */
+            message: string;
+            /**
+             * The HTTP status code
+             */
+            status?: number;
+            /**
+             * The cause of the error (visible for bad requests - http 400)
+             */
+            cause?: string;
+            /**
+             * The error message. Carries the same string as `message`, which the shared `Error`
+             * schema requires — `error` is the field responses have always used, and every caller
+             * to date reads. Declared here rather than on the shared `Error` because a request
+             * validation failure puts a list of validation errors in this field instead of a
+             * string, and those responses reference `Error` directly.
+             *
+             */
+            error?: string;
+            code?: /**
+             * Machine-readable failure mode of a conditional-pricing operation, allowing clients
+             * to branch on the kind of failure instead of parsing the error message.
+             *
+             * - `NOT_FOUND` (404): the addressed entity, variant or version does not exist
+             * - `AMBIGUOUS_RESOLUTION` (409): several variants match the given context while a single result was requested
+             * - `TUPLE_CONFLICT` (409): the condition tuple is already claimed by another variant
+             * - `VERSION_CONFLICT` (409): a version already exists at the given `valid_from` on that variant
+             * - `SUPERSEDED_VERSION` (409): the addressed version has been superseded
+             * - `CONDITION_UNDEFINED` (400): the context names a condition the entity's schema does not define
+             * - `OPERATOR_UNSUPPORTED` (400): the requested operator is not applicable to the condition's type
+             * - `CONTEXT_FORMAT_INVALID` (400): a context value is malformed for its condition type
+             * - `TOO_MANY_MATCHES` (400): a multi-match resolve exceeded its result cap
+             * - `WRITE_CONFLICT` (409): transient write contention, retryable unlike `TUPLE_CONFLICT`
+             *
+             * Each code is emitted with the HTTP status shown above, and only with that status.
+             *
+             */
+            ConditionalPricingErrorCode;
+            /**
+             * Structured data about the failure, shaped by the accompanying `code`
+             * (e.g. the candidate variants of an `ambiguous-resolution`). Only present
+             * when the failure has structured data to report, and never without a `code`.
+             *
+             */
+            details?: {
+                [name: string]: any;
+            };
+        }
+        /**
+         * Machine-readable failure mode of a conditional-pricing operation, allowing clients
+         * to branch on the kind of failure instead of parsing the error message.
+         *
+         * - `NOT_FOUND` (404): the addressed entity, variant or version does not exist
+         * - `AMBIGUOUS_RESOLUTION` (409): several variants match the given context while a single result was requested
+         * - `TUPLE_CONFLICT` (409): the condition tuple is already claimed by another variant
+         * - `VERSION_CONFLICT` (409): a version already exists at the given `valid_from` on that variant
+         * - `SUPERSEDED_VERSION` (409): the addressed version has been superseded
+         * - `CONDITION_UNDEFINED` (400): the context names a condition the entity's schema does not define
+         * - `OPERATOR_UNSUPPORTED` (400): the requested operator is not applicable to the condition's type
+         * - `CONTEXT_FORMAT_INVALID` (400): a context value is malformed for its condition type
+         * - `TOO_MANY_MATCHES` (400): a multi-match resolve exceeded its result cap
+         * - `WRITE_CONFLICT` (409): transient write contention, retryable unlike `TUPLE_CONFLICT`
+         *
+         * Each code is emitted with the HTTP status shown above, and only with that status.
+         *
+         */
+        export type ConditionalPricingErrorCode = "NOT_FOUND" | "AMBIGUOUS_RESOLUTION" | "TUPLE_CONFLICT" | "VERSION_CONFLICT" | "SUPERSEDED_VERSION" | "CONDITION_UNDEFINED" | "OPERATOR_UNSUPPORTED" | "CONTEXT_FORMAT_INVALID" | "TOO_MANY_MATCHES" | "WRITE_CONFLICT";
         export type ConsumptionTypeGetAg = "household" | "heating_pump" | "night_storage_heating" | "night_storage_heating_common_meter";
         /**
          * The coupon entity
@@ -9780,12 +9858,49 @@ declare namespace Components {
              *   "_updated_at": "2021-02-09T12:41:43.662Z"
              * }
              */
-            Tax;
+            Tax | /**
+             * A minimal, ad-hoc tax rate for line items with no backing tax entity
+             * in the catalog (e.g. a fully custom/composite price component built
+             * by a client with no product/price reference to resolve tax from).
+             * Mirrors how PriceItem relates to Price: unlike Tax, this has no
+             * entity identity — it isn't persisted and can't be looked up by _id,
+             * so it can't be shared/reused across price items the way a catalog
+             * Tax can.
+             *
+             * example:
+             * {
+             *   "rate": 19,
+             *   "type": "VAT",
+             *   "description": "Custom 19% VAT"
+             * }
+             */
+            TaxItem;
         }
         export interface TaxBreakdownInfo {
             rate?: number | null;
             type?: "VAT" | "GST" | "Custom";
             _id?: string;
+        }
+        /**
+         * A minimal, ad-hoc tax rate for line items with no backing tax entity
+         * in the catalog (e.g. a fully custom/composite price component built
+         * by a client with no product/price reference to resolve tax from).
+         * Mirrors how PriceItem relates to Price: unlike Tax, this has no
+         * entity identity — it isn't persisted and can't be looked up by _id,
+         * so it can't be shared/reused across price items the way a catalog
+         * Tax can.
+         *
+         * example:
+         * {
+         *   "rate": 19,
+         *   "type": "VAT",
+         *   "description": "Custom 19% VAT"
+         * }
+         */
+        export interface TaxItem {
+            type: "VAT" | "GST" | "Custom";
+            rate: number | null;
+            description?: string;
         }
         export interface TierDetails {
             quantity: number;
@@ -12037,6 +12152,8 @@ export type ComputePriceResult = Components.Schemas.ComputePriceResult;
 export type ComputedBasePrice = Components.Schemas.ComputedBasePrice;
 export type ComputedPriceBreakdown = Components.Schemas.ComputedPriceBreakdown;
 export type ComputedPriceComponents = Components.Schemas.ComputedPriceComponents;
+export type ConditionalPricingError = Components.Schemas.ConditionalPricingError;
+export type ConditionalPricingErrorCode = Components.Schemas.ConditionalPricingErrorCode;
 export type ConsumptionTypeGetAg = Components.Schemas.ConsumptionTypeGetAg;
 export type Coupon = Components.Schemas.Coupon;
 export type CouponItem = Components.Schemas.CouponItem;
@@ -12141,6 +12258,7 @@ export type TaxAmount = Components.Schemas.TaxAmount;
 export type TaxAmountBreakdown = Components.Schemas.TaxAmountBreakdown;
 export type TaxAmountDto = Components.Schemas.TaxAmountDto;
 export type TaxBreakdownInfo = Components.Schemas.TaxBreakdownInfo;
+export type TaxItem = Components.Schemas.TaxItem;
 export type TierDetails = Components.Schemas.TierDetails;
 export type TotalDetails = Components.Schemas.TotalDetails;
 export type TypeGetAg = Components.Schemas.TypeGetAg;
