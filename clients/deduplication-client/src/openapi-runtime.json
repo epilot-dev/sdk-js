@@ -39,6 +39,79 @@
         ],
         "responses": {}
       }
+    },
+    "/v1/detect-duplicates": {
+      "post": {
+        "operationId": "detectDuplicates",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/uniqueness-criteria": {
+      "get": {
+        "operationId": "listUniquenessCriteria",
+        "parameters": [
+          {
+            "name": "schema",
+            "in": "query",
+            "required": false
+          }
+        ],
+        "responses": {}
+      },
+      "post": {
+        "operationId": "createUniquenessCriteria",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/uniqueness-criteria/{schema}": {
+      "get": {
+        "operationId": "getUniquenessCriteria",
+        "parameters": [
+          {
+            "name": "schema",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      },
+      "put": {
+        "operationId": "updateUniquenessCriteria",
+        "parameters": [
+          {
+            "name": "schema",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteUniquenessCriteria",
+        "parameters": [
+          {
+            "name": "schema",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
     }
   },
   "components": {},
