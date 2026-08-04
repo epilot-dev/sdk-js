@@ -4915,6 +4915,11 @@
             "description": "Name of the app",
             "readOnly": true
           },
+          "icon_url": {
+            "type": "string",
+            "description": "Public URL of the app logo, if one has been uploaded",
+            "readOnly": true
+          },
           "option_values": {
             "type": "array",
             "items": {
