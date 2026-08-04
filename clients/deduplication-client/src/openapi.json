@@ -102,6 +102,193 @@
           }
         }
       }
+    },
+    "/v1/detect-duplicates": {
+      "post": {
+        "operationId": "detectDuplicates",
+        "summary": "detectDuplicates",
+        "description": "Detects potential duplicate entities for the given entity using the schema's prioritized uniqueness rules. Returns matches with a confidence score.",
+        "tags": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DetectDuplicatesRequestBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Potential duplicates ranked by rule priority",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DetectDuplicatesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/uniqueness-criteria": {
+      "get": {
+        "operationId": "listUniquenessCriteria",
+        "summary": "listUniquenessCriteria",
+        "description": "Lists UniquenessCriteria for the requesting organization. Optionally filtered by schema.",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "schema",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter results to a specific entity schema."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Array of UniquenessCriteria records",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UniquenessCriteriaListResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "createUniquenessCriteria",
+        "summary": "createUniquenessCriteria",
+        "description": "Creates a new UniquenessCriteria record.",
+        "tags": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UniquenessCriteriaCreateBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created record",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UniquenessCriteria"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/uniqueness-criteria/{schema}": {
+      "get": {
+        "operationId": "getUniquenessCriteria",
+        "summary": "getUniquenessCriteria",
+        "description": "Fetch a single UniquenessCriteria record.",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "schema",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Entity schema slug."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The criteria record",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UniquenessCriteria"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Record not found"
+          }
+        }
+      },
+      "put": {
+        "operationId": "updateUniquenessCriteria",
+        "summary": "updateUniquenessCriteria",
+        "description": "Replace the matchRules on an existing UniquenessCriteria record.",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "schema",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Entity schema slug."
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UniquenessCriteriaUpdateBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated record",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UniquenessCriteria"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Record not found"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteUniquenessCriteria",
+        "summary": "deleteUniquenessCriteria",
+        "description": "Delete a UniquenessCriteria record.",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "schema",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Entity schema slug."
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Record deleted"
+          },
+          "404": {
+            "description": "Record not found"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -120,20 +307,26 @@
           "type": "object",
           "properties": {
             "toKeep": {
-              "type": "string"
+              "type": "string",
+              "minLength": 1,
+              "description": "Entity id to keep and merge the duplicates into"
             },
             "toDelete": {
               "type": "array",
               "items": {
-                "type": "string"
-              }
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 1,
+              "description": "Non-empty list of duplicate entity ids to merge into toKeep and delete"
             }
           },
           "required": [
             "toKeep",
             "toDelete"
           ]
-        }
+        },
+        "minItems": 1
       },
       "DeduplicateRequestResponse": {
         "type": "array",
@@ -303,6 +496,205 @@
           "updatedAt"
         ],
         "description": "Represents an async deduplication job"
+      },
+      "DetectDuplicatesRequestBody": {
+        "type": "object",
+        "properties": {
+          "schema": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Entity schema to search (e.g. 'contact'). Must have UniquenessCriteria configured for the calling org."
+          },
+          "entity": {
+            "type": "object",
+            "additionalProperties": {},
+            "description": "The entity to look up potential duplicates for. Attribute values are extracted from this entity per the schema's match rules; system fields such as '_id' are supported. A rule is evaluated when at least one of its attributes resolves to a non-empty value on this entity; attributes without a value require candidates to also lack a value for them."
+          }
+        },
+        "required": [
+          "schema",
+          "entity"
+        ]
+      },
+      "DetectDuplicatesResponse": {
+        "type": "object",
+        "properties": {
+          "matches": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DetectedDuplicateMatch"
+            }
+          }
+        },
+        "required": [
+          "matches"
+        ]
+      },
+      "DetectedDuplicateMatch": {
+        "type": "object",
+        "properties": {
+          "entity": {
+            "$ref": "#/components/schemas/Entity"
+          },
+          "confidence": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "Confidence score for the match, between 0 and 1."
+          },
+          "matched_attributes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "description": "Names of the attributes that matched on the rule that produced this hit."
+          }
+        },
+        "required": [
+          "entity",
+          "confidence",
+          "matched_attributes"
+        ]
+      },
+      "UniquenessCriteriaListResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UniquenessCriteria"
+            }
+          }
+        },
+        "required": [
+          "items"
+        ]
+      },
+      "UniquenessCriteria": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Unique identifier of the criteria record."
+          },
+          "orgId": {
+            "type": "string",
+            "description": "Organization the criteria belong to."
+          },
+          "schema": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Entity schema these criteria apply to (e.g. 'contact')."
+          },
+          "matchRules": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MatchRule"
+            },
+            "minItems": 1,
+            "description": "Ordered list of match rules. Order is the evaluation priority."
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "ISO 8601 timestamp of record creation.",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "ISO 8601 timestamp of last update.",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "orgId",
+          "schema",
+          "matchRules",
+          "createdAt",
+          "updatedAt"
+        ],
+        "description": "Defines what makes an entity of a given schema unique within an organization."
+      },
+      "MatchRule": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 100,
+            "description": "Optional human-readable label for the rule. Purely descriptive; not used during matching."
+          },
+          "attributes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MatchAttribute"
+            },
+            "minItems": 1,
+            "description": "Attributes that must all match for this rule to fire. Attributes without a value on the source entity must also have no value on a matching candidate."
+          },
+          "confidence": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "Confidence assigned to matches produced by this rule, between 0 and 1."
+          }
+        },
+        "required": [
+          "attributes",
+          "confidence"
+        ],
+        "description": "One way to identify the same entity. Evaluated in order; first rule whose attributes are all available and that returns hits wins."
+      },
+      "MatchAttribute": {
+        "type": "object",
+        "properties": {
+          "attribute": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Name of the entity attribute to match on. Its query path is resolved from the entity schema at query time."
+          }
+        },
+        "required": [
+          "attribute"
+        ],
+        "description": "One attribute participating in a match rule. Wrapped as an object so per-attribute options can be added later."
+      },
+      "UniquenessCriteriaCreateBody": {
+        "type": "object",
+        "properties": {
+          "schema": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Entity schema these criteria apply to."
+          },
+          "matchRules": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MatchRule"
+            },
+            "minItems": 1
+          }
+        },
+        "required": [
+          "schema",
+          "matchRules"
+        ]
+      },
+      "UniquenessCriteriaUpdateBody": {
+        "type": "object",
+        "properties": {
+          "matchRules": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MatchRule"
+            },
+            "minItems": 1
+          }
+        },
+        "required": [
+          "matchRules"
+        ]
       }
     }
   },
