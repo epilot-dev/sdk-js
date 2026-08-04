@@ -66,7 +66,9 @@ const { data } = await pricingClient.$calculatePricingDetails(...)
 
 **Schemas**
 - [`IntegrationId`](#integrationid)
+- [`ConditionalPricingErrorCode`](#conditionalpricingerrorcode)
 - [`Error`](#error)
+- [`ConditionalPricingError`](#conditionalpricingerror)
 - [`Product`](#product)
 - [`Opportunity`](#opportunity)
 - [`Order`](#order)
@@ -178,6 +180,7 @@ const { data } = await pricingClient.$calculatePricingDetails(...)
 - [`EntityItem`](#entityitem)
 - [`EntityRelation`](#entityrelation)
 - [`Tax`](#tax)
+- [`TaxItem`](#taxitem)
 - [`TaxBreakdownInfo`](#taxbreakdowninfo)
 - [`BaseCouponCommon`](#basecouponcommon)
 - [`CouponWithoutPromoCodes`](#couponwithoutpromocodes)
@@ -1782,6 +1785,18 @@ const { data } = await client.$productRecommendations(
 type IntegrationId = "getag" | "external-catalog"
 ```
 
+### `ConditionalPricingErrorCode`
+
+Machine-readable failure mode of a conditional-pricing operation, allowing clients
+to branch on the kind of failure instead of parsing the error message.
+
+- `NOT_FOUND` (404): the addressed entity, variant or version does not exist
+- `AMBIGUOUS_RESOLUTION` (409): several variants match the given con
+
+```ts
+type ConditionalPricingErrorCode = "NOT_FOUND" | "AMBIGUOUS_RESOLUTION" | "TUPLE_CONFLICT" | "VERSION_CONFLICT" | "SUPERSEDED_VERSION" | "CONDITION_UNDEFINED" | "OPERATOR_UNSUPPORTED" | "CONTEXT_FORMAT_INVALID" | "TOO_MANY_MATCHES" | "WRITE_CONFLICT"
+```
+
 ### `Error`
 
 ```ts
@@ -1789,6 +1804,24 @@ type Error = {
   message: string
   status?: number
   cause?: string
+}
+```
+
+### `ConditionalPricingError`
+
+An error from a conditional-pricing operation, carrying a machine-readable `code`
+from the conditional-pricing vocabulary plus any structured data about the failure,
+so a client can branch on the kind of failure rather than parse the message.
+Referenced only by the operations that emit these codes; 
+
+```ts
+type ConditionalPricingError = {
+  message: string
+  status?: number
+  cause?: string
+  error?: string
+  code?: "NOT_FOUND" | "AMBIGUOUS_RESOLUTION" | "TUPLE_CONFLICT" | "VERSION_CONFLICT" | "SUPERSEDED_VERSION" | "CONDITION_UNDEFINED" | "OPERATOR_UNSUPPORTED" | "CONTEXT_FORMAT_INVALID" | "TOO_MANY_MATCHES" | "WRITE_CONFLICT"
+  details?: Record<string, unknown>
 }
 ```
 
@@ -4175,6 +4208,10 @@ type TaxAmountDto = {
     active?: boolean
     region?: string
     region_label?: string
+  } | {
+    type: "VAT" | "GST" | "Custom"
+    rate: number
+    description?: string
   }
 }
 ```
@@ -5360,6 +5397,22 @@ type Tax = {
   active?: boolean
   region?: string
   region_label?: string
+}
+```
+
+### `TaxItem`
+
+A minimal, ad-hoc tax rate for line items with no backing tax entity
+in the catalog (e.g. a fully custom/composite price component built
+by a client with no product/price reference to resolve tax from).
+Mirrors how PriceItem relates to Price: unlike Tax, this has no
+entity identity — it isn't persis
+
+```ts
+type TaxItem = {
+  type: "VAT" | "GST" | "Custom"
+  rate: number
+  description?: string
 }
 ```
 
