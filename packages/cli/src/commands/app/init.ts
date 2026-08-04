@@ -102,7 +102,7 @@ export default defineCommand({
         '',
         'Code-based (have src/ and build step):',
         '- `CUSTOM_FLOW_ACTION_SANDBOX` — Sandboxed flow action (JS runs in epilot)',
-        '- `CUSTOM_CAPABILITY` — Custom entity tab or group',
+        '- `CUSTOM_CAPABILITY` — Custom entity tab, group or widget',
         '- `CUSTOM_JOURNEY_BLOCK` — Custom journey builder block',
         '- `CUSTOM_PAGE` — Custom navigation page',
         '- `CUSTOM_PORTAL_BLOCK` — Custom portal widget',
@@ -314,7 +314,7 @@ type AppProps<T> = {
 \`\`\`
 
 #### CUSTOM_CAPABILITY
-A tab or group on entity detail pages. Uses App Bridge for communication with epilot.
+A tab, group or widget on entity detail pages. Uses App Bridge for communication with epilot.
 
 **Stack:** React + Vite + Tailwind + \`@epilot/volt-ui\` + \`@epilot/app-bridge\`
 **Build output:** \`dist/\` directory (zipped and uploaded on deploy)
@@ -329,7 +329,7 @@ A tab or group on entity detail pages. Uses App Bridge for communication with ep
 \`\`\`
 
 \`allowed_schemas\` controls which entity types show the tab. Empty array = all schemas.
-\`type\` can be \`"tab"\` or \`"group"\`.
+\`type\` can be \`"tab"\` (its own tab), \`"group"\` (a section on the main tab) or \`"widget"\` (a card in the widget grid at the top of the entity page). Widgets render in a compact card (~260px tall) alongside epilot's own widgets — design for a small, glanceable surface, not a full page.
 
 **Key files:**
 - \`src/main.tsx\` — Renders React app inside \`AppBridgeProvider\`

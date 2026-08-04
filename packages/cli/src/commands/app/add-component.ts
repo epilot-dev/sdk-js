@@ -55,7 +55,7 @@ const TEMPLATE_REGISTRY: Record<string, TemplateInfo> = {
     configOnly: false,
     manifestType: 'CUSTOM_CAPABILITY',
     templateDir: 'custom-capability',
-    description: 'Custom entity tab or group',
+    description: 'Custom entity tab, group or widget',
     configuration: () => ({ type: 'tab', allowed_schemas: [] }),
     surfaces: (id) => ({ capability_config: { app_url: `./components/${id}/dist/index.html` } }),
     assets: (id) => ({ zip: `./components/${id}/dist/` }),
@@ -197,6 +197,10 @@ export default defineCommand({
   args: {
     name: { type: 'positional', description: 'Component name', required: false },
     type: { type: 'string', alias: 't', description: 'Component type' },
+    'capability-type': {
+      type: 'string',
+      description: 'CUSTOM_CAPABILITY only: where it renders on the entity page (tab | group | widget, default: tab)',
+    },
     path: { type: 'string', description: 'Path to manifest.json (default: manifest.json)' },
   },
   run: async ({ args }) => {
@@ -221,6 +225,32 @@ export default defineCommand({
         log.info(`  ${type} — ${TEMPLATE_REGISTRY[type].description}`);
       }
       process.exit(1);
+    }
+
+    // CUSTOM_CAPABILITY: resolve where on the entity page it renders
+    const CAPABILITY_TYPES = ['tab', 'group', 'widget'];
+    let capabilityType = args['capability-type'];
+    if (componentType === 'CUSTOM_CAPABILITY') {
+      if (capabilityType && !CAPABILITY_TYPES.includes(capabilityType)) {
+        log.error(`Invalid capability type: ${capabilityType}. Must be one of: ${CAPABILITY_TYPES.join(', ')}`);
+        process.exit(1);
+      }
+      // Component type was chosen interactively — ask for the capability type too.
+      // With --type given and no --capability-type, default to "tab" (non-interactive safe).
+      if (!capabilityType && !args.type) {
+        const { select } = await import('@inquirer/prompts');
+        capabilityType = await select({
+          message: 'Where should it render on the entity page?',
+          choices: [
+            { value: 'tab', name: 'tab — its own tab' },
+            { value: 'group', name: 'group — a section on the main tab' },
+            { value: 'widget', name: 'widget — a card in the widget grid' },
+          ],
+        });
+      }
+    } else if (capabilityType) {
+      log.warn('--capability-type only applies to CUSTOM_CAPABILITY components — ignoring.');
+      capabilityType = undefined;
     }
 
     // Interactive: prompt for name if not provided
@@ -308,6 +338,7 @@ export default defineCommand({
     const configuration = proxyConfig
       ? { name: proxyConfig.name, target: proxyConfig.target, auth_type: proxyConfig.auth_type }
       : tmpl.configuration(componentName);
+    if (capabilityType) configuration.type = capabilityType;
     const component: ManifestComponent = {
       id: componentId,
       component_type: tmpl.manifestType,
