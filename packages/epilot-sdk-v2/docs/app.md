@@ -1977,7 +1977,7 @@ type ApiProxyComponent = {
 type CustomCapabilityComponent = {
   component_type: "CUSTOM_CAPABILITY"
   configuration: {
-    type?: "tab" | "group"
+    type?: "tab" | "group" | "widget"
     allowed_schemas?: string[]
   }
   surfaces?: {

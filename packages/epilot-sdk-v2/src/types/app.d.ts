@@ -858,7 +858,7 @@ export declare namespace Components {
                 /**
                  * Define what type of capability this is
                  */
-                type?: "tab" | "group";
+                type?: "tab" | "group" | "widget";
                 /**
                  * Which schemas are supported by the capability. If empty, all schemas are supported.
                  */
@@ -1687,7 +1687,7 @@ export declare namespace Components {
              */
             change_mode?: "synchronous" | "asynchronous";
             /**
-             * Whether the portal user must confirm their current password before the change email request is handed over to the third-party system. When true, the portal collects and verifies the current password before calling the hook. Treated as true when `change_mode` is `synchronous`, since the portal re-creates the login with the confirmed password. Skipped either way for portal users whose identity is managed by an identity provider: an SSO login has no password to confirm.
+             * Whether the portal user must confirm their current password before the change email request is handed over to the third-party system. When true, the portal collects and verifies the current password before calling the hook. Skipped for portal users whose identity is managed by an identity provider: an SSO login has no password to confirm. When no password is confirmed and `change_mode` is `synchronous`, the re-created login gets a random password and the portal user signs in through their identity provider, or sets a new password via the email code flow.
              *
              */
             require_password_confirmation?: boolean;
