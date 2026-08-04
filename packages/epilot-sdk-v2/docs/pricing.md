@@ -4852,6 +4852,10 @@ type TaxAmount = {
     active?: boolean
     region?: string
     region_label?: string
+  } | {
+    type: "VAT" | "GST" | "Custom"
+    rate: number
+    description?: string
   }
 }
 ```
