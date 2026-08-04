@@ -9807,7 +9807,23 @@ export declare namespace Components {
              *   "_updated_at": "2021-02-09T12:41:43.662Z"
              * }
              */
-            Tax;
+            Tax | /**
+             * A minimal, ad-hoc tax rate for line items with no backing tax entity
+             * in the catalog (e.g. a fully custom/composite price component built
+             * by a client with no product/price reference to resolve tax from).
+             * Mirrors how PriceItem relates to Price: unlike Tax, this has no
+             * entity identity — it isn't persisted and can't be looked up by _id,
+             * so it can't be shared/reused across price items the way a catalog
+             * Tax can.
+             *
+             * example:
+             * {
+             *   "rate": 19,
+             *   "type": "VAT",
+             *   "description": "Custom 19% VAT"
+             * }
+             */
+            TaxItem;
         }
         /**
          * A tax amount associated with a specific tax rate.
