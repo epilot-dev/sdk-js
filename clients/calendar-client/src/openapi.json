@@ -3,15 +3,19 @@
   "info": {
     "title": "Calendar API",
     "version": "0.1.0",
-    "description": "epilot's calendar API.\n\nExposes calendars and events as first-class epilot resources.\nToday, data is sourced from external providers (Microsoft 365, Google Calendar) synced into epilot.\nIn the future, epilot will also host native calendars created directly in the platform.\n\nThe provider is an implementation detail surfaced only through each resource's `source` field.\nConsumers interact with calendars and events through the same API regardless of origin."
+    "description": "epilot's calendar API.\n\nExposes calendars and events as first-class epilot resources."
   },
   "tags": [
+    {
+      "name": "Absence",
+      "description": "User absence from calendar events and absence adjustments"
+    },
     {
       "name": "Calendars",
       "description": "User and organization calendars"
     },
     {
-      "name": "Events",
+      "name": "Calendar Events",
       "description": "Calendar events"
     }
   ],
@@ -29,6 +33,736 @@
     }
   ],
   "paths": {
+    "/v1/calendar/absence/users": {
+      "get": {
+        "operationId": "listUsersAbsence",
+        "summary": "listUsersAbsence",
+        "description": "List organization users with known absence metadata in the requested time window.",
+        "tags": [
+          "Absence"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "from",
+            "description": "Start of the time window (inclusive). Maximum window: 31 days.",
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "description": "Start of the time window (inclusive). Maximum window: 31 days."
+            },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "description": "End of the time window (exclusive). Must be after from.",
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "description": "End of the time window (exclusive). Must be after from."
+            },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "include_busy",
+            "description": "Include busy inputs in addition to out-of-office absence. Defaults to false.",
+            "schema": {
+              "type": "boolean",
+              "description": "Include busy inputs in addition to out-of-office absence. Defaults to false.",
+              "default": false
+            }
+          },
+          {
+            "in": "query",
+            "name": "query",
+            "description": "Optional user directory search query.",
+            "schema": {
+              "type": "string",
+              "description": "Optional user directory search query."
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "description": "Maximum users to return.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "description": "Maximum users to return."
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "description": "User directory offset.",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "User directory offset."
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Organization users absence",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "from": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "to": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "hits": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "absent": {
+                            "type": "boolean"
+                          },
+                          "absence_intervals": {
+                            "type": "array",
+                            "items": {
+                              "$ref": "#/components/schemas/AbsenceInterval"
+                            }
+                          },
+                          "user_id": {
+                            "type": "string"
+                          },
+                          "display_name": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "email": {
+                            "type": "string",
+                            "nullable": true,
+                            "format": "email"
+                          },
+                          "status": {
+                            "type": "string",
+                            "nullable": true
+                          }
+                        },
+                        "required": [
+                          "absent",
+                          "absence_intervals",
+                          "user_id"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "from",
+                    "to",
+                    "hits",
+                    "results"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/calendar/absence:search": {
+      "post": {
+        "operationId": "searchAbsence",
+        "summary": "searchAbsence",
+        "description": "Search known absence for candidate users in the requested time window.",
+        "tags": [
+          "Absence"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchAbsenceBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Users absence",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "from": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "to": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "users": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "object",
+                        "properties": {
+                          "absent": {
+                            "type": "boolean"
+                          },
+                          "absence_intervals": {
+                            "type": "array",
+                            "items": {
+                              "$ref": "#/components/schemas/AbsenceInterval"
+                            }
+                          }
+                        },
+                        "required": [
+                          "absent",
+                          "absence_intervals"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "from",
+                    "to",
+                    "users"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request body",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/calendar/absence:search-now": {
+      "post": {
+        "operationId": "searchNowAbsence",
+        "summary": "searchNowAbsence",
+        "description": "Search known absence for candidate users at the current server time.",
+        "tags": [
+          "Absence"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchNowAbsenceBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Users current absence",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "from": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "to": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "users": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "object",
+                        "properties": {
+                          "absent": {
+                            "type": "boolean"
+                          },
+                          "absence_intervals": {
+                            "type": "array",
+                            "items": {
+                              "$ref": "#/components/schemas/AbsenceInterval"
+                            }
+                          },
+                          "absent_until": {
+                            "type": "string",
+                            "nullable": true,
+                            "format": "date-time",
+                            "description": "End of the currently active absence interval, or null when the user is not absent."
+                          }
+                        },
+                        "required": [
+                          "absent",
+                          "absence_intervals",
+                          "absent_until"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "from",
+                    "to",
+                    "users"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request body",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/calendar/absence/users/{user_id}/adjustments": {
+      "get": {
+        "operationId": "listAbsenceAdjustments",
+        "summary": "listAbsenceAdjustments",
+        "description": "List absence adjustments for a user in a time window.",
+        "tags": [
+          "Absence"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "user_id",
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "description": "Start of the time window (inclusive). Maximum window: 90 days.",
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "description": "Start of the time window (inclusive). Maximum window: 90 days."
+            },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "description": "End of the time window (exclusive). Must be after from.",
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "description": "End of the time window (exclusive). Must be after from."
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Absence adjustments",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "from": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "to": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/AbsenceAdjustment"
+                      }
+                    }
+                  },
+                  "required": [
+                    "from",
+                    "to",
+                    "results"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "createAbsenceAdjustment",
+        "summary": "createAbsenceAdjustment",
+        "description": "Create a time-bound absence adjustment for a user in the caller organization.",
+        "tags": [
+          "Absence"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "user_id",
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAbsenceAdjustmentBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created absence adjustment",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AbsenceAdjustment"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request body",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/calendar/absence/users/{user_id}/adjustments/{adjustment_id}": {
+      "get": {
+        "operationId": "getAbsenceAdjustment",
+        "summary": "getAbsenceAdjustment",
+        "description": "Get an absence adjustment by ID.",
+        "tags": [
+          "Absence"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "user_id",
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "adjustment_id",
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Absence adjustment",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AbsenceAdjustment"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "patchAbsenceAdjustment",
+        "summary": "patchAbsenceAdjustment",
+        "description": "Update an absence adjustment in the caller organization.",
+        "tags": [
+          "Absence"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "user_id",
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "adjustment_id",
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchAbsenceAdjustmentBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated absence adjustment",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AbsenceAdjustment"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request body",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteAbsenceAdjustment",
+        "summary": "deleteAbsenceAdjustment",
+        "description": "Delete an absence adjustment.",
+        "tags": [
+          "Absence"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "user_id",
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "adjustment_id",
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Absence adjustment deleted"
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/calendar/absence/users/{user_id}": {
+      "get": {
+        "operationId": "getUserAbsence",
+        "summary": "getUserAbsence",
+        "description": "Get known absence for a user in a time window. absent=false means no known absence, not guaranteed availability.",
+        "tags": [
+          "Absence"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "user_id",
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "description": "Start of the time window (inclusive). Maximum window: 31 days.",
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "description": "Start of the time window (inclusive). Maximum window: 31 days."
+            },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "description": "End of the time window (exclusive). Must be after from.",
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "description": "End of the time window (exclusive). Must be after from."
+            },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "include_busy",
+            "description": "Include busy inputs in addition to out-of-office absence. Defaults to false.",
+            "schema": {
+              "type": "boolean",
+              "description": "Include busy inputs in addition to out-of-office absence. Defaults to false.",
+              "default": false
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User absence",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "absent": {
+                      "type": "boolean"
+                    },
+                    "absence_intervals": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/AbsenceInterval"
+                      }
+                    },
+                    "from": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "to": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "user_id": {
+                      "type": "string"
+                    },
+                    "external_calendars": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ExternalCalendar"
+                      },
+                      "description": "The user's connected external calendars (Outlook/Google), if any."
+                    }
+                  },
+                  "required": [
+                    "absent",
+                    "absence_intervals",
+                    "from",
+                    "to",
+                    "user_id"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/calendar": {
       "get": {
         "operationId": "listCalendars",
@@ -84,6 +818,223 @@
             }
           }
         }
+      },
+      "post": {
+        "operationId": "createCalendar",
+        "summary": "createCalendar",
+        "description": "Create a native epilot calendar.",
+        "tags": [
+          "Calendars"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CalendarCreateBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Calendar created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Calendar"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request body",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/calendar/sources/outlook": {
+      "post": {
+        "operationId": "addOutlookCalendar",
+        "summary": "addOutlookCalendar",
+        "description": "Registers one of the caller's Outlook calendars as an epilot calendar.\n\nThe returned calendar resource carries `source.provider=outlook` and the\nprovider calendar id, so subsequent reads through `GET /v1/calendar` /\n`GET /v1/calendar/events` route through the sync provider.",
+        "tags": [
+          "Calendars"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddOutlookCalendarRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Calendar created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Calendar"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request body",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Caller has not connected their personal Outlook calendar yet",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/calendar/sources/outlook/available": {
+      "get": {
+        "operationId": "listOutlookCalendars",
+        "summary": "listOutlookCalendars",
+        "description": "Lists the calling user's Outlook calendars available to import as epilot calendars.\n\nRequires the caller to have a personal Outlook calendar connection (created via the\nOAuth flow on email-settings: `POST /v2/outlook/connect { \"calendar\": true }`).",
+        "tags": [
+          "Calendars"
+        ],
+        "responses": {
+          "200": {
+            "description": "List of available Outlook calendars",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "calendars": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/AvailableOutlookCalendar"
+                      }
+                    }
+                  },
+                  "required": [
+                    "calendars"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Caller has not connected their personal Outlook calendar yet",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/calendar/sources/outlook/{calendar_id}": {
+      "delete": {
+        "operationId": "deleteOutlookCalendar",
+        "summary": "deleteOutlookCalendar",
+        "description": "Disconnects a previously registered Outlook calendar.\n\nDeletes the Microsoft Graph subscription, removes the backing `calendar`\nentity, and drops the local subscription record. Idempotent: a 404 from\nGraph (subscription already gone) is treated as success.",
+        "tags": [
+          "Calendars"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "calendar_id",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Outlook calendar disconnected"
+          },
+          "404": {
+            "description": "No Outlook calendar registration found for this id",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Microsoft Graph subscription deletion failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/calendar/outlook/webhook": {
+      "post": {
+        "operationId": "outlookWebhook",
+        "summary": "outlookWebhook",
+        "description": "Public Microsoft Graph webhook receiver for per-user Outlook calendar\nsubscriptions. Unauthenticated by design (API Gateway `Authorizer: NONE`):\nGraph calls it with no epilot token.\n\nHandles both the subscription-validation handshake (echoes the\n`validationToken` query param as `text/plain`) and change notifications.\nEach notification is trusted only after its HMAC-signed `clientState` is\nverified and matched against the stored subscription — identity is never\nread from the request body.",
+        "tags": [
+          "Calendars"
+        ],
+        "security": [],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "validationToken",
+            "description": "Set by Graph on the subscription-validation handshake; echoed back verbatim.",
+            "schema": {
+              "type": "string",
+              "description": "Set by Graph on the subscription-validation handshake; echoed back verbatim."
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Validation handshake echo (text/plain)",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "202": {
+            "description": "Notification batch accepted"
+          }
+        }
       }
     },
     "/v1/calendar/{calendar_id}": {
@@ -126,6 +1077,119 @@
             }
           }
         }
+      },
+      "patch": {
+        "operationId": "updateCalendar",
+        "summary": "updateCalendar",
+        "description": "Update fields on a calendar.",
+        "tags": [
+          "Calendars"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "calendar_id",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CalendarPatchBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Calendar updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Calendar"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request body",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Calendar is read-only",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteCalendar",
+        "summary": "deleteCalendar",
+        "description": "Delete a native epilot calendar and its events.",
+        "tags": [
+          "Calendars"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "calendar_id",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Calendar deleted"
+          },
+          "403": {
+            "description": "Calendar is read-only",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/v1/calendar/events": {
@@ -134,7 +1198,7 @@
         "summary": "listEvents",
         "description": "List events in a time window. Recurring events are returned as expanded occurrences – each instance appears as its own event.",
         "tags": [
-          "Events"
+          "Calendar Events"
         ],
         "parameters": [
           {
@@ -222,6 +1286,66 @@
             }
           }
         }
+      },
+      "post": {
+        "operationId": "createEvent",
+        "summary": "createEvent",
+        "description": "Create a native epilot calendar event.",
+        "tags": [
+          "Calendar Events"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CalendarEventCreateBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Event created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalendarEvent"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request body",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Calendar is read-only",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Calendar not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/v1/calendar/events/{event_id}": {
@@ -230,7 +1354,7 @@
         "summary": "getEvent",
         "description": "Get a single event by its epilot ID.",
         "tags": [
-          "Events"
+          "Calendar Events"
         ],
         "parameters": [
           {
@@ -264,6 +1388,237 @@
             }
           }
         }
+      },
+      "patch": {
+        "operationId": "updateEvent",
+        "summary": "updateEvent",
+        "description": "Update a native epilot calendar event.",
+        "tags": [
+          "Calendar Events"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "event_id",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CalendarEventPatchBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Event updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalendarEvent"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request body",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Event or calendar is read-only",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteEvent",
+        "summary": "deleteEvent",
+        "description": "Delete a native epilot calendar event.",
+        "tags": [
+          "Calendar Events"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "event_id",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Event deleted"
+          },
+          "403": {
+            "description": "Event or calendar is read-only",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/calendar/events/{event_id}/share": {
+      "post": {
+        "operationId": "shareEvent",
+        "summary": "shareEvent",
+        "description": "Share a calendar event with another user of the same organization, view-only. Owner-only: recipients of a share cannot re-share. Sharing an already-shared event is a no-op.",
+        "tags": [
+          "Calendar Events"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "event_id",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ShareEventBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Event shared"
+          },
+          "400": {
+            "description": "Invalid request body",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Caller is not the event owner",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Event or recipient not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/calendar/events/{event_id}/share/{user_id}": {
+      "delete": {
+        "operationId": "unshareEvent",
+        "summary": "unshareEvent",
+        "description": "Revoke a per-event share. The recipient loses access immediately. Owner-only.",
+        "tags": [
+          "Calendar Events"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "event_id",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "user_id",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Share revoked (or was not present)"
+          },
+          "403": {
+            "description": "Caller is not the event owner",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Event not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
       }
     }
   },
@@ -282,6 +1637,307 @@
       }
     },
     "schemas": {
+      "AbsenceInterval": {
+        "type": "object",
+        "properties": {
+          "from": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Absence interval start clipped to the requested window."
+          },
+          "to": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Absence interval end clipped to the requested window."
+          },
+          "original_from": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Original absence interval start before clipping."
+          },
+          "original_to": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Original absence interval end before clipping."
+          },
+          "absent": {
+            "type": "boolean",
+            "description": "Effective absence state for this interval."
+          },
+          "source": {
+            "$ref": "#/components/schemas/AbsenceIntervalSource"
+          },
+          "calendar_event_id": {
+            "type": "string",
+            "description": "calendar_event ID for calendar-derived intervals."
+          },
+          "absence_adjustment_id": {
+            "type": "string",
+            "description": "absence adjustment ID for manual intervals."
+          },
+          "reason": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "from",
+          "to",
+          "original_from",
+          "original_to",
+          "absent",
+          "source"
+        ]
+      },
+      "AbsenceIntervalSource": {
+        "type": "string",
+        "enum": [
+          "calendar_event",
+          "absence_adjustment"
+        ]
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "integer"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "array",
+                "items": {}
+              }
+            ]
+          }
+        },
+        "required": [
+          "status",
+          "error"
+        ]
+      },
+      "SearchAbsenceBody": {
+        "type": "object",
+        "properties": {
+          "from": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Start of the time window (inclusive). Maximum window: 31 days."
+          },
+          "to": {
+            "type": "string",
+            "format": "date-time",
+            "description": "End of the time window (exclusive). Must be after from."
+          },
+          "user_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 1,
+            "maxItems": 300,
+            "description": "Candidate users to check for absence inside the caller organization."
+          },
+          "include_busy": {
+            "type": "boolean",
+            "description": "Include busy inputs in addition to out-of-office absence. Defaults to false.",
+            "default": false
+          }
+        },
+        "required": [
+          "from",
+          "to",
+          "user_ids"
+        ]
+      },
+      "SearchNowAbsenceBody": {
+        "type": "object",
+        "properties": {
+          "user_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 1,
+            "maxItems": 300,
+            "description": "Candidate users to check for absence at the current server time inside the caller organization."
+          },
+          "include_busy": {
+            "type": "boolean",
+            "description": "Include busy inputs in addition to out-of-office absence. Defaults to false.",
+            "default": false
+          }
+        },
+        "required": [
+          "user_ids"
+        ]
+      },
+      "AbsenceAdjustment": {
+        "type": "object",
+        "properties": {
+          "from": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Adjustment start. Maximum adjustment duration: 7 days."
+          },
+          "to": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Adjustment end. Must be after from."
+          },
+          "absent": {
+            "type": "boolean",
+            "description": "Manual override state: true means absent, false means not absent."
+          },
+          "status": {
+            "$ref": "#/components/schemas/AbsenceStatus"
+          },
+          "type": {
+            "$ref": "#/components/schemas/AbsenceType"
+          },
+          "reason": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 500
+          },
+          "adjustment_id": {
+            "type": "string"
+          },
+          "user_id": {
+            "type": "string"
+          },
+          "created_by": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "from",
+          "to",
+          "absent",
+          "status",
+          "adjustment_id",
+          "user_id",
+          "created_by",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "AbsenceStatus": {
+        "type": "string",
+        "enum": [
+          "busy",
+          "oof"
+        ],
+        "description": "Calendar status targeted by the absence adjustment."
+      },
+      "AbsenceType": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 128,
+        "description": "Optional producer-defined reference stored with an absence adjustment."
+      },
+      "CreateAbsenceAdjustmentBody": {
+        "type": "object",
+        "properties": {
+          "from": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Adjustment start. Maximum adjustment duration: 7 days."
+          },
+          "to": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Adjustment end. Must be after from."
+          },
+          "absent": {
+            "type": "boolean",
+            "description": "Manual override state: true means absent, false means not absent."
+          },
+          "status": {
+            "$ref": "#/components/schemas/AbsenceStatus"
+          },
+          "type": {
+            "$ref": "#/components/schemas/AbsenceType"
+          },
+          "reason": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 500
+          }
+        },
+        "required": [
+          "from",
+          "to",
+          "absent",
+          "status"
+        ]
+      },
+      "PatchAbsenceAdjustmentBody": {
+        "type": "object",
+        "properties": {
+          "from": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Adjustment start. Maximum adjustment duration: 7 days."
+          },
+          "to": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Adjustment end. Must be after from."
+          },
+          "absent": {
+            "type": "boolean",
+            "description": "Manual override state: true means absent, false means not absent."
+          },
+          "status": {
+            "$ref": "#/components/schemas/AbsenceStatus"
+          },
+          "type": {
+            "$ref": "#/components/schemas/AbsenceType"
+          },
+          "reason": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 500
+          }
+        }
+      },
+      "ExternalCalendar": {
+        "type": "object",
+        "properties": {
+          "provider": {
+            "type": "string",
+            "enum": [
+              "outlook",
+              "google"
+            ],
+            "description": "External calendar provider."
+          },
+          "last_synced_at": {
+            "type": "string",
+            "nullable": true,
+            "format": "date-time",
+            "description": "Last successful sync of this provider calendar, if any."
+          }
+        },
+        "required": [
+          "provider",
+          "last_synced_at"
+        ]
+      },
       "Calendar": {
         "type": "object",
         "properties": {
@@ -304,7 +1960,8 @@
             "description": "Computed display title"
           },
           "name": {
-            "type": "string"
+            "type": "string",
+            "minLength": 1
           },
           "description": {
             "type": "string",
@@ -388,19 +2045,92 @@
         ],
         "description": "Null for native epilot calendars"
       },
-      "Error": {
+      "CalendarCreateBody": {
         "type": "object",
         "properties": {
-          "message": {
-            "type": "string"
+          "name": {
+            "type": "string",
+            "minLength": 1
           },
-          "code": {
-            "type": "string"
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "color": {
+            "type": "string",
+            "nullable": true,
+            "description": "Hex color (e.g. \"#3b82f6\") or provider-defined named color"
           }
         },
         "required": [
-          "message"
+          "name"
         ]
+      },
+      "AddOutlookCalendarRequest": {
+        "type": "object",
+        "properties": {
+          "provider_calendar_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Optional override; defaults to the provider calendar name."
+          }
+        },
+        "required": [
+          "provider_calendar_id"
+        ]
+      },
+      "AvailableOutlookCalendar": {
+        "type": "object",
+        "properties": {
+          "provider_calendar_id": {
+            "type": "string",
+            "description": "Microsoft Graph calendar id (immutable, e.g. base64-encoded)"
+          },
+          "name": {
+            "type": "string"
+          },
+          "color": {
+            "type": "string",
+            "nullable": true
+          },
+          "is_default": {
+            "type": "boolean"
+          },
+          "can_edit": {
+            "type": "boolean"
+          },
+          "owner": {
+            "type": "string",
+            "nullable": true,
+            "description": "Owner email address on the Microsoft side"
+          }
+        },
+        "required": [
+          "provider_calendar_id",
+          "name"
+        ]
+      },
+      "CalendarPatchBody": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "color": {
+            "type": "string",
+            "nullable": true,
+            "description": "Hex color (e.g. \"#3b82f6\") or provider-defined named color"
+          }
+        }
       },
       "CalendarEvent": {
         "type": "object",
@@ -432,6 +2162,7 @@
           },
           "calendar_id": {
             "type": "string",
+            "minLength": 1,
             "description": "epilot calendar this event belongs to"
           },
           "event_type": {
@@ -455,6 +2186,7 @@
           },
           "timezone": {
             "type": "string",
+            "minLength": 1,
             "description": "IANA timezone of the original event (for display)"
           },
           "is_all_day": {
@@ -668,6 +2400,120 @@
         },
         "required": [
           "type"
+        ]
+      },
+      "CalendarEventCreateBody": {
+        "type": "object",
+        "properties": {
+          "calendar_id": {
+            "type": "string",
+            "minLength": 1,
+            "description": "epilot calendar this event belongs to"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true,
+            "description": "Preview of the event body, truncated to 255 chars",
+            "maxLength": 255
+          },
+          "start_time": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Event start in UTC"
+          },
+          "end_time": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Event end in UTC"
+          },
+          "timezone": {
+            "type": "string",
+            "minLength": 1,
+            "description": "IANA timezone of the original event (for display)"
+          },
+          "is_all_day": {
+            "type": "boolean"
+          },
+          "location": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "$ref": "#/components/schemas/EventStatus"
+          },
+          "sensitivity": {
+            "$ref": "#/components/schemas/Sensitivity"
+          },
+          "_title": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "calendar_id",
+          "start_time",
+          "end_time",
+          "timezone",
+          "is_all_day",
+          "status",
+          "sensitivity",
+          "_title"
+        ]
+      },
+      "CalendarEventPatchBody": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "string",
+            "nullable": true,
+            "description": "Preview of the event body, truncated to 255 chars",
+            "maxLength": 255
+          },
+          "start_time": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Event start in UTC"
+          },
+          "end_time": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Event end in UTC"
+          },
+          "timezone": {
+            "type": "string",
+            "minLength": 1,
+            "description": "IANA timezone of the original event (for display)"
+          },
+          "is_all_day": {
+            "type": "boolean"
+          },
+          "location": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "$ref": "#/components/schemas/EventStatus"
+          },
+          "sensitivity": {
+            "$ref": "#/components/schemas/Sensitivity"
+          },
+          "_title": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "ShareEventBody": {
+        "type": "object",
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "minLength": 1,
+            "description": "epilot user id (same organization) to grant view-only access to this event"
+          }
+        },
+        "required": [
+          "user_id"
         ]
       }
     }
