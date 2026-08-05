@@ -130,6 +130,18 @@
         "responses": {}
       }
     },
+    "/v1/automation/executions:search": {
+      "post": {
+        "operationId": "searchExecutions",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v1/automation/executions/bulk-jobs": {
       "post": {
         "operationId": "bulkTriggerExecutions",
