@@ -836,6 +836,10 @@ declare namespace Components {
         }
         /**
          * Configuration for adjusting a contract installment through a Journey.
+         * example:
+         * {
+         *   "journey_id": "adjust-installment-flow"
+         * }
          */
         export interface AdjustInstallmentCapabilityConfig {
             /**
@@ -3321,7 +3325,14 @@ declare namespace Components {
              * 123e4567-e89b-12d3-a456-426614174000
              */
             app_id?: string;
-            adjust_installment?: /* Configuration for adjusting a contract installment through a Journey. */ AdjustInstallmentCapabilityConfig;
+            adjust_installment?: /**
+             * Configuration for adjusting a contract installment through a Journey.
+             * example:
+             * {
+             *   "journey_id": "adjust-installment-flow"
+             * }
+             */
+            AdjustInstallmentCapabilityConfig;
             ui_config?: {
                 /**
                  * Whether the capability is filterable
@@ -3467,7 +3478,14 @@ declare namespace Components {
              * 123e4567-e89b-12d3-a456-426614174000
              */
             app_id?: string;
-            adjust_installment?: /* Configuration for adjusting a contract installment through a Journey. */ AdjustInstallmentCapabilityConfig;
+            adjust_installment?: /**
+             * Configuration for adjusting a contract installment through a Journey.
+             * example:
+             * {
+             *   "journey_id": "adjust-installment-flow"
+             * }
+             */
+            AdjustInstallmentCapabilityConfig;
             ui_config?: {
                 /**
                  * Whether the capability is filterable
@@ -15431,7 +15449,7 @@ declare namespace Paths {
             /**
              * ISO 8601 timestamp to filter jobs created after this time (e.g., 2023-01-01T00:00:00Z).
              * example:
-             * 2023-01-01T00:00:00.000Z
+             * 2023-01-01T00:00:00Z
              */
             export type CreatedAfter = string; // date-time
             /**
@@ -15457,7 +15475,7 @@ declare namespace Paths {
             created_after?: /**
              * ISO 8601 timestamp to filter jobs created after this time (e.g., 2023-01-01T00:00:00Z).
              * example:
-             * 2023-01-01T00:00:00.000Z
+             * 2023-01-01T00:00:00Z
              */
             Parameters.CreatedAfter /* date-time */;
             sort_pending_first?: /* When true, sorts PENDING status jobs to the top of the results. */ Parameters.SortPendingFirst;
