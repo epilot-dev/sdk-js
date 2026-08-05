@@ -2,13 +2,17 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Integration Toolkit API",
-    "version": "1.5.12",
+    "version": "1.7.0",
     "description": "API for integrating with external systems in a standardised way."
   },
   "tags": [
     {
       "name": "erp",
       "description": "ERP integration endpoints"
+    },
+    {
+      "name": "erp-imports",
+      "description": "ERP pricing file import endpoints"
     },
     {
       "name": "trigger",
@@ -3735,6 +3739,227 @@
           }
         }
       }
+    },
+    "/v2/erp/imports": {
+      "post": {
+        "operationId": "createErpImport",
+        "summary": "createErpImport",
+        "description": "Create a pricing-file import job from an already-uploaded file (S3 ref). Returns a job id and starts the validate phase asynchronously — poll GET /v2/erp/imports/{importId}.",
+        "tags": [
+          "erp-imports"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateErpImportRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Import job accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateErpImportResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "get": {
+        "operationId": "listErpImports",
+        "summary": "listErpImports",
+        "description": "List recent pricing-file import jobs for the org, newest first.\n\nPass `next_cursor` back as `cursor` for the next page. A page can be\nshorter than `limit` and still have more behind it, so stop on\n`next_cursor: null`.\n",
+        "tags": [
+          "erp-imports"
+        ],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Page size. Values above 100 are clamped to 100.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 50
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "description": "Opaque cursor from a prior page's `next_cursor`.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Import jobs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErpImportList"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/erp/imports/{importId}": {
+      "get": {
+        "operationId": "getErpImport",
+        "summary": "getErpImport",
+        "description": "Get a pricing-file import job (status, counts, result links).",
+        "tags": [
+          "erp-imports"
+        ],
+        "parameters": [
+          {
+            "name": "importId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The import job",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErpImportJob"
+                }
+              }
+            }
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/erp/imports/{importId}:execute": {
+      "post": {
+        "operationId": "executeErpImport",
+        "summary": "executeErpImport",
+        "description": "Confirm and run the write phase of a validated import. Only a READY job may be executed; any other status returns 409.",
+        "tags": [
+          "erp-imports"
+        ],
+        "parameters": [
+          {
+            "name": "importId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Execution started",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErpImportJob"
+                }
+              }
+            }
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/erp/imports/{importId}:abort": {
+      "post": {
+        "operationId": "abortErpImport",
+        "summary": "abortErpImport",
+        "description": "Ask a running import to stop. Valid while the job is VALIDATING or PROCESSING; any other status returns 409.\nThe stop is cooperative: the job passes through CANCELLING and typically reaches CANCELLED within seconds.\nRows already published to the platform are **kept**: this is a stop, not a rollback. Aborting during VALIDATING has published nothing, so it is always clean; aborting during PROCESSING leaves a partial import, and the rows that landed are visible in monitoring under the job's correlation_id.",
+        "tags": [
+          "erp-imports"
+        ],
+        "parameters": [
+          {
+            "name": "importId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "The stop was recorded. The job is still finishing up — poll GET /v2/erp/imports/{importId} to observe CANCELLED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErpImportJob"
+                }
+              }
+            }
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -3747,6 +3972,219 @@
       }
     },
     "schemas": {
+      "S3Reference": {
+        "type": "object",
+        "required": [
+          "bucket",
+          "key"
+        ],
+        "properties": {
+          "bucket": {
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          }
+        }
+      },
+      "CreateErpImportRequest": {
+        "type": "object",
+        "required": [
+          "s3_reference",
+          "integration_id"
+        ],
+        "properties": {
+          "s3_reference": {
+            "$ref": "#/components/schemas/S3Reference"
+          },
+          "integration_id": {
+            "type": "string"
+          },
+          "use_case_slug": {
+            "type": "string"
+          }
+        }
+      },
+      "ErpImportValidation": {
+        "type": "object",
+        "description": "Validate-phase summary: what the file will create, and whether it may be confirmed. Absent until the validate phase completes. No per-row detail is kept — a rejected file is corrected and imported again.",
+        "required": [
+          "total_rows",
+          "blocking",
+          "warnings",
+          "entities"
+        ],
+        "properties": {
+          "total_rows": {
+            "type": "integer",
+            "description": "Data rows read from the file."
+          },
+          "blocking": {
+            "type": "integer"
+          },
+          "warnings": {
+            "type": "integer"
+          },
+          "entities": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "description": "Distinct entities the file expresses, keyed by entity slug."
+          }
+        }
+      },
+      "ErpImportProgress": {
+        "type": "object",
+        "description": "How far the currently running phase has got. Written at every batch boundary, so it advances during long runs rather than only at the end.\n`total_rows` is ABSENT during the validate phase until the file has been read to the end — there is deliberately no counting pass, since that would be a second unbounded read of the whole file. Render an indeterminate indicator while it is missing: dividing by a missing total yields a determinate bar pinned at 0%, which reads as a hung import.",
+        "required": [
+          "processed_rows"
+        ],
+        "properties": {
+          "processed_rows": {
+            "type": "integer",
+            "description": "Rows fully processed. An exact \"the first N rows are done\" watermark, not an estimate — it only advances once a batch has been completely handled."
+          },
+          "total_rows": {
+            "type": "integer",
+            "description": "Rows in the file. Known only once a phase has read to EOF; the execute phase has it from the start, because validate recorded it first."
+          }
+        }
+      },
+      "ErpImportError": {
+        "type": "object",
+        "description": "Why the import failed — present if and only if status = FAILED.",
+        "required": [
+          "type",
+          "message"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "VALIDATION_BLOCKED = blocking row issues (see `validation`); PROCESSING_ERROR = a named, deterministic failure — retrying the same file cannot help; INTERNAL_ERROR = crashed or never started, so retry.",
+            "enum": [
+              "VALIDATION_BLOCKED",
+              "PROCESSING_ERROR",
+              "INTERNAL_ERROR"
+            ]
+          },
+          "message": {
+            "type": "string",
+            "description": "User-facing explanation of `type`."
+          }
+        }
+      },
+      "CreateErpImportResponse": {
+        "type": "object",
+        "required": [
+          "import_id"
+        ],
+        "properties": {
+          "import_id": {
+            "type": "string",
+            "description": "`imp_{ULID}` — time-ordered, also used as the job's correlation_id."
+          }
+        }
+      },
+      "ErpImportJob": {
+        "type": "object",
+        "required": [
+          "import_id",
+          "org_id",
+          "integration_id",
+          "format",
+          "status",
+          "s3_input_ref",
+          "created_at",
+          "updated_at"
+        ],
+        "properties": {
+          "import_id": {
+            "type": "string",
+            "description": "`imp_{ULID}` — time-ordered, also used as the job's correlation_id."
+          },
+          "org_id": {
+            "type": "string"
+          },
+          "created_by": {
+            "type": "string"
+          },
+          "integration_id": {
+            "type": "string"
+          },
+          "use_case_slug": {
+            "type": "string",
+            "description": "The inbound use case whose mapping drives both phases."
+          },
+          "format": {
+            "type": "string",
+            "enum": [
+              "csv",
+              "xlsx"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "description": "PENDING → VALIDATING → READY → PROCESSING → IMPORTED, with FAILED reachable from any working status, and CANCELLING → CANCELLED reachable from VALIDATING or PROCESSING via :abort. IMPORTED, FAILED and CANCELLED are terminal and final.\nIMPORTED means every row was handed to the platform, not that the platform finished — per-row outcomes live in monitoring, filtered by correlation_id. A file that fails validation is FAILED with error.type = VALIDATION_BLOCKED.\nREADY is legitimately idle for as long as the user takes to confirm, so it carries no running work and never goes stale.\nCANCELLING is transient and cooperative: the abort has been recorded but the worker only notices at its next batch boundary. Rows already published stay published — a stop is not a rollback.",
+            "enum": [
+              "PENDING",
+              "VALIDATING",
+              "READY",
+              "PROCESSING",
+              "IMPORTED",
+              "FAILED",
+              "CANCELLING",
+              "CANCELLED"
+            ]
+          },
+          "s3_input_ref": {
+            "$ref": "#/components/schemas/S3Reference"
+          },
+          "validation": {
+            "$ref": "#/components/schemas/ErpImportValidation"
+          },
+          "progress": {
+            "$ref": "#/components/schemas/ErpImportProgress"
+          },
+          "error": {
+            "$ref": "#/components/schemas/ErpImportError"
+          },
+          "correlation_id": {
+            "type": "string",
+            "description": "Scopes this run in monitoring. Always equal to `import_id`."
+          },
+          "activity_id": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ErpImportList": {
+        "type": "object",
+        "required": [
+          "results"
+        ],
+        "properties": {
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ErpImportJob"
+            }
+          },
+          "next_cursor": {
+            "type": "string",
+            "nullable": true,
+            "description": "Cursor for the next page, or null when there are no more rows."
+          }
+        }
+      },
       "NotificationHistoryItem": {
         "type": "object",
         "description": "A single notification-history row (one real notification decision).",
@@ -9921,6 +10359,16 @@
           }
         }
       },
+      "Conflict": {
+        "description": "Conflict - the resource is not in a state that allows this operation",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponseBase"
+            }
+          }
+        }
+      },
       "InternalServerError": {
         "description": "Internal Server Error",
         "content": {
@@ -10100,7 +10548,7 @@
         }
       },
       "ReplayEventsResponse": {
-        "description": "Events replay initiated",
+        "description": "Events replay initiated. Always 200 — per-event outcomes are reported in `results`, so inspect it (or compare `replayed` against the number of requested ids) rather than treating the status code as success.\n",
         "content": {
           "application/json": {
             "schema": {
@@ -10110,6 +10558,48 @@
                 "results"
               ],
               "properties": {
+                "replayed": {
+                  "type": "integer",
+                  "description": "Number of events actually queued for re-processing.",
+                  "example": 2
+                },
+                "results": {
+                  "type": "array",
+                  "description": "One entry per requested event id, in request order.",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "event_id",
+                      "status"
+                    ],
+                    "properties": {
+                      "event_id": {
+                        "type": "string",
+                        "description": "The requested (source) event ID."
+                      },
+                      "status": {
+                        "type": "string",
+                        "enum": [
+                          "success",
+                          "queued",
+                          "skipped",
+                          "ignored",
+                          "not_found",
+                          "error"
+                        ],
+                        "description": "Outcome for this event. `success`/`queued` means it was enqueued for re-processing. `not_found` means no inbound event with that ID exists for the organization. `skipped` means it was deduplicated, `ignored` means no enabled use case matched it, and `error` means it could not be queued (see `message`).\n"
+                      },
+                      "replay_event_id": {
+                        "type": "string",
+                        "description": "The new event ID assigned to the replayed event. Use it to follow the replay in monitoring.\n"
+                      },
+                      "message": {
+                        "type": "string",
+                        "description": "Human-readable detail for this outcome."
+                      }
+                    }
+                  }
+                },
                 "event_ids": {
                   "type": "array",
                   "items": {

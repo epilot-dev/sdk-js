@@ -923,6 +923,73 @@
         },
         "responses": {}
       }
+    },
+    "/v2/erp/imports": {
+      "post": {
+        "operationId": "createErpImport",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "get": {
+        "operationId": "listErpImports",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/erp/imports/{importId}": {
+      "get": {
+        "operationId": "getErpImport",
+        "parameters": [
+          {
+            "name": "importId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/erp/imports/{importId}:execute": {
+      "post": {
+        "operationId": "executeErpImport",
+        "parameters": [
+          {
+            "name": "importId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/erp/imports/{importId}:abort": {
+      "post": {
+        "operationId": "abortErpImport",
+        "parameters": [
+          {
+            "name": "importId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
     }
   },
   "components": {
@@ -943,6 +1010,11 @@
         }
       },
       "Forbidden": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "Conflict": {
         "content": {
           "application/json": {}
         }
