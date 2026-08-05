@@ -10,6 +10,7 @@ import type {
 export declare namespace Components {
     namespace Responses {
         export type BadRequest = Schemas.ErrorResponseBase;
+        export type Conflict = Schemas.ErrorResponseBase;
         export interface ERPUpdatesResponse {
             results?: {
                 /**
@@ -163,6 +164,35 @@ export declare namespace Components {
             has_more?: boolean;
         }
         export interface ReplayEventsResponse {
+            /**
+             * Number of events actually queued for re-processing.
+             * example:
+             * 2
+             */
+            replayed: number;
+            /**
+             * One entry per requested event id, in request order.
+             */
+            results: {
+                /**
+                 * The requested (source) event ID.
+                 */
+                event_id: string;
+                /**
+                 * Outcome for this event. `success`/`queued` means it was enqueued for re-processing. `not_found` means no inbound event with that ID exists for the organization. `skipped` means it was deduplicated, `ignored` means no enabled use case matched it, and `error` means it could not be queued (see `message`).
+                 *
+                 */
+                status: "success" | "queued" | "skipped" | "ignored" | "not_found" | "error";
+                /**
+                 * The new event ID assigned to the replayed event. Use it to follow the replay in monitoring.
+                 *
+                 */
+                replay_event_id?: string;
+                /**
+                 * Human-readable detail for this outcome.
+                 */
+                message?: string;
+            }[];
             /**
              * List of event IDs for which replay was requested
              */
@@ -1312,6 +1342,17 @@ export declare namespace Components {
              */
             latest_types_package_name?: string;
         }
+        export interface CreateErpImportRequest {
+            s3_reference: S3Reference;
+            integration_id: string;
+            use_case_slug?: string;
+        }
+        export interface CreateErpImportResponse {
+            /**
+             * `imp_{ULID}` — time-ordered, also used as the job's correlation_id.
+             */
+            import_id: string;
+        }
         export interface CreateFileProxyUseCaseRequest {
             /**
              * Use case name
@@ -1924,6 +1965,93 @@ export declare namespace Components {
              */
             group_id?: string;
         };
+        /**
+         * Why the import failed — present if and only if status = FAILED.
+         */
+        export interface ErpImportError {
+            /**
+             * VALIDATION_BLOCKED = blocking row issues (see `validation`); PROCESSING_ERROR = a named, deterministic failure — retrying the same file cannot help; INTERNAL_ERROR = crashed or never started, so retry.
+             */
+            type: "VALIDATION_BLOCKED" | "PROCESSING_ERROR" | "INTERNAL_ERROR";
+            /**
+             * User-facing explanation of `type`.
+             */
+            message: string;
+        }
+        export interface ErpImportJob {
+            /**
+             * `imp_{ULID}` — time-ordered, also used as the job's correlation_id.
+             */
+            import_id: string;
+            org_id: string;
+            created_by?: string;
+            integration_id: string;
+            /**
+             * The inbound use case whose mapping drives both phases.
+             */
+            use_case_slug?: string;
+            format: "csv" | "xlsx";
+            /**
+             * PENDING → VALIDATING → READY → PROCESSING → IMPORTED, with FAILED reachable from any working status, and CANCELLING → CANCELLED reachable from VALIDATING or PROCESSING via :abort. IMPORTED, FAILED and CANCELLED are terminal and final.
+             * IMPORTED means every row was handed to the platform, not that the platform finished — per-row outcomes live in monitoring, filtered by correlation_id. A file that fails validation is FAILED with error.type = VALIDATION_BLOCKED.
+             * READY is legitimately idle for as long as the user takes to confirm, so it carries no running work and never goes stale.
+             * CANCELLING is transient and cooperative: the abort has been recorded but the worker only notices at its next batch boundary. Rows already published stay published — a stop is not a rollback.
+             */
+            status: "PENDING" | "VALIDATING" | "READY" | "PROCESSING" | "IMPORTED" | "FAILED" | "CANCELLING" | "CANCELLED";
+            s3_input_ref: S3Reference;
+            validation?: /* Validate-phase summary: what the file will create, and whether it may be confirmed. Absent until the validate phase completes. No per-row detail is kept — a rejected file is corrected and imported again. */ ErpImportValidation;
+            progress?: /**
+             * How far the currently running phase has got. Written at every batch boundary, so it advances during long runs rather than only at the end.
+             * `total_rows` is ABSENT during the validate phase until the file has been read to the end — there is deliberately no counting pass, since that would be a second unbounded read of the whole file. Render an indeterminate indicator while it is missing: dividing by a missing total yields a determinate bar pinned at 0%, which reads as a hung import.
+             */
+            ErpImportProgress;
+            error?: /* Why the import failed — present if and only if status = FAILED. */ ErpImportError;
+            /**
+             * Scopes this run in monitoring. Always equal to `import_id`.
+             */
+            correlation_id?: string;
+            activity_id?: string;
+            created_at: string; // date-time
+            updated_at: string; // date-time
+        }
+        export interface ErpImportList {
+            results: ErpImportJob[];
+            /**
+             * Cursor for the next page, or null when there are no more rows.
+             */
+            next_cursor?: string | null;
+        }
+        /**
+         * How far the currently running phase has got. Written at every batch boundary, so it advances during long runs rather than only at the end.
+         * `total_rows` is ABSENT during the validate phase until the file has been read to the end — there is deliberately no counting pass, since that would be a second unbounded read of the whole file. Render an indeterminate indicator while it is missing: dividing by a missing total yields a determinate bar pinned at 0%, which reads as a hung import.
+         */
+        export interface ErpImportProgress {
+            /**
+             * Rows fully processed. An exact "the first N rows are done" watermark, not an estimate — it only advances once a batch has been completely handled.
+             */
+            processed_rows: number;
+            /**
+             * Rows in the file. Known only once a phase has read to EOF; the execute phase has it from the start, because validate recorded it first.
+             */
+            total_rows?: number;
+        }
+        /**
+         * Validate-phase summary: what the file will create, and whether it may be confirmed. Absent until the validate phase completes. No per-row detail is kept — a rejected file is corrected and imported again.
+         */
+        export interface ErpImportValidation {
+            /**
+             * Data rows read from the file.
+             */
+            total_rows: number;
+            blocking: number;
+            warnings: number;
+            /**
+             * Distinct entities the file expresses, keyed by entity slug.
+             */
+            entities: {
+                [name: string]: number;
+            };
+        }
         export interface ErpUpdatesEventsV2Request {
             /**
              * UUID that identifies the integration configuration to use
@@ -5612,6 +5740,10 @@ export declare namespace Components {
              */
             buckets?: RuleBaselineBucket[] | null;
         }
+        export interface S3Reference {
+            bucket: string;
+            key: string;
+        }
         export interface SecureProxyRequest {
             /**
              * Integration ID that owns the secure_proxy use case
@@ -6459,6 +6591,21 @@ export declare namespace Components {
     }
 }
 export declare namespace Paths {
+    namespace AbortErpImport {
+        namespace Parameters {
+            export type ImportId = string;
+        }
+        export interface PathParameters {
+            importId: Parameters.ImportId;
+        }
+        namespace Responses {
+            export type $202 = Components.Schemas.ErpImportJob;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $409 = Components.Responses.Conflict;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace AckOutboundMessages {
         namespace Parameters {
             export type IntegrationId = string; // uuid
@@ -6510,6 +6657,15 @@ export declare namespace Paths {
             export type $400 = Components.Responses.BadRequest;
             export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace CreateErpImport {
+        export type RequestBody = Components.Schemas.CreateErpImportRequest;
+        namespace Responses {
+            export type $202 = Components.Schemas.CreateErpImportResponse;
+            export type $400 = Components.Responses.BadRequest;
+            export type $403 = Components.Responses.Forbidden;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -6625,6 +6781,21 @@ export declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace ExecuteErpImport {
+        namespace Parameters {
+            export type ImportId = string;
+        }
+        export interface PathParameters {
+            importId: Parameters.ImportId;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.ErpImportJob;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $409 = Components.Responses.Conflict;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace GenerateTypes {
         namespace Parameters {
             export type IntegrationId = string; // uuid
@@ -6669,6 +6840,20 @@ export declare namespace Paths {
             export type $200 = Components.Responses.GetAssociatedMonitoringEventsResponse;
             export type $400 = Components.Responses.BadRequest;
             export type $401 = Components.Responses.Unauthorized;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace GetErpImport {
+        namespace Parameters {
+            export type ImportId = string;
+        }
+        export interface PathParameters {
+            importId: Parameters.ImportId;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.ErpImportJob;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -6871,6 +7056,22 @@ export declare namespace Paths {
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace ListErpImports {
+        namespace Parameters {
+            export type Cursor = string;
+            export type Limit = number;
+        }
+        export interface QueryParameters {
+            limit?: Parameters.Limit;
+            cursor?: Parameters.Cursor;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.ErpImportList;
+            export type $400 = Components.Responses.BadRequest;
+            export type $403 = Components.Responses.Forbidden;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -8157,6 +8358,63 @@ export interface OperationMethods {
     data?: Paths.CommitTypes.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CommitTypes.Responses.$200>
+  /**
+   * listErpImports - listErpImports
+   * 
+   * List recent pricing-file import jobs for the org, newest first.
+   * 
+   * Pass `next_cursor` back as `cursor` for the next page. A page can be
+   * shorter than `limit` and still have more behind it, so stop on
+   * `next_cursor: null`.
+   * 
+   */
+  'listErpImports'(
+    parameters?: Parameters<Paths.ListErpImports.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ListErpImports.Responses.$200>
+  /**
+   * createErpImport - createErpImport
+   * 
+   * Create a pricing-file import job from an already-uploaded file (S3 ref). Returns a job id and starts the validate phase asynchronously — poll GET /v2/erp/imports/{importId}.
+   */
+  'createErpImport'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.CreateErpImport.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CreateErpImport.Responses.$202>
+  /**
+   * getErpImport - getErpImport
+   * 
+   * Get a pricing-file import job (status, counts, result links).
+   */
+  'getErpImport'(
+    parameters?: Parameters<Paths.GetErpImport.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetErpImport.Responses.$200>
+  /**
+   * executeErpImport - executeErpImport
+   * 
+   * Confirm and run the write phase of a validated import. Only a READY job may be executed; any other status returns 409.
+   */
+  'executeErpImport'(
+    parameters?: Parameters<Paths.ExecuteErpImport.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ExecuteErpImport.Responses.$200>
+  /**
+   * abortErpImport - abortErpImport
+   * 
+   * Ask a running import to stop. Valid while the job is VALIDATING or PROCESSING; any other status returns 409.
+   * The stop is cooperative: the job passes through CANCELLING and typically reaches CANCELLED within seconds.
+   * Rows already published to the platform are **kept**: this is a stop, not a rollback. Aborting during VALIDATING has published nothing, so it is always clean; aborting during PROCESSING leaves a partial import, and the rows that landed are visible in monitoring under the job's correlation_id.
+   */
+  'abortErpImport'(
+    parameters?: Parameters<Paths.AbortErpImport.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.AbortErpImport.Responses.$202>
 }
 
 export interface PathsDictionary {
@@ -8977,6 +9235,71 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.CommitTypes.Responses.$200>
   }
+  ['/v2/erp/imports']: {
+    /**
+     * createErpImport - createErpImport
+     * 
+     * Create a pricing-file import job from an already-uploaded file (S3 ref). Returns a job id and starts the validate phase asynchronously — poll GET /v2/erp/imports/{importId}.
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.CreateErpImport.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CreateErpImport.Responses.$202>
+    /**
+     * listErpImports - listErpImports
+     * 
+     * List recent pricing-file import jobs for the org, newest first.
+     * 
+     * Pass `next_cursor` back as `cursor` for the next page. A page can be
+     * shorter than `limit` and still have more behind it, so stop on
+     * `next_cursor: null`.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.ListErpImports.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ListErpImports.Responses.$200>
+  }
+  ['/v2/erp/imports/{importId}']: {
+    /**
+     * getErpImport - getErpImport
+     * 
+     * Get a pricing-file import job (status, counts, result links).
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetErpImport.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetErpImport.Responses.$200>
+  }
+  ['/v2/erp/imports/{importId}:execute']: {
+    /**
+     * executeErpImport - executeErpImport
+     * 
+     * Confirm and run the write phase of a validated import. Only a READY job may be executed; any other status returns 409.
+     */
+    'post'(
+      parameters?: Parameters<Paths.ExecuteErpImport.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ExecuteErpImport.Responses.$200>
+  }
+  ['/v2/erp/imports/{importId}:abort']: {
+    /**
+     * abortErpImport - abortErpImport
+     * 
+     * Ask a running import to stop. Valid while the job is VALIDATING or PROCESSING; any other status returns 409.
+     * The stop is cooperative: the job passes through CANCELLING and typically reaches CANCELLED within seconds.
+     * Rows already published to the platform are **kept**: this is a stop, not a rollback. Aborting during VALIDATING has published nothing, so it is always clean; aborting during PROCESSING leaves a partial import, and the rows that landed are visible in monitoring under the job's correlation_id.
+     */
+    'post'(
+      parameters?: Parameters<Paths.AbortErpImport.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.AbortErpImport.Responses.$202>
+  }
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
@@ -8990,6 +9313,8 @@ export type AutoRefreshSettings = Components.Schemas.AutoRefreshSettings;
 export type CommitTypesRequest = Components.Schemas.CommitTypesRequest;
 export type CommitTypesResponse = Components.Schemas.CommitTypesResponse;
 export type ConnectorConfig = Components.Schemas.ConnectorConfig;
+export type CreateErpImportRequest = Components.Schemas.CreateErpImportRequest;
+export type CreateErpImportResponse = Components.Schemas.CreateErpImportResponse;
 export type CreateFileProxyUseCaseRequest = Components.Schemas.CreateFileProxyUseCaseRequest;
 export type CreateInboundUseCaseRequest = Components.Schemas.CreateInboundUseCaseRequest;
 export type CreateIntegrationRequest = Components.Schemas.CreateIntegrationRequest;
@@ -9012,6 +9337,11 @@ export type EnvVarRefConfig = Components.Schemas.EnvVarRefConfig;
 export type EnvironmentFieldConfig = Components.Schemas.EnvironmentFieldConfig;
 export type ErpEvent = Components.Schemas.ErpEvent;
 export type ErpEventV3 = Components.Schemas.ErpEventV3;
+export type ErpImportError = Components.Schemas.ErpImportError;
+export type ErpImportJob = Components.Schemas.ErpImportJob;
+export type ErpImportList = Components.Schemas.ErpImportList;
+export type ErpImportProgress = Components.Schemas.ErpImportProgress;
+export type ErpImportValidation = Components.Schemas.ErpImportValidation;
 export type ErpUpdatesEventsV2Request = Components.Schemas.ErpUpdatesEventsV2Request;
 export type ErpUpdatesEventsV3Request = Components.Schemas.ErpUpdatesEventsV3Request;
 export type ErrorResponseBase = Components.Schemas.ErrorResponseBase;
@@ -9117,6 +9447,7 @@ export type RepeatableFieldType = Components.Schemas.RepeatableFieldType;
 export type ReplayEventsRequest = Components.Schemas.ReplayEventsRequest;
 export type RuleBaselineBucket = Components.Schemas.RuleBaselineBucket;
 export type RuleBaselineStatus = Components.Schemas.RuleBaselineStatus;
+export type S3Reference = Components.Schemas.S3Reference;
 export type SecureProxyRequest = Components.Schemas.SecureProxyRequest;
 export type SecureProxyResponse = Components.Schemas.SecureProxyResponse;
 export type SecureProxySummary = Components.Schemas.SecureProxySummary;

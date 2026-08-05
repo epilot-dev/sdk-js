@@ -88,7 +88,22 @@ const { data } = await integrationToolkitClient.acknowledgeTracking(...)
 **managed-call**
 - [`managedCallExecute`](#managedcallexecute)
 
+**erp-imports**
+- [`createErpImport`](#createerpimport)
+- [`listErpImports`](#listerpimports)
+- [`getErpImport`](#geterpimport)
+- [`executeErpImport`](#executeerpimport)
+- [`abortErpImport`](#aborterpimport)
+
 **Schemas**
+- [`S3Reference`](#s3reference)
+- [`CreateErpImportRequest`](#createerpimportrequest)
+- [`ErpImportValidation`](#erpimportvalidation)
+- [`ErpImportProgress`](#erpimportprogress)
+- [`ErpImportError`](#erpimporterror)
+- [`CreateErpImportResponse`](#createerpimportresponse)
+- [`ErpImportJob`](#erpimportjob)
+- [`ErpImportList`](#erpimportlist)
 - [`NotificationHistoryItem`](#notificationhistoryitem)
 - [`NotificationHistoryResponse`](#notificationhistoryresponse)
 - [`TestNotificationRequest`](#testnotificationrequest)
@@ -953,6 +968,15 @@ const { data } = await client.replayEvents(
 
 ```json
 {
+  "replayed": 2,
+  "results": [
+    {
+      "event_id": "string",
+      "status": "success",
+      "replay_event_id": "string",
+      "message": "string"
+    }
+  ],
   "event_ids": ["string"]
 }
 ```
@@ -3075,7 +3099,350 @@ const { data } = await client.commitTypes(
 
 ---
 
+### `createErpImport`
+
+Create a pricing-file import job from an already-uploaded file (S3 ref). Returns a job id and starts the validate phase asynchronously — poll GET /v2/erp/imports/{importId}.
+
+`POST /v2/erp/imports`
+
+```ts
+const { data } = await client.createErpImport(
+  null,
+  {
+    s3_reference: {
+      bucket: 'string',
+      key: 'string'
+    },
+    integration_id: 'string',
+    use_case_slug: 'string'
+  },
+)
+```
+
+---
+
+### `listErpImports`
+
+List recent pricing-file import jobs for the org, newest first.
+
+`GET /v2/erp/imports`
+
+```ts
+const { data } = await client.listErpImports({
+  limit: 1,
+  cursor: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "results": [
+    {
+      "import_id": "string",
+      "org_id": "string",
+      "created_by": "string",
+      "integration_id": "string",
+      "use_case_slug": "string",
+      "format": "csv",
+      "status": "PENDING",
+      "s3_input_ref": {
+        "bucket": "string",
+        "key": "string"
+      },
+      "validation": {
+        "total_rows": 0,
+        "blocking": 0,
+        "warnings": 0,
+        "entities": {}
+      },
+      "progress": {
+        "processed_rows": 0,
+        "total_rows": 0
+      },
+      "error": {
+        "type": "VALIDATION_BLOCKED",
+        "message": "string"
+      },
+      "correlation_id": "string",
+      "activity_id": "string",
+      "created_at": "1970-01-01T00:00:00.000Z",
+      "updated_at": "1970-01-01T00:00:00.000Z"
+    }
+  ],
+  "next_cursor": "string"
+}
+```
+
+</details>
+
+---
+
+### `getErpImport`
+
+Get a pricing-file import job (status, counts, result links).
+
+`GET /v2/erp/imports/{importId}`
+
+```ts
+const { data } = await client.getErpImport({
+  importId: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "import_id": "string",
+  "org_id": "string",
+  "created_by": "string",
+  "integration_id": "string",
+  "use_case_slug": "string",
+  "format": "csv",
+  "status": "PENDING",
+  "s3_input_ref": {
+    "bucket": "string",
+    "key": "string"
+  },
+  "validation": {
+    "total_rows": 0,
+    "blocking": 0,
+    "warnings": 0,
+    "entities": {}
+  },
+  "progress": {
+    "processed_rows": 0,
+    "total_rows": 0
+  },
+  "error": {
+    "type": "VALIDATION_BLOCKED",
+    "message": "string"
+  },
+  "correlation_id": "string",
+  "activity_id": "string",
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "updated_at": "1970-01-01T00:00:00.000Z"
+}
+```
+
+</details>
+
+---
+
+### `executeErpImport`
+
+Confirm and run the write phase of a validated import. Only a READY job may be executed; any other status returns 409.
+
+`POST /v2/erp/imports/{importId}:execute`
+
+```ts
+const { data } = await client.executeErpImport({
+  importId: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "import_id": "string",
+  "org_id": "string",
+  "created_by": "string",
+  "integration_id": "string",
+  "use_case_slug": "string",
+  "format": "csv",
+  "status": "PENDING",
+  "s3_input_ref": {
+    "bucket": "string",
+    "key": "string"
+  },
+  "validation": {
+    "total_rows": 0,
+    "blocking": 0,
+    "warnings": 0,
+    "entities": {}
+  },
+  "progress": {
+    "processed_rows": 0,
+    "total_rows": 0
+  },
+  "error": {
+    "type": "VALIDATION_BLOCKED",
+    "message": "string"
+  },
+  "correlation_id": "string",
+  "activity_id": "string",
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "updated_at": "1970-01-01T00:00:00.000Z"
+}
+```
+
+</details>
+
+---
+
+### `abortErpImport`
+
+Ask a running import to stop. Valid while the job is VALIDATING or PROCESSING; any other status returns 409.
+The stop is cooperative: the job passes through CANCELLING and typically reaches CANCELLED 
+
+`POST /v2/erp/imports/{importId}:abort`
+
+```ts
+const { data } = await client.abortErpImport({
+  importId: 'example',
+})
+```
+
+---
+
 ## Schemas
+
+### `S3Reference`
+
+```ts
+type S3Reference = {
+  bucket: string
+  key: string
+}
+```
+
+### `CreateErpImportRequest`
+
+```ts
+type CreateErpImportRequest = {
+  s3_reference: {
+    bucket: string
+    key: string
+  }
+  integration_id: string
+  use_case_slug?: string
+}
+```
+
+### `ErpImportValidation`
+
+Validate-phase summary: what the file will create, and whether it may be confirmed. Absent until the validate phase completes. No per-row detail is kept — a rejected file is corrected and imported again.
+
+```ts
+type ErpImportValidation = {
+  total_rows: number
+  blocking: number
+  warnings: number
+  entities: Record<string, number>
+}
+```
+
+### `ErpImportProgress`
+
+How far the currently running phase has got. Written at every batch boundary, so it advances during long runs rather than only at the end.
+`total_rows` is ABSENT during the validate phase until the file has been read to the end — there is deliberately no counting pass, since that would be a second u
+
+```ts
+type ErpImportProgress = {
+  processed_rows: number
+  total_rows?: number
+}
+```
+
+### `ErpImportError`
+
+Why the import failed — present if and only if status = FAILED.
+
+```ts
+type ErpImportError = {
+  type: "VALIDATION_BLOCKED" | "PROCESSING_ERROR" | "INTERNAL_ERROR"
+  message: string
+}
+```
+
+### `CreateErpImportResponse`
+
+```ts
+type CreateErpImportResponse = {
+  import_id: string
+}
+```
+
+### `ErpImportJob`
+
+```ts
+type ErpImportJob = {
+  import_id: string
+  org_id: string
+  created_by?: string
+  integration_id: string
+  use_case_slug?: string
+  format: "csv" | "xlsx"
+  status: "PENDING" | "VALIDATING" | "READY" | "PROCESSING" | "IMPORTED" | "FAILED" | "CANCELLING" | "CANCELLED"
+  s3_input_ref: {
+    bucket: string
+    key: string
+  }
+  validation?: {
+    total_rows: number
+    blocking: number
+    warnings: number
+    entities: Record<string, number>
+  }
+  progress?: {
+    processed_rows: number
+    total_rows?: number
+  }
+  error?: {
+    type: "VALIDATION_BLOCKED" | "PROCESSING_ERROR" | "INTERNAL_ERROR"
+    message: string
+  }
+  correlation_id?: string
+  activity_id?: string
+  created_at: string // date-time
+  updated_at: string // date-time
+}
+```
+
+### `ErpImportList`
+
+```ts
+type ErpImportList = {
+  results: Array<{
+    import_id: string
+    org_id: string
+    created_by?: string
+    integration_id: string
+    use_case_slug?: string
+    format: "csv" | "xlsx"
+    status: "PENDING" | "VALIDATING" | "READY" | "PROCESSING" | "IMPORTED" | "FAILED" | "CANCELLING" | "CANCELLED"
+    s3_input_ref: {
+      bucket: { ... }
+      key: { ... }
+    }
+    validation?: {
+      total_rows: { ... }
+      blocking: { ... }
+      warnings: { ... }
+      entities: { ... }
+    }
+    progress?: {
+      processed_rows: { ... }
+      total_rows?: { ... }
+    }
+    error?: {
+      type: { ... }
+      message: { ... }
+    }
+    correlation_id?: string
+    activity_id?: string
+    created_at: string // date-time
+    updated_at: string // date-time
+  }>
+  next_cursor?: string
+}
+```
 
 ### `NotificationHistoryItem`
 
