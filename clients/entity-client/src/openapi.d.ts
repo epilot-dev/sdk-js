@@ -834,6 +834,15 @@ declare namespace Components {
              */
             DefaultAddressFields;
         }
+        /**
+         * Configuration for adjusting a contract installment through a Journey.
+         */
+        export interface AdjustInstallmentCapabilityConfig {
+            /**
+             * ID of the Flow Journey to open when adjusting the installment.
+             */
+            journey_id: string;
+        }
         export type Attribute = /* Textarea or text input */ TextAttribute | /* Link with title and href */ LinkAttribute | /* Date or Datetime picker */ DateAttribute | /* Country picker */ CountryAttribute | /* Yes / No Toggle */ BooleanAttribute | /* Dropdown select */ SelectAttribute | /* Multi Choice Selection */ MultiSelectAttribute | /* Status select */ StatusAttribute | /* Sequence of unique identifiers */ SequenceAttribute | /* Entity Relationship */ RelationAttribute | /* User Relationship */ UserRelationAttribute | /* Address attribute */ AddressAttribute | /* Reference to an address attribute of another entity */ AddressRelationAttribute | /* Reference to a payment method attribute of another entity */ PaymentMethodRelationAttribute | /* Currency input */ CurrencyAttribute | /* Tags */ TagsAttribute | /* Message emil address */ MessageEmailAddressAttribute | /* Numeric input */ NumberAttribute | /* Dynamic data table with configurable columns. Data is stored as an array of objects where each object represents a row. */ TableAttribute | /* Consent Management */ ConsentAttribute | /* No UI representation */ InternalAttribute | /* Type of attribute to render N number of ordered fields */ OrderedListAttribute | /* File or Image Attachment */ FileAttribute | /* An attribute that is computed from the entity data. For more details on how to use them, check the docs [here](https://e-pilot.atlassian.net/wiki/spaces/EO/pages/5642977476/How+To+Computed+Schema+Attributes) */ ComputedAttribute | /* Partner Status */ PartnerStatusAttribute | /* Email address for send invitation */ InvitationEmailAttribute | /* Automation entity */ AutomationAttribute | /* Epilot internal user info */ InternalUserAttribute | /* Entity Taxonomy */ PurposeAttribute | /* Shared Partner Organisations */ PartnerOrganisationAttribute | /* Portal access configuration */ PortalAccessAttribute | /* Phone number */ PhoneAttribute | /* Email address */ EmailAttribute | /* Payment method */ PaymentAttribute | /* Price component */ PriceComponentAttribute;
         /**
          * a readonly computed ID for the attribute including schema slug and the attribute ID
@@ -3312,6 +3321,7 @@ declare namespace Components {
              * 123e4567-e89b-12d3-a456-426614174000
              */
             app_id?: string;
+            adjust_installment?: /* Configuration for adjusting a contract installment through a Journey. */ AdjustInstallmentCapabilityConfig;
             ui_config?: {
                 /**
                  * Whether the capability is filterable
@@ -3457,6 +3467,7 @@ declare namespace Components {
              * 123e4567-e89b-12d3-a456-426614174000
              */
             app_id?: string;
+            adjust_installment?: /* Configuration for adjusting a contract installment through a Journey. */ AdjustInstallmentCapabilityConfig;
             ui_config?: {
                 /**
                  * Whether the capability is filterable
@@ -19436,6 +19447,7 @@ export type ActivityItem = Components.Schemas.ActivityItem;
 export type ActivityType = Components.Schemas.ActivityType;
 export type AddressAttribute = Components.Schemas.AddressAttribute;
 export type AddressRelationAttribute = Components.Schemas.AddressRelationAttribute;
+export type AdjustInstallmentCapabilityConfig = Components.Schemas.AdjustInstallmentCapabilityConfig;
 export type Attribute = Components.Schemas.Attribute;
 export type AttributeWithCompositeID = Components.Schemas.AttributeWithCompositeID;
 export type AutomationAttribute = Components.Schemas.AutomationAttribute;
