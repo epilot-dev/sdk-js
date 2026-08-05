@@ -35,6 +35,7 @@ const { data } = await automationClient.searchFlows(...)
 **executions**
 - [`getExecutions`](#getexecutions)
 - [`startExecution`](#startexecution)
+- [`searchExecutions`](#searchexecutions)
 - [`getExecution`](#getexecution)
 - [`cancelExecution`](#cancelexecution)
 - [`retriggerAction`](#retriggeraction)
@@ -137,6 +138,8 @@ const { data } = await automationClient.searchFlows(...)
 - [`ApiCallerContext`](#apicallercontext)
 - [`ExecutionStatus`](#executionstatus)
 - [`GetExecutionsResp`](#getexecutionsresp)
+- [`SearchExecutionsReq`](#searchexecutionsreq)
+- [`SearchExecutionsResp`](#searchexecutionsresp)
 - [`StartExecutionRequest`](#startexecutionrequest)
 - [`PatchBulkJobRequest`](#patchbulkjobrequest)
 - [`BulkTriggerRequest`](#bulktriggerrequest)
@@ -487,6 +490,67 @@ const { data } = await client.startExecution(
   ],
   "loop_state": {},
   "chain": ["string"]
+}
+```
+
+</details>
+
+---
+
+### `searchExecutions`
+
+Search automation executions of an entity with cursor-based pagination.
+Returns pages of up to 100 executions, newest first.
+Prefer this over GET /v1/automation/executions, which returns the full
+exec
+
+`POST /v1/automation/executions:search`
+
+```ts
+const { data } = await client.searchExecutions(
+  null,
+  {
+    entity_id: 'e3d3ebac-baab-4395-abf4-50b5bf1f8b74',
+    include_flows: false,
+    size: 25,
+    cursor: 'string'
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "total": 0,
+  "results": [
+    {
+      "id": "9baf184f-bc81-4128-bca3-d974c90a12c4",
+      "execution_status": "pending",
+      "entity_id": "e3d3ebac-baab-4395-abf4-50b5bf1f8b74",
+      "activity_id": "e3d3ebac-baab-4395-abf4-50b5bf1f8b74",
+      "entity_snapshot": {},
+      "org_id": "e3d3ebac-baab-4395-abf4-50b5bf1f8b74",
+      "flow_id": "7791b04a-16d2-44a2-9af9-2d59c25c512f",
+      "flow_name": "Handle contact form",
+      "created_at": "1970-01-01T00:00:00.000Z",
+      "updated_at": "1970-01-01T00:00:00.000Z",
+      "current_action_id": "9ec3711b-db63-449c-b894-54d5bb622a8f",
+      "conditions": [],
+      "schedules": [],
+      "actions": [],
+      "resume_token": "eyJraWQiOiJrZXkifQ==",
+      "trigger_context": {},
+      "version": 2,
+      "trigger_event": {},
+      "workflow_context": {},
+      "loops": [],
+      "loop_state": {},
+      "chain": ["string"]
+    }
+  ],
+  "next_cursor": "string"
 }
 ```
 
@@ -2284,6 +2348,13 @@ type AssignThreadAction = {
   config?: {
     remove?: string[]
     add?: string[]
+    assignment_type?: "direct" | "even_distribution" | "sequential"
+    only_available_users?: boolean
+    match_user_skills?: boolean
+    required_skill_categories?: string[]
+    skill_match_mode?: "require_all" | "prefer"
+    fallback?: "leave_unassigned" | "assign_to_fallback"
+    fallback_assignees?: string[]
   }
 }
 ```
@@ -2302,6 +2373,13 @@ type MoveThreadConfig = {
 type AssignThreadConfig = {
   remove?: string[]
   add?: string[]
+  assignment_type?: "direct" | "even_distribution" | "sequential"
+  only_available_users?: boolean
+  match_user_skills?: boolean
+  required_skill_categories?: string[]
+  skill_match_mode?: "require_all" | "prefer"
+  fallback?: "leave_unassigned" | "assign_to_fallback"
+  fallback_assignees?: string[]
 }
 ```
 
@@ -3299,6 +3377,124 @@ type ExecutionStatus = "pending" | "starting" | "in_progress" | "paused" | "succ
 
 ```ts
 type GetExecutionsResp = {
+  total: number
+  results: Array<{
+    id: string
+    execution_status?: "pending" | "starting" | "in_progress" | "paused" | "success" | "failed" | "cancelled" | "skipped" | "scheduled" | "hot"
+    entity_id: string
+    activity_id?: string
+    entity_snapshot?: {
+      _id: { ... }
+      _title: { ... }
+      _org: { ... }
+      _schema: { ... }
+      _tags?: { ... }
+      _created_at: { ... }
+      _updated_at: { ... }
+    }
+    org_id: string
+    flow_id: string
+    flow_name?: string
+    created_at?: string // date-time
+    updated_at?: string // date-time
+    current_action_id?: string
+    conditions?: Array<{
+      id?: { ... }
+      schedule_id?: { ... }
+      evaluation_order?: { ... }
+      evaluationResult?: { ... }
+      error_output?: { ... }
+      allow_failure?: { ... }
+      statements?: { ... }
+    }>
+    schedules?: Array<{
+      id: { ... }
+      scheduleApiId?: { ... }
+      numberOfUnits?: { ... }
+      timePeriod?: { ... }
+      timeRelation?: { ... }
+      source: { ... }
+    }>
+    actions: Array<{
+      type?: { ... }
+      config?: { ... }
+    } | {
+      type?: { ... }
+      config?: { ... }
+    } | {
+      type?: { ... }
+      config?: { ... }
+    } | {
+      type?: { ... }
+      config?: { ... }
+    } | {
+      type?: { ... }
+      config?: { ... }
+    } | {
+      type?: { ... }
+      config?: { ... }
+    } | {
+      type?: { ... }
+      config?: { ... }
+    } | {
+      type?: { ... }
+      config?: { ... }
+    } | {
+      type?: { ... }
+      config?: { ... }
+    } | {
+      type?: { ... }
+      config?: { ... }
+    } | {
+      id?: { ... }
+      flow_action_id?: { ... }
+      name?: { ... }
+      type?: { ... }
+      config?: { ... }
+      allow_failure?: { ... }
+      created_automatically?: { ... }
+      is_bulk_action?: { ... }
+      reason?: { ... }
+      condition_id?: { ... }
+      schedule_id?: { ... }
+      loop_id?: { ... }
+      execution_status?: { ... }
+      started_at?: { ... }
+      updated_at?: { ... }
+      outputs?: { ... }
+      error_output?: { ... }
+      retry_strategy?: { ... }
+      iterations?: { ... }
+    } | {
+      type?: { ... }
+      config?: { ... }
+    } | {
+      type?: { ... }
+      config?: { ... }
+    } | {
+      type?: { ... }
+      config?: { ... }
+    }>
+    resume_token?: string
+  // ...
+}
+```
+
+### `SearchExecutionsReq`
+
+```ts
+type SearchExecutionsReq = {
+  entity_id: string
+  include_flows?: boolean
+  size?: number
+  cursor?: string
+}
+```
+
+### `SearchExecutionsResp`
+
+```ts
+type SearchExecutionsResp = {
   total: number
   results: Array<{
     id: string

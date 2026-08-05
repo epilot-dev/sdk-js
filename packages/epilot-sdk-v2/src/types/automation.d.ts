@@ -721,9 +721,64 @@ export declare namespace Components {
              */
             remove?: string[];
             /**
-             * Assignees to add to the thread
+             * Assignees to add to the thread. For even_distribution this may contain group IDs (prefixed "group_") whose members are candidates.
              */
             add?: string[];
+            /**
+             * How assignees in `add` are resolved.
+             * - direct: assign exactly the users in `add` (default).
+             * - even_distribution: treat `add` as a candidate pool (users and/or groups)
+             *   and assign the least-loaded available agent.
+             * - sequential: reserved for future use.
+             *
+             */
+            assignment_type?: "direct" | "even_distribution" | "sequential";
+            /**
+             * Candidate condition for even_distribution: when true, skip users who
+             * are currently absent (out-of-office). Opt-in; defaults to false.
+             *
+             */
+            only_available_users?: boolean;
+            /**
+             * Candidate condition for even_distribution: when true, only assign to
+             * users whose skills (tags) match a label on the message. Opt-in;
+             * defaults to false.
+             *
+             */
+            match_user_skills?: boolean;
+            /**
+             * Candidate condition (with match_user_skills): label families
+             * (taxonomy slugs) that must match. A user qualifies only if it shares
+             * a label with the message within each of these categories. Leave empty
+             * to match on any label (flat OR across all categories).
+             *
+             */
+            required_skill_categories?: string[];
+            /**
+             * How strictly required skill categories are matched (applies with
+             * match_user_skills and required skill categories set).
+             * - require_all: hard match (default) — a user must match every required
+             *   category the message has a label in.
+             * - prefer: soft match — prefer the best-matching users, relaxing to
+             *   fewer categories only when no better match exists; a user matching
+             *   no category is never eligible (the fallback then applies).
+             *
+             */
+            skill_match_mode?: "require_all" | "prefer";
+            /**
+             * What to do when smart assignment resolves no assignable candidate.
+             * Applies to even_distribution.
+             * - leave_unassigned: leave the thread unassigned (default).
+             * - assign_to_fallback: route to the users/groups in `fallback_assignees`.
+             *
+             */
+            fallback?: "leave_unassigned" | "assign_to_fallback";
+            /**
+             * Target user/group IDs (group IDs prefixed "group_") to assign when
+             * `fallback` is "assign_to_fallback".
+             *
+             */
+            fallback_assignees?: string[];
         }
         /**
          * example:
@@ -3597,6 +3652,40 @@ export declare namespace Components {
             total: number;
             results: AutomationFlow[];
         }
+        export interface SearchExecutionsReq {
+            entity_id: /**
+             * example:
+             * e3d3ebac-baab-4395-abf4-50b5bf1f8b74
+             */
+            EntityId;
+            /**
+             * Include flow automations in the response
+             */
+            include_flows?: boolean;
+            /**
+             * Max number of executions to return per page
+             */
+            size?: number;
+            /**
+             * Opaque cursor returned as next_cursor by a previous page.
+             * Pass it to fetch the next page of results.
+             *
+             */
+            cursor?: string;
+        }
+        export interface SearchExecutionsResp {
+            /**
+             * Number of executions in this page
+             */
+            total: number;
+            results: AutomationExecution[];
+            /**
+             * Opaque cursor to fetch the next page of results.
+             * Only present when more results are available.
+             *
+             */
+            next_cursor?: string;
+        }
         export interface SendEmailAction {
             id?: /**
              * example:
@@ -5047,6 +5136,20 @@ export declare namespace Paths {
             Components.Responses.NotFoundError;
         }
     }
+    namespace SearchExecutions {
+        export type RequestBody = Components.Schemas.SearchExecutionsReq;
+        namespace Responses {
+            export type $200 = Components.Schemas.SearchExecutionsResp;
+            export type $403 = /**
+             * example:
+             * {
+             *   "status": 403,
+             *   "error": "Forbidden"
+             * }
+             */
+            Components.Responses.ForbiddenError;
+        }
+    }
     namespace SearchFlows {
         namespace Parameters {
             export type From = number;
@@ -5190,6 +5293,20 @@ export interface OperationMethods {
     data?: Paths.StartExecution.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.StartExecution.Responses.$201>
+  /**
+   * searchExecutions - searchExecutions
+   * 
+   * Search automation executions of an entity with cursor-based pagination.
+   * Returns pages of up to 100 executions, newest first.
+   * Prefer this over GET /v1/automation/executions, which returns the full
+   * execution history in a single response.
+   * 
+   */
+  'searchExecutions'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.SearchExecutions.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.SearchExecutions.Responses.$200>
   /**
    * bulkTriggerExecutions - bulkTriggerExecutions
    * 
@@ -5365,6 +5482,22 @@ export interface PathsDictionary {
       data?: Paths.StartExecution.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.StartExecution.Responses.$201>
+  }
+  ['/v1/automation/executions:search']: {
+    /**
+     * searchExecutions - searchExecutions
+     * 
+     * Search automation executions of an entity with cursor-based pagination.
+     * Returns pages of up to 100 executions, newest first.
+     * Prefer this over GET /v1/automation/executions, which returns the full
+     * execution history in a single response.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.SearchExecutions.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.SearchExecutions.Responses.$200>
   }
   ['/v1/automation/executions/bulk-jobs']: {
     /**
@@ -5573,6 +5706,8 @@ export type ResumeToken = Components.Schemas.ResumeToken;
 export type RetryReq = Components.Schemas.RetryReq;
 export type RetryStrategy = Components.Schemas.RetryStrategy;
 export type SearchAutomationsResp = Components.Schemas.SearchAutomationsResp;
+export type SearchExecutionsReq = Components.Schemas.SearchExecutionsReq;
+export type SearchExecutionsResp = Components.Schemas.SearchExecutionsResp;
 export type SendEmailAction = Components.Schemas.SendEmailAction;
 export type SendEmailActionConfig = Components.Schemas.SendEmailActionConfig;
 export type SendEmailCondition = Components.Schemas.SendEmailCondition;
