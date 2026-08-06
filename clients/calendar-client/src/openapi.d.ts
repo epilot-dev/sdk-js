@@ -62,11 +62,11 @@ declare namespace Components {
             absence_adjustment_id?: string;
             reason?: string | null;
         }
-        export type AbsenceIntervalSource = "calendar_event" | "absence_adjustment";
+        export type AbsenceIntervalSource = "calendar_event" | "absence_adjustment" | "working_hours";
         /**
          * Calendar status targeted by the absence adjustment.
          */
-        export type AbsenceStatus = "busy" | "oof";
+        export type AbsenceStatus = "oof" | "busy";
         /**
          * Optional producer-defined reference stored with an absence adjustment.
          */
@@ -673,6 +673,10 @@ declare namespace Components {
              * Include busy inputs in addition to out-of-office absence. Defaults to false.
              */
             include_busy?: boolean;
+            /**
+             * At what granularity working hours contribute to absence. "time" (default): all time outside a user's working windows counts as absent. "day": only full days with no working windows count as absent (whole-day granularity, used by thread assignment). Users without a working-hours record never produce working-hours intervals.
+             */
+            working_hours_granularity?: "time" | "day";
         }
         export interface SearchNowAbsenceBody {
             /**
@@ -984,6 +988,10 @@ declare namespace Components {
              * Include busy inputs in addition to out-of-office absence. Defaults to false.
              */
             include_busy?: boolean;
+            /**
+             * At what granularity working hours contribute to absence. "time" (default): all time outside a user's working windows counts as absent. "day": only full days with no working windows count as absent (whole-day granularity, used by thread assignment). Users without a working-hours record never produce working-hours intervals.
+             */
+            working_hours_granularity?: "time" | "day";
         }
         export type Sensitivity = "normal" | "personal" | "private" | "confidential";
         export interface ShareEventBody {
@@ -991,6 +999,195 @@ declare namespace Components {
              * epilot user id (same organization) to grant view-only access to this event
              */
             user_id: string;
+        }
+        /**
+         * A wall-clock working window within a single day.
+         */
+        export interface TimeWindow {
+            /**
+             * 24h wall-clock time ("HH:mm") in the timezone of the working-hours record.
+             */
+            start: string; // ^([01]\d|2[0-3]):[0-5]\d$
+            /**
+             * 24h wall-clock time ("HH:mm") in the timezone of the working-hours record.
+             */
+            end: string; // ^([01]\d|2[0-3]):[0-5]\d$
+        }
+        /**
+         * Full replacement of the working-hours record. All weekdays are required; an empty array means a day off. Users without a working-hours record are treated as always available.
+         */
+        export interface UpsertWorkingHoursBody {
+            /**
+             * Working windows for a day, sorted and non-overlapping. An empty array means a day off.
+             */
+            monday: [
+                /* A wall-clock working window within a single day. */ TimeWindow?,
+                /* A wall-clock working window within a single day. */ TimeWindow?,
+                /* A wall-clock working window within a single day. */ TimeWindow?,
+                /* A wall-clock working window within a single day. */ TimeWindow?,
+                /* A wall-clock working window within a single day. */ TimeWindow?,
+                /* A wall-clock working window within a single day. */ TimeWindow?
+            ];
+            /**
+             * Working windows for a day, sorted and non-overlapping. An empty array means a day off.
+             */
+            tuesday: [
+                /* A wall-clock working window within a single day. */ TimeWindow?,
+                /* A wall-clock working window within a single day. */ TimeWindow?,
+                /* A wall-clock working window within a single day. */ TimeWindow?,
+                /* A wall-clock working window within a single day. */ TimeWindow?,
+                /* A wall-clock working window within a single day. */ TimeWindow?,
+                /* A wall-clock working window within a single day. */ TimeWindow?
+            ];
+            /**
+             * Working windows for a day, sorted and non-overlapping. An empty array means a day off.
+             */
+            wednesday: [
+                /* A wall-clock working window within a single day. */ TimeWindow?,
+                /* A wall-clock working window within a single day. */ TimeWindow?,
+                /* A wall-clock working window within a single day. */ TimeWindow?,
+                /* A wall-clock working window within a single day. */ TimeWindow?,
+                /* A wall-clock working window within a single day. */ TimeWindow?,
+                /* A wall-clock working window within a single day. */ TimeWindow?
+            ];
+            /**
+             * Working windows for a day, sorted and non-overlapping. An empty array means a day off.
+             */
+            thursday: [
+                /* A wall-clock working window within a single day. */ TimeWindow?,
+                /* A wall-clock working window within a single day. */ TimeWindow?,
+                /* A wall-clock working window within a single day. */ TimeWindow?,
+                /* A wall-clock working window within a single day. */ TimeWindow?,
+                /* A wall-clock working window within a single day. */ TimeWindow?,
+                /* A wall-clock working window within a single day. */ TimeWindow?
+            ];
+            /**
+             * Working windows for a day, sorted and non-overlapping. An empty array means a day off.
+             */
+            friday: [
+                /* A wall-clock working window within a single day. */ TimeWindow?,
+                /* A wall-clock working window within a single day. */ TimeWindow?,
+                /* A wall-clock working window within a single day. */ TimeWindow?,
+                /* A wall-clock working window within a single day. */ TimeWindow?,
+                /* A wall-clock working window within a single day. */ TimeWindow?,
+                /* A wall-clock working window within a single day. */ TimeWindow?
+            ];
+            /**
+             * Working windows for a day, sorted and non-overlapping. An empty array means a day off.
+             */
+            saturday: [
+                /* A wall-clock working window within a single day. */ TimeWindow?,
+                /* A wall-clock working window within a single day. */ TimeWindow?,
+                /* A wall-clock working window within a single day. */ TimeWindow?,
+                /* A wall-clock working window within a single day. */ TimeWindow?,
+                /* A wall-clock working window within a single day. */ TimeWindow?,
+                /* A wall-clock working window within a single day. */ TimeWindow?
+            ];
+            /**
+             * Working windows for a day, sorted and non-overlapping. An empty array means a day off.
+             */
+            sunday: [
+                /* A wall-clock working window within a single day. */ TimeWindow?,
+                /* A wall-clock working window within a single day. */ TimeWindow?,
+                /* A wall-clock working window within a single day. */ TimeWindow?,
+                /* A wall-clock working window within a single day. */ TimeWindow?,
+                /* A wall-clock working window within a single day. */ TimeWindow?,
+                /* A wall-clock working window within a single day. */ TimeWindow?
+            ];
+            /**
+             * IANA timezone the working windows are expressed in. Defaults to Europe/Berlin.
+             */
+            timezone?: string;
+        }
+        /**
+         * Recurring weekly working hours of a user. The absence of a record means the user is treated as always available.
+         */
+        export interface WorkingHours {
+            /**
+             * Working windows for a day, sorted and non-overlapping. An empty array means a day off.
+             */
+            monday: [
+                /* A wall-clock working window within a single day. */ TimeWindow?,
+                /* A wall-clock working window within a single day. */ TimeWindow?,
+                /* A wall-clock working window within a single day. */ TimeWindow?,
+                /* A wall-clock working window within a single day. */ TimeWindow?,
+                /* A wall-clock working window within a single day. */ TimeWindow?,
+                /* A wall-clock working window within a single day. */ TimeWindow?
+            ];
+            /**
+             * Working windows for a day, sorted and non-overlapping. An empty array means a day off.
+             */
+            tuesday: [
+                /* A wall-clock working window within a single day. */ TimeWindow?,
+                /* A wall-clock working window within a single day. */ TimeWindow?,
+                /* A wall-clock working window within a single day. */ TimeWindow?,
+                /* A wall-clock working window within a single day. */ TimeWindow?,
+                /* A wall-clock working window within a single day. */ TimeWindow?,
+                /* A wall-clock working window within a single day. */ TimeWindow?
+            ];
+            /**
+             * Working windows for a day, sorted and non-overlapping. An empty array means a day off.
+             */
+            wednesday: [
+                /* A wall-clock working window within a single day. */ TimeWindow?,
+                /* A wall-clock working window within a single day. */ TimeWindow?,
+                /* A wall-clock working window within a single day. */ TimeWindow?,
+                /* A wall-clock working window within a single day. */ TimeWindow?,
+                /* A wall-clock working window within a single day. */ TimeWindow?,
+                /* A wall-clock working window within a single day. */ TimeWindow?
+            ];
+            /**
+             * Working windows for a day, sorted and non-overlapping. An empty array means a day off.
+             */
+            thursday: [
+                /* A wall-clock working window within a single day. */ TimeWindow?,
+                /* A wall-clock working window within a single day. */ TimeWindow?,
+                /* A wall-clock working window within a single day. */ TimeWindow?,
+                /* A wall-clock working window within a single day. */ TimeWindow?,
+                /* A wall-clock working window within a single day. */ TimeWindow?,
+                /* A wall-clock working window within a single day. */ TimeWindow?
+            ];
+            /**
+             * Working windows for a day, sorted and non-overlapping. An empty array means a day off.
+             */
+            friday: [
+                /* A wall-clock working window within a single day. */ TimeWindow?,
+                /* A wall-clock working window within a single day. */ TimeWindow?,
+                /* A wall-clock working window within a single day. */ TimeWindow?,
+                /* A wall-clock working window within a single day. */ TimeWindow?,
+                /* A wall-clock working window within a single day. */ TimeWindow?,
+                /* A wall-clock working window within a single day. */ TimeWindow?
+            ];
+            /**
+             * Working windows for a day, sorted and non-overlapping. An empty array means a day off.
+             */
+            saturday: [
+                /* A wall-clock working window within a single day. */ TimeWindow?,
+                /* A wall-clock working window within a single day. */ TimeWindow?,
+                /* A wall-clock working window within a single day. */ TimeWindow?,
+                /* A wall-clock working window within a single day. */ TimeWindow?,
+                /* A wall-clock working window within a single day. */ TimeWindow?,
+                /* A wall-clock working window within a single day. */ TimeWindow?
+            ];
+            /**
+             * Working windows for a day, sorted and non-overlapping. An empty array means a day off.
+             */
+            sunday: [
+                /* A wall-clock working window within a single day. */ TimeWindow?,
+                /* A wall-clock working window within a single day. */ TimeWindow?,
+                /* A wall-clock working window within a single day. */ TimeWindow?,
+                /* A wall-clock working window within a single day. */ TimeWindow?,
+                /* A wall-clock working window within a single day. */ TimeWindow?,
+                /* A wall-clock working window within a single day. */ TimeWindow?
+            ];
+            /**
+             * IANA timezone the working windows are expressed in.
+             */
+            timezone: string;
+            user_id: string;
+            updated_by: string;
+            created_at: string; // date-time
+            updated_at: string; // date-time
         }
     }
 }
@@ -1089,6 +1286,19 @@ declare namespace Paths {
             export type $502 = Components.Schemas.Error;
         }
     }
+    namespace DeleteWorkingHours {
+        namespace Parameters {
+            export type UserId = string;
+        }
+        export interface PathParameters {
+            user_id: Parameters.UserId;
+        }
+        namespace Responses {
+            export interface $204 {
+            }
+            export type $404 = Components.Schemas.Error;
+        }
+    }
     namespace GetAbsenceAdjustment {
         namespace Parameters {
             export type AdjustmentId = string;
@@ -1142,6 +1352,10 @@ declare namespace Paths {
              */
             export type To = string; // date-time
             export type UserId = string;
+            /**
+             * At what granularity working hours contribute to absence. "time" (default): all time outside a user's working windows counts as absent. "day": only full days with no working windows count as absent (whole-day granularity, used by thread assignment). Users without a working-hours record never produce working-hours intervals.
+             */
+            export type WorkingHoursGranularity = "time" | "day";
         }
         export interface PathParameters {
             user_id: Parameters.UserId;
@@ -1150,6 +1364,7 @@ declare namespace Paths {
             from: /* Start of the time window (inclusive). Maximum window: 31 days. */ Parameters.From /* date-time */;
             to: /* End of the time window (exclusive). Must be after from. */ Parameters.To /* date-time */;
             include_busy?: /* Include busy inputs in addition to out-of-office absence. Defaults to false. */ Parameters.IncludeBusy;
+            working_hours_granularity?: /* At what granularity working hours contribute to absence. "time" (default): all time outside a user's working windows counts as absent. "day": only full days with no working windows count as absent (whole-day granularity, used by thread assignment). Users without a working-hours record never produce working-hours intervals. */ Parameters.WorkingHoursGranularity;
         }
         namespace Responses {
             export interface $200 {
@@ -1164,6 +1379,18 @@ declare namespace Paths {
                 external_calendars?: Components.Schemas.ExternalCalendar[];
             }
             export type $400 = Components.Schemas.Error;
+        }
+    }
+    namespace GetWorkingHours {
+        namespace Parameters {
+            export type UserId = string;
+        }
+        export interface PathParameters {
+            user_id: Parameters.UserId;
+        }
+        namespace Responses {
+            export type $200 = /* Recurring weekly working hours of a user. The absence of a record means the user is treated as always available. */ Components.Schemas.WorkingHours;
+            export type $404 = Components.Schemas.Error;
         }
     }
     namespace ListAbsenceAdjustments {
@@ -1279,11 +1506,16 @@ declare namespace Paths {
              * End of the time window (exclusive). Must be after from.
              */
             export type To = string; // date-time
+            /**
+             * At what granularity working hours contribute to absence. "time" (default): all time outside a user's working windows counts as absent. "day": only full days with no working windows count as absent (whole-day granularity, used by thread assignment). Users without a working-hours record never produce working-hours intervals.
+             */
+            export type WorkingHoursGranularity = "time" | "day";
         }
         export interface QueryParameters {
             from: /* Start of the time window (inclusive). Maximum window: 31 days. */ Parameters.From /* date-time */;
             to: /* End of the time window (exclusive). Must be after from. */ Parameters.To /* date-time */;
             include_busy?: /* Include busy inputs in addition to out-of-office absence. Defaults to false. */ Parameters.IncludeBusy;
+            working_hours_granularity?: /* At what granularity working hours contribute to absence. "time" (default): all time outside a user's working windows counts as absent. "day": only full days with no working windows count as absent (whole-day granularity, used by thread assignment). Users without a working-hours record never produce working-hours intervals. */ Parameters.WorkingHoursGranularity;
             query?: /* Optional user directory search query. */ Parameters.Query;
             limit?: /* Maximum users to return. */ Parameters.Limit;
             offset?: /* User directory offset. */ Parameters.Offset;
@@ -1335,6 +1567,19 @@ declare namespace Paths {
             export type $200 = Components.Schemas.AbsenceAdjustment;
             export type $400 = Components.Schemas.Error;
             export type $404 = Components.Schemas.Error;
+        }
+    }
+    namespace PutWorkingHours {
+        namespace Parameters {
+            export type UserId = string;
+        }
+        export interface PathParameters {
+            user_id: Parameters.UserId;
+        }
+        export type RequestBody = /* Full replacement of the working-hours record. All weekdays are required; an empty array means a day off. Users without a working-hours record are treated as always available. */ Components.Schemas.UpsertWorkingHoursBody;
+        namespace Responses {
+            export type $200 = /* Recurring weekly working hours of a user. The absence of a record means the user is treated as always available. */ Components.Schemas.WorkingHours;
+            export type $400 = Components.Schemas.Error;
         }
     }
     namespace SearchAbsence {
@@ -1530,6 +1775,36 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetUserAbsence.Responses.$200>
   /**
+   * getWorkingHours - getWorkingHours
+   * 
+   * Get the recurring weekly working hours of a user. 404 means no record exists and the user is treated as always available.
+   */
+  'getWorkingHours'(
+    parameters?: Parameters<Paths.GetWorkingHours.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetWorkingHours.Responses.$200>
+  /**
+   * putWorkingHours - putWorkingHours
+   * 
+   * Create or fully replace the working hours of a user in the caller organization. This is a full replace, not a merge.
+   */
+  'putWorkingHours'(
+    parameters?: Parameters<Paths.PutWorkingHours.PathParameters> | null,
+    data?: Paths.PutWorkingHours.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.PutWorkingHours.Responses.$200>
+  /**
+   * deleteWorkingHours - deleteWorkingHours
+   * 
+   * Delete the working hours of a user. The user is then treated as always available again.
+   */
+  'deleteWorkingHours'(
+    parameters?: Parameters<Paths.DeleteWorkingHours.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.DeleteWorkingHours.Responses.$204>
+  /**
    * listCalendars - listCalendars
    * 
    * List calendars visible to the caller.
@@ -1600,7 +1875,7 @@ export interface OperationMethods {
    * Handles both the subscription-validation handshake (echoes the
    * `validationToken` query param as `text/plain`) and change notifications.
    * Each notification is trusted only after its HMAC-signed `clientState` is
-   * verified and matched against the stored subscription — identity is never
+   * verified and matched against the stored subscription – identity is never
    * read from the request body.
    */
   'outlookWebhook'(
@@ -1813,6 +2088,38 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetUserAbsence.Responses.$200>
   }
+  ['/v1/calendar/working-hours/users/{user_id}']: {
+    /**
+     * getWorkingHours - getWorkingHours
+     * 
+     * Get the recurring weekly working hours of a user. 404 means no record exists and the user is treated as always available.
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetWorkingHours.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetWorkingHours.Responses.$200>
+    /**
+     * putWorkingHours - putWorkingHours
+     * 
+     * Create or fully replace the working hours of a user in the caller organization. This is a full replace, not a merge.
+     */
+    'put'(
+      parameters?: Parameters<Paths.PutWorkingHours.PathParameters> | null,
+      data?: Paths.PutWorkingHours.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.PutWorkingHours.Responses.$200>
+    /**
+     * deleteWorkingHours - deleteWorkingHours
+     * 
+     * Delete the working hours of a user. The user is then treated as always available again.
+     */
+    'delete'(
+      parameters?: Parameters<Paths.DeleteWorkingHours.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.DeleteWorkingHours.Responses.$204>
+  }
   ['/v1/calendar']: {
     /**
      * listCalendars - listCalendars
@@ -1893,7 +2200,7 @@ export interface PathsDictionary {
      * Handles both the subscription-validation handshake (echoes the
      * `validationToken` query param as `text/plain`) and change notifications.
      * Each notification is trusted only after its HMAC-signed `clientState` is
-     * verified and matched against the stored subscription — identity is never
+     * verified and matched against the stored subscription – identity is never
      * read from the request body.
      */
     'post'(
@@ -2046,3 +2353,6 @@ export type SearchAbsenceBody = Components.Schemas.SearchAbsenceBody;
 export type SearchNowAbsenceBody = Components.Schemas.SearchNowAbsenceBody;
 export type Sensitivity = Components.Schemas.Sensitivity;
 export type ShareEventBody = Components.Schemas.ShareEventBody;
+export type TimeWindow = Components.Schemas.TimeWindow;
+export type UpsertWorkingHoursBody = Components.Schemas.UpsertWorkingHoursBody;
+export type WorkingHours = Components.Schemas.WorkingHours;

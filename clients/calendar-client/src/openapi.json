@@ -17,6 +17,10 @@
     {
       "name": "Calendar Events",
       "description": "Calendar events"
+    },
+    {
+      "name": "Working Hours",
+      "description": "Recurring weekly working hours of users"
     }
   ],
   "servers": [
@@ -72,6 +76,20 @@
               "type": "boolean",
               "description": "Include busy inputs in addition to out-of-office absence. Defaults to false.",
               "default": false
+            }
+          },
+          {
+            "in": "query",
+            "name": "working_hours_granularity",
+            "description": "At what granularity working hours contribute to absence. \"time\" (default): all time outside a user's working windows counts as absent. \"day\": only full days with no working windows count as absent (whole-day granularity, used by thread assignment). Users without a working-hours record never produce working-hours intervals.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "time",
+                "day"
+              ],
+              "description": "At what granularity working hours contribute to absence. \"time\" (default): all time outside a user's working windows counts as absent. \"day\": only full days with no working windows count as absent (whole-day granularity, used by thread assignment). Users without a working-hours record never produce working-hours intervals.",
+              "default": "time"
             }
           },
           {
@@ -701,6 +719,20 @@
               "description": "Include busy inputs in addition to out-of-office absence. Defaults to false.",
               "default": false
             }
+          },
+          {
+            "in": "query",
+            "name": "working_hours_granularity",
+            "description": "At what granularity working hours contribute to absence. \"time\" (default): all time outside a user's working windows counts as absent. \"day\": only full days with no working windows count as absent (whole-day granularity, used by thread assignment). Users without a working-hours record never produce working-hours intervals.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "time",
+                "day"
+              ],
+              "description": "At what granularity working hours contribute to absence. \"time\" (default): all time outside a user's working windows counts as absent. \"day\": only full days with no working windows count as absent (whole-day granularity, used by thread assignment). Users without a working-hours record never produce working-hours intervals.",
+              "default": "time"
+            }
           }
         ],
         "responses": {
@@ -752,6 +784,134 @@
           },
           "400": {
             "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/calendar/working-hours/users/{user_id}": {
+      "get": {
+        "operationId": "getWorkingHours",
+        "summary": "getWorkingHours",
+        "description": "Get the recurring weekly working hours of a user. 404 means no record exists and the user is treated as always available.",
+        "tags": [
+          "Working Hours"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "user_id",
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Working hours",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkingHours"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "operationId": "putWorkingHours",
+        "summary": "putWorkingHours",
+        "description": "Create or fully replace the working hours of a user in the caller organization. This is a full replace, not a merge.",
+        "tags": [
+          "Working Hours"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "user_id",
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpsertWorkingHoursBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Stored working hours",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkingHours"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request body",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteWorkingHours",
+        "summary": "deleteWorkingHours",
+        "description": "Delete the working hours of a user. The user is then treated as always available again.",
+        "tags": [
+          "Working Hours"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "user_id",
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Working hours deleted"
+          },
+          "404": {
+            "description": "Not found",
             "content": {
               "application/json": {
                 "schema": {
@@ -1004,7 +1164,7 @@
       "post": {
         "operationId": "outlookWebhook",
         "summary": "outlookWebhook",
-        "description": "Public Microsoft Graph webhook receiver for per-user Outlook calendar\nsubscriptions. Unauthenticated by design (API Gateway `Authorizer: NONE`):\nGraph calls it with no epilot token.\n\nHandles both the subscription-validation handshake (echoes the\n`validationToken` query param as `text/plain`) and change notifications.\nEach notification is trusted only after its HMAC-signed `clientState` is\nverified and matched against the stored subscription — identity is never\nread from the request body.",
+        "description": "Public Microsoft Graph webhook receiver for per-user Outlook calendar\nsubscriptions. Unauthenticated by design (API Gateway `Authorizer: NONE`):\nGraph calls it with no epilot token.\n\nHandles both the subscription-validation handshake (echoes the\n`validationToken` query param as `text/plain`) and change notifications.\nEach notification is trusted only after its HMAC-signed `clientState` is\nverified and matched against the stored subscription – identity is never\nread from the request body.",
         "tags": [
           "Calendars"
         ],
@@ -1693,7 +1853,8 @@
         "type": "string",
         "enum": [
           "calendar_event",
-          "absence_adjustment"
+          "absence_adjustment",
+          "working_hours"
         ]
       },
       "Error": {
@@ -1746,6 +1907,15 @@
             "type": "boolean",
             "description": "Include busy inputs in addition to out-of-office absence. Defaults to false.",
             "default": false
+          },
+          "working_hours_granularity": {
+            "type": "string",
+            "enum": [
+              "time",
+              "day"
+            ],
+            "description": "At what granularity working hours contribute to absence. \"time\" (default): all time outside a user's working windows counts as absent. \"day\": only full days with no working windows count as absent (whole-day granularity, used by thread assignment). Users without a working-hours record never produce working-hours intervals.",
+            "default": "time"
           }
         },
         "required": [
@@ -1771,6 +1941,15 @@
             "type": "boolean",
             "description": "Include busy inputs in addition to out-of-office absence. Defaults to false.",
             "default": false
+          },
+          "working_hours_granularity": {
+            "type": "string",
+            "enum": [
+              "time",
+              "day"
+            ],
+            "description": "At what granularity working hours contribute to absence. \"time\" (default): all time outside a user's working windows counts as absent. \"day\": only full days with no working windows count as absent (whole-day granularity, used by thread assignment). Users without a working-hours record never produce working-hours intervals.",
+            "default": "time"
           }
         },
         "required": [
@@ -1838,8 +2017,8 @@
       "AbsenceStatus": {
         "type": "string",
         "enum": [
-          "busy",
-          "oof"
+          "oof",
+          "busy"
         ],
         "description": "Calendar status targeted by the absence adjustment."
       },
@@ -1937,6 +2116,196 @@
           "provider",
           "last_synced_at"
         ]
+      },
+      "WorkingHours": {
+        "type": "object",
+        "properties": {
+          "monday": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TimeWindow"
+            },
+            "maxItems": 6,
+            "description": "Working windows for a day, sorted and non-overlapping. An empty array means a day off."
+          },
+          "tuesday": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TimeWindow"
+            },
+            "maxItems": 6,
+            "description": "Working windows for a day, sorted and non-overlapping. An empty array means a day off."
+          },
+          "wednesday": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TimeWindow"
+            },
+            "maxItems": 6,
+            "description": "Working windows for a day, sorted and non-overlapping. An empty array means a day off."
+          },
+          "thursday": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TimeWindow"
+            },
+            "maxItems": 6,
+            "description": "Working windows for a day, sorted and non-overlapping. An empty array means a day off."
+          },
+          "friday": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TimeWindow"
+            },
+            "maxItems": 6,
+            "description": "Working windows for a day, sorted and non-overlapping. An empty array means a day off."
+          },
+          "saturday": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TimeWindow"
+            },
+            "maxItems": 6,
+            "description": "Working windows for a day, sorted and non-overlapping. An empty array means a day off."
+          },
+          "sunday": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TimeWindow"
+            },
+            "maxItems": 6,
+            "description": "Working windows for a day, sorted and non-overlapping. An empty array means a day off."
+          },
+          "timezone": {
+            "type": "string",
+            "description": "IANA timezone the working windows are expressed in."
+          },
+          "user_id": {
+            "type": "string"
+          },
+          "updated_by": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "monday",
+          "tuesday",
+          "wednesday",
+          "thursday",
+          "friday",
+          "saturday",
+          "sunday",
+          "timezone",
+          "user_id",
+          "updated_by",
+          "created_at",
+          "updated_at"
+        ],
+        "description": "Recurring weekly working hours of a user. The absence of a record means the user is treated as always available."
+      },
+      "UpsertWorkingHoursBody": {
+        "type": "object",
+        "properties": {
+          "monday": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TimeWindow"
+            },
+            "maxItems": 6,
+            "description": "Working windows for a day, sorted and non-overlapping. An empty array means a day off."
+          },
+          "tuesday": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TimeWindow"
+            },
+            "maxItems": 6,
+            "description": "Working windows for a day, sorted and non-overlapping. An empty array means a day off."
+          },
+          "wednesday": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TimeWindow"
+            },
+            "maxItems": 6,
+            "description": "Working windows for a day, sorted and non-overlapping. An empty array means a day off."
+          },
+          "thursday": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TimeWindow"
+            },
+            "maxItems": 6,
+            "description": "Working windows for a day, sorted and non-overlapping. An empty array means a day off."
+          },
+          "friday": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TimeWindow"
+            },
+            "maxItems": 6,
+            "description": "Working windows for a day, sorted and non-overlapping. An empty array means a day off."
+          },
+          "saturday": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TimeWindow"
+            },
+            "maxItems": 6,
+            "description": "Working windows for a day, sorted and non-overlapping. An empty array means a day off."
+          },
+          "sunday": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TimeWindow"
+            },
+            "maxItems": 6,
+            "description": "Working windows for a day, sorted and non-overlapping. An empty array means a day off."
+          },
+          "timezone": {
+            "type": "string",
+            "description": "IANA timezone the working windows are expressed in. Defaults to Europe/Berlin.",
+            "default": "Europe/Berlin"
+          }
+        },
+        "required": [
+          "monday",
+          "tuesday",
+          "wednesday",
+          "thursday",
+          "friday",
+          "saturday",
+          "sunday"
+        ],
+        "description": "Full replacement of the working-hours record. All weekdays are required; an empty array means a day off. Users without a working-hours record are treated as always available."
+      },
+      "TimeWindow": {
+        "type": "object",
+        "properties": {
+          "start": {
+            "type": "string",
+            "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$",
+            "description": "24h wall-clock time (\"HH:mm\") in the timezone of the working-hours record."
+          },
+          "end": {
+            "type": "string",
+            "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$",
+            "description": "24h wall-clock time (\"HH:mm\") in the timezone of the working-hours record."
+          }
+        },
+        "required": [
+          "start",
+          "end"
+        ],
+        "description": "A wall-clock working window within a single day."
       },
       "Calendar": {
         "type": "object",
