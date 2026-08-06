@@ -35,6 +35,11 @@ const { data } = await calendarClient.listUsersAbsence(...)
 - [`deleteAbsenceAdjustment`](#deleteabsenceadjustment)
 - [`getUserAbsence`](#getuserabsence)
 
+**Working Hours**
+- [`getWorkingHours`](#getworkinghours)
+- [`putWorkingHours`](#putworkinghours)
+- [`deleteWorkingHours`](#deleteworkinghours)
+
 **Calendars**
 - [`listCalendars`](#listcalendars)
 - [`createCalendar`](#createcalendar)
@@ -67,6 +72,9 @@ const { data } = await calendarClient.listUsersAbsence(...)
 - [`CreateAbsenceAdjustmentBody`](#createabsenceadjustmentbody)
 - [`PatchAbsenceAdjustmentBody`](#patchabsenceadjustmentbody)
 - [`ExternalCalendar`](#externalcalendar)
+- [`WorkingHours`](#workinghours)
+- [`UpsertWorkingHoursBody`](#upsertworkinghoursbody)
+- [`TimeWindow`](#timewindow)
 - [`Calendar`](#calendar)
 - [`CalendarSource`](#calendarsource)
 - [`Provider`](#provider)
@@ -97,6 +105,7 @@ const { data } = await client.listUsersAbsence({
   from: 'example',
   to: 'example',
   include_busy: true,
+  working_hours_granularity: 'example',
   query: 'example',
   limit: 1,
   offset: 1,
@@ -153,7 +162,8 @@ const { data } = await client.searchAbsence(
     from: '1970-01-01T00:00:00.000Z',
     to: '1970-01-01T00:00:00.000Z',
     user_ids: ['string'],
-    include_busy: false
+    include_busy: false,
+    working_hours_granularity: 'time'
   },
 )
 ```
@@ -184,7 +194,8 @@ const { data } = await client.searchNowAbsence(
   null,
   {
     user_ids: ['string'],
-    include_busy: false
+    include_busy: false,
+    working_hours_granularity: 'time'
   },
 )
 ```
@@ -230,7 +241,7 @@ const { data } = await client.listAbsenceAdjustments({
       "from": "1970-01-01T00:00:00.000Z",
       "to": "1970-01-01T00:00:00.000Z",
       "absent": true,
-      "status": "busy",
+      "status": "oof",
       "type": "string",
       "reason": "string",
       "adjustment_id": "string",
@@ -262,7 +273,7 @@ const { data } = await client.createAbsenceAdjustment(
     from: '1970-01-01T00:00:00.000Z',
     to: '1970-01-01T00:00:00.000Z',
     absent: true,
-    status: 'busy',
+    status: 'oof',
     type: 'string',
     reason: 'string'
   },
@@ -277,7 +288,7 @@ const { data } = await client.createAbsenceAdjustment(
   "from": "1970-01-01T00:00:00.000Z",
   "to": "1970-01-01T00:00:00.000Z",
   "absent": true,
-  "status": "busy",
+  "status": "oof",
   "type": "string",
   "reason": "string",
   "adjustment_id": "string",
@@ -313,7 +324,7 @@ const { data } = await client.getAbsenceAdjustment({
   "from": "1970-01-01T00:00:00.000Z",
   "to": "1970-01-01T00:00:00.000Z",
   "absent": true,
-  "status": "busy",
+  "status": "oof",
   "type": "string",
   "reason": "string",
   "adjustment_id": "string",
@@ -344,7 +355,7 @@ const { data } = await client.patchAbsenceAdjustment(
     from: '1970-01-01T00:00:00.000Z',
     to: '1970-01-01T00:00:00.000Z',
     absent: true,
-    status: 'busy',
+    status: 'oof',
     type: 'string',
     reason: 'string'
   },
@@ -359,7 +370,7 @@ const { data } = await client.patchAbsenceAdjustment(
   "from": "1970-01-01T00:00:00.000Z",
   "to": "1970-01-01T00:00:00.000Z",
   "absent": true,
-  "status": "busy",
+  "status": "oof",
   "type": "string",
   "reason": "string",
   "adjustment_id": "string",
@@ -401,6 +412,7 @@ const { data } = await client.getUserAbsence({
   from: 'example',
   to: 'example',
   include_busy: true,
+  working_hours_granularity: 'example',
 })
 ```
 
@@ -436,6 +448,209 @@ const { data } = await client.getUserAbsence({
 ```
 
 </details>
+
+---
+
+### `getWorkingHours`
+
+Get the recurring weekly working hours of a user. 404 means no record exists and the user is treated as always available.
+
+`GET /v1/calendar/working-hours/users/{user_id}`
+
+```ts
+const { data } = await client.getWorkingHours({
+  user_id: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "monday": [
+    {
+      "start": "string",
+      "end": "string"
+    }
+  ],
+  "tuesday": [
+    {
+      "start": "string",
+      "end": "string"
+    }
+  ],
+  "wednesday": [
+    {
+      "start": "string",
+      "end": "string"
+    }
+  ],
+  "thursday": [
+    {
+      "start": "string",
+      "end": "string"
+    }
+  ],
+  "friday": [
+    {
+      "start": "string",
+      "end": "string"
+    }
+  ],
+  "saturday": [
+    {
+      "start": "string",
+      "end": "string"
+    }
+  ],
+  "sunday": [
+    {
+      "start": "string",
+      "end": "string"
+    }
+  ],
+  "timezone": "string",
+  "user_id": "string",
+  "updated_by": "string",
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "updated_at": "1970-01-01T00:00:00.000Z"
+}
+```
+
+</details>
+
+---
+
+### `putWorkingHours`
+
+Create or fully replace the working hours of a user in the caller organization. This is a full replace, not a merge.
+
+`PUT /v1/calendar/working-hours/users/{user_id}`
+
+```ts
+const { data } = await client.putWorkingHours(
+  {
+    user_id: 'example',
+  },
+  {
+    monday: [
+      {
+        start: 'string',
+        end: 'string'
+      }
+    ],
+    tuesday: [
+      {
+        start: 'string',
+        end: 'string'
+      }
+    ],
+    wednesday: [
+      {
+        start: 'string',
+        end: 'string'
+      }
+    ],
+    thursday: [
+      {
+        start: 'string',
+        end: 'string'
+      }
+    ],
+    friday: [
+      {
+        start: 'string',
+        end: 'string'
+      }
+    ],
+    saturday: [
+      {
+        start: 'string',
+        end: 'string'
+      }
+    ],
+    sunday: [
+      {
+        start: 'string',
+        end: 'string'
+      }
+    ],
+    timezone: 'Europe/Berlin'
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "monday": [
+    {
+      "start": "string",
+      "end": "string"
+    }
+  ],
+  "tuesday": [
+    {
+      "start": "string",
+      "end": "string"
+    }
+  ],
+  "wednesday": [
+    {
+      "start": "string",
+      "end": "string"
+    }
+  ],
+  "thursday": [
+    {
+      "start": "string",
+      "end": "string"
+    }
+  ],
+  "friday": [
+    {
+      "start": "string",
+      "end": "string"
+    }
+  ],
+  "saturday": [
+    {
+      "start": "string",
+      "end": "string"
+    }
+  ],
+  "sunday": [
+    {
+      "start": "string",
+      "end": "string"
+    }
+  ],
+  "timezone": "string",
+  "user_id": "string",
+  "updated_by": "string",
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "updated_at": "1970-01-01T00:00:00.000Z"
+}
+```
+
+</details>
+
+---
+
+### `deleteWorkingHours`
+
+Delete the working hours of a user. The user is then treated as always available again.
+
+`DELETE /v1/calendar/working-hours/users/{user_id}`
+
+```ts
+const { data } = await client.deleteWorkingHours({
+  user_id: 'example',
+})
+```
 
 ---
 
@@ -1108,7 +1323,7 @@ type AbsenceInterval = {
   original_from: string // date-time
   original_to: string // date-time
   absent: boolean
-  source: "calendar_event" | "absence_adjustment"
+  source: "calendar_event" | "absence_adjustment" | "working_hours"
   calendar_event_id?: string
   absence_adjustment_id?: string
   reason?: string
@@ -1118,7 +1333,7 @@ type AbsenceInterval = {
 ### `AbsenceIntervalSource`
 
 ```ts
-type AbsenceIntervalSource = "calendar_event" | "absence_adjustment"
+type AbsenceIntervalSource = "calendar_event" | "absence_adjustment" | "working_hours"
 ```
 
 ### `Error`
@@ -1138,6 +1353,7 @@ type SearchAbsenceBody = {
   to: string // date-time
   user_ids: string[]
   include_busy?: boolean
+  working_hours_granularity?: "time" | "day"
 }
 ```
 
@@ -1147,6 +1363,7 @@ type SearchAbsenceBody = {
 type SearchNowAbsenceBody = {
   user_ids: string[]
   include_busy?: boolean
+  working_hours_granularity?: "time" | "day"
 }
 ```
 
@@ -1157,7 +1374,7 @@ type AbsenceAdjustment = {
   from: string // date-time
   to: string // date-time
   absent: boolean
-  status: "busy" | "oof"
+  status: "oof" | "busy"
   type?: string
   reason?: string
   adjustment_id: string
@@ -1173,7 +1390,7 @@ type AbsenceAdjustment = {
 Calendar status targeted by the absence adjustment.
 
 ```ts
-type AbsenceStatus = "busy" | "oof"
+type AbsenceStatus = "oof" | "busy"
 ```
 
 ### `AbsenceType`
@@ -1191,7 +1408,7 @@ type CreateAbsenceAdjustmentBody = {
   from: string // date-time
   to: string // date-time
   absent: boolean
-  status: "busy" | "oof"
+  status: "oof" | "busy"
   type?: string
   reason?: string
 }
@@ -1204,7 +1421,7 @@ type PatchAbsenceAdjustmentBody = {
   from?: string // date-time
   to?: string // date-time
   absent?: boolean
-  status?: "busy" | "oof"
+  status?: "oof" | "busy"
   type?: string
   reason?: string
 }
@@ -1216,6 +1433,97 @@ type PatchAbsenceAdjustmentBody = {
 type ExternalCalendar = {
   provider: "outlook" | "google"
   last_synced_at: string // date-time
+}
+```
+
+### `WorkingHours`
+
+Recurring weekly working hours of a user. The absence of a record means the user is treated as always available.
+
+```ts
+type WorkingHours = {
+  monday: Array<{
+    start: string
+    end: string
+  }>
+  tuesday: Array<{
+    start: string
+    end: string
+  }>
+  wednesday: Array<{
+    start: string
+    end: string
+  }>
+  thursday: Array<{
+    start: string
+    end: string
+  }>
+  friday: Array<{
+    start: string
+    end: string
+  }>
+  saturday: Array<{
+    start: string
+    end: string
+  }>
+  sunday: Array<{
+    start: string
+    end: string
+  }>
+  timezone: string
+  user_id: string
+  updated_by: string
+  created_at: string // date-time
+  updated_at: string // date-time
+}
+```
+
+### `UpsertWorkingHoursBody`
+
+Full replacement of the working-hours record. All weekdays are required; an empty array means a day off. Users without a working-hours record are treated as always available.
+
+```ts
+type UpsertWorkingHoursBody = {
+  monday: Array<{
+    start: string
+    end: string
+  }>
+  tuesday: Array<{
+    start: string
+    end: string
+  }>
+  wednesday: Array<{
+    start: string
+    end: string
+  }>
+  thursday: Array<{
+    start: string
+    end: string
+  }>
+  friday: Array<{
+    start: string
+    end: string
+  }>
+  saturday: Array<{
+    start: string
+    end: string
+  }>
+  sunday: Array<{
+    start: string
+    end: string
+  }>
+  timezone?: string
+}
+```
+
+### `TimeWindow`
+
+A wall-clock working window within a single day.
+
+```ts
+type TimeWindow = {
+  start: string
+  end: string
 }
 ```
 

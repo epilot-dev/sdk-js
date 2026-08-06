@@ -498,9 +498,7 @@ const { data } = await client.getSchema({
       "_purpose": ["taxonomy-slug:classification-slug"],
       "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
       "app_id": "123e4567-e89b-12d3-a456-426614174000",
-      "adjust_installment": {
-        "journey_id": "adjust-installment-flow"
-      },
+      "adjust_installment": {},
       "ui_config": {},
       "ui_hooks": [],
       "feature_flag": "FF_MY_FEATURE_FLAG",
@@ -653,9 +651,7 @@ const { data } = await client.putSchema(
         _purpose: ['taxonomy-slug:classification-slug'],
         _manifest: ['123e4567-e89b-12d3-a456-426614174000'],
         app_id: '123e4567-e89b-12d3-a456-426614174000',
-        adjust_installment: {
-          journey_id: 'adjust-installment-flow'
-        },
+        adjust_installment: { /* ... */ },
         ui_config: { /* ... */ },
         ui_hooks: [ /* ... */ ],
         feature_flag: 'FF_MY_FEATURE_FLAG',
@@ -808,9 +804,7 @@ const { data } = await client.putSchema(
       "_purpose": ["taxonomy-slug:classification-slug"],
       "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
       "app_id": "123e4567-e89b-12d3-a456-426614174000",
-      "adjust_installment": {
-        "journey_id": "adjust-installment-flow"
-      },
+      "adjust_installment": {},
       "ui_config": {},
       "ui_hooks": [],
       "feature_flag": "FF_MY_FEATURE_FLAG",
@@ -1255,9 +1249,7 @@ const { data } = await client.freezeSchema(
       "_purpose": ["taxonomy-slug:classification-slug"],
       "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
       "app_id": "123e4567-e89b-12d3-a456-426614174000",
-      "adjust_installment": {
-        "journey_id": "adjust-installment-flow"
-      },
+      "adjust_installment": {},
       "ui_config": {},
       "ui_hooks": [],
       "feature_flag": "FF_MY_FEATURE_FLAG",
@@ -1424,9 +1416,7 @@ const { data } = await client.unfreezeSchema({
       "_purpose": ["taxonomy-slug:classification-slug"],
       "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
       "app_id": "123e4567-e89b-12d3-a456-426614174000",
-      "adjust_installment": {
-        "journey_id": "adjust-installment-flow"
-      },
+      "adjust_installment": {},
       "ui_config": {},
       "ui_hooks": [],
       "feature_flag": "FF_MY_FEATURE_FLAG",
@@ -1531,9 +1521,7 @@ const { data } = await client.listAvailableCapabilities({
       "_purpose": ["taxonomy-slug:classification-slug"],
       "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
       "app_id": "123e4567-e89b-12d3-a456-426614174000",
-      "adjust_installment": {
-        "journey_id": "adjust-installment-flow"
-      },
+      "adjust_installment": {},
       "ui_config": {},
       "ui_hooks": [],
       "feature_flag": "FF_MY_FEATURE_FLAG",
