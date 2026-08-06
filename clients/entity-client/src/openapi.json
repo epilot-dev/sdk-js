@@ -3947,7 +3947,7 @@
               "description": "ISO 8601 timestamp to filter jobs created after this time (e.g., 2023-01-01T00:00:00Z).",
               "type": "string",
               "format": "date-time",
-              "example": "2023-01-01T00:00:00.000Z"
+              "example": "2023-01-01T00:00:00Z"
             }
           },
           {
@@ -7405,6 +7405,24 @@
         "pattern": "^[a-zA-Z0-9_-]+$",
         "example": "contact"
       },
+      "AdjustInstallmentCapabilityConfig": {
+        "description": "Configuration for adjusting a contract installment through a Journey.",
+        "type": "object",
+        "additionalProperties": false,
+        "example": {
+          "journey_id": "adjust-installment-flow"
+        },
+        "required": [
+          "journey_id"
+        ],
+        "properties": {
+          "journey_id": {
+            "type": "string",
+            "minLength": 1,
+            "description": "ID of the Flow Journey to open when adjusting the installment."
+          }
+        }
+      },
       "EntityCapability": {
         "description": "Capabilities the Entity has. Turn features on/off for entities.",
         "type": "object",
@@ -7450,6 +7468,9 @@
             "type": "string",
             "description": "ID of the app if the capability is provided by an app",
             "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "adjust_installment": {
+            "$ref": "#/components/schemas/AdjustInstallmentCapabilityConfig"
           },
           "ui_config": {
             "type": "object",
