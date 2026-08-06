@@ -30,6 +30,10 @@
           },
           {
             "in": "query",
+            "name": "working_hours_granularity"
+          },
+          {
+            "in": "query",
             "name": "query"
           },
           {
@@ -186,6 +190,51 @@
           {
             "in": "query",
             "name": "include_busy"
+          },
+          {
+            "in": "query",
+            "name": "working_hours_granularity"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/calendar/working-hours/users/{user_id}": {
+      "get": {
+        "operationId": "getWorkingHours",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "user_id",
+            "required": true
+          }
+        ],
+        "responses": {}
+      },
+      "put": {
+        "operationId": "putWorkingHours",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "user_id",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteWorkingHours",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "user_id",
+            "required": true
           }
         ],
         "responses": {}
