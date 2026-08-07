@@ -49,6 +49,7 @@ export default defineCommand({
         const tokenUse = claims?.token_use as string | undefined;
         const roles = claims?.assume_roles as string[] | undefined;
         const readOnly = claims?.read_only === true;
+        const anonymize = claims?.anonymize === true;
 
         if (name) process.stdout.write(`  Name:    ${name}\n`);
         if (adminEmail && adminEmail !== name) process.stdout.write(`  Email:   ${adminEmail}\n`);
@@ -58,6 +59,7 @@ export default defineCommand({
         if (tokenUse) process.stdout.write(`  Use:     ${tokenUse}\n`);
         if (roles?.length) process.stdout.write(`  Roles:   ${roles.join(', ')}\n`);
         process.stdout.write(`  Access:  ${readOnly ? `${YELLOW}read-only${RESET}` : `${GREEN}read-write${RESET}`}\n`);
+        if (anonymize) process.stdout.write(`  Data:    ${YELLOW}anonymized${RESET}\n`);
 
         // Expiry
         if (creds.expires_at) {
