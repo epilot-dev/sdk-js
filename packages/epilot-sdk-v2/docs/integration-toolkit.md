@@ -220,6 +220,8 @@ const { data } = await integrationToolkitClient.acknowledgeTracking(...)
 - [`MappingSimulationWarning`](#mappingsimulationwarning)
 - [`EntityUpdate`](#entityupdate)
 - [`MeterReadingUpdate`](#meterreadingupdate)
+- [`EntityPruneScopeUpdate`](#entityprunescopeupdate)
+- [`MeterReadingPruneScopeUpdate`](#meterreadingprunescopeupdate)
 - [`IntegrationConfigurationV1`](#integrationconfigurationv1)
 - [`IntegrationObjectV1`](#integrationobjectv1)
 - [`IntegrationFieldV1`](#integrationfieldv1)
@@ -424,7 +426,14 @@ const { data } = await client.simulateMappingV2(
     {
       "entity_slug": "string",
       "unique_identifiers": {},
-      "attributes": {}
+      "attributes": {},
+      "pricing": {
+        "config": {},
+        "data": [
+          {}
+        ]
+      },
+      "mode": "upsert"
     }
   ],
   "meter_readings_updates": [
@@ -435,7 +444,35 @@ const { data } = await client.simulateMappingV2(
       "meter_counter": {
         "$entity_unique_ids": {}
       },
-      "attributes": {}
+      "attributes": {},
+      "mode": "upsert"
+    }
+  ],
+  "prune_scope_updates": [
+    {
+      "entity_slug": "string",
+      "scope": {
+        "scope_mode": "relations",
+        "schema": "string",
+        "unique_ids": {},
+        "query": {}
+      },
+      "keep_unique_ids": [
+        {}
+      ],
+      "deletion_mode": "delete"
+    }
+  ],
+  "meter_readings_prune_scope_updates": [
+    {
+      "meter": {
+        "$entity_unique_ids": {}
+      },
+      "meter_counter": {
+        "$entity_unique_ids": {}
+      },
+      "keep_external_ids": ["string"],
+      "source": "string"
     }
   ],
   "warnings": [
@@ -484,7 +521,14 @@ const { data } = await client.simulateMapping(
     {
       "entity_slug": "string",
       "unique_identifiers": {},
-      "attributes": {}
+      "attributes": {},
+      "pricing": {
+        "config": {},
+        "data": [
+          {}
+        ]
+      },
+      "mode": "upsert"
     }
   ],
   "meter_readings_updates": [
@@ -495,7 +539,35 @@ const { data } = await client.simulateMapping(
       "meter_counter": {
         "$entity_unique_ids": {}
       },
-      "attributes": {}
+      "attributes": {},
+      "mode": "upsert"
+    }
+  ],
+  "prune_scope_updates": [
+    {
+      "entity_slug": "string",
+      "scope": {
+        "scope_mode": "relations",
+        "schema": "string",
+        "unique_ids": {},
+        "query": {}
+      },
+      "keep_unique_ids": [
+        {}
+      ],
+      "deletion_mode": "delete"
+    }
+  ],
+  "meter_readings_prune_scope_updates": [
+    {
+      "meter": {
+        "$entity_unique_ids": {}
+      },
+      "meter_counter": {
+        "$entity_unique_ids": {}
+      },
+      "keep_external_ids": ["string"],
+      "source": "string"
     }
   ],
   "warnings": [
@@ -6933,6 +7005,11 @@ type MappingSimulationResponse = {
     entity_slug: string
     unique_identifiers: Record<string, unknown>
     attributes: Record<string, unknown>
+    pricing?: {
+      config: { ... }
+      data: { ... }
+    }
+    mode: "upsert" | "delete" | "purge"
   }>
   meter_readings_updates?: Array<{
     meter: {
@@ -6942,6 +7019,28 @@ type MappingSimulationResponse = {
       $entity_unique_ids?: { ... }
     }
     attributes: Record<string, unknown>
+    mode: "upsert" | "delete"
+  }>
+  prune_scope_updates?: Array<{
+    entity_slug: string
+    scope: {
+      scope_mode: { ... }
+      schema?: { ... }
+      unique_ids?: { ... }
+      query?: { ... }
+    }
+    keep_unique_ids: Record<string, unknown>[]
+    deletion_mode: "delete" | "purge"
+  }>
+  meter_readings_prune_scope_updates?: Array<{
+    meter: {
+      $entity_unique_ids: { ... }
+    }
+    meter_counter?: {
+      $entity_unique_ids?: { ... }
+    }
+    keep_external_ids: string[]
+    source?: string
   }>
   warnings?: Array<{
     entity_schema: string
@@ -6968,6 +7067,11 @@ type EntityUpdate = {
   entity_slug: string
   unique_identifiers: Record<string, unknown>
   attributes: Record<string, unknown>
+  pricing?: {
+    config: Record<string, unknown>
+    data: Record<string, unknown>[]
+  }
+  mode: "upsert" | "delete" | "purge"
 }
 ```
 
@@ -6982,6 +7086,42 @@ type MeterReadingUpdate = {
     $entity_unique_ids?: Record<string, unknown>
   }
   attributes: Record<string, unknown>
+  mode: "upsert" | "delete"
+}
+```
+
+### `EntityPruneScopeUpdate`
+
+A resolved entity prune scope. At runtime, entities of `entity_slug` found within `scope` whose unique identifiers are not listed in `keep_unique_ids` are removed using `deletion_mode`.
+
+```ts
+type EntityPruneScopeUpdate = {
+  entity_slug: string
+  scope: {
+    scope_mode: "relations" | "query"
+    schema?: string
+    unique_ids?: Record<string, unknown>
+    query?: Record<string, unknown>
+  }
+  keep_unique_ids: Record<string, unknown>[]
+  deletion_mode: "delete" | "purge"
+}
+```
+
+### `MeterReadingPruneScopeUpdate`
+
+A resolved meter reading prune scope. At runtime, readings of the given meter (+ counter) whose external ids are not listed in `keep_external_ids` are deleted.
+
+```ts
+type MeterReadingPruneScopeUpdate = {
+  meter: {
+    $entity_unique_ids: Record<string, unknown>
+  }
+  meter_counter?: {
+    $entity_unique_ids?: Record<string, unknown>
+  }
+  keep_external_ids: string[]
+  source?: string
 }
 ```
 
