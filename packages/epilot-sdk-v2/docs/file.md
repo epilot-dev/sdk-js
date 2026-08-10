@@ -417,6 +417,7 @@ const { data } = await client.downloadFile({
   id: '123e4567-e89b-12d3-a456-426614174000',
   version: 1,
   attachment: true,
+  x-track: 'example',
 })
 ```
 

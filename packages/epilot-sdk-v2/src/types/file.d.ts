@@ -3675,6 +3675,9 @@ export declare namespace Paths {
              */
             Components.Schemas.FileEntityId;
             export type Version = number;
+            export interface XTrack {
+                [name: string]: string;
+            }
         }
         export interface PathParameters {
             id: Parameters.Id;
@@ -3682,6 +3685,7 @@ export declare namespace Paths {
         export interface QueryParameters {
             version?: Parameters.Version;
             attachment?: Parameters.Attachment;
+            "x-track"?: Parameters.XTrack;
         }
         namespace Responses {
             export interface $200 {
@@ -4451,6 +4455,15 @@ export declare namespace Paths {
              * }
              */
             Components.Responses.UnauthorizedError;
+            export type $403 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 403,
+             *   "error": "Forbidden: You do not have permission to access this file"
+             * }
+             */
+            Components.Responses.ForbiddenError;
             export type $404 = /**
              * A generic error returned by the API
              * example:
@@ -5107,6 +5120,15 @@ export interface OperationMethods {
    * 
    * The returned URL is valid for a limited time (typically 15 minutes) and can be used to download the file directly.
    * 
+   * **Download attribution (`x-track-*`):** any query parameter whose name starts with
+   * `x-track-` is treated as opaque tracking metadata and signed into the returned URL, so it
+   * shows up in the S3 access logs / CloudTrail data events when the link is actually opened.
+   * This is a generic, service-agnostic channel — e.g. the customer portal sends
+   * `x-track-portal-id` and `x-track-contact-id`. Only the `x-track-` namespace is forwarded;
+   * the values cannot affect how S3 resolves or serves the object. Parameter names must match
+   * `^x-track-[a-z0-9](?:[a-z0-9_-]{0,38}[a-z0-9])?$`, values are capped at 256 characters, and
+   * at most 10 such parameters are honoured (see the `x-track` parameter below).
+   * 
    */
   'downloadFile'(
     parameters?: Parameters<Paths.DownloadFile.QueryParameters & Paths.DownloadFile.PathParameters> | null,
@@ -5608,6 +5630,15 @@ export interface PathsDictionary {
      * Generate a pre-signed download URL for a file.
      * 
      * The returned URL is valid for a limited time (typically 15 minutes) and can be used to download the file directly.
+     * 
+     * **Download attribution (`x-track-*`):** any query parameter whose name starts with
+     * `x-track-` is treated as opaque tracking metadata and signed into the returned URL, so it
+     * shows up in the S3 access logs / CloudTrail data events when the link is actually opened.
+     * This is a generic, service-agnostic channel — e.g. the customer portal sends
+     * `x-track-portal-id` and `x-track-contact-id`. Only the `x-track-` namespace is forwarded;
+     * the values cannot affect how S3 resolves or serves the object. Parameter names must match
+     * `^x-track-[a-z0-9](?:[a-z0-9_-]{0,38}[a-z0-9])?$`, values are capped at 256 characters, and
+     * at most 10 such parameters are honoured (see the `x-track` parameter below).
      * 
      */
     'get'(
