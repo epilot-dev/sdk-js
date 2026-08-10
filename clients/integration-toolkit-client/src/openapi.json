@@ -2075,7 +2075,7 @@
     "/v2/integrations/{integrationId}/use-cases/{useCaseId}/secure-proxy-whitelist": {
       "get": {
         "operationId": "getSecureProxyWhitelist",
-        "summary": "Get secure_proxy whitelist (admin portal only)",
+        "summary": "getSecureProxyWhitelist",
         "description": "Returns the current allowed_domains, allowed_ips, and vpc_mode for a secure_proxy use case.\nStaff-only — gated by internal-auth issuer AND admin-portal Cognito user pool membership.\nRejects Login-As tokens.\n",
         "tags": [
           "integrations",
@@ -2135,7 +2135,7 @@
       },
       "put": {
         "operationId": "updateSecureProxyWhitelist",
-        "summary": "Update secure_proxy whitelist (admin portal only)",
+        "summary": "updateSecureProxyWhitelist",
         "description": "Replaces allowed_domains and/or allowed_ips on a secure_proxy use case.\nAt least one of the two fields is required. Validation mirrors the CLI's\n`validateDomainPatterns` / `validateCidrs`. Writes a USECASE_HISTORY row\nwith the admin user's email as `changed_by`.\n\nUpdate semantics per field:\n  - **omitted** — field is not modified; the stored value is preserved.\n  - **non-empty array** — the stored value is replaced with the supplied list.\n  - **empty array (`[]`)** — the list is cleared (stored as `[]`). This is\n    the canonical way to remove all entries. `null` is not accepted.\n\nStaff-only — same auth gates as GET.\n",
         "tags": [
           "integrations",
@@ -2207,7 +2207,7 @@
     "/v2/integrations/{integrationId}/use-cases/{useCaseId}/secure-proxy-whitelist/history": {
       "get": {
         "operationId": "listSecureProxyWhitelistHistory",
-        "summary": "List secure_proxy whitelist change history (admin portal only)",
+        "summary": "listSecureProxyWhitelistHistory",
         "description": "Returns the most recent USECASE_HISTORY entries for a secure_proxy use case,\nin reverse chronological order (newest first). Each entry includes the\nactor email (`changed_by`), the ISO-8601 timestamp (`history_created_at`),\nthe `change_description` (free-text action), and the full `configuration`\nsnapshot — from which UI-08 computes a before/after diff between consecutive\nentries.\n\nStaff-only — gated by internal-auth issuer AND admin-portal Cognito user pool\nmembership. Rejects Login-As tokens (same auth gate as the GET / PUT\nsecure-proxy-whitelist operations).\n\nThin wrapper over the service-layer `listUseCaseHistory` that powers\n`GET /v1/integrations/{integrationId}/use-cases/{useCaseId}/history` — the\nseparate path exists because the /v1 variant is tenant-gated and admin-portal\ninternal-auth tokens do not carry tenant permissions.\n",
         "tags": [
           "integrations",
@@ -3357,7 +3357,7 @@
     "/v1/integrations/secure-proxies": {
       "get": {
         "operationId": "listSecureProxies",
-        "summary": "List all secure proxy use cases",
+        "summary": "listSecureProxies",
         "description": "Lists all secure_proxy use cases across all integrations for the authenticated organization.\nReturns minimal data suitable for dropdowns and selection UIs.\n",
         "tags": [
           "integrations"
@@ -3401,7 +3401,7 @@
     "/v1/secure-proxy": {
       "post": {
         "operationId": "secureProxy",
-        "summary": "Proxy HTTP request through secure VPC",
+        "summary": "secureProxy",
         "description": "Routes an HTTP request through a VPC with either static IP egress or VPN secure link access.\nThe VPC mode is determined by the referenced secure_proxy use case configuration.\nFor secure_link mode, the target URL must match the use case's allowed_domains whitelist.\n",
         "tags": [
           "proxy"
@@ -3484,7 +3484,7 @@
     "/v1/managed-call/{slug}/execute": {
       "post": {
         "operationId": "managedCallExecute",
-        "summary": "Execute a managed call operation",
+        "summary": "managedCallExecute",
         "description": "Execute a managed call operation synchronously. The slug in the path acts as the RPC method name.\nCalls an external partner API with JSONata mapping on both request and response.\n",
         "tags": [
           "managed-call"
@@ -3573,7 +3573,7 @@
     "/v1/integrations/{integrationId}/generate-types-preview": {
       "post": {
         "operationId": "generateTypesPreview",
-        "summary": "Preview scaffolded types for a connector integration",
+        "summary": "generateTypesPreview",
         "description": "Analyses the JSONata mappings of all managed-call use cases in the integration and returns scaffolded type descriptors. The frontend uses these to show the type editor modal where developers fill in leaf types.\n",
         "tags": [
           "integrations"
@@ -3623,7 +3623,7 @@
     "/v1/integrations/{integrationId}/generate-types": {
       "post": {
         "operationId": "generateTypes",
-        "summary": "Generate a TypeScript npm package for a connector integration",
+        "summary": "generateTypes",
         "description": "Generates a complete TypeScript npm package with typed interfaces for all managed-call use cases. This is a stateless operation that does not persist any changes. Use the commit-types endpoint to lock configurations after review.\n",
         "tags": [
           "integrations"
@@ -3683,7 +3683,7 @@
     "/v1/integrations/{integrationId}/commit-types": {
       "post": {
         "operationId": "commitTypes",
-        "summary": "Commit generated types and lock use case configurations",
+        "summary": "commitTypes",
         "description": "Commits the generated types by locking use case configurations and updating version tracking. Should be called after the user reviews and downloads the generated package.\n",
         "tags": [
           "integrations"
@@ -6214,7 +6214,11 @@
           "change_description": {
             "type": "string",
             "maxLength": 2000,
-            "description": "Description of the last change made to this use case"
+            "description": "Reason given for the update that produced the current version. Absent when the update supplied none — it is not inherited from the previous version.\n"
+          },
+          "changed_by": {
+            "type": "string",
+            "description": "User ID recorded for the update that produced the current version. Absent when the update had no user context, e.g. an automated sync.\n"
           },
           "created_at": {
             "type": "string",

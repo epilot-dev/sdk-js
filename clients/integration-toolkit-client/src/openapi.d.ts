@@ -2341,9 +2341,15 @@ declare namespace Components {
             type: "inbound" | "outbound" | "file_proxy" | "managed_call" | "secure_proxy" | "file_proxy";
             enabled: boolean;
             /**
-             * Description of the last change made to this use case
+             * Reason given for the update that produced the current version. Absent when the update supplied none — it is not inherited from the previous version.
+             *
              */
             change_description?: string;
+            /**
+             * User ID recorded for the update that produced the current version. Absent when the update had no user context, e.g. an automated sync.
+             *
+             */
+            changed_by?: string;
             /**
              * ISO-8601 timestamp when the use case was created
              */
@@ -2747,9 +2753,15 @@ declare namespace Components {
             type: "inbound" | "outbound" | "file_proxy" | "managed_call" | "secure_proxy" | "inbound";
             enabled: boolean;
             /**
-             * Description of the last change made to this use case
+             * Reason given for the update that produced the current version. Absent when the update supplied none — it is not inherited from the previous version.
+             *
              */
             change_description?: string;
+            /**
+             * User ID recorded for the update that produced the current version. Absent when the update had no user context, e.g. an automated sync.
+             *
+             */
+            changed_by?: string;
             /**
              * ISO-8601 timestamp when the use case was created
              */
@@ -3901,9 +3913,15 @@ declare namespace Components {
             type: "inbound" | "outbound" | "file_proxy" | "managed_call" | "secure_proxy" | "managed_call";
             enabled: boolean;
             /**
-             * Description of the last change made to this use case
+             * Reason given for the update that produced the current version. Absent when the update supplied none — it is not inherited from the previous version.
+             *
              */
             change_description?: string;
+            /**
+             * User ID recorded for the update that produced the current version. Absent when the update had no user context, e.g. an automated sync.
+             *
+             */
+            changed_by?: string;
             /**
              * ISO-8601 timestamp when the use case was created
              */
@@ -4792,9 +4810,15 @@ declare namespace Components {
             type: "inbound" | "outbound" | "file_proxy" | "managed_call" | "secure_proxy" | "outbound";
             enabled: boolean;
             /**
-             * Description of the last change made to this use case
+             * Reason given for the update that produced the current version. Absent when the update supplied none — it is not inherited from the previous version.
+             *
              */
             change_description?: string;
+            /**
+             * User ID recorded for the update that produced the current version. Absent when the update had no user context, e.g. an automated sync.
+             *
+             */
+            changed_by?: string;
             /**
              * ISO-8601 timestamp when the use case was created
              */
@@ -5847,9 +5871,15 @@ declare namespace Components {
             type: "inbound" | "outbound" | "file_proxy" | "managed_call" | "secure_proxy" | "secure_proxy";
             enabled: boolean;
             /**
-             * Description of the last change made to this use case
+             * Reason given for the update that produced the current version. Absent when the update supplied none — it is not inherited from the previous version.
+             *
              */
             change_description?: string;
+            /**
+             * User ID recorded for the update that produced the current version. Absent when the update had no user context, e.g. an automated sync.
+             *
+             */
+            changed_by?: string;
             /**
              * ISO-8601 timestamp when the use case was created
              */
@@ -6483,9 +6513,15 @@ declare namespace Components {
             type: "inbound" | "outbound" | "file_proxy" | "managed_call" | "secure_proxy";
             enabled: boolean;
             /**
-             * Description of the last change made to this use case
+             * Reason given for the update that produced the current version. Absent when the update supplied none — it is not inherited from the previous version.
+             *
              */
             change_description?: string;
+            /**
+             * User ID recorded for the update that produced the current version. Absent when the update had no user context, e.g. an automated sync.
+             *
+             */
+            changed_by?: string;
             /**
              * ISO-8601 timestamp when the use case was created
              */
@@ -7948,7 +7984,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetNotificationStatus.Responses.$200>
   /**
-   * getSecureProxyWhitelist - Get secure_proxy whitelist (admin portal only)
+   * getSecureProxyWhitelist - getSecureProxyWhitelist
    * 
    * Returns the current allowed_domains, allowed_ips, and vpc_mode for a secure_proxy use case.
    * Staff-only — gated by internal-auth issuer AND admin-portal Cognito user pool membership.
@@ -7961,7 +7997,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetSecureProxyWhitelist.Responses.$200>
   /**
-   * updateSecureProxyWhitelist - Update secure_proxy whitelist (admin portal only)
+   * updateSecureProxyWhitelist - updateSecureProxyWhitelist
    * 
    * Replaces allowed_domains and/or allowed_ips on a secure_proxy use case.
    * At least one of the two fields is required. Validation mirrors the CLI's
@@ -7983,7 +8019,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UpdateSecureProxyWhitelist.Responses.$200>
   /**
-   * listSecureProxyWhitelistHistory - List secure_proxy whitelist change history (admin portal only)
+   * listSecureProxyWhitelistHistory - listSecureProxyWhitelistHistory
    * 
    * Returns the most recent USECASE_HISTORY entries for a secure_proxy use case,
    * in reverse chronological order (newest first). Each entry includes the
@@ -8288,7 +8324,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetMonitoringTraceByCorrelation.Responses.$200>
   /**
-   * listSecureProxies - List all secure proxy use cases
+   * listSecureProxies - listSecureProxies
    * 
    * Lists all secure_proxy use cases across all integrations for the authenticated organization.
    * Returns minimal data suitable for dropdowns and selection UIs.
@@ -8300,7 +8336,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ListSecureProxies.Responses.$200>
   /**
-   * secureProxy - Proxy HTTP request through secure VPC
+   * secureProxy - secureProxy
    * 
    * Routes an HTTP request through a VPC with either static IP egress or VPN secure link access.
    * The VPC mode is determined by the referenced secure_proxy use case configuration.
@@ -8313,7 +8349,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.SecureProxy.Responses.$200>
   /**
-   * managedCallExecute - Execute a managed call operation
+   * managedCallExecute - managedCallExecute
    * 
    * Execute a managed call operation synchronously. The slug in the path acts as the RPC method name.
    * Calls an external partner API with JSONata mapping on both request and response.
@@ -8325,7 +8361,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ManagedCallExecute.Responses.$200>
   /**
-   * generateTypesPreview - Preview scaffolded types for a connector integration
+   * generateTypesPreview - generateTypesPreview
    * 
    * Analyses the JSONata mappings of all managed-call use cases in the integration and returns scaffolded type descriptors. The frontend uses these to show the type editor modal where developers fill in leaf types.
    * 
@@ -8336,7 +8372,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GenerateTypesPreview.Responses.$200>
   /**
-   * generateTypes - Generate a TypeScript npm package for a connector integration
+   * generateTypes - generateTypes
    * 
    * Generates a complete TypeScript npm package with typed interfaces for all managed-call use cases. This is a stateless operation that does not persist any changes. Use the commit-types endpoint to lock configurations after review.
    * 
@@ -8347,7 +8383,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GenerateTypes.Responses.$200>
   /**
-   * commitTypes - Commit generated types and lock use case configurations
+   * commitTypes - commitTypes
    * 
    * Commits the generated types by locking use case configurations and updating version tracking. Should be called after the user reviews and downloads the generated package.
    * 
@@ -8774,7 +8810,7 @@ export interface PathsDictionary {
   }
   ['/v2/integrations/{integrationId}/use-cases/{useCaseId}/secure-proxy-whitelist']: {
     /**
-     * getSecureProxyWhitelist - Get secure_proxy whitelist (admin portal only)
+     * getSecureProxyWhitelist - getSecureProxyWhitelist
      * 
      * Returns the current allowed_domains, allowed_ips, and vpc_mode for a secure_proxy use case.
      * Staff-only — gated by internal-auth issuer AND admin-portal Cognito user pool membership.
@@ -8787,7 +8823,7 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetSecureProxyWhitelist.Responses.$200>
     /**
-     * updateSecureProxyWhitelist - Update secure_proxy whitelist (admin portal only)
+     * updateSecureProxyWhitelist - updateSecureProxyWhitelist
      * 
      * Replaces allowed_domains and/or allowed_ips on a secure_proxy use case.
      * At least one of the two fields is required. Validation mirrors the CLI's
@@ -8811,7 +8847,7 @@ export interface PathsDictionary {
   }
   ['/v2/integrations/{integrationId}/use-cases/{useCaseId}/secure-proxy-whitelist/history']: {
     /**
-     * listSecureProxyWhitelistHistory - List secure_proxy whitelist change history (admin portal only)
+     * listSecureProxyWhitelistHistory - listSecureProxyWhitelistHistory
      * 
      * Returns the most recent USECASE_HISTORY entries for a secure_proxy use case,
      * in reverse chronological order (newest first). Each entry includes the
@@ -9154,7 +9190,7 @@ export interface PathsDictionary {
   }
   ['/v1/integrations/secure-proxies']: {
     /**
-     * listSecureProxies - List all secure proxy use cases
+     * listSecureProxies - listSecureProxies
      * 
      * Lists all secure_proxy use cases across all integrations for the authenticated organization.
      * Returns minimal data suitable for dropdowns and selection UIs.
@@ -9168,7 +9204,7 @@ export interface PathsDictionary {
   }
   ['/v1/secure-proxy']: {
     /**
-     * secureProxy - Proxy HTTP request through secure VPC
+     * secureProxy - secureProxy
      * 
      * Routes an HTTP request through a VPC with either static IP egress or VPN secure link access.
      * The VPC mode is determined by the referenced secure_proxy use case configuration.
@@ -9183,7 +9219,7 @@ export interface PathsDictionary {
   }
   ['/v1/managed-call/{slug}/execute']: {
     /**
-     * managedCallExecute - Execute a managed call operation
+     * managedCallExecute - managedCallExecute
      * 
      * Execute a managed call operation synchronously. The slug in the path acts as the RPC method name.
      * Calls an external partner API with JSONata mapping on both request and response.
@@ -9197,7 +9233,7 @@ export interface PathsDictionary {
   }
   ['/v1/integrations/{integrationId}/generate-types-preview']: {
     /**
-     * generateTypesPreview - Preview scaffolded types for a connector integration
+     * generateTypesPreview - generateTypesPreview
      * 
      * Analyses the JSONata mappings of all managed-call use cases in the integration and returns scaffolded type descriptors. The frontend uses these to show the type editor modal where developers fill in leaf types.
      * 
@@ -9210,7 +9246,7 @@ export interface PathsDictionary {
   }
   ['/v1/integrations/{integrationId}/generate-types']: {
     /**
-     * generateTypes - Generate a TypeScript npm package for a connector integration
+     * generateTypes - generateTypes
      * 
      * Generates a complete TypeScript npm package with typed interfaces for all managed-call use cases. This is a stateless operation that does not persist any changes. Use the commit-types endpoint to lock configurations after review.
      * 
@@ -9223,7 +9259,7 @@ export interface PathsDictionary {
   }
   ['/v1/integrations/{integrationId}/commit-types']: {
     /**
-     * commitTypes - Commit generated types and lock use case configurations
+     * commitTypes - commitTypes
      * 
      * Commits the generated types by locking use case configurations and updating version tracking. Should be called after the user reviews and downloads the generated package.
      * 
