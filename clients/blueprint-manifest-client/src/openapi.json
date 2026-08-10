@@ -62,7 +62,7 @@
       "get": {
         "operationId": "getJob",
         "summary": "getJob",
-        "description": "Get the current status of a blueprint (export or import)",
+        "description": "Get the current status of a blueprint (export or import)\n\n@deprecated Terraform-based operation. Use the V3 blueprint operations instead.\n",
         "deprecated": true,
         "tags": [
           "Jobs"
@@ -90,7 +90,7 @@
       "post": {
         "operationId": "createExport",
         "summary": "createExport",
-        "description": "Creates a new Export Job with a list of available resources to export from the passed root resource.\n\nMultiple root resources can be added by calling this multiple times with the same jobId\n",
+        "description": "Creates a new Export Job with a list of available resources to export from the passed root resource.\n\nMultiple root resources can be added by calling this multiple times with the same jobId\n\n@deprecated Terraform-based operation. Use the V3 blueprint operations instead.\n",
         "deprecated": true,
         "tags": [
           "Export"
@@ -166,7 +166,7 @@
       "post": {
         "operationId": "exportManifest",
         "summary": "exportManifest",
-        "description": "Triggers exporting a manifest file using selected resoruce ids for a job created with `createExportJob`",
+        "description": "Triggers exporting a manifest file using selected resoruce ids for a job created with `createExportJob`\n\n@deprecated Terraform-based operation. Use the V3 blueprint operations instead.\n",
         "deprecated": true,
         "tags": [
           "Export"
@@ -312,7 +312,7 @@
       "post": {
         "operationId": "createPlan",
         "summary": "createPlan",
-        "description": "Creates a new import job from an uploaded manifest file and returns the plan.\n\nCreates an updated plan for an installed manifest when `manifest_id` is passed\n",
+        "description": "Creates a new import job from an uploaded manifest file and returns the plan.\n\nCreates an updated plan for an installed manifest when `manifest_id` is passed\n\n@deprecated Terraform-based operation. Use the V3 blueprint operations instead.\n",
         "deprecated": true,
         "tags": [
           "Import"
@@ -517,7 +517,7 @@
       "post": {
         "operationId": "applyPlan",
         "summary": "applyPlan",
-        "description": "Apply a plan returned by `createPlan`.",
+        "description": "Apply a plan returned by `createPlan`.\n\n@deprecated Terraform-based operation. Use the V3 blueprint operations instead.\n",
         "deprecated": true,
         "tags": [
           "Import"
@@ -575,7 +575,7 @@
       "get": {
         "operationId": "listInstalledManifests",
         "summary": "listInstalledManifests",
-        "description": "List Blueprint Manifests installed to the organization",
+        "description": "List Blueprint Manifests installed to the organization\n\n@deprecated Terraform-based operation. Use the V3 blueprint operations instead.\n",
         "deprecated": true,
         "tags": [
           "Manifests"
@@ -610,7 +610,7 @@
       "get": {
         "operationId": "getManifest",
         "summary": "getManifest",
-        "description": "Get installed Manifest by ID",
+        "description": "Get installed Manifest by ID\n\n@deprecated Terraform-based operation. Use the V3 blueprint operations instead.\n",
         "deprecated": true,
         "tags": [
           "Manifests"
@@ -641,7 +641,7 @@
       "put": {
         "operationId": "updateManifest",
         "summary": "updateManifest",
-        "description": "Update an installed manifest\n",
+        "description": "Update an installed manifest\n\n@deprecated Terraform-based operation. Use the V3 blueprint operations instead.\n",
         "deprecated": true,
         "tags": [
           "Manifests"
@@ -681,7 +681,7 @@
       "delete": {
         "operationId": "deleteManifest",
         "summary": "deleteManifest",
-        "description": "Remove installed manifest from the org\n\nNote that this does not delete the installed resources of the Manifest!\n",
+        "description": "Remove installed manifest from the org\n\nNote that this does not delete the installed resources of the Manifest!\n\n@deprecated Terraform-based operation. Use the V3 blueprint operations instead.\n",
         "deprecated": true,
         "tags": [
           "Manifests"
@@ -823,7 +823,7 @@
       "post": {
         "operationId": "preInstallBlueprint",
         "summary": "preInstallBlueprint",
-        "description": "Pre-install a Blueprint based on a blueprint file",
+        "description": "Pre-install a Blueprint based on a blueprint file. Format-agnostic: the engine is detected from the uploaded archive, so this endpoint accepts both Terraform exports and signed V3 packages. The returned preview's `sync_engine` says which install endpoint to call next. An archive that is neither a Terraform export nor a validly signed V3 package is rejected with 400.",
         "tags": [
           "Blueprints"
         ],
@@ -862,6 +862,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Invalid request body, or an archive that no install engine accepts"
           }
         }
       }
@@ -906,7 +909,7 @@
         "operationId": "installBlueprint",
         "deprecated": true,
         "summary": "installBlueprint",
-        "description": "Kick off a new blueprint installation job. Returns 202 Accepted with Location header pointing to the job resource\n",
+        "description": "Kick off a new blueprint installation job. Returns 202 Accepted with Location header pointing to the job resource\n\n@deprecated Terraform-based operation. Use the V3 blueprint operations instead.\n",
         "tags": [
           "Blueprints"
         ],
@@ -1173,6 +1176,94 @@
       }
     },
     "/v2/blueprint-manifest/blueprints/{blueprint_id}/notes/{note_id}": {
+      "patch": {
+        "operationId": "updateBlueprintNote",
+        "summary": "updateBlueprintNote",
+        "description": "Rewrite the text of an existing internal note. The note keeps its position in\nthe list along with `created_at` and `created_by`, so an edit cannot reassign\nauthorship; `updated_at` is stamped server-side.\n",
+        "tags": [
+          "Blueprints"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id",
+            "schema": {
+              "$ref": "#/components/schemas/BlueprintID"
+            }
+          },
+          {
+            "in": "path",
+            "required": true,
+            "name": "note_id",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "text"
+                ],
+                "properties": {
+                  "text": {
+                    "type": "string",
+                    "description": "Plain-text note body. Must not be blank.",
+                    "minLength": 1
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The updated note",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintNote"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Blank note text",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Blueprint or note not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
       "delete": {
         "operationId": "deleteBlueprintNote",
         "summary": "deleteBlueprintNote",
@@ -1240,7 +1331,7 @@
         "operationId": "validateBlueprint",
         "deprecated": true,
         "summary": "validateBlueprint",
-        "description": "Start a blueprint validation job. Validates Terraform for the blueprint (all types).\nReturns 202 Accepted with job_id. Poll GET /jobs/{job_id} for status, valid, and errors.\n",
+        "description": "Start a blueprint validation job. Validates Terraform for the blueprint (all types).\nReturns 202 Accepted with job_id. Poll GET /jobs/{job_id} for status, valid, and errors.\n\n@deprecated Terraform-based operation. Use the V3 blueprint operations instead.\n",
         "tags": [
           "Blueprints"
         ],
@@ -1393,7 +1484,7 @@
         "operationId": "detectPatchChanges",
         "deprecated": true,
         "summary": "detectPatchChanges",
-        "description": "Detect changes between the current state of a blueprint's resources and its tfstate baseline.\nReturns field-level diffs for resources that have been modified since the blueprint was last installed/exported.\n",
+        "description": "Detect changes between the current state of a blueprint's resources and its tfstate baseline.\nReturns field-level diffs for resources that have been modified since the blueprint was last installed/exported.\n\n@deprecated Terraform-based operation. Use the V3 blueprint operations instead.\n",
         "tags": [
           "Patches"
         ],
@@ -1453,7 +1544,7 @@
         "operationId": "createPatch",
         "deprecated": true,
         "summary": "createPatch",
-        "description": "Create a new patch for a blueprint.",
+        "description": "Create a new patch for a blueprint.\n\n@deprecated Terraform-based operation. Use the V3 blueprint operations instead.\n",
         "tags": [
           "Patches"
         ],
@@ -1527,7 +1618,7 @@
         "operationId": "listPatches",
         "deprecated": true,
         "summary": "listPatches",
-        "description": "List all patches for a blueprint.",
+        "description": "List all patches for a blueprint.\n\n@deprecated Terraform-based operation. Use the V3 blueprint operations instead.\n",
         "tags": [
           "Patches"
         ],
@@ -1571,7 +1662,7 @@
         "operationId": "getPatch",
         "deprecated": true,
         "summary": "getPatch",
-        "description": "Get a patch by ID, including per-org execution results.",
+        "description": "Get a patch by ID, including per-org execution results.\n\n@deprecated Terraform-based operation. Use the V3 blueprint operations instead.\n",
         "tags": [
           "Patches"
         ],
@@ -1615,7 +1706,7 @@
         "operationId": "applyPatch",
         "deprecated": true,
         "summary": "applyPatch",
-        "description": "Apply a patch to a single destination org.",
+        "description": "Apply a patch to a single destination org.\n\n@deprecated Terraform-based operation. Use the V3 blueprint operations instead.\n",
         "tags": [
           "Patches"
         ],
@@ -1689,7 +1780,7 @@
         "operationId": "retryPatchOrg",
         "deprecated": true,
         "summary": "retryPatchOrg",
-        "description": "Retry a failed patch execution for a specific org.",
+        "description": "Retry a failed patch execution for a specific org.\n\n@deprecated Terraform-based operation. Use the V3 blueprint operations instead.\n",
         "tags": [
           "Patches"
         ],
@@ -1758,7 +1849,7 @@
         "operationId": "exportBlueprint",
         "deprecated": true,
         "summary": "exportBlueprint",
-        "description": "Kick off a new blueprint export job. Returns 202 Accepted with Location header pointing to the job resource.\n",
+        "description": "Kick off a new blueprint export job. Returns 202 Accepted with Location header pointing to the job resource.\n\n@deprecated Terraform-based operation. Use the V3 blueprint operations instead.\n",
         "tags": [
           "Blueprints"
         ],
@@ -2079,6 +2170,28 @@
                       "items": {
                         "$ref": "#/components/schemas/BlueprintResource"
                       }
+                    },
+                    "skipped": {
+                      "type": "array",
+                      "description": "Resources that were dropped during enrichment instead of being added",
+                      "items": {
+                        "$ref": "#/components/schemas/SkippedBlueprintResource"
+                      }
+                    },
+                    "errors": {
+                      "type": "array",
+                      "description": "Non-fatal dependency extraction failures encountered while enriching, deduplicated and capped. The listed resources were still added; some of their dependencies may be missing.",
+                      "items": {
+                        "$ref": "#/components/schemas/FormattedError"
+                      }
+                    },
+                    "total_errors": {
+                      "type": "integer",
+                      "description": "Total distinct dependency errors, before the cap applied to `errors`"
+                    },
+                    "errors_truncated": {
+                      "type": "boolean",
+                      "description": "Whether `errors` omits some of the distinct errors counted by `total_errors`"
                     }
                   }
                 }
@@ -2200,6 +2313,28 @@
                       "items": {
                         "$ref": "#/components/schemas/BlueprintResource"
                       }
+                    },
+                    "skipped": {
+                      "type": "array",
+                      "description": "Resources that were dropped during enrichment instead of being added",
+                      "items": {
+                        "$ref": "#/components/schemas/SkippedBlueprintResource"
+                      }
+                    },
+                    "errors": {
+                      "type": "array",
+                      "description": "Non-fatal dependency extraction failures encountered while enriching, deduplicated and capped. The listed resources were still added; some of their dependencies may be missing.",
+                      "items": {
+                        "$ref": "#/components/schemas/FormattedError"
+                      }
+                    },
+                    "total_errors": {
+                      "type": "integer",
+                      "description": "Total distinct dependency errors, before the cap applied to `errors`"
+                    },
+                    "errors_truncated": {
+                      "type": "boolean",
+                      "description": "Whether `errors` omits some of the distinct errors counted by `total_errors`"
                     }
                   }
                 }
@@ -2415,7 +2550,7 @@
     "/v2/blueprint-manifest/jobs": {
       "get": {
         "operationId": "listBlueprintJobs",
-        "summary": "List Blueprint Jobs",
+        "summary": "listBlueprintJobs",
         "description": "List all blueprint jobs",
         "tags": [
           "Jobs"
@@ -2449,7 +2584,7 @@
     "/v2/blueprint-manifest/jobs/{job_id}": {
       "get": {
         "operationId": "getBlueprintJob",
-        "summary": "Get Job",
+        "summary": "getBlueprintJob",
         "description": "Poll the current state of a job. Serves both Terraform (v2) and V3-engine jobs —\ncheck `sync_engine` (`terraform` | `v3`) to tell them apart. V3 jobs additionally\nexpose live `resource_progress[]`. V3 single-install and bulk-install child jobs\nare polled here.\n",
         "tags": [
           "Jobs"
@@ -2481,7 +2616,7 @@
     "/v2/blueprint-manifest/jobs/{job_id}:continue": {
       "post": {
         "operationId": "continueInstallationJob",
-        "summary": "Continue Installation Job",
+        "summary": "continueInstallationJob",
         "description": "Resume an installation job that is paused at `status: \"WAITING_USER_ACTION\"` after\nplanning. Works for both Terraform and V3 jobs. Not needed for V3 installs created\nwith `auto_apply: true` (including all bulk-install child jobs), which apply\nwithout pausing.\n",
         "tags": [
           "Jobs"
@@ -2523,7 +2658,7 @@
     "/v2/blueprint-manifest/jobs/{job_id}:cancel": {
       "post": {
         "operationId": "cancelBlueprintJob",
-        "summary": "Cancel Blueprint Job",
+        "summary": "cancelBlueprintJob",
         "description": "Cancel a blueprint job if it is still running.",
         "tags": [
           "Jobs"
@@ -3034,8 +3169,8 @@
     "/v3/blueprint-manifest/blueprints/{blueprint_id}:publish": {
       "post": {
         "operationId": "publishBlueprintV3",
-        "summary": "Publish Blueprint V3",
-        "description": "Starts an asynchronous V3 publication. The result is a signed, portable package; poll the existing blueprint job endpoint for completion.",
+        "summary": "publishBlueprintV3",
+        "description": "Starts an asynchronous V3 publication. The result is a signed, portable package; poll the existing blueprint job endpoint for completion.\n\nBy default this only builds the package and stores it privately for download. Creating or\noverwriting the public marketplace listing is opt-in via `publish_to_marketplace`.\n",
         "tags": [
           "Blueprints"
         ],
@@ -3049,6 +3184,23 @@
             }
           }
         ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "publish_to_marketplace": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "When true, upload the package with public access and create or overwrite the\nblueprint's Webflow CMS listing. Leave unset for a download-only package build.\n"
+                  }
+                }
+              }
+            }
+          }
+        },
         "responses": {
           "202": {
             "description": "Blueprint export job started",
@@ -3081,7 +3233,7 @@
     "/v3/blueprint-manifest/blueprints:pre-install": {
       "post": {
         "operationId": "preInstallBlueprintV3",
-        "summary": "Preview a V3 blueprint package before installation",
+        "summary": "preInstallBlueprintV3",
         "description": "Validates a signed V3 package and returns the destination-specific resource plan used by the install UI.",
         "tags": [
           "Blueprints"
@@ -3138,7 +3290,7 @@
     "/v3/blueprint-manifest/blueprint:install": {
       "post": {
         "operationId": "installBlueprintV3",
-        "summary": "Install Blueprint V3",
+        "summary": "installBlueprintV3",
         "description": "Install a blueprint into a single destination org using the V3 engine (direct API\ncalls, no Terraform). Creates resources in topological order with global ID\nreplacement and supports checkpoint-based resume on failure.\n\n**Lifecycle (how to drive an install to completion):**\n1. `POST /v3/blueprint-manifest/blueprint:install` returns `{ job_id }` (202).\n2. Poll the job with `GET /v2/blueprint-manifest/jobs/{job_id}` — V3 jobs are\n   served by the same v2 jobs endpoints as Terraform jobs and are identified by\n   `sync_engine: \"v3\"`. Watch `status` and `resource_progress[]`.\n3. If `auto_apply` is `false` (default), the job pauses at\n   `status: \"WAITING_USER_ACTION\"` after planning. Resume it with\n   `POST /v2/blueprint-manifest/jobs/{job_id}:continue`.\n4. If `auto_apply` is `true`, the engine applies automatically after plan +\n   snapshot — no `:continue` call is needed. This is what the bulk-install worker\n   uses; to install into many orgs at once prefer `POST .../bulk-installs`.\n\nFor cross-org installs, pass `destination_auth_token` (the destination org's\ntoken); reads use the caller's bearer token, writes use that token.\n",
         "tags": [
           "Blueprints"
@@ -3276,7 +3428,7 @@
     "/v3/blueprint-manifest/blueprints/{blueprint_id}/deployments/{job_id}:restore": {
       "post": {
         "operationId": "restoreBlueprintDeploymentV3",
-        "summary": "Restore a specific deployment by job_id",
+        "summary": "restoreBlueprintDeploymentV3",
         "description": "Roll a deployment back to its pre-install state. Two phases:\n\n  1. Upsert — re-applies the captured payloads via snapshot-api's\n     `:restore` (server-side; runs config-engine.apply with captured\n     target ids pre-seeded). Skipped for pure-create deployments\n     whose snapshot was empty.\n  2. Delete sweep — for lineage rows of this blueprint instance not\n     present in the snapshot's captured set, deletes the live\n     resource via the type's adapter. Co-ownership / drift /\n     no-delete-capability skip the entry with the corresponding\n     reason.\n\nResolves `(blueprint_id, job_id)` to the entry in\n`Blueprint.deployments[]` and reads its `snapshot_id` and\n`destination_blueprint_id` — the caller never needs to handle\nsnapshot ids directly.\n\nAsync — returns 202 with a job id. Poll the job to track progress.\nThe per-instance lock (`installation_status === 'IN_PROGRESS'`)\nrejects concurrent installs or restores with 409.\n",
         "tags": [
           "Blueprints"
@@ -3344,7 +3496,7 @@
     "/v3/blueprint-manifest/blueprints/{blueprint_id}/deployments/{job_id}/restore-preview": {
       "get": {
         "operationId": "getRestorePreview",
-        "summary": "Predicted outcome of reverting a deployment",
+        "summary": "getRestorePreview",
         "description": "Computes what would happen if the user triggered a restore on this\ndeployment, without performing any writes. The forecast uses the\nsnapshot's captured resources (when present) plus the current lineage\nstate plus per-adapter gates (co-ownership, no-delete-capability,\nheuristic-match, drift when wired).\n\nIdempotent and side-effect free. Safe to call repeatedly. The result\nmay shift between calls if operators edit destination resources or\nanother blueprint adopts a shared resource in the meantime.\n",
         "tags": [
           "Blueprints"
@@ -3388,7 +3540,7 @@
     "/v3/blueprint-manifest/blueprints/{blueprint_id}/deployments/{job_id}:health-check": {
       "post": {
         "operationId": "triggerDeploymentHealthCheckV3",
-        "summary": "Run a health check on a deployment",
+        "summary": "triggerDeploymentHealthCheckV3",
         "description": "Starts a read-only health scan of the resources this deployment's\nblueprint instance tracks in the destination org (see\ndocs/rfcs/RFC-org-health-check.md, Phase 0). Checks:\n\n  - live readability — every lineage-tracked resource is read back\n    via its adapter; tracked-but-unreadable resources are flagged.\n  - referential integrity — destination payloads containing\n    unreplaced source-org ids, or references to tracked resources\n    that are not readable.\n  - install completeness — install operations whose final attempt\n    ended `failed` or `skipped`, with their rejection reasons.\n\nAsync — returns 202 immediately with a `running` report stub. Poll\nthe health-report endpoint until `status` is `completed` or\n`failed`. Never mutates any resource.\n",
         "tags": [
           "Blueprints"
@@ -3460,7 +3612,7 @@
     "/v3/blueprint-manifest/blueprints/{blueprint_id}/deployments/{job_id}/health-report": {
       "get": {
         "operationId": "getDeploymentHealthReportV3",
-        "summary": "Get the latest health report of a deployment",
+        "summary": "getDeploymentHealthReportV3",
         "description": "Returns the most recent health report produced for this deployment\nby the `:health-check` endpoint. Idempotent and side-effect free.\n",
         "tags": [
           "Blueprints"
@@ -3503,7 +3655,7 @@
     "/v3/blueprint-manifest/blueprints/{blueprint_id}/lineage": {
       "get": {
         "operationId": "getBlueprintLineageV3",
-        "summary": "Get Blueprint Lineage V3",
+        "summary": "getBlueprintLineageV3",
         "description": "Returns the lineage registry entries for a blueprint's resources in the current org.\nShows the mapping between source lineage IDs and target resource IDs.\n",
         "tags": [
           "Blueprints"
@@ -3546,7 +3698,7 @@
     "/v3/blueprint-manifest/bulk-installs": {
       "post": {
         "operationId": "createBulkInstallV3",
-        "summary": "Create Bulk Install V3",
+        "summary": "createBulkInstallV3",
         "description": "Install one source blueprint into many destination organizations in a single\nrequest. The server schedules child V3 installs with `auto_apply=true` and caps\nactive installs at `max_concurrency`. Per-target failures are isolated and\nretryable; they do not stop the remaining targets.\n\nEach target carries its own write-only `destination_auth_token` (org-scoped).\nTokens are passed to the worker via Step Functions input only — they are never\npersisted in DynamoDB nor returned by any endpoint.\n",
         "tags": [
           "Blueprints"
@@ -3627,7 +3779,7 @@
     "/v3/blueprint-manifest/bulk-installs/{bulk_job_id}": {
       "get": {
         "operationId": "getBulkInstallV3",
-        "summary": "Get Bulk Install V3",
+        "summary": "getBulkInstallV3",
         "description": "Returns the bulk install parent with aggregate status and counts. Scoped by the\ncaller org as `source_org_id`. Target rows are not included — use the targets\nendpoint to page through them.\n",
         "tags": [
           "Blueprints"
@@ -3662,7 +3814,7 @@
     "/v3/blueprint-manifest/bulk-installs/{bulk_job_id}/targets": {
       "get": {
         "operationId": "listBulkInstallTargetsV3",
-        "summary": "List Bulk Install Targets V3",
+        "summary": "listBulkInstallTargetsV3",
         "description": "Pages through the bulk install's target rows. Each row hydrates its latest child\ninstall job (`job_ids.at(-1)`) with the standard V3 job shape (`events[]`,\n`resource_progress[]`) so callers can inspect per-resource progress and errors.\n",
         "tags": [
           "Blueprints"
@@ -3716,7 +3868,7 @@
     "/v3/blueprint-manifest/bulk-installs/{bulk_job_id}/targets/{destination_org_id}:retry": {
       "post": {
         "operationId": "retryBulkInstallTargetV3",
-        "summary": "Retry Bulk Install Target V3",
+        "summary": "retryBulkInstallTargetV3",
         "description": "Retries a single failed target. Allowed only for `FAILED` and `PARTIAL_SUCCESS`\ntargets. Starts a new child install with `auto_apply=true`, appends its job id to\n`job_ids`, and reuses the same target row. Only the destination auth token may be\nsupplied for the new attempt; source/destination identifiers are immutable.\n",
         "tags": [
           "Blueprints"
@@ -4211,6 +4363,11 @@
             "type": "string",
             "format": "date-time"
           },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Set the first time the note text is edited."
+          },
           "created_by": {
             "$ref": "#/components/schemas/CallerIdentity"
           }
@@ -4255,7 +4412,7 @@
           },
           "notes": {
             "type": "array",
-            "description": "Internal collaboration notes, oldest first. Append-only: each entry is\nstamped with its author and creation time server-side and is never\nrewritten, so the history of who noted what stays intact. Written via\n`addBlueprintNote` / `deleteBlueprintNote`, not by `updateBlueprint`.\n\nAvailable on every blueprint including marketplace ones (whose\n`description` is read-only), and never included in the published\nmarketplace package — see `buildMetadata` in\n`services/blueprint-v3/published-blueprint.ts`. Carried to a\ndestination org only when an install/sync passes\n`options.sync_notes: true`.\n",
+            "description": "Internal collaboration notes, oldest first. Each entry is stamped with\nits author and creation time server-side; an edit rewrites only `text`\nand stamps `updated_at`, so the history of who noted what stays intact.\nWritten via `addBlueprintNote` / `updateBlueprintNote` /\n`deleteBlueprintNote`, not by `updateBlueprint`.\n\nAvailable on every blueprint including marketplace ones (whose\n`description` is read-only), and never included in the published\nmarketplace package — see `buildMetadata` in\n`services/blueprint-v3/published-blueprint.ts`. Carried to a\ndestination org only when an install/sync passes\n`options.sync_notes: true`.\n",
             "items": {
               "$ref": "#/components/schemas/BlueprintNote"
             }
@@ -4287,6 +4444,14 @@
                 "triggered_at": {
                   "type": "string",
                   "format": "date-time"
+                },
+                "performed_by": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/CallerIdentity"
+                    }
+                  ],
+                  "description": "Who actually ran this synchronization — the caller of the install job.\nAbsent on deployments recorded before this field existed; consumers\nshould fall back to the blueprint's `updated_by` for those.\n"
                 },
                 "note": {
                   "type": "string",
@@ -4549,6 +4714,31 @@
           }
         }
       },
+      "SkippedBlueprintResource": {
+        "type": "object",
+        "description": "A resource that was requested (or discovered as a dependency) but was not\nadded to the Blueprint. Reasons are stable machine-readable codes.\n",
+        "required": [
+          "id",
+          "type",
+          "reason"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/BlueprintResourceID"
+          },
+          "type": {
+            "$ref": "#/components/schemas/ResourceNodeType"
+          },
+          "reason": {
+            "type": "string",
+            "enum": [
+              "not_found",
+              "source_validation_failed",
+              "enrichment_failed"
+            ]
+          }
+        }
+      },
       "BlueprintResource": {
         "type": "object",
         "properties": {
@@ -4663,6 +4853,14 @@
             "enum": [
               "marketplace",
               "file"
+            ]
+          },
+          "sync_engine": {
+            "type": "string",
+            "description": "Engine that must install this preview, detected from the uploaded archive's own format (never from a feature flag or request parameter). `v3` is only reported for a correctly shaped and validly signed V3 package. Clients must install a `v3` preview through `POST /v3/blueprint-manifest/blueprint:install` and a `terraform` preview through `POST /v2/blueprint-manifest/blueprints:install`. Absent only on previews created before format detection shipped; treat an absent value as `terraform`.",
+            "enum": [
+              "terraform",
+              "v3"
             ]
           },
           "blueprint_file_s3_key": {
