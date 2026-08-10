@@ -1011,6 +1011,7 @@ const { data } = await client.listUseCases({
       "type": "inbound",
       "enabled": true,
       "change_description": "string",
+      "changed_by": "string",
       "created_at": "1970-01-01T00:00:00.000Z",
       "updated_at": "1970-01-01T00:00:00.000Z",
       "configuration": {}
@@ -1063,6 +1064,7 @@ const { data } = await client.createUseCase(
   "type": "inbound",
   "enabled": true,
   "change_description": "string",
+  "changed_by": "string",
   "created_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z",
   "configuration": {
@@ -1105,6 +1107,7 @@ const { data } = await client.getUseCase({
   "type": "inbound",
   "enabled": true,
   "change_description": "string",
+  "changed_by": "string",
   "created_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z",
   "configuration": {
@@ -1164,6 +1167,7 @@ const { data } = await client.updateUseCase(
   "type": "inbound",
   "enabled": true,
   "change_description": "string",
+  "changed_by": "string",
   "created_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z",
   "configuration": {
@@ -1449,6 +1453,7 @@ const { data } = await client.createIntegrationV2(
       "type": "inbound",
       "enabled": true,
       "change_description": "string",
+      "changed_by": "string",
       "created_at": "1970-01-01T00:00:00.000Z",
       "updated_at": "1970-01-01T00:00:00.000Z",
       "configuration": {}
@@ -1547,6 +1552,7 @@ const { data } = await client.getIntegrationV2({
       "type": "inbound",
       "enabled": true,
       "change_description": "string",
+      "changed_by": "string",
       "created_at": "1970-01-01T00:00:00.000Z",
       "updated_at": "1970-01-01T00:00:00.000Z",
       "configuration": {}
@@ -1720,6 +1726,7 @@ const { data } = await client.updateIntegrationV2(
       "type": "inbound",
       "enabled": true,
       "change_description": "string",
+      "changed_by": "string",
       "created_at": "1970-01-01T00:00:00.000Z",
       "updated_at": "1970-01-01T00:00:00.000Z",
       "configuration": {}
@@ -1879,7 +1886,9 @@ const { data } = await client.getNotificationStatus({
 
 ### `getSecureProxyWhitelist`
 
-Get secure_proxy whitelist (admin portal only)
+Returns the current allowed_domains, allowed_ips, and vpc_mode for a secure_proxy use case.
+Staff-only — gated by internal-auth issuer AND admin-portal Cognito user pool membership.
+Rejects Login-As t
 
 `GET /v2/integrations/{integrationId}/use-cases/{useCaseId}/secure-proxy-whitelist`
 
@@ -1907,7 +1916,9 @@ const { data } = await client.getSecureProxyWhitelist({
 
 ### `updateSecureProxyWhitelist`
 
-Update secure_proxy whitelist (admin portal only)
+Replaces allowed_domains and/or allowed_ips on a secure_proxy use case.
+At least one of the two fields is required. Validation mirrors the CLI's
+`validateDomainPatterns` / `validateCidrs`. Writes a US
 
 `PUT /v2/integrations/{integrationId}/use-cases/{useCaseId}/secure-proxy-whitelist`
 
@@ -1941,7 +1952,9 @@ const { data } = await client.updateSecureProxyWhitelist(
 
 ### `listSecureProxyWhitelistHistory`
 
-List secure_proxy whitelist change history (admin portal only)
+Returns the most recent USECASE_HISTORY entries for a secure_proxy use case,
+in reverse chronological order (newest first). Each entry includes the
+actor email (`changed_by`), the ISO-8601 timestamp (
 
 `GET /v2/integrations/{integrationId}/use-cases/{useCaseId}/secure-proxy-whitelist/history`
 
@@ -2914,7 +2927,8 @@ const { data } = await client.getMonitoringTraceByCorrelation({
 
 ### `listSecureProxies`
 
-List all secure proxy use cases
+Lists all secure_proxy use cases across all integrations for the authenticated organization.
+Returns minimal data suitable for dropdowns and selection UIs.
 
 `GET /v1/integrations/secure-proxies`
 
@@ -2949,7 +2963,9 @@ const { data } = await client.listSecureProxies()
 
 ### `secureProxy`
 
-Proxy HTTP request through secure VPC
+Routes an HTTP request through a VPC with either static IP egress or VPN secure link access.
+The VPC mode is determined by the referenced secure_proxy use case configuration.
+For secure_link mode, the
 
 `POST /v1/secure-proxy`
 
@@ -2986,7 +3002,8 @@ const { data } = await client.secureProxy(
 
 ### `managedCallExecute`
 
-Execute a managed call operation
+Execute a managed call operation synchronously. The slug in the path acts as the RPC method name.
+Calls an external partner API with JSONata mapping on both request and response.
 
 `POST /v1/managed-call/{slug}/execute`
 
@@ -3016,7 +3033,7 @@ const { data } = await client.managedCallExecute(
 
 ### `generateTypesPreview`
 
-Preview scaffolded types for a connector integration
+Analyses the JSONata mappings of all managed-call use cases in the integration and returns scaffolded type descriptors. The frontend uses these to show the type editor modal where developers fill in l
 
 `POST /v1/integrations/{integrationId}/generate-types-preview`
 
@@ -3030,7 +3047,7 @@ const { data } = await client.generateTypesPreview({
 
 ### `generateTypes`
 
-Generate a TypeScript npm package for a connector integration
+Generates a complete TypeScript npm package with typed interfaces for all managed-call use cases. This is a stateless operation that does not persist any changes. Use the commit-types endpoint to lock
 
 `POST /v1/integrations/{integrationId}/generate-types`
 
@@ -3068,7 +3085,7 @@ const { data } = await client.generateTypes(
 
 ### `commitTypes`
 
-Commit generated types and lock use case configurations
+Commits the generated types by locking use case configurations and updating version tracking. Should be called after the user reviews and downloads the generated package.
 
 `POST /v1/integrations/{integrationId}/commit-types`
 
@@ -4222,6 +4239,7 @@ type IntegrationWithUseCases = {
     type: "inbound"
     enabled: boolean
     change_description?: string
+    changed_by?: string
     created_at: string // date-time
     updated_at: string // date-time
     configuration?: {
@@ -4236,6 +4254,7 @@ type IntegrationWithUseCases = {
     type: "outbound"
     enabled: boolean
     change_description?: string
+    changed_by?: string
     created_at: string // date-time
     updated_at: string // date-time
     configuration?: {
@@ -4250,6 +4269,7 @@ type IntegrationWithUseCases = {
     type: "file_proxy"
     enabled: boolean
     change_description?: string
+    changed_by?: string
     created_at: string // date-time
     updated_at: string // date-time
     configuration?: {
@@ -4269,6 +4289,7 @@ type IntegrationWithUseCases = {
     type: "managed_call"
     enabled: boolean
     change_description?: string
+    changed_by?: string
     created_at: string // date-time
     updated_at: string // date-time
     configuration?: {
@@ -4290,6 +4311,7 @@ type IntegrationWithUseCases = {
     type: "secure_proxy"
     enabled: boolean
     change_description?: string
+    changed_by?: string
     created_at: string // date-time
     updated_at: string // date-time
     configuration?: {
@@ -5198,6 +5220,7 @@ type UseCaseBase = {
   type: "inbound" | "outbound" | "file_proxy" | "managed_call" | "secure_proxy"
   enabled: boolean
   change_description?: string
+  changed_by?: string
   created_at: string // date-time
   updated_at: string // date-time
 }
@@ -5214,6 +5237,7 @@ type InboundUseCase = {
   type: "inbound"
   enabled: boolean
   change_description?: string
+  changed_by?: string
   created_at: string // date-time
   updated_at: string // date-time
   configuration?: {
@@ -5250,6 +5274,7 @@ type OutboundUseCase = {
   type: "outbound"
   enabled: boolean
   change_description?: string
+  changed_by?: string
   created_at: string // date-time
   updated_at: string // date-time
   configuration?: {
@@ -5278,6 +5303,7 @@ type FileProxyUseCase = {
   type: "file_proxy"
   enabled: boolean
   change_description?: string
+  changed_by?: string
   created_at: string // date-time
   updated_at: string // date-time
   configuration?: {
@@ -5333,6 +5359,7 @@ type ManagedCallUseCase = {
   type: "managed_call"
   enabled: boolean
   change_description?: string
+  changed_by?: string
   created_at: string // date-time
   updated_at: string // date-time
   configuration?: {
@@ -5365,6 +5392,7 @@ type SecureProxyUseCase = {
   type: "secure_proxy"
   enabled: boolean
   change_description?: string
+  changed_by?: string
   created_at: string // date-time
   updated_at: string // date-time
   configuration?: {
@@ -5386,6 +5414,7 @@ type UseCase = {
   type: "inbound"
   enabled: boolean
   change_description?: string
+  changed_by?: string
   created_at: string // date-time
   updated_at: string // date-time
   configuration?: {
@@ -5416,6 +5445,7 @@ type UseCase = {
   type: "outbound"
   enabled: boolean
   change_description?: string
+  changed_by?: string
   created_at: string // date-time
   updated_at: string // date-time
   configuration?: {
@@ -5438,6 +5468,7 @@ type UseCase = {
   type: "file_proxy"
   enabled: boolean
   change_description?: string
+  changed_by?: string
   created_at: string // date-time
   updated_at: string // date-time
   configuration?: {
@@ -5475,9 +5506,6 @@ type UseCase = {
       body: { ... }
       encoding: { ... }
       filename?: { ... }
-      content_type?: { ... }
-    }
-    prevent_indirect_serving?: boolean
   // ...
 }
 ```
