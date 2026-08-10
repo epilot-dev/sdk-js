@@ -154,6 +154,13 @@
           {
             "name": "attachment",
             "in": "query"
+          },
+          {
+            "name": "x-track",
+            "in": "query",
+            "required": false,
+            "style": "form",
+            "explode": true
           }
         ],
         "responses": {}

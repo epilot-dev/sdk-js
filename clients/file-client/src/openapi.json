@@ -557,7 +557,7 @@
       "get": {
         "operationId": "downloadFile",
         "summary": "downloadFile",
-        "description": "Generate a pre-signed download URL for a file.\n\nThe returned URL is valid for a limited time (typically 15 minutes) and can be used to download the file directly.\n",
+        "description": "Generate a pre-signed download URL for a file.\n\nThe returned URL is valid for a limited time (typically 15 minutes) and can be used to download the file directly.\n\n**Download attribution (`x-track-*`):** any query parameter whose name starts with\n`x-track-` is treated as opaque tracking metadata and signed into the returned URL, so it\nshows up in the S3 access logs / CloudTrail data events when the link is actually opened.\nThis is a generic, service-agnostic channel — e.g. the customer portal sends\n`x-track-portal-id` and `x-track-contact-id`. Only the `x-track-` namespace is forwarded;\nthe values cannot affect how S3 resolves or serves the object. Parameter names must match\n`^x-track-[a-z0-9](?:[a-z0-9_-]{0,38}[a-z0-9])?$`, values are capped at 256 characters, and\nat most 10 such parameters are honoured (see the `x-track` parameter below).\n",
         "tags": [
           "File"
         ],
@@ -587,6 +587,20 @@
             "schema": {
               "type": "boolean",
               "default": true
+            }
+          },
+          {
+            "name": "x-track",
+            "in": "query",
+            "required": false,
+            "style": "form",
+            "explode": true,
+            "description": "Download-attribution channel. Provide any number of query parameters whose names\nstart with `x-track-` (e.g. `x-track-portal-id`, `x-track-contact-id`); each is signed\ninto the pre-signed URL verbatim so the download is recorded in the S3 access logs /\nCloudTrail data events. Only the `x-track-` namespace is forwarded — values cannot\naffect how S3 resolves or serves the object. Parameter names must match\n`^x-track-[a-z0-9](?:[a-z0-9_-]{0,38}[a-z0-9])?$`, values are capped at 256 characters,\nand at most 10 such parameters are honoured.\n",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
             }
           }
         ],
@@ -1242,6 +1256,9 @@
           },
           "401": {
             "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
           },
           "404": {
             "$ref": "#/components/responses/NotFoundError"
