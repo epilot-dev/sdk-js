@@ -28,6 +28,7 @@ const { data } = await deduplicationClient.deduplicate(...)
 - [`deduplicateAsync`](#deduplicateasync)
 - [`getDeduplicationJob`](#getdeduplicationjob)
 - [`detectDuplicates`](#detectduplicates)
+- [`dismissDuplicates`](#dismissduplicates)
 - [`listUniquenessCriteria`](#listuniquenesscriteria)
 - [`createUniquenessCriteria`](#createuniquenesscriteria)
 - [`getUniquenessCriteria`](#getuniquenesscriteria)
@@ -44,6 +45,8 @@ const { data } = await deduplicationClient.deduplicate(...)
 - [`DetectDuplicatesRequestBody`](#detectduplicatesrequestbody)
 - [`DetectDuplicatesResponse`](#detectduplicatesresponse)
 - [`DetectedDuplicateMatch`](#detectedduplicatematch)
+- [`DismissDuplicatesRequestBody`](#dismissduplicatesrequestbody)
+- [`DismissDuplicatesResponse`](#dismissduplicatesresponse)
 - [`UniquenessCriteriaListResponse`](#uniquenesscriterialistresponse)
 - [`UniquenessCriteria`](#uniquenesscriteria)
 - [`MatchRule`](#matchrule)
@@ -73,26 +76,28 @@ const { data } = await client.deduplicate(
 <summary>Response</summary>
 
 ```json
-[
-  {
-    "_id": "string",
-    "_org": "string",
-    "_schema": "string",
-    "_created_at": "1970-01-01T00:00:00.000Z",
-    "_updated_at": "1970-01-01T00:00:00.000Z",
-    "_created_by": "string",
-    "created_by": "string",
-    "_tags": ["string"],
-    "_acl": {},
-    "_owners": [
-      {
-        "org_id": "string",
-        "user_id": "string"
-      }
-    ],
-    "type": "string"
-  }
-]
+{
+  "deduplicatedEntities": [
+    {
+      "_id": "string",
+      "_org": "string",
+      "_schema": "string",
+      "_created_at": "1970-01-01T00:00:00.000Z",
+      "_updated_at": "1970-01-01T00:00:00.000Z",
+      "_created_by": "string",
+      "created_by": "string",
+      "_tags": ["string"],
+      "_acl": {},
+      "_owners": [
+        {
+          "org_id": "string",
+          "user_id": "string"
+        }
+      ],
+      "type": "string"
+    }
+  ]
+}
 ```
 
 </details>
@@ -213,6 +218,35 @@ const { data } = await client.detectDuplicates(
       "matched_attributes": ["string"]
     }
   ]
+}
+```
+
+</details>
+
+---
+
+### `dismissDuplicates`
+
+Confirms entities as NOT duplicates: clears the internal duplicate-detection flags (_matching_entities) on each given entity, so they stop appearing as open duplicate sets. The records themselves are 
+
+`POST /v1/duplicates/dismiss`
+
+```ts
+const { data } = await client.dismissDuplicates(
+  null,
+  {
+    schema: 'string',
+    entityIds: ['string']
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "dismissed": ["string"]
 }
 ```
 
@@ -441,22 +475,24 @@ type DeduplicateRequestBody = Array<{
 ### `DeduplicateRequestResponse`
 
 ```ts
-type DeduplicateRequestResponse = Array<{
-  _id: string
-  _org?: string
-  _schema?: string
-  _created_at?: string // date-time
-  _updated_at?: string // date-time
-  _created_by?: string | number
-  created_by?: string | number
-  _tags?: string[]
-  _acl?: Record<string, string[]>
-  _owners?: Array<{
-    org_id: string
-    user_id: string
+type DeduplicateRequestResponse = {
+  deduplicatedEntities: Array<{
+    _id: string
+    _org?: string
+    _schema?: string
+    _created_at?: string // date-time
+    _updated_at?: string // date-time
+    _created_by?: string | number
+    created_by?: string | number
+    _tags?: string[]
+    _acl?: Record<string, string[]>
+    _owners?: Array<{
+      org_id: { ... }
+      user_id: { ... }
+    }>
+    type?: string
   }>
-  type?: string
-}>
+}
 ```
 
 ### `Entity`
@@ -585,6 +621,23 @@ type DetectedDuplicateMatch = {
   }
   confidence: number
   matched_attributes: string[]
+}
+```
+
+### `DismissDuplicatesRequestBody`
+
+```ts
+type DismissDuplicatesRequestBody = {
+  schema: string
+  entityIds: string[]
+}
+```
+
+### `DismissDuplicatesResponse`
+
+```ts
+type DismissDuplicatesResponse = {
+  dismissed: string[]
 }
 ```
 
