@@ -50,7 +50,12 @@ declare namespace Components {
                 ];
             }[]
         ];
-        export type DeduplicateRequestResponse = /* Base Entity schema */ Entity[];
+        export interface DeduplicateRequestResponse {
+            /**
+             * The merged survivor entity of each processed set
+             */
+            deduplicatedEntities: /* Base Entity schema */ Entity[];
+        }
         /**
          * Represents an async deduplication job
          */
@@ -105,6 +110,120 @@ declare namespace Components {
                 string,
                 ...string[]
             ];
+        }
+        export interface DismissDuplicatesRequestBody {
+            schema: string;
+            /**
+             * Entities whose duplicate flags (_matching_entities) are cleared — the records are confirmed as NOT duplicates and stay separate
+             */
+            entityIds: [
+                string,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?
+            ];
+        }
+        export interface DismissDuplicatesResponse {
+            /**
+             * Entity ids whose duplicate flags were cleared
+             */
+            dismissed: string[];
         }
         /**
          * Base Entity schema
@@ -279,6 +398,12 @@ declare namespace Paths {
             export type $200 = Components.Schemas.DetectDuplicatesResponse;
         }
     }
+    namespace DismissDuplicates {
+        export type RequestBody = Components.Schemas.DismissDuplicatesRequestBody;
+        namespace Responses {
+            export type $200 = Components.Schemas.DismissDuplicatesResponse;
+        }
+    }
     namespace GetDeduplicationJob {
         namespace Parameters {
             export type JobId = string;
@@ -374,6 +499,16 @@ export interface OperationMethods {
     data?: Paths.DetectDuplicates.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DetectDuplicates.Responses.$200>
+  /**
+   * dismissDuplicates - dismissDuplicates
+   * 
+   * Confirms entities as NOT duplicates: clears the internal duplicate-detection flags (_matching_entities) on each given entity, so they stop appearing as open duplicate sets. The records themselves are not modified otherwise.
+   */
+  'dismissDuplicates'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.DismissDuplicates.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.DismissDuplicates.Responses.$200>
   /**
    * listUniquenessCriteria - listUniquenessCriteria
    * 
@@ -475,6 +610,18 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DetectDuplicates.Responses.$200>
   }
+  ['/v1/duplicates/dismiss']: {
+    /**
+     * dismissDuplicates - dismissDuplicates
+     * 
+     * Confirms entities as NOT duplicates: clears the internal duplicate-detection flags (_matching_entities) on each given entity, so they stop appearing as open duplicate sets. The records themselves are not modified otherwise.
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.DismissDuplicates.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.DismissDuplicates.Responses.$200>
+  }
   ['/v1/uniqueness-criteria']: {
     /**
      * listUniquenessCriteria - listUniquenessCriteria
@@ -541,6 +688,8 @@ export type DeduplicationJob = Components.Schemas.DeduplicationJob;
 export type DetectDuplicatesRequestBody = Components.Schemas.DetectDuplicatesRequestBody;
 export type DetectDuplicatesResponse = Components.Schemas.DetectDuplicatesResponse;
 export type DetectedDuplicateMatch = Components.Schemas.DetectedDuplicateMatch;
+export type DismissDuplicatesRequestBody = Components.Schemas.DismissDuplicatesRequestBody;
+export type DismissDuplicatesResponse = Components.Schemas.DismissDuplicatesResponse;
 export type Entity = Components.Schemas.Entity;
 export type JobStatus = Components.Schemas.JobStatus;
 export type MatchAttribute = Components.Schemas.MatchAttribute;

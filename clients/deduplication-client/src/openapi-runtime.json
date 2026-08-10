@@ -51,6 +51,17 @@
         "responses": {}
       }
     },
+    "/v1/duplicates/dismiss": {
+      "post": {
+        "operationId": "dismissDuplicates",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v1/uniqueness-criteria": {
       "get": {
         "operationId": "listUniquenessCriteria",
