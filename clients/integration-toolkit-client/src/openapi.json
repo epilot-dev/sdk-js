@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Integration Toolkit API",
-    "version": "1.7.0",
+    "version": "1.8.0",
     "description": "API for integrating with external systems in a standardised way."
   },
   "tags": [
@@ -7932,6 +7932,20 @@
               "$ref": "#/components/schemas/MeterReadingUpdate"
             }
           },
+          "prune_scope_updates": {
+            "type": "array",
+            "description": "Resolved prune scopes produced by entity mappings using `upsert-prune-scope-purge` / `upsert-prune-scope-delete`. Each entry describes the entities that would be deleted at runtime because they exist in scope but were not part of this payload.",
+            "items": {
+              "$ref": "#/components/schemas/EntityPruneScopeUpdate"
+            }
+          },
+          "meter_readings_prune_scope_updates": {
+            "type": "array",
+            "description": "Resolved prune scopes produced by meter reading mappings using `upsert-prune-scope`. Each entry describes the readings that would be deleted at runtime for a meter (+ counter) because they were not part of this payload.",
+            "items": {
+              "$ref": "#/components/schemas/MeterReadingPruneScopeUpdate"
+            }
+          },
           "warnings": {
             "type": "array",
             "description": "Validation warnings about the configuration (e.g., unique_ids referencing non-indexed fields)",
@@ -7968,7 +7982,8 @@
         "required": [
           "entity_slug",
           "unique_identifiers",
-          "attributes"
+          "attributes",
+          "mode"
         ],
         "properties": {
           "entity_slug": {
@@ -7984,6 +7999,38 @@
             "type": "object",
             "description": "Mapped attribute values",
             "additionalProperties": true
+          },
+          "pricing": {
+            "type": "object",
+            "description": "Present when the entity mapping has a `pricing` block. Echoes the pricing configuration and the data extracted for it, so mapping authors can see what would be sent to the pricing service.",
+            "required": [
+              "config",
+              "data"
+            ],
+            "properties": {
+              "config": {
+                "type": "object",
+                "additionalProperties": true,
+                "description": "The pricing configuration from the entity mapping"
+              },
+              "data": {
+                "type": "array",
+                "description": "The pricing input data extracted from the payload",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "upsert",
+              "delete",
+              "purge"
+            ],
+            "description": "Effective operation mode applied to this entity at runtime. `upsert-prune-scope-purge` / `upsert-prune-scope-delete` configurations report `upsert` here, because the individual entities in the payload are upserted — the destructive part of those modes is reported separately in `prune_scope_updates`. For `delete` / `purge`, `attributes` are still mapped and returned but ignored at runtime: only `unique_identifiers` are used to locate the entity to remove."
           }
         }
       },
@@ -7991,7 +8038,8 @@
         "type": "object",
         "required": [
           "meter",
-          "attributes"
+          "attributes",
+          "mode"
         ],
         "properties": {
           "meter": {
@@ -8021,6 +8069,121 @@
             "type": "object",
             "additionalProperties": true,
             "description": "Meter reading attributes. Required: external_id, timestamp, source, value. `timestamp` must be ISO 8601 — either `YYYY-MM-DD` or `YYYY-MM-DDTHH:mm:ss` (with optional fractional seconds and optional `Z` / `±HH:mm` timezone offset); non-ISO formats (e.g. `DD.MM.YYYY` or epoch numbers) are rejected and must be converted upstream via a `jsonataExpression` (e.g. `$fromMillis(...)`). Date-only values are normalized to midnight UTC and offset-less date-times are anchored to UTC before being forwarded to the metering API. `source` must be one of: ECP, ERP, 360, journey-submission. `reason` (optional) must be one of: regular, irregular, last, first, meter_change, contract_change, meter_adjustment (or empty/null)."
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "upsert",
+              "delete"
+            ],
+            "description": "Effective operation mode applied to this reading at runtime. `upsert-prune-scope` configurations report `upsert` here — their destructive part is reported separately in `meter_readings_prune_scope_updates`."
+          }
+        }
+      },
+      "EntityPruneScopeUpdate": {
+        "type": "object",
+        "description": "A resolved entity prune scope. At runtime, entities of `entity_slug` found within `scope` whose unique identifiers are not listed in `keep_unique_ids` are removed using `deletion_mode`.",
+        "required": [
+          "entity_slug",
+          "scope",
+          "keep_unique_ids",
+          "deletion_mode"
+        ],
+        "properties": {
+          "entity_slug": {
+            "type": "string",
+            "description": "The entity type that would be pruned"
+          },
+          "scope": {
+            "type": "object",
+            "description": "The scope configuration resolved against the payload",
+            "required": [
+              "scope_mode"
+            ],
+            "properties": {
+              "scope_mode": {
+                "type": "string",
+                "enum": [
+                  "relations",
+                  "query"
+                ],
+                "description": "How the entities in scope are found"
+              },
+              "schema": {
+                "type": "string",
+                "description": "Schema of the related entity defining the scope (`relations` scope_mode only)"
+              },
+              "unique_ids": {
+                "type": "object",
+                "additionalProperties": true,
+                "description": "Resolved unique identifiers of the related scope entity (`relations` scope_mode only)"
+              },
+              "query": {
+                "type": "object",
+                "additionalProperties": true,
+                "description": "Resolved query parameters used to find entities in scope (`query` scope_mode only)"
+              }
+            }
+          },
+          "keep_unique_ids": {
+            "type": "array",
+            "description": "Unique identifiers of the entities upserted by this payload. Everything else found in scope would be deleted.",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "deletion_mode": {
+            "type": "string",
+            "enum": [
+              "delete",
+              "purge"
+            ],
+            "description": "`delete` soft deletes the pruned entities, `purge` removes them permanently"
+          }
+        }
+      },
+      "MeterReadingPruneScopeUpdate": {
+        "type": "object",
+        "description": "A resolved meter reading prune scope. At runtime, readings of the given meter (+ counter) whose external ids are not listed in `keep_external_ids` are deleted.",
+        "required": [
+          "meter",
+          "keep_external_ids"
+        ],
+        "properties": {
+          "meter": {
+            "type": "object",
+            "required": [
+              "$entity_unique_ids"
+            ],
+            "properties": {
+              "$entity_unique_ids": {
+                "type": "object",
+                "additionalProperties": true,
+                "description": "Unique identifiers for the meter"
+              }
+            }
+          },
+          "meter_counter": {
+            "type": "object",
+            "properties": {
+              "$entity_unique_ids": {
+                "type": "object",
+                "additionalProperties": true,
+                "description": "Unique identifiers for the meter counter"
+              }
+            }
+          },
+          "keep_external_ids": {
+            "type": "array",
+            "description": "External ids of the readings present in this payload. All other readings in scope would be deleted. An empty array means every reading in scope would be deleted.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "source": {
+            "type": "string",
+            "description": "When set, only readings with this source are eligible for pruning (e.g. `ERP`)"
           }
         }
       },

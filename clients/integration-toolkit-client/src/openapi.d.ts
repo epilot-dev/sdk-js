@@ -1731,6 +1731,50 @@ declare namespace Components {
              */
             change_description?: string;
         }
+        /**
+         * A resolved entity prune scope. At runtime, entities of `entity_slug` found within `scope` whose unique identifiers are not listed in `keep_unique_ids` are removed using `deletion_mode`.
+         */
+        export interface EntityPruneScopeUpdate {
+            /**
+             * The entity type that would be pruned
+             */
+            entity_slug: string;
+            /**
+             * The scope configuration resolved against the payload
+             */
+            scope: {
+                /**
+                 * How the entities in scope are found
+                 */
+                scope_mode: "relations" | "query";
+                /**
+                 * Schema of the related entity defining the scope (`relations` scope_mode only)
+                 */
+                schema?: string;
+                /**
+                 * Resolved unique identifiers of the related scope entity (`relations` scope_mode only)
+                 */
+                unique_ids?: {
+                    [name: string]: any;
+                };
+                /**
+                 * Resolved query parameters used to find entities in scope (`query` scope_mode only)
+                 */
+                query?: {
+                    [name: string]: any;
+                };
+            };
+            /**
+             * Unique identifiers of the entities upserted by this payload. Everything else found in scope would be deleted.
+             */
+            keep_unique_ids: {
+                [name: string]: any;
+            }[];
+            /**
+             * `delete` soft deletes the pruned entities, `purge` removes them permanently
+             */
+            deletion_mode: "delete" | "purge";
+        }
         export interface EntityUpdate {
             /**
              * The entity type slug
@@ -1748,6 +1792,27 @@ declare namespace Components {
             attributes: {
                 [name: string]: any;
             };
+            /**
+             * Present when the entity mapping has a `pricing` block. Echoes the pricing configuration and the data extracted for it, so mapping authors can see what would be sent to the pricing service.
+             */
+            pricing?: {
+                /**
+                 * The pricing configuration from the entity mapping
+                 */
+                config: {
+                    [name: string]: any;
+                };
+                /**
+                 * The pricing input data extracted from the payload
+                 */
+                data: {
+                    [name: string]: any;
+                }[];
+            };
+            /**
+             * Effective operation mode applied to this entity at runtime. `upsert-prune-scope-purge` / `upsert-prune-scope-delete` configurations report `upsert` here, because the individual entities in the payload are upserted — the destructive part of those modes is reported separately in `prune_scope_updates`. For `delete` / `purge`, `attributes` are still mapped and returned but ignored at runtime: only `unique_identifiers` are used to locate the entity to remove.
+             */
+            mode: "upsert" | "delete" | "purge";
         }
         /**
          * Resolves to an org-scoped environment variable from the epilot environments-api service at runtime, replacing hard-coded environment-specific values (URLs, prefixes, identifiers) in inbound mappings. Secrets (`SecretString` values) are never exposed; the runtime treats both "missing key" and "secret-typed key" as identical `undefined` outcomes (no info disclosure via error code). For secret-resolving contexts (e.g. authorization headers in managed-call or file-proxy step configurations), use the templated `{{ env.<key> }}` syntax instead — that mechanism does decrypt secrets.
@@ -4017,6 +4082,14 @@ declare namespace Components {
             entity_updates: EntityUpdate[];
             meter_readings_updates?: MeterReadingUpdate[];
             /**
+             * Resolved prune scopes produced by entity mappings using `upsert-prune-scope-purge` / `upsert-prune-scope-delete`. Each entry describes the entities that would be deleted at runtime because they exist in scope but were not part of this payload.
+             */
+            prune_scope_updates?: /* A resolved entity prune scope. At runtime, entities of `entity_slug` found within `scope` whose unique identifiers are not listed in `keep_unique_ids` are removed using `deletion_mode`. */ EntityPruneScopeUpdate[];
+            /**
+             * Resolved prune scopes produced by meter reading mappings using `upsert-prune-scope`. Each entry describes the readings that would be deleted at runtime for a meter (+ counter) because they were not part of this payload.
+             */
+            meter_readings_prune_scope_updates?: /* A resolved meter reading prune scope. At runtime, readings of the given meter (+ counter) whose external ids are not listed in `keep_external_ids` are deleted. */ MeterReadingPruneScopeUpdate[];
+            /**
              * Validation warnings about the configuration (e.g., unique_ids referencing non-indexed fields)
              */
             warnings?: MappingSimulationWarning[];
@@ -4066,6 +4139,35 @@ declare namespace Components {
              */
             source?: string;
         }
+        /**
+         * A resolved meter reading prune scope. At runtime, readings of the given meter (+ counter) whose external ids are not listed in `keep_external_ids` are deleted.
+         */
+        export interface MeterReadingPruneScopeUpdate {
+            meter: {
+                /**
+                 * Unique identifiers for the meter
+                 */
+                $entity_unique_ids: {
+                    [name: string]: any;
+                };
+            };
+            meter_counter?: {
+                /**
+                 * Unique identifiers for the meter counter
+                 */
+                $entity_unique_ids?: {
+                    [name: string]: any;
+                };
+            };
+            /**
+             * External ids of the readings present in this payload. All other readings in scope would be deleted. An empty array means every reading in scope would be deleted.
+             */
+            keep_external_ids: string[];
+            /**
+             * When set, only readings with this source are eligible for pruning (e.g. `ERP`)
+             */
+            source?: string;
+        }
         export interface MeterReadingUpdate {
             meter: {
                 /**
@@ -4089,6 +4191,10 @@ declare namespace Components {
             attributes: {
                 [name: string]: any;
             };
+            /**
+             * Effective operation mode applied to this reading at runtime. `upsert-prune-scope` configurations report `upsert` here — their destructive part is reported separately in `meter_readings_prune_scope_updates`.
+             */
+            mode: "upsert" | "delete";
         }
         export interface MeterUniqueIdsConfig {
             /**
@@ -9367,6 +9473,7 @@ export type EmbeddedOutboundUseCaseRequest = Components.Schemas.EmbeddedOutbound
 export type EmbeddedSecureProxyUseCaseRequest = Components.Schemas.EmbeddedSecureProxyUseCaseRequest;
 export type EmbeddedUseCaseRequest = Components.Schemas.EmbeddedUseCaseRequest;
 export type EmbeddedUseCaseRequestBase = Components.Schemas.EmbeddedUseCaseRequestBase;
+export type EntityPruneScopeUpdate = Components.Schemas.EntityPruneScopeUpdate;
 export type EntityUpdate = Components.Schemas.EntityUpdate;
 export type EnvVarRefConfig = Components.Schemas.EnvVarRefConfig;
 export type EnvironmentFieldConfig = Components.Schemas.EnvironmentFieldConfig;
@@ -9431,6 +9538,7 @@ export type MappingSimulationResponse = Components.Schemas.MappingSimulationResp
 export type MappingSimulationV2Request = Components.Schemas.MappingSimulationV2Request;
 export type MappingSimulationWarning = Components.Schemas.MappingSimulationWarning;
 export type MeterReadingPruneScopeConfig = Components.Schemas.MeterReadingPruneScopeConfig;
+export type MeterReadingPruneScopeUpdate = Components.Schemas.MeterReadingPruneScopeUpdate;
 export type MeterReadingUpdate = Components.Schemas.MeterReadingUpdate;
 export type MeterUniqueIdsConfig = Components.Schemas.MeterUniqueIdsConfig;
 export type MonitoringEventV2 = Components.Schemas.MonitoringEventV2;
