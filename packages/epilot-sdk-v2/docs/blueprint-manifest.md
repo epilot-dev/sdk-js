@@ -37,6 +37,7 @@ const { data } = await blueprintManifestClient.getJob(...)
 - [`updateBlueprint`](#updateblueprint)
 - [`deleteBlueprint`](#deleteblueprint)
 - [`addBlueprintNote`](#addblueprintnote)
+- [`updateBlueprintNote`](#updateblueprintnote)
 - [`deleteBlueprintNote`](#deleteblueprintnote)
 - [`verifyBlueprint`](#verifyblueprint)
 - [`listMarketplaceSlugs`](#listmarketplaceslugs)
@@ -105,6 +106,7 @@ const { data } = await blueprintManifestClient.getJob(...)
 - [`CommonBlueprintFields`](#commonblueprintfields)
 - [`SuggestBlueprintResourcesRequest`](#suggestblueprintresourcesrequest)
 - [`SuggestBlueprintResourcesResponse`](#suggestblueprintresourcesresponse)
+- [`SkippedBlueprintResource`](#skippedblueprintresource)
 - [`BlueprintResource`](#blueprintresource)
 - [`BlueprintPreview`](#blueprintpreview)
 - [`CustomBlueprint`](#customblueprint)
@@ -285,6 +287,7 @@ const { data } = await client.createBlueprint(
         id: '3f1c9b0e-2f3a-4a1f-9a3e-6f2b8c7d1e40',
         text: 'Adjusted the meter-reading journey for the §14a rollout.',
         created_at: '1970-01-01T00:00:00.000Z',
+        updated_at: '1970-01-01T00:00:00.000Z',
         created_by: { /* ... */ }
       }
     ],
@@ -297,6 +300,7 @@ const { data } = await client.createBlueprint(
         destination_blueprint_id: 'string',
         job_id: 'string',
         triggered_at: '1970-01-01T00:00:00.000Z',
+        performed_by: { /* ... */ },
         note: 'string',
         status: 'IN_PROGRESS',
         restore_details: { /* ... */ },
@@ -389,6 +393,7 @@ const { data } = await client.createBlueprint(
       "id": "3f1c9b0e-2f3a-4a1f-9a3e-6f2b8c7d1e40",
       "text": "Adjusted the meter-reading journey for the §14a rollout.",
       "created_at": "1970-01-01T00:00:00.000Z",
+      "updated_at": "1970-01-01T00:00:00.000Z",
       "created_by": {}
     }
   ],
@@ -401,6 +406,7 @@ const { data } = await client.createBlueprint(
       "destination_blueprint_id": "string",
       "job_id": "string",
       "triggered_at": "1970-01-01T00:00:00.000Z",
+      "performed_by": {},
       "note": "string",
       "status": "IN_PROGRESS",
       "restore_details": {},
@@ -529,7 +535,7 @@ const { data } = await client.listInstalledMarketplaceBlueprints()
 
 ### `preInstallBlueprint`
 
-Pre-install a Blueprint based on a blueprint file
+Pre-install a Blueprint based on a blueprint file. Format-agnostic: the engine is detected from the uploaded archive, so this endpoint accepts both Terraform exports and signed V3 packages. The return
 
 `POST /v2/blueprint-manifest/blueprints:pre-install`
 
@@ -558,6 +564,7 @@ const { data } = await client.preInstallBlueprint(
   "version": "string",
   "slug": "string",
   "source_type": "marketplace",
+  "sync_engine": "terraform",
   "blueprint_file_s3_key": "string",
   "is_verified": true,
   "docs_url": "string",
@@ -624,6 +631,7 @@ const { data } = await client.getBlueprintPreview({
   "version": "string",
   "slug": "string",
   "source_type": "marketplace",
+  "sync_engine": "terraform",
   "blueprint_file_s3_key": "string",
   "is_verified": true,
   "docs_url": "string",
@@ -693,6 +701,7 @@ const { data } = await client.getBlueprint({
       "id": "3f1c9b0e-2f3a-4a1f-9a3e-6f2b8c7d1e40",
       "text": "Adjusted the meter-reading journey for the §14a rollout.",
       "created_at": "1970-01-01T00:00:00.000Z",
+      "updated_at": "1970-01-01T00:00:00.000Z",
       "created_by": {}
     }
   ],
@@ -705,6 +714,7 @@ const { data } = await client.getBlueprint({
       "destination_blueprint_id": "string",
       "job_id": "string",
       "triggered_at": "1970-01-01T00:00:00.000Z",
+      "performed_by": {},
       "note": "string",
       "status": "IN_PROGRESS",
       "restore_details": {},
@@ -809,6 +819,7 @@ const { data } = await client.updateBlueprint(
         id: '3f1c9b0e-2f3a-4a1f-9a3e-6f2b8c7d1e40',
         text: 'Adjusted the meter-reading journey for the §14a rollout.',
         created_at: '1970-01-01T00:00:00.000Z',
+        updated_at: '1970-01-01T00:00:00.000Z',
         created_by: { /* ... */ }
       }
     ],
@@ -821,6 +832,7 @@ const { data } = await client.updateBlueprint(
         destination_blueprint_id: 'string',
         job_id: 'string',
         triggered_at: '1970-01-01T00:00:00.000Z',
+        performed_by: { /* ... */ },
         note: 'string',
         status: 'IN_PROGRESS',
         restore_details: { /* ... */ },
@@ -913,6 +925,7 @@ const { data } = await client.updateBlueprint(
       "id": "3f1c9b0e-2f3a-4a1f-9a3e-6f2b8c7d1e40",
       "text": "Adjusted the meter-reading journey for the §14a rollout.",
       "created_at": "1970-01-01T00:00:00.000Z",
+      "updated_at": "1970-01-01T00:00:00.000Z",
       "created_by": {}
     }
   ],
@@ -925,6 +938,7 @@ const { data } = await client.updateBlueprint(
       "destination_blueprint_id": "string",
       "job_id": "string",
       "triggered_at": "1970-01-01T00:00:00.000Z",
+      "performed_by": {},
       "note": "string",
       "status": "IN_PROGRESS",
       "restore_details": {},
@@ -1032,6 +1046,7 @@ const { data } = await client.deleteBlueprint({
       "id": "3f1c9b0e-2f3a-4a1f-9a3e-6f2b8c7d1e40",
       "text": "Adjusted the meter-reading journey for the §14a rollout.",
       "created_at": "1970-01-01T00:00:00.000Z",
+      "updated_at": "1970-01-01T00:00:00.000Z",
       "created_by": {}
     }
   ],
@@ -1044,6 +1059,7 @@ const { data } = await client.deleteBlueprint({
       "destination_blueprint_id": "string",
       "job_id": "string",
       "triggered_at": "1970-01-01T00:00:00.000Z",
+      "performed_by": {},
       "note": "string",
       "status": "IN_PROGRESS",
       "restore_details": {},
@@ -1149,6 +1165,49 @@ const { data } = await client.addBlueprintNote(
   "id": "3f1c9b0e-2f3a-4a1f-9a3e-6f2b8c7d1e40",
   "text": "Adjusted the meter-reading journey for the §14a rollout.",
   "created_at": "1970-01-01T00:00:00.000Z",
+  "updated_at": "1970-01-01T00:00:00.000Z",
+  "created_by": {
+    "name": "manifest@epilot.cloud",
+    "org_id": "911690",
+    "user_id": "11001045",
+    "token_id": "api_5ZugdRXasLfWBypHi93Fk"
+  }
+}
+```
+
+</details>
+
+---
+
+### `updateBlueprintNote`
+
+Rewrite the text of an existing internal note. The note keeps its position in
+the list along with `created_at` and `created_by`, so an edit cannot reassign
+authorship; `updated_at` is stamped server-s
+
+`PATCH /v2/blueprint-manifest/blueprints/{blueprint_id}/notes/{note_id}`
+
+```ts
+const { data } = await client.updateBlueprintNote(
+  {
+    blueprint_id: 'example',
+    note_id: 'example',
+  },
+  {
+    text: 'string'
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "id": "3f1c9b0e-2f3a-4a1f-9a3e-6f2b8c7d1e40",
+  "text": "Adjusted the meter-reading journey for the §14a rollout.",
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "updated_at": "1970-01-01T00:00:00.000Z",
   "created_by": {
     "name": "manifest@epilot.cloud",
     "org_id": "911690",
@@ -1185,6 +1244,7 @@ const { data } = await client.deleteBlueprintNote({
       "id": "3f1c9b0e-2f3a-4a1f-9a3e-6f2b8c7d1e40",
       "text": "Adjusted the meter-reading journey for the §14a rollout.",
       "created_at": "1970-01-01T00:00:00.000Z",
+      "updated_at": "1970-01-01T00:00:00.000Z",
       "created_by": {
         "name": "manifest@epilot.cloud",
         "org_id": "911690",
@@ -1409,7 +1469,34 @@ const { data } = await client.addBlueprintResource(
       "impact_on_install": ["create"],
       "impact_on_install_reason": ["string"]
     }
-  ]
+  ],
+  "skipped": [
+    {
+      "id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+      "type": "designbuilder",
+      "reason": "not_found"
+    }
+  ],
+  "errors": [
+    {
+      "error": "string",
+      "code": "dependency_extraction",
+      "data": {
+        "formattedResource": {
+          "id": "string",
+          "name": "string",
+          "type": "string"
+        },
+        "resource": "string",
+        "resourceDependency": "string",
+        "resources": ["string"],
+        "addresses": ["string"],
+        "originalError": "string"
+      }
+    }
+  ],
+  "total_errors": 0,
+  "errors_truncated": true
 }
 ```
 
@@ -1485,7 +1572,34 @@ const { data } = await client.bulkAddBlueprintResources(
       "impact_on_install": ["create"],
       "impact_on_install_reason": ["string"]
     }
-  ]
+  ],
+  "skipped": [
+    {
+      "id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+      "type": "designbuilder",
+      "reason": "not_found"
+    }
+  ],
+  "errors": [
+    {
+      "error": "string",
+      "code": "dependency_extraction",
+      "data": {
+        "formattedResource": {
+          "id": "string",
+          "name": "string",
+          "type": "string"
+        },
+        "resource": "string",
+        "resourceDependency": "string",
+        "resources": ["string"],
+        "addresses": ["string"],
+        "originalError": "string"
+      }
+    }
+  ],
+  "total_errors": 0,
+  "errors_truncated": true
 }
 ```
 
@@ -1700,7 +1814,7 @@ const { data } = await client.deleteBlueprintResource({
 
 ### `listBlueprintJobs`
 
-List Blueprint Jobs
+List all blueprint jobs
 
 `GET /v2/blueprint-manifest/jobs`
 
@@ -1772,7 +1886,9 @@ const { data } = await client.listBlueprintJobs()
 
 ### `getBlueprintJob`
 
-Get Job
+Poll the current state of a job. Serves both Terraform (v2) and V3-engine jobs —
+check `sync_engine` (`terraform` | `v3`) to tell them apart. V3 jobs additionally
+expose live `resource_progress[]`. V3
 
 `GET /v2/blueprint-manifest/jobs/{job_id}`
 
@@ -1841,7 +1957,9 @@ const { data } = await client.getBlueprintJob({
 
 ### `continueInstallationJob`
 
-Continue Installation Job
+Resume an installation job that is paused at `status: "WAITING_USER_ACTION"` after
+planning. Works for both Terraform and V3 jobs. Not needed for V3 installs created
+with `auto_apply: true` (including
 
 `POST /v2/blueprint-manifest/jobs/{job_id}:continue`
 
@@ -1930,7 +2048,7 @@ const { data } = await client.continueInstallationJob(
 
 ### `cancelBlueprintJob`
 
-Cancel Blueprint Job
+Cancel a blueprint job if it is still running.
 
 `POST /v2/blueprint-manifest/jobs/{job_id}:cancel`
 
@@ -2577,21 +2695,26 @@ const { data } = await client.publishMarketplaceListingVersion(
 
 ### `publishBlueprintV3`
 
-Publish Blueprint V3
+Starts an asynchronous V3 publication. The result is a signed, portable package; poll the existing blueprint job endpoint for completion.
 
 `POST /v3/blueprint-manifest/blueprints/{blueprint_id}:publish`
 
 ```ts
-const { data } = await client.publishBlueprintV3({
-  blueprint_id: 'example',
-})
+const { data } = await client.publishBlueprintV3(
+  {
+    blueprint_id: 'example',
+  },
+  {
+    publish_to_marketplace: false
+  },
+)
 ```
 
 ---
 
 ### `preInstallBlueprintV3`
 
-Preview a V3 blueprint package before installation
+Validates a signed V3 package and returns the destination-specific resource plan used by the install UI.
 
 `POST /v3/blueprint-manifest/blueprints:pre-install`
 
@@ -2620,6 +2743,7 @@ const { data } = await client.preInstallBlueprintV3(
   "version": "string",
   "slug": "string",
   "source_type": "marketplace",
+  "sync_engine": "terraform",
   "blueprint_file_s3_key": "string",
   "is_verified": true,
   "docs_url": "string",
@@ -2662,7 +2786,9 @@ const { data } = await client.preInstallBlueprintV3(
 
 ### `installBlueprintV3`
 
-Install Blueprint V3
+Install a blueprint into a single destination org using the V3 engine (direct API
+calls, no Terraform). Creates resources in topological order with global ID
+replacement and supports checkpoint-based 
 
 `POST /v3/blueprint-manifest/blueprint:install`
 
@@ -2677,7 +2803,7 @@ const { data } = await client.installBlueprintV3(
 
 ### `restoreBlueprintDeploymentV3`
 
-Restore a specific deployment by job_id
+Roll a deployment back to its pre-install state. Two phases:
 
 `POST /v3/blueprint-manifest/blueprints/{blueprint_id}/deployments/{job_id}:restore`
 
@@ -2692,7 +2818,9 @@ const { data } = await client.restoreBlueprintDeploymentV3({
 
 ### `getRestorePreview`
 
-Predicted outcome of reverting a deployment
+Computes what would happen if the user triggered a restore on this
+deployment, without performing any writes. The forecast uses the
+snapshot's captured resources (when present) plus the current lineag
 
 `GET /v3/blueprint-manifest/blueprints/{blueprint_id}/deployments/{job_id}/restore-preview`
 
@@ -2739,7 +2867,9 @@ const { data } = await client.getRestorePreview({
 
 ### `triggerDeploymentHealthCheckV3`
 
-Run a health check on a deployment
+Starts a read-only health scan of the resources this deployment's
+blueprint instance tracks in the destination org (see
+docs/rfcs/RFC-org-health-check.md, Phase 0). Checks:
 
 `POST /v3/blueprint-manifest/blueprints/{blueprint_id}/deployments/{job_id}:health-check`
 
@@ -2760,7 +2890,8 @@ const { data } = await client.triggerDeploymentHealthCheckV3(
 
 ### `getDeploymentHealthReportV3`
 
-Get the latest health report of a deployment
+Returns the most recent health report produced for this deployment
+by the `:health-check` endpoint. Idempotent and side-effect free.
 
 `GET /v3/blueprint-manifest/blueprints/{blueprint_id}/deployments/{job_id}/health-report`
 
@@ -2848,7 +2979,8 @@ const { data } = await client.getDeploymentHealthReportV3({
 
 ### `getBlueprintLineageV3`
 
-Get Blueprint Lineage V3
+Returns the lineage registry entries for a blueprint's resources in the current org.
+Shows the mapping between source lineage IDs and target resource IDs.
 
 `GET /v3/blueprint-manifest/blueprints/{blueprint_id}/lineage`
 
@@ -2883,7 +3015,9 @@ const { data } = await client.getBlueprintLineageV3({
 
 ### `createBulkInstallV3`
 
-Create Bulk Install V3
+Install one source blueprint into many destination organizations in a single
+request. The server schedules child V3 installs with `auto_apply=true` and caps
+active installs at `max_concurrency`. Per-t
 
 `POST /v3/blueprint-manifest/bulk-installs`
 
@@ -2914,7 +3048,9 @@ const { data } = await client.createBulkInstallV3(
 
 ### `getBulkInstallV3`
 
-Get Bulk Install V3
+Returns the bulk install parent with aggregate status and counts. Scoped by the
+caller org as `source_org_id`. Target rows are not included — use the targets
+endpoint to page through them.
 
 `GET /v3/blueprint-manifest/bulk-installs/{bulk_job_id}`
 
@@ -2958,7 +3094,9 @@ const { data } = await client.getBulkInstallV3({
 
 ### `listBulkInstallTargetsV3`
 
-List Bulk Install Targets V3
+Pages through the bulk install's target rows. Each row hydrates its latest child
+install job (`job_ids.at(-1)`) with the standard V3 job shape (`events[]`,
+`resource_progress[]`) so callers can inspec
 
 `GET /v3/blueprint-manifest/bulk-installs/{bulk_job_id}/targets`
 
@@ -3057,7 +3195,9 @@ const { data } = await client.listBulkInstallTargetsV3({
 
 ### `retryBulkInstallTargetV3`
 
-Retry Bulk Install Target V3
+Retries a single failed target. Allowed only for `FAILED` and `PARTIAL_SUCCESS`
+targets. Starts a new child install with `auto_apply=true`, appends its job id to
+`job_ids`, and reuses the same target 
 
 `POST /v3/blueprint-manifest/bulk-installs/{bulk_job_id}/targets/{destination_org_id}:retry`
 
@@ -3300,7 +3440,7 @@ type UniquenessCriteria = {
 type LineageEntry = {
   lineage_id?: string
   target_id?: string
-  resource_type?: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
+  resource_type?: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
   blueprint_instance_ids?: string[]
   fidelity?: "full" | "partial"
   last_synced_at?: string // date-time
@@ -3464,6 +3604,7 @@ type BlueprintNote = {
   id: string
   text: string
   created_at: string // date-time
+  updated_at?: string // date-time
   created_by?: {
     name?: unknown
     org_id: string
@@ -3504,6 +3645,7 @@ type CommonBlueprintFields = {
     id: string
     text: string
     created_at: string // date-time
+    updated_at?: string // date-time
     created_by?: {
       name?: { ... }
       org_id: { ... }
@@ -3519,6 +3661,12 @@ type CommonBlueprintFields = {
     destination_blueprint_id?: string
     job_id?: string
     triggered_at?: string // date-time
+    performed_by?: {
+      name?: { ... }
+      org_id: { ... }
+      user_id?: { ... }
+      token_id?: { ... }
+    }
     note?: string
     status?: "IN_PROGRESS" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED"
     restore_details?: {
@@ -3597,13 +3745,13 @@ type SuggestBlueprintResourcesResponse = {
   resources: Array<{
     id: string
     name?: string
-    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
+    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
     address?: string
     is_root?: boolean
     is_ready?: boolean
     is_hidden?: boolean
     is_disabled?: boolean
-    hard_dependencies?: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"[]
+    hard_dependencies?: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"[]
     parent_resource_ids?: string[]
     depends_on_addresses?: string[]
     impact_on_install?: "create" | "update" | "internal-update" | "no-op" | "delete" | "ignored" | "error"[]
@@ -3615,19 +3763,33 @@ type SuggestBlueprintResourcesResponse = {
 }
 ```
 
+### `SkippedBlueprintResource`
+
+A resource that was requested (or discovered as a dependency) but was not
+added to the Blueprint. Reasons are stable machine-readable codes.
+
+
+```ts
+type SkippedBlueprintResource = {
+  id: string
+  type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
+  reason: "not_found" | "source_validation_failed" | "enrichment_failed"
+}
+```
+
 ### `BlueprintResource`
 
 ```ts
 type BlueprintResource = {
   id: string
   name?: string
-  type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
+  type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
   address?: string
   is_root?: boolean
   is_ready?: boolean
   is_hidden?: boolean
   is_disabled?: boolean
-  hard_dependencies?: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"[]
+  hard_dependencies?: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"[]
   parent_resource_ids?: string[]
   depends_on_addresses?: string[]
   impact_on_install?: "create" | "update" | "internal-update" | "no-op" | "delete" | "ignored" | "error"[]
@@ -3650,6 +3812,7 @@ type BlueprintPreview = {
   version?: string
   slug?: string
   source_type: "marketplace" | "file"
+  sync_engine?: "terraform" | "v3"
   blueprint_file_s3_key: string
   is_verified: boolean
   docs_url?: string
@@ -3669,13 +3832,13 @@ type BlueprintPreview = {
   resources: Array<{
     id: string
     name?: string
-    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
+    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
     address?: string
     is_root?: boolean
     is_ready?: boolean
     is_hidden?: boolean
     is_disabled?: boolean
-    hard_dependencies?: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"[]
+    hard_dependencies?: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"[]
     parent_resource_ids?: string[]
     depends_on_addresses?: string[]
     impact_on_install?: "create" | "update" | "internal-update" | "no-op" | "delete" | "ignored" | "error"[]
@@ -3699,6 +3862,7 @@ type CustomBlueprint = {
     id: string
     text: string
     created_at: string // date-time
+    updated_at?: string // date-time
     created_by?: {
       name?: { ... }
       org_id: { ... }
@@ -3714,6 +3878,12 @@ type CustomBlueprint = {
     destination_blueprint_id?: string
     job_id?: string
     triggered_at?: string // date-time
+    performed_by?: {
+      name?: { ... }
+      org_id: { ... }
+      user_id?: { ... }
+      token_id?: { ... }
+    }
     note?: string
     status?: "IN_PROGRESS" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED"
     restore_details?: {
@@ -3776,17 +3946,10 @@ type CustomBlueprint = {
   resources?: Array<{
     id: string
     name?: string
-    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
+    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
     address?: string
     is_root?: boolean
     is_ready?: boolean
-    is_hidden?: boolean
-    is_disabled?: boolean
-    hard_dependencies?: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"[]
-    parent_resource_ids?: string[]
-    depends_on_addresses?: string[]
-    impact_on_install?: "create" | "update" | "internal-update" | "no-op" | "delete" | "ignored" | "error"[]
-    impact_on_install_reason?: string[]
   // ...
 }
 ```
@@ -3806,6 +3969,7 @@ type FileBlueprint = {
     id: string
     text: string
     created_at: string // date-time
+    updated_at?: string // date-time
     created_by?: {
       name?: { ... }
       org_id: { ... }
@@ -3821,6 +3985,12 @@ type FileBlueprint = {
     destination_blueprint_id?: string
     job_id?: string
     triggered_at?: string // date-time
+    performed_by?: {
+      name?: { ... }
+      org_id: { ... }
+      user_id?: { ... }
+      token_id?: { ... }
+    }
     note?: string
     status?: "IN_PROGRESS" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED"
     restore_details?: {
@@ -3884,16 +4054,9 @@ type FileBlueprint = {
   resources?: Array<{
     id: string
     name?: string
-    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
+    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
     address?: string
     is_root?: boolean
-    is_ready?: boolean
-    is_hidden?: boolean
-    is_disabled?: boolean
-    hard_dependencies?: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"[]
-    parent_resource_ids?: string[]
-    depends_on_addresses?: string[]
-    impact_on_install?: "create" | "update" | "internal-update" | "no-op" | "delete" | "ignored" | "error"[]
   // ...
 }
 ```
@@ -3913,6 +4076,7 @@ type MarketplaceBlueprint = {
     id: string
     text: string
     created_at: string // date-time
+    updated_at?: string // date-time
     created_by?: {
       name?: { ... }
       org_id: { ... }
@@ -3928,6 +4092,12 @@ type MarketplaceBlueprint = {
     destination_blueprint_id?: string
     job_id?: string
     triggered_at?: string // date-time
+    performed_by?: {
+      name?: { ... }
+      org_id: { ... }
+      user_id?: { ... }
+      token_id?: { ... }
+    }
     note?: string
     status?: "IN_PROGRESS" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED"
     restore_details?: {
@@ -3991,16 +4161,9 @@ type MarketplaceBlueprint = {
   resources?: Array<{
     id: string
     name?: string
-    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
+    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
     address?: string
     is_root?: boolean
-    is_ready?: boolean
-    is_hidden?: boolean
-    is_disabled?: boolean
-    hard_dependencies?: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"[]
-    parent_resource_ids?: string[]
-    depends_on_addresses?: string[]
-    impact_on_install?: "create" | "update" | "internal-update" | "no-op" | "delete" | "ignored" | "error"[]
   // ...
 }
 ```
@@ -4049,6 +4212,7 @@ type DeployedBlueprint = {
     id: string
     text: string
     created_at: string // date-time
+    updated_at?: string // date-time
     created_by?: {
       name?: { ... }
       org_id: { ... }
@@ -4064,6 +4228,12 @@ type DeployedBlueprint = {
     destination_blueprint_id?: string
     job_id?: string
     triggered_at?: string // date-time
+    performed_by?: {
+      name?: { ... }
+      org_id: { ... }
+      user_id?: { ... }
+      token_id?: { ... }
+    }
     note?: string
     status?: "IN_PROGRESS" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED"
     restore_details?: {
@@ -4127,16 +4297,9 @@ type DeployedBlueprint = {
   resources?: Array<{
     id: string
     name?: string
-    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
+    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
     address?: string
     is_root?: boolean
-    is_ready?: boolean
-    is_hidden?: boolean
-    is_disabled?: boolean
-    hard_dependencies?: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"[]
-    parent_resource_ids?: string[]
-    depends_on_addresses?: string[]
-    impact_on_install?: "create" | "update" | "internal-update" | "no-op" | "delete" | "ignored" | "error"[]
   // ...
 }
 ```
@@ -4156,6 +4319,7 @@ type AppBlueprint = {
     id: string
     text: string
     created_at: string // date-time
+    updated_at?: string // date-time
     created_by?: {
       name?: { ... }
       org_id: { ... }
@@ -4171,6 +4335,12 @@ type AppBlueprint = {
     destination_blueprint_id?: string
     job_id?: string
     triggered_at?: string // date-time
+    performed_by?: {
+      name?: { ... }
+      org_id: { ... }
+      user_id?: { ... }
+      token_id?: { ... }
+    }
     note?: string
     status?: "IN_PROGRESS" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED"
     restore_details?: {
@@ -4234,16 +4404,9 @@ type AppBlueprint = {
   resources?: Array<{
     id: string
     name?: string
-    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
+    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
     address?: string
     is_root?: boolean
-    is_ready?: boolean
-    is_hidden?: boolean
-    is_disabled?: boolean
-    hard_dependencies?: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"[]
-    parent_resource_ids?: string[]
-    depends_on_addresses?: string[]
-    impact_on_install?: "create" | "update" | "internal-update" | "no-op" | "delete" | "ignored" | "error"[]
   // ...
 }
 ```
@@ -4263,6 +4426,7 @@ type Blueprint = {
     id: string
     text: string
     created_at: string // date-time
+    updated_at?: string // date-time
     created_by?: {
       name?: { ... }
       org_id: { ... }
@@ -4278,6 +4442,12 @@ type Blueprint = {
     destination_blueprint_id?: string
     job_id?: string
     triggered_at?: string // date-time
+    performed_by?: {
+      name?: { ... }
+      org_id: { ... }
+      user_id?: { ... }
+      token_id?: { ... }
+    }
     note?: string
     status?: "IN_PROGRESS" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED"
     restore_details?: {
@@ -4340,17 +4510,10 @@ type Blueprint = {
   resources?: Array<{
     id: string
     name?: string
-    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
+    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
     address?: string
     is_root?: boolean
     is_ready?: boolean
-    is_hidden?: boolean
-    is_disabled?: boolean
-    hard_dependencies?: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"[]
-    parent_resource_ids?: string[]
-    depends_on_addresses?: string[]
-    impact_on_install?: "create" | "update" | "internal-update" | "no-op" | "delete" | "ignored" | "error"[]
-    impact_on_install_reason?: string[]
   // ...
 }
 ```
@@ -5140,7 +5303,7 @@ type BlueprintVerificationJob = {
     fetch_errors?: number
   }
   resource_results?: Array<{
-    resource_type?: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
+    resource_type?: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
     resource_name?: string
     source_resource_id?: string
     source_resource_address?: string
@@ -5202,7 +5365,7 @@ type VerificationSummary = {
 
 ```ts
 type ResourceVerificationResult = {
-  resource_type?: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
+  resource_type?: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
   resource_name?: string
   source_resource_id?: string
   source_resource_address?: string
@@ -5461,7 +5624,7 @@ type JobStatus = "PENDING" | "STARTED" | "WAITING_USER_ACTION" | "CANCELED" | "I
 Type of the resource
 
 ```ts
-type ResourceNodeType = "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
+type ResourceNodeType = "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
 ```
 
 ### `PlanChanges`
@@ -5475,7 +5638,7 @@ type PlanChanges = "create" | "update" | "internal-update" | "no-op" | "delete" 
 ```ts
 type CommonResourceNode = {
   id: string
-  type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
+  type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
   name?: string
   source_id?: string
   is_virtual?: boolean
@@ -5487,14 +5650,14 @@ type CommonResourceNode = {
 ```ts
 type RootResourceNode = {
   id: string
-  type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
+  type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
   name?: string
   source_id?: string
   is_virtual?: boolean
   address?: string
   dependencies?: Array<{
     id: string
-    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
+    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
     name?: string
     source_id?: string
     is_virtual?: true
@@ -5521,13 +5684,13 @@ type RootResourceNode = {
 ```ts
 type VirtualResourceNodeGroup = {
   id: string
-  type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
+  type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
   name?: string
   source_id?: string
   is_virtual?: true
   dependencies?: Array<{
     id: string
-    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
+    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
     name?: string
     source_id?: string
     is_virtual?: boolean
@@ -5559,14 +5722,14 @@ type VirtualResourceNodeGroup = {
 ```ts
 type ResourceNode = {
   id: string
-  type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
+  type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
   name?: string
   source_id?: string
   is_virtual?: boolean
   address?: string
   dependencies?: Array<{
     id: string
-    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
+    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
     name?: string
     source_id?: string
     is_virtual?: boolean
@@ -5592,7 +5755,7 @@ type ResourceNode = {
   }>
   parents?: Array<{
     id?: string
-    type?: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
+    type?: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
   }>
   changes?: "create" | "update" | "internal-update" | "no-op" | "delete" | "ignored"[]
   changes_reason?: string[]
@@ -5611,7 +5774,7 @@ type Job = {
   plan_file_content?: string
   resources_to_export?: Array<{
     id: string
-    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
+    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
     name?: string
     source_id?: string
     is_virtual?: boolean
@@ -5628,7 +5791,7 @@ type Job = {
     changes_reason?: string[]
   }> | {
     id: string
-    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
+    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
     name?: string
     source_id?: string
     is_virtual?: boolean
@@ -5647,7 +5810,7 @@ type Job = {
   large_resources_to_export_url?: string
   resources_to_import?: Array<{
     id: string
-    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
+    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
     name?: string
     source_id?: string
     is_virtual?: boolean
@@ -5664,7 +5827,7 @@ type Job = {
     changes_reason?: string[]
   }> | {
     id: string
-    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
+    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
     name?: string
     source_id?: string
     is_virtual?: boolean
@@ -5788,7 +5951,7 @@ type CommonImportFields = {
   source_type?: "file" | "marketplace" | "sandbox"
   imported_resources?: Array<{
     id: string
-    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
+    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
     name?: string
     source_id?: string
     is_virtual?: boolean
@@ -5805,7 +5968,7 @@ type CommonImportFields = {
     changes_reason?: string[]
   }> | {
     id: string
-    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
+    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
     name?: string
     source_id?: string
     is_virtual?: boolean
@@ -5905,7 +6068,7 @@ type CallerIdentity = {
 type SelectedResources = {
   exported_root_resources: Array<{
     id: string
-    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
+    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
     address?: string
   }>
   selected_resources: string[]
