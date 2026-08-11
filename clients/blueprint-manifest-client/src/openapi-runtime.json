@@ -266,6 +266,28 @@
       }
     },
     "/v2/blueprint-manifest/blueprints/{blueprint_id}/notes/{note_id}": {
+      "patch": {
+        "operationId": "updateBlueprintNote",
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id"
+          },
+          {
+            "in": "path",
+            "required": true,
+            "name": "note_id"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
       "delete": {
         "operationId": "deleteBlueprintNote",
         "parameters": [
@@ -852,6 +874,12 @@
             "name": "blueprint_id"
           }
         ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {}
+          }
+        },
         "responses": {}
       }
     },
