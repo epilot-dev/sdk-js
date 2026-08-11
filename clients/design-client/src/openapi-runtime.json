@@ -67,6 +67,19 @@
         "responses": {}
       }
     },
+    "/v1/designs/{designId}/duplicate": {
+      "post": {
+        "operationId": "duplicateDesign",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "designId",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v1/designs/{designId}/parse": {
       "get": {
         "operationId": "getThemeFromDesign",

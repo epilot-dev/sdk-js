@@ -1890,6 +1890,27 @@ declare namespace Paths {
             export type $500 = Components.Schemas.ErrorResp;
         }
     }
+    namespace DuplicateDesign {
+        namespace Parameters {
+            export type DesignId = /**
+             * Id of the design
+             * example:
+             * 4a062990-a6a3-11eb-9828-4f3da7d4935a
+             */
+            Components.Schemas.DesignId;
+        }
+        export interface PathParameters {
+            designId: Parameters.DesignId;
+        }
+        namespace Responses {
+            export type $201 = Components.Schemas.AddDesignRes;
+            export type $400 = Components.Schemas.ErrorResp;
+            export type $401 = Components.Schemas.ErrorResp;
+            export interface $404 {
+            }
+            export type $500 = Components.Schemas.ErrorResp;
+        }
+    }
     namespace GetAllDesigns {
         namespace Responses {
             export type $200 = Components.Schemas.GetAllDesignsRes;
@@ -2115,6 +2136,16 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteDesign.Responses.$204>
   /**
+   * duplicateDesign - duplicateDesign
+   * 
+   * Duplicate an existing design owned by the user organization. The copy carries over the style, custom CSS and name (marked as a copy) but does NOT carry over journey/portal relations, so the new design starts with 0 consumers, exactly like a freshly created design.
+   */
+  'duplicateDesign'(
+    parameters?: Parameters<Paths.DuplicateDesign.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.DuplicateDesign.Responses.$201>
+  /**
    * getThemeFromDesign - getThemeFromDesign
    * 
    * Search for a especific design owned by user organization and parse them to a new or old theme
@@ -2250,6 +2281,18 @@ export interface PathsDictionary {
       data?: Paths.UpdateDesign.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.UpdateDesign.Responses.$204>
+  }
+  ['/v1/designs/{designId}/duplicate']: {
+    /**
+     * duplicateDesign - duplicateDesign
+     * 
+     * Duplicate an existing design owned by the user organization. The copy carries over the style, custom CSS and name (marked as a copy) but does NOT carry over journey/portal relations, so the new design starts with 0 consumers, exactly like a freshly created design.
+     */
+    'post'(
+      parameters?: Parameters<Paths.DuplicateDesign.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.DuplicateDesign.Responses.$201>
   }
   ['/v1/designs/{designId}/parse']: {
     /**
