@@ -45,10 +45,11 @@ declare namespace Components {
                 postinstall?: string;
             };
             /**
-             * Internal collaboration notes, oldest first. Append-only: each entry is
-             * stamped with its author and creation time server-side and is never
-             * rewritten, so the history of who noted what stays intact. Written via
-             * `addBlueprintNote` / `deleteBlueprintNote`, not by `updateBlueprint`.
+             * Internal collaboration notes, oldest first. Each entry is stamped with
+             * its author and creation time server-side; an edit rewrites only `text`
+             * and stamps `updated_at`, so the history of who noted what stays intact.
+             * Written via `addBlueprintNote` / `updateBlueprintNote` /
+             * `deleteBlueprintNote`, not by `updateBlueprint`.
              *
              * Available on every blueprint including marketplace ones (whose
              * `description` is read-only), and never included in the published
@@ -70,6 +71,38 @@ declare namespace Components {
                  */
                 job_id?: string;
                 triggered_at?: string; // date-time
+                /**
+                 * Who actually ran this synchronization — the caller of the install job.
+                 * Absent on deployments recorded before this field existed; consumers
+                 * should fall back to the blueprint's `updated_by` for those.
+                 *
+                 */
+                performed_by?: {
+                    /**
+                     * a human readable name of the caller (e.g. user name, token name or email address)
+                     * example:
+                     * manifest@epilot.cloud
+                     */
+                    name?: any;
+                    /**
+                     * epilot organization id
+                     * example:
+                     * 911690
+                     */
+                    org_id: string;
+                    /**
+                     * epilot user id, when called by a user
+                     * example:
+                     * 11001045
+                     */
+                    user_id?: string;
+                    /**
+                     * token id, when called by API token
+                     * example:
+                     * api_5ZugdRXasLfWBypHi93Fk
+                     */
+                    token_id?: string;
+                };
                 /**
                  * User-provided note about this synchronization
                  */
@@ -367,6 +400,10 @@ declare namespace Components {
              */
             text: string;
             created_at: string; // date-time
+            /**
+             * Set the first time the note text is edited.
+             */
+            updated_at?: string; // date-time
             created_by?: CallerIdentity;
         }
         export interface BlueprintPatch {
@@ -429,6 +466,10 @@ declare namespace Components {
             version?: string;
             slug?: string;
             source_type: "marketplace" | "file";
+            /**
+             * Engine that must install this preview, detected from the uploaded archive's own format (never from a feature flag or request parameter). `v3` is only reported for a correctly shaped and validly signed V3 package. Clients must install a `v3` preview through `POST /v3/blueprint-manifest/blueprint:install` and a `terraform` preview through `POST /v2/blueprint-manifest/blueprints:install`. Absent only on previews created before format detection shipped; treat an absent value as `terraform`.
+             */
+            sync_engine?: "terraform" | "v3";
             /**
              * S3 key of the blueprint zip file
              */
@@ -952,10 +993,11 @@ declare namespace Components {
                 postinstall?: string;
             };
             /**
-             * Internal collaboration notes, oldest first. Append-only: each entry is
-             * stamped with its author and creation time server-side and is never
-             * rewritten, so the history of who noted what stays intact. Written via
-             * `addBlueprintNote` / `deleteBlueprintNote`, not by `updateBlueprint`.
+             * Internal collaboration notes, oldest first. Each entry is stamped with
+             * its author and creation time server-side; an edit rewrites only `text`
+             * and stamps `updated_at`, so the history of who noted what stays intact.
+             * Written via `addBlueprintNote` / `updateBlueprintNote` /
+             * `deleteBlueprintNote`, not by `updateBlueprint`.
              *
              * Available on every blueprint including marketplace ones (whose
              * `description` is read-only), and never included in the published
@@ -977,6 +1019,38 @@ declare namespace Components {
                  */
                 job_id?: string;
                 triggered_at?: string; // date-time
+                /**
+                 * Who actually ran this synchronization — the caller of the install job.
+                 * Absent on deployments recorded before this field existed; consumers
+                 * should fall back to the blueprint's `updated_by` for those.
+                 *
+                 */
+                performed_by?: {
+                    /**
+                     * a human readable name of the caller (e.g. user name, token name or email address)
+                     * example:
+                     * manifest@epilot.cloud
+                     */
+                    name?: any;
+                    /**
+                     * epilot organization id
+                     * example:
+                     * 911690
+                     */
+                    org_id: string;
+                    /**
+                     * epilot user id, when called by a user
+                     * example:
+                     * 11001045
+                     */
+                    user_id?: string;
+                    /**
+                     * token id, when called by API token
+                     * example:
+                     * api_5ZugdRXasLfWBypHi93Fk
+                     */
+                    token_id?: string;
+                };
                 /**
                  * User-provided note about this synchronization
                  */
@@ -1338,10 +1412,11 @@ declare namespace Components {
                 postinstall?: string;
             };
             /**
-             * Internal collaboration notes, oldest first. Append-only: each entry is
-             * stamped with its author and creation time server-side and is never
-             * rewritten, so the history of who noted what stays intact. Written via
-             * `addBlueprintNote` / `deleteBlueprintNote`, not by `updateBlueprint`.
+             * Internal collaboration notes, oldest first. Each entry is stamped with
+             * its author and creation time server-side; an edit rewrites only `text`
+             * and stamps `updated_at`, so the history of who noted what stays intact.
+             * Written via `addBlueprintNote` / `updateBlueprintNote` /
+             * `deleteBlueprintNote`, not by `updateBlueprint`.
              *
              * Available on every blueprint including marketplace ones (whose
              * `description` is read-only), and never included in the published
@@ -1363,6 +1438,38 @@ declare namespace Components {
                  */
                 job_id?: string;
                 triggered_at?: string; // date-time
+                /**
+                 * Who actually ran this synchronization — the caller of the install job.
+                 * Absent on deployments recorded before this field existed; consumers
+                 * should fall back to the blueprint's `updated_by` for those.
+                 *
+                 */
+                performed_by?: {
+                    /**
+                     * a human readable name of the caller (e.g. user name, token name or email address)
+                     * example:
+                     * manifest@epilot.cloud
+                     */
+                    name?: any;
+                    /**
+                     * epilot organization id
+                     * example:
+                     * 911690
+                     */
+                    org_id: string;
+                    /**
+                     * epilot user id, when called by a user
+                     * example:
+                     * 11001045
+                     */
+                    user_id?: string;
+                    /**
+                     * token id, when called by API token
+                     * example:
+                     * api_5ZugdRXasLfWBypHi93Fk
+                     */
+                    token_id?: string;
+                };
                 /**
                  * User-provided note about this synchronization
                  */
@@ -1540,10 +1647,11 @@ declare namespace Components {
                 postinstall?: string;
             };
             /**
-             * Internal collaboration notes, oldest first. Append-only: each entry is
-             * stamped with its author and creation time server-side and is never
-             * rewritten, so the history of who noted what stays intact. Written via
-             * `addBlueprintNote` / `deleteBlueprintNote`, not by `updateBlueprint`.
+             * Internal collaboration notes, oldest first. Each entry is stamped with
+             * its author and creation time server-side; an edit rewrites only `text`
+             * and stamps `updated_at`, so the history of who noted what stays intact.
+             * Written via `addBlueprintNote` / `updateBlueprintNote` /
+             * `deleteBlueprintNote`, not by `updateBlueprint`.
              *
              * Available on every blueprint including marketplace ones (whose
              * `description` is read-only), and never included in the published
@@ -1565,6 +1673,38 @@ declare namespace Components {
                  */
                 job_id?: string;
                 triggered_at?: string; // date-time
+                /**
+                 * Who actually ran this synchronization — the caller of the install job.
+                 * Absent on deployments recorded before this field existed; consumers
+                 * should fall back to the blueprint's `updated_by` for those.
+                 *
+                 */
+                performed_by?: {
+                    /**
+                     * a human readable name of the caller (e.g. user name, token name or email address)
+                     * example:
+                     * manifest@epilot.cloud
+                     */
+                    name?: any;
+                    /**
+                     * epilot organization id
+                     * example:
+                     * 911690
+                     */
+                    org_id: string;
+                    /**
+                     * epilot user id, when called by a user
+                     * example:
+                     * 11001045
+                     */
+                    user_id?: string;
+                    /**
+                     * token id, when called by API token
+                     * example:
+                     * api_5ZugdRXasLfWBypHi93Fk
+                     */
+                    token_id?: string;
+                };
                 /**
                  * User-provided note about this synchronization
                  */
@@ -1788,10 +1928,11 @@ declare namespace Components {
                 postinstall?: string;
             };
             /**
-             * Internal collaboration notes, oldest first. Append-only: each entry is
-             * stamped with its author and creation time server-side and is never
-             * rewritten, so the history of who noted what stays intact. Written via
-             * `addBlueprintNote` / `deleteBlueprintNote`, not by `updateBlueprint`.
+             * Internal collaboration notes, oldest first. Each entry is stamped with
+             * its author and creation time server-side; an edit rewrites only `text`
+             * and stamps `updated_at`, so the history of who noted what stays intact.
+             * Written via `addBlueprintNote` / `updateBlueprintNote` /
+             * `deleteBlueprintNote`, not by `updateBlueprint`.
              *
              * Available on every blueprint including marketplace ones (whose
              * `description` is read-only), and never included in the published
@@ -1813,6 +1954,38 @@ declare namespace Components {
                  */
                 job_id?: string;
                 triggered_at?: string; // date-time
+                /**
+                 * Who actually ran this synchronization — the caller of the install job.
+                 * Absent on deployments recorded before this field existed; consumers
+                 * should fall back to the blueprint's `updated_by` for those.
+                 *
+                 */
+                performed_by?: {
+                    /**
+                     * a human readable name of the caller (e.g. user name, token name or email address)
+                     * example:
+                     * manifest@epilot.cloud
+                     */
+                    name?: any;
+                    /**
+                     * epilot organization id
+                     * example:
+                     * 911690
+                     */
+                    org_id: string;
+                    /**
+                     * epilot user id, when called by a user
+                     * example:
+                     * 11001045
+                     */
+                    user_id?: string;
+                    /**
+                     * token id, when called by API token
+                     * example:
+                     * api_5ZugdRXasLfWBypHi93Fk
+                     */
+                    token_id?: string;
+                };
                 /**
                  * User-provided note about this synchronization
                  */
@@ -2674,10 +2847,11 @@ declare namespace Components {
                 postinstall?: string;
             };
             /**
-             * Internal collaboration notes, oldest first. Append-only: each entry is
-             * stamped with its author and creation time server-side and is never
-             * rewritten, so the history of who noted what stays intact. Written via
-             * `addBlueprintNote` / `deleteBlueprintNote`, not by `updateBlueprint`.
+             * Internal collaboration notes, oldest first. Each entry is stamped with
+             * its author and creation time server-side; an edit rewrites only `text`
+             * and stamps `updated_at`, so the history of who noted what stays intact.
+             * Written via `addBlueprintNote` / `updateBlueprintNote` /
+             * `deleteBlueprintNote`, not by `updateBlueprint`.
              *
              * Available on every blueprint including marketplace ones (whose
              * `description` is read-only), and never included in the published
@@ -2699,6 +2873,38 @@ declare namespace Components {
                  */
                 job_id?: string;
                 triggered_at?: string; // date-time
+                /**
+                 * Who actually ran this synchronization — the caller of the install job.
+                 * Absent on deployments recorded before this field existed; consumers
+                 * should fall back to the blueprint's `updated_by` for those.
+                 *
+                 */
+                performed_by?: {
+                    /**
+                     * a human readable name of the caller (e.g. user name, token name or email address)
+                     * example:
+                     * manifest@epilot.cloud
+                     */
+                    name?: any;
+                    /**
+                     * epilot organization id
+                     * example:
+                     * 911690
+                     */
+                    org_id: string;
+                    /**
+                     * epilot user id, when called by a user
+                     * example:
+                     * 11001045
+                     */
+                    user_id?: string;
+                    /**
+                     * token id, when called by API token
+                     * example:
+                     * api_5ZugdRXasLfWBypHi93Fk
+                     */
+                    token_id?: string;
+                };
                 /**
                  * User-provided note about this synchronization
                  */
@@ -3057,7 +3263,7 @@ declare namespace Components {
         /**
          * Type of the resource
          */
-        export type ResourceNodeType = "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission";
+        export type ResourceNodeType = "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission";
         export interface ResourceReplacement {
             /**
              * Original resource ID to be replaced
@@ -3215,6 +3421,21 @@ declare namespace Components {
              */
             pipeline_id?: string;
         }
+        /**
+         * A resource that was requested (or discovered as a dependency) but was not
+         * added to the Blueprint. Reasons are stable machine-readable codes.
+         *
+         */
+        export interface SkippedBlueprintResource {
+            id: /**
+             * ID of a blueprint resource
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            BlueprintResourceID;
+            type: /* Type of the resource */ ResourceNodeType;
+            reason: "not_found" | "source_validation_failed" | "enrichment_failed";
+        }
         export interface SuggestBlueprintResourcesRequest {
             /**
              * Natural-language description of what to include.
@@ -3366,6 +3587,27 @@ declare namespace Paths {
         namespace Responses {
             export interface $200 {
                 resources?: Components.Schemas.BlueprintResource[];
+                /**
+                 * Resources that were dropped during enrichment instead of being added
+                 */
+                skipped?: /**
+                 * A resource that was requested (or discovered as a dependency) but was not
+                 * added to the Blueprint. Reasons are stable machine-readable codes.
+                 *
+                 */
+                Components.Schemas.SkippedBlueprintResource[];
+                /**
+                 * Non-fatal dependency extraction failures encountered while enriching, deduplicated and capped. The listed resources were still added; some of their dependencies may be missing.
+                 */
+                errors?: Components.Schemas.FormattedError[];
+                /**
+                 * Total distinct dependency errors, before the cap applied to `errors`
+                 */
+                total_errors?: number;
+                /**
+                 * Whether `errors` omits some of the distinct errors counted by `total_errors`
+                 */
+                errors_truncated?: boolean;
             }
         }
     }
@@ -3453,6 +3695,27 @@ declare namespace Paths {
         namespace Responses {
             export interface $200 {
                 resources?: Components.Schemas.BlueprintResource[];
+                /**
+                 * Resources that were dropped during enrichment instead of being added
+                 */
+                skipped?: /**
+                 * A resource that was requested (or discovered as a dependency) but was not
+                 * added to the Blueprint. Reasons are stable machine-readable codes.
+                 *
+                 */
+                Components.Schemas.SkippedBlueprintResource[];
+                /**
+                 * Non-fatal dependency extraction failures encountered while enriching, deduplicated and capped. The listed resources were still added; some of their dependencies may be missing.
+                 */
+                errors?: Components.Schemas.FormattedError[];
+                /**
+                 * Total distinct dependency errors, before the cap applied to `errors`
+                 */
+                total_errors?: number;
+                /**
+                 * Whether `errors` omits some of the distinct errors counted by `total_errors`
+                 */
+                errors_truncated?: boolean;
             }
         }
     }
@@ -4615,6 +4878,8 @@ declare namespace Paths {
         }
         namespace Responses {
             export type $200 = /* Preview data for a blueprint before installation. Stored temporarily with TTL. */ Components.Schemas.BlueprintPreview;
+            export interface $400 {
+            }
         }
     }
     namespace PreInstallBlueprintV3 {
@@ -4680,6 +4945,14 @@ declare namespace Paths {
         }
         export interface PathParameters {
             blueprint_id: Parameters.BlueprintId;
+        }
+        export interface RequestBody {
+            /**
+             * When true, upload the package with public access and create or overwrite the
+             * blueprint's Webflow CMS listing. Leave unset for a download-only package build.
+             *
+             */
+            publish_to_marketplace?: boolean;
         }
         namespace Responses {
             export interface $202 {
@@ -4914,6 +5187,36 @@ declare namespace Paths {
         export type RequestBody = Components.Schemas.Blueprint;
         namespace Responses {
             export type $200 = Components.Schemas.Blueprint;
+        }
+    }
+    namespace UpdateBlueprintNote {
+        namespace Parameters {
+            export type BlueprintId = /**
+             * ID of a blueprint
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            Components.Schemas.BlueprintID;
+            export type NoteId = string;
+        }
+        export interface PathParameters {
+            blueprint_id: Parameters.BlueprintId;
+            note_id: Parameters.NoteId;
+        }
+        export interface RequestBody {
+            /**
+             * Plain-text note body. Must not be blank.
+             */
+            text: string;
+        }
+        namespace Responses {
+            export type $200 = /* A single internal note on a blueprint. */ Components.Schemas.BlueprintNote;
+            export interface $400 {
+                message?: string;
+            }
+            export interface $404 {
+                message?: string;
+            }
         }
     }
     namespace UpdateBlueprintResource {
@@ -5256,7 +5559,7 @@ export interface OperationMethods {
   /**
    * preInstallBlueprint - preInstallBlueprint
    * 
-   * Pre-install a Blueprint based on a blueprint file
+   * Pre-install a Blueprint based on a blueprint file. Format-agnostic: the engine is detected from the uploaded archive, so this endpoint accepts both Terraform exports and signed V3 packages. The returned preview's `sync_engine` says which install endpoint to call next. An archive that is neither a Terraform export nor a validly signed V3 package is rejected with 400.
    */
   'preInstallBlueprint'(
     parameters?: Parameters<UnknownParamsObject> | null,
@@ -5327,6 +5630,19 @@ export interface OperationMethods {
     data?: Paths.AddBlueprintNote.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.AddBlueprintNote.Responses.$201>
+  /**
+   * updateBlueprintNote - updateBlueprintNote
+   * 
+   * Rewrite the text of an existing internal note. The note keeps its position in
+   * the list along with `created_at` and `created_by`, so an edit cannot reassign
+   * authorship; `updated_at` is stamped server-side.
+   * 
+   */
+  'updateBlueprintNote'(
+    parameters?: Parameters<Paths.UpdateBlueprintNote.PathParameters> | null,
+    data?: Paths.UpdateBlueprintNote.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.UpdateBlueprintNote.Responses.$200>
   /**
    * deleteBlueprintNote - deleteBlueprintNote
    * 
@@ -5562,7 +5878,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteBlueprintResource.Responses.$200>
   /**
-   * listBlueprintJobs - List Blueprint Jobs
+   * listBlueprintJobs - listBlueprintJobs
    * 
    * List all blueprint jobs
    */
@@ -5572,7 +5888,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ListBlueprintJobs.Responses.$200>
   /**
-   * getBlueprintJob - Get Job
+   * getBlueprintJob - getBlueprintJob
    * 
    * Poll the current state of a job. Serves both Terraform (v2) and V3-engine jobs —
    * check `sync_engine` (`terraform` | `v3`) to tell them apart. V3 jobs additionally
@@ -5586,7 +5902,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetBlueprintJob.Responses.$200>
   /**
-   * continueInstallationJob - Continue Installation Job
+   * continueInstallationJob - continueInstallationJob
    * 
    * Resume an installation job that is paused at `status: "WAITING_USER_ACTION"` after
    * planning. Works for both Terraform and V3 jobs. Not needed for V3 installs created
@@ -5600,7 +5916,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ContinueInstallationJob.Responses.$200>
   /**
-   * cancelBlueprintJob - Cancel Blueprint Job
+   * cancelBlueprintJob - cancelBlueprintJob
    * 
    * Cancel a blueprint job if it is still running.
    */
@@ -5710,17 +6026,21 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.PublishMarketplaceListingVersion.Responses.$200>
   /**
-   * publishBlueprintV3 - Publish Blueprint V3
+   * publishBlueprintV3 - publishBlueprintV3
    * 
    * Starts an asynchronous V3 publication. The result is a signed, portable package; poll the existing blueprint job endpoint for completion.
+   * 
+   * By default this only builds the package and stores it privately for download. Creating or
+   * overwriting the public marketplace listing is opt-in via `publish_to_marketplace`.
+   * 
    */
   'publishBlueprintV3'(
     parameters?: Parameters<Paths.PublishBlueprintV3.PathParameters> | null,
-    data?: any,
+    data?: Paths.PublishBlueprintV3.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.PublishBlueprintV3.Responses.$202>
   /**
-   * preInstallBlueprintV3 - Preview a V3 blueprint package before installation
+   * preInstallBlueprintV3 - preInstallBlueprintV3
    * 
    * Validates a signed V3 package and returns the destination-specific resource plan used by the install UI.
    */
@@ -5730,7 +6050,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.PreInstallBlueprintV3.Responses.$200>
   /**
-   * installBlueprintV3 - Install Blueprint V3
+   * installBlueprintV3 - installBlueprintV3
    * 
    * Install a blueprint into a single destination org using the V3 engine (direct API
    * calls, no Terraform). Creates resources in topological order with global ID
@@ -5758,7 +6078,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.InstallBlueprintV3.Responses.$202>
   /**
-   * restoreBlueprintDeploymentV3 - Restore a specific deployment by job_id
+   * restoreBlueprintDeploymentV3 - restoreBlueprintDeploymentV3
    * 
    * Roll a deployment back to its pre-install state. Two phases:
    * 
@@ -5788,7 +6108,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.RestoreBlueprintDeploymentV3.Responses.$202>
   /**
-   * getRestorePreview - Predicted outcome of reverting a deployment
+   * getRestorePreview - getRestorePreview
    * 
    * Computes what would happen if the user triggered a restore on this
    * deployment, without performing any writes. The forecast uses the
@@ -5807,7 +6127,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetRestorePreview.Responses.$200>
   /**
-   * triggerDeploymentHealthCheckV3 - Run a health check on a deployment
+   * triggerDeploymentHealthCheckV3 - triggerDeploymentHealthCheckV3
    * 
    * Starts a read-only health scan of the resources this deployment's
    * blueprint instance tracks in the destination org (see
@@ -5832,7 +6152,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.TriggerDeploymentHealthCheckV3.Responses.$202>
   /**
-   * getDeploymentHealthReportV3 - Get the latest health report of a deployment
+   * getDeploymentHealthReportV3 - getDeploymentHealthReportV3
    * 
    * Returns the most recent health report produced for this deployment
    * by the `:health-check` endpoint. Idempotent and side-effect free.
@@ -5844,7 +6164,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetDeploymentHealthReportV3.Responses.$200>
   /**
-   * getBlueprintLineageV3 - Get Blueprint Lineage V3
+   * getBlueprintLineageV3 - getBlueprintLineageV3
    * 
    * Returns the lineage registry entries for a blueprint's resources in the current org.
    * Shows the mapping between source lineage IDs and target resource IDs.
@@ -5856,7 +6176,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetBlueprintLineageV3.Responses.$200>
   /**
-   * createBulkInstallV3 - Create Bulk Install V3
+   * createBulkInstallV3 - createBulkInstallV3
    * 
    * Install one source blueprint into many destination organizations in a single
    * request. The server schedules child V3 installs with `auto_apply=true` and caps
@@ -5874,7 +6194,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CreateBulkInstallV3.Responses.$202>
   /**
-   * getBulkInstallV3 - Get Bulk Install V3
+   * getBulkInstallV3 - getBulkInstallV3
    * 
    * Returns the bulk install parent with aggregate status and counts. Scoped by the
    * caller org as `source_org_id`. Target rows are not included — use the targets
@@ -5887,7 +6207,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetBulkInstallV3.Responses.$200>
   /**
-   * listBulkInstallTargetsV3 - List Bulk Install Targets V3
+   * listBulkInstallTargetsV3 - listBulkInstallTargetsV3
    * 
    * Pages through the bulk install's target rows. Each row hydrates its latest child
    * install job (`job_ids.at(-1)`) with the standard V3 job shape (`events[]`,
@@ -5900,7 +6220,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ListBulkInstallTargetsV3.Responses.$200>
   /**
-   * retryBulkInstallTargetV3 - Retry Bulk Install Target V3
+   * retryBulkInstallTargetV3 - retryBulkInstallTargetV3
    * 
    * Retries a single failed target. Allowed only for `FAILED` and `PARTIAL_SUCCESS`
    * targets. Starts a new child install with `auto_apply=true`, appends its job id to
@@ -6130,7 +6450,7 @@ export interface PathsDictionary {
     /**
      * preInstallBlueprint - preInstallBlueprint
      * 
-     * Pre-install a Blueprint based on a blueprint file
+     * Pre-install a Blueprint based on a blueprint file. Format-agnostic: the engine is detected from the uploaded archive, so this endpoint accepts both Terraform exports and signed V3 packages. The returned preview's `sync_engine` says which install endpoint to call next. An archive that is neither a Terraform export nor a validly signed V3 package is rejected with 400.
      */
     'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
@@ -6211,6 +6531,19 @@ export interface PathsDictionary {
     ): OperationResponse<Paths.AddBlueprintNote.Responses.$201>
   }
   ['/v2/blueprint-manifest/blueprints/{blueprint_id}/notes/{note_id}']: {
+    /**
+     * updateBlueprintNote - updateBlueprintNote
+     * 
+     * Rewrite the text of an existing internal note. The note keeps its position in
+     * the list along with `created_at` and `created_by`, so an edit cannot reassign
+     * authorship; `updated_at` is stamped server-side.
+     * 
+     */
+    'patch'(
+      parameters?: Parameters<Paths.UpdateBlueprintNote.PathParameters> | null,
+      data?: Paths.UpdateBlueprintNote.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.UpdateBlueprintNote.Responses.$200>
     /**
      * deleteBlueprintNote - deleteBlueprintNote
      * 
@@ -6480,7 +6813,7 @@ export interface PathsDictionary {
   }
   ['/v2/blueprint-manifest/jobs']: {
     /**
-     * listBlueprintJobs - List Blueprint Jobs
+     * listBlueprintJobs - listBlueprintJobs
      * 
      * List all blueprint jobs
      */
@@ -6492,7 +6825,7 @@ export interface PathsDictionary {
   }
   ['/v2/blueprint-manifest/jobs/{job_id}']: {
     /**
-     * getBlueprintJob - Get Job
+     * getBlueprintJob - getBlueprintJob
      * 
      * Poll the current state of a job. Serves both Terraform (v2) and V3-engine jobs —
      * check `sync_engine` (`terraform` | `v3`) to tell them apart. V3 jobs additionally
@@ -6508,7 +6841,7 @@ export interface PathsDictionary {
   }
   ['/v2/blueprint-manifest/jobs/{job_id}:continue']: {
     /**
-     * continueInstallationJob - Continue Installation Job
+     * continueInstallationJob - continueInstallationJob
      * 
      * Resume an installation job that is paused at `status: "WAITING_USER_ACTION"` after
      * planning. Works for both Terraform and V3 jobs. Not needed for V3 installs created
@@ -6524,7 +6857,7 @@ export interface PathsDictionary {
   }
   ['/v2/blueprint-manifest/jobs/{job_id}:cancel']: {
     /**
-     * cancelBlueprintJob - Cancel Blueprint Job
+     * cancelBlueprintJob - cancelBlueprintJob
      * 
      * Cancel a blueprint job if it is still running.
      */
@@ -6648,19 +6981,23 @@ export interface PathsDictionary {
   }
   ['/v3/blueprint-manifest/blueprints/{blueprint_id}:publish']: {
     /**
-     * publishBlueprintV3 - Publish Blueprint V3
+     * publishBlueprintV3 - publishBlueprintV3
      * 
      * Starts an asynchronous V3 publication. The result is a signed, portable package; poll the existing blueprint job endpoint for completion.
+     * 
+     * By default this only builds the package and stores it privately for download. Creating or
+     * overwriting the public marketplace listing is opt-in via `publish_to_marketplace`.
+     * 
      */
     'post'(
       parameters?: Parameters<Paths.PublishBlueprintV3.PathParameters> | null,
-      data?: any,
+      data?: Paths.PublishBlueprintV3.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.PublishBlueprintV3.Responses.$202>
   }
   ['/v3/blueprint-manifest/blueprints:pre-install']: {
     /**
-     * preInstallBlueprintV3 - Preview a V3 blueprint package before installation
+     * preInstallBlueprintV3 - preInstallBlueprintV3
      * 
      * Validates a signed V3 package and returns the destination-specific resource plan used by the install UI.
      */
@@ -6672,7 +7009,7 @@ export interface PathsDictionary {
   }
   ['/v3/blueprint-manifest/blueprint:install']: {
     /**
-     * installBlueprintV3 - Install Blueprint V3
+     * installBlueprintV3 - installBlueprintV3
      * 
      * Install a blueprint into a single destination org using the V3 engine (direct API
      * calls, no Terraform). Creates resources in topological order with global ID
@@ -6702,7 +7039,7 @@ export interface PathsDictionary {
   }
   ['/v3/blueprint-manifest/blueprints/{blueprint_id}/deployments/{job_id}:restore']: {
     /**
-     * restoreBlueprintDeploymentV3 - Restore a specific deployment by job_id
+     * restoreBlueprintDeploymentV3 - restoreBlueprintDeploymentV3
      * 
      * Roll a deployment back to its pre-install state. Two phases:
      * 
@@ -6734,7 +7071,7 @@ export interface PathsDictionary {
   }
   ['/v3/blueprint-manifest/blueprints/{blueprint_id}/deployments/{job_id}/restore-preview']: {
     /**
-     * getRestorePreview - Predicted outcome of reverting a deployment
+     * getRestorePreview - getRestorePreview
      * 
      * Computes what would happen if the user triggered a restore on this
      * deployment, without performing any writes. The forecast uses the
@@ -6755,7 +7092,7 @@ export interface PathsDictionary {
   }
   ['/v3/blueprint-manifest/blueprints/{blueprint_id}/deployments/{job_id}:health-check']: {
     /**
-     * triggerDeploymentHealthCheckV3 - Run a health check on a deployment
+     * triggerDeploymentHealthCheckV3 - triggerDeploymentHealthCheckV3
      * 
      * Starts a read-only health scan of the resources this deployment's
      * blueprint instance tracks in the destination org (see
@@ -6782,7 +7119,7 @@ export interface PathsDictionary {
   }
   ['/v3/blueprint-manifest/blueprints/{blueprint_id}/deployments/{job_id}/health-report']: {
     /**
-     * getDeploymentHealthReportV3 - Get the latest health report of a deployment
+     * getDeploymentHealthReportV3 - getDeploymentHealthReportV3
      * 
      * Returns the most recent health report produced for this deployment
      * by the `:health-check` endpoint. Idempotent and side-effect free.
@@ -6796,7 +7133,7 @@ export interface PathsDictionary {
   }
   ['/v3/blueprint-manifest/blueprints/{blueprint_id}/lineage']: {
     /**
-     * getBlueprintLineageV3 - Get Blueprint Lineage V3
+     * getBlueprintLineageV3 - getBlueprintLineageV3
      * 
      * Returns the lineage registry entries for a blueprint's resources in the current org.
      * Shows the mapping between source lineage IDs and target resource IDs.
@@ -6810,7 +7147,7 @@ export interface PathsDictionary {
   }
   ['/v3/blueprint-manifest/bulk-installs']: {
     /**
-     * createBulkInstallV3 - Create Bulk Install V3
+     * createBulkInstallV3 - createBulkInstallV3
      * 
      * Install one source blueprint into many destination organizations in a single
      * request. The server schedules child V3 installs with `auto_apply=true` and caps
@@ -6830,7 +7167,7 @@ export interface PathsDictionary {
   }
   ['/v3/blueprint-manifest/bulk-installs/{bulk_job_id}']: {
     /**
-     * getBulkInstallV3 - Get Bulk Install V3
+     * getBulkInstallV3 - getBulkInstallV3
      * 
      * Returns the bulk install parent with aggregate status and counts. Scoped by the
      * caller org as `source_org_id`. Target rows are not included — use the targets
@@ -6845,7 +7182,7 @@ export interface PathsDictionary {
   }
   ['/v3/blueprint-manifest/bulk-installs/{bulk_job_id}/targets']: {
     /**
-     * listBulkInstallTargetsV3 - List Bulk Install Targets V3
+     * listBulkInstallTargetsV3 - listBulkInstallTargetsV3
      * 
      * Pages through the bulk install's target rows. Each row hydrates its latest child
      * install job (`job_ids.at(-1)`) with the standard V3 job shape (`events[]`,
@@ -6860,7 +7197,7 @@ export interface PathsDictionary {
   }
   ['/v3/blueprint-manifest/bulk-installs/{bulk_job_id}/targets/{destination_org_id}:retry']: {
     /**
-     * retryBulkInstallTargetV3 - Retry Bulk Install Target V3
+     * retryBulkInstallTargetV3 - retryBulkInstallTargetV3
      * 
      * Retries a single failed target. Allowed only for `FAILED` and `PARTIAL_SUCCESS`
      * targets. Starts a new child install with `auto_apply=true`, appends its job id to
@@ -7007,6 +7344,7 @@ export type RestoreOutcomeItem = Components.Schemas.RestoreOutcomeItem;
 export type RootResourceNode = Components.Schemas.RootResourceNode;
 export type S3Reference = Components.Schemas.S3Reference;
 export type SelectedResources = Components.Schemas.SelectedResources;
+export type SkippedBlueprintResource = Components.Schemas.SkippedBlueprintResource;
 export type SuggestBlueprintResourcesRequest = Components.Schemas.SuggestBlueprintResourcesRequest;
 export type SuggestBlueprintResourcesResponse = Components.Schemas.SuggestBlueprintResourcesResponse;
 export type UniquenessCriteria = Components.Schemas.UniquenessCriteria;
