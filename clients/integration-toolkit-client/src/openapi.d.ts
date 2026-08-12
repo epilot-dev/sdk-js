@@ -2034,13 +2034,33 @@ declare namespace Components {
          */
         export interface ErpImportError {
             /**
-             * VALIDATION_BLOCKED = blocking row issues (see `validation`); PROCESSING_ERROR = a named, deterministic failure — retrying the same file cannot help; INTERNAL_ERROR = crashed or never started, so retry.
+             * Enum of possible error codes.
+             *
              */
-            type: "VALIDATION_BLOCKED" | "PROCESSING_ERROR" | "INTERNAL_ERROR";
+            code: "VALIDATION_BLOCKED" | "FILE_FORMAT_UNSUPPORTED" | "FILE_UNAVAILABLE" | "VALIDATE_TIMEOUT" | "IMPORT_TIMEOUT" | "USE_CASE_NOT_USABLE" | "IMPORT_NO_PROGRESS" | "INTERNAL_ERROR";
             /**
              * User-facing explanation of `type`.
              */
             message: string;
+        }
+        /**
+         * A problem found during validation, scoped to the file as a whole rather than to individual rows. See `code` for the kinds reported.
+         */
+        export interface ErpImportIssue {
+            /**
+             * Enum of possible issue codes.
+             *
+             */
+            code: "UNIQUE_ID_COLUMN_MISSING" | "MAPPED_COLUMN_MISSING" | "MALFORMED_ROW" | "INVALID_ENCODING" | "EMPTY_FILE" | "TOO_MANY_ROWS";
+            severity: "warning" | "blocking";
+            /**
+             * User-facing explanation. Lists at most 10 column names; `columns` has all of them.
+             */
+            message: string;
+            /**
+             * The columns this issue is about, so clients render names rather than parsing the message.
+             */
+            columns?: string[];
         }
         export interface ErpImportJob {
             /**
@@ -2057,7 +2077,7 @@ declare namespace Components {
             format: "csv" | "xlsx";
             /**
              * PENDING → VALIDATING → READY → PROCESSING → IMPORTED, with FAILED reachable from any working status, and CANCELLING → CANCELLED reachable from VALIDATING or PROCESSING via :abort. IMPORTED, FAILED and CANCELLED are terminal and final.
-             * IMPORTED means every row was handed to the platform, not that the platform finished — per-row outcomes live in monitoring, filtered by correlation_id. A file that fails validation is FAILED with error.type = VALIDATION_BLOCKED.
+             * IMPORTED means every row was handed to the platform, not that the platform finished — per-row outcomes live in monitoring, filtered by correlation_id. A file that fails validation is FAILED with error.code = VALIDATION_BLOCKED.
              * READY is legitimately idle for as long as the user takes to confirm, so it carries no running work and never goes stale.
              * CANCELLING is transient and cooperative: the abort has been recorded but the worker only notices at its next batch boundary. Rows already published stay published — a stop is not a rollback.
              */
@@ -2115,6 +2135,10 @@ declare namespace Components {
             entities: {
                 [name: string]: number;
             };
+            /**
+             * Whole-file issues. At most 20 are kept; the count of everything found is in blocking and warnings. Warnings here are what `ack_warnings` on `:execute` acknowledges.
+             */
+            issues?: /* A problem found during validation, scoped to the file as a whole rather than to individual rows. See `code` for the kinds reported. */ ErpImportIssue[];
         }
         export interface ErpUpdatesEventsV2Request {
             /**
@@ -2180,6 +2204,15 @@ declare namespace Components {
              * Error message
              */
             message?: string;
+        }
+        /**
+         * Confirmation options. Required only when the verdict carries warnings — a clean import needs no body at all.
+         */
+        export interface ExecuteErpImportRequest {
+            /**
+             * The caller has seen `validation.issues` and accepts them. Required when `validation.warnings` is greater than 0; ignored otherwise.
+             */
+            ack_warnings?: boolean;
         }
         /**
          * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
@@ -6929,11 +6962,13 @@ declare namespace Paths {
         export interface PathParameters {
             importId: Parameters.ImportId;
         }
+        export type RequestBody = /* Confirmation options. Required only when the verdict carries warnings — a clean import needs no body at all. */ Components.Schemas.ExecuteErpImportRequest;
         namespace Responses {
             export type $200 = Components.Schemas.ErpImportJob;
             export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
             export type $409 = Components.Responses.Conflict;
+            export type $422 = Components.Schemas.ErrorResponseBase;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -8541,7 +8576,7 @@ export interface OperationMethods {
    */
   'executeErpImport'(
     parameters?: Parameters<Paths.ExecuteErpImport.PathParameters> | null,
-    data?: any,
+    data?: Paths.ExecuteErpImport.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ExecuteErpImport.Responses.$200>
   /**
@@ -9423,7 +9458,7 @@ export interface PathsDictionary {
      */
     'post'(
       parameters?: Parameters<Paths.ExecuteErpImport.PathParameters> | null,
-      data?: any,
+      data?: Paths.ExecuteErpImport.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ExecuteErpImport.Responses.$200>
   }
@@ -9480,6 +9515,7 @@ export type EnvironmentFieldConfig = Components.Schemas.EnvironmentFieldConfig;
 export type ErpEvent = Components.Schemas.ErpEvent;
 export type ErpEventV3 = Components.Schemas.ErpEventV3;
 export type ErpImportError = Components.Schemas.ErpImportError;
+export type ErpImportIssue = Components.Schemas.ErpImportIssue;
 export type ErpImportJob = Components.Schemas.ErpImportJob;
 export type ErpImportList = Components.Schemas.ErpImportList;
 export type ErpImportProgress = Components.Schemas.ErpImportProgress;
@@ -9487,6 +9523,7 @@ export type ErpImportValidation = Components.Schemas.ErpImportValidation;
 export type ErpUpdatesEventsV2Request = Components.Schemas.ErpUpdatesEventsV2Request;
 export type ErpUpdatesEventsV3Request = Components.Schemas.ErpUpdatesEventsV3Request;
 export type ErrorResponseBase = Components.Schemas.ErrorResponseBase;
+export type ExecuteErpImportRequest = Components.Schemas.ExecuteErpImportRequest;
 export type ExternalMonitoringSpan = Components.Schemas.ExternalMonitoringSpan;
 export type FileProxyAuth = Components.Schemas.FileProxyAuth;
 export type FileProxyParam = Components.Schemas.FileProxyParam;

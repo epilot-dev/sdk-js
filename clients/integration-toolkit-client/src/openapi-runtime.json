@@ -975,6 +975,12 @@
             "required": true
           }
         ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {}
+          }
+        },
         "responses": {}
       }
     },

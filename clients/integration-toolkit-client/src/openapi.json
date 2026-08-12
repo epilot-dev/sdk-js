@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Integration Toolkit API",
-    "version": "1.8.0",
+    "version": "1.10.0",
     "description": "API for integrating with external systems in a standardised way."
   },
   "tags": [
@@ -3891,6 +3891,16 @@
             }
           }
         ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExecuteErpImportRequest"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "Execution started",
@@ -3910,6 +3920,16 @@
           },
           "409": {
             "$ref": "#/components/responses/Conflict"
+          },
+          "422": {
+            "description": "The verdict carries warnings and `ack_warnings` was not true",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseBase"
+                }
+              }
+            }
           },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
@@ -4005,6 +4025,57 @@
           }
         }
       },
+      "ExecuteErpImportRequest": {
+        "type": "object",
+        "description": "Confirmation options. Required only when the verdict carries warnings — a clean import needs no body at all.",
+        "properties": {
+          "ack_warnings": {
+            "type": "boolean",
+            "description": "The caller has seen `validation.issues` and accepts them. Required when `validation.warnings` is greater than 0; ignored otherwise."
+          }
+        }
+      },
+      "ErpImportIssue": {
+        "type": "object",
+        "description": "A problem found during validation, scoped to the file as a whole rather than to individual rows. See `code` for the kinds reported.",
+        "required": [
+          "code",
+          "severity",
+          "message"
+        ],
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Enum of possible issue codes.\n",
+            "enum": [
+              "UNIQUE_ID_COLUMN_MISSING",
+              "MAPPED_COLUMN_MISSING",
+              "MALFORMED_ROW",
+              "INVALID_ENCODING",
+              "EMPTY_FILE",
+              "TOO_MANY_ROWS"
+            ]
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "warning",
+              "blocking"
+            ]
+          },
+          "message": {
+            "type": "string",
+            "description": "User-facing explanation. Lists at most 10 column names; `columns` has all of them."
+          },
+          "columns": {
+            "type": "array",
+            "description": "The columns this issue is about, so clients render names rather than parsing the message.",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
       "ErpImportValidation": {
         "type": "object",
         "description": "Validate-phase summary: what the file will create, and whether it may be confirmed. Absent until the validate phase completes. No per-row detail is kept — a rejected file is corrected and imported again.",
@@ -4031,6 +4102,13 @@
               "type": "integer"
             },
             "description": "Distinct entities the file expresses, keyed by entity slug."
+          },
+          "issues": {
+            "type": "array",
+            "description": "Whole-file issues. At most 20 are kept; the count of everything found is in blocking and warnings. Warnings here are what `ack_warnings` on `:execute` acknowledges.",
+            "items": {
+              "$ref": "#/components/schemas/ErpImportIssue"
+            }
           }
         }
       },
@@ -4055,16 +4133,21 @@
         "type": "object",
         "description": "Why the import failed — present if and only if status = FAILED.",
         "required": [
-          "type",
+          "code",
           "message"
         ],
         "properties": {
-          "type": {
+          "code": {
             "type": "string",
-            "description": "VALIDATION_BLOCKED = blocking row issues (see `validation`); PROCESSING_ERROR = a named, deterministic failure — retrying the same file cannot help; INTERNAL_ERROR = crashed or never started, so retry.",
+            "description": "Enum of possible error codes.\n",
             "enum": [
               "VALIDATION_BLOCKED",
-              "PROCESSING_ERROR",
+              "FILE_FORMAT_UNSUPPORTED",
+              "FILE_UNAVAILABLE",
+              "VALIDATE_TIMEOUT",
+              "IMPORT_TIMEOUT",
+              "USE_CASE_NOT_USABLE",
+              "IMPORT_NO_PROGRESS",
               "INTERNAL_ERROR"
             ]
           },
@@ -4125,7 +4208,7 @@
           },
           "status": {
             "type": "string",
-            "description": "PENDING → VALIDATING → READY → PROCESSING → IMPORTED, with FAILED reachable from any working status, and CANCELLING → CANCELLED reachable from VALIDATING or PROCESSING via :abort. IMPORTED, FAILED and CANCELLED are terminal and final.\nIMPORTED means every row was handed to the platform, not that the platform finished — per-row outcomes live in monitoring, filtered by correlation_id. A file that fails validation is FAILED with error.type = VALIDATION_BLOCKED.\nREADY is legitimately idle for as long as the user takes to confirm, so it carries no running work and never goes stale.\nCANCELLING is transient and cooperative: the abort has been recorded but the worker only notices at its next batch boundary. Rows already published stay published — a stop is not a rollback.",
+            "description": "PENDING → VALIDATING → READY → PROCESSING → IMPORTED, with FAILED reachable from any working status, and CANCELLING → CANCELLED reachable from VALIDATING or PROCESSING via :abort. IMPORTED, FAILED and CANCELLED are terminal and final.\nIMPORTED means every row was handed to the platform, not that the platform finished — per-row outcomes live in monitoring, filtered by correlation_id. A file that fails validation is FAILED with error.code = VALIDATION_BLOCKED.\nREADY is legitimately idle for as long as the user takes to confirm, so it carries no running work and never goes stale.\nCANCELLING is transient and cooperative: the abort has been recorded but the worker only notices at its next batch boundary. Rows already published stay published — a stop is not a rollback.",
             "enum": [
               "PENDING",
               "VALIDATING",

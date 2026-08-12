@@ -1,6 +1,6 @@
 {
   "name": "@epilot/integration-toolkit-client",
-  "version": "1.7.0",
+  "version": "1.7.1",
   "description": "Client library for epilot Integration Toolkit API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -27,6 +27,7 @@
     "typescript": "tsc",
     "bundle-definition": "webpack",
     "openapi": "node ../../scripts/update-openapi.js https://docs.api.epilot.io/integration-toolkit.yaml",
+    "openapi:local": "node ../../scripts/update-openapi.js ../../../erp-integration-api/lambda/ApiHandlerFunction/openapi.yml",
     "typegen": "openapi typegen src/openapi.json --client > src/openapi.d.ts",
     "build": "tsc && npm run build:patch && npm run bundle-definition",
     "build:patch": "sed -i'' -e '/^__exportStar.*openapi.*$/d' dist/index.js",
