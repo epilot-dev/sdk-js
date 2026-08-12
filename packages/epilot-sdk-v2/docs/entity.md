@@ -487,7 +487,11 @@ const { data } = await client.getSchema({
       "columns": 0,
       "cells": [0]
     },
-    "widget_order": ["string"]
+    "widget_order": ["string"],
+    "widget_visibility": {
+      "next_best_action": true,
+      "address_map": false
+    }
   },
   "capabilities": [
     {
@@ -495,6 +499,7 @@ const { data } = await client.getSchema({
       "name": "customer_messaging",
       "title": "Messaging",
       "attributes": [],
+      "variant_overridable": false,
       "_purpose": ["taxonomy-slug:classification-slug"],
       "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
       "app_id": "123e4567-e89b-12d3-a456-426614174000",
@@ -640,7 +645,11 @@ const { data } = await client.putSchema(
         columns: 0,
         cells: [0]
       },
-      widget_order: ['string']
+      widget_order: ['string'],
+      widget_visibility: {
+        next_best_action: true,
+        address_map: false
+      }
     },
     capabilities: [
       {
@@ -648,6 +657,7 @@ const { data } = await client.putSchema(
         name: 'customer_messaging',
         title: 'Messaging',
         attributes: [ /* ... */ ],
+        variant_overridable: false,
         _purpose: ['taxonomy-slug:classification-slug'],
         _manifest: ['123e4567-e89b-12d3-a456-426614174000'],
         app_id: '123e4567-e89b-12d3-a456-426614174000',
@@ -793,7 +803,11 @@ const { data } = await client.putSchema(
       "columns": 0,
       "cells": [0]
     },
-    "widget_order": ["string"]
+    "widget_order": ["string"],
+    "widget_visibility": {
+      "next_best_action": true,
+      "address_map": false
+    }
   },
   "capabilities": [
     {
@@ -801,6 +815,7 @@ const { data } = await client.putSchema(
       "name": "customer_messaging",
       "title": "Messaging",
       "attributes": [],
+      "variant_overridable": false,
       "_purpose": ["taxonomy-slug:classification-slug"],
       "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
       "app_id": "123e4567-e89b-12d3-a456-426614174000",
@@ -1238,7 +1253,11 @@ const { data } = await client.freezeSchema(
       "columns": 0,
       "cells": [0]
     },
-    "widget_order": ["string"]
+    "widget_order": ["string"],
+    "widget_visibility": {
+      "next_best_action": true,
+      "address_map": false
+    }
   },
   "capabilities": [
     {
@@ -1246,6 +1265,7 @@ const { data } = await client.freezeSchema(
       "name": "customer_messaging",
       "title": "Messaging",
       "attributes": [],
+      "variant_overridable": false,
       "_purpose": ["taxonomy-slug:classification-slug"],
       "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
       "app_id": "123e4567-e89b-12d3-a456-426614174000",
@@ -1405,7 +1425,11 @@ const { data } = await client.unfreezeSchema({
       "columns": 0,
       "cells": [0]
     },
-    "widget_order": ["string"]
+    "widget_order": ["string"],
+    "widget_visibility": {
+      "next_best_action": true,
+      "address_map": false
+    }
   },
   "capabilities": [
     {
@@ -1413,6 +1437,7 @@ const { data } = await client.unfreezeSchema({
       "name": "customer_messaging",
       "title": "Messaging",
       "attributes": [],
+      "variant_overridable": false,
       "_purpose": ["taxonomy-slug:classification-slug"],
       "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
       "app_id": "123e4567-e89b-12d3-a456-426614174000",
@@ -1518,6 +1543,7 @@ const { data } = await client.listAvailableCapabilities({
       "name": "customer_messaging",
       "title": "Messaging",
       "attributes": [],
+      "variant_overridable": false,
       "_purpose": ["taxonomy-slug:classification-slug"],
       "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
       "app_id": "123e4567-e89b-12d3-a456-426614174000",
@@ -5164,6 +5190,7 @@ const { data } = await client.createSchemaCapability(
       },
       /* ... 33 more */
     ],
+    variant_overridable: false,
     _purpose: ['taxonomy-slug:classification-slug'],
     _manifest: ['123e4567-e89b-12d3-a456-426614174000'],
     app_id: '123e4567-e89b-12d3-a456-426614174000',
@@ -5186,7 +5213,9 @@ const { data } = await client.createSchemaCapability(
         icon: 'email',
         disabled: true,
         header: true,
-        requiredPermission: { /* ... */ }
+        requiredPermission: { /* ... */ },
+        default_visible: false,
+        pricing_tier_setting: 'entity_address_maps'
       }
     ],
     feature_flag: 'FF_MY_FEATURE_FLAG',
@@ -5296,6 +5325,7 @@ const { data } = await client.createSchemaCapability(
       "type": "link"
     }
   ],
+  "variant_overridable": false,
   "_purpose": ["taxonomy-slug:classification-slug"],
   "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
   "app_id": "123e4567-e89b-12d3-a456-426614174000",
@@ -5318,7 +5348,9 @@ const { data } = await client.createSchemaCapability(
       "icon": "email",
       "disabled": true,
       "header": true,
-      "requiredPermission": {}
+      "requiredPermission": {},
+      "default_visible": false,
+      "pricing_tier_setting": "entity_address_maps"
     }
   ],
   "feature_flag": "FF_MY_FEATURE_FLAG",
@@ -5443,6 +5475,7 @@ const { data } = await client.getSchemaCapability({
       "type": "link"
     }
   ],
+  "variant_overridable": false,
   "_purpose": ["taxonomy-slug:classification-slug"],
   "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
   "app_id": "123e4567-e89b-12d3-a456-426614174000",
@@ -5465,7 +5498,9 @@ const { data } = await client.getSchemaCapability({
       "icon": "email",
       "disabled": true,
       "header": true,
-      "requiredPermission": {}
+      "requiredPermission": {},
+      "default_visible": false,
+      "pricing_tier_setting": "entity_address_maps"
     }
   ],
   "feature_flag": "FF_MY_FEATURE_FLAG",
@@ -5586,6 +5621,7 @@ const { data } = await client.putSchemaCapability(
       },
       /* ... 33 more */
     ],
+    variant_overridable: false,
     _purpose: ['taxonomy-slug:classification-slug'],
     _manifest: ['123e4567-e89b-12d3-a456-426614174000'],
     app_id: '123e4567-e89b-12d3-a456-426614174000',
@@ -5608,7 +5644,9 @@ const { data } = await client.putSchemaCapability(
         icon: 'email',
         disabled: true,
         header: true,
-        requiredPermission: { /* ... */ }
+        requiredPermission: { /* ... */ },
+        default_visible: false,
+        pricing_tier_setting: 'entity_address_maps'
       }
     ],
     feature_flag: 'FF_MY_FEATURE_FLAG',
@@ -5718,6 +5756,7 @@ const { data } = await client.putSchemaCapability(
       "type": "link"
     }
   ],
+  "variant_overridable": false,
   "_purpose": ["taxonomy-slug:classification-slug"],
   "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
   "app_id": "123e4567-e89b-12d3-a456-426614174000",
@@ -5740,7 +5779,9 @@ const { data } = await client.putSchemaCapability(
       "icon": "email",
       "disabled": true,
       "header": true,
-      "requiredPermission": {}
+      "requiredPermission": {},
+      "default_visible": false,
+      "pricing_tier_setting": "entity_address_maps"
     }
   ],
   "feature_flag": "FF_MY_FEATURE_FLAG",
@@ -5865,6 +5906,7 @@ const { data } = await client.deleteSchemaCapability({
       "type": "link"
     }
   ],
+  "variant_overridable": false,
   "_purpose": ["taxonomy-slug:classification-slug"],
   "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
   "app_id": "123e4567-e89b-12d3-a456-426614174000",
@@ -5887,7 +5929,9 @@ const { data } = await client.deleteSchemaCapability({
       "icon": "email",
       "disabled": true,
       "header": true,
-      "requiredPermission": {}
+      "requiredPermission": {},
+      "default_visible": false,
+      "pricing_tier_setting": "entity_address_maps"
     }
   ],
   "feature_flag": "FF_MY_FEATURE_FLAG",
@@ -6423,6 +6467,7 @@ type EntitySchema = {
       cells?: { ... }
     }
     widget_order?: string[]
+    widget_visibility?: Record<string, boolean>
   }
   capabilities: Array<{
     id?: string
@@ -6451,7 +6496,6 @@ type EntitySchema = {
       _purpose?: { ... }
       _manifest?: { ... }
       constraints?: { ... }
-      feature_flag?: { ... }
   // ...
 }
 ```
@@ -6541,6 +6585,7 @@ type EntitySchemaItem = {
       cells?: { ... }
     }
     widget_order?: string[]
+    widget_visibility?: Record<string, boolean>
   }
   capabilities: Array<{
     id?: string
@@ -6558,7 +6603,6 @@ type EntitySchemaItem = {
       readonly?: { ... }
       deprecated?: { ... }
       variant_overridable?: { ... }
-      default_value?: { ... }
   // ...
 }
 ```
