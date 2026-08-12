@@ -98,6 +98,8 @@ const { data } = await integrationToolkitClient.acknowledgeTracking(...)
 **Schemas**
 - [`S3Reference`](#s3reference)
 - [`CreateErpImportRequest`](#createerpimportrequest)
+- [`ExecuteErpImportRequest`](#executeerpimportrequest)
+- [`ErpImportIssue`](#erpimportissue)
 - [`ErpImportValidation`](#erpimportvalidation)
 - [`ErpImportProgress`](#erpimportprogress)
 - [`ErpImportError`](#erpimporterror)
@@ -3245,14 +3247,22 @@ const { data } = await client.listErpImports({
         "total_rows": 0,
         "blocking": 0,
         "warnings": 0,
-        "entities": {}
+        "entities": {},
+        "issues": [
+          {
+            "code": "UNIQUE_ID_COLUMN_MISSING",
+            "severity": "warning",
+            "message": "string",
+            "columns": ["string"]
+          }
+        ]
       },
       "progress": {
         "processed_rows": 0,
         "total_rows": 0
       },
       "error": {
-        "type": "VALIDATION_BLOCKED",
+        "code": "VALIDATION_BLOCKED",
         "message": "string"
       },
       "correlation_id": "string",
@@ -3301,14 +3311,22 @@ const { data } = await client.getErpImport({
     "total_rows": 0,
     "blocking": 0,
     "warnings": 0,
-    "entities": {}
+    "entities": {},
+    "issues": [
+      {
+        "code": "UNIQUE_ID_COLUMN_MISSING",
+        "severity": "warning",
+        "message": "string",
+        "columns": ["string"]
+      }
+    ]
   },
   "progress": {
     "processed_rows": 0,
     "total_rows": 0
   },
   "error": {
-    "type": "VALIDATION_BLOCKED",
+    "code": "VALIDATION_BLOCKED",
     "message": "string"
   },
   "correlation_id": "string",
@@ -3329,9 +3347,14 @@ Confirm and run the write phase of a validated import. Only a READY job may be e
 `POST /v2/erp/imports/{importId}:execute`
 
 ```ts
-const { data } = await client.executeErpImport({
-  importId: 'example',
-})
+const { data } = await client.executeErpImport(
+  {
+    importId: 'example',
+  },
+  {
+    ack_warnings: true
+  },
+)
 ```
 
 <details>
@@ -3354,14 +3377,22 @@ const { data } = await client.executeErpImport({
     "total_rows": 0,
     "blocking": 0,
     "warnings": 0,
-    "entities": {}
+    "entities": {},
+    "issues": [
+      {
+        "code": "UNIQUE_ID_COLUMN_MISSING",
+        "severity": "warning",
+        "message": "string",
+        "columns": ["string"]
+      }
+    ]
   },
   "progress": {
     "processed_rows": 0,
     "total_rows": 0
   },
   "error": {
-    "type": "VALIDATION_BLOCKED",
+    "code": "VALIDATION_BLOCKED",
     "message": "string"
   },
   "correlation_id": "string",
@@ -3414,6 +3445,29 @@ type CreateErpImportRequest = {
 }
 ```
 
+### `ExecuteErpImportRequest`
+
+Confirmation options. Required only when the verdict carries warnings — a clean import needs no body at all.
+
+```ts
+type ExecuteErpImportRequest = {
+  ack_warnings?: boolean
+}
+```
+
+### `ErpImportIssue`
+
+A problem found during validation, scoped to the file as a whole rather than to individual rows. See `code` for the kinds reported.
+
+```ts
+type ErpImportIssue = {
+  code: "UNIQUE_ID_COLUMN_MISSING" | "MAPPED_COLUMN_MISSING" | "MALFORMED_ROW" | "INVALID_ENCODING" | "EMPTY_FILE" | "TOO_MANY_ROWS"
+  severity: "warning" | "blocking"
+  message: string
+  columns?: string[]
+}
+```
+
 ### `ErpImportValidation`
 
 Validate-phase summary: what the file will create, and whether it may be confirmed. Absent until the validate phase completes. No per-row detail is kept — a rejected file is corrected and imported again.
@@ -3424,6 +3478,12 @@ type ErpImportValidation = {
   blocking: number
   warnings: number
   entities: Record<string, number>
+  issues?: Array<{
+    code: "UNIQUE_ID_COLUMN_MISSING" | "MAPPED_COLUMN_MISSING" | "MALFORMED_ROW" | "INVALID_ENCODING" | "EMPTY_FILE" | "TOO_MANY_ROWS"
+    severity: "warning" | "blocking"
+    message: string
+    columns?: string[]
+  }>
 }
 ```
 
@@ -3445,7 +3505,7 @@ Why the import failed — present if and only if status = FAILED.
 
 ```ts
 type ErpImportError = {
-  type: "VALIDATION_BLOCKED" | "PROCESSING_ERROR" | "INTERNAL_ERROR"
+  code: "VALIDATION_BLOCKED" | "FILE_FORMAT_UNSUPPORTED" | "FILE_UNAVAILABLE" | "VALIDATE_TIMEOUT" | "IMPORT_TIMEOUT" | "USE_CASE_NOT_USABLE" | "IMPORT_NO_PROGRESS" | "INTERNAL_ERROR"
   message: string
 }
 ```
@@ -3478,13 +3538,19 @@ type ErpImportJob = {
     blocking: number
     warnings: number
     entities: Record<string, number>
+    issues?: Array<{
+      code: { ... }
+      severity: { ... }
+      message: { ... }
+      columns?: { ... }
+    }>
   }
   progress?: {
     processed_rows: number
     total_rows?: number
   }
   error?: {
-    type: "VALIDATION_BLOCKED" | "PROCESSING_ERROR" | "INTERNAL_ERROR"
+    code: "VALIDATION_BLOCKED" | "FILE_FORMAT_UNSUPPORTED" | "FILE_UNAVAILABLE" | "VALIDATE_TIMEOUT" | "IMPORT_TIMEOUT" | "USE_CASE_NOT_USABLE" | "IMPORT_NO_PROGRESS" | "INTERNAL_ERROR"
     message: string
   }
   correlation_id?: string
@@ -3515,13 +3581,14 @@ type ErpImportList = {
       blocking: { ... }
       warnings: { ... }
       entities: { ... }
+      issues?: { ... }
     }
     progress?: {
       processed_rows: { ... }
       total_rows?: { ... }
     }
     error?: {
-      type: { ... }
+      code: { ... }
       message: { ... }
     }
     correlation_id?: string
