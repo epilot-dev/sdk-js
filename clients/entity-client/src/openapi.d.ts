@@ -3310,6 +3310,15 @@ declare namespace Components {
              */
             title?: string;
             attributes?: Attribute[];
+            /**
+             * Allow conditional variants of the entity to override the values managed by this
+             * capability. Only meaningful on schemas that declare `conditions` and on capabilities
+             * that render an attribute group (`EntityAttributes:Group` ui hook), e.g. pricing tiers.
+             * Attributes carried by the capability opt in individually via their own
+             * `variant_overridable` flag.
+             *
+             */
+            variant_overridable?: boolean;
             _purpose?: /**
              * example:
              * taxonomy-slug:classification-slug
@@ -3416,6 +3425,18 @@ declare namespace Components {
                      */
                     resource?: string;
                 };
+                /**
+                 * Whether this widget is switched on by default for entity types that have the capability. Only meaningful on the `EntityDetailsV2:Widget` hook. Defaults to true when omitted. An admin's explicit choice in the entity builder is stored in the schema's `ui_config.widget_visibility` and wins over this.
+                 * example:
+                 * false
+                 */
+                default_visible?: boolean;
+                /**
+                 * The pricing-tier settings key an organisation must have enabled to use this widget. Omit for widgets available to everyone. Resolved against `GET /v2/pricing-tiers/me` as `override_settings[key].enabled ?? settings[key].enabled`. Note this is commercial packaging enforced in the UI, not a security control — the key must also be added to the pricing tier settings list in epilot-admin-portal, or it can never be switched on for a tier.
+                 * example:
+                 * entity_address_maps
+                 */
+                pricing_tier_setting?: string;
             }[];
             /**
              * This capability should only be active when the feature flag is enabled
@@ -3463,6 +3484,15 @@ declare namespace Components {
              */
             title?: string;
             attributes?: Attribute[];
+            /**
+             * Allow conditional variants of the entity to override the values managed by this
+             * capability. Only meaningful on schemas that declare `conditions` and on capabilities
+             * that render an attribute group (`EntityAttributes:Group` ui hook), e.g. pricing tiers.
+             * Attributes carried by the capability opt in individually via their own
+             * `variant_overridable` flag.
+             *
+             */
+            variant_overridable?: boolean;
             _purpose?: /**
              * example:
              * taxonomy-slug:classification-slug
@@ -3569,6 +3599,18 @@ declare namespace Components {
                      */
                     resource?: string;
                 };
+                /**
+                 * Whether this widget is switched on by default for entity types that have the capability. Only meaningful on the `EntityDetailsV2:Widget` hook. Defaults to true when omitted. An admin's explicit choice in the entity builder is stored in the schema's `ui_config.widget_visibility` and wins over this.
+                 * example:
+                 * false
+                 */
+                default_visible?: boolean;
+                /**
+                 * The pricing-tier settings key an organisation must have enabled to use this widget. Omit for widgets available to everyone. Resolved against `GET /v2/pricing-tiers/me` as `override_settings[key].enabled ?? settings[key].enabled`. Note this is commercial packaging enforced in the UI, not a security control — the key must also be added to the pricing tier settings list in epilot-admin-portal, or it can never be switched on for a tier.
+                 * example:
+                 * entity_address_maps
+                 */
+                pricing_tier_setting?: string;
             }[];
             /**
              * This capability should only be active when the feature flag is enabled
@@ -4584,6 +4626,17 @@ declare namespace Components {
                  * Ordered list of widget ids controlling the entity-details widget-grid order. Each id is a capability widget's `component` (or `summary` for the synthesized summary card); widgets absent from the list keep their natural order at the end.
                  */
                 widget_order?: string[];
+                /**
+                 * Per-widget on/off state for the entity-details widget grid, keyed by widget id (a capability widget's `component`, or `summary` for the synthesized summary card). Holds only the admin's deviations from each widget's declared default: a widget absent from this map falls back to its ui_hook `default_visible`, and then to visible. Do not seed this map from migrations — doing so would freeze today's defaults into the schema.
+                 * example:
+                 * {
+                 *   "next_best_action": true,
+                 *   "address_map": false
+                 * }
+                 */
+                widget_visibility?: {
+                    [name: string]: boolean;
+                };
             };
             capabilities: /* Capabilities the Entity has. Turn features on/off for entities. */ EntityCapability[];
             /**
@@ -5015,6 +5068,17 @@ declare namespace Components {
                  * Ordered list of widget ids controlling the entity-details widget-grid order. Each id is a capability widget's `component` (or `summary` for the synthesized summary card); widgets absent from the list keep their natural order at the end.
                  */
                 widget_order?: string[];
+                /**
+                 * Per-widget on/off state for the entity-details widget grid, keyed by widget id (a capability widget's `component`, or `summary` for the synthesized summary card). Holds only the admin's deviations from each widget's declared default: a widget absent from this map falls back to its ui_hook `default_visible`, and then to visible. Do not seed this map from migrations — doing so would freeze today's defaults into the schema.
+                 * example:
+                 * {
+                 *   "next_best_action": true,
+                 *   "address_map": false
+                 * }
+                 */
+                widget_visibility?: {
+                    [name: string]: boolean;
+                };
             };
             capabilities: /* Capabilities the Entity has. Turn features on/off for entities. */ EntityCapability[];
             /**
@@ -15449,7 +15513,7 @@ declare namespace Paths {
             /**
              * ISO 8601 timestamp to filter jobs created after this time (e.g., 2023-01-01T00:00:00Z).
              * example:
-             * 2023-01-01T00:00:00Z
+             * 2023-01-01T00:00:00.000Z
              */
             export type CreatedAfter = string; // date-time
             /**
@@ -15475,7 +15539,7 @@ declare namespace Paths {
             created_after?: /**
              * ISO 8601 timestamp to filter jobs created after this time (e.g., 2023-01-01T00:00:00Z).
              * example:
-             * 2023-01-01T00:00:00Z
+             * 2023-01-01T00:00:00.000Z
              */
             Parameters.CreatedAfter /* date-time */;
             sort_pending_first?: /* When true, sorts PENDING status jobs to the top of the results. */ Parameters.SortPendingFirst;

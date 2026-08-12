@@ -3947,7 +3947,7 @@
               "description": "ISO 8601 timestamp to filter jobs created after this time (e.g., 2023-01-01T00:00:00Z).",
               "type": "string",
               "format": "date-time",
-              "example": "2023-01-01T00:00:00Z"
+              "example": "2023-01-01T00:00:00.000Z"
             }
           },
           {
@@ -5096,6 +5096,17 @@
                 "description": "Ordered list of widget ids controlling the entity-details widget-grid order. Each id is a capability widget's `component` (or `summary` for the synthesized summary card); widgets absent from the list keep their natural order at the end.",
                 "items": {
                   "type": "string"
+                }
+              },
+              "widget_visibility": {
+                "type": "object",
+                "description": "Per-widget on/off state for the entity-details widget grid, keyed by widget id (a capability widget's `component`, or `summary` for the synthesized summary card). Holds only the admin's deviations from each widget's declared default: a widget absent from this map falls back to its ui_hook `default_visible`, and then to visible. Do not seed this map from migrations — doing so would freeze today's defaults into the schema.",
+                "additionalProperties": {
+                  "type": "boolean"
+                },
+                "example": {
+                  "next_best_action": true,
+                  "address_map": false
                 }
               }
             }
@@ -7448,6 +7459,11 @@
               "$ref": "#/components/schemas/Attribute"
             }
           },
+          "variant_overridable": {
+            "type": "boolean",
+            "default": false,
+            "description": "Allow conditional variants of the entity to override the values managed by this\ncapability. Only meaningful on schemas that declare `conditions` and on capabilities\nthat render an attribute group (`EntityAttributes:Group` ui hook), e.g. pricing tiers.\nAttributes carried by the capability opt in individually via their own\n`variant_overridable` flag.\n"
+          },
           "_purpose": {
             "type": "array",
             "items": {
@@ -7555,6 +7571,16 @@
                   "required": [
                     "action"
                   ]
+                },
+                "default_visible": {
+                  "type": "boolean",
+                  "description": "Whether this widget is switched on by default for entity types that have the capability. Only meaningful on the `EntityDetailsV2:Widget` hook. Defaults to true when omitted. An admin's explicit choice in the entity builder is stored in the schema's `ui_config.widget_visibility` and wins over this.",
+                  "example": false
+                },
+                "pricing_tier_setting": {
+                  "type": "string",
+                  "description": "The pricing-tier settings key an organisation must have enabled to use this widget. Omit for widgets available to everyone. Resolved against `GET /v2/pricing-tiers/me` as `override_settings[key].enabled ?? settings[key].enabled`. Note this is commercial packaging enforced in the UI, not a security control — the key must also be added to the pricing tier settings list in epilot-admin-portal, or it can never be switched on for a tier.",
+                  "example": "entity_address_maps"
                 }
               },
               "required": [
