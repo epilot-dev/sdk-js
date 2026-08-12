@@ -1348,9 +1348,21 @@
       "post": {
         "operationId": "createSmtpConnection",
         "summary": "createSmtpConnection",
-        "description": "Creates a new custom SMTP connection. Runs a live verify against the SMTP server\nbefore persisting; on failure the request is rejected and nothing is saved.\nThe password is encrypted via KMS before being written to DynamoDB.\n",
+        "description": "Creates a new custom SMTP connection. Runs a live verify against the SMTP server\nbefore persisting; on failure the request is rejected and nothing is saved. Pass\n`skip_test=true` to store the configuration untested instead.\n",
         "tags": [
           "Custom SMTP"
+        ],
+        "parameters": [
+          {
+            "name": "skip_test",
+            "in": "query",
+            "required": false,
+            "description": "Save without running the live verify. Use when the server is not reachable from\nepilot yet, or when a referenced `{{ env.* }}` secret has not been set. The\nconnection is stored untested — `last_test_status` is left unset rather than\nclaimed as `ok` — and env references are not resolved either, since an\nunresolvable one is expected in this case.\n",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
         ],
         "requestBody": {
           "required": true,
@@ -1428,9 +1440,21 @@
       "put": {
         "operationId": "updateSmtpConnection",
         "summary": "updateSmtpConnection",
-        "description": "Partial update; omitted fields keep their existing values. The merged\nconfiguration is verified against the SMTP server before persisting.\n",
+        "description": "Partial update; omitted fields keep their existing values. The merged\nconfiguration is verified against the SMTP server before persisting. Pass\n`skip_test=true` to store it untested instead, which also clears any previous\ntest result — it described a configuration that no longer applies.\n",
         "tags": [
           "Custom SMTP"
+        ],
+        "parameters": [
+          {
+            "name": "skip_test",
+            "in": "query",
+            "required": false,
+            "description": "Save without running the live verify. Use when the server is not reachable from\nepilot yet, or when a referenced `{{ env.* }}` secret has not been set. The\nconnection is stored untested — `last_test_status` is left unset rather than\nclaimed as `ok` — and env references are not resolved either, since an\nunresolvable one is expected in this case.\n",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
         ],
         "requestBody": {
           "required": true,
@@ -3335,8 +3359,8 @@
             "description": "Hostname of the SMTP server (e.g. smtp.mailgun.org)"
           },
           "smtp_port": {
-            "type": "integer",
-            "description": "SMTP port (typically 587 for STARTTLS or 465 for TLS)"
+            "type": "string",
+            "description": "SMTP port (typically 587 for STARTTLS or 465 for TLS). A string, because it\nmay hold a `{{ env.your_key }}` reference rather than a literal port.\n"
           },
           "smtp_secure": {
             "type": "string",
@@ -3408,9 +3432,17 @@
             "type": "string"
           },
           "smtp_port": {
-            "type": "integer",
-            "minimum": 1,
-            "maximum": 65535
+            "description": "A port between 1 and 65535, or a `{{ env.your_key }}` template resolving to\none. An integer is still accepted, so callers predating the template support\nkeep working.\n",
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 65535
+              }
+            ]
           },
           "smtp_secure": {
             "type": "string",
@@ -3437,9 +3469,17 @@
             "type": "string"
           },
           "smtp_port": {
-            "type": "integer",
-            "minimum": 1,
-            "maximum": 65535
+            "description": "A port between 1 and 65535, or a `{{ env.your_key }}` template resolving to\none. An integer is still accepted, so callers predating the template support\nkeep working.\n",
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 65535
+              }
+            ]
           },
           "smtp_secure": {
             "type": "string",

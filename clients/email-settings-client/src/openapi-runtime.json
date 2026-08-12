@@ -293,6 +293,13 @@
       },
       "post": {
         "operationId": "createSmtpConnection",
+        "parameters": [
+          {
+            "name": "skip_test",
+            "in": "query",
+            "required": false
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -316,6 +323,13 @@
       },
       "put": {
         "operationId": "updateSmtpConnection",
+        "parameters": [
+          {
+            "name": "skip_test",
+            "in": "query",
+            "required": false
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
