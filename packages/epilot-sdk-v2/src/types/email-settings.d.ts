@@ -244,7 +244,19 @@ export declare namespace Components {
         }
         export interface CreateSmtpConnectionRequest {
             smtp_host: string;
-            smtp_port: number;
+            /**
+             * A port between 1 and 65535, or a `{{ env.your_key }}` template resolving to
+             * one. An integer is still accepted, so callers predating the template support
+             * keep working.
+             *
+             */
+            smtp_port: /**
+             * A port between 1 and 65535, or a `{{ env.your_key }}` template resolving to
+             * one. An integer is still accepted, so callers predating the template support
+             * keep working.
+             *
+             */
+            string | number;
             smtp_secure: "tls" | "starttls";
             smtp_username: string;
             /**
@@ -801,9 +813,11 @@ export declare namespace Components {
              */
             smtp_host: string;
             /**
-             * SMTP port (typically 587 for STARTTLS or 465 for TLS)
+             * SMTP port (typically 587 for STARTTLS or 465 for TLS). A string, because it
+             * may hold a `{{ env.your_key }}` reference rather than a literal port.
+             *
              */
-            smtp_port: number;
+            smtp_port: string;
             /**
              * Connection security mode. Plaintext SMTP is not offered: it would put the
              * SMTP password on the wire in the clear.
@@ -955,7 +969,19 @@ export declare namespace Components {
          */
         export interface UpdateSmtpConnectionRequest {
             smtp_host?: string;
-            smtp_port?: number;
+            /**
+             * A port between 1 and 65535, or a `{{ env.your_key }}` template resolving to
+             * one. An integer is still accepted, so callers predating the template support
+             * keep working.
+             *
+             */
+            smtp_port?: /**
+             * A port between 1 and 65535, or a `{{ env.your_key }}` template resolving to
+             * one. An integer is still accepted, so callers predating the template support
+             * keep working.
+             *
+             */
+            string | number;
             smtp_secure?: "tls" | "starttls";
             smtp_username?: string;
             smtp_password?: string;
@@ -1127,6 +1153,12 @@ export declare namespace Paths {
         }
     }
     namespace CreateSmtpConnection {
+        namespace Parameters {
+            export type SkipTest = boolean;
+        }
+        export interface QueryParameters {
+            skip_test?: Parameters.SkipTest;
+        }
         export type RequestBody = Components.Schemas.CreateSmtpConnectionRequest;
         namespace Responses {
             export type $201 = Components.Schemas.SmtpConnection;
@@ -1706,6 +1738,12 @@ export declare namespace Paths {
         }
     }
     namespace UpdateSmtpConnection {
+        namespace Parameters {
+            export type SkipTest = boolean;
+        }
+        export interface QueryParameters {
+            skip_test?: Parameters.SkipTest;
+        }
         export type RequestBody = /* Partial update; omitted fields keep their existing values. */ Components.Schemas.UpdateSmtpConnectionRequest;
         namespace Responses {
             export type $200 = Components.Schemas.SmtpConnection;
@@ -2180,12 +2218,12 @@ export interface OperationMethods {
    * createSmtpConnection - createSmtpConnection
    * 
    * Creates a new custom SMTP connection. Runs a live verify against the SMTP server
-   * before persisting; on failure the request is rejected and nothing is saved.
-   * The password is encrypted via KMS before being written to DynamoDB.
+   * before persisting; on failure the request is rejected and nothing is saved. Pass
+   * `skip_test=true` to store the configuration untested instead.
    * 
    */
   'createSmtpConnection'(
-    parameters?: Parameters<UnknownParamsObject> | null,
+    parameters?: Parameters<Paths.CreateSmtpConnection.QueryParameters> | null,
     data?: Paths.CreateSmtpConnection.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CreateSmtpConnection.Responses.$201>
@@ -2203,11 +2241,13 @@ export interface OperationMethods {
    * updateSmtpConnection - updateSmtpConnection
    * 
    * Partial update; omitted fields keep their existing values. The merged
-   * configuration is verified against the SMTP server before persisting.
+   * configuration is verified against the SMTP server before persisting. Pass
+   * `skip_test=true` to store it untested instead, which also clears any previous
+   * test result — it described a configuration that no longer applies.
    * 
    */
   'updateSmtpConnection'(
-    parameters?: Parameters<Paths.V2SmtpConnections$ConnectionId.PathParameters> | null,
+    parameters?: Parameters<Paths.UpdateSmtpConnection.QueryParameters & Paths.V2SmtpConnections$ConnectionId.PathParameters> | null,
     data?: Paths.UpdateSmtpConnection.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UpdateSmtpConnection.Responses.$200>
@@ -2904,12 +2944,12 @@ export interface PathsDictionary {
      * createSmtpConnection - createSmtpConnection
      * 
      * Creates a new custom SMTP connection. Runs a live verify against the SMTP server
-     * before persisting; on failure the request is rejected and nothing is saved.
-     * The password is encrypted via KMS before being written to DynamoDB.
+     * before persisting; on failure the request is rejected and nothing is saved. Pass
+     * `skip_test=true` to store the configuration untested instead.
      * 
      */
     'post'(
-      parameters?: Parameters<UnknownParamsObject> | null,
+      parameters?: Parameters<Paths.CreateSmtpConnection.QueryParameters> | null,
       data?: Paths.CreateSmtpConnection.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.CreateSmtpConnection.Responses.$201>
@@ -2929,11 +2969,13 @@ export interface PathsDictionary {
      * updateSmtpConnection - updateSmtpConnection
      * 
      * Partial update; omitted fields keep their existing values. The merged
-     * configuration is verified against the SMTP server before persisting.
+     * configuration is verified against the SMTP server before persisting. Pass
+     * `skip_test=true` to store it untested instead, which also clears any previous
+     * test result — it described a configuration that no longer applies.
      * 
      */
     'put'(
-      parameters?: Parameters<Paths.V2SmtpConnections$ConnectionId.PathParameters> | null,
+      parameters?: Parameters<Paths.UpdateSmtpConnection.QueryParameters & Paths.V2SmtpConnections$ConnectionId.PathParameters> | null,
       data?: Paths.UpdateSmtpConnection.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.UpdateSmtpConnection.Responses.$200>
