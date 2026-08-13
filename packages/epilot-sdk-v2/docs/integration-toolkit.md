@@ -92,12 +92,17 @@ const { data } = await integrationToolkitClient.acknowledgeTracking(...)
 - [`createErpImport`](#createerpimport)
 - [`listErpImports`](#listerpimports)
 - [`getErpImport`](#geterpimport)
+- [`validateErpImport`](#validateerpimport)
+- [`suggestErpImportUseCases`](#suggesterpimportusecases)
 - [`executeErpImport`](#executeerpimport)
 - [`abortErpImport`](#aborterpimport)
 
 **Schemas**
 - [`S3Reference`](#s3reference)
 - [`CreateErpImportRequest`](#createerpimportrequest)
+- [`ValidateErpImportRequest`](#validateerpimportrequest)
+- [`ErpImportUseCaseSuggestion`](#erpimportusecasesuggestion)
+- [`SuggestErpImportUseCasesResponse`](#suggesterpimportusecasesresponse)
 - [`ExecuteErpImportRequest`](#executeerpimportrequest)
 - [`ErpImportIssue`](#erpimportissue)
 - [`ErpImportValidation`](#erpimportvalidation)
@@ -3192,7 +3197,7 @@ const { data } = await client.commitTypes(
 
 ### `createErpImport`
 
-Create a pricing-file import job from an already-uploaded file (S3 ref). Returns a job id and starts the validate phase asynchronously — poll GET /v2/erp/imports/{importId}.
+Register an already-uploaded file (S3 ref) as a pricing-file import job and return its id. Nothing runs yet: no use case is chosen and no validation starts here. Rank the candidates with POST /v2/erp/
 
 `POST /v2/erp/imports`
 
@@ -3203,9 +3208,7 @@ const { data } = await client.createErpImport(
     s3_reference: {
       bucket: 'string',
       key: 'string'
-    },
-    integration_id: 'string',
-    use_case_slug: 'string'
+    }
   },
 )
 ```
@@ -3340,6 +3343,62 @@ const { data } = await client.getErpImport({
 
 ---
 
+### `validateErpImport`
+
+Choose the use case to read this file with, and start the validate phase.
+Callable from PENDING, READY and FAILED — so a wrong choice is corrected by calling this again with a different use case, rath
+
+`POST /v2/erp/imports/{importId}:validate`
+
+```ts
+const { data } = await client.validateErpImport(
+  {
+    importId: 'example',
+  },
+  {
+    integration_id: 'string',
+    use_case_slug: 'string'
+  },
+)
+```
+
+---
+
+### `suggestErpImportUseCases`
+
+Rank the org's inbound use cases against this file's columns — the input to the ranked picker ("matches 6 of your 7 columns"). Reads only the file's first row, not its data.
+Every eligible use case is
+
+`POST /v2/erp/imports/{importId}:suggest-use-cases`
+
+```ts
+const { data } = await client.suggestErpImportUseCases({
+  importId: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "suggestions": [
+    {
+      "integration_id": "string",
+      "integration_name": "string",
+      "use_case_slug": "string",
+      "use_case_name": "string",
+      "matched_columns": 0,
+      "file_columns": 0
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
 ### `executeErpImport`
 
 Confirm and run the write phase of a validated import. Only a READY job may be executed; any other status returns 409.
@@ -3434,14 +3493,51 @@ type S3Reference = {
 
 ### `CreateErpImportRequest`
 
+Register an already-uploaded file as an import. The use case is chosen later, via `:validate` — upload and interpretation are separate decisions.
+
 ```ts
 type CreateErpImportRequest = {
   s3_reference: {
     bucket: string
     key: string
   }
+}
+```
+
+### `ValidateErpImportRequest`
+
+```ts
+type ValidateErpImportRequest = {
   integration_id: string
-  use_case_slug?: string
+  use_case_slug: string
+}
+```
+
+### `ErpImportUseCaseSuggestion`
+
+```ts
+type ErpImportUseCaseSuggestion = {
+  integration_id: string
+  integration_name: string
+  use_case_slug: string
+  use_case_name: string
+  matched_columns: number
+  file_columns: number
+}
+```
+
+### `SuggestErpImportUseCasesResponse`
+
+```ts
+type SuggestErpImportUseCasesResponse = {
+  suggestions: Array<{
+    integration_id: string
+    integration_name: string
+    use_case_slug: string
+    use_case_name: string
+    matched_columns: number
+    file_columns: number
+  }>
 }
 ```
 
@@ -3525,7 +3621,7 @@ type ErpImportJob = {
   import_id: string
   org_id: string
   created_by?: string
-  integration_id: string
+  integration_id?: string
   use_case_slug?: string
   format: "csv" | "xlsx"
   status: "PENDING" | "VALIDATING" | "READY" | "PROCESSING" | "IMPORTED" | "FAILED" | "CANCELLING" | "CANCELLED"
@@ -3568,7 +3664,7 @@ type ErpImportList = {
     import_id: string
     org_id: string
     created_by?: string
-    integration_id: string
+    integration_id?: string
     use_case_slug?: string
     format: "csv" | "xlsx"
     status: "PENDING" | "VALIDATING" | "READY" | "PROCESSING" | "IMPORTED" | "FAILED" | "CANCELLING" | "CANCELLED"
