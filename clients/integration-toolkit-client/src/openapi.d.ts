@@ -1341,10 +1341,11 @@ declare namespace Components {
              */
             latest_types_package_name?: string;
         }
+        /**
+         * Register an already-uploaded file as an import. The use case is chosen later, via `:validate` — upload and interpretation are separate decisions.
+         */
         export interface CreateErpImportRequest {
             s3_reference: S3Reference;
-            integration_id: string;
-            use_case_slug?: string;
         }
         export interface CreateErpImportResponse {
             /**
@@ -2069,14 +2070,17 @@ declare namespace Components {
             import_id: string;
             org_id: string;
             created_by?: string;
-            integration_id: string;
             /**
-             * The inbound use case whose mapping drives both phases.
+             * The integration owning the chosen use case. Absent until the first `:validate`.
+             */
+            integration_id?: string;
+            /**
+             * The inbound use case whose mapping drives both phases. Absent until the first `:validate`, and MUTABLE — re-validating with a different use case replaces it.
              */
             use_case_slug?: string;
             format: "csv" | "xlsx";
             /**
-             * PENDING → VALIDATING → READY → PROCESSING → IMPORTED, with FAILED reachable from any working status, and CANCELLING → CANCELLED reachable from VALIDATING or PROCESSING via :abort. IMPORTED, FAILED and CANCELLED are terminal and final.
+             * PENDING → VALIDATING → READY → PROCESSING → IMPORTED, with FAILED reachable from any working status, and CANCELLING → CANCELLED reachable from VALIDATING or PROCESSING via :abort. Only IMPORTED and CANCELLED are terminal. READY and FAILED both accept a further `:validate`, which is how a wrong use case is corrected without re-uploading the file.
              * IMPORTED means every row was handed to the platform, not that the platform finished — per-row outcomes live in monitoring, filtered by correlation_id. A file that fails validation is FAILED with error.code = VALIDATION_BLOCKED.
              * READY is legitimately idle for as long as the user takes to confirm, so it carries no running work and never goes stale.
              * CANCELLING is transient and cooperative: the abort has been recorded but the worker only notices at its next batch boundary. Rows already published stay published — a stop is not a rollback.
@@ -2118,6 +2122,20 @@ declare namespace Components {
              * Rows in the file. Known only once a phase has read to EOF; the execute phase has it from the start, because validate recorded it first.
              */
             total_rows?: number;
+        }
+        export interface ErpImportUseCaseSuggestion {
+            integration_id: string;
+            integration_name: string;
+            use_case_slug: string;
+            use_case_name: string;
+            /**
+             * How many of the FILE's columns this use case reads, by exact trimmed name.
+             */
+            matched_columns: number;
+            /**
+             * Columns in the file. Identical across entries; repeated per entry so each row renders standalone as "matches N of your M columns".
+             */
+            file_columns: number;
         }
         /**
          * Validate-phase summary: what the file will create, and whether it may be confirmed. Absent until the validate phase completes. No per-row detail is kept — a rejected file is corrected and imported again.
@@ -6175,6 +6193,9 @@ declare namespace Components {
              */
             overwrite?: boolean;
         }
+        export interface SuggestErpImportUseCasesResponse {
+            suggestions: ErpImportUseCaseSuggestion[];
+        }
         export interface TestNotificationRequest {
             /**
              * The kind of notification to render and send.
@@ -6727,6 +6748,13 @@ declare namespace Components {
             response_shape: /* Describes the inferred type shape of a JSONata expression */ TypeDescriptor;
             existing_annotations?: /* Developer-provided type annotations for a use case's request and response fields */ TypeAnnotations;
         }
+        export interface ValidateErpImportRequest {
+            integration_id: string;
+            /**
+             * An inbound use case's slug, unique within its integration.
+             */
+            use_case_slug: string;
+        }
         /**
          * Push delivery of the transformed event to a webhook via svc-webhooks
          */
@@ -6835,7 +6863,7 @@ declare namespace Paths {
         }
     }
     namespace CreateErpImport {
-        export type RequestBody = Components.Schemas.CreateErpImportRequest;
+        export type RequestBody = /* Register an already-uploaded file as an import. The use case is chosen later, via `:validate` — upload and interpretation are separate decisions. */ Components.Schemas.CreateErpImportRequest;
         namespace Responses {
             export type $202 = Components.Schemas.CreateErpImportResponse;
             export type $400 = Components.Responses.BadRequest;
@@ -7663,6 +7691,21 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace SuggestErpImportUseCases {
+        namespace Parameters {
+            export type ImportId = string;
+        }
+        export interface PathParameters {
+            importId: Parameters.ImportId;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.SuggestErpImportUseCasesResponse;
+            export type $400 = Components.Responses.BadRequest;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace TestSendNotification {
         namespace Parameters {
             export type IntegrationId = string; // uuid
@@ -7800,6 +7843,23 @@ declare namespace Paths {
             export type $401 = Components.Responses.Unauthorized;
             export interface $404 {
             }
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace ValidateErpImport {
+        namespace Parameters {
+            export type ImportId = string;
+        }
+        export interface PathParameters {
+            importId: Parameters.ImportId;
+        }
+        export type RequestBody = Components.Schemas.ValidateErpImportRequest;
+        namespace Responses {
+            export type $202 = Components.Schemas.ErpImportJob;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $409 = Components.Responses.Conflict;
+            export type $422 = Components.Schemas.ErrorResponseBase;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -8552,7 +8612,7 @@ export interface OperationMethods {
   /**
    * createErpImport - createErpImport
    * 
-   * Create a pricing-file import job from an already-uploaded file (S3 ref). Returns a job id and starts the validate phase asynchronously — poll GET /v2/erp/imports/{importId}.
+   * Register an already-uploaded file (S3 ref) as a pricing-file import job and return its id. Nothing runs yet: no use case is chosen and no validation starts here. Rank the candidates with POST /v2/erp/imports/{importId}:suggest-use-cases, then start the validate phase with POST /v2/erp/imports/{importId}:validate.
    */
   'createErpImport'(
     parameters?: Parameters<UnknownParamsObject> | null,
@@ -8569,6 +8629,29 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetErpImport.Responses.$200>
+  /**
+   * validateErpImport - validateErpImport
+   * 
+   * Choose the use case to read this file with, and start the validate phase.
+   * Callable from PENDING, READY and FAILED — so a wrong choice is corrected by calling this again with a different use case, rather than re-uploading. Each call replaces any previous verdict. Any other status returns 409.
+   */
+  'validateErpImport'(
+    parameters?: Parameters<Paths.ValidateErpImport.PathParameters> | null,
+    data?: Paths.ValidateErpImport.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ValidateErpImport.Responses.$202>
+  /**
+   * suggestErpImportUseCases - suggestErpImportUseCases
+   * 
+   * Rank the org's inbound use cases against this file's columns — the input to the ranked picker ("matches 6 of your 7 columns"). Reads only the file's first row, not its data.
+   * Every eligible use case is returned, including ones matching nothing: the "nothing fits, pick anyway" view needs the full list. Highest match first.
+   * CSV only — an xlsx import fails with 400 rather than silently returning zero matches, which would look identical to "we checked and nothing matches".
+   */
+  'suggestErpImportUseCases'(
+    parameters?: Parameters<Paths.SuggestErpImportUseCases.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.SuggestErpImportUseCases.Responses.$200>
   /**
    * executeErpImport - executeErpImport
    * 
@@ -9415,7 +9498,7 @@ export interface PathsDictionary {
     /**
      * createErpImport - createErpImport
      * 
-     * Create a pricing-file import job from an already-uploaded file (S3 ref). Returns a job id and starts the validate phase asynchronously — poll GET /v2/erp/imports/{importId}.
+     * Register an already-uploaded file (S3 ref) as a pricing-file import job and return its id. Nothing runs yet: no use case is chosen and no validation starts here. Rank the candidates with POST /v2/erp/imports/{importId}:suggest-use-cases, then start the validate phase with POST /v2/erp/imports/{importId}:validate.
      */
     'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
@@ -9449,6 +9532,33 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetErpImport.Responses.$200>
+  }
+  ['/v2/erp/imports/{importId}:validate']: {
+    /**
+     * validateErpImport - validateErpImport
+     * 
+     * Choose the use case to read this file with, and start the validate phase.
+     * Callable from PENDING, READY and FAILED — so a wrong choice is corrected by calling this again with a different use case, rather than re-uploading. Each call replaces any previous verdict. Any other status returns 409.
+     */
+    'post'(
+      parameters?: Parameters<Paths.ValidateErpImport.PathParameters> | null,
+      data?: Paths.ValidateErpImport.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ValidateErpImport.Responses.$202>
+  }
+  ['/v2/erp/imports/{importId}:suggest-use-cases']: {
+    /**
+     * suggestErpImportUseCases - suggestErpImportUseCases
+     * 
+     * Rank the org's inbound use cases against this file's columns — the input to the ranked picker ("matches 6 of your 7 columns"). Reads only the file's first row, not its data.
+     * Every eligible use case is returned, including ones matching nothing: the "nothing fits, pick anyway" view needs the full list. Highest match first.
+     * CSV only — an xlsx import fails with 400 rather than silently returning zero matches, which would look identical to "we checked and nothing matches".
+     */
+    'post'(
+      parameters?: Parameters<Paths.SuggestErpImportUseCases.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.SuggestErpImportUseCases.Responses.$200>
   }
   ['/v2/erp/imports/{importId}:execute']: {
     /**
@@ -9519,6 +9629,7 @@ export type ErpImportIssue = Components.Schemas.ErpImportIssue;
 export type ErpImportJob = Components.Schemas.ErpImportJob;
 export type ErpImportList = Components.Schemas.ErpImportList;
 export type ErpImportProgress = Components.Schemas.ErpImportProgress;
+export type ErpImportUseCaseSuggestion = Components.Schemas.ErpImportUseCaseSuggestion;
 export type ErpImportValidation = Components.Schemas.ErpImportValidation;
 export type ErpUpdatesEventsV2Request = Components.Schemas.ErpUpdatesEventsV2Request;
 export type ErpUpdatesEventsV3Request = Components.Schemas.ErpUpdatesEventsV3Request;
@@ -9638,6 +9749,7 @@ export type SecureProxyUseCaseHistoryEntry = Components.Schemas.SecureProxyUseCa
 export type SecureProxyWhitelist = Components.Schemas.SecureProxyWhitelist;
 export type SecureProxyWhitelistUpdate = Components.Schemas.SecureProxyWhitelistUpdate;
 export type SetIntegrationAppMappingRequest = Components.Schemas.SetIntegrationAppMappingRequest;
+export type SuggestErpImportUseCasesResponse = Components.Schemas.SuggestErpImportUseCasesResponse;
 export type TestNotificationRequest = Components.Schemas.TestNotificationRequest;
 export type TestNotificationResponse = Components.Schemas.TestNotificationResponse;
 export type TimeSeriesBreakdownItemV2 = Components.Schemas.TimeSeriesBreakdownItemV2;
@@ -9663,5 +9775,6 @@ export type UseCaseBase = Components.Schemas.UseCaseBase;
 export type UseCaseHistoryEntry = Components.Schemas.UseCaseHistoryEntry;
 export type UseCaseHistoryEntryBase = Components.Schemas.UseCaseHistoryEntryBase;
 export type UseCaseTypePreview = Components.Schemas.UseCaseTypePreview;
+export type ValidateErpImportRequest = Components.Schemas.ValidateErpImportRequest;
 export type WebhookDeliveryConfig = Components.Schemas.WebhookDeliveryConfig;
 export type WebhookStatus = Components.Schemas.WebhookStatus;

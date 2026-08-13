@@ -965,6 +965,38 @@
         "responses": {}
       }
     },
+    "/v2/erp/imports/{importId}:validate": {
+      "post": {
+        "operationId": "validateErpImport",
+        "parameters": [
+          {
+            "name": "importId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/erp/imports/{importId}:suggest-use-cases": {
+      "post": {
+        "operationId": "suggestErpImportUseCases",
+        "parameters": [
+          {
+            "name": "importId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v2/erp/imports/{importId}:execute": {
       "post": {
         "operationId": "executeErpImport",

@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Integration Toolkit API",
-    "version": "1.10.0",
+    "version": "1.12.0",
     "description": "API for integrating with external systems in a standardised way."
   },
   "tags": [
@@ -3744,7 +3744,7 @@
       "post": {
         "operationId": "createErpImport",
         "summary": "createErpImport",
-        "description": "Create a pricing-file import job from an already-uploaded file (S3 ref). Returns a job id and starts the validate phase asynchronously — poll GET /v2/erp/imports/{importId}.",
+        "description": "Register an already-uploaded file (S3 ref) as a pricing-file import job and return its id. Nothing runs yet: no use case is chosen and no validation starts here. Rank the candidates with POST /v2/erp/imports/{importId}:suggest-use-cases, then start the validate phase with POST /v2/erp/imports/{importId}:validate.",
         "tags": [
           "erp-imports"
         ],
@@ -3860,6 +3860,114 @@
                 }
               }
             }
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/erp/imports/{importId}:validate": {
+      "post": {
+        "operationId": "validateErpImport",
+        "summary": "validateErpImport",
+        "description": "Choose the use case to read this file with, and start the validate phase.\nCallable from PENDING, READY and FAILED — so a wrong choice is corrected by calling this again with a different use case, rather than re-uploading. Each call replaces any previous verdict. Any other status returns 409.",
+        "tags": [
+          "erp-imports"
+        ],
+        "parameters": [
+          {
+            "name": "importId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ValidateErpImportRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Validation started",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErpImportJob"
+                }
+              }
+            }
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "422": {
+            "description": "The use case cannot drive an import",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseBase"
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/erp/imports/{importId}:suggest-use-cases": {
+      "post": {
+        "operationId": "suggestErpImportUseCases",
+        "summary": "suggestErpImportUseCases",
+        "description": "Rank the org's inbound use cases against this file's columns — the input to the ranked picker (\"matches 6 of your 7 columns\"). Reads only the file's first row, not its data.\nEvery eligible use case is returned, including ones matching nothing: the \"nothing fits, pick anyway\" view needs the full list. Highest match first.\nCSV only — an xlsx import fails with 400 rather than silently returning zero matches, which would look identical to \"we checked and nothing matches\".",
+        "tags": [
+          "erp-imports"
+        ],
+        "parameters": [
+          {
+            "name": "importId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Ranked use-case suggestions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuggestErpImportUseCasesResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
           },
           "403": {
             "$ref": "#/components/responses/Forbidden"
@@ -4009,25 +4117,85 @@
       },
       "CreateErpImportRequest": {
         "type": "object",
+        "description": "Register an already-uploaded file as an import. The use case is chosen later, via `:validate` — upload and interpretation are separate decisions.",
         "required": [
-          "s3_reference",
-          "integration_id"
+          "s3_reference"
         ],
+        "additionalProperties": false,
         "properties": {
           "s3_reference": {
             "$ref": "#/components/schemas/S3Reference"
-          },
+          }
+        }
+      },
+      "ValidateErpImportRequest": {
+        "type": "object",
+        "required": [
+          "integration_id",
+          "use_case_slug"
+        ],
+        "additionalProperties": false,
+        "properties": {
           "integration_id": {
             "type": "string"
           },
           "use_case_slug": {
+            "type": "string",
+            "description": "An inbound use case's slug, unique within its integration."
+          }
+        }
+      },
+      "ErpImportUseCaseSuggestion": {
+        "type": "object",
+        "required": [
+          "integration_id",
+          "integration_name",
+          "use_case_slug",
+          "use_case_name",
+          "matched_columns",
+          "file_columns"
+        ],
+        "properties": {
+          "integration_id": {
             "type": "string"
+          },
+          "integration_name": {
+            "type": "string"
+          },
+          "use_case_slug": {
+            "type": "string"
+          },
+          "use_case_name": {
+            "type": "string"
+          },
+          "matched_columns": {
+            "type": "integer",
+            "description": "How many of the FILE's columns this use case reads, by exact trimmed name."
+          },
+          "file_columns": {
+            "type": "integer",
+            "description": "Columns in the file. Identical across entries; repeated per entry so each row renders standalone as \"matches N of your M columns\"."
+          }
+        }
+      },
+      "SuggestErpImportUseCasesResponse": {
+        "type": "object",
+        "required": [
+          "suggestions"
+        ],
+        "properties": {
+          "suggestions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ErpImportUseCaseSuggestion"
+            }
           }
         }
       },
       "ExecuteErpImportRequest": {
         "type": "object",
         "description": "Confirmation options. Required only when the verdict carries warnings — a clean import needs no body at all.",
+        "additionalProperties": false,
         "properties": {
           "ack_warnings": {
             "type": "boolean",
@@ -4174,7 +4342,6 @@
         "required": [
           "import_id",
           "org_id",
-          "integration_id",
           "format",
           "status",
           "s3_input_ref",
@@ -4193,11 +4360,12 @@
             "type": "string"
           },
           "integration_id": {
-            "type": "string"
+            "type": "string",
+            "description": "The integration owning the chosen use case. Absent until the first `:validate`."
           },
           "use_case_slug": {
             "type": "string",
-            "description": "The inbound use case whose mapping drives both phases."
+            "description": "The inbound use case whose mapping drives both phases. Absent until the first `:validate`, and MUTABLE — re-validating with a different use case replaces it."
           },
           "format": {
             "type": "string",
@@ -4208,7 +4376,7 @@
           },
           "status": {
             "type": "string",
-            "description": "PENDING → VALIDATING → READY → PROCESSING → IMPORTED, with FAILED reachable from any working status, and CANCELLING → CANCELLED reachable from VALIDATING or PROCESSING via :abort. IMPORTED, FAILED and CANCELLED are terminal and final.\nIMPORTED means every row was handed to the platform, not that the platform finished — per-row outcomes live in monitoring, filtered by correlation_id. A file that fails validation is FAILED with error.code = VALIDATION_BLOCKED.\nREADY is legitimately idle for as long as the user takes to confirm, so it carries no running work and never goes stale.\nCANCELLING is transient and cooperative: the abort has been recorded but the worker only notices at its next batch boundary. Rows already published stay published — a stop is not a rollback.",
+            "description": "PENDING → VALIDATING → READY → PROCESSING → IMPORTED, with FAILED reachable from any working status, and CANCELLING → CANCELLED reachable from VALIDATING or PROCESSING via :abort. Only IMPORTED and CANCELLED are terminal. READY and FAILED both accept a further `:validate`, which is how a wrong use case is corrected without re-uploading the file.\nIMPORTED means every row was handed to the platform, not that the platform finished — per-row outcomes live in monitoring, filtered by correlation_id. A file that fails validation is FAILED with error.code = VALIDATION_BLOCKED.\nREADY is legitimately idle for as long as the user takes to confirm, so it carries no running work and never goes stale.\nCANCELLING is transient and cooperative: the abort has been recorded but the worker only notices at its next batch boundary. Rows already published stay published — a stop is not a rollback.",
             "enum": [
               "PENDING",
               "VALIDATING",
