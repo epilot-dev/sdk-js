@@ -1295,6 +1295,9 @@
           },
           {
             "$ref": "#/components/schemas/ReplyEmailAction"
+          },
+          {
+            "$ref": "#/components/schemas/AssignEntityAction"
           }
         ]
       },
@@ -1341,6 +1344,9 @@
           },
           {
             "$ref": "#/components/schemas/ReplyEmailActionConfig"
+          },
+          {
+            "$ref": "#/components/schemas/AssignEntityActionConfig"
           }
         ]
       },
@@ -1851,6 +1857,10 @@
             "type": "string",
             "description": "Schema of target entity"
           },
+          "use_uniqueness_criteria": {
+            "type": "boolean",
+            "description": "Resolve this action's target (contact/account) via the organization's global uniqueness criteria instead of per-action identifiers (target_unique / Unique switches). Forwarded to entity mapping by automation-workers.\n"
+          },
           "target_unique": {
             "type": "array",
             "description": "Unique key for target entity (see upsertEntity of Entity API)",
@@ -2243,6 +2253,11 @@
             "description": "Candidate condition for even_distribution: when true, skip users who\nare currently absent (out-of-office). Opt-in; defaults to false.\n",
             "default": false
           },
+          "hold_until_available": {
+            "type": "boolean",
+            "description": "Sub-option of only_available_users: when a day off (weekend / whole\nday off with a known return) is what empties the candidate pool, hold\nthe thread and retry when the soonest candidate is back — bounded to\n7 retries over 7 days — before applying the fallback. Defaults to\ntrue; set false to skip the hold and fall straight through to the\nfallback. Out-of-office / vacation and non-availability reasons never\nhold regardless.\n",
+            "default": true
+          },
           "match_user_skills": {
             "type": "boolean",
             "description": "Candidate condition for even_distribution: when true, only assign to\nusers whose skills (tags) match a label on the message. Opt-in;\ndefaults to false.\n",
@@ -2281,6 +2296,161 @@
             }
           }
         }
+      },
+      "EntityAssignee": {
+        "type": "object",
+        "description": "A single assignee as stored in a user-relation attribute. Written through\nverbatim by the assign-entity worker. Note this object encoding differs\ndeliberately from AssignThreadConfig, which stores bare id strings —\neach matches what its own target accepts.\n",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "Which kind of principal this assignee is. Required: it selects which\nof the identifier properties below applies, and forms part of the\nappend-mode de-duplication key.\n",
+            "enum": [
+              "user",
+              "partner_user",
+              "partner_organization",
+              "group"
+            ]
+          },
+          "user_id": {
+            "type": "string",
+            "description": "Set for user and partner_user assignees."
+          },
+          "group_id": {
+            "type": "string",
+            "description": "Set for group assignees."
+          },
+          "org_id": {
+            "type": "string",
+            "description": "Organization the assignee belongs to."
+          },
+          "partner_id": {
+            "type": "string",
+            "description": "Set for partner_user and partner_organization assignees."
+          },
+          "display_name": {
+            "type": "string",
+            "description": "Label snapshotted at configuration time; may go stale after a rename."
+          },
+          "email": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "AssignEntityConfig": {
+        "type": "object",
+        "properties": {
+          "attribute": {
+            "type": "string",
+            "description": "Slug of the user-relation attribute on the triggering entity to write to."
+          },
+          "assignees": {
+            "type": "array",
+            "description": "Assignees to write into `attribute`, in the order given.",
+            "items": {
+              "$ref": "#/components/schemas/EntityAssignee"
+            }
+          },
+          "write_mode": {
+            "type": "string",
+            "description": "How `assignees` combine with the attribute's current value.\n- replace: overwrite the attribute with `assignees` (default).\n- append: union with the existing assignees, de-duplicated, existing\n  entries first. Two assignees are duplicates when their `type` and\n  `org_id` both match and the identifier for that type matches:\n  `user_id` for user and partner_user, `group_id` for group,\n  `partner_id` for partner_organization. Scoping by `org_id` keeps\n  assignees from different organizations distinct even when their\n  identifiers coincide.\n",
+            "enum": [
+              "replace",
+              "append"
+            ],
+            "default": "replace"
+          },
+          "assignment_type": {
+            "type": "string",
+            "description": "How assignees are resolved.\n- direct: assign exactly the assignees listed (default, and the only\n  accepted value).\nReserved for a future routing strategy; widening this enum later is\nbackwards compatible and needs no migration of existing flows.\n",
+            "enum": [
+              "direct"
+            ],
+            "default": "direct"
+          },
+          "source": {
+            "type": "object",
+            "description": "Which entity to assign to. Omit for the triggering entity (the\ndefault, and the behaviour of every flow saved before this field\nexisted).\n- trigger: the entity that started the flow.\n- action: the entity produced by an earlier action, identified by\n  that action's `flow_action_id`.\n",
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "The producing action's `flow_action_id` when origin is `action`, or the trigger id when origin is `trigger`. Note this is `flow_action_id` (stable across executions), not `id`.\n"
+              },
+              "origin": {
+                "type": "string",
+                "enum": [
+                  "trigger",
+                  "action"
+                ]
+              },
+              "schema": {
+                "type": "string",
+                "description": "Entity schema recorded when the source was chosen, for display. The worker uses the schema on the resolved entity itself, since this value goes stale if the producing action's target changes.\n"
+              }
+            }
+          }
+        }
+      },
+      "AssignEntityActionConfig": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AutomationActionConfig"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "enum": [
+                  "assign-entity"
+                ]
+              },
+              "config": {
+                "$ref": "#/components/schemas/AssignEntityConfig"
+              }
+            }
+          }
+        ],
+        "example": {
+          "id": "25jga0-gkasl26-0asg-908sgaj2",
+          "name": "Assign Entity",
+          "type": "assign-entity",
+          "config": {
+            "attribute": "assigned_to",
+            "write_mode": "replace",
+            "assignment_type": "direct",
+            "assignees": [
+              {
+                "type": "user",
+                "user_id": "90503",
+                "org_id": "66",
+                "display_name": "Jane Doe",
+                "email": "jane.doe@example.com"
+              }
+            ]
+          }
+        }
+      },
+      "AssignEntityAction": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AutomationAction"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "enum": [
+                  "assign-entity"
+                ]
+              },
+              "config": {
+                "$ref": "#/components/schemas/AssignEntityConfig"
+              }
+            }
+          }
+        ]
       },
       "SendEmailActionConfig": {
         "allOf": [
@@ -3689,6 +3859,13 @@
           },
           "_execution_chain": {
             "$ref": "#/components/schemas/ExecutionChain"
+          },
+          "_automation_chain": {
+            "type": "array",
+            "description": "[Internal] Ordered automation flow ids that led to the parent flow being started. The started execution appends its own flow id, so entity writes it performs carry the full chain and a loop running through a workflow can be detected. This is an internal property and should not be used by external consumers.\n",
+            "items": {
+              "type": "string"
+            }
           },
           "entity_contexts": {
             "type": "array",
