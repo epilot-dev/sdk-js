@@ -884,7 +884,7 @@
     "/v2/portal/consumption": {
       "get": {
         "operationId": "getConsumption",
-        "summary": "Get Consumption",
+        "summary": "getConsumption",
         "description": "Get energy consumption data between a given time period.",
         "tags": [
           "ECP"
@@ -1039,7 +1039,7 @@
     "/v2/portal/visualization:export": {
       "post": {
         "operationId": "prepareVisualizationExport",
-        "summary": "Prepare Visualization Export",
+        "summary": "prepareVisualizationExport",
         "description": "Asks an installed App to prepare a downloadable export of a visualization (consumption chart, dynamic tariff chart, etc.). The export is produced by the third-party App via a configured portal extension hook of type `dataExport` — this endpoint does not generate the file itself, it forwards the request to the configured hook and returns the descriptor the App provides (typically a `download_url`).\n",
         "tags": [
           "ECP"
@@ -1143,7 +1143,7 @@
     "/v2/portal/visualization/metadata": {
       "get": {
         "operationId": "getVisualizationMetadata",
-        "summary": "Get Visualization Metadata",
+        "summary": "getVisualizationMetadata",
         "description": "Returns runtime metadata describing how a visualization (consumption / price / cost chart) should be rendered for a given portal context (meter, contract, etc). Resolves the extension's `visualizationMetadata` hook implicitly from `app_id` + `extensionId` and invokes it. Supplies the response as a structured payload that the portal uses to configure type/aggregation options, supported intervals, and the available data range.\n",
         "tags": [
           "ECP"
@@ -1211,7 +1211,7 @@
     "/v2/portal/costs": {
       "get": {
         "operationId": "getCosts",
-        "summary": "Get Costs",
+        "summary": "getCosts",
         "description": "Get energy cost data between a given time period.",
         "tags": [
           "ECP"
@@ -1385,7 +1385,7 @@
     "/v2/portal/prices": {
       "get": {
         "operationId": "getPrices",
-        "summary": "Get Prices",
+        "summary": "getPrices",
         "description": "Get energy prices data between a given time period.",
         "tags": [
           "ECP"
@@ -3119,6 +3119,10 @@
                         "journey_registration_email": {
                           "type": "string",
                           "description": "The email address registered in the journey's Login & Registration block"
+                        },
+                        "journey_registration_portal_id": {
+                          "type": "string",
+                          "description": "The portal selected on the journey's Login & Registration block, used to target the registration link to that portal"
                         }
                       }
                     }
@@ -6965,6 +6969,56 @@
         }
       }
     },
+    "/v2/portal/user/file/{id}/preview": {
+      "get": {
+        "operationId": "getFilePreview",
+        "summary": "getFilePreview",
+        "description": "resolves an in-portal preview for a file. Returns a Content-Disposition: inline URL for directly-previewable files (PDF, common image formats), or a document-api PDF conversion result for the Office formats it currently supports (docx/xls/xlsx/xlsm) -- NOT doc/csv/pptx, which document-api's conversion does not cover today. Returns { kind: \"unsupported\" } (no url) for anything else, so the caller can fall back to the existing download flow. An optional `download_url` is returned for all kinds — including \"unsupported\" — whenever the file entity exposes one, so the client can render a real anchor for its Download action; it is only a Content-Disposition: attachment URL for private files, and for other access levels it is the plain object URL, which may render inline. The previewability decision is made server-side from the file's own filename/mime_type — never trust a client-supplied kind for anything security-sensitive.",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "$ref": "#/components/schemas/EntityId"
+            },
+            "required": true,
+            "description": "The Id of a file"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The file preview was resolved (which may still indicate kind \"unsupported\" with no url).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FilePreviewResult"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/v2/portal/user/file/{id}/downloaded": {
       "post": {
         "operationId": "trackFileDownloaded",
@@ -7023,7 +7077,7 @@
     "/v2/portal/user/files/count-by-entity": {
       "get": {
         "operationId": "getFilesCountByEntity",
-        "summary": "getFileCountByEntity",
+        "summary": "getFilesCountByEntity",
         "description": "Fetch file counts for all ECP user related entities",
         "deprecated": true,
         "tags": [
@@ -7911,7 +7965,7 @@
     "/v2/portal/entity/{slug}/{id}/workflows": {
       "get": {
         "operationId": "getEntityWorkflows",
-        "summary": "Get workflows for an entity",
+        "summary": "getEntityWorkflows",
         "description": "Get all workflows associated with an entity (requires access to the entity)",
         "tags": [
           "ECP"
@@ -7980,7 +8034,7 @@
     "/v2/portal/entity/{slug}/{id}/workflows/linearized": {
       "get": {
         "operationId": "getEntityPortalWorkflows",
-        "summary": "Get linearized workflows for an entity",
+        "summary": "getEntityPortalWorkflows",
         "description": "Get all portal-relevant workflows associated with an entity (requires access to the entity),\nlinearized by the Workflows API into a flat, ordered list of portal-visible tasks.\n\nUnlike `getEntityWorkflows`, this endpoint returns a single uniform shape for both legacy\n(V1) workflow executions and graph-based (V2) flow executions — the execution graph is\nalready resolved server-side (active path, task reachability, chronological ordering), so\nclients can render a timeline without any graph traversal logic.\n\nTasks carry the config of both portal audiences (`ecp` and `installer`); clients filter\nper their configured audience, so one response serves every block on a page.\n",
         "tags": [
           "ECP"
@@ -8046,10 +8100,96 @@
         }
       }
     },
+    "/v2/portal/entities/workflows/linearized/batch": {
+      "post": {
+        "operationId": "getEntityPortalWorkflowsBatch",
+        "summary": "getEntityPortalWorkflowsBatch",
+        "description": "Batch variant of `getEntityPortalWorkflows`: returns portal-relevant workflows for\nup to 50 entities — schemas may differ — in a single call, each already linearized\nby the Workflows API into a flat, ordered list of portal-visible tasks.\n\nIntended for portal list views (e.g. an entity list where every card shows its\nworkflow progress). Entities the portal user cannot access are omitted from the\nresponse; an entry with an empty task list means the entity has no portal-relevant\nworkflow.\n",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "requestBody": {
+          "description": "Entities to load portal workflows for",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "entities": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "description": "ID of the entity"
+                        },
+                        "slug": {
+                          "type": "string",
+                          "description": "Schema slug of the entity",
+                          "example": "order"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "slug"
+                      ]
+                    },
+                    "minItems": 1,
+                    "maxItems": 50
+                  }
+                },
+                "required": [
+                  "entities"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "One entry per accessible entity, each with its linearized workflows",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/EntityPortalWorkflows"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/v2/portal/metering/reading/photo": {
       "post": {
         "operationId": "uploadMeterReadingPhoto",
-        "summary": "Upload Meter Reading Photo",
+        "summary": "uploadMeterReadingPhoto",
         "description": "Uploads a Meter Reading photo and - if enabled - gives back data extracted from the photo.",
         "tags": [
           "ECP"
@@ -8104,7 +8244,7 @@
     "/v2/portal/metering/reading": {
       "post": {
         "operationId": "createMeterReading",
-        "summary": "Create Meter Reading",
+        "summary": "createMeterReading",
         "description": "Inserts a new meter reading.",
         "tags": [
           "ECP"
@@ -8171,6 +8311,7 @@
     "/v2/portal/metering/reading/allowed-range/{meter_id}": {
       "get": {
         "operationId": "getAllowedMeterReadingRange",
+        "summary": "getAllowedMeterReadingRange",
         "description": "Get allowed reading range for all counters of a meter from the configured\nthird-party plausibility check hook using 'range' mode. This endpoint requires\na plausibility check hook to be configured for the portal.\n",
         "tags": [
           "ECP"
@@ -8272,7 +8413,7 @@
     "/v2/portal/metering/readings": {
       "post": {
         "operationId": "getMeterReadings",
-        "summary": "Get meter readings with optional template resolution",
+        "summary": "getMeterReadings",
         "description": "Fetches meter readings for a counter and optionally resolves Handlebars\ntemplate strings against each reading object using @epilot/variables.\n",
         "tags": [
           "ECP"
@@ -9617,7 +9758,7 @@
     "/v2/portal/campaign/{campaign_id}/entity:status": {
       "put": {
         "operationId": "updateCampaignPortalBlockStatus",
-        "summary": "Update Campaign Portal Block Status",
+        "summary": "updateCampaignPortalBlockStatus",
         "description": "Updates the status of a campaign portal block for multiple recipients.",
         "tags": [
           "ECP"
@@ -10271,7 +10412,7 @@
                     "items": {
                       "$ref": "#/components/schemas/SwappableConfig"
                     },
-                    "description": "Items to swap"
+                    "description": "Optional, opt-in configuration items to additionally swap on top of the always-swapped pages and functional config. Defaults to an empty list (nothing extra swapped). Domain and access/security settings can never be swapped."
                   }
                 }
               }
@@ -11579,6 +11720,10 @@
           "message": {
             "type": "string",
             "description": "Error message"
+          },
+          "reason": {
+            "type": "string",
+            "description": "Machine-readable cause, when the API can name one. `PORTAL_USER_PENDING_ACTIVATION` means the portal user is authenticated but not mapped to a contact yet, so re-authenticating will not help."
           }
         }
       },
@@ -11994,7 +12139,7 @@
           },
           "identity_providers": {
             "type": "array",
-            "description": "SSO identity providers for the portal. When sent on a portal save (PUT/POST),\nthe list is fully synced — incoming providers are upserted and any existing\nproviders not in the list are deleted. Omit the field to leave SSO\nconfiguration unchanged; send an empty array to remove all providers.\n\nEach provider is persisted verbatim — `oidc_config.client_secret` is stored\nas sent. Customers are encouraged to reference an org env secret via\n`{{ env.VAR }}` rather than embed raw values.\n",
+            "description": "SSO identity providers for the portal. When sent on a portal save (PUT/POST),\nthe list is fully synced — incoming providers are upserted and any existing\nproviders not in the list are deleted. Omit the field to leave SSO\nconfiguration unchanged; send an empty array to remove all providers.\n\nSecrets: a provider sent without `oidc_config.client_secret` keeps the\nstored secret for the same slug; an explicit empty string clears it.\n`getPortalConfigV3` returns providers with raw secrets redacted;\n`{{ env.VAR }}` references pass through.\n",
             "items": {
               "$ref": "#/components/schemas/ProviderConfig"
             }
@@ -14369,6 +14514,33 @@
           }
         ]
       },
+      "FilePreviewResult": {
+        "type": "object",
+        "required": [
+          "kind"
+        ],
+        "properties": {
+          "kind": {
+            "type": "string",
+            "description": "What kind of preview (if any) is available. \"pdf\" covers both native PDFs and Office documents that were converted to PDF server-side. \"unsupported\" means no preview is available and the caller should fall back to download.",
+            "enum": [
+              "pdf",
+              "image",
+              "unsupported"
+            ]
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "description": "A Content-Disposition: inline URL to render in a preview viewer. Present only when kind is \"pdf\" or \"image\". Short-lived — do not cache across dialog opens."
+          },
+          "download_url": {
+            "type": "string",
+            "format": "uri",
+            "description": "Optional download URL for the file, returned for any kind — including \"unsupported\" — whenever the file entity exposes one. It is only a Content-Disposition: attachment URL for files with access_control \"private\", where it is a short-lived signed URL; for any other access level it is the file entity's plain public/CDN object URL, which carries no attachment disposition and may render inline in the browser. Absent when the file entity exposes no usable URL, so clients must handle it being missing."
+          }
+        }
+      },
       "EntityFileCount": {
         "type": "object",
         "required": [
@@ -14866,6 +15038,26 @@
           "order",
           "status",
           "is_active"
+        ]
+      },
+      "EntityPortalWorkflows": {
+        "type": "object",
+        "description": "Linearized portal workflows of a single entity",
+        "properties": {
+          "entity_id": {
+            "type": "string"
+          },
+          "portal_workflows": {
+            "type": "array",
+            "description": "Empty when the entity has no portal-relevant workflow",
+            "items": {
+              "$ref": "#/components/schemas/PortalWorkflow"
+            }
+          }
+        },
+        "required": [
+          "entity_id",
+          "portal_workflows"
         ]
       },
       "PortalTaskConfig": {
@@ -19211,10 +19403,8 @@
       },
       "SwappableConfig": {
         "type": "string",
+        "description": "Optional configuration item that a portal swap can additionally include. The swap always transfers the pages and the functional experience config that keep the portal working. These items are opt-in on top of that and are OFF by default. Domain and access/security settings (domain, cognito_details, auth_settings) can never be swapped and are therefore not part of this enum.",
         "enum": [
-          "all",
-          "domain",
-          "users",
           "email_templates"
         ]
       },

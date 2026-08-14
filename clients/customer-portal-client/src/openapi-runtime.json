@@ -1663,6 +1663,19 @@
         "responses": {}
       }
     },
+    "/v2/portal/user/file/{id}/preview": {
+      "get": {
+        "operationId": "getFilePreview",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v2/portal/user/file/{id}/downloaded": {
       "post": {
         "operationId": "trackFileDownloaded",
@@ -1969,6 +1982,18 @@
             "required": true
           }
         ],
+        "responses": {}
+      }
+    },
+    "/v2/portal/entities/workflows/linearized/batch": {
+      "post": {
+        "operationId": "getEntityPortalWorkflowsBatch",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
         "responses": {}
       }
     },
