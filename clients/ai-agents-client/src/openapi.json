@@ -630,6 +630,130 @@
         }
       }
     },
+    "/v1/executions/{execution_id}/feedback": {
+      "get": {
+        "tags": [
+          "Agent Execution"
+        ],
+        "summary": "Get execution feedback",
+        "description": "Returns the authenticated user's feedback for an execution.",
+        "operationId": "getExecutionFeedback",
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "execution_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Feedback state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExecutionFeedbackResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Execution not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Agent Execution"
+        ],
+        "summary": "Submit execution feedback",
+        "description": "Upserts thumbs up/down feedback and mirrors it to the execution's Langfuse trace.",
+        "operationId": "putExecutionFeedback",
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "execution_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PutExecutionFeedbackRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Feedback recorded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExecutionFeedbackResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid feedback",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Execution not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Execution cannot be rated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/executions/{execution_id}/approve": {
       "post": {
         "tags": [
@@ -1572,6 +1696,67 @@
           "timestamp": {
             "type": "string",
             "format": "date-time"
+          }
+        }
+      },
+      "ExecutionFeedback": {
+        "type": "object",
+        "required": [
+          "rating",
+          "user_id",
+          "submitted_at"
+        ],
+        "properties": {
+          "rating": {
+            "type": "string",
+            "enum": [
+              "up",
+              "down"
+            ]
+          },
+          "comment": {
+            "type": "string"
+          },
+          "user_id": {
+            "type": "string"
+          },
+          "submitted_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ExecutionFeedbackResponse": {
+        "type": "object",
+        "required": [
+          "feedback"
+        ],
+        "properties": {
+          "feedback": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ExecutionFeedback"
+              }
+            ],
+            "nullable": true
+          }
+        }
+      },
+      "PutExecutionFeedbackRequest": {
+        "type": "object",
+        "required": [
+          "rating"
+        ],
+        "properties": {
+          "rating": {
+            "type": "string",
+            "enum": [
+              "up",
+              "down"
+            ]
+          },
+          "comment": {
+            "type": "string"
           }
         }
       },

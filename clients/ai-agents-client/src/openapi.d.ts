@@ -375,6 +375,20 @@ declare namespace Components {
                 [key: string]: any;
             };
         } | null;
+        export interface ExecutionFeedback {
+            rating: "up" | "down";
+            comment?: string;
+            user_id: string;
+            submitted_at: string; // date-time
+        }
+        export interface ExecutionFeedbackResponse {
+            feedback: {
+                rating: "up" | "down";
+                comment?: string;
+                user_id: string;
+                submitted_at: string; // date-time
+            } | null;
+        }
         export interface ExecutionIteration {
             iteration_index?: number;
             /**
@@ -822,6 +836,10 @@ declare namespace Components {
              */
             color?: "success" | "warning" | "error" | "info";
         }
+        export interface PutExecutionFeedbackRequest {
+            rating: "up" | "down";
+            comment?: string;
+        }
         export interface RejectExecutionRequest {
             /**
              * Reason for rejection
@@ -1204,6 +1222,18 @@ declare namespace Paths {
             export type $404 = Components.Schemas.Error;
         }
     }
+    namespace GetExecutionFeedback {
+        namespace Parameters {
+            export type ExecutionId = string; // uuid
+        }
+        export interface PathParameters {
+            execution_id: Parameters.ExecutionId /* uuid */;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.ExecutionFeedbackResponse;
+            export type $404 = Components.Schemas.Error;
+        }
+    }
     namespace GetExecutionTrace {
         namespace Parameters {
             export type ExecutionId = string; // uuid
@@ -1275,6 +1305,21 @@ declare namespace Paths {
         namespace Responses {
             export type $200 = Components.Schemas.ListExecutionsResponse;
             export type $400 = Components.Schemas.Error;
+        }
+    }
+    namespace PutExecutionFeedback {
+        namespace Parameters {
+            export type ExecutionId = string; // uuid
+        }
+        export interface PathParameters {
+            execution_id: Parameters.ExecutionId /* uuid */;
+        }
+        export type RequestBody = Components.Schemas.PutExecutionFeedbackRequest;
+        namespace Responses {
+            export type $200 = Components.Schemas.ExecutionFeedbackResponse;
+            export type $400 = Components.Schemas.Error;
+            export type $404 = Components.Schemas.Error;
+            export type $409 = Components.Schemas.Error;
         }
     }
     namespace RejectExecution {
@@ -1471,6 +1516,26 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetExecutionTrace.Responses.$200>
+  /**
+   * getExecutionFeedback - Get execution feedback
+   *
+   * Returns the authenticated user's feedback for an execution.
+   */
+  'getExecutionFeedback'(
+    parameters?: Parameters<Paths.GetExecutionFeedback.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig
+  ): OperationResponse<Paths.GetExecutionFeedback.Responses.$200>
+  /**
+   * putExecutionFeedback - Submit execution feedback
+   *
+   * Upserts thumbs up/down feedback and mirrors it to the execution's Langfuse trace.
+   */
+  'putExecutionFeedback'(
+    parameters?: Parameters<Paths.PutExecutionFeedback.PathParameters> | null,
+    data?: Paths.PutExecutionFeedback.RequestBody,
+    config?: AxiosRequestConfig
+  ): OperationResponse<Paths.PutExecutionFeedback.Responses.$200>
   /**
    * approveExecution - Approve pending action
    * 
@@ -1692,6 +1757,28 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetExecutionTrace.Responses.$200>
   }
+  ['/v1/executions/{execution_id}/feedback']: {
+    /**
+     * getExecutionFeedback - Get execution feedback
+     *
+     * Returns the authenticated user's feedback for an execution.
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetExecutionFeedback.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig
+    ): OperationResponse<Paths.GetExecutionFeedback.Responses.$200>
+    /**
+     * putExecutionFeedback - Submit execution feedback
+     *
+     * Upserts thumbs up/down feedback and mirrors it to the execution's Langfuse trace.
+     */
+    'put'(
+      parameters?: Parameters<Paths.PutExecutionFeedback.PathParameters> | null,
+      data?: Paths.PutExecutionFeedback.RequestBody,
+      config?: AxiosRequestConfig
+    ): OperationResponse<Paths.PutExecutionFeedback.Responses.$200>
+  }
   ['/v1/executions/{execution_id}/approve']: {
     /**
      * approveExecution - Approve pending action
@@ -1805,6 +1892,8 @@ export type Error = Components.Schemas.Error;
 export type ExecuteAgentRequest = Components.Schemas.ExecuteAgentRequest;
 export type ExecutionContext = Components.Schemas.ExecutionContext;
 export type ExecutionError = Components.Schemas.ExecutionError;
+export type ExecutionFeedback = Components.Schemas.ExecutionFeedback;
+export type ExecutionFeedbackResponse = Components.Schemas.ExecutionFeedbackResponse;
 export type ExecutionIteration = Components.Schemas.ExecutionIteration;
 export type ExecutionIterationProjection = Components.Schemas.ExecutionIterationProjection;
 export type ExecutionMetrics = Components.Schemas.ExecutionMetrics;
@@ -1828,6 +1917,7 @@ export type PreviewActionType = Components.Schemas.PreviewActionType;
 export type PreviewChange = Components.Schemas.PreviewChange;
 export type PreviewEntity = Components.Schemas.PreviewEntity;
 export type PreviewValue = Components.Schemas.PreviewValue;
+export type PutExecutionFeedbackRequest = Components.Schemas.PutExecutionFeedbackRequest;
 export type RejectExecutionRequest = Components.Schemas.RejectExecutionRequest;
 export type SkillAvailability = Components.Schemas.SkillAvailability;
 export type SkillCategory = Components.Schemas.SkillCategory;
