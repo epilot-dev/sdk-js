@@ -940,6 +940,113 @@
         }
       }
     },
+    "/v1/files/{id}/summary/feedback": {
+      "get": {
+        "operationId": "getFileSummaryFeedback",
+        "summary": "Get file summary feedback",
+        "description": "Get the authenticated user's feedback for the current generated file summary.",
+        "tags": [
+          "File"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "The UUID of the file entity",
+            "schema": {
+              "$ref": "#/components/schemas/FileEntityId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Current feedback state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FileSummaryFeedbackResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "put": {
+        "operationId": "putFileSummaryFeedback",
+        "summary": "Submit file summary feedback",
+        "description": "Upsert thumbs up/down feedback for the current generated file summary.",
+        "tags": [
+          "File"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "The UUID of the file entity",
+            "schema": {
+              "$ref": "#/components/schemas/FileEntityId"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PutFileSummaryFeedbackRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Feedback recorded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FileSummaryFeedbackResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "409": {
+            "$ref": "#/components/responses/ConflictError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/v1/files/{id}/summary-jobs": {
       "post": {
         "operationId": "createFileSummaryJob",
@@ -2512,6 +2619,12 @@
             "type": "string",
             "description": "Short English paragraph summary for file preview surfaces.",
             "readOnly": true
+          },
+          "file_summary_execution_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "AI execution that produced the current summary. Used to correlate user feedback.",
+            "readOnly": true
           }
         }
       },
@@ -2596,6 +2709,10 @@
             "format": "uuid",
             "description": "Current summary job ID when available."
           },
+          "feedback_available": {
+            "type": "boolean",
+            "description": "Whether the current summary can receive user feedback."
+          },
           "preview_summary_de": {
             "type": "string",
             "nullable": true,
@@ -2615,6 +2732,67 @@
             "type": "string",
             "nullable": true,
             "description": "Short English paragraph summary for file preview surfaces."
+          }
+        }
+      },
+      "FileSummaryFeedback": {
+        "type": "object",
+        "required": [
+          "rating",
+          "user_id",
+          "submitted_at"
+        ],
+        "properties": {
+          "rating": {
+            "type": "string",
+            "enum": [
+              "up",
+              "down"
+            ]
+          },
+          "comment": {
+            "type": "string"
+          },
+          "user_id": {
+            "type": "string"
+          },
+          "submitted_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "FileSummaryFeedbackResponse": {
+        "type": "object",
+        "required": [
+          "feedback"
+        ],
+        "properties": {
+          "feedback": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FileSummaryFeedback"
+              }
+            ],
+            "nullable": true
+          }
+        }
+      },
+      "PutFileSummaryFeedbackRequest": {
+        "type": "object",
+        "required": [
+          "rating"
+        ],
+        "properties": {
+          "rating": {
+            "type": "string",
+            "enum": [
+              "up",
+              "down"
+            ]
+          },
+          "comment": {
+            "type": "string"
           }
         }
       },

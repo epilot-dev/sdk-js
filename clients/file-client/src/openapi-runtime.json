@@ -236,6 +236,36 @@
         "responses": {}
       }
     },
+    "/v1/files/{id}/summary/feedback": {
+      "get": {
+        "operationId": "getFileSummaryFeedback",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      },
+      "put": {
+        "operationId": "putFileSummaryFeedback",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v1/files/{id}/summary-jobs": {
       "post": {
         "operationId": "createFileSummaryJob",
