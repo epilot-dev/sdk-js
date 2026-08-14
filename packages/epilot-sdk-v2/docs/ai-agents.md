@@ -38,6 +38,8 @@ const { data } = await aiAgentsClient.createAgent(...)
 - [`getExecution`](#getexecution)
 - [`cancelExecution`](#cancelexecution)
 - [`getExecutionTrace`](#getexecutiontrace)
+- [`getExecutionFeedback`](#getexecutionfeedback)
+- [`putExecutionFeedback`](#putexecutionfeedback)
 - [`approveExecution`](#approveexecution)
 - [`rejectExecution`](#rejectexecution)
 - [`streamExecution`](#streamexecution)
@@ -63,6 +65,9 @@ const { data } = await aiAgentsClient.createAgent(...)
 - [`ExecuteAgentRequest`](#executeagentrequest)
 - [`ExecutionResponse`](#executionresponse)
 - [`ExecutionIterationProjection`](#executioniterationprojection)
+- [`ExecutionFeedback`](#executionfeedback)
+- [`ExecutionFeedbackResponse`](#executionfeedbackresponse)
+- [`PutExecutionFeedbackRequest`](#putexecutionfeedbackrequest)
 - [`ExecutionTrace`](#executiontrace)
 - [`ExecutionIteration`](#executioniteration)
 - [`PendingAction`](#pendingaction)
@@ -1040,6 +1045,72 @@ const { data } = await client.getExecutionTrace({
 
 ---
 
+### `getExecutionFeedback`
+
+Get execution feedback
+
+`GET /v1/executions/{execution_id}/feedback`
+
+```ts
+const { data } = await client.getExecutionFeedback({
+  execution_id: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "feedback": {
+    "rating": "up",
+    "comment": "string",
+    "user_id": "string",
+    "submitted_at": "1970-01-01T00:00:00.000Z"
+  }
+}
+```
+
+</details>
+
+---
+
+### `putExecutionFeedback`
+
+Submit execution feedback
+
+`PUT /v1/executions/{execution_id}/feedback`
+
+```ts
+const { data } = await client.putExecutionFeedback(
+  {
+    execution_id: 'example',
+  },
+  {
+    rating: 'up',
+    comment: 'string'
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "feedback": {
+    "rating": "up",
+    "comment": "string",
+    "user_id": "string",
+    "submitted_at": "1970-01-01T00:00:00.000Z"
+  }
+}
+```
+
+</details>
+
+---
+
 ### `approveExecution`
 
 Approve pending action
@@ -1854,6 +1925,39 @@ type ExecutionIterationProjection = {
   tool?: string
   status?: "running" | "completed"
   timestamp?: string // date-time
+}
+```
+
+### `ExecutionFeedback`
+
+```ts
+type ExecutionFeedback = {
+  rating: "up" | "down"
+  comment?: string
+  user_id: string
+  submitted_at: string // date-time
+}
+```
+
+### `ExecutionFeedbackResponse`
+
+```ts
+type ExecutionFeedbackResponse = {
+  feedback: {
+    rating: "up" | "down"
+    comment?: string
+    user_id: string
+    submitted_at: string // date-time
+  }
+}
+```
+
+### `PutExecutionFeedbackRequest`
+
+```ts
+type PutExecutionFeedbackRequest = {
+  rating: "up" | "down"
+  comment?: string
 }
 ```
 
