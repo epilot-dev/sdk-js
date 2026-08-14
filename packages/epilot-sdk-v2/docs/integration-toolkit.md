@@ -108,6 +108,7 @@ const { data } = await integrationToolkitClient.acknowledgeTracking(...)
 - [`ErpImportValidation`](#erpimportvalidation)
 - [`ErpImportProgress`](#erpimportprogress)
 - [`ErpImportError`](#erpimporterror)
+- [`ErpImportFilePreview`](#erpimportfilepreview)
 - [`CreateErpImportResponse`](#createerpimportresponse)
 - [`ErpImportJob`](#erpimportjob)
 - [`ErpImportList`](#erpimportlist)
@@ -220,6 +221,8 @@ const { data } = await integrationToolkitClient.acknowledgeTracking(...)
 - [`FileProxyAuth`](#fileproxyauth)
 - [`FileProxyParam`](#fileproxyparam)
 - [`FileProxyStep`](#fileproxystep)
+- [`FileProxyFanOutConfig`](#fileproxyfanoutconfig)
+- [`FileProxyUploadConfig`](#fileproxyuploadconfig)
 - [`FileProxyResponseConfig`](#fileproxyresponseconfig)
 - [`MappingSimulationRequest`](#mappingsimulationrequest)
 - [`MappingSimulationV2Request`](#mappingsimulationv2request)
@@ -237,8 +240,11 @@ const { data } = await integrationToolkitClient.acknowledgeTracking(...)
 - [`DeliveryConfig`](#deliveryconfig)
 - [`WebhookDeliveryConfig`](#webhookdeliveryconfig)
 - [`PollDeliveryConfig`](#polldeliveryconfig)
+- [`FileProxyDeliveryConfig`](#fileproxydeliveryconfig)
+- [`FileProxyLookup`](#fileproxylookup)
 - [`OutboundStatusResponse`](#outboundstatusresponse)
 - [`OutboundUseCaseStatus`](#outboundusecasestatus)
+- [`OutboundFileProxyTargetStatus`](#outboundfileproxytargetstatus)
 - [`OutboundPollStatus`](#outboundpollstatus)
 - [`WebhookStatus`](#webhookstatus)
 - [`OutboundConflict`](#outboundconflict)
@@ -2373,7 +2379,18 @@ const { data } = await client.getOutboundStatus({
         "last_ack_at": "1970-01-01T00:00:00.000Z",
         "blocked": true,
         "dlq_count": 0
-      }
+      },
+      "file_proxy": [
+        {
+          "mapping_id": "string",
+          "use_case_slug": "string",
+          "resolved": true,
+          "target_use_case_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+          "target_enabled": true,
+          "target_updated_at": "1970-01-01T00:00:00.000Z",
+          "unresolved_reason": "not_found"
+        }
+      ]
     }
   ]
 }
@@ -3208,7 +3225,8 @@ const { data } = await client.createErpImport(
     s3_reference: {
       bucket: 'string',
       key: 'string'
-    }
+    },
+    include_preview: false
   },
 )
 ```
@@ -3388,6 +3406,7 @@ const { data } = await client.suggestErpImportUseCases({
       "integration_name": "string",
       "use_case_slug": "string",
       "use_case_name": "string",
+      "entity_types": 0,
       "matched_columns": 0,
       "file_columns": 0
     }
@@ -3501,6 +3520,7 @@ type CreateErpImportRequest = {
     bucket: string
     key: string
   }
+  include_preview?: boolean
 }
 ```
 
@@ -3521,6 +3541,7 @@ type ErpImportUseCaseSuggestion = {
   integration_name: string
   use_case_slug: string
   use_case_name: string
+  entity_types: number
   matched_columns: number
   file_columns: number
 }
@@ -3535,6 +3556,7 @@ type SuggestErpImportUseCasesResponse = {
     integration_name: string
     use_case_slug: string
     use_case_name: string
+    entity_types: number
     matched_columns: number
     file_columns: number
   }>
@@ -3606,11 +3628,28 @@ type ErpImportError = {
 }
 ```
 
+### `ErpImportFilePreview`
+
+Sample of the file's first rows, using the same parser as `:validate`. `status` is the outcome of this read, not a verdict on the file.
+
+```ts
+type ErpImportFilePreview = {
+  status: "AVAILABLE" | "FORMAT_UNSUPPORTED" | "UNREADABLE"
+  columns?: string[]
+  rows?: string[][]
+}
+```
+
 ### `CreateErpImportResponse`
 
 ```ts
 type CreateErpImportResponse = {
   import_id: string
+  preview?: {
+    status: "AVAILABLE" | "FORMAT_UNSUPPORTED" | "UNREADABLE"
+    columns?: string[]
+    rows?: string[][]
+  }
 }
 ```
 
@@ -4494,7 +4533,9 @@ type IntegrationWithUseCases = {
     updated_at: string // date-time
     configuration?: {
       event_catalog_event: { ... }
+      event_filter?: { ... }
       mappings: { ... }
+      ack_tracking?: { ... }
     }
   } | {
     id: string // uuid
@@ -4508,12 +4549,20 @@ type IntegrationWithUseCases = {
     created_at: string // date-time
     updated_at: string // date-time
     configuration?: {
+      direction?: { ... }
+      upload?: { ... }
+      fan_out?: { ... }
+      params_mapping?: { ... }
+      lookups?: { ... }
+      constants?: { ... }
+      file_source?: { ... }
+      required_params?: { ... }
       secure_proxy?: { ... }
       auth?: { ... }
       params?: { ... }
       allowed_origins?: { ... }
       steps: { ... }
-      response: { ... }
+      response?: { ... }
       prevent_indirect_serving?: { ... }
     }
   } | {
@@ -4555,6 +4604,7 @@ type IntegrationWithUseCases = {
       allowed_ips?: { ... }
     }
   }>
+  // ...
 }
 ```
 
@@ -4640,7 +4690,9 @@ type UpsertIntegrationWithUseCasesRequest = {
     type: "outbound"
     configuration?: {
       event_catalog_event: { ... }
+      event_filter?: { ... }
       mappings: { ... }
+      ack_tracking?: { ... }
     }
   } | {
     id?: string // uuid
@@ -4650,17 +4702,15 @@ type UpsertIntegrationWithUseCasesRequest = {
     change_description?: string
     type: "file_proxy"
     configuration?: {
+      direction?: { ... }
+      upload?: { ... }
+      fan_out?: { ... }
+      params_mapping?: { ... }
+      lookups?: { ... }
+      constants?: { ... }
+      file_source?: { ... }
+      required_params?: { ... }
       secure_proxy?: { ... }
-      auth?: { ... }
-      params?: { ... }
-      allowed_origins?: { ... }
-      steps: { ... }
-      response: { ... }
-      prevent_indirect_serving?: { ... }
-    }
-  } | {
-    id?: string // uuid
-    name: string
   // ...
 }
 ```
@@ -4734,6 +4784,7 @@ Configuration for outbound use cases. Defines the event that triggers the flow a
 ```ts
 type OutboundIntegrationEventConfiguration = {
   event_catalog_event: string
+  event_filter?: string
   mappings: Array<{
     id?: string // uuid
     name: string
@@ -4749,10 +4800,14 @@ type OutboundIntegrationEventConfiguration = {
       retention_days?: { ... }
       poison_policy?: { ... }
       max_delivery_attempts?: { ... }
+    } | {
+      type: { ... }
+      use_case_slug: { ... }
     }
     created_at?: string // date-time
     updated_at?: string // date-time
   }>
+  ack_tracking?: "on" | "off"
 }
 ```
 
@@ -5212,6 +5267,7 @@ type EmbeddedUseCaseRequest = {
   type: "outbound"
   configuration?: {
     event_catalog_event: string
+    event_filter?: string
     mappings: Array<{
       id?: { ... }
       name: { ... }
@@ -5221,6 +5277,7 @@ type EmbeddedUseCaseRequest = {
       created_at?: { ... }
       updated_at?: { ... }
     }>
+    ack_tracking?: "on" | "off"
   }
 } | {
   id?: string // uuid
@@ -5230,6 +5287,27 @@ type EmbeddedUseCaseRequest = {
   change_description?: string
   type: "file_proxy"
   configuration?: {
+    direction?: "download" | "upload"
+    upload?: {
+      max_file_bytes?: { ... }
+      max_delivery_attempts?: { ... }
+      success_when?: { ... }
+      external_id?: { ... }
+    }
+    fan_out?: {
+      enabled: { ... }
+      split_expression?: { ... }
+    }
+    params_mapping?: string
+    lookups?: Record<string, {
+      source: { ... }
+      entries: { ... }
+      default?: { ... }
+      on_miss?: { ... }
+    }>
+    constants?: Record<string, unknown>
+    file_source?: string
+    required_params?: string[]
     secure_proxy?: {
       use_case_slug: { ... }
     }
@@ -5253,29 +5331,6 @@ type EmbeddedUseCaseRequest = {
       description?: { ... }
     }>
     allowed_origins?: string // uri[]
-    steps: Array<{
-      url: { ... }
-      method: { ... }
-      headers?: { ... }
-      body?: { ... }
-      response_type: { ... }
-    }>
-    response: {
-      body: { ... }
-      encoding: { ... }
-      filename?: { ... }
-      content_type?: { ... }
-    }
-    prevent_indirect_serving?: boolean
-  }
-} | {
-  id?: string // uuid
-  name: string
-  slug?: string
-  enabled: boolean
-  change_description?: string
-  type: "managed_call"
-  configuration?: {
   // ...
 }
 ```
@@ -5337,6 +5392,7 @@ type EmbeddedOutboundUseCaseRequest = {
   type: "outbound"
   configuration?: {
     event_catalog_event: string
+    event_filter?: string
     mappings: Array<{
       id?: { ... }
       name: { ... }
@@ -5346,6 +5402,7 @@ type EmbeddedOutboundUseCaseRequest = {
       created_at?: { ... }
       updated_at?: { ... }
     }>
+    ack_tracking?: "on" | "off"
   }
 }
 ```
@@ -5361,6 +5418,27 @@ type EmbeddedFileProxyUseCaseRequest = {
   change_description?: string
   type: "file_proxy"
   configuration?: {
+    direction?: "download" | "upload"
+    upload?: {
+      max_file_bytes?: { ... }
+      max_delivery_attempts?: { ... }
+      success_when?: { ... }
+      external_id?: { ... }
+    }
+    fan_out?: {
+      enabled: { ... }
+      split_expression?: { ... }
+    }
+    params_mapping?: string
+    lookups?: Record<string, {
+      source: { ... }
+      entries: { ... }
+      default?: { ... }
+      on_miss?: { ... }
+    }>
+    constants?: Record<string, unknown>
+    file_source?: string
+    required_params?: string[]
     secure_proxy?: {
       use_case_slug: { ... }
     }
@@ -5391,7 +5469,7 @@ type EmbeddedFileProxyUseCaseRequest = {
       body?: { ... }
       response_type: { ... }
     }>
-    response: {
+    response?: {
       body: { ... }
       encoding: { ... }
       filename?: { ... }
@@ -5514,6 +5592,7 @@ type OutboundUseCase = {
   updated_at: string // date-time
   configuration?: {
     event_catalog_event: string
+    event_filter?: string
     mappings: Array<{
       id?: { ... }
       name: { ... }
@@ -5523,6 +5602,7 @@ type OutboundUseCase = {
       created_at?: { ... }
       updated_at?: { ... }
     }>
+    ack_tracking?: "on" | "off"
   }
 }
 ```
@@ -5542,6 +5622,27 @@ type FileProxyUseCase = {
   created_at: string // date-time
   updated_at: string // date-time
   configuration?: {
+    direction?: "download" | "upload"
+    upload?: {
+      max_file_bytes?: { ... }
+      max_delivery_attempts?: { ... }
+      success_when?: { ... }
+      external_id?: { ... }
+    }
+    fan_out?: {
+      enabled: { ... }
+      split_expression?: { ... }
+    }
+    params_mapping?: string
+    lookups?: Record<string, {
+      source: { ... }
+      entries: { ... }
+      default?: { ... }
+      on_miss?: { ... }
+    }>
+    constants?: Record<string, unknown>
+    file_source?: string
+    required_params?: string[]
     secure_proxy?: {
       use_case_slug: { ... }
     }
@@ -5572,7 +5673,7 @@ type FileProxyUseCase = {
       body?: { ... }
       response_type: { ... }
     }>
-    response: {
+    response?: {
       body: { ... }
       encoding: { ... }
       filename?: { ... }
@@ -5685,6 +5786,7 @@ type UseCase = {
   updated_at: string // date-time
   configuration?: {
     event_catalog_event: string
+    event_filter?: string
     mappings: Array<{
       id?: { ... }
       name: { ... }
@@ -5694,6 +5796,7 @@ type UseCase = {
       created_at?: { ... }
       updated_at?: { ... }
     }>
+    ack_tracking?: "on" | "off"
   }
 } | {
   id: string // uuid
@@ -5707,6 +5810,27 @@ type UseCase = {
   created_at: string // date-time
   updated_at: string // date-time
   configuration?: {
+    direction?: "download" | "upload"
+    upload?: {
+      max_file_bytes?: { ... }
+      max_delivery_attempts?: { ... }
+      success_when?: { ... }
+      external_id?: { ... }
+    }
+    fan_out?: {
+      enabled: { ... }
+      split_expression?: { ... }
+    }
+    params_mapping?: string
+    lookups?: Record<string, {
+      source: { ... }
+      entries: { ... }
+      default?: { ... }
+      on_miss?: { ... }
+    }>
+    constants?: Record<string, unknown>
+    file_source?: string
+    required_params?: string[]
     secure_proxy?: {
       use_case_slug: { ... }
     }
@@ -5718,29 +5842,6 @@ type UseCase = {
       scope?: { ... }
       audience?: { ... }
       resource?: { ... }
-      username?: { ... }
-      password?: { ... }
-      body_params?: { ... }
-      headers?: { ... }
-      query_params?: { ... }
-    }
-    params?: Array<{
-      name: { ... }
-      required: { ... }
-      description?: { ... }
-    }>
-    allowed_origins?: string // uri[]
-    steps: Array<{
-      url: { ... }
-      method: { ... }
-      headers?: { ... }
-      body?: { ... }
-      response_type: { ... }
-    }>
-    response: {
-      body: { ... }
-      encoding: { ... }
-      filename?: { ... }
   // ...
 }
 ```
@@ -5780,6 +5881,7 @@ type CreateUseCaseRequest = {
   type: "outbound"
   configuration?: {
     event_catalog_event: string
+    event_filter?: string
     mappings: Array<{
       id?: { ... }
       name: { ... }
@@ -5789,6 +5891,7 @@ type CreateUseCaseRequest = {
       created_at?: { ... }
       updated_at?: { ... }
     }>
+    ack_tracking?: "on" | "off"
   }
 } | {
   name: string
@@ -5796,6 +5899,27 @@ type CreateUseCaseRequest = {
   enabled: boolean
   type: "file_proxy"
   configuration?: {
+    direction?: "download" | "upload"
+    upload?: {
+      max_file_bytes?: { ... }
+      max_delivery_attempts?: { ... }
+      success_when?: { ... }
+      external_id?: { ... }
+    }
+    fan_out?: {
+      enabled: { ... }
+      split_expression?: { ... }
+    }
+    params_mapping?: string
+    lookups?: Record<string, {
+      source: { ... }
+      entries: { ... }
+      default?: { ... }
+      on_miss?: { ... }
+    }>
+    constants?: Record<string, unknown>
+    file_source?: string
+    required_params?: string[]
     secure_proxy?: {
       use_case_slug: { ... }
     }
@@ -5825,29 +5949,6 @@ type CreateUseCaseRequest = {
       headers?: { ... }
       body?: { ... }
       response_type: { ... }
-    }>
-    response: {
-      body: { ... }
-      encoding: { ... }
-      filename?: { ... }
-      content_type?: { ... }
-    }
-    prevent_indirect_serving?: boolean
-  }
-} | {
-  name: string
-  slug: string
-  enabled: boolean
-  type: "managed_call"
-  configuration?: {
-    operation: {
-      method: { ... }
-      path: { ... }
-      headers?: { ... }
-      query_params?: { ... }
-    }
-    request_mapping?: string
-    response_mapping?: string
   // ...
 }
 ```
@@ -5903,6 +6004,7 @@ type CreateOutboundUseCaseRequest = {
   type: "outbound"
   configuration?: {
     event_catalog_event: string
+    event_filter?: string
     mappings: Array<{
       id?: { ... }
       name: { ... }
@@ -5912,6 +6014,7 @@ type CreateOutboundUseCaseRequest = {
       created_at?: { ... }
       updated_at?: { ... }
     }>
+    ack_tracking?: "on" | "off"
   }
 }
 ```
@@ -5925,6 +6028,27 @@ type CreateFileProxyUseCaseRequest = {
   enabled: boolean
   type: "file_proxy"
   configuration?: {
+    direction?: "download" | "upload"
+    upload?: {
+      max_file_bytes?: { ... }
+      max_delivery_attempts?: { ... }
+      success_when?: { ... }
+      external_id?: { ... }
+    }
+    fan_out?: {
+      enabled: { ... }
+      split_expression?: { ... }
+    }
+    params_mapping?: string
+    lookups?: Record<string, {
+      source: { ... }
+      entries: { ... }
+      default?: { ... }
+      on_miss?: { ... }
+    }>
+    constants?: Record<string, unknown>
+    file_source?: string
+    required_params?: string[]
     secure_proxy?: {
       use_case_slug: { ... }
     }
@@ -5955,7 +6079,7 @@ type CreateFileProxyUseCaseRequest = {
       body?: { ... }
       response_type: { ... }
     }>
-    response: {
+    response?: {
       body: { ... }
       encoding: { ... }
       filename?: { ... }
@@ -6041,6 +6165,7 @@ type UpdateUseCaseRequest = {
   type?: "outbound"
   configuration?: {
     event_catalog_event: string
+    event_filter?: string
     mappings: Array<{
       id?: { ... }
       name: { ... }
@@ -6050,6 +6175,7 @@ type UpdateUseCaseRequest = {
       created_at?: { ... }
       updated_at?: { ... }
     }>
+    ack_tracking?: "on" | "off"
   }
 } | {
   name?: string
@@ -6058,6 +6184,27 @@ type UpdateUseCaseRequest = {
   change_description?: string
   type?: "file_proxy"
   configuration?: {
+    direction?: "download" | "upload"
+    upload?: {
+      max_file_bytes?: { ... }
+      max_delivery_attempts?: { ... }
+      success_when?: { ... }
+      external_id?: { ... }
+    }
+    fan_out?: {
+      enabled: { ... }
+      split_expression?: { ... }
+    }
+    params_mapping?: string
+    lookups?: Record<string, {
+      source: { ... }
+      entries: { ... }
+      default?: { ... }
+      on_miss?: { ... }
+    }>
+    constants?: Record<string, unknown>
+    file_source?: string
+    required_params?: string[]
     secure_proxy?: {
       use_case_slug: { ... }
     }
@@ -6084,29 +6231,6 @@ type UpdateUseCaseRequest = {
     steps: Array<{
       url: { ... }
       method: { ... }
-      headers?: { ... }
-      body?: { ... }
-      response_type: { ... }
-    }>
-    response: {
-      body: { ... }
-      encoding: { ... }
-      filename?: { ... }
-      content_type?: { ... }
-    }
-    prevent_indirect_serving?: boolean
-  }
-} | {
-  name?: string
-  slug?: string
-  enabled?: boolean
-  change_description?: string
-  type?: "managed_call"
-  configuration?: {
-    operation: {
-      method: { ... }
-      path: { ... }
-      headers?: { ... }
   // ...
 }
 ```
@@ -6165,6 +6289,7 @@ type UpdateOutboundUseCaseRequest = {
   type?: "outbound"
   configuration?: {
     event_catalog_event: string
+    event_filter?: string
     mappings: Array<{
       id?: { ... }
       name: { ... }
@@ -6174,6 +6299,7 @@ type UpdateOutboundUseCaseRequest = {
       created_at?: { ... }
       updated_at?: { ... }
     }>
+    ack_tracking?: "on" | "off"
   }
 }
 ```
@@ -6188,6 +6314,27 @@ type UpdateFileProxyUseCaseRequest = {
   change_description?: string
   type?: "file_proxy"
   configuration?: {
+    direction?: "download" | "upload"
+    upload?: {
+      max_file_bytes?: { ... }
+      max_delivery_attempts?: { ... }
+      success_when?: { ... }
+      external_id?: { ... }
+    }
+    fan_out?: {
+      enabled: { ... }
+      split_expression?: { ... }
+    }
+    params_mapping?: string
+    lookups?: Record<string, {
+      source: { ... }
+      entries: { ... }
+      default?: { ... }
+      on_miss?: { ... }
+    }>
+    constants?: Record<string, unknown>
+    file_source?: string
+    required_params?: string[]
     secure_proxy?: {
       use_case_slug: { ... }
     }
@@ -6218,7 +6365,7 @@ type UpdateFileProxyUseCaseRequest = {
       body?: { ... }
       response_type: { ... }
     }>
-    response: {
+    response?: {
       body: { ... }
       encoding: { ... }
       filename?: { ... }
@@ -6324,6 +6471,7 @@ type UseCaseHistoryEntry = {
   type: "outbound"
   configuration?: {
     event_catalog_event: string
+    event_filter?: string
     mappings: Array<{
       id?: { ... }
       name: { ... }
@@ -6333,6 +6481,7 @@ type UseCaseHistoryEntry = {
       created_at?: { ... }
       updated_at?: { ... }
     }>
+    ack_tracking?: "on" | "off"
   }
 } | {
   id: string // uuid
@@ -6348,34 +6497,32 @@ type UseCaseHistoryEntry = {
   history_created_at: string // date-time
   type: "file_proxy"
   configuration?: {
+    direction?: "download" | "upload"
+    upload?: {
+      max_file_bytes?: { ... }
+      max_delivery_attempts?: { ... }
+      success_when?: { ... }
+      external_id?: { ... }
+    }
+    fan_out?: {
+      enabled: { ... }
+      split_expression?: { ... }
+    }
+    params_mapping?: string
+    lookups?: Record<string, {
+      source: { ... }
+      entries: { ... }
+      default?: { ... }
+      on_miss?: { ... }
+    }>
+    constants?: Record<string, unknown>
+    file_source?: string
+    required_params?: string[]
     secure_proxy?: {
       use_case_slug: { ... }
     }
     auth?: {
       type: { ... }
-      token_url: { ... }
-      client_id: { ... }
-      client_secret: { ... }
-      scope?: { ... }
-      audience?: { ... }
-      resource?: { ... }
-      username?: { ... }
-      password?: { ... }
-      body_params?: { ... }
-      headers?: { ... }
-      query_params?: { ... }
-    }
-    params?: Array<{
-      name: { ... }
-      required: { ... }
-      description?: { ... }
-    }>
-    allowed_origins?: string // uri[]
-    steps: Array<{
-      url: { ... }
-      method: { ... }
-      headers?: { ... }
-      body?: { ... }
   // ...
 }
 ```
@@ -6455,6 +6602,7 @@ type OutboundUseCaseHistoryEntry = {
   type: "outbound"
   configuration?: {
     event_catalog_event: string
+    event_filter?: string
     mappings: Array<{
       id?: { ... }
       name: { ... }
@@ -6464,6 +6612,7 @@ type OutboundUseCaseHistoryEntry = {
       created_at?: { ... }
       updated_at?: { ... }
     }>
+    ack_tracking?: "on" | "off"
   }
 }
 ```
@@ -6485,6 +6634,27 @@ type FileProxyUseCaseHistoryEntry = {
   history_created_at: string // date-time
   type: "file_proxy"
   configuration?: {
+    direction?: "download" | "upload"
+    upload?: {
+      max_file_bytes?: { ... }
+      max_delivery_attempts?: { ... }
+      success_when?: { ... }
+      external_id?: { ... }
+    }
+    fan_out?: {
+      enabled: { ... }
+      split_expression?: { ... }
+    }
+    params_mapping?: string
+    lookups?: Record<string, {
+      source: { ... }
+      entries: { ... }
+      default?: { ... }
+      on_miss?: { ... }
+    }>
+    constants?: Record<string, unknown>
+    file_source?: string
+    required_params?: string[]
     secure_proxy?: {
       use_case_slug: { ... }
     }
@@ -6515,7 +6685,7 @@ type FileProxyUseCaseHistoryEntry = {
       body?: { ... }
       response_type: { ... }
     }>
-    response: {
+    response?: {
       body: { ... }
       encoding: { ... }
       filename?: { ... }
@@ -6999,13 +7169,35 @@ type CommitTypesResponse = {
 
 ### `FileProxyUseCaseConfiguration`
 
-Configuration for file_proxy use cases. Defines how to authenticate and fetch files from external document systems.
+Configuration for file_proxy use cases. Defines how to authenticate and move files
+between epilot and an external document system, in either direction (see `direction`).
 
-The file proxy download URL always requires `orgId`, `integrationId`, and either `useCaseSlug` (recommended) or `useCaseId` (legacy UUID) as query parameters.
-The `orgId` is included 
+**Download** (`direction: download`, the default) fetches a file from the external system
+and serves it to a browser. The downloa
 
 ```ts
 type FileProxyUseCaseConfiguration = {
+  direction?: "download" | "upload"
+  upload?: {
+    max_file_bytes?: number
+    max_delivery_attempts?: number
+    success_when?: string
+    external_id?: string
+  }
+  fan_out?: {
+    enabled: boolean
+    split_expression?: string
+  }
+  params_mapping?: string
+  lookups?: Record<string, {
+    source: string
+    entries: Record<string, string>
+    default?: string
+    on_miss?: "default" | "warn" | "fail"
+  }>
+  constants?: Record<string, unknown>
+  file_source?: string
+  required_params?: string[]
   secure_proxy?: {
     use_case_slug: string
   }
@@ -7031,12 +7223,12 @@ type FileProxyUseCaseConfiguration = {
   allowed_origins?: string // uri[]
   steps: Array<{
     url: string
-    method: "GET" | "POST"
+    method: "GET" | "POST" | "PUT" | "PATCH"
     headers?: Record<string, string>
     body?: string
     response_type: "json" | "binary"
   }>
-  response: {
+  response?: {
     body: string
     encoding: "base64" | "binary"
     filename?: string
@@ -7088,14 +7280,50 @@ type FileProxyParam = {
 ```ts
 type FileProxyStep = {
   url: string
-  method: "GET" | "POST"
+  method: "GET" | "POST" | "PUT" | "PATCH"
   headers?: Record<string, string>
   body?: string
   response_type: "json" | "binary"
 }
 ```
 
+### `FileProxyFanOutConfig`
+
+Splits one event into several independent deliveries.
+
+Mirrors the inbound mapping idiom, where an entity's JSONata expression returning an array
+produces one entity update per element. Made explicit with a toggle here because an upload
+is also legitimately used without splitting, and because auto-d
+
+```ts
+type FileProxyFanOutConfig = {
+  enabled: boolean
+  split_expression?: string
+}
+```
+
+### `FileProxyUploadConfig`
+
+Upload-side settings for a file_proxy use case with `direction: upload`.
+Everything about WHAT is sent lives on the outbound mapping
+(see `FileProxyDeliveryConfig`); this object only governs HOW the transfer is bounded
+and judged.
+
+
+```ts
+type FileProxyUploadConfig = {
+  max_file_bytes?: number
+  max_delivery_attempts?: number
+  success_when?: string
+  external_id?: string
+}
+```
+
 ### `FileProxyResponseConfig`
+
+How to extract the file from the step results. REQUIRED when `direction` is `download`;
+rejected when `direction` is `upload` (an upload has no file to extract).
+
 
 ```ts
 type FileProxyResponseConfig = {
@@ -7343,7 +7571,7 @@ type IntegrationConfigurationV2 = {
 
 ### `OutboundMapping`
 
-A mapping that delivers an event to an external system — either pushed to a webhook (with a JSONata payload transformation) or made available on the pull-based poll queue (raw event payload, no transformation)
+A mapping that delivers an event to an external system by one of three mechanisms — pushed to a webhook (with a JSONata payload transformation), made available on the pull-based poll queue (raw event payload, no transformation), or handed to a file_proxy use case that uploads files to an external do
 
 ```ts
 type OutboundMapping = {
@@ -7361,6 +7589,9 @@ type OutboundMapping = {
     retention_days?: number
     poison_policy?: "dead_letter" | "block"
     max_delivery_attempts?: number
+  } | {
+    type: "file_proxy"
+    use_case_slug: string
   }
   created_at?: string // date-time
   updated_at?: string // date-time
@@ -7369,7 +7600,7 @@ type OutboundMapping = {
 
 ### `DeliveryConfig`
 
-Configuration for how the event should be delivered. webhook = push delivery via svc-webhooks (JSONata-transformed payload); poll = pull-based queue delivery where the consumer fetches items via the poll API (raw event payload)
+Configuration for how the event should be delivered. webhook = push delivery via svc-webhooks (JSONata-transformed payload); poll = pull-based queue delivery where the consumer fetches items via the poll API (raw event payload); file_proxy = one push per event attachment to an external document syst
 
 ```ts
 type DeliveryConfig = {
@@ -7382,6 +7613,9 @@ type DeliveryConfig = {
   retention_days?: number
   poison_policy?: "dead_letter" | "block"
   max_delivery_attempts?: number
+} | {
+  type: "file_proxy"
+  use_case_slug: string
 }
 ```
 
@@ -7408,6 +7642,35 @@ type PollDeliveryConfig = {
   retention_days?: number
   poison_policy?: "dead_letter" | "block"
   max_delivery_attempts?: number
+}
+```
+
+### `FileProxyDeliveryConfig`
+
+Push delivery to an external document system through a `file_proxy` use case.
+
+A pure pointer, deliberately. The outbound use case decides WHEN to deliver — its event
+name plus `event_filter` — and the referenced `file_proxy` use case decides WHAT and HOW:
+which items to fan out over (`fan_out`), wh
+
+```ts
+type FileProxyDeliveryConfig = {
+  type: "file_proxy"
+  use_case_slug: string
+}
+```
+
+### `FileProxyLookup`
+
+A named translation from a value in the event to a value the external system expects.
+
+
+```ts
+type FileProxyLookup = {
+  source: string
+  entries: Record<string, string>
+  default?: string
+  on_miss?: "default" | "warn" | "fail"
 }
 ```
 
@@ -7440,6 +7703,15 @@ type OutboundStatusResponse = {
       blocked: { ... }
       dlq_count: { ... }
     }
+    file_proxy?: Array<{
+      mapping_id: { ... }
+      use_case_slug: { ... }
+      resolved: { ... }
+      target_use_case_id?: { ... }
+      target_enabled?: { ... }
+      target_updated_at?: { ... }
+      unresolved_reason?: { ... }
+    }>
   }>
 }
 ```
@@ -7472,6 +7744,35 @@ type OutboundUseCaseStatus = {
     blocked: boolean
     dlq_count: number
   }
+  file_proxy?: Array<{
+    mapping_id: string
+    use_case_slug: string
+    resolved: boolean
+    target_use_case_id?: string // uuid
+    target_enabled?: boolean
+    target_updated_at?: string // date-time
+    unresolved_reason?: "not_found" | "wrong_type" | "wrong_direction" | "disabled"
+  }>
+}
+```
+
+### `OutboundFileProxyTargetStatus`
+
+Resolution state of one file_proxy mapping's referenced upload use case.
+
+Because the transport lives on a separate use case, edits to the endpoint or credentials
+do not appear in THIS use case's history. `target_updated_at` is the hook that lets an
+operator notice a target changed underneath a deli
+
+```ts
+type OutboundFileProxyTargetStatus = {
+  mapping_id: string
+  use_case_slug: string
+  resolved: boolean
+  target_use_case_id?: string // uuid
+  target_enabled?: boolean
+  target_updated_at?: string // date-time
+  unresolved_reason?: "not_found" | "wrong_type" | "wrong_direction" | "disabled"
 }
 ```
 

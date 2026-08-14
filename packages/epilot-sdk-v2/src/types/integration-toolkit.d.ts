@@ -1347,12 +1347,17 @@ export declare namespace Components {
          */
         export interface CreateErpImportRequest {
             s3_reference: S3Reference;
+            /**
+             * Return a sample of the file's first rows. Informational only — `:validate` is still the authority. `preview` is present iff this is true.
+             */
+            include_preview?: boolean;
         }
         export interface CreateErpImportResponse {
             /**
              * `imp_{ULID}` — time-ordered, also used as the job's correlation_id.
              */
             import_id: string;
+            preview?: /* Sample of the file's first rows, using the same parser as `:validate`. `status` is the outcome of this read, not a verdict on the file. */ ErpImportFilePreview;
         }
         export interface CreateFileProxyUseCaseRequest {
             /**
@@ -1373,11 +1378,25 @@ export declare namespace Components {
              */
             type: "file_proxy";
             configuration?: /**
-             * Configuration for file_proxy use cases. Defines how to authenticate and fetch files from external document systems.
+             * Configuration for file_proxy use cases. Defines how to authenticate and move files
+             * between epilot and an external document system, in either direction (see `direction`).
              *
-             * The file proxy download URL always requires `orgId`, `integrationId`, and either `useCaseSlug` (recommended) or `useCaseId` (legacy UUID) as query parameters.
-             * The `orgId` is included in the signed URL to establish organization context without requiring authentication.
-             * Additional use-case-specific parameters are declared in the `params` array.
+             * **Download** (`direction: download`, the default) fetches a file from the external system
+             * and serves it to a browser. The download URL always requires `orgId`, `integrationId`, and
+             * either `useCaseSlug` (recommended) or `useCaseId` (legacy UUID) as query parameters.
+             * The `orgId` is included in the signed URL to establish organization context without
+             * requiring authentication. Additional use-case-specific parameters are declared in the
+             * `params` array. `response` is REQUIRED for download use cases.
+             *
+             * **Upload** (`direction: upload`) pushes epilot files to the external system. It is not
+             * reachable over the download endpoint; an outbound use case points at it via a `file_proxy`
+             * delivery, and this configuration owns everything about what gets sent: `fan_out` decides
+             * how many deliveries one event produces, `params_mapping` builds the values, and the
+             * `steps` place those values into requests via `{{ params.* }}`.
+             * `upload` and `params_mapping` are REQUIRED and `response` MUST be omitted.
+             *
+             * OpenAPI 3.0 cannot express this conditional requiredness, so it is enforced by the
+             * server-side validator, which returns an explicit message naming the offending field.
              *
              */
             FileProxyUseCaseConfiguration;
@@ -1530,9 +1549,26 @@ export declare namespace Components {
             component_id: string; // uuid
         }
         /**
-         * Configuration for how the event should be delivered. webhook = push delivery via svc-webhooks (JSONata-transformed payload); poll = pull-based queue delivery where the consumer fetches items via the poll API (raw event payload)
+         * Configuration for how the event should be delivered. webhook = push delivery via svc-webhooks (JSONata-transformed payload); poll = pull-based queue delivery where the consumer fetches items via the poll API (raw event payload); file_proxy = one push per event attachment to an external document system, through a file_proxy use case (JSONata-transformed payload carrying the file bytes)
          */
-        export type DeliveryConfig = /* Configuration for how the event should be delivered. webhook = push delivery via svc-webhooks (JSONata-transformed payload); poll = pull-based queue delivery where the consumer fetches items via the poll API (raw event payload) */ /* Push delivery of the transformed event to a webhook via svc-webhooks */ WebhookDeliveryConfig | /* Pull-based queue delivery. Items carry the raw standardized event-catalog payload; no JSONata mapping is applied in poll mode. Consumers fetch and acknowledge items via the poll API. */ PollDeliveryConfig;
+        export type DeliveryConfig = /* Configuration for how the event should be delivered. webhook = push delivery via svc-webhooks (JSONata-transformed payload); poll = pull-based queue delivery where the consumer fetches items via the poll API (raw event payload); file_proxy = one push per event attachment to an external document system, through a file_proxy use case (JSONata-transformed payload carrying the file bytes) */ /* Push delivery of the transformed event to a webhook via svc-webhooks */ WebhookDeliveryConfig | /* Pull-based queue delivery. Items carry the raw standardized event-catalog payload; no JSONata mapping is applied in poll mode. Consumers fetch and acknowledge items via the poll API. */ PollDeliveryConfig | /**
+         * Push delivery to an external document system through a `file_proxy` use case.
+         *
+         * A pure pointer, deliberately. The outbound use case decides WHEN to deliver — its event
+         * name plus `event_filter` — and the referenced `file_proxy` use case decides WHAT and HOW:
+         * which items to fan out over (`fan_out`), what values to build (`params_mapping`,
+         * `lookups`, `constants`), and the steps that send them. Keeping every file concern on the
+         * file_proxy side is what lets one upload recipe be shared by several event subscriptions
+         * without duplicating any of it.
+         *
+         * `jsonata_expression` on the mapping is NOT used for this delivery type and is rejected.
+         *
+         * The slug is resolved at delivery time, not at save time, so use cases can be saved in any
+         * order; a dangling reference surfaces as a `USE_CASE_NOT_FOUND` monitoring event naming
+         * the referencing mapping.
+         *
+         */
+        FileProxyDeliveryConfig;
         export interface EmbeddedFileProxyUseCaseRequest {
             /**
              * Optional use case ID for update matching.
@@ -1564,11 +1600,25 @@ export declare namespace Components {
              */
             type: "file_proxy";
             configuration?: /**
-             * Configuration for file_proxy use cases. Defines how to authenticate and fetch files from external document systems.
+             * Configuration for file_proxy use cases. Defines how to authenticate and move files
+             * between epilot and an external document system, in either direction (see `direction`).
              *
-             * The file proxy download URL always requires `orgId`, `integrationId`, and either `useCaseSlug` (recommended) or `useCaseId` (legacy UUID) as query parameters.
-             * The `orgId` is included in the signed URL to establish organization context without requiring authentication.
-             * Additional use-case-specific parameters are declared in the `params` array.
+             * **Download** (`direction: download`, the default) fetches a file from the external system
+             * and serves it to a browser. The download URL always requires `orgId`, `integrationId`, and
+             * either `useCaseSlug` (recommended) or `useCaseId` (legacy UUID) as query parameters.
+             * The `orgId` is included in the signed URL to establish organization context without
+             * requiring authentication. Additional use-case-specific parameters are declared in the
+             * `params` array. `response` is REQUIRED for download use cases.
+             *
+             * **Upload** (`direction: upload`) pushes epilot files to the external system. It is not
+             * reachable over the download endpoint; an outbound use case points at it via a `file_proxy`
+             * delivery, and this configuration owns everything about what gets sent: `fan_out` decides
+             * how many deliveries one event produces, `params_mapping` builds the values, and the
+             * `steps` place those values into requests via `{{ params.* }}`.
+             * `upload` and `params_mapping` are REQUIRED and `response` MUST be omitted.
+             *
+             * OpenAPI 3.0 cannot express this conditional requiredness, so it is enforced by the
+             * server-side validator, which returns an explicit message naming the offending field.
              *
              */
             FileProxyUseCaseConfiguration;
@@ -2046,6 +2096,23 @@ export declare namespace Components {
             message: string;
         }
         /**
+         * Sample of the file's first rows, using the same parser as `:validate`. `status` is the outcome of this read, not a verdict on the file.
+         */
+        export interface ErpImportFilePreview {
+            /**
+             * Treat an unrecognized value as "no preview available". Values may be added. UNREADABLE covers empty, header-only, malformed, or gone — there is no breakdown; `:validate` reports the reason.
+             */
+            status: "AVAILABLE" | "FORMAT_UNSUPPORTED" | "UNREADABLE";
+            /**
+             * Effective column names (trimmed, duplicates collapsed). Set iff `status` is AVAILABLE.
+             */
+            columns?: string[];
+            /**
+             * Up to the first 5 data rows, aligned to `columns`.
+             */
+            rows?: string[][];
+        }
+        /**
          * A problem found during validation, scoped to the file as a whole rather than to individual rows. See `code` for the kinds reported.
          */
         export interface ErpImportIssue {
@@ -2129,6 +2196,10 @@ export declare namespace Components {
             integration_name: string;
             use_case_slug: string;
             use_case_name: string;
+            /**
+             * How many distinct entity schemas this mapping uses.
+             */
+            entity_types: number;
             /**
              * How many of the FILE's columns this use case reads, by exact trimmed name.
              */
@@ -2324,6 +2395,110 @@ export declare namespace Components {
                 [name: string]: string;
             };
         }
+        /**
+         * Push delivery to an external document system through a `file_proxy` use case.
+         *
+         * A pure pointer, deliberately. The outbound use case decides WHEN to deliver — its event
+         * name plus `event_filter` — and the referenced `file_proxy` use case decides WHAT and HOW:
+         * which items to fan out over (`fan_out`), what values to build (`params_mapping`,
+         * `lookups`, `constants`), and the steps that send them. Keeping every file concern on the
+         * file_proxy side is what lets one upload recipe be shared by several event subscriptions
+         * without duplicating any of it.
+         *
+         * `jsonata_expression` on the mapping is NOT used for this delivery type and is rejected.
+         *
+         * The slug is resolved at delivery time, not at save time, so use cases can be saved in any
+         * order; a dangling reference surfaces as a `USE_CASE_NOT_FOUND` monitoring event naming
+         * the referencing mapping.
+         *
+         */
+        export interface FileProxyDeliveryConfig {
+            /**
+             * Delivery mechanism type
+             */
+            type: "file_proxy";
+            /**
+             * Slug of a `file_proxy` use case with `direction: upload` in the SAME integration.
+             *
+             * example:
+             * wemag_d3_document_upload
+             */
+            use_case_slug: string;
+        }
+        /**
+         * Splits one event into several independent deliveries.
+         *
+         * Mirrors the inbound mapping idiom, where an entity's JSONata expression returning an array
+         * produces one entity update per element. Made explicit with a toggle here because an upload
+         * is also legitimately used without splitting, and because auto-detecting "array means
+         * split" would make a single-element result ambiguous.
+         *
+         * Each resulting delivery is fully independent: its own idempotency record, its own retry
+         * schedule, its own monitoring events. A four-item event can therefore end up three-of-four
+         * delivered, which is the honest state to report.
+         *
+         * The split is evaluated ONCE, when the event is enqueued, so item indices — and therefore
+         * idempotency keys — stay stable across retries.
+         *
+         */
+        export interface FileProxyFanOutConfig {
+            /**
+             * When false (or absent), the event produces exactly one delivery and `$item` is not
+             * bound in `params_mapping`.
+             *
+             */
+            enabled: boolean;
+            /**
+             * JSONata over the event that MUST return an array; one delivery is created per element,
+             * bound as `$item` in `params_mapping`. Required when `enabled` is true.
+             *
+             * Keep this a plain projection — scoping which events are handled at all belongs in the
+             * outbound use case's `event_filter`, not here. A non-array result fails the event with
+             * `FAN_OUT_INVALID_RESULT`; an empty array produces no deliveries and one info-level
+             * `FAN_OUT_EMPTY`, which is the normal outcome for a catch-all subscription seeing an
+             * event with nothing to send.
+             *
+             * example:
+             * event_attachments
+             */
+            split_expression?: string;
+        }
+        /**
+         * A named translation from a value in the event to a value the external system expects.
+         *
+         */
+        export interface FileProxyLookup {
+            /**
+             * JSONata expression over the event producing the lookup key
+             * example:
+             * ticket._purpose_name[0]
+             */
+            source: string;
+            /**
+             * Key-to-value translation table
+             * example:
+             * {
+             *   "Zählerstandsmeldung": "Zählerstand",
+             *   "Kündigung": "Kündigung"
+             * }
+             */
+            entries: {
+                [name: string]: string;
+            };
+            /**
+             * Value used when the key is absent from `entries`
+             */
+            default?: string;
+            /**
+             * What happens when the key is not in `entries`.
+             * `default` substitutes `default` silently; `warn` substitutes it and emits a
+             * `LOOKUP_UNMAPPED` warning so the gap is visible without stopping delivery;
+             * `fail` aborts the delivery terminally.
+             * Defaults to `default` when a `default` is set, and to `warn` when it is not.
+             *
+             */
+            on_miss?: "default" | "warn" | "fail";
+        }
         export interface FileProxyParam {
             /**
              * Parameter name as it appears in the query string
@@ -2338,6 +2513,11 @@ export declare namespace Components {
              */
             description?: string;
         }
+        /**
+         * How to extract the file from the step results. REQUIRED when `direction` is `download`;
+         * rejected when `direction` is `upload` (an upload has no file to extract).
+         *
+         */
         export interface FileProxyResponseConfig {
             /**
              * JSONata expression to extract file content from step results
@@ -2370,7 +2550,7 @@ export declare namespace Components {
             /**
              * HTTP method
              */
-            method: "GET" | "POST";
+            method: "GET" | "POST" | "PUT" | "PATCH";
             /**
              * Handlebars templates for request headers
              */
@@ -2378,13 +2558,75 @@ export declare namespace Components {
                 [name: string]: string;
             };
             /**
-             * Handlebars template for the request body (POST only)
+             * Handlebars template for the request body (write methods only). On an `upload` use
+             * case this is where the payload is assembled, reading `{{ params.* }}` built by
+             * `params_mapping`, plus `{{ env.* }}` and `{{ steps.N.body }}`.
+             *
+             * **Route every user-controlled value through the `json` helper**: the template engine
+             * does not escape, so `"name":"{{ params.fileName }}"` produces invalid JSON the moment
+             * a filename contains a quote. Write `"name": {{json params.fileName}}` instead — the
+             * helper emits the surrounding quotes itself and renders absent values as `null`. Use
+             * `{{jsonEscape v}}` if you prefer to keep your own quotes. Upload configurations whose
+             * body would break on such input are rejected at save time.
+             *
+             * Handlebars block helpers work, so optional fields can be omitted rather than sent
+             * empty: `{{#if params.pin}},"pin": {{json params.pin}}{{/if}}`. Note that `{{/if}}}`
+             * fails to parse — leave a space before a closing brace: `{{/if}} }`.
+             *
              */
             body?: string;
             /**
              * Expected response type
              */
             response_type: "json" | "binary";
+        }
+        /**
+         * Upload-side settings for a file_proxy use case with `direction: upload`.
+         * Everything about WHAT is sent lives on the outbound mapping
+         * (see `FileProxyDeliveryConfig`); this object only governs HOW the transfer is bounded
+         * and judged.
+         *
+         */
+        export interface FileProxyUploadConfig {
+            /**
+             * Per-file ceiling for this use case, in bytes. Files above it fail terminally with
+             * `FILE_TOO_LARGE` before any bytes are fetched. Defaults to — and is clamped by — the
+             * platform ceiling of 100 MiB (104857600).
+             *
+             */
+            max_file_bytes?: number;
+            /**
+             * Maximum delivery attempts per item before the delivery is marked failed and the
+             * message is dead-lettered. Attempts are spaced by an exponential, jittered backoff
+             * spanning roughly 16 hours over the default 8 attempts, so an ERP maintenance window
+             * does not exhaust them.
+             *
+             * Lives here rather than on the outbound delivery because how hard to retry is a
+             * property of the transport — the same judgement as `max_file_bytes` — and the outbound
+             * delivery is a pure pointer.
+             *
+             */
+            max_delivery_attempts?: number;
+            /**
+             * Optional JSONata predicate evaluated against the final step result
+             * (`{ statusCode, headers, body }`) to decide whether the external system really
+             * accepted the file. When omitted, any 2xx counts as delivered. Use this for systems
+             * that return 200 with an error envelope.
+             *
+             * example:
+             * body.status = 'OK'
+             */
+            success_when?: string;
+            /**
+             * Optional JSONata expression over the step results yielding the external system's
+             * identifier for the stored document. Recorded on the delivery record and on the
+             * `FILE_PROXY_UPLOADED` monitoring event so an operator can find the document in the
+             * target system.
+             *
+             * example:
+             * steps[-1].body.documentId
+             */
+            external_id?: string;
         }
         /**
          * Auto-constructs a file proxy download URL. orgId and integrationId are injected from context. Exactly one of use_case_id or use_case_slug must be provided. Using use_case_slug is recommended as it is portable across environments.
@@ -2476,24 +2718,169 @@ export declare namespace Components {
              */
             updated_at: string; // date-time
             configuration?: /**
-             * Configuration for file_proxy use cases. Defines how to authenticate and fetch files from external document systems.
+             * Configuration for file_proxy use cases. Defines how to authenticate and move files
+             * between epilot and an external document system, in either direction (see `direction`).
              *
-             * The file proxy download URL always requires `orgId`, `integrationId`, and either `useCaseSlug` (recommended) or `useCaseId` (legacy UUID) as query parameters.
-             * The `orgId` is included in the signed URL to establish organization context without requiring authentication.
-             * Additional use-case-specific parameters are declared in the `params` array.
+             * **Download** (`direction: download`, the default) fetches a file from the external system
+             * and serves it to a browser. The download URL always requires `orgId`, `integrationId`, and
+             * either `useCaseSlug` (recommended) or `useCaseId` (legacy UUID) as query parameters.
+             * The `orgId` is included in the signed URL to establish organization context without
+             * requiring authentication. Additional use-case-specific parameters are declared in the
+             * `params` array. `response` is REQUIRED for download use cases.
+             *
+             * **Upload** (`direction: upload`) pushes epilot files to the external system. It is not
+             * reachable over the download endpoint; an outbound use case points at it via a `file_proxy`
+             * delivery, and this configuration owns everything about what gets sent: `fan_out` decides
+             * how many deliveries one event produces, `params_mapping` builds the values, and the
+             * `steps` place those values into requests via `{{ params.* }}`.
+             * `upload` and `params_mapping` are REQUIRED and `response` MUST be omitted.
+             *
+             * OpenAPI 3.0 cannot express this conditional requiredness, so it is enforced by the
+             * server-side validator, which returns an explicit message naming the offending field.
              *
              */
             FileProxyUseCaseConfiguration;
         }
         /**
-         * Configuration for file_proxy use cases. Defines how to authenticate and fetch files from external document systems.
+         * Configuration for file_proxy use cases. Defines how to authenticate and move files
+         * between epilot and an external document system, in either direction (see `direction`).
          *
-         * The file proxy download URL always requires `orgId`, `integrationId`, and either `useCaseSlug` (recommended) or `useCaseId` (legacy UUID) as query parameters.
-         * The `orgId` is included in the signed URL to establish organization context without requiring authentication.
-         * Additional use-case-specific parameters are declared in the `params` array.
+         * **Download** (`direction: download`, the default) fetches a file from the external system
+         * and serves it to a browser. The download URL always requires `orgId`, `integrationId`, and
+         * either `useCaseSlug` (recommended) or `useCaseId` (legacy UUID) as query parameters.
+         * The `orgId` is included in the signed URL to establish organization context without
+         * requiring authentication. Additional use-case-specific parameters are declared in the
+         * `params` array. `response` is REQUIRED for download use cases.
+         *
+         * **Upload** (`direction: upload`) pushes epilot files to the external system. It is not
+         * reachable over the download endpoint; an outbound use case points at it via a `file_proxy`
+         * delivery, and this configuration owns everything about what gets sent: `fan_out` decides
+         * how many deliveries one event produces, `params_mapping` builds the values, and the
+         * `steps` place those values into requests via `{{ params.* }}`.
+         * `upload` and `params_mapping` are REQUIRED and `response` MUST be omitted.
+         *
+         * OpenAPI 3.0 cannot express this conditional requiredness, so it is enforced by the
+         * server-side validator, which returns an explicit message naming the offending field.
          *
          */
         export interface FileProxyUseCaseConfiguration {
+            /**
+             * Direction of file travel. `download` (default) pulls a file from the external system
+             * into epilot; `upload` pushes an epilot file out to the external system. Omitted means
+             * `download`, so every pre-existing configuration keeps its exact meaning.
+             *
+             * Note this is the direction of the FILE, not the epilot use-case type — an `upload`
+             * file_proxy use case is still a `file_proxy` use case, never an `outbound` one.
+             *
+             */
+            direction?: "download" | "upload";
+            upload?: /**
+             * Upload-side settings for a file_proxy use case with `direction: upload`.
+             * Everything about WHAT is sent lives on the outbound mapping
+             * (see `FileProxyDeliveryConfig`); this object only governs HOW the transfer is bounded
+             * and judged.
+             *
+             */
+            FileProxyUploadConfig;
+            fan_out?: /**
+             * Splits one event into several independent deliveries.
+             *
+             * Mirrors the inbound mapping idiom, where an entity's JSONata expression returning an array
+             * produces one entity update per element. Made explicit with a toggle here because an upload
+             * is also legitimately used without splitting, and because auto-detecting "array means
+             * split" would make a single-element result ambiguous.
+             *
+             * Each resulting delivery is fully independent: its own idempotency record, its own retry
+             * schedule, its own monitoring events. A four-item event can therefore end up three-of-four
+             * delivered, which is the honest state to report.
+             *
+             * The split is evaluated ONCE, when the event is enqueued, so item indices — and therefore
+             * idempotency keys — stay stable across retries.
+             *
+             */
+            FileProxyFanOutConfig;
+            /**
+             * Upload-only, REQUIRED when `direction` is `upload`. JSONata expression evaluated once
+             * per fan-out item, producing the `params` object that step templates read as
+             * `{{ params.* }}`.
+             *
+             * The evaluation root is the hydrated event, so `contact.customer_pin` and
+             * `ticket._purpose` are reachable directly, unprefixed.
+             *
+             * **Everything per-item is a `$`-prefixed JSONata binding**: `$item` (the fan-out
+             * element, absent when `fan_out` is disabled), `$file_base64` and `$file`
+             * (`{filename, mime_type, size_bytes}`) for the resolved file, plus `$constants`,
+             * `$lookups`, `$ack_id`, `$germanDate(iso)` and `$now()`. Writing `item.filename`
+             * instead of `$item.filename` yields nothing — it reads a field named `item` on the
+             * event, which does not exist.
+             *
+             * Must evaluate to an object. `constants` are shallow-merged underneath the result, so
+             * the expression wins on any key collision.
+             *
+             * example:
+             * { "documentType": $lookups.documentType, "fileName": $item.filename, "fileData": $file_base64, "pin": contact.customer_pin }
+             */
+            params_mapping?: string;
+            /**
+             * Upload-only. Named translation tables resolved BEFORE `params_mapping` runs and bound
+             * as `$lookups`, so an expression reads `$lookups.documentType` rather than carrying a
+             * conditional chain. Deliberately generic: the next ERP calls the same concept
+             * `Belegart`.
+             *
+             */
+            lookups?: {
+                [name: string]: /**
+                 * A named translation from a value in the event to a value the external system expects.
+                 *
+                 */
+                FileProxyLookup;
+            };
+            /**
+             * Upload-only. Fixed values shallow-merged UNDERNEATH the `params_mapping` result — the
+             * expression wins on key collisions, constants only add. Use for the unchanging strings
+             * (tenant, sender, channel) that would otherwise be repeated in every expression.
+             *
+             * example:
+             * {
+             *   "mandant": "EPILOT_WNG",
+             *   "sender": "KSSP"
+             * }
+             */
+            constants?: {
+                [name: string]: any;
+            };
+            /**
+             * Upload-only. JSONata returning the attachment-shaped object (`entity_id`, optionally
+             * `s3ref`) whose bytes should be fetched for this delivery. The evaluation root is the
+             * event; the fan-out element is the `$item` binding, same as in `params_mapping`.
+             *
+             * Usually unnecessary: when the fan-out item is itself attachment-shaped it is used
+             * directly. Supply this only when splitting over something that is not the attachment
+             * — for example one delivery per meter reading, each carrying a file referenced from
+             * elsewhere in the event. When nothing resolves, no file is fetched and `file_base64`
+             * is undefined, which is valid for a fan-out that sends metadata only.
+             *
+             * example:
+             * event_attachments[entity_id = $item.file_id][0]
+             */
+            file_source?: string;
+            /**
+             * Upload-only. Params that MUST be present after `params_mapping` runs. Any listed name
+             * resolving to null or undefined fails the delivery terminally with
+             * `REQUIRED_PARAM_MISSING` before a single step executes.
+             *
+             * This is the generic net behind a lookup's `on_miss: fail`: it catches a required field
+             * going missing for any reason, so the external system never receives a body that is
+             * silently short a field its API requires.
+             *
+             * example:
+             * [
+             *   "documentType",
+             *   "fileName",
+             *   "fileData"
+             * ]
+             */
+            required_params?: string[];
             /**
              * Optional secure proxy attachment for routing all outbound file proxy requests.
              * Only `use_case_slug` is supported and the referenced secure_proxy use case
@@ -2508,22 +2895,37 @@ export declare namespace Components {
             };
             auth?: FileProxyAuth;
             /**
-             * Additional use-case-specific parameters expected in the download URL query string (beyond the required orgId, integrationId, and useCaseSlug or useCaseId)
+             * Download-only. Additional use-case-specific parameters expected in the download URL
+             * query string (beyond the required orgId, integrationId, and useCaseSlug or useCaseId).
+             * Rejected when `direction` is `upload`.
+             *
              */
             params?: FileProxyParam[];
             /**
-             * Additional origins permitted to call /download for this use case (CORS, exact match). Portal origins are always allowed.
+             * Download-only. Additional origins permitted to call /download for this use case
+             * (CORS, exact match). Portal origins are always allowed. Rejected when `direction`
+             * is `upload`.
+             *
              */
             allowed_origins?: string /* uri ^https?:// */[];
             /**
-             * Ordered list of HTTP steps to execute to retrieve the file
+             * Ordered list of HTTP steps to execute. For `download` these retrieve the file; for
+             * `upload` they deliver it, each assembling its own request body from `{{ params.* }}`
+             * built by `params_mapping`.
+             *
              */
             steps: [
                 FileProxyStep,
                 ...FileProxyStep[]
             ];
-            response: FileProxyResponseConfig;
+            response?: /**
+             * How to extract the file from the step results. REQUIRED when `direction` is `download`;
+             * rejected when `direction` is `upload` (an upload has no file to extract).
+             *
+             */
+            FileProxyResponseConfig;
             /**
+             * Download-only; rejected when `direction` is `upload`.
              * When `true`, this use case is served via the streaming endpoint: mapped file URLs
              * are built as `/stream/download`, files of any size are streamed inline over HTTP
              * response streaming, and buffered `/download` requests for oversize files are
@@ -2584,11 +2986,25 @@ export declare namespace Components {
              */
             type: "file_proxy";
             configuration?: /**
-             * Configuration for file_proxy use cases. Defines how to authenticate and fetch files from external document systems.
+             * Configuration for file_proxy use cases. Defines how to authenticate and move files
+             * between epilot and an external document system, in either direction (see `direction`).
              *
-             * The file proxy download URL always requires `orgId`, `integrationId`, and either `useCaseSlug` (recommended) or `useCaseId` (legacy UUID) as query parameters.
-             * The `orgId` is included in the signed URL to establish organization context without requiring authentication.
-             * Additional use-case-specific parameters are declared in the `params` array.
+             * **Download** (`direction: download`, the default) fetches a file from the external system
+             * and serves it to a browser. The download URL always requires `orgId`, `integrationId`, and
+             * either `useCaseSlug` (recommended) or `useCaseId` (legacy UUID) as query parameters.
+             * The `orgId` is included in the signed URL to establish organization context without
+             * requiring authentication. Additional use-case-specific parameters are declared in the
+             * `params` array. `response` is REQUIRED for download use cases.
+             *
+             * **Upload** (`direction: upload`) pushes epilot files to the external system. It is not
+             * reachable over the download endpoint; an outbound use case points at it via a `file_proxy`
+             * delivery, and this configuration owns everything about what gets sent: `fan_out` decides
+             * how many deliveries one event produces, `params_mapping` builds the values, and the
+             * `steps` place those values into requests via `{{ params.* }}`.
+             * `upload` and `params_mapping` are REQUIRED and `response` MUST be omitted.
+             *
+             * OpenAPI 3.0 cannot express this conditional requiredness, so it is enforced by the
+             * server-side validator, which returns an explicit message naming the offending field.
              *
              */
             FileProxyUseCaseConfiguration;
@@ -4754,6 +5170,49 @@ export declare namespace Components {
             expires_at?: string; // date-time
         }
         /**
+         * Resolution state of one file_proxy mapping's referenced upload use case.
+         *
+         * Because the transport lives on a separate use case, edits to the endpoint or credentials
+         * do not appear in THIS use case's history. `target_updated_at` is the hook that lets an
+         * operator notice a target changed underneath a delivery that started failing.
+         *
+         */
+        export interface OutboundFileProxyTargetStatus {
+            /**
+             * The mapping holding this file_proxy delivery
+             */
+            mapping_id: string;
+            /**
+             * Slug of the referenced file_proxy use case
+             */
+            use_case_slug: string;
+            /**
+             * Whether the slug currently resolves to an enabled `file_proxy` use case with
+             * `direction: upload` in this integration. References are resolved at delivery time,
+             * so `false` is a live warning rather than a save-time error.
+             *
+             */
+            resolved: boolean;
+            /**
+             * Id of the referenced use case — absent when unresolved
+             */
+            target_use_case_id?: string; // uuid
+            /**
+             * Whether the referenced use case is enabled — absent when unresolved
+             */
+            target_enabled?: boolean;
+            /**
+             * When the referenced use case was last modified — absent when unresolved. Surfaced
+             * because a change here is invisible in this use case's own history diff.
+             *
+             */
+            target_updated_at?: string; // date-time
+            /**
+             * Why the reference did not resolve — absent when `resolved` is true
+             */
+            unresolved_reason?: "not_found" | "wrong_type" | "wrong_direction" | "disabled";
+        }
+        /**
          * Configuration for outbound use cases. Defines the event that triggers the flow and the webhook mappings.
          */
         export interface OutboundIntegrationEventConfiguration {
@@ -4764,15 +5223,48 @@ export declare namespace Components {
              */
             event_catalog_event: string;
             /**
+             * JSONata boolean predicate over the hydrated event payload. The use case handles the
+             * event only when this evaluates truthy; when absent it handles every event of its name,
+             * which is the behaviour of every pre-existing configuration.
+             *
+             * This is where event scoping belongs — narrowing to certain ticket purposes, contract
+             * types or channels. Evaluation input is the full hydrated event, so relation nodes such
+             * as `ticket` and `contact` are populated. An expression that throws is treated as no
+             * match and logged, so one malformed filter cannot block the other use cases subscribed
+             * to the same event.
+             *
+             * example:
+             * $count(ticket._purpose[$ in ['bae4b4d1-d728-49ef-92ff-54486dd301b4']]) > 0
+             */
+            event_filter?: string;
+            /**
              * List of mappings that transform and deliver the event
              */
             mappings: [
-                /* A mapping that delivers an event to an external system — either pushed to a webhook (with a JSONata payload transformation) or made available on the pull-based poll queue (raw event payload, no transformation) */ OutboundMapping,
-                .../* A mapping that delivers an event to an external system — either pushed to a webhook (with a JSONata payload transformation) or made available on the pull-based poll queue (raw event payload, no transformation) */ OutboundMapping[]
+                /* A mapping that delivers an event to an external system by one of three mechanisms — pushed to a webhook (with a JSONata payload transformation), made available on the pull-based poll queue (raw event payload, no transformation), or handed to a file_proxy use case that uploads files to an external document system (a pointer only; the referenced use case owns the payload and the fan-out) */ OutboundMapping,
+                .../* A mapping that delivers an event to an external system by one of three mechanisms — pushed to a webhook (with a JSONata payload transformation), made available on the pull-based poll queue (raw event payload, no transformation), or handed to a file_proxy use case that uploads files to an external document system (a pointer only; the referenced use case owns the payload and the fan-out) */ OutboundMapping[]
             ];
+            /**
+             * Whether this use case participates in the acknowledgement protocol.
+             *
+             * `on` (the default, and the behaviour of every pre-existing use case) records an
+             * ACK_PENDING on each event and expects the consumer to confirm receipt via
+             * `POST /v1/erp/tracking/acknowledgement`; unconfirmed events raise ACK_TIMEOUT after
+             * the timeout window.
+             *
+             * `off` opts the use case out entirely: no tracking row, no ACK_PENDING, no
+             * ACK_TIMEOUT. Set it for consumers that never acknowledge — otherwise every event
+             * produces a guaranteed timeout warning — and for deliveries that already keep their
+             * own durable per-item record, such as `file_proxy`.
+             *
+             * The tracking row is per-event, not per-use-case, so it is suppressed only when EVERY
+             * enabled use case matching the event has opted out.
+             *
+             */
+            ack_tracking?: "on" | "off";
         }
         /**
-         * A mapping that delivers an event to an external system — either pushed to a webhook (with a JSONata payload transformation) or made available on the pull-based poll queue (raw event payload, no transformation)
+         * A mapping that delivers an event to an external system by one of three mechanisms — pushed to a webhook (with a JSONata payload transformation), made available on the pull-based poll queue (raw event payload, no transformation), or handed to a file_proxy use case that uploads files to an external document system (a pointer only; the referenced use case owns the payload and the fan-out)
          */
         export interface OutboundMapping {
             /**
@@ -4786,7 +5278,7 @@ export declare namespace Components {
              */
             name: string;
             /**
-             * JSONata expression to transform the event payload. Required for webhook delivery; ignored for poll delivery.
+             * JSONata expression to transform the event payload. Required for webhook delivery, ignored for poll delivery, and rejected for file_proxy delivery — a file_proxy payload is built by the referenced use case's `params_mapping`, so accepting an expression here would silently do nothing.
              * example:
              * { "id": entity._id, "customer": entity.customer_name }
              */
@@ -4795,7 +5287,7 @@ export declare namespace Components {
              * Whether this mapping is active
              */
             enabled: boolean;
-            delivery: /* Configuration for how the event should be delivered. webhook = push delivery via svc-webhooks (JSONata-transformed payload); poll = pull-based queue delivery where the consumer fetches items via the poll API (raw event payload) */ DeliveryConfig;
+            delivery: /* Configuration for how the event should be delivered. webhook = push delivery via svc-webhooks (JSONata-transformed payload); poll = pull-based queue delivery where the consumer fetches items via the poll API (raw event payload); file_proxy = one push per event attachment to an external document system, through a file_proxy use case (JSONata-transformed payload carrying the file bytes) */ DeliveryConfig;
             /**
              * Timestamp when the mapping was created
              */
@@ -5081,6 +5573,20 @@ export declare namespace Components {
              *
              */
             OutboundPollStatus;
+            /**
+             * One entry per file_proxy mapping on this use case. Present only on use cases with a
+             * file_proxy delivery mapping.
+             *
+             */
+            file_proxy?: /**
+             * Resolution state of one file_proxy mapping's referenced upload use case.
+             *
+             * Because the transport lives on a separate use case, edits to the endpoint or credentials
+             * do not appear in THIS use case's history. `target_updated_at` is the hook that lets an
+             * operator notice a target changed underneath a delivery that started failing.
+             *
+             */
+            OutboundFileProxyTargetStatus[];
         }
         /**
          * Pull-based queue delivery. Items carry the raw standardized event-catalog payload; no JSONata mapping is applied in poll mode. Consumers fetch and acknowledge items via the poll API.
@@ -6468,11 +6974,25 @@ export declare namespace Components {
              */
             type?: "file_proxy";
             configuration?: /**
-             * Configuration for file_proxy use cases. Defines how to authenticate and fetch files from external document systems.
+             * Configuration for file_proxy use cases. Defines how to authenticate and move files
+             * between epilot and an external document system, in either direction (see `direction`).
              *
-             * The file proxy download URL always requires `orgId`, `integrationId`, and either `useCaseSlug` (recommended) or `useCaseId` (legacy UUID) as query parameters.
-             * The `orgId` is included in the signed URL to establish organization context without requiring authentication.
-             * Additional use-case-specific parameters are declared in the `params` array.
+             * **Download** (`direction: download`, the default) fetches a file from the external system
+             * and serves it to a browser. The download URL always requires `orgId`, `integrationId`, and
+             * either `useCaseSlug` (recommended) or `useCaseId` (legacy UUID) as query parameters.
+             * The `orgId` is included in the signed URL to establish organization context without
+             * requiring authentication. Additional use-case-specific parameters are declared in the
+             * `params` array. `response` is REQUIRED for download use cases.
+             *
+             * **Upload** (`direction: upload`) pushes epilot files to the external system. It is not
+             * reachable over the download endpoint; an outbound use case points at it via a `file_proxy`
+             * delivery, and this configuration owns everything about what gets sent: `fan_out` decides
+             * how many deliveries one event produces, `params_mapping` builds the values, and the
+             * `steps` place those values into requests via `{{ params.* }}`.
+             * `upload` and `params_mapping` are REQUIRED and `response` MUST be omitted.
+             *
+             * OpenAPI 3.0 cannot express this conditional requiredness, so it is enforced by the
+             * server-side validator, which returns an explicit message naming the offending field.
              *
              */
             FileProxyUseCaseConfiguration;
@@ -9626,6 +10146,7 @@ export type EnvironmentFieldConfig = Components.Schemas.EnvironmentFieldConfig;
 export type ErpEvent = Components.Schemas.ErpEvent;
 export type ErpEventV3 = Components.Schemas.ErpEventV3;
 export type ErpImportError = Components.Schemas.ErpImportError;
+export type ErpImportFilePreview = Components.Schemas.ErpImportFilePreview;
 export type ErpImportIssue = Components.Schemas.ErpImportIssue;
 export type ErpImportJob = Components.Schemas.ErpImportJob;
 export type ErpImportList = Components.Schemas.ErpImportList;
@@ -9638,10 +10159,14 @@ export type ErrorResponseBase = Components.Schemas.ErrorResponseBase;
 export type ExecuteErpImportRequest = Components.Schemas.ExecuteErpImportRequest;
 export type ExternalMonitoringSpan = Components.Schemas.ExternalMonitoringSpan;
 export type FileProxyAuth = Components.Schemas.FileProxyAuth;
+export type FileProxyDeliveryConfig = Components.Schemas.FileProxyDeliveryConfig;
+export type FileProxyFanOutConfig = Components.Schemas.FileProxyFanOutConfig;
+export type FileProxyLookup = Components.Schemas.FileProxyLookup;
 export type FileProxyParam = Components.Schemas.FileProxyParam;
 export type FileProxyResponseConfig = Components.Schemas.FileProxyResponseConfig;
 export type FileProxySecureProxyAttachment = Components.Schemas.FileProxySecureProxyAttachment;
 export type FileProxyStep = Components.Schemas.FileProxyStep;
+export type FileProxyUploadConfig = Components.Schemas.FileProxyUploadConfig;
 export type FileProxyUrlConfig = Components.Schemas.FileProxyUrlConfig;
 export type FileProxyUrlParam = Components.Schemas.FileProxyUrlParam;
 export type FileProxyUrlParams = Components.Schemas.FileProxyUrlParams;
@@ -9705,6 +10230,7 @@ export type NotificationStatusResponse = Components.Schemas.NotificationStatusRe
 export type OutboundConflict = Components.Schemas.OutboundConflict;
 export type OutboundDlqListResponse = Components.Schemas.OutboundDlqListResponse;
 export type OutboundDlqMessage = Components.Schemas.OutboundDlqMessage;
+export type OutboundFileProxyTargetStatus = Components.Schemas.OutboundFileProxyTargetStatus;
 export type OutboundIntegrationEventConfiguration = Components.Schemas.OutboundIntegrationEventConfiguration;
 export type OutboundMapping = Components.Schemas.OutboundMapping;
 export type OutboundMessage = Components.Schemas.OutboundMessage;
