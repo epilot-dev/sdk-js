@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Integration Toolkit API",
-    "version": "1.12.0",
+    "version": "1.13.0",
     "description": "API for integrating with external systems in a standardised way."
   },
   "tags": [
@@ -4125,6 +4125,11 @@
         "properties": {
           "s3_reference": {
             "$ref": "#/components/schemas/S3Reference"
+          },
+          "include_preview": {
+            "type": "boolean",
+            "default": false,
+            "description": "Return a sample of the file's first rows. Informational only — `:validate` is still the authority. `preview` is present iff this is true."
           }
         }
       },
@@ -4153,7 +4158,8 @@
           "use_case_slug",
           "use_case_name",
           "matched_columns",
-          "file_columns"
+          "file_columns",
+          "entity_types"
         ],
         "properties": {
           "integration_id": {
@@ -4167,6 +4173,10 @@
           },
           "use_case_name": {
             "type": "string"
+          },
+          "entity_types": {
+            "type": "integer",
+            "description": "How many distinct entity schemas this mapping uses."
           },
           "matched_columns": {
             "type": "integer",
@@ -4325,6 +4335,41 @@
           }
         }
       },
+      "ErpImportFilePreview": {
+        "type": "object",
+        "description": "Sample of the file's first rows, using the same parser as `:validate`. `status` is the outcome of this read, not a verdict on the file.",
+        "required": [
+          "status"
+        ],
+        "properties": {
+          "status": {
+            "type": "string",
+            "description": "Treat an unrecognized value as \"no preview available\". Values may be added. UNREADABLE covers empty, header-only, malformed, or gone — there is no breakdown; `:validate` reports the reason.",
+            "enum": [
+              "AVAILABLE",
+              "FORMAT_UNSUPPORTED",
+              "UNREADABLE"
+            ]
+          },
+          "columns": {
+            "type": "array",
+            "description": "Effective column names (trimmed, duplicates collapsed). Set iff `status` is AVAILABLE.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "rows": {
+            "type": "array",
+            "description": "Up to the first 5 data rows, aligned to `columns`.",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
       "CreateErpImportResponse": {
         "type": "object",
         "required": [
@@ -4334,6 +4379,9 @@
           "import_id": {
             "type": "string",
             "description": "`imp_{ULID}` — time-ordered, also used as the job's correlation_id."
+          },
+          "preview": {
+            "$ref": "#/components/schemas/ErpImportFilePreview"
           }
         }
       },
@@ -5738,6 +5786,11 @@
             "description": "The Event Catalog event name that triggers this outbound flow",
             "example": "contract.created"
           },
+          "event_filter": {
+            "type": "string",
+            "description": "JSONata boolean predicate over the hydrated event payload. The use case handles the\nevent only when this evaluates truthy; when absent it handles every event of its name,\nwhich is the behaviour of every pre-existing configuration.\n\nThis is where event scoping belongs — narrowing to certain ticket purposes, contract\ntypes or channels. Evaluation input is the full hydrated event, so relation nodes such\nas `ticket` and `contact` are populated. An expression that throws is treated as no\nmatch and logged, so one malformed filter cannot block the other use cases subscribed\nto the same event.\n",
+            "example": "$count(ticket._purpose[$ in ['bae4b4d1-d728-49ef-92ff-54486dd301b4']]) > 0"
+          },
           "mappings": {
             "type": "array",
             "minItems": 1,
@@ -5745,6 +5798,15 @@
               "$ref": "#/components/schemas/OutboundMapping"
             },
             "description": "List of mappings that transform and deliver the event"
+          },
+          "ack_tracking": {
+            "type": "string",
+            "enum": [
+              "on",
+              "off"
+            ],
+            "default": "on",
+            "description": "Whether this use case participates in the acknowledgement protocol.\n\n`on` (the default, and the behaviour of every pre-existing use case) records an\nACK_PENDING on each event and expects the consumer to confirm receipt via\n`POST /v1/erp/tracking/acknowledgement`; unconfirmed events raise ACK_TIMEOUT after\nthe timeout window.\n\n`off` opts the use case out entirely: no tracking row, no ACK_PENDING, no\nACK_TIMEOUT. Set it for consumers that never acknowledge — otherwise every event\nproduces a guaranteed timeout warning — and for deliveries that already keep their\nown durable per-item record, such as `file_proxy`.\n\nThe tracking row is per-event, not per-use-case, so it is suppressed only when EVERY\nenabled use case matching the event has opted out.\n"
           }
         }
       },
@@ -7854,11 +7916,63 @@
       "FileProxyUseCaseConfiguration": {
         "type": "object",
         "required": [
-          "steps",
-          "response"
+          "steps"
         ],
-        "description": "Configuration for file_proxy use cases. Defines how to authenticate and fetch files from external document systems.\n\nThe file proxy download URL always requires `orgId`, `integrationId`, and either `useCaseSlug` (recommended) or `useCaseId` (legacy UUID) as query parameters.\nThe `orgId` is included in the signed URL to establish organization context without requiring authentication.\nAdditional use-case-specific parameters are declared in the `params` array.\n",
+        "description": "Configuration for file_proxy use cases. Defines how to authenticate and move files\nbetween epilot and an external document system, in either direction (see `direction`).\n\n**Download** (`direction: download`, the default) fetches a file from the external system\nand serves it to a browser. The download URL always requires `orgId`, `integrationId`, and\neither `useCaseSlug` (recommended) or `useCaseId` (legacy UUID) as query parameters.\nThe `orgId` is included in the signed URL to establish organization context without\nrequiring authentication. Additional use-case-specific parameters are declared in the\n`params` array. `response` is REQUIRED for download use cases.\n\n**Upload** (`direction: upload`) pushes epilot files to the external system. It is not\nreachable over the download endpoint; an outbound use case points at it via a `file_proxy`\ndelivery, and this configuration owns everything about what gets sent: `fan_out` decides\nhow many deliveries one event produces, `params_mapping` builds the values, and the\n`steps` place those values into requests via `{{ params.* }}`.\n`upload` and `params_mapping` are REQUIRED and `response` MUST be omitted.\n\nOpenAPI 3.0 cannot express this conditional requiredness, so it is enforced by the\nserver-side validator, which returns an explicit message naming the offending field.\n",
         "properties": {
+          "direction": {
+            "type": "string",
+            "enum": [
+              "download",
+              "upload"
+            ],
+            "default": "download",
+            "description": "Direction of file travel. `download` (default) pulls a file from the external system\ninto epilot; `upload` pushes an epilot file out to the external system. Omitted means\n`download`, so every pre-existing configuration keeps its exact meaning.\n\nNote this is the direction of the FILE, not the epilot use-case type — an `upload`\nfile_proxy use case is still a `file_proxy` use case, never an `outbound` one.\n"
+          },
+          "upload": {
+            "$ref": "#/components/schemas/FileProxyUploadConfig"
+          },
+          "fan_out": {
+            "$ref": "#/components/schemas/FileProxyFanOutConfig"
+          },
+          "params_mapping": {
+            "type": "string",
+            "description": "Upload-only, REQUIRED when `direction` is `upload`. JSONata expression evaluated once\nper fan-out item, producing the `params` object that step templates read as\n`{{ params.* }}`.\n\nThe evaluation root is the hydrated event, so `contact.customer_pin` and\n`ticket._purpose` are reachable directly, unprefixed.\n\n**Everything per-item is a `$`-prefixed JSONata binding**: `$item` (the fan-out\nelement, absent when `fan_out` is disabled), `$file_base64` and `$file`\n(`{filename, mime_type, size_bytes}`) for the resolved file, plus `$constants`,\n`$lookups`, `$ack_id`, `$germanDate(iso)` and `$now()`. Writing `item.filename`\ninstead of `$item.filename` yields nothing — it reads a field named `item` on the\nevent, which does not exist.\n\nMust evaluate to an object. `constants` are shallow-merged underneath the result, so\nthe expression wins on any key collision.\n",
+            "example": "{ \"documentType\": $lookups.documentType, \"fileName\": $item.filename, \"fileData\": $file_base64, \"pin\": contact.customer_pin }"
+          },
+          "lookups": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/FileProxyLookup"
+            },
+            "description": "Upload-only. Named translation tables resolved BEFORE `params_mapping` runs and bound\nas `$lookups`, so an expression reads `$lookups.documentType` rather than carrying a\nconditional chain. Deliberately generic: the next ERP calls the same concept\n`Belegart`.\n"
+          },
+          "constants": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Upload-only. Fixed values shallow-merged UNDERNEATH the `params_mapping` result — the\nexpression wins on key collisions, constants only add. Use for the unchanging strings\n(tenant, sender, channel) that would otherwise be repeated in every expression.\n",
+            "example": {
+              "mandant": "EPILOT_WNG",
+              "sender": "KSSP"
+            }
+          },
+          "file_source": {
+            "type": "string",
+            "description": "Upload-only. JSONata returning the attachment-shaped object (`entity_id`, optionally\n`s3ref`) whose bytes should be fetched for this delivery. The evaluation root is the\nevent; the fan-out element is the `$item` binding, same as in `params_mapping`.\n\nUsually unnecessary: when the fan-out item is itself attachment-shaped it is used\ndirectly. Supply this only when splitting over something that is not the attachment\n— for example one delivery per meter reading, each carrying a file referenced from\nelsewhere in the event. When nothing resolves, no file is fetched and `file_base64`\nis undefined, which is valid for a fan-out that sends metadata only.\n",
+            "example": "event_attachments[entity_id = $item.file_id][0]"
+          },
+          "required_params": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Upload-only. Params that MUST be present after `params_mapping` runs. Any listed name\nresolving to null or undefined fails the delivery terminally with\n`REQUIRED_PARAM_MISSING` before a single step executes.\n\nThis is the generic net behind a lookup's `on_miss: fail`: it catches a required field\ngoing missing for any reason, so the external system never receives a body that is\nsilently short a field its API requires.\n",
+            "example": [
+              "documentType",
+              "fileName",
+              "fileData"
+            ]
+          },
           "secure_proxy": {
             "description": "Optional secure proxy attachment for routing all outbound file proxy requests.\nOnly `use_case_slug` is supported and the referenced secure_proxy use case\nmust belong to the same integration.\n",
             "allOf": [
@@ -7875,7 +7989,7 @@
             "items": {
               "$ref": "#/components/schemas/FileProxyParam"
             },
-            "description": "Additional use-case-specific parameters expected in the download URL query string (beyond the required orgId, integrationId, and useCaseSlug or useCaseId)"
+            "description": "Download-only. Additional use-case-specific parameters expected in the download URL\nquery string (beyond the required orgId, integrationId, and useCaseSlug or useCaseId).\nRejected when `direction` is `upload`.\n"
           },
           "allowed_origins": {
             "type": "array",
@@ -7884,7 +7998,7 @@
               "format": "uri",
               "pattern": "^https?://"
             },
-            "description": "Additional origins permitted to call /download for this use case (CORS, exact match). Portal origins are always allowed."
+            "description": "Download-only. Additional origins permitted to call /download for this use case\n(CORS, exact match). Portal origins are always allowed. Rejected when `direction`\nis `upload`.\n"
           },
           "steps": {
             "type": "array",
@@ -7892,7 +8006,7 @@
             "items": {
               "$ref": "#/components/schemas/FileProxyStep"
             },
-            "description": "Ordered list of HTTP steps to execute to retrieve the file"
+            "description": "Ordered list of HTTP steps to execute. For `download` these retrieve the file; for\n`upload` they deliver it, each assembling its own request body from `{{ params.* }}`\nbuilt by `params_mapping`.\n"
           },
           "response": {
             "$ref": "#/components/schemas/FileProxyResponseConfig"
@@ -7900,7 +8014,7 @@
           "prevent_indirect_serving": {
             "type": "boolean",
             "default": false,
-            "description": "When `true`, this use case is served via the streaming endpoint: mapped file URLs\nare built as `/stream/download`, files of any size are streamed inline over HTTP\nresponse streaming, and buffered `/download` requests for oversize files are\n307-redirected to `/stream`. Files never transit epilot's temporary S3 storage on\nthe streaming path. Defaults to `false` (small files are served directly and large\nfiles are transparently served via a temporary S3 redirect).\n"
+            "description": "Download-only; rejected when `direction` is `upload`.\nWhen `true`, this use case is served via the streaming endpoint: mapped file URLs\nare built as `/stream/download`, files of any size are streamed inline over HTTP\nresponse streaming, and buffered `/download` requests for oversize files are\n307-redirected to `/stream`. Files never transit epilot's temporary S3 storage on\nthe streaming path. Defaults to `false` (small files are served directly and large\nfiles are transparently served via a temporary S3 redirect).\n"
           }
         }
       },
@@ -8026,7 +8140,9 @@
             "type": "string",
             "enum": [
               "GET",
-              "POST"
+              "POST",
+              "PUT",
+              "PATCH"
             ],
             "description": "HTTP method"
           },
@@ -8039,7 +8155,7 @@
           },
           "body": {
             "type": "string",
-            "description": "Handlebars template for the request body (POST only)"
+            "description": "Handlebars template for the request body (write methods only). On an `upload` use\ncase this is where the payload is assembled, reading `{{ params.* }}` built by\n`params_mapping`, plus `{{ env.* }}` and `{{ steps.N.body }}`.\n\n**Route every user-controlled value through the `json` helper**: the template engine\ndoes not escape, so `\"name\":\"{{ params.fileName }}\"` produces invalid JSON the moment\na filename contains a quote. Write `\"name\": {{json params.fileName}}` instead — the\nhelper emits the surrounding quotes itself and renders absent values as `null`. Use\n`{{jsonEscape v}}` if you prefer to keep your own quotes. Upload configurations whose\nbody would break on such input are rejected at save time.\n\nHandlebars block helpers work, so optional fields can be omitted rather than sent\nempty: `{{#if params.pin}},\"pin\": {{json params.pin}}{{/if}}`. Note that `{{/if}}}`\nfails to parse — leave a space before a closing brace: `{{/if}} }`.\n"
           },
           "response_type": {
             "type": "string",
@@ -8051,8 +8167,56 @@
           }
         }
       },
+      "FileProxyFanOutConfig": {
+        "type": "object",
+        "required": [
+          "enabled"
+        ],
+        "description": "Splits one event into several independent deliveries.\n\nMirrors the inbound mapping idiom, where an entity's JSONata expression returning an array\nproduces one entity update per element. Made explicit with a toggle here because an upload\nis also legitimately used without splitting, and because auto-detecting \"array means\nsplit\" would make a single-element result ambiguous.\n\nEach resulting delivery is fully independent: its own idempotency record, its own retry\nschedule, its own monitoring events. A four-item event can therefore end up three-of-four\ndelivered, which is the honest state to report.\n\nThe split is evaluated ONCE, when the event is enqueued, so item indices — and therefore\nidempotency keys — stay stable across retries.\n",
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "description": "When false (or absent), the event produces exactly one delivery and `$item` is not\nbound in `params_mapping`.\n"
+          },
+          "split_expression": {
+            "type": "string",
+            "description": "JSONata over the event that MUST return an array; one delivery is created per element,\nbound as `$item` in `params_mapping`. Required when `enabled` is true.\n\nKeep this a plain projection — scoping which events are handled at all belongs in the\noutbound use case's `event_filter`, not here. A non-array result fails the event with\n`FAN_OUT_INVALID_RESULT`; an empty array produces no deliveries and one info-level\n`FAN_OUT_EMPTY`, which is the normal outcome for a catch-all subscription seeing an\nevent with nothing to send.\n",
+            "example": "event_attachments"
+          }
+        }
+      },
+      "FileProxyUploadConfig": {
+        "type": "object",
+        "description": "Upload-side settings for a file_proxy use case with `direction: upload`.\nEverything about WHAT is sent lives on the outbound mapping\n(see `FileProxyDeliveryConfig`); this object only governs HOW the transfer is bounded\nand judged.\n",
+        "properties": {
+          "max_file_bytes": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 104857600,
+            "description": "Per-file ceiling for this use case, in bytes. Files above it fail terminally with\n`FILE_TOO_LARGE` before any bytes are fetched. Defaults to — and is clamped by — the\nplatform ceiling of 100 MiB (104857600).\n"
+          },
+          "max_delivery_attempts": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100,
+            "default": 8,
+            "description": "Maximum delivery attempts per item before the delivery is marked failed and the\nmessage is dead-lettered. Attempts are spaced by an exponential, jittered backoff\nspanning roughly 16 hours over the default 8 attempts, so an ERP maintenance window\ndoes not exhaust them.\n\nLives here rather than on the outbound delivery because how hard to retry is a\nproperty of the transport — the same judgement as `max_file_bytes` — and the outbound\ndelivery is a pure pointer.\n"
+          },
+          "success_when": {
+            "type": "string",
+            "description": "Optional JSONata predicate evaluated against the final step result\n(`{ statusCode, headers, body }`) to decide whether the external system really\naccepted the file. When omitted, any 2xx counts as delivered. Use this for systems\nthat return 200 with an error envelope.\n",
+            "example": "body.status = 'OK'"
+          },
+          "external_id": {
+            "type": "string",
+            "description": "Optional JSONata expression over the step results yielding the external system's\nidentifier for the stored document. Recorded on the delivery record and on the\n`FILE_PROXY_UPLOADED` monitoring event so an operator can find the document in the\ntarget system.\n",
+            "example": "steps[-1].body.documentId"
+          }
+        }
+      },
       "FileProxyResponseConfig": {
         "type": "object",
+        "description": "How to extract the file from the step results. REQUIRED when `direction` is `download`;\nrejected when `direction` is `upload` (an upload has no file to extract).\n",
         "required": [
           "body",
           "encoding"
@@ -8570,7 +8734,7 @@
           "enabled",
           "delivery"
         ],
-        "description": "A mapping that delivers an event to an external system — either pushed to a webhook (with a JSONata payload transformation) or made available on the pull-based poll queue (raw event payload, no transformation)",
+        "description": "A mapping that delivers an event to an external system by one of three mechanisms — pushed to a webhook (with a JSONata payload transformation), made available on the pull-based poll queue (raw event payload, no transformation), or handed to a file_proxy use case that uploads files to an external document system (a pointer only; the referenced use case owns the payload and the fan-out)",
         "properties": {
           "id": {
             "type": "string",
@@ -8584,7 +8748,7 @@
           },
           "jsonata_expression": {
             "type": "string",
-            "description": "JSONata expression to transform the event payload. Required for webhook delivery; ignored for poll delivery.",
+            "description": "JSONata expression to transform the event payload. Required for webhook delivery, ignored for poll delivery, and rejected for file_proxy delivery — a file_proxy payload is built by the referenced use case's `params_mapping`, so accepting an expression here would silently do nothing.",
             "example": "{ \"id\": entity._id, \"customer\": entity.customer_name }"
           },
           "enabled": {
@@ -8608,20 +8772,24 @@
         }
       },
       "DeliveryConfig": {
-        "description": "Configuration for how the event should be delivered. webhook = push delivery via svc-webhooks (JSONata-transformed payload); poll = pull-based queue delivery where the consumer fetches items via the poll API (raw event payload)",
+        "description": "Configuration for how the event should be delivered. webhook = push delivery via svc-webhooks (JSONata-transformed payload); poll = pull-based queue delivery where the consumer fetches items via the poll API (raw event payload); file_proxy = one push per event attachment to an external document system, through a file_proxy use case (JSONata-transformed payload carrying the file bytes)",
         "oneOf": [
           {
             "$ref": "#/components/schemas/WebhookDeliveryConfig"
           },
           {
             "$ref": "#/components/schemas/PollDeliveryConfig"
+          },
+          {
+            "$ref": "#/components/schemas/FileProxyDeliveryConfig"
           }
         ],
         "discriminator": {
           "propertyName": "type",
           "mapping": {
             "webhook": "#/components/schemas/WebhookDeliveryConfig",
-            "poll": "#/components/schemas/PollDeliveryConfig"
+            "poll": "#/components/schemas/PollDeliveryConfig",
+            "file_proxy": "#/components/schemas/FileProxyDeliveryConfig"
           }
         }
       },
@@ -8690,6 +8858,67 @@
             "maximum": 100,
             "default": 5,
             "description": "Maximum delivery attempts before the poison_policy is applied"
+          }
+        }
+      },
+      "FileProxyDeliveryConfig": {
+        "type": "object",
+        "required": [
+          "type",
+          "use_case_slug"
+        ],
+        "description": "Push delivery to an external document system through a `file_proxy` use case.\n\nA pure pointer, deliberately. The outbound use case decides WHEN to deliver — its event\nname plus `event_filter` — and the referenced `file_proxy` use case decides WHAT and HOW:\nwhich items to fan out over (`fan_out`), what values to build (`params_mapping`,\n`lookups`, `constants`), and the steps that send them. Keeping every file concern on the\nfile_proxy side is what lets one upload recipe be shared by several event subscriptions\nwithout duplicating any of it.\n\n`jsonata_expression` on the mapping is NOT used for this delivery type and is rejected.\n\nThe slug is resolved at delivery time, not at save time, so use cases can be saved in any\norder; a dangling reference surfaces as a `USE_CASE_NOT_FOUND` monitoring event naming\nthe referencing mapping.\n",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "file_proxy"
+            ],
+            "description": "Delivery mechanism type"
+          },
+          "use_case_slug": {
+            "type": "string",
+            "description": "Slug of a `file_proxy` use case with `direction: upload` in the SAME integration.\n",
+            "example": "wemag_d3_document_upload"
+          }
+        }
+      },
+      "FileProxyLookup": {
+        "type": "object",
+        "required": [
+          "source",
+          "entries"
+        ],
+        "description": "A named translation from a value in the event to a value the external system expects.\n",
+        "properties": {
+          "source": {
+            "type": "string",
+            "description": "JSONata expression over the event producing the lookup key",
+            "example": "ticket._purpose_name[0]"
+          },
+          "entries": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Key-to-value translation table",
+            "example": {
+              "Zählerstandsmeldung": "Zählerstand",
+              "Kündigung": "Kündigung"
+            }
+          },
+          "default": {
+            "type": "string",
+            "description": "Value used when the key is absent from `entries`"
+          },
+          "on_miss": {
+            "type": "string",
+            "enum": [
+              "default",
+              "warn",
+              "fail"
+            ],
+            "description": "What happens when the key is not in `entries`.\n`default` substitutes `default` silently; `warn` substitutes it and emits a\n`LOOKUP_UNMAPPED` warning so the gap is visible without stopping delivery;\n`fail` aborts the delivery terminally.\nDefaults to `default` when a `default` is set, and to `warn` when it is not.\n"
           }
         }
       },
@@ -8763,6 +8992,60 @@
           },
           "poll": {
             "$ref": "#/components/schemas/OutboundPollStatus"
+          },
+          "file_proxy": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OutboundFileProxyTargetStatus"
+            },
+            "description": "One entry per file_proxy mapping on this use case. Present only on use cases with a\nfile_proxy delivery mapping.\n"
+          }
+        }
+      },
+      "OutboundFileProxyTargetStatus": {
+        "type": "object",
+        "description": "Resolution state of one file_proxy mapping's referenced upload use case.\n\nBecause the transport lives on a separate use case, edits to the endpoint or credentials\ndo not appear in THIS use case's history. `target_updated_at` is the hook that lets an\noperator notice a target changed underneath a delivery that started failing.\n",
+        "required": [
+          "mapping_id",
+          "use_case_slug",
+          "resolved"
+        ],
+        "properties": {
+          "mapping_id": {
+            "type": "string",
+            "description": "The mapping holding this file_proxy delivery"
+          },
+          "use_case_slug": {
+            "type": "string",
+            "description": "Slug of the referenced file_proxy use case"
+          },
+          "resolved": {
+            "type": "boolean",
+            "description": "Whether the slug currently resolves to an enabled `file_proxy` use case with\n`direction: upload` in this integration. References are resolved at delivery time,\nso `false` is a live warning rather than a save-time error.\n"
+          },
+          "target_use_case_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Id of the referenced use case — absent when unresolved"
+          },
+          "target_enabled": {
+            "type": "boolean",
+            "description": "Whether the referenced use case is enabled — absent when unresolved"
+          },
+          "target_updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the referenced use case was last modified — absent when unresolved. Surfaced\nbecause a change here is invisible in this use case's own history diff.\n"
+          },
+          "unresolved_reason": {
+            "type": "string",
+            "enum": [
+              "not_found",
+              "wrong_type",
+              "wrong_direction",
+              "disabled"
+            ],
+            "description": "Why the reference did not resolve — absent when `resolved` is true"
           }
         }
       },
