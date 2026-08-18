@@ -3214,7 +3214,7 @@ const { data } = await client.commitTypes(
 
 ### `createErpImport`
 
-Register an already-uploaded file (S3 ref) as a pricing-file import job and return its id. Nothing runs yet: no use case is chosen and no validation starts here. Rank the candidates with POST /v2/erp/
+Register an already-uploaded file (S3 ref) as a pricing-file import job. Returns the job and a file preview. Nothing runs yet: no use case is chosen and no validation starts here. Optionally rank cand
 
 `POST /v2/erp/imports`
 
@@ -3230,6 +3230,66 @@ const { data } = await client.createErpImport(
   },
 )
 ```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "job": {
+    "import_id": "string",
+    "org_id": "string",
+    "created_by": "string",
+    "integration_id": "string",
+    "use_case_slug": "string",
+    "format": "csv",
+    "status": "PENDING",
+    "s3_input_ref": {
+      "bucket": "string",
+      "key": "string"
+    },
+    "validation": {
+      "total_rows": 0,
+      "blocking": 0,
+      "warnings": 0,
+      "entities": {},
+      "issues": [
+        {
+          "code": "UNIQUE_ID_COLUMN_MISSING",
+          "severity": "warning",
+          "columns": [
+            {
+              "name": "string",
+              "entity": "string"
+            }
+          ],
+          "row": 0
+        }
+      ]
+    },
+    "progress": {
+      "processed_rows": 0,
+      "total_rows": 0
+    },
+    "error": {
+      "code": "VALIDATION_BLOCKED",
+      "message": "string"
+    },
+    "correlation_id": "string",
+    "activity_id": "string",
+    "created_at": "1970-01-01T00:00:00.000Z",
+    "updated_at": "1970-01-01T00:00:00.000Z"
+  },
+  "preview": {
+    "columns": ["string"],
+    "rows": [
+      ["string"]
+    ]
+  }
+}
+```
+
+</details>
 
 ---
 
@@ -3273,8 +3333,13 @@ const { data } = await client.listErpImports({
           {
             "code": "UNIQUE_ID_COLUMN_MISSING",
             "severity": "warning",
-            "message": "string",
-            "columns": ["string"]
+            "columns": [
+              {
+                "name": "string",
+                "entity": "string"
+              }
+            ],
+            "row": 0
           }
         ]
       },
@@ -3337,8 +3402,13 @@ const { data } = await client.getErpImport({
       {
         "code": "UNIQUE_ID_COLUMN_MISSING",
         "severity": "warning",
-        "message": "string",
-        "columns": ["string"]
+        "columns": [
+          {
+            "name": "string",
+            "entity": "string"
+          }
+        ],
+        "row": 0
       }
     ]
   },
@@ -3384,8 +3454,7 @@ const { data } = await client.validateErpImport(
 
 ### `suggestErpImportUseCases`
 
-Rank the org's inbound use cases against this file's columns — the input to the ranked picker ("matches 6 of your 7 columns"). Reads only the file's first row, not its data.
-Every eligible use case is
+Rank the org's inbound use cases against this file's columns — the input to the ranked picker ("matches 6 of your 7 columns"). Optional: skip this and call `:validate` directly when the use case is al
 
 `POST /v2/erp/imports/{importId}:suggest-use-cases`
 
@@ -3400,6 +3469,7 @@ const { data } = await client.suggestErpImportUseCases({
 
 ```json
 {
+  "file_columns": 0,
   "suggestions": [
     {
       "integration_id": "string",
@@ -3407,8 +3477,7 @@ const { data } = await client.suggestErpImportUseCases({
       "use_case_slug": "string",
       "use_case_name": "string",
       "entity_types": 0,
-      "matched_columns": 0,
-      "file_columns": 0
+      "matched_columns": 0
     }
   ]
 }
@@ -3434,53 +3503,6 @@ const { data } = await client.executeErpImport(
   },
 )
 ```
-
-<details>
-<summary>Response</summary>
-
-```json
-{
-  "import_id": "string",
-  "org_id": "string",
-  "created_by": "string",
-  "integration_id": "string",
-  "use_case_slug": "string",
-  "format": "csv",
-  "status": "PENDING",
-  "s3_input_ref": {
-    "bucket": "string",
-    "key": "string"
-  },
-  "validation": {
-    "total_rows": 0,
-    "blocking": 0,
-    "warnings": 0,
-    "entities": {},
-    "issues": [
-      {
-        "code": "UNIQUE_ID_COLUMN_MISSING",
-        "severity": "warning",
-        "message": "string",
-        "columns": ["string"]
-      }
-    ]
-  },
-  "progress": {
-    "processed_rows": 0,
-    "total_rows": 0
-  },
-  "error": {
-    "code": "VALIDATION_BLOCKED",
-    "message": "string"
-  },
-  "correlation_id": "string",
-  "activity_id": "string",
-  "created_at": "1970-01-01T00:00:00.000Z",
-  "updated_at": "1970-01-01T00:00:00.000Z"
-}
-```
-
-</details>
 
 ---
 
@@ -3543,7 +3565,6 @@ type ErpImportUseCaseSuggestion = {
   use_case_name: string
   entity_types: number
   matched_columns: number
-  file_columns: number
 }
 ```
 
@@ -3551,6 +3572,7 @@ type ErpImportUseCaseSuggestion = {
 
 ```ts
 type SuggestErpImportUseCasesResponse = {
+  file_columns: number
   suggestions: Array<{
     integration_id: string
     integration_name: string
@@ -3558,7 +3580,6 @@ type SuggestErpImportUseCasesResponse = {
     use_case_name: string
     entity_types: number
     matched_columns: number
-    file_columns: number
   }>
 }
 ```
@@ -3575,14 +3596,18 @@ type ExecuteErpImportRequest = {
 
 ### `ErpImportIssue`
 
-A problem found during validation, scoped to the file as a whole rather than to individual rows. See `code` for the kinds reported.
+A problem found during validation, scoped to the file as a whole rather than to individual rows.
+`code` is the translation key and the other fields are its parameters — there is deliberately no message to display. Each code appears at most once, with everything it has to say aggregated into that one
 
 ```ts
 type ErpImportIssue = {
   code: "UNIQUE_ID_COLUMN_MISSING" | "MAPPED_COLUMN_MISSING" | "MALFORMED_ROW" | "INVALID_ENCODING" | "EMPTY_FILE" | "TOO_MANY_ROWS"
   severity: "warning" | "blocking"
-  message: string
-  columns?: string[]
+  columns?: Array<{
+    name: string
+    entity?: string
+  }>
+  row?: number
 }
 ```
 
@@ -3599,8 +3624,11 @@ type ErpImportValidation = {
   issues?: Array<{
     code: "UNIQUE_ID_COLUMN_MISSING" | "MAPPED_COLUMN_MISSING" | "MALFORMED_ROW" | "INVALID_ENCODING" | "EMPTY_FILE" | "TOO_MANY_ROWS"
     severity: "warning" | "blocking"
-    message: string
-    columns?: string[]
+    columns?: Array<{
+      name: { ... }
+      entity?: { ... }
+    }>
+    row?: number
   }>
 }
 ```
@@ -3619,7 +3647,7 @@ type ErpImportProgress = {
 
 ### `ErpImportError`
 
-Why the import failed — present if and only if status = FAILED.
+Why the import failed — present if and only if status = FAILED. `code` is the translation key; for VALIDATION_BLOCKED the specifics are in `validation`.
 
 ```ts
 type ErpImportError = {
@@ -3630,13 +3658,12 @@ type ErpImportError = {
 
 ### `ErpImportFilePreview`
 
-Sample of the file's first rows, using the same parser as `:validate`. `status` is the outcome of this read, not a verdict on the file.
+Sample of the file's first rows, using the same parser as `:validate`. Registration refuses a file it cannot read, so a created job always includes this.
 
 ```ts
 type ErpImportFilePreview = {
-  status: "AVAILABLE" | "FORMAT_UNSUPPORTED" | "UNREADABLE"
-  columns?: string[]
-  rows?: string[][]
+  columns: string[]
+  rows: string[][]
 }
 ```
 
@@ -3644,11 +3671,41 @@ type ErpImportFilePreview = {
 
 ```ts
 type CreateErpImportResponse = {
-  import_id: string
+  job: {
+    import_id: string
+    org_id: string
+    created_by?: string
+    integration_id?: string
+    use_case_slug?: string
+    format: "csv" | "xlsx"
+    status: "PENDING" | "VALIDATING" | "READY" | "PROCESSING" | "IMPORTED" | "FAILED" | "CANCELLING" | "CANCELLED"
+    s3_input_ref: {
+      bucket: { ... }
+      key: { ... }
+    }
+    validation?: {
+      total_rows: { ... }
+      blocking: { ... }
+      warnings: { ... }
+      entities: { ... }
+      issues?: { ... }
+    }
+    progress?: {
+      processed_rows: { ... }
+      total_rows?: { ... }
+    }
+    error?: {
+      code: { ... }
+      message: { ... }
+    }
+    correlation_id?: string
+    activity_id?: string
+    created_at: string // date-time
+    updated_at: string // date-time
+  }
   preview?: {
-    status: "AVAILABLE" | "FORMAT_UNSUPPORTED" | "UNREADABLE"
-    columns?: string[]
-    rows?: string[][]
+    columns: string[]
+    rows: string[][]
   }
 }
 ```
@@ -3676,8 +3733,8 @@ type ErpImportJob = {
     issues?: Array<{
       code: { ... }
       severity: { ... }
-      message: { ... }
       columns?: { ... }
+      row?: { ... }
     }>
   }
   progress?: {
