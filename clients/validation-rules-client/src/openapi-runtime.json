@@ -13,6 +13,7 @@
       "post": {
         "operationId": "createValidationRule",
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {}
           }
@@ -96,9 +97,5 @@
     }
   },
   "components": {},
-  "servers": [
-    {
-      "url": "https://validation-rules.sls.epilot.io"
-    }
-  ]
+  "servers": []
 }
