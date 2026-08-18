@@ -1347,16 +1347,13 @@ declare namespace Components {
         export interface CreateErpImportRequest {
             s3_reference: S3Reference;
             /**
-             * Return a sample of the file's first rows. Informational only — `:validate` is still the authority. `preview` is present iff this is true.
+             * Return a sample of the file's first rows in `preview`. Only controls whether the sample comes BACK — the head is read either way, because that read is how an unreadable file gets refused.
              */
             include_preview?: boolean;
         }
         export interface CreateErpImportResponse {
-            /**
-             * `imp_{ULID}` — time-ordered, also used as the job's correlation_id.
-             */
-            import_id: string;
-            preview?: /* Sample of the file's first rows, using the same parser as `:validate`. `status` is the outcome of this read, not a verdict on the file. */ ErpImportFilePreview;
+            job: ErpImportJob;
+            preview?: /* Sample of the file's first rows, using the same parser as `:validate`. Registration refuses a file it cannot read, so a created job always includes this. */ ErpImportFilePreview;
         }
         export interface CreateFileProxyUseCaseRequest {
             /**
@@ -2081,7 +2078,7 @@ declare namespace Components {
             group_id?: string;
         };
         /**
-         * Why the import failed — present if and only if status = FAILED.
+         * Why the import failed — present if and only if status = FAILED. `code` is the translation key; for VALIDATION_BLOCKED the specifics are in `validation`.
          */
         export interface ErpImportError {
             /**
@@ -2090,29 +2087,26 @@ declare namespace Components {
              */
             code: "VALIDATION_BLOCKED" | "FILE_FORMAT_UNSUPPORTED" | "FILE_UNAVAILABLE" | "VALIDATE_TIMEOUT" | "IMPORT_TIMEOUT" | "USE_CASE_NOT_USABLE" | "IMPORT_NO_PROGRESS" | "INTERNAL_ERROR";
             /**
-             * User-facing explanation of `type`.
+             * One English sentence, derived from `code` so the two always agree. A fallback for a client that has no translation for this code — prefer translating `code`, and never parse this. It deliberately does NOT restate `validation.issues`.
              */
             message: string;
         }
         /**
-         * Sample of the file's first rows, using the same parser as `:validate`. `status` is the outcome of this read, not a verdict on the file.
+         * Sample of the file's first rows, using the same parser as `:validate`. Registration refuses a file it cannot read, so a created job always includes this.
          */
         export interface ErpImportFilePreview {
             /**
-             * Treat an unrecognized value as "no preview available". Values may be added. UNREADABLE covers empty, header-only, malformed, or gone — there is no breakdown; `:validate` reports the reason.
+             * Effective column names (trimmed, duplicates collapsed).
              */
-            status: "AVAILABLE" | "FORMAT_UNSUPPORTED" | "UNREADABLE";
+            columns: string[];
             /**
-             * Effective column names (trimmed, duplicates collapsed). Set iff `status` is AVAILABLE.
+             * Up to the first 3 data rows, aligned to `columns`.
              */
-            columns?: string[];
-            /**
-             * Up to the first 5 data rows, aligned to `columns`.
-             */
-            rows?: string[][];
+            rows: string[][];
         }
         /**
-         * A problem found during validation, scoped to the file as a whole rather than to individual rows. See `code` for the kinds reported.
+         * A problem found during validation, scoped to the file as a whole rather than to individual rows.
+         * `code` is the translation key and the other fields are its parameters — there is deliberately no message to display. Each code appears at most once, with everything it has to say aggregated into that one entry.
          */
         export interface ErpImportIssue {
             /**
@@ -2122,13 +2116,23 @@ declare namespace Components {
             code: "UNIQUE_ID_COLUMN_MISSING" | "MAPPED_COLUMN_MISSING" | "MALFORMED_ROW" | "INVALID_ENCODING" | "EMPTY_FILE" | "TOO_MANY_ROWS";
             severity: "warning" | "blocking";
             /**
-             * User-facing explanation. Lists at most 10 column names; `columns` has all of them.
+             * The columns this issue is about, at most one entry per column per entity.
+             * On UNIQUE_ID_COLUMN_MISSING the file has NONE of these. Do NOT tell the user that adding one of them is enough: a unique id may read several columns through a JSONata expression, and whether it combines them (`A & B`, both needed) or falls back between them (`A ? A : B`, either will do) is not knowable here.
              */
-            message: string;
+            columns?: {
+                /**
+                 * The column name, spelled as the mapping reads it.
+                 */
+                name: string;
+                /**
+                 * Slug of the entity this column helps identify. UNIQUE_ID_COLUMN_MISSING only.
+                 */
+                entity?: string;
+            }[];
             /**
-             * The columns this issue is about, so clients render names rather than parsing the message.
+             * The offending data row, 1-based as the user counts rows. MALFORMED_ROW only.
              */
-            columns?: string[];
+            row?: number;
         }
         export interface ErpImportJob {
             /**
@@ -2160,7 +2164,7 @@ declare namespace Components {
              * `total_rows` is ABSENT during the validate phase until the file has been read to the end — there is deliberately no counting pass, since that would be a second unbounded read of the whole file. Render an indeterminate indicator while it is missing: dividing by a missing total yields a determinate bar pinned at 0%, which reads as a hung import.
              */
             ErpImportProgress;
-            error?: /* Why the import failed — present if and only if status = FAILED. */ ErpImportError;
+            error?: /* Why the import failed — present if and only if status = FAILED. `code` is the translation key; for VALIDATION_BLOCKED the specifics are in `validation`. */ ErpImportError;
             /**
              * Scopes this run in monitoring. Always equal to `import_id`.
              */
@@ -2203,10 +2207,6 @@ declare namespace Components {
              * How many of the FILE's columns this use case reads, by exact trimmed name.
              */
             matched_columns: number;
-            /**
-             * Columns in the file. Identical across entries; repeated per entry so each row renders standalone as "matches N of your M columns".
-             */
-            file_columns: number;
         }
         /**
          * Validate-phase summary: what the file will create, and whether it may be confirmed. Absent until the validate phase completes. No per-row detail is kept — a rejected file is corrected and imported again.
@@ -2216,6 +2216,9 @@ declare namespace Components {
              * Data rows read from the file.
              */
             total_rows: number;
+            /**
+             * Blocking problems found, counting per-row ones that are not listed in `issues`.
+             */
             blocking: number;
             warnings: number;
             /**
@@ -2225,9 +2228,13 @@ declare namespace Components {
                 [name: string]: number;
             };
             /**
-             * Whole-file issues. At most 20 are kept; the count of everything found is in blocking and warnings. Warnings here are what `ack_warnings` on `:execute` acknowledges.
+             * Whole-file issues, at most one per `code`. Do not expect the length to match blocking + warnings: those also count per-row problems, which are recorded for support but never listed here. Warnings here are what `ack_warnings` on `:execute` acknowledges.
              */
-            issues?: /* A problem found during validation, scoped to the file as a whole rather than to individual rows. See `code` for the kinds reported. */ ErpImportIssue[];
+            issues?: /**
+             * A problem found during validation, scoped to the file as a whole rather than to individual rows.
+             * `code` is the translation key and the other fields are its parameters — there is deliberately no message to display. Each code appears at most once, with everything it has to say aggregated into that one entry.
+             */
+            ErpImportIssue[];
         }
         export interface ErpUpdatesEventsV2Request {
             /**
@@ -6700,6 +6707,10 @@ declare namespace Components {
             overwrite?: boolean;
         }
         export interface SuggestErpImportUseCasesResponse {
+            /**
+             * Columns in the file. Present even when `suggestions` is empty.
+             */
+            file_columns: number;
             suggestions: ErpImportUseCaseSuggestion[];
         }
         export interface TestNotificationRequest {
@@ -7385,7 +7396,7 @@ declare namespace Paths {
     namespace CreateErpImport {
         export type RequestBody = /* Register an already-uploaded file as an import. The use case is chosen later, via `:validate` — upload and interpretation are separate decisions. */ Components.Schemas.CreateErpImportRequest;
         namespace Responses {
-            export type $202 = Components.Schemas.CreateErpImportResponse;
+            export type $201 = Components.Schemas.CreateErpImportResponse;
             export type $400 = Components.Responses.BadRequest;
             export type $403 = Components.Responses.Forbidden;
             export type $500 = Components.Responses.InternalServerError;
@@ -7512,7 +7523,7 @@ declare namespace Paths {
         }
         export type RequestBody = /* Confirmation options. Required only when the verdict carries warnings — a clean import needs no body at all. */ Components.Schemas.ExecuteErpImportRequest;
         namespace Responses {
-            export type $200 = Components.Schemas.ErpImportJob;
+            export type $202 = Components.Schemas.ErpImportJob;
             export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
             export type $409 = Components.Responses.Conflict;
@@ -9132,13 +9143,13 @@ export interface OperationMethods {
   /**
    * createErpImport - createErpImport
    * 
-   * Register an already-uploaded file (S3 ref) as a pricing-file import job and return its id. Nothing runs yet: no use case is chosen and no validation starts here. Rank the candidates with POST /v2/erp/imports/{importId}:suggest-use-cases, then start the validate phase with POST /v2/erp/imports/{importId}:validate.
+   * Register an already-uploaded file (S3 ref) as a pricing-file import job. Returns the job and a file preview. Nothing runs yet: no use case is chosen and no validation starts here. Optionally rank candidates with POST /v2/erp/imports/{importId}:suggest-use-cases, then start validation with POST /v2/erp/imports/{importId}:validate.
    */
   'createErpImport'(
     parameters?: Parameters<UnknownParamsObject> | null,
     data?: Paths.CreateErpImport.RequestBody,
     config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.CreateErpImport.Responses.$202>
+  ): OperationResponse<Paths.CreateErpImport.Responses.$201>
   /**
    * getErpImport - getErpImport
    * 
@@ -9163,7 +9174,7 @@ export interface OperationMethods {
   /**
    * suggestErpImportUseCases - suggestErpImportUseCases
    * 
-   * Rank the org's inbound use cases against this file's columns — the input to the ranked picker ("matches 6 of your 7 columns"). Reads only the file's first row, not its data.
+   * Rank the org's inbound use cases against this file's columns — the input to the ranked picker ("matches 6 of your 7 columns"). Optional: skip this and call `:validate` directly when the use case is already known. Reads only the file's first row, not its data.
    * Every eligible use case is returned, including ones matching nothing: the "nothing fits, pick anyway" view needs the full list. Highest match first.
    * CSV only — an xlsx import fails with 400 rather than silently returning zero matches, which would look identical to "we checked and nothing matches".
    */
@@ -9181,7 +9192,7 @@ export interface OperationMethods {
     parameters?: Parameters<Paths.ExecuteErpImport.PathParameters> | null,
     data?: Paths.ExecuteErpImport.RequestBody,
     config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.ExecuteErpImport.Responses.$200>
+  ): OperationResponse<Paths.ExecuteErpImport.Responses.$202>
   /**
    * abortErpImport - abortErpImport
    * 
@@ -10018,13 +10029,13 @@ export interface PathsDictionary {
     /**
      * createErpImport - createErpImport
      * 
-     * Register an already-uploaded file (S3 ref) as a pricing-file import job and return its id. Nothing runs yet: no use case is chosen and no validation starts here. Rank the candidates with POST /v2/erp/imports/{importId}:suggest-use-cases, then start the validate phase with POST /v2/erp/imports/{importId}:validate.
+     * Register an already-uploaded file (S3 ref) as a pricing-file import job. Returns the job and a file preview. Nothing runs yet: no use case is chosen and no validation starts here. Optionally rank candidates with POST /v2/erp/imports/{importId}:suggest-use-cases, then start validation with POST /v2/erp/imports/{importId}:validate.
      */
     'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
       data?: Paths.CreateErpImport.RequestBody,
       config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.CreateErpImport.Responses.$202>
+    ): OperationResponse<Paths.CreateErpImport.Responses.$201>
     /**
      * listErpImports - listErpImports
      * 
@@ -10070,7 +10081,7 @@ export interface PathsDictionary {
     /**
      * suggestErpImportUseCases - suggestErpImportUseCases
      * 
-     * Rank the org's inbound use cases against this file's columns — the input to the ranked picker ("matches 6 of your 7 columns"). Reads only the file's first row, not its data.
+     * Rank the org's inbound use cases against this file's columns — the input to the ranked picker ("matches 6 of your 7 columns"). Optional: skip this and call `:validate` directly when the use case is already known. Reads only the file's first row, not its data.
      * Every eligible use case is returned, including ones matching nothing: the "nothing fits, pick anyway" view needs the full list. Highest match first.
      * CSV only — an xlsx import fails with 400 rather than silently returning zero matches, which would look identical to "we checked and nothing matches".
      */
@@ -10090,7 +10101,7 @@ export interface PathsDictionary {
       parameters?: Parameters<Paths.ExecuteErpImport.PathParameters> | null,
       data?: Paths.ExecuteErpImport.RequestBody,
       config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.ExecuteErpImport.Responses.$200>
+    ): OperationResponse<Paths.ExecuteErpImport.Responses.$202>
   }
   ['/v2/erp/imports/{importId}:abort']: {
     /**

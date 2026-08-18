@@ -112,6 +112,9 @@ export default defineCommand({
         '- `PORTAL_EXTENSION` — Portal extension hooks',
         '- `EXTERNAL_PRODUCT_CATALOG` — External product catalog hooks',
         '',
+        'Inline in manifest.json (no directory):',
+        '- `API_PROXY` — Server-side API proxy with credential injection',
+        '',
       ].join('\n'),
     );
 
@@ -256,6 +259,21 @@ Deploy the app:
 **Important:** Components with missing build artifacts (bundle/zip) are skipped. Run \`npm run build\` first.
 
 The deploy command reads \`components/<dir>/configuration.json\` at deploy time and uses it as the component's configuration. This means you edit config in the component directory, not in manifest.json.
+
+**Deploy does not update existing installations.** Installations keep a frozen snapshot of
+components, options and grants. After deploying to an app that is already installed:
+
+\`\`\`bash
+epilot app api patchInstallation <appId> -d '{"version":"<version>"}'
+\`\`\`
+
+This refreshes components and grants **and preserves configured option values**
+(uninstall/reinstall loses them; \`promote-to\` to the already-installed version is a silent
+no-op). The patch resets \`enabled\` to \`false\` — an org admin must re-save the app
+configuration in the epilot UI afterwards.
+
+**Auth tokens expire after ~1 hour.** A mid-deploy 403 that reads like a permissions problem
+is usually just an expired token — run \`epilot auth login\` and deploy again.
 
 ### \`epilot app export --app-id <id> [-o manifest.json]\`
 Export an existing app from the API as a manifest.json.
@@ -447,9 +465,95 @@ Hooks that provide products from an external catalog to epilot Journeys.
 
 **Hook types:** \`products\`, \`product-recommendations\`.
 
+### Inline components (no directory at all)
+
+#### API_PROXY
+A server-side proxy that lets your frontend components call an external API without exposing
+credentials to the browser. Added with \`epilot app add-component <name> --type API_PROXY\`
+(prompts for proxy name, target URL and auth type). Unlike every other component type it has
+**no \`_dir\` and no folder** — it lives inline in \`manifest.json\`:
+
+\`\`\`json
+{
+  "component_type": "API_PROXY",
+  "configuration": {
+    "name": "sap",
+    "target": "https://my-gateway.example.com",
+    "auth_type": "header"
+  }
+}
+\`\`\`
+
+Call it from the frontend with the \`@epilot/app-sdk\` helper (do not hand-roll fetch):
+
+\`\`\`ts
+import { proxy } from '@epilot/app-sdk';
+
+const data = await proxy('sap', '/API_BUSINESS_PARTNER/A_BusinessPartner', {
+  appId,
+  token, // App Bridge session token
+});
+\`\`\`
+
+Current limits — probe your target with curl through the proxy before building on it:
+
+- **Query parameters are rejected** (400) by the proxy route's own request validation.
+  Workaround until fixed: percent-encode the \`?\` into the path
+  (\`/path%3F$expand=to_Customer\`) — fragile, leave a comment where you do it.
+- Only **GET and POST** are proxied — no PUT/PATCH/DELETE.
+- \`auth_type\` is \`none | header | bearer | oauth2\` — there is **no \`basic\`**. For HTTP Basic
+  targets, add one secret option holding a pre-computed Base64 \`user:pass\` and configure
+  \`"headers": { "Authorization": "Basic {{my_basic_secret}}" }\`.
+
+## Local Development (Dev Mode)
+
+\`npm run dev\` alone is of limited use for capabilities/pages: outside the epilot iframe there
+is no token and no entity. **Dev mode** makes epilot load your component from localhost inside
+the real epilot UI (localhost is a trustworthy origin, so the HTTPS iframe allows it).
+
+\`\`\`bash
+epilot app dev                                  # enable (default URL http://localhost:5173)
+epilot app dev -c my-tab -u http://localhost:3000   # pick component and URL
+epilot app dev --off                            # disable — required before cloning a version
+\`\`\`
+
+Then \`npm run dev\` in the component folder and reload the entity page in epilot.
+
+If your CLI version predates \`app dev\`, it wraps these two raw API patches:
+
+\`\`\`bash
+# 1. Enable dev mode on the app
+epilot app api patchMetadata <appId> -d '{"dev_mode": true}'
+
+# 2. Add the override URL to the component.
+#    The PATCH does NOT merge — fetch the full component object first and re-send
+#    ALL of it with the override added, or you get: 400 must have required property 'id'.
+epilot app api getConfiguration <appId>
+epilot app api patchComponent <appId> <version> <componentId> -d '<full component + override>'
+\`\`\`
+
+The override location **depends on the component type**:
+
+| Component type | Override field |
+| --- | --- |
+| \`CUSTOM_CAPABILITY\` (and other zip surfaces) | \`surfaces.capability_config.override_url\` |
+| \`CUSTOM_JOURNEY_BLOCK\` | \`configuration.override_dev_mode.override_url\` |
+
+Do not copy the journey-block shape onto a capability — it silently does nothing.
+
+To leave dev mode, set \`dev_mode: false\` and remove the override (again re-sending the full
+component).
+
+Note: the dev-mode switch in the epilot portal UI is a different mechanism and does not write
+these fields.
+
 ## Workflow: Building an App from Scratch
 
 \`\`\`bash
+# 0. If the app calls an external API: probe it with curl FIRST.
+#    Get auth + one real response working in the terminal before writing any code.
+#    (Through the proxy too, once deployed — its limits bite real targets, see API_PROXY.)
+
 # 1. Scaffold the project
 epilot app init my-app
 cd my-app
@@ -499,16 +603,72 @@ For every component with a \`_dir\` field, the CLI reads \`components/<dir>/conf
 5. Injects the CDN URL into the component configuration/surfaces before upserting
 
 ### Permissions
-Apps can request permissions via the \`permissions\` array in the manifest. These are created as a role when the app is installed. Common actions: \`entity:read\`, \`entity:write\`, \`entity:delete\`, \`workflow:read\`, \`workflow:write\`.
+
+Apps request permissions via the \`permissions\` array in the manifest. On installation, epilot
+creates a role with these grants in the installing organization. Common actions:
+\`entity:read\`, \`entity:write\`, \`entity:delete\`, \`workflow:read\`, \`workflow:write\`.
+
+What permissions do and do not cover:
+
+- They gate the app's **server-side** access to epilot APIs.
+- They do **not** make the App Bridge token work against the Entity API — that call returns
+  403 even with the permission granted. To show the current entity's data in a capability,
+  read it from the App Bridge context (see the App Bridge section); that path needs **no
+  permission at all**. Only request \`entity:*\` permissions for genuine server-side API use.
+- **Every \`epilot app deploy\` re-patches the version's grants and desyncs existing
+  installations** — the installed app starts getting 403s while the permissions UI still
+  shows everything granted. After deploying to an already-installed app, re-sync with
+  \`epilot app api patchInstallation <appId> -d '{"version":"<version>"}'\`, then have an org
+  admin re-save the app configuration in epilot (the patch resets \`enabled\` to false).
 
 ### Options
-Components can declare \`options\` — configuration values set by the installing organization. Types: \`text\`, \`number\`, \`boolean\`, \`secret\`. Secret values are encrypted and never included in the manifest. Use \`{{option_key}}\` in configuration URLs/headers for interpolation.
+Components can declare \`options\` — configuration values set by the installing organization. Types: \`text\`, \`number\`, \`boolean\`, \`secret\`. Use \`{{option_key}}\` in configuration URLs/headers for interpolation.
+
+Two caveats:
+- **Options merge on upsert.** Deploying a component without an \`options\` key leaves the old
+  options in place, so removed options stay visible to installing admins. Send \`"options": []\`
+  once to clear them, then patch the installation.
+- **"Secret" means not delivered to the app's browser code.** Secret values are never stored
+  in the manifest and are injected server-side — but organization admins with API access can
+  read stored values back. Do not describe them to users as unreadable.
 
 ### Descriptions
 All user-facing text (app name, component names, descriptions) must include a \`de\` (German) translation. \`en\` is optional but recommended.
 
 ### App Bridge
-Components that render inside epilot (capabilities, pages, portal blocks) use \`@epilot/app-bridge\` to communicate with the parent window. The bridge provides an auth token and language setting. Always wrap your React app in an \`AppBridgeProvider\`.
+
+Capabilities, pages and portal blocks run in an iframe and talk to epilot via
+\`@epilot/app-bridge\`. Wrap your app in an \`AppBridgeProvider\`.
+
+**The context already contains the entity.** \`getEntityContext()\` returns the full entity
+next to its id (the \`EntityContext\` type may not declare the \`entity\` field yet — it is
+there at runtime). A tab that renders entity data needs no Entity API call and no
+\`entity:read\` permission:
+
+\`\`\`ts
+const ctx = await getEntityContext()
+ctx.entityId            // '53a9f8c4-…'
+(ctx as any).entity     // the whole entity — prefer this over fetching it
+\`\`\`
+
+Prefer this over the Entity API: it is one round-trip cheaper, and app tokens are **not**
+guaranteed to authorise direct Entity API calls (expect 403 there even when the permission
+shows as granted).
+
+**\`initialize()\` makes one attempt and rejects after \`timeout\` (default 5000 ms).** There is
+no internal retry, so if the parent is not listening yet the message is lost. Retry 2–3 times
+before concluding you are outside epilot, and keep the session token even when a later
+context request fails — otherwise "epilot answered oddly" is indistinguishable from "no epilot".
+
+**Report your height.** The iframe does not auto-size. Call \`updateContentHeight(px)\` from a
+\`ResizeObserver\` on \`document.body\`. Do **not** set \`html, body, #root { height: 100% }\` while
+measuring \`scrollHeight\` — the body then can never exceed the iframe, so the reported height
+never grows and the tab stays a small scrolling box.
+
+**Refresh on becoming visible.** \`onVisibilityChange(cb)\` fires when the user switches tabs.
+
+**Debugging.** Your console output goes to the iframe's JS context (\`cdn.app.sls.epilot.io\`),
+not \`top\`. Switch the DevTools context selector or you will see nothing and assume nothing ran.
 
 ### Volt UI
 Use \`@epilot/volt-ui\` for UI components in App Bridge surfaces (capabilities, pages, portal blocks). It provides cards, buttons, forms, selectors, and more — consistent with epilot's design system.

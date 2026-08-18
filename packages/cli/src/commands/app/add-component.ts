@@ -28,16 +28,6 @@ type TemplateInfo = {
 };
 
 const TEMPLATE_REGISTRY: Record<string, TemplateInfo> = {
-  CUSTOM_FLOW_ACTION_SANDBOX: {
-    configOnly: false,
-    manifestType: 'CUSTOM_FLOW_ACTION',
-    templateDir: 'custom-flow-action-sandbox',
-    description: 'Sandboxed flow action (JS runs in epilot)',
-    configuration: () => ({
-      type: 'sandbox',
-      sandbox_settings: { code: '// code is read from dist/ during deploy' },
-    }),
-  },
   CUSTOM_FLOW_ACTION_EXTERNAL: {
     configOnly: true,
     manifestType: 'CUSTOM_FLOW_ACTION',

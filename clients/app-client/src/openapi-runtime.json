@@ -521,6 +521,14 @@
           "in": "path",
           "required": true,
           "description": "Path to forward to the proxy target"
+        },
+        {
+          "name": "query",
+          "in": "query",
+          "required": false,
+          "style": "form",
+          "explode": true,
+          "description": "Free-form query parameters, forwarded unchanged to the proxy target"
         }
       ],
       "get": {
