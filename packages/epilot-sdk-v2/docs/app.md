@@ -75,6 +75,7 @@ const { data } = await appClient.getPublicFacingComponent(...)
 - [`OptionsRef`](#optionsref)
 - [`S3Reference`](#s3reference)
 - [`ComponentType`](#componenttype)
+- [`FunctionDefinition`](#functiondefinition)
 - [`Author`](#author)
 - [`NotificationConfig`](#notificationconfig)
 - [`NotificationEvent`](#notificationevent)
@@ -90,7 +91,6 @@ const { data } = await appClient.getPublicFacingComponent(...)
 - [`CustomFlowActionComponent`](#customflowactioncomponent)
 - [`BaseCustomActionConfig`](#basecustomactionconfig)
 - [`ExternalIntegrationCustomActionConfig`](#externalintegrationcustomactionconfig)
-- [`SandboxCustomActionConfig`](#sandboxcustomactionconfig)
 - [`CustomFlowConfig`](#customflowconfig)
 - [`ExternalProductCatalogComponent`](#externalproductcatalogcomponent)
 - [`ExternalProductCatalogConfig`](#externalproductcatalogconfig)
@@ -127,6 +127,7 @@ const { data } = await appClient.getPublicFacingComponent(...)
 - [`Pricing`](#pricing)
 - [`Audit`](#audit)
 - [`Review`](#review)
+- [`InternalReview`](#internalreview)
 - [`ConfigurationMetadata`](#configurationmetadata)
 - [`ConfigurationVersion`](#configurationversion)
 - [`ApiProxyConfig`](#apiproxyconfig)
@@ -404,6 +405,21 @@ const { data } = await client.getPublicConfiguration({
       "configuration": {}
     }
   ],
+  "functions": [
+    {
+      "name": "string",
+      "type": "workflow",
+      "label": {},
+      "description": {},
+      "code": "string",
+      "schedule": "rate(30 minutes)",
+      "schedule_timezone": "Europe/Berlin",
+      "schedule_overlap": "skip",
+      "secrets": ["string"],
+      "wait_for_callback": true,
+      "surfaces": {}
+    }
+  ],
   "is_beta": true,
   "deprecated_at": "string",
   "version": "string",
@@ -425,6 +441,7 @@ const { data } = await client.getPublicConfiguration({
       "app_id": "string",
       "owner_org_id": "string",
       "components": [],
+      "functions": [],
       "visibility": "private",
       "public": false,
       "pending": false,
@@ -501,20 +518,22 @@ const { data } = await client.getConfiguration({
   "components": [
     {
       "component_type": "CUSTOM_JOURNEY_BLOCK",
-      "configuration": {
-        "override_dev_mode": {
-          "override_url": "http://localhost:3000"
-        },
-        "component_url": "https://cdn.apps.com/123/v1.0.0/bundle.js",
-        "component_tag": "string",
-        "component_args": [
-          {
-            "type": "text"
-          }
-        ],
-        "component_size": 0,
-        "component_mapping": {}
-      }
+      "configuration": {}
+    }
+  ],
+  "functions": [
+    {
+      "name": "string",
+      "type": "workflow",
+      "label": {},
+      "description": {},
+      "code": "string",
+      "schedule": "rate(30 minutes)",
+      "schedule_timezone": "Europe/Berlin",
+      "schedule_overlap": "skip",
+      "secrets": ["string"],
+      "wait_for_callback": true,
+      "surfaces": {}
     }
   ],
   "visibility": "private",
@@ -528,10 +547,7 @@ const { data } = await client.getConfiguration({
   "role": {
     "id": "string",
     "grants": [
-      {
-        "action": "string",
-        "resource": "string"
-      }
+      {}
     ]
   },
   "blueprint_ref": {
@@ -876,6 +892,33 @@ const { data } = await client.listVersions({
           }
         }
       ],
+      "functions": [
+        {
+          "name": "string",
+          "type": "workflow",
+          "label": {
+            "en": "string",
+            "de": "string"
+          },
+          "description": {
+            "en": "string",
+            "de": "string"
+          },
+          "code": "string",
+          "schedule": "rate(30 minutes)",
+          "schedule_timezone": "Europe/Berlin",
+          "schedule_overlap": "skip",
+          "secrets": ["string"],
+          "wait_for_callback": true,
+          "surfaces": {
+            "flow_action_config": {
+              "app_url": "string",
+              "zip_url": "string",
+              "override_url": "string"
+            }
+          }
+        }
+      ],
       "visibility": "private",
       "public": false,
       "pending": false,
@@ -976,20 +1019,22 @@ const { data } = await client.getVersion({
   "components": [
     {
       "component_type": "CUSTOM_JOURNEY_BLOCK",
-      "configuration": {
-        "override_dev_mode": {
-          "override_url": "http://localhost:3000"
-        },
-        "component_url": "https://cdn.apps.com/123/v1.0.0/bundle.js",
-        "component_tag": "string",
-        "component_args": [
-          {
-            "type": "text"
-          }
-        ],
-        "component_size": 0,
-        "component_mapping": {}
-      }
+      "configuration": {}
+    }
+  ],
+  "functions": [
+    {
+      "name": "string",
+      "type": "workflow",
+      "label": {},
+      "description": {},
+      "code": "string",
+      "schedule": "rate(30 minutes)",
+      "schedule_timezone": "Europe/Berlin",
+      "schedule_overlap": "skip",
+      "secrets": ["string"],
+      "wait_for_callback": true,
+      "surfaces": {}
     }
   ],
   "visibility": "private",
@@ -1003,10 +1048,7 @@ const { data } = await client.getVersion({
   "role": {
     "id": "string",
     "grants": [
-      {
-        "action": "string",
-        "resource": "string"
-      }
+      {}
     ]
   },
   "blueprint_ref": {
@@ -1063,6 +1105,33 @@ const { data } = await client.patchVersion(
       {
         action: 'string',
         resource: 'string'
+      }
+    ],
+    functions: [
+      {
+        name: 'string',
+        type: 'workflow',
+        label: {
+          en: 'string',
+          de: 'string'
+        },
+        description: {
+          en: 'string',
+          de: 'string'
+        },
+        code: 'string',
+        schedule: 'rate(30 minutes)',
+        schedule_timezone: 'Europe/Berlin',
+        schedule_overlap: 'skip',
+        secrets: ['string'],
+        wait_for_callback: true,
+        surfaces: {
+          flow_action_config: {
+            app_url: 'string',
+            zip_url: 'string',
+            override_url: 'string'
+          }
+        }
       }
     ]
   },
@@ -1345,6 +1414,33 @@ const { data } = await client.listInstallations({
           }
         }
       ],
+      "functions": [
+        {
+          "name": "string",
+          "type": "workflow",
+          "label": {
+            "en": "string",
+            "de": "string"
+          },
+          "description": {
+            "en": "string",
+            "de": "string"
+          },
+          "code": "string",
+          "schedule": "rate(30 minutes)",
+          "schedule_timezone": "Europe/Berlin",
+          "schedule_overlap": "skip",
+          "secrets": ["string"],
+          "wait_for_callback": true,
+          "surfaces": {
+            "flow_action_config": {
+              "app_url": "string",
+              "zip_url": "string",
+              "override_url": "string"
+            }
+          }
+        }
+      ],
       "installed_version": "string",
       "role": "string",
       "blueprint_ref": {
@@ -1423,6 +1519,33 @@ const { data } = await client.getInstallation({
         ],
         "component_size": 0,
         "component_mapping": {}
+      }
+    }
+  ],
+  "functions": [
+    {
+      "name": "string",
+      "type": "workflow",
+      "label": {
+        "en": "string",
+        "de": "string"
+      },
+      "description": {
+        "en": "string",
+        "de": "string"
+      },
+      "code": "string",
+      "schedule": "rate(30 minutes)",
+      "schedule_timezone": "Europe/Berlin",
+      "schedule_overlap": "skip",
+      "secrets": ["string"],
+      "wait_for_callback": true,
+      "surfaces": {
+        "flow_action_config": {
+          "app_url": "string",
+          "zip_url": "string",
+          "override_url": "string"
+        }
       }
     }
   ],
@@ -1514,6 +1637,33 @@ const { data } = await client.install(
         ],
         "component_size": 0,
         "component_mapping": {}
+      }
+    }
+  ],
+  "functions": [
+    {
+      "name": "string",
+      "type": "workflow",
+      "label": {
+        "en": "string",
+        "de": "string"
+      },
+      "description": {
+        "en": "string",
+        "de": "string"
+      },
+      "code": "string",
+      "schedule": "rate(30 minutes)",
+      "schedule_timezone": "Europe/Berlin",
+      "schedule_overlap": "skip",
+      "secrets": ["string"],
+      "wait_for_callback": true,
+      "surfaces": {
+        "flow_action_config": {
+          "app_url": "string",
+          "zip_url": "string",
+          "override_url": "string"
+        }
       }
     }
   ],
@@ -1637,6 +1787,33 @@ const { data } = await client.promoteVersion({
       }
     }
   ],
+  "functions": [
+    {
+      "name": "string",
+      "type": "workflow",
+      "label": {
+        "en": "string",
+        "de": "string"
+      },
+      "description": {
+        "en": "string",
+        "de": "string"
+      },
+      "code": "string",
+      "schedule": "rate(30 minutes)",
+      "schedule_timezone": "Europe/Berlin",
+      "schedule_overlap": "skip",
+      "secrets": ["string"],
+      "wait_for_callback": true,
+      "surfaces": {
+        "flow_action_config": {
+          "app_url": "string",
+          "zip_url": "string",
+          "override_url": "string"
+        }
+      }
+    }
+  ],
   "installed_version": "string",
   "role": "string",
   "blueprint_ref": {
@@ -1699,6 +1876,7 @@ const { data } = await client.publicProxyGet({
   appId: 'example',
   proxyName: 'example',
   path: 'example',
+  query: 'example',
 })
 ```
 
@@ -1716,6 +1894,7 @@ const { data } = await client.publicProxyPost(
     appId: 'example',
     proxyName: 'example',
     path: 'example',
+    query: 'example',
   },
   {},
 )
@@ -1735,6 +1914,7 @@ const { data } = await client.publicProxyPut(
     appId: 'example',
     proxyName: 'example',
     path: 'example',
+    query: 'example',
   },
   {},
 )
@@ -1754,6 +1934,7 @@ const { data } = await client.publicProxyPatch(
     appId: 'example',
     proxyName: 'example',
     path: 'example',
+    query: 'example',
   },
   {},
 )
@@ -1772,6 +1953,7 @@ const { data } = await client.publicProxyDelete({
   appId: 'example',
   proxyName: 'example',
   path: 'example',
+  query: 'example',
 })
 ```
 
@@ -1865,7 +2047,40 @@ type S3Reference = {
 Type of app component
 
 ```ts
-type ComponentType = "CUSTOM_JOURNEY_BLOCK" | "CUSTOM_PORTAL_BLOCK" | "PORTAL_EXTENSION" | "CUSTOM_FLOW_ACTION" | "ERP_INFORM_TOOLKIT" | "CUSTOM_CAPABILITY" | "EXTERNAL_PRODUCT_CATALOG" | "CUSTOM_PAGE" | "API_PROXY"
+type ComponentType = "CUSTOM_JOURNEY_BLOCK" | "CUSTOM_PORTAL_BLOCK" | "PORTAL_EXTENSION" | "CUSTOM_FLOW_ACTION" | "ERP_INFORM_TOOLKIT" | "CUSTOM_CAPABILITY" | "EXTERNAL_PRODUCT_CATALOG" | "CUSTOM_PAGE" | "API_PROXY" | "APP_FUNCTION"
+```
+
+### `FunctionDefinition`
+
+A named server-side function belonging to the app. Runs in the epilot code-execution sandbox with an installation-scoped app token. Functions with a schedule are executed automatically once per installation.
+
+
+```ts
+type FunctionDefinition = {
+  name: string
+  type: "workflow" | "scheduled"
+  label?: {
+    en?: string
+    de: string
+  }
+  description?: {
+    en?: string
+    de: string
+  }
+  code: string
+  schedule?: string
+  schedule_timezone?: string
+  schedule_overlap?: "skip"
+  secrets?: string[]
+  wait_for_callback?: boolean
+  surfaces?: {
+    flow_action_config?: {
+      app_url?: { ... }
+      zip_url?: { ... }
+      override_url?: { ... }
+    }
+  }
+}
 ```
 
 ### `Author`
@@ -1967,7 +2182,7 @@ type ApiProxyComponent = {
   configuration: {
     name: string
     target: string
-    auth_type: "header" | "bearer" | "oauth2" | "none"
+    auth_type: "header" | "bearer" | "basic" | "oauth2" | "none"
     auth_header?: string
     token_url?: string // uri
     headers?: Record<string, string>
@@ -2092,14 +2307,6 @@ type CustomFlowActionComponent = {
       url?: { ... }
       headers?: { ... }
     }
-  } | {
-    name?: string
-    description?: string
-    wait_for_callback?: boolean
-    type: "sandbox"
-    sandbox_settings?: {
-      code?: { ... }
-    }
   }
   surfaces?: {
     flow_action_config?: {
@@ -2136,21 +2343,10 @@ type ExternalIntegrationCustomActionConfig = {
 }
 ```
 
-### `SandboxCustomActionConfig`
-
-```ts
-type SandboxCustomActionConfig = {
-  name?: string
-  description?: string
-  wait_for_callback?: boolean
-  type: "sandbox"
-  sandbox_settings?: {
-    code?: string
-  }
-}
-```
-
 ### `CustomFlowConfig`
+
+Configuration of an external-integration flow action. Sandboxed code belongs in the app's `functions` (type `workflow`) instead — workflow functions are selectable directly in the flow builder without a component.
+
 
 ```ts
 type CustomFlowConfig = {
@@ -2161,14 +2357,6 @@ type CustomFlowConfig = {
   external_integration_settings?: {
     url?: string
     headers?: Record<string, unknown>
-  }
-} | {
-  name?: string
-  description?: string
-  wait_for_callback?: boolean
-  type: "sandbox"
-  sandbox_settings?: {
-    code?: string
   }
 }
 ```
@@ -3270,6 +3458,26 @@ type Review = {
 }
 ```
 
+### `InternalReview`
+
+Review entry including app ownership info, used by internal admin endpoints
+
+```ts
+type InternalReview = {
+  version?: string
+  review_status?: "approved" | "rejected" | "pending"
+  requested_at?: string
+  requested_by?: string
+  technical_contact?: string
+  marketing_contact?: string
+  demo_url?: string
+  app_id?: string
+  org_id?: string
+  reviewed_by?: string
+  reviewed_at?: string
+}
+```
+
 ### `ConfigurationMetadata`
 
 Basic metadata about your app configuration which does not get versioned
@@ -3344,6 +3552,27 @@ type ConfigurationVersion = {
     }>
     surfaces?: object
   }>
+  functions?: Array<{
+    name: string
+    type: "workflow" | "scheduled"
+    label?: {
+      en?: { ... }
+      de: { ... }
+    }
+    description?: {
+      en?: { ... }
+      de: { ... }
+    }
+    code: string
+    schedule?: string
+    schedule_timezone?: string
+    schedule_overlap?: "skip"
+    secrets?: string[]
+    wait_for_callback?: boolean
+    surfaces?: {
+      flow_action_config?: { ... }
+    }
+  }>
   visibility?: "public" | "private"
   public?: boolean
   pending?: boolean
@@ -3383,7 +3612,7 @@ Configuration for an API proxy component
 type ApiProxyConfig = {
   name: string
   target: string
-  auth_type: "header" | "bearer" | "oauth2" | "none"
+  auth_type: "header" | "bearer" | "basic" | "oauth2" | "none"
   auth_header?: string
   token_url?: string // uri
   headers?: Record<string, string>
@@ -3452,6 +3681,27 @@ type Installation = {
     }>
     surfaces?: object
   }>
+  functions?: Array<{
+    name: string
+    type: "workflow" | "scheduled"
+    label?: {
+      en?: { ... }
+      de: { ... }
+    }
+    description?: {
+      en?: { ... }
+      de: { ... }
+    }
+    code: string
+    schedule?: string
+    schedule_timezone?: string
+    schedule_overlap?: "skip"
+    secrets?: string[]
+    wait_for_callback?: boolean
+    surfaces?: {
+      flow_action_config?: { ... }
+    }
+  }>
   installed_version: string
   role?: string
   blueprint_ref?: {
@@ -3518,6 +3768,27 @@ type PublicConfiguration = {
     }>
     surfaces?: object
   }>
+  functions?: Array<{
+    name: string
+    type: "workflow" | "scheduled"
+    label?: {
+      en?: { ... }
+      de: { ... }
+    }
+    description?: {
+      en?: { ... }
+      de: { ... }
+    }
+    code: string
+    schedule?: string
+    schedule_timezone?: string
+    schedule_overlap?: "skip"
+    secrets?: string[]
+    wait_for_callback?: boolean
+    surfaces?: {
+      flow_action_config?: { ... }
+    }
+  }>
   is_beta?: boolean
   deprecated_at?: string
   version: string
@@ -3545,32 +3816,15 @@ type PublicConfiguration = {
       options?: { ... }
       surfaces?: { ... }
     }>
-    visibility?: "public" | "private"
-    public?: boolean
-    pending?: boolean
-    version: string
-    is_beta?: boolean
-    deprecated_at?: string
-    changelog?: string
-    review_status?: "approved" | "rejected" | "pending"
-    role?: {
-      id?: { ... }
-      grants?: { ... }
-    }
-    blueprint_ref?: {
-      manifest_id?: { ... }
-      job_id?: { ... }
-      source_blueprint_file?: { ... }
-    }
-    version_audit: {
-      created_at?: { ... }
-      created_by?: { ... }
-      updated_at?: { ... }
-      updated_by?: { ... }
-      versioned_at?: { ... }
-      versioned_by?: { ... }
-    }
-  }>
+    functions?: Array<{
+      name: { ... }
+      type: { ... }
+      label?: { ... }
+      description?: { ... }
+      code: { ... }
+      schedule?: { ... }
+      schedule_timezone?: { ... }
+  // ...
 }
 ```
 
@@ -3637,6 +3891,27 @@ type Configuration = {
     }>
     surfaces?: object
   }>
+  functions?: Array<{
+    name: string
+    type: "workflow" | "scheduled"
+    label?: {
+      en?: { ... }
+      de: { ... }
+    }
+    description?: {
+      en?: { ... }
+      de: { ... }
+    }
+    code: string
+    schedule?: string
+    schedule_timezone?: string
+    schedule_overlap?: "skip"
+    secrets?: string[]
+    wait_for_callback?: boolean
+    surfaces?: {
+      flow_action_config?: { ... }
+    }
+  }>
   visibility?: "public" | "private"
   public?: boolean
   pending?: boolean
@@ -3658,13 +3933,7 @@ type Configuration = {
     source_blueprint_file?: string
   }
   version_audit: {
-    created_at?: string
-    created_by?: string
-    updated_at?: string
-    updated_by?: string
-    versioned_at?: string
-    versioned_by?: string
-  }
+  // ...
 }
 ```
 
@@ -3700,7 +3969,7 @@ type BatchEventRequest = {
     timestamp?: string
     correlation_id?: string
     event_type: "ERROR" | "WARNING" | "INFO"
-    source: "CUSTOM_JOURNEY_BLOCK" | "CUSTOM_PORTAL_BLOCK" | "PORTAL_EXTENSION" | "CUSTOM_FLOW_ACTION" | "ERP_INFORM_TOOLKIT" | "CUSTOM_CAPABILITY" | "EXTERNAL_PRODUCT_CATALOG" | "CUSTOM_PAGE" | "API_PROXY"
+    source: "CUSTOM_JOURNEY_BLOCK" | "CUSTOM_PORTAL_BLOCK" | "PORTAL_EXTENSION" | "CUSTOM_FLOW_ACTION" | "ERP_INFORM_TOOLKIT" | "CUSTOM_CAPABILITY" | "EXTERNAL_PRODUCT_CATALOG" | "CUSTOM_PAGE" | "API_PROXY" | "APP_FUNCTION"
     actor: {
       org_id?: { ... }
       user_id?: { ... }
@@ -3732,7 +4001,7 @@ type AppEventData = {
   timestamp?: string
   correlation_id?: string
   event_type: "ERROR" | "WARNING" | "INFO"
-  source: "CUSTOM_JOURNEY_BLOCK" | "CUSTOM_PORTAL_BLOCK" | "PORTAL_EXTENSION" | "CUSTOM_FLOW_ACTION" | "ERP_INFORM_TOOLKIT" | "CUSTOM_CAPABILITY" | "EXTERNAL_PRODUCT_CATALOG" | "CUSTOM_PAGE" | "API_PROXY"
+  source: "CUSTOM_JOURNEY_BLOCK" | "CUSTOM_PORTAL_BLOCK" | "PORTAL_EXTENSION" | "CUSTOM_FLOW_ACTION" | "ERP_INFORM_TOOLKIT" | "CUSTOM_CAPABILITY" | "EXTERNAL_PRODUCT_CATALOG" | "CUSTOM_PAGE" | "API_PROXY" | "APP_FUNCTION"
   actor: {
     org_id?: string
     user_id?: string
@@ -3752,7 +4021,7 @@ type EventsQuery = {
     preset?: "1h" | "6h" | "24h" | "7d" | "30d"
   }
   filters?: {
-    source?: "CUSTOM_JOURNEY_BLOCK" | "CUSTOM_PORTAL_BLOCK" | "PORTAL_EXTENSION" | "CUSTOM_FLOW_ACTION" | "ERP_INFORM_TOOLKIT" | "CUSTOM_CAPABILITY" | "EXTERNAL_PRODUCT_CATALOG" | "CUSTOM_PAGE" | "API_PROXY"[]
+    source?: "CUSTOM_JOURNEY_BLOCK" | "CUSTOM_PORTAL_BLOCK" | "PORTAL_EXTENSION" | "CUSTOM_FLOW_ACTION" | "ERP_INFORM_TOOLKIT" | "CUSTOM_CAPABILITY" | "EXTERNAL_PRODUCT_CATALOG" | "CUSTOM_PAGE" | "API_PROXY" | "APP_FUNCTION"[]
     component_id?: string[]
     event_type?: "ERROR" | "WARNING" | "INFO"[]
     correlation_id?: string
@@ -3844,7 +4113,7 @@ type RawEvents = {
     timestamp?: string
     correlation_id?: string
     event_type: "ERROR" | "WARNING" | "INFO"
-    source: "CUSTOM_JOURNEY_BLOCK" | "CUSTOM_PORTAL_BLOCK" | "PORTAL_EXTENSION" | "CUSTOM_FLOW_ACTION" | "ERP_INFORM_TOOLKIT" | "CUSTOM_CAPABILITY" | "EXTERNAL_PRODUCT_CATALOG" | "CUSTOM_PAGE" | "API_PROXY"
+    source: "CUSTOM_JOURNEY_BLOCK" | "CUSTOM_PORTAL_BLOCK" | "PORTAL_EXTENSION" | "CUSTOM_FLOW_ACTION" | "ERP_INFORM_TOOLKIT" | "CUSTOM_CAPABILITY" | "EXTERNAL_PRODUCT_CATALOG" | "CUSTOM_PAGE" | "API_PROXY" | "APP_FUNCTION"
     actor: {
       org_id?: { ... }
       user_id?: { ... }

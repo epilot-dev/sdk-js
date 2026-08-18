@@ -106,6 +106,14 @@ export declare namespace Components {
              */
             role_id?: string | null;
             grants?: /* Required grants for the app in order to call APIs for the installing tenant */ Schemas.Grants;
+            /**
+             * Replaces the full set of server-side functions for this version
+             */
+            functions?: /**
+             * A named server-side function belonging to the app. Runs in the epilot code-execution sandbox with an installation-scoped app token. Functions with a schedule are executed automatically once per installation.
+             *
+             */
+            Schemas.FunctionDefinition[];
         }
         export type UpsertComponentRequest = Schemas.BaseComponent;
     }
@@ -156,9 +164,9 @@ export declare namespace Components {
              */
             target: string; // ^https://
             /**
-             * Authentication strategy
+             * Authentication strategy. 'basic' sends an HTTP Basic Authorization header built server-side from the 'username' and 'password' component options.
              */
-            auth_type: "header" | "bearer" | "oauth2" | "none";
+            auth_type: "header" | "bearer" | "basic" | "oauth2" | "none";
             /**
              * Header name for 'header' auth type
              */
@@ -505,7 +513,7 @@ export declare namespace Components {
         /**
          * Type of app component
          */
-        export type ComponentType = "CUSTOM_JOURNEY_BLOCK" | "CUSTOM_PORTAL_BLOCK" | "PORTAL_EXTENSION" | "CUSTOM_FLOW_ACTION" | "ERP_INFORM_TOOLKIT" | "CUSTOM_CAPABILITY" | "EXTERNAL_PRODUCT_CATALOG" | "CUSTOM_PAGE" | "API_PROXY";
+        export type ComponentType = "CUSTOM_JOURNEY_BLOCK" | "CUSTOM_PORTAL_BLOCK" | "PORTAL_EXTENSION" | "CUSTOM_FLOW_ACTION" | "ERP_INFORM_TOOLKIT" | "CUSTOM_CAPABILITY" | "EXTERNAL_PRODUCT_CATALOG" | "CUSTOM_PAGE" | "API_PROXY" | "APP_FUNCTION";
         /**
          * Configuration of the published app
          */
@@ -613,6 +621,14 @@ export declare namespace Components {
                 updated_by?: string;
             };
             components: BaseComponent[];
+            /**
+             * Server-side functions of the app, including scheduled functions
+             */
+            functions?: /**
+             * A named server-side function belonging to the app. Runs in the epilot code-execution sandbox with an installation-scoped app token. Functions with a schedule are executed automatically once per installation.
+             *
+             */
+            FunctionDefinition[];
             /**
              * Visibility of the app version
              */
@@ -792,6 +808,14 @@ export declare namespace Components {
             owner_org_id: string;
             components: BaseComponent[];
             /**
+             * Server-side functions of the app, including scheduled functions
+             */
+            functions?: /**
+             * A named server-side function belonging to the app. Runs in the epilot code-execution sandbox with an installation-scoped app token. Functions with a schedule are executed automatically once per installation.
+             *
+             */
+            FunctionDefinition[];
+            /**
              * Visibility of the app version
              */
             visibility?: "public" | "private";
@@ -870,12 +894,24 @@ export declare namespace Components {
         }
         export interface CustomFlowActionComponent {
             component_type: "CUSTOM_FLOW_ACTION";
-            configuration: CustomFlowConfig;
+            configuration: /**
+             * Configuration of an external-integration flow action. Sandboxed code belongs in the app's `functions` (type `workflow`) instead — workflow functions are selectable directly in the flow builder without a component.
+             *
+             */
+            CustomFlowConfig;
             surfaces?: {
                 flow_action_config?: AppBridgeSurfaceConfig;
             };
         }
-        export type CustomFlowConfig = ExternalIntegrationCustomActionConfig | SandboxCustomActionConfig;
+        /**
+         * Configuration of an external-integration flow action. Sandboxed code belongs in the app's `functions` (type `workflow`) instead — workflow functions are selectable directly in the flow builder without a component.
+         *
+         */
+        export type CustomFlowConfig = /**
+         * Configuration of an external-integration flow action. Sandboxed code belongs in the app's `functions` (type `workflow`) instead — workflow functions are selectable directly in the flow builder without a component.
+         *
+         */
+        ExternalIntegrationCustomActionConfig;
         export interface CustomPageComponent {
             component_type: "CUSTOM_PAGE";
             configuration: CustomPageConfig;
@@ -1178,6 +1214,83 @@ export declare namespace Components {
             };
         }
         /**
+         * A named server-side function belonging to the app. Runs in the epilot code-execution sandbox with an installation-scoped app token. Functions with a schedule are executed automatically once per installation.
+         *
+         */
+        export interface FunctionDefinition {
+            /**
+             * Unique function name within the app
+             */
+            name: string; // ^[a-z0-9][a-z0-9-]{0,63}$
+            /**
+             * Where the function can be used. `workflow` functions are selectable as actions in the flow builder and run with entity context. `scheduled` functions run automatically per installation on their cron schedule.
+             *
+             */
+            type: "workflow" | "scheduled";
+            /**
+             * Human-readable display name, e.g. shown in the flow builder action picker
+             */
+            label?: {
+                /**
+                 * English translation
+                 */
+                en?: string | null;
+                /**
+                 * German translation
+                 */
+                de: string;
+            };
+            /**
+             * Description of the function
+             */
+            description?: {
+                /**
+                 * English translation
+                 */
+                en?: string | null;
+                /**
+                 * German translation
+                 */
+                de: string;
+            };
+            /**
+             * JavaScript code to execute. Must declare a top-level `async function handler(input, context)`. Maximum size: 300KB (hard limit). Security restrictions: eval() and Function() constructor are not allowed.
+             *
+             */
+            code: string;
+            /**
+             * Cron trigger for the function, executed once per installation. Standard 5-field cron expression (e.g. "0 3 * * *") or rate expression (e.g. "rate(30 minutes)"). Minimum interval: 15 minutes. Scheduled runs are limited to 60 seconds.
+             *
+             * example:
+             * rate(30 minutes)
+             */
+            schedule?: string;
+            /**
+             * IANA timezone the cron expression is evaluated in
+             */
+            schedule_timezone?: string;
+            /**
+             * Behavior when the previous scheduled run is still active
+             */
+            schedule_overlap?: "skip";
+            /**
+             * Keys of installation options of type secret made available to the function via input.app_options
+             *
+             */
+            secrets?: string[];
+            /**
+             * Workflow functions only — wait for the callback_url to be called before completing the flow action
+             *
+             */
+            wait_for_callback?: boolean;
+            /**
+             * Workflow functions only — optional custom config UI shown in the flow builder
+             */
+            surfaces?: {
+                flow_action_config?: AppBridgeSurfaceConfig;
+            };
+        }
+        /**
          * Required grants for the app in order to call APIs for the installing tenant
          */
         export type Grants = {
@@ -1227,6 +1340,14 @@ export declare namespace Components {
              */
             components: BaseComponent[];
             /**
+             * Server-side functions of the installed version, including scheduled functions
+             */
+            functions?: /**
+             * A named server-side function belonging to the app. Runs in the epilot code-execution sandbox with an installation-scoped app token. Functions with a schedule are executed automatically once per installation.
+             *
+             */
+            FunctionDefinition[];
+            /**
              * Version of the app that is installed
              */
             installed_version: string;
@@ -1260,6 +1381,55 @@ export declare namespace Components {
              * Manifest ID used to create/update the entity
              */
             _manifest?: string /* uuid */[];
+        }
+        /**
+         * Review entry including app ownership info, used by internal admin endpoints
+         */
+        export interface InternalReview {
+            /**
+             * Version of the app that is under review
+             */
+            version?: string;
+            /**
+             * Status of the review
+             */
+            review_status?: "approved" | "rejected" | "pending";
+            /**
+             * Timestamp of the review
+             */
+            requested_at?: string;
+            /**
+             * User ID of the reviewer
+             */
+            requested_by?: string;
+            /**
+             * Email of the technical contact
+             */
+            technical_contact?: string;
+            /**
+             * Email of the marketing contact
+             */
+            marketing_contact?: string;
+            /**
+             * URL of the demo
+             */
+            demo_url?: string;
+            /**
+             * ID of the app configuration
+             */
+            app_id?: string;
+            /**
+             * Organization ID of the app owner
+             */
+            org_id?: string;
+            /**
+             * Identity of the internal reviewer who approved the review
+             */
+            reviewed_by?: string;
+            /**
+             * Timestamp of the approval
+             */
+            reviewed_at?: string;
         }
         export interface JourneyBlockComponent {
             component_type: "CUSTOM_JOURNEY_BLOCK";
@@ -2649,6 +2819,14 @@ export declare namespace Components {
             };
             components: BaseComponent[];
             /**
+             * Server-side functions of the app, including scheduled functions
+             */
+            functions?: /**
+             * A named server-side function belonging to the app. Runs in the epilot code-execution sandbox with an installation-scoped app token. Functions with a schedule are executed automatically once per installation.
+             *
+             */
+            FunctionDefinition[];
+            /**
              * Flag to indicate if the app is in beta.
              */
             is_beta?: boolean;
@@ -2729,28 +2907,6 @@ export declare namespace Components {
              * manifest.json
              */
             key: string;
-        }
-        export interface SandboxCustomActionConfig {
-            /**
-             * Name of the custom action
-             */
-            name?: string;
-            /**
-             * Description of the custom action
-             */
-            description?: string;
-            /**
-             * Wait for callback_url to be called before completing the action
-             */
-            wait_for_callback?: boolean;
-            type: "sandbox";
-            sandbox_settings?: {
-                /**
-                 * JavaScript code to execute for the sandbox action. Maximum size: 300KB (hard limit). Code is stored as raw JavaScript and will be syntax-validated on save. Security restrictions: eval() and Function() constructor are not allowed.
-                 *
-                 */
-                code?: string;
-            };
         }
         export interface TextArg {
             type?: "text";
@@ -3400,11 +3556,17 @@ export declare namespace Paths {
             export type AppId = string;
             export type Path = string;
             export type ProxyName = string;
+            export interface Query {
+                [name: string]: any;
+            }
         }
         export interface PathParameters {
             appId: Parameters.AppId;
             proxyName: Parameters.ProxyName;
             path: Parameters.Path;
+        }
+        export interface QueryParameters {
+            query?: Parameters.Query;
         }
     }
 }
@@ -3718,7 +3880,7 @@ export interface OperationMethods {
    * Forward a GET request to a registered proxy target from a public-facing component (e.g. journey blocks)
    */
   'publicProxyGet'(
-    parameters?: Parameters<Paths.V1PublicApp$AppIdProxy$ProxyName$Path.PathParameters> | null,
+    parameters?: Parameters<Paths.V1PublicApp$AppIdProxy$ProxyName$Path.QueryParameters & Paths.V1PublicApp$AppIdProxy$ProxyName$Path.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.PublicProxyGet.Responses.$200>
@@ -3728,7 +3890,7 @@ export interface OperationMethods {
    * Forward a PUT request to a registered proxy target from a public-facing component
    */
   'publicProxyPut'(
-    parameters?: Parameters<Paths.V1PublicApp$AppIdProxy$ProxyName$Path.PathParameters> | null,
+    parameters?: Parameters<Paths.V1PublicApp$AppIdProxy$ProxyName$Path.QueryParameters & Paths.V1PublicApp$AppIdProxy$ProxyName$Path.PathParameters> | null,
     data?: Paths.PublicProxyPut.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.PublicProxyPut.Responses.$200>
@@ -3738,7 +3900,7 @@ export interface OperationMethods {
    * Forward a POST request to a registered proxy target from a public-facing component (e.g. journey blocks)
    */
   'publicProxyPost'(
-    parameters?: Parameters<Paths.V1PublicApp$AppIdProxy$ProxyName$Path.PathParameters> | null,
+    parameters?: Parameters<Paths.V1PublicApp$AppIdProxy$ProxyName$Path.QueryParameters & Paths.V1PublicApp$AppIdProxy$ProxyName$Path.PathParameters> | null,
     data?: Paths.PublicProxyPost.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.PublicProxyPost.Responses.$200>
@@ -3748,7 +3910,7 @@ export interface OperationMethods {
    * Forward a PATCH request to a registered proxy target from a public-facing component
    */
   'publicProxyPatch'(
-    parameters?: Parameters<Paths.V1PublicApp$AppIdProxy$ProxyName$Path.PathParameters> | null,
+    parameters?: Parameters<Paths.V1PublicApp$AppIdProxy$ProxyName$Path.QueryParameters & Paths.V1PublicApp$AppIdProxy$ProxyName$Path.PathParameters> | null,
     data?: Paths.PublicProxyPatch.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.PublicProxyPatch.Responses.$200>
@@ -3758,7 +3920,7 @@ export interface OperationMethods {
    * Forward a DELETE request to a registered proxy target from a public-facing component
    */
   'publicProxyDelete'(
-    parameters?: Parameters<Paths.V1PublicApp$AppIdProxy$ProxyName$Path.PathParameters> | null,
+    parameters?: Parameters<Paths.V1PublicApp$AppIdProxy$ProxyName$Path.QueryParameters & Paths.V1PublicApp$AppIdProxy$ProxyName$Path.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.PublicProxyDelete.Responses.$200>
@@ -4111,7 +4273,7 @@ export interface PathsDictionary {
      * Forward a GET request to a registered proxy target from a public-facing component (e.g. journey blocks)
      */
     'get'(
-      parameters?: Parameters<Paths.V1PublicApp$AppIdProxy$ProxyName$Path.PathParameters> | null,
+      parameters?: Parameters<Paths.V1PublicApp$AppIdProxy$ProxyName$Path.QueryParameters & Paths.V1PublicApp$AppIdProxy$ProxyName$Path.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.PublicProxyGet.Responses.$200>
@@ -4121,7 +4283,7 @@ export interface PathsDictionary {
      * Forward a POST request to a registered proxy target from a public-facing component (e.g. journey blocks)
      */
     'post'(
-      parameters?: Parameters<Paths.V1PublicApp$AppIdProxy$ProxyName$Path.PathParameters> | null,
+      parameters?: Parameters<Paths.V1PublicApp$AppIdProxy$ProxyName$Path.QueryParameters & Paths.V1PublicApp$AppIdProxy$ProxyName$Path.PathParameters> | null,
       data?: Paths.PublicProxyPost.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.PublicProxyPost.Responses.$200>
@@ -4131,7 +4293,7 @@ export interface PathsDictionary {
      * Forward a PUT request to a registered proxy target from a public-facing component
      */
     'put'(
-      parameters?: Parameters<Paths.V1PublicApp$AppIdProxy$ProxyName$Path.PathParameters> | null,
+      parameters?: Parameters<Paths.V1PublicApp$AppIdProxy$ProxyName$Path.QueryParameters & Paths.V1PublicApp$AppIdProxy$ProxyName$Path.PathParameters> | null,
       data?: Paths.PublicProxyPut.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.PublicProxyPut.Responses.$200>
@@ -4141,7 +4303,7 @@ export interface PathsDictionary {
      * Forward a PATCH request to a registered proxy target from a public-facing component
      */
     'patch'(
-      parameters?: Parameters<Paths.V1PublicApp$AppIdProxy$ProxyName$Path.PathParameters> | null,
+      parameters?: Parameters<Paths.V1PublicApp$AppIdProxy$ProxyName$Path.QueryParameters & Paths.V1PublicApp$AppIdProxy$ProxyName$Path.PathParameters> | null,
       data?: Paths.PublicProxyPatch.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.PublicProxyPatch.Responses.$200>
@@ -4151,7 +4313,7 @@ export interface PathsDictionary {
      * Forward a DELETE request to a registered proxy target from a public-facing component
      */
     'delete'(
-      parameters?: Parameters<Paths.V1PublicApp$AppIdProxy$ProxyName$Path.PathParameters> | null,
+      parameters?: Parameters<Paths.V1PublicApp$AppIdProxy$ProxyName$Path.QueryParameters & Paths.V1PublicApp$AppIdProxy$ProxyName$Path.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.PublicProxyDelete.Responses.$200>
@@ -4197,8 +4359,10 @@ export type ExternalProductCatalogComponent = Components.Schemas.ExternalProduct
 export type ExternalProductCatalogConfig = Components.Schemas.ExternalProductCatalogConfig;
 export type ExternalProductCatalogHookProductRecommendations = Components.Schemas.ExternalProductCatalogHookProductRecommendations;
 export type ExternalProductCatalogHookProducts = Components.Schemas.ExternalProductCatalogHookProducts;
+export type FunctionDefinition = Components.Schemas.FunctionDefinition;
 export type Grants = Components.Schemas.Grants;
 export type Installation = Components.Schemas.Installation;
+export type InternalReview = Components.Schemas.InternalReview;
 export type JourneyBlockComponent = Components.Schemas.JourneyBlockComponent;
 export type JourneyBlockComponentArgs = Components.Schemas.JourneyBlockComponentArgs;
 export type JourneyBlockConfig = Components.Schemas.JourneyBlockConfig;
@@ -4234,6 +4398,5 @@ export type RawEvents = Components.Schemas.RawEvents;
 export type Review = Components.Schemas.Review;
 export type Role = Components.Schemas.Role;
 export type S3Reference = Components.Schemas.S3Reference;
-export type SandboxCustomActionConfig = Components.Schemas.SandboxCustomActionConfig;
 export type TextArg = Components.Schemas.TextArg;
 export type TranslatedString = Components.Schemas.TranslatedString;
