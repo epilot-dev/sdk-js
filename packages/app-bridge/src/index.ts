@@ -10,8 +10,8 @@
  * // Initialize and get auth token
  * const { token, lang } = await initialize();
  *
- * // Get entity context (for entity surfaces)
- * const { entityId, schema } = await getEntityContext();
+ * // Get entity context (for entity surfaces) — includes the full entity
+ * const { entityId, schema, entity } = await getEntityContext();
  *
  * // Update content height
  * updateContentHeight(document.body.scrollHeight);
@@ -127,6 +127,7 @@ export type {
   RequestOptions,
   UpdateConfigOptions,
   // Entity surface types
+  Entity,
   EntityCapability,
   EntityContext,
   // Page surface types

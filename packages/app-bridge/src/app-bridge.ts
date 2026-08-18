@@ -33,6 +33,18 @@ let initPromise: Promise<AppBridgeSession> | null = null;
 /** Default timeout for requests */
 const DEFAULT_TIMEOUT = 5000;
 
+/** Default number of retries for the init handshake */
+const DEFAULT_INIT_RETRIES = 2;
+
+/**
+ * Log handshake lifecycle at debug level so a silent failure leaves a trace.
+ * @internal
+ */
+function debug(message: string): void {
+  // eslint-disable-next-line no-console
+  console.debug(`[app-bridge] ${message}`);
+}
+
 // =============================================================================
 // Internal Helpers
 // =============================================================================
@@ -72,6 +84,10 @@ function request<T>(event: string, payload: Record<string, unknown> = {}, option
  * Returns a session containing the authentication token and user language.
  * Safe to call multiple times - subsequent calls return the cached session.
  *
+ * The handshake message is lost if the parent has not attached its listener
+ * yet, so timed-out attempts are retried (default: 2 retries) before the
+ * returned promise rejects with {@link AppBridgeTimeoutError}.
+ *
  * @param options - Initialization options
  * @returns Session data with token and language
  *
@@ -100,8 +116,32 @@ export async function initialize(options: InitOptions = {}): Promise<AppBridgeSe
   }
 
   const contentHeight = options.contentHeight ?? document.body.scrollHeight;
+  const retries = options.retries ?? DEFAULT_INIT_RETRIES;
 
-  initPromise = request<AppBridgeSession>('app-bridge:init', { contentHeight }, { timeout: options.timeout })
+  const attemptHandshake = async (): Promise<AppBridgeSession> => {
+    for (let attempt = 1; ; attempt++) {
+      try {
+        debug(`init handshake sent (attempt ${attempt}/${retries + 1})`);
+        const result = await request<AppBridgeSession>(
+          'app-bridge:init',
+          { contentHeight },
+          { timeout: options.timeout },
+        );
+
+        debug('init handshake acknowledged by parent');
+
+        return result;
+      } catch (error) {
+        if (attempt > retries) {
+          debug('init handshake timed out, giving up');
+          throw error;
+        }
+        debug('init handshake timed out, retrying');
+      }
+    }
+  };
+
+  initPromise = attemptHandshake()
     .then((result) => {
       session = result;
       return result;
@@ -160,7 +200,12 @@ export function isInitialized(): boolean {
 /**
  * Get the entity context for entity tab/capability surfaces.
  *
- * Returns context including the entity ID, schema, and capability configuration.
+ * Returns context including the entity ID, schema, the full entity, and
+ * capability configuration.
+ *
+ * Prefer `context.entity` over fetching the entity from the Entity API:
+ * it is one round-trip cheaper, needs no permissions, and app tokens are
+ * not guaranteed to authorize direct Entity API calls.
  *
  * @param options - Request options
  * @returns Entity context data
@@ -171,11 +216,11 @@ export function isInitialized(): boolean {
  *
  * await initialize();
  *
- * const { entityId, schema } = await getEntityContext();
+ * const { entityId, schema, entity } = await getEntityContext();
  * console.log(`Viewing ${schema} entity: ${entityId}`);
  *
- * // Fetch entity data from API
- * const entity = await api.getEntity(schema, entityId);
+ * // The full entity is already in the context — no API call needed
+ * console.log(entity?._title);
  * ```
  */
 export async function getEntityContext(options?: RequestOptions): Promise<EntityContext> {
