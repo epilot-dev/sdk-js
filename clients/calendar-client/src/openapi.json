@@ -1241,7 +1241,7 @@
       "patch": {
         "operationId": "updateCalendar",
         "summary": "updateCalendar",
-        "description": "Update fields on a calendar.",
+        "description": "Update local calendar details. Changes to synced calendars do not modify the provider calendar.",
         "tags": [
           "Calendars"
         ],
@@ -1286,16 +1286,6 @@
               }
             }
           },
-          "403": {
-            "description": "Calendar is read-only",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
           "404": {
             "description": "Resource not found",
             "content": {
@@ -1311,7 +1301,7 @@
       "delete": {
         "operationId": "deleteCalendar",
         "summary": "deleteCalendar",
-        "description": "Delete a native epilot calendar and its events.",
+        "description": "Delete a native epilot calendar or disconnect a synced calendar, including its locally stored events.",
         "tags": [
           "Calendars"
         ],
@@ -1327,17 +1317,7 @@
         ],
         "responses": {
           "204": {
-            "description": "Calendar deleted"
-          },
-          "403": {
-            "description": "Calendar is read-only",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
+            "description": "Calendar deleted or disconnected"
           },
           "404": {
             "description": "Resource not found",
@@ -2347,7 +2327,7 @@
           },
           "read_only": {
             "type": "boolean",
-            "description": "True if the caller cannot modify events in this calendar"
+            "description": "True if the caller cannot create, update, or delete events in this calendar"
           },
           "owner_email": {
             "type": "string",
@@ -2573,7 +2553,12 @@
             "description": "Convenience flag, true when status is busy/oof/tentative"
           },
           "is_cancelled": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "Whether the event was cancelled but still exists"
+          },
+          "is_draft": {
+            "type": "boolean",
+            "description": "Whether the event is saved as a draft"
           },
           "sensitivity": {
             "$ref": "#/components/schemas/Sensitivity"
@@ -2612,6 +2597,11 @@
             },
             "description": "Null when sensitivity is private or confidential"
           },
+          "metadata": {
+            "type": "object",
+            "nullable": true,
+            "additionalProperties": {}
+          },
           "is_recurring": {
             "type": "boolean"
           },
@@ -2645,6 +2635,7 @@
           "status",
           "busy",
           "is_cancelled",
+          "is_draft",
           "sensitivity",
           "importance",
           "is_online_meeting",
@@ -2813,6 +2804,11 @@
           "sensitivity": {
             "$ref": "#/components/schemas/Sensitivity"
           },
+          "metadata": {
+            "type": "object",
+            "nullable": true,
+            "additionalProperties": {}
+          },
           "_title": {
             "type": "string",
             "minLength": 1
@@ -2862,6 +2858,10 @@
           },
           "status": {
             "$ref": "#/components/schemas/EventStatus"
+          },
+          "is_cancelled": {
+            "type": "boolean",
+            "description": "Whether the event was cancelled but still exists"
           },
           "sensitivity": {
             "$ref": "#/components/schemas/Sensitivity"

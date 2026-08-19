@@ -123,7 +123,7 @@ declare namespace Components {
              */
             is_default: boolean;
             /**
-             * True if the caller cannot modify events in this calendar
+             * True if the caller cannot create, update, or delete events in this calendar
              */
             read_only: boolean;
             owner_email?: string | null; // email
@@ -182,7 +182,14 @@ declare namespace Components {
              * Convenience flag, true when status is busy/oof/tentative
              */
             busy: boolean;
+            /**
+             * Whether the event was cancelled but still exists
+             */
             is_cancelled: boolean;
+            /**
+             * Whether the event is saved as a draft
+             */
+            is_draft: boolean;
             sensitivity: Sensitivity;
             importance: Importance;
             is_online_meeting: boolean;
@@ -200,6 +207,9 @@ declare namespace Components {
              * Null when sensitivity is private or confidential
              */
             attendees?: Attendee[] | null;
+            metadata?: {
+                [name: string]: any;
+            } | null;
             is_recurring: boolean;
             /**
              * ID of the recurring series this occurrence belongs to
@@ -234,6 +244,9 @@ declare namespace Components {
             location?: string | null;
             status: /* Free/busy state derived from provider `showAs` */ EventStatus;
             sensitivity: Sensitivity;
+            metadata?: {
+                [name: string]: any;
+            } | null;
             _title: string;
         }
         export interface CalendarEventPatchBody {
@@ -256,6 +269,10 @@ declare namespace Components {
             is_all_day?: boolean;
             location?: string | null;
             status?: /* Free/busy state derived from provider `showAs` */ EventStatus;
+            /**
+             * Whether the event was cancelled but still exists
+             */
+            is_cancelled?: boolean;
             sensitivity?: Sensitivity;
             _title?: string;
         }
@@ -1254,7 +1271,6 @@ declare namespace Paths {
         namespace Responses {
             export interface $204 {
             }
-            export type $403 = Components.Schemas.Error;
             export type $404 = Components.Schemas.Error;
         }
     }
@@ -1661,7 +1677,6 @@ declare namespace Paths {
         namespace Responses {
             export type $200 = Components.Schemas.Calendar;
             export type $400 = Components.Schemas.Error;
-            export type $403 = Components.Schemas.Error;
             export type $404 = Components.Schemas.Error;
         }
     }
@@ -1896,7 +1911,7 @@ export interface OperationMethods {
   /**
    * updateCalendar - updateCalendar
    * 
-   * Update fields on a calendar.
+   * Update local calendar details. Changes to synced calendars do not modify the provider calendar.
    */
   'updateCalendar'(
     parameters?: Parameters<Paths.UpdateCalendar.PathParameters> | null,
@@ -1906,7 +1921,7 @@ export interface OperationMethods {
   /**
    * deleteCalendar - deleteCalendar
    * 
-   * Delete a native epilot calendar and its events.
+   * Delete a native epilot calendar or disconnect a synced calendar, including its locally stored events.
    */
   'deleteCalendar'(
     parameters?: Parameters<Paths.DeleteCalendar.PathParameters> | null,
@@ -2223,7 +2238,7 @@ export interface PathsDictionary {
     /**
      * updateCalendar - updateCalendar
      * 
-     * Update fields on a calendar.
+     * Update local calendar details. Changes to synced calendars do not modify the provider calendar.
      */
     'patch'(
       parameters?: Parameters<Paths.UpdateCalendar.PathParameters> | null,
@@ -2233,7 +2248,7 @@ export interface PathsDictionary {
     /**
      * deleteCalendar - deleteCalendar
      * 
-     * Delete a native epilot calendar and its events.
+     * Delete a native epilot calendar or disconnect a synced calendar, including its locally stored events.
      */
     'delete'(
       parameters?: Parameters<Paths.DeleteCalendar.PathParameters> | null,
