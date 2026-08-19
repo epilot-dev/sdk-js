@@ -101,6 +101,58 @@
         "responses": {}
       }
     },
+    "/v1/configs/compare": {
+      "post": {
+        "operationId": "compareConfigs",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/configs/compare/suggestions": {
+      "post": {
+        "operationId": "suggestMatches",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/configs/lineage": {
+      "post": {
+        "operationId": "confirmLineage",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "breakLineage",
+        "parameters": [
+          {
+            "name": "type",
+            "in": "query",
+            "required": true
+          },
+          {
+            "name": "source_id",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v1/configs/sync-jobs": {
       "post": {
         "operationId": "createSyncJob",
@@ -157,6 +209,17 @@
         "responses": {}
       }
     },
+    "/v1/configs/sync-jobs/{id}/cancel": {
+      "post": {
+        "operationId": "cancelSyncJob",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SyncJobId"
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v1/configs/sync-jobs/{id}/resources": {
       "get": {
         "operationId": "listSyncJobResources",
@@ -178,9 +241,73 @@
         "responses": {}
       }
     },
+    "/v1/configs/delete-jobs": {
+      "post": {
+        "operationId": "createDeleteJob",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "get": {
+        "operationId": "listDeleteJobs",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CursorParam"
+          },
+          {
+            "$ref": "#/components/parameters/SizeParam"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/configs/delete-jobs/{id}": {
+      "get": {
+        "operationId": "getDeleteJob",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/DeleteJobId"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/configs/delete-jobs/{id}/resources": {
+      "get": {
+        "operationId": "listDeleteJobResources",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/DeleteJobId"
+          },
+          {
+            "$ref": "#/components/parameters/CursorParam"
+          },
+          {
+            "$ref": "#/components/parameters/SizeParam"
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v1/configs/index:rebuild": {
       "post": {
         "operationId": "rebuildIndex",
+        "responses": {}
+      }
+    },
+    "/v1/configs/inventory": {
+      "get": {
+        "operationId": "getConfigInventory",
+        "parameters": [
+          {
+            "name": "include_dependency_only",
+            "in": "query"
+          }
+        ],
         "responses": {}
       }
     }
@@ -206,6 +333,11 @@
         "in": "query"
       },
       "SyncJobId": {
+        "name": "id",
+        "in": "path",
+        "required": true
+      },
+      "DeleteJobId": {
         "name": "id",
         "in": "path",
         "required": true
