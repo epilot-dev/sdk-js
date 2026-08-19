@@ -45,6 +45,10 @@ const { data } = await integrationToolkitClient.acknowledgeTracking(...)
 - [`updateUseCase`](#updateusecase)
 - [`deleteUseCase`](#deleteusecase)
 - [`listUseCaseHistory`](#listusecasehistory)
+- [`listDocumentationPages`](#listdocumentationpages)
+- [`getDocumentationPage`](#getdocumentationpage)
+- [`upsertDocumentationPage`](#upsertdocumentationpage)
+- [`deleteDocumentationPage`](#deletedocumentationpage)
 - [`listIntegrationsV2`](#listintegrationsv2)
 - [`createIntegrationV2`](#createintegrationv2)
 - [`getIntegrationV2`](#getintegrationv2)
@@ -92,6 +96,7 @@ const { data } = await integrationToolkitClient.acknowledgeTracking(...)
 - [`createErpImport`](#createerpimport)
 - [`listErpImports`](#listerpimports)
 - [`getErpImport`](#geterpimport)
+- [`deleteErpImport`](#deleteerpimport)
 - [`validateErpImport`](#validateerpimport)
 - [`suggestErpImportUseCases`](#suggesterpimportusecases)
 - [`executeErpImport`](#executeerpimport)
@@ -291,6 +296,9 @@ const { data } = await integrationToolkitClient.acknowledgeTracking(...)
 - [`GetMonitoringTimeSeriesV2Request`](#getmonitoringtimeseriesv2request)
 - [`TimeSeriesBreakdownItemV2`](#timeseriesbreakdownitemv2)
 - [`TimeSeriesBucketV2`](#timeseriesbucketv2)
+- [`DocumentationPageSummary`](#documentationpagesummary)
+- [`DocumentationPage`](#documentationpage)
+- [`UpsertDocumentationPageRequest`](#upsertdocumentationpagerequest)
 
 ### `acknowledgeTracking`
 
@@ -1335,6 +1343,150 @@ const { data } = await client.listUseCaseHistory({
     }
   ],
   "next_cursor": "string"
+}
+```
+
+</details>
+
+---
+
+### `listDocumentationPages`
+
+Retrieve all documentation pages of an integration, without their markdown content.
+An integration has at most one general page plus at most one page per use case.
+The page id is 'general' for the int
+
+`GET /v1/integrations/{integrationId}/documentation`
+
+```ts
+const { data } = await client.listDocumentationPages({
+  integrationId: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "pages": [
+    {
+      "id": "general",
+      "integration_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "scope": "integration",
+      "use_case_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "title": "string",
+      "created_at": "1970-01-01T00:00:00.000Z",
+      "created_by": "string",
+      "updated_at": "1970-01-01T00:00:00.000Z",
+      "updated_by": "string"
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `getDocumentationPage`
+
+Retrieve a single documentation page including its markdown content
+
+`GET /v1/integrations/{integrationId}/documentation/{docId}`
+
+```ts
+const { data } = await client.getDocumentationPage({
+  integrationId: 'example',
+  docId: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "id": "general",
+  "integration_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "scope": "integration",
+  "use_case_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "title": "string",
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "created_by": "string",
+  "updated_at": "1970-01-01T00:00:00.000Z",
+  "updated_by": "string",
+  "content": "string"
+}
+```
+
+</details>
+
+---
+
+### `upsertDocumentationPage`
+
+Create or update the documentation page identified by docId.
+Upsert semantics enforce the invariant of one general page per
+integration and one page per use case. For use case pages the
+use case must 
+
+`PUT /v1/integrations/{integrationId}/documentation/{docId}`
+
+```ts
+const { data } = await client.upsertDocumentationPage(
+  {
+    integrationId: 'example',
+    docId: 'example',
+  },
+  {
+    title: 'string',
+    content: 'string'
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "id": "general",
+  "integration_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "scope": "integration",
+  "use_case_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "title": "string",
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "created_by": "string",
+  "updated_at": "1970-01-01T00:00:00.000Z",
+  "updated_by": "string",
+  "content": "string"
+}
+```
+
+</details>
+
+---
+
+### `deleteDocumentationPage`
+
+Delete a documentation page
+
+`DELETE /v1/integrations/{integrationId}/documentation/{docId}`
+
+```ts
+const { data } = await client.deleteDocumentationPage({
+  integrationId: 'example',
+  docId: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "message": "string"
 }
 ```
 
@@ -3248,6 +3400,8 @@ const { data } = await client.createErpImport(
       "bucket": "string",
       "key": "string"
     },
+    "size_bytes": 0,
+    "column_count": 0,
     "validation": {
       "total_rows": 0,
       "blocking": 0,
@@ -3324,6 +3478,8 @@ const { data } = await client.listErpImports({
         "bucket": "string",
         "key": "string"
       },
+      "size_bytes": 0,
+      "column_count": 0,
       "validation": {
         "total_rows": 0,
         "blocking": 0,
@@ -3393,6 +3549,8 @@ const { data } = await client.getErpImport({
     "bucket": "string",
     "key": "string"
   },
+  "size_bytes": 0,
+  "column_count": 0,
   "validation": {
     "total_rows": 0,
     "blocking": 0,
@@ -3428,6 +3586,20 @@ const { data } = await client.getErpImport({
 ```
 
 </details>
+
+---
+
+### `deleteErpImport`
+
+Remove an import and the file it owns. Allowed from any status: an import whose run is still in flight is stopped by the deletion, and rows it already wrote stay written.
+
+`DELETE /v2/erp/imports/{importId}`
+
+```ts
+const { data } = await client.deleteErpImport({
+  importId: 'example',
+})
+```
 
 ---
 
@@ -3683,6 +3855,8 @@ type CreateErpImportResponse = {
       bucket: { ... }
       key: { ... }
     }
+    size_bytes?: number
+    column_count?: number
     validation?: {
       total_rows: { ... }
       blocking: { ... }
@@ -3725,6 +3899,8 @@ type ErpImportJob = {
     bucket: string
     key: string
   }
+  size_bytes?: number
+  column_count?: number
   validation?: {
     total_rows: number
     blocking: number
@@ -3768,6 +3944,8 @@ type ErpImportList = {
       bucket: { ... }
       key: { ... }
     }
+    size_bytes?: number
+    column_count?: number
     validation?: {
       total_rows: { ... }
       blocking: { ... }
@@ -8557,5 +8735,51 @@ type TimeSeriesBucketV2 = {
     skipped_count: number
     total_count: number
   }>
+}
+```
+
+### `DocumentationPageSummary`
+
+Documentation page metadata without the markdown content
+
+```ts
+type DocumentationPageSummary = {
+  id: string
+  integration_id: string // uuid
+  scope: "integration" | "use_case"
+  use_case_id?: string // uuid
+  title: string
+  created_at: string // date-time
+  created_by?: string
+  updated_at: string // date-time
+  updated_by?: string
+}
+```
+
+### `DocumentationPage`
+
+A markdown documentation page of an integration
+
+```ts
+type DocumentationPage = {
+  id: string
+  integration_id: string // uuid
+  scope: "integration" | "use_case"
+  use_case_id?: string // uuid
+  title: string
+  created_at: string // date-time
+  created_by?: string
+  updated_at: string // date-time
+  updated_by?: string
+  content: string
+}
+```
+
+### `UpsertDocumentationPageRequest`
+
+```ts
+type UpsertDocumentationPageRequest = {
+  title: string
+  content: string
 }
 ```
