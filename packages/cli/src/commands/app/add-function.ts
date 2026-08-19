@@ -15,11 +15,13 @@ export default defineCommand({
     name: { type: 'positional', description: 'Function name (kebab-case)', required: true },
     type: {
       type: 'string',
-      description: '"workflow" (selectable as flow action) or "scheduled" (cron per installation). Default: scheduled when --schedule is given, workflow otherwise',
+      description:
+        '"workflow" (selectable as flow action) or "scheduled" (cron per installation). Default: scheduled when --schedule is given, workflow otherwise',
     },
     schedule: {
       type: 'string',
-      description: 'Cron ("0 3 * * *") or rate ("rate(30 minutes)") expression to run the function once per installation',
+      description:
+        'Cron ("0 3 * * *") or rate ("rate(30 minutes)") expression to run the function once per installation',
     },
     label: { type: 'string', description: 'Display name shown to org admins (e.g. in the flow builder)' },
     timezone: { type: 'string', description: 'IANA timezone for cron schedules (default: Europe/Berlin)' },
@@ -133,7 +135,11 @@ export default defineCommand({
   },
 });
 
-const handlerTemplate = (name: string, fnType: 'workflow' | 'scheduled', schedule?: string): string => `// App function: ${name}
+const handlerTemplate = (
+  name: string,
+  fnType: 'workflow' | 'scheduled',
+  schedule?: string,
+): string => `// App function: ${name}
 //${
   fnType === 'scheduled'
     ? `
@@ -166,12 +172,12 @@ interface FunctionInput {
   trigger?: { type: string; schedule?: string; scheduled_time?: string };
   org_id?: string;
   app_id?: string;${
-  fnType === 'workflow'
-    ? `
+    fnType === 'workflow'
+      ? `
   entity?: Record<string, unknown>;
   action_config?: Record<string, unknown>;`
-    : ''
-}
+      : ''
+  }
   app_options?: { token?: string; stage?: string } & Record<string, unknown>;
 }
 

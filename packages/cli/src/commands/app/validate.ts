@@ -40,9 +40,7 @@ export default defineCommand({
     if (manifest.functions?.length) {
       const scheduled = manifest.functions.filter((f) => f.type === 'scheduled');
       const workflow = manifest.functions.filter((f) => f.type === 'workflow');
-      log.info(
-        `${manifest.functions.length} function(s): ${workflow.length} workflow, ${scheduled.length} scheduled`,
-      );
+      log.info(`${manifest.functions.length} function(s): ${workflow.length} workflow, ${scheduled.length} scheduled`);
       for (const fn of scheduled) {
         log.dim(`${fn.name}: ${fn.schedule}${fn.schedule_timezone ? ` (${fn.schedule_timezone})` : ''}`);
       }

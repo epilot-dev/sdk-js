@@ -141,7 +141,11 @@ export default defineCommand({
           } else if (dryRun) {
             log.info(`[dry-run] Would zip and upload config UI for function ${fn.name}`);
           } else {
-            const { upload_url, artifact_url } = await client.createZipUploadUrl(appId!, targetVersion, `fn-${fn.name}`);
+            const { upload_url, artifact_url } = await client.createZipUploadUrl(
+              appId!,
+              targetVersion,
+              `fn-${fn.name}`,
+            );
             const zipSize = await uploadDirectoryAsZip(upload_url, zipPath);
             log.success(`Uploaded config UI for function ${fn.name} (${formatFileSize(zipSize)})`);
             payload.surfaces = {
@@ -155,7 +159,9 @@ export default defineCommand({
 
         functionsPayload.push(payload);
         if (dryRun) {
-          log.info(`[dry-run] Would deploy ${fn.type} function ${fn.name}${fn.schedule ? ` (schedule: ${fn.schedule})` : ''}`);
+          log.info(
+            `[dry-run] Would deploy ${fn.type} function ${fn.name}${fn.schedule ? ` (schedule: ${fn.schedule})` : ''}`,
+          );
         }
       }
     }
@@ -171,8 +177,9 @@ export default defineCommand({
         if (!isNew && manifest.permissions?.length) {
           try {
             const remoteVersion = await client.getVersion(appId!, targetVersion);
-            const remoteGrants = (remoteVersion.role as { grants?: { action: string; resource?: string }[] } | undefined)
-              ?.grants;
+            const remoteGrants = (
+              remoteVersion.role as { grants?: { action: string; resource?: string }[] } | undefined
+            )?.grants;
             grantsChanged = normalizeGrants(remoteGrants) !== normalizeGrants(manifest.permissions);
           } catch {
             // Cannot compare — keep grantsChanged = true and patch as before
