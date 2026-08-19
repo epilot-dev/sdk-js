@@ -581,6 +581,44 @@
         }
       }
     },
+    "/v1/message/unread:counts": {
+      "post": {
+        "operationId": "getUnreadCounts",
+        "summary": "getUnreadCounts",
+        "description": "Unread counts for several named scopes in one request.\n\nA scope is a name plus the same parameters the thread list already takes (`q`, `inbox_id`),\nso a scope's count and the list beneath it are the same predicate and agree by construction.\nThe server adds only the read-state condition; it does not re-author the caller's view.\n\nThe `organization` scope is the exception and takes no `q`: it reuses the four canonical\ncentral-inbox queries, so its numbers match `getUnread` exactly.\n\nBuckets are not symmetric, across scope types or across actors. Every scope other than\n`organization` returns `unread` alone. The `organization` scope returns all four\n(`unread`, `drafts`, `unassigned`, `spam`) for `actor: organization`, and only `unread` and\n`drafts` for `actor: user` — the agent sidebar has no Spam or Unlinked folder, so those two\nnumbers have nowhere to render and each one costs a cardinality aggregation. This is a\ndeliberate divergence from `getUnread`, which computes all four for both actors.\n\nGated on the `message-unread-counts` flag, evaluated once per request against the calling\norg. With the flag off the response is `{ \"enabled\": false, \"counts\": {} }` and no\nElasticsearch query is issued.\n",
+        "tags": [
+          "Messages"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UnreadCountsPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnreadCountsResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The request names more scopes than the cap allows, repeats a scope name, or omits `q`\non a scope type that requires it. Over-cap requests are refused rather than truncated:\na silently dropped scope renders as a missing badge, which is indistinguishable from\nzero unread.\n"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
     "/v2/message/messages/{id}/unread": {
       "post": {
         "operationId": "markUnreadMessageV2",
@@ -2657,6 +2695,136 @@
           }
         }
       },
+      "UnreadCountScope": {
+        "type": "object",
+        "required": [
+          "name",
+          "type"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Caller-chosen key for this scope. Echoed back as the key in `counts`, so it is how the\ncaller matches a number to the sidebar row it belongs to. Must be unique within the\nrequest; duplicates are refused rather than silently collapsed.\n",
+            "example": "inbox-support"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "organization",
+              "shared_inbox",
+              "saved_view"
+            ],
+            "description": "Decides which buckets come back, and whether `q` is required. `organization` returns all\nfour buckets from the canonical central-inbox queries and takes no `q`. `shared_inbox`\nand `saved_view` return `unread` alone and require the `q` their list uses.\n\nA `shared_inbox` scope additionally requires `actor: organization` and is refused with a\n400 otherwise. A shared inbox is an organization-level construct — selecting one always\nswitches the mailbox to the organization — so it has no per-user read state and the\ncombination would compute a number no surface renders. `saved_view` accepts either actor,\nbecause a view's own configuration names its mailbox.\n"
+          },
+          "q": {
+            "type": "string",
+            "description": "The scope's own list predicate, in Lucene syntax, exactly as the caller passes it to\n`threads:search`. Required for `shared_inbox` and `saved_view`, rejected for\n`organization`. The server ANDs the read-state condition onto it and nothing else, which\nis what makes the count and the list agree. Until the predicate definition moves\nserver-side, this is the caller's authored copy.\n",
+            "example": "_tags.keyword:inbox AND !_tags.keyword:trash"
+          },
+          "inbox_id": {
+            "description": "Shared inbox ids, resolved to bucket ids the same way `threads:search` resolves them.",
+            "oneOf": [
+              {
+                "type": "string",
+                "example": "3f34ce73-089c-4d45-a5ee-c161234e41c3"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            ]
+          }
+        }
+      },
+      "UnreadCountsPayload": {
+        "type": "object",
+        "required": [
+          "actor",
+          "scopes"
+        ],
+        "properties": {
+          "actor": {
+            "type": "string",
+            "enum": [
+              "organization",
+              "user"
+            ],
+            "description": "Which read state to count against — the org's or the calling user's. Same meaning as\n`getUnread`'s path parameter, and unrelated to a scope's `type`.\n"
+          },
+          "email_filter": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Restrict every scope to messages involving these addresses."
+          },
+          "scopes": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 25,
+            "items": {
+              "$ref": "#/components/schemas/UnreadCountScope"
+            }
+          }
+        }
+      },
+      "UnreadCountsResult": {
+        "type": "object",
+        "required": [
+          "enabled",
+          "counts"
+        ],
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "description": "False when the `message-unread-counts` flag is off for the calling org, in which case\n`counts` is empty and no Elasticsearch work was done. Callers render no badges rather\nthan rendering zeroes.\n",
+            "example": true
+          },
+          "counts": {
+            "type": "object",
+            "description": "One entry per scope, keyed by the scope's `name`. A scope whose predicate could not be\nbuilt is **absent** rather than zero, because a zero badge is a claim about the mailbox\nand an absent one is a claim about the request.\n",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/UnreadCountBuckets"
+            }
+          },
+          "omitted": {
+            "type": "array",
+            "description": "Names of scopes that were accepted but could not be counted — today, a shared inbox whose\nids matched no bucket in this org. Listed explicitly so a caller can tell an omission apart\nfrom a mis-spelled scope name, both of which are otherwise just a missing key in `counts`.\n",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "UnreadCountBuckets": {
+        "type": "object",
+        "required": [
+          "unread"
+        ],
+        "properties": {
+          "unread": {
+            "type": "number",
+            "example": 14
+          },
+          "drafts": {
+            "type": "number",
+            "description": "Organization scope only.",
+            "example": 12
+          },
+          "unassigned": {
+            "type": "number",
+            "description": "Organization scope only.",
+            "example": 1
+          },
+          "spam": {
+            "type": "number",
+            "description": "Organization scope only.",
+            "example": 3
+          }
+        }
+      },
       "SearchParamsV2": {
         "type": "object",
         "required": [
@@ -2923,6 +3091,254 @@
           }
         }
       },
+      "WorkflowStartedEvent": {
+        "type": "object",
+        "required": [
+          "type"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "WORKFLOW_STARTED"
+            ]
+          },
+          "workflow_id": {
+            "type": "string",
+            "description": "ID of the workflow/flow execution that was started"
+          },
+          "workflow_name": {
+            "type": "string",
+            "description": "Name of the workflow that was started"
+          }
+        }
+      },
+      "ThreadUserAssignedEvent": {
+        "type": "object",
+        "required": [
+          "type"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "THREAD_USER_ASSIGNED"
+            ]
+          },
+          "added": {
+            "type": "array",
+            "description": "User IDs assigned to the thread",
+            "items": {
+              "type": "string"
+            }
+          },
+          "removed": {
+            "type": "array",
+            "description": "User IDs unassigned from the thread",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "MessageLabelAddedEvent": {
+        "type": "object",
+        "required": [
+          "type",
+          "label"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "MESSAGE_LABEL_ADDED"
+            ]
+          },
+          "label": {
+            "type": "string",
+            "description": "The label that was added (raw tag slug, e.g. `sentiments:angry`)"
+          },
+          "label_name": {
+            "type": "string",
+            "description": "Resolved taxonomy classification display name (e.g. `Verärgert`), when the label is a classification. Absent for free-form tags."
+          }
+        }
+      },
+      "MessageLabelRemovedEvent": {
+        "type": "object",
+        "required": [
+          "type",
+          "label"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "MESSAGE_LABEL_REMOVED"
+            ]
+          },
+          "label": {
+            "type": "string",
+            "description": "The label that was removed (raw tag slug, e.g. `sentiments:angry`)"
+          },
+          "label_name": {
+            "type": "string",
+            "description": "Resolved taxonomy classification display name (e.g. `Verärgert`), when the label is a classification. Absent for free-form tags."
+          }
+        }
+      },
+      "MessageEntityLinkedEvent": {
+        "type": "object",
+        "required": [
+          "type"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "MESSAGE_ENTITY_LINKED"
+            ]
+          },
+          "entities": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TimelineLinkedEntity"
+            }
+          },
+          "link_kind": {
+            "type": "string",
+            "enum": [
+              "manual",
+              "auto"
+            ]
+          }
+        }
+      },
+      "MessageEntityUnlinkedEvent": {
+        "type": "object",
+        "required": [
+          "type"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "MESSAGE_ENTITY_UNLINKED"
+            ]
+          },
+          "entities": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TimelineLinkedEntity"
+            }
+          },
+          "link_kind": {
+            "type": "string",
+            "enum": [
+              "manual",
+              "auto"
+            ]
+          }
+        }
+      },
+      "MessageAutoReplySentEvent": {
+        "type": "object",
+        "required": [
+          "type"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "MESSAGE_AUTO_REPLY_SENT"
+            ]
+          },
+          "reply_message_id": {
+            "type": "string",
+            "description": "ID of the message that was sent as the automatic reply"
+          },
+          "parent_message_id": {
+            "type": "string",
+            "description": "ID of the message the automatic reply responded to"
+          }
+        }
+      },
+      "ThreadMovedToInboxEvent": {
+        "type": "object",
+        "required": [
+          "type"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "THREAD_MOVED_TO_INBOX"
+            ]
+          },
+          "target_inbox_id": {
+            "type": "string",
+            "description": "ID of the shared inbox the thread was moved to"
+          },
+          "target_inbox_name": {
+            "type": "string",
+            "description": "Name of the shared inbox the thread was moved to"
+          }
+        }
+      },
+      "ThreadTrashedEvent": {
+        "type": "object",
+        "required": [
+          "type"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "THREAD_TRASHED"
+            ]
+          }
+        }
+      },
+      "ThreadRestoredEvent": {
+        "type": "object",
+        "required": [
+          "type"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "THREAD_RESTORED"
+            ]
+          }
+        }
+      },
+      "TimelineLinkedEntity": {
+        "type": "object",
+        "required": [
+          "entity_id"
+        ],
+        "properties": {
+          "entity_id": {
+            "type": "string"
+          },
+          "schema": {
+            "type": "string",
+            "description": "Entity schema slug, e.g. \"opportunity\""
+          }
+        }
+      },
+      "TimelineActor": {
+        "type": "object",
+        "properties": {
+          "user_id": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          }
+        }
+      },
       "TimelineEventData": {
         "type": "object",
         "discriminator": {
@@ -2934,6 +3350,36 @@
           },
           {
             "$ref": "#/components/schemas/ThreadOpenEvent"
+          },
+          {
+            "$ref": "#/components/schemas/WorkflowStartedEvent"
+          },
+          {
+            "$ref": "#/components/schemas/ThreadUserAssignedEvent"
+          },
+          {
+            "$ref": "#/components/schemas/MessageLabelAddedEvent"
+          },
+          {
+            "$ref": "#/components/schemas/MessageLabelRemovedEvent"
+          },
+          {
+            "$ref": "#/components/schemas/MessageEntityLinkedEvent"
+          },
+          {
+            "$ref": "#/components/schemas/MessageEntityUnlinkedEvent"
+          },
+          {
+            "$ref": "#/components/schemas/MessageAutoReplySentEvent"
+          },
+          {
+            "$ref": "#/components/schemas/ThreadMovedToInboxEvent"
+          },
+          {
+            "$ref": "#/components/schemas/ThreadTrashedEvent"
+          },
+          {
+            "$ref": "#/components/schemas/ThreadRestoredEvent"
           }
         ]
       },
@@ -2944,13 +3390,47 @@
           "data"
         ],
         "properties": {
+          "id": {
+            "type": "string",
+            "description": "Activity id (ActivityItem._id), for deep-linking to the item in the activity feed"
+          },
           "data": {
             "$ref": "#/components/schemas/TimelineEventData"
           },
           "timestamp": {
             "type": "string",
             "description": "Timestamp of the event",
-            "example": "2024-01-01T00:00:00.000Z"
+            "example": "2024-01-01T00:00:00Z"
+          },
+          "message_id": {
+            "type": "string",
+            "description": "For message-level events, the message the activity is anchored to"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "user",
+              "automation",
+              "system"
+            ]
+          },
+          "automated": {
+            "type": "boolean",
+            "description": "Whether the activity was performed automatically (automation/system)"
+          },
+          "actor": {
+            "$ref": "#/components/schemas/TimelineActor"
+          },
+          "automation": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              }
+            }
           }
         }
       },
