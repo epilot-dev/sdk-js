@@ -494,7 +494,7 @@ const { data } = await client.confirmLineage(
 
 Delete a lineage entry from the caller org's partition (caller as sync
 target), identified by `type` + `source_id`. Used to break a wrong or
-stale match from the Compare view. Note: a future sync can
+stale match from the Compare view. Note: a future sync can 
 
 `DELETE /v1/configs/lineage`
 
@@ -749,7 +749,7 @@ const { data } = await client.getSyncJob({
 
 Retry the unresolved resources from a prior sync job: `failed` rows, plus
 rows the original run left at `pending`/`in_progress` because it stopped
-early. Creates a new job whose scope is that `(type,
+early. Creates a new job whose scope is that `(type, 
 
 `POST /v1/configs/sync-jobs/{id}/retry`
 
@@ -1140,7 +1140,7 @@ const { data } = await client.rebuildIndex()
 
 Returns a fresh inventory of an org's configuration resources — `{ type, id }` identities only,
 no full payloads. Calls every adapter's `list()` live (bypasses the 7-day DynamoDB index).
-Intended for
+Intended for 
 
 `GET /v1/configs/inventory`
 
