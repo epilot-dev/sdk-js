@@ -37,9 +37,7 @@ export default defineCommand({
       (c) => c.component_type === 'CUSTOM_JOURNEY_BLOCK' || (c.surfaces && Object.keys(c.surfaces).length > 0),
     );
 
-    let localComponent = args.component
-      ? manifest.components.find((c) => c._dir === args.component)
-      : undefined;
+    let localComponent = args.component ? manifest.components.find((c) => c._dir === args.component) : undefined;
 
     if (args.component && !localComponent) {
       log.error(`Component "${args.component}" not found in manifest (expected its folder name in components/).`);
@@ -50,7 +48,9 @@ export default defineCommand({
       if (overridable.length === 1) {
         localComponent = overridable[0];
       } else if (overridable.length === 0) {
-        log.error('No overridable component found — dev mode works for UI components (capabilities, pages, portal blocks, journey blocks).');
+        log.error(
+          'No overridable component found — dev mode works for UI components (capabilities, pages, portal blocks, journey blocks).',
+        );
         process.exit(1);
       } else {
         log.error(

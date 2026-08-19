@@ -95,14 +95,27 @@ const FIELD_RANGES: [string, number, number][] = [
 ];
 
 const MONTH_NAMES: Record<string, number> = {
-  jan: 1, feb: 2, mar: 3, apr: 4, may: 5, jun: 6, jul: 7, aug: 8, sep: 9, oct: 10, nov: 11, dec: 12,
+  jan: 1,
+  feb: 2,
+  mar: 3,
+  apr: 4,
+  may: 5,
+  jun: 6,
+  jul: 7,
+  aug: 8,
+  sep: 9,
+  oct: 10,
+  nov: 11,
+  dec: 12,
 };
 const DOW_NAMES: Record<string, number> = { sun: 0, mon: 1, tue: 2, wed: 3, thu: 4, fri: 5, sat: 6 };
 
 function parseCron(expr: string): CronFields {
   const fields = expr.split(/\s+/);
   if (fields.length !== 5) {
-    throw new Error(`Invalid cron expression "${expr}" — expected 5 fields (minute hour day-of-month month day-of-week)`);
+    throw new Error(
+      `Invalid cron expression "${expr}" — expected 5 fields (minute hour day-of-month month day-of-week)`,
+    );
   }
   const sets = fields.map((field, i) => {
     const [label, min, max] = FIELD_RANGES[i];
@@ -125,7 +138,13 @@ function parseCron(expr: string): CronFields {
   };
 }
 
-function parseField(field: string, label: string, min: number, max: number, names?: Record<string, number>): Set<number> {
+function parseField(
+  field: string,
+  label: string,
+  min: number,
+  max: number,
+  names?: Record<string, number>,
+): Set<number> {
   const values = new Set<number>();
   for (const part of field.split(',')) {
     const [rangePart, stepPart, ...rest] = part.split('/');
