@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Integration Toolkit API",
-    "version": "1.15.0",
+    "version": "1.17.0",
     "description": "API for integrating with external systems in a standardised way."
   },
   "tags": [
@@ -1621,6 +1621,239 @@
           },
           "404": {
             "description": "Use case not found"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/integrations/{integrationId}/documentation": {
+      "get": {
+        "operationId": "listDocumentationPages",
+        "summary": "listDocumentationPages",
+        "description": "Retrieve all documentation pages of an integration, without their markdown content.\nAn integration has at most one general page plus at most one page per use case.\nThe page id is 'general' for the integration-wide page, otherwise the use case ID.\n",
+        "tags": [
+          "integrations"
+        ],
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true,
+            "description": "The integration ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved documentation pages",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "pages"
+                  ],
+                  "properties": {
+                    "pages": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/DocumentationPageSummary"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "description": "Integration not found"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/integrations/{integrationId}/documentation/{docId}": {
+      "get": {
+        "operationId": "getDocumentationPage",
+        "summary": "getDocumentationPage",
+        "description": "Retrieve a single documentation page including its markdown content",
+        "tags": [
+          "integrations"
+        ],
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true,
+            "description": "The integration ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "docId",
+            "in": "path",
+            "required": true,
+            "description": "'general' for the integration-wide page, otherwise a use case ID",
+            "schema": {
+              "type": "string",
+              "pattern": "^(general|[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved documentation page",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentationPage"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "description": "Documentation page not found"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "put": {
+        "operationId": "upsertDocumentationPage",
+        "summary": "upsertDocumentationPage",
+        "description": "Create or update the documentation page identified by docId.\nUpsert semantics enforce the invariant of one general page per\nintegration and one page per use case. For use case pages the\nuse case must exist.\n",
+        "tags": [
+          "integrations"
+        ],
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true,
+            "description": "The integration ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "docId",
+            "in": "path",
+            "required": true,
+            "description": "'general' for the integration-wide page, otherwise a use case ID",
+            "schema": {
+              "type": "string",
+              "pattern": "^(general|[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpsertDocumentationPageRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Documentation page created or updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentationPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "description": "Integration or use case not found"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteDocumentationPage",
+        "summary": "deleteDocumentationPage",
+        "description": "Delete a documentation page",
+        "tags": [
+          "integrations"
+        ],
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true,
+            "description": "The integration ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "docId",
+            "in": "path",
+            "required": true,
+            "description": "'general' for the integration-wide page, otherwise a use case ID",
+            "schema": {
+              "type": "string",
+              "pattern": "^(general|[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Documentation page deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "description": "Documentation page not found"
           },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
@@ -3879,6 +4112,38 @@
             "$ref": "#/components/responses/InternalServerError"
           }
         }
+      },
+      "delete": {
+        "operationId": "deleteErpImport",
+        "summary": "deleteErpImport",
+        "description": "Remove an import and the file it owns. Allowed from any status: an import whose run is still in flight is stopped by the deletion, and rows it already wrote stay written.",
+        "tags": [
+          "erp-imports"
+        ],
+        "parameters": [
+          {
+            "name": "importId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "The import and its file were removed"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
       }
     },
     "/v2/erp/imports/{importId}:validate": {
@@ -4450,6 +4715,15 @@
           },
           "s3_input_ref": {
             "$ref": "#/components/schemas/S3Reference"
+          },
+          "size_bytes": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Size of the uploaded file, recorded at registration. Present on every job registered from version 1.17.0 onwards; absent on older rows, which were written before it was captured."
+          },
+          "column_count": {
+            "type": "integer",
+            "description": "How many effective columns the file's header yielded — the length of the `preview.columns` returned at registration, kept so a job loaded later can still describe its file. The preview ROWS are deliberately not stored: they are a sample for the person about to choose a mapping, not job state. Present on every job registered from version 1.17.0 onwards."
           },
           "validation": {
             "$ref": "#/components/schemas/ErpImportValidation"
@@ -11027,6 +11301,110 @@
             "items": {
               "$ref": "#/components/schemas/TimeSeriesBreakdownItemV2"
             }
+          }
+        }
+      },
+      "DocumentationPageSummary": {
+        "type": "object",
+        "description": "Documentation page metadata without the markdown content",
+        "required": [
+          "id",
+          "integration_id",
+          "scope",
+          "title",
+          "created_at",
+          "updated_at"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "'general' for the integration-wide page, otherwise the use case ID",
+            "example": "general"
+          },
+          "integration_id": {
+            "type": "string",
+            "format": "uuid",
+            "readOnly": true
+          },
+          "scope": {
+            "type": "string",
+            "enum": [
+              "integration",
+              "use_case"
+            ],
+            "description": "Whether the page documents the whole integration or a single use case"
+          },
+          "use_case_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The linked use case. Only set when scope is use_case."
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 150
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "created_by": {
+            "type": "string",
+            "nullable": true,
+            "description": "User ID that created the page",
+            "readOnly": true
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "updated_by": {
+            "type": "string",
+            "nullable": true,
+            "description": "User ID of the last edit",
+            "readOnly": true
+          }
+        }
+      },
+      "DocumentationPage": {
+        "description": "A markdown documentation page of an integration",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/DocumentationPageSummary"
+          },
+          {
+            "type": "object",
+            "required": [
+              "content"
+            ],
+            "properties": {
+              "content": {
+                "type": "string",
+                "maxLength": 100000,
+                "description": "Markdown source of the page"
+              }
+            }
+          }
+        ]
+      },
+      "UpsertDocumentationPageRequest": {
+        "type": "object",
+        "required": [
+          "title",
+          "content"
+        ],
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 150
+          },
+          "content": {
+            "type": "string",
+            "maxLength": 100000,
+            "description": "Markdown source of the page"
           }
         }
       }
