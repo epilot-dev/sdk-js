@@ -91,6 +91,7 @@ const { data } = await appClient.getPublicFacingComponent(...)
 - [`CustomFlowActionComponent`](#customflowactioncomponent)
 - [`BaseCustomActionConfig`](#basecustomactionconfig)
 - [`ExternalIntegrationCustomActionConfig`](#externalintegrationcustomactionconfig)
+- [`FunctionRefCustomActionConfig`](#functionrefcustomactionconfig)
 - [`CustomFlowConfig`](#customflowconfig)
 - [`ExternalProductCatalogComponent`](#externalproductcatalogcomponent)
 - [`ExternalProductCatalogConfig`](#externalproductcatalogconfig)
@@ -415,9 +416,7 @@ const { data } = await client.getPublicConfiguration({
       "schedule": "rate(30 minutes)",
       "schedule_timezone": "Europe/Berlin",
       "schedule_overlap": "skip",
-      "secrets": ["string"],
-      "wait_for_callback": true,
-      "surfaces": {}
+      "secrets": ["string"]
     }
   ],
   "is_beta": true,
@@ -531,9 +530,7 @@ const { data } = await client.getConfiguration({
       "schedule": "rate(30 minutes)",
       "schedule_timezone": "Europe/Berlin",
       "schedule_overlap": "skip",
-      "secrets": ["string"],
-      "wait_for_callback": true,
-      "surfaces": {}
+      "secrets": ["string"]
     }
   ],
   "visibility": "private",
@@ -908,15 +905,7 @@ const { data } = await client.listVersions({
           "schedule": "rate(30 minutes)",
           "schedule_timezone": "Europe/Berlin",
           "schedule_overlap": "skip",
-          "secrets": ["string"],
-          "wait_for_callback": true,
-          "surfaces": {
-            "flow_action_config": {
-              "app_url": "string",
-              "zip_url": "string",
-              "override_url": "string"
-            }
-          }
+          "secrets": ["string"]
         }
       ],
       "visibility": "private",
@@ -1032,9 +1021,7 @@ const { data } = await client.getVersion({
       "schedule": "rate(30 minutes)",
       "schedule_timezone": "Europe/Berlin",
       "schedule_overlap": "skip",
-      "secrets": ["string"],
-      "wait_for_callback": true,
-      "surfaces": {}
+      "secrets": ["string"]
     }
   ],
   "visibility": "private",
@@ -1123,15 +1110,7 @@ const { data } = await client.patchVersion(
         schedule: 'rate(30 minutes)',
         schedule_timezone: 'Europe/Berlin',
         schedule_overlap: 'skip',
-        secrets: ['string'],
-        wait_for_callback: true,
-        surfaces: {
-          flow_action_config: {
-            app_url: 'string',
-            zip_url: 'string',
-            override_url: 'string'
-          }
-        }
+        secrets: ['string']
       }
     ]
   },
@@ -1430,15 +1409,7 @@ const { data } = await client.listInstallations({
           "schedule": "rate(30 minutes)",
           "schedule_timezone": "Europe/Berlin",
           "schedule_overlap": "skip",
-          "secrets": ["string"],
-          "wait_for_callback": true,
-          "surfaces": {
-            "flow_action_config": {
-              "app_url": "string",
-              "zip_url": "string",
-              "override_url": "string"
-            }
-          }
+          "secrets": ["string"]
         }
       ],
       "installed_version": "string",
@@ -1538,15 +1509,7 @@ const { data } = await client.getInstallation({
       "schedule": "rate(30 minutes)",
       "schedule_timezone": "Europe/Berlin",
       "schedule_overlap": "skip",
-      "secrets": ["string"],
-      "wait_for_callback": true,
-      "surfaces": {
-        "flow_action_config": {
-          "app_url": "string",
-          "zip_url": "string",
-          "override_url": "string"
-        }
-      }
+      "secrets": ["string"]
     }
   ],
   "installed_version": "string",
@@ -1656,15 +1619,7 @@ const { data } = await client.install(
       "schedule": "rate(30 minutes)",
       "schedule_timezone": "Europe/Berlin",
       "schedule_overlap": "skip",
-      "secrets": ["string"],
-      "wait_for_callback": true,
-      "surfaces": {
-        "flow_action_config": {
-          "app_url": "string",
-          "zip_url": "string",
-          "override_url": "string"
-        }
-      }
+      "secrets": ["string"]
     }
   ],
   "installed_version": "string",
@@ -1803,15 +1758,7 @@ const { data } = await client.promoteVersion({
       "schedule": "rate(30 minutes)",
       "schedule_timezone": "Europe/Berlin",
       "schedule_overlap": "skip",
-      "secrets": ["string"],
-      "wait_for_callback": true,
-      "surfaces": {
-        "flow_action_config": {
-          "app_url": "string",
-          "zip_url": "string",
-          "override_url": "string"
-        }
-      }
+      "secrets": ["string"]
     }
   ],
   "installed_version": "string",
@@ -2072,14 +2019,6 @@ type FunctionDefinition = {
   schedule_timezone?: string
   schedule_overlap?: "skip"
   secrets?: string[]
-  wait_for_callback?: boolean
-  surfaces?: {
-    flow_action_config?: {
-      app_url?: { ... }
-      zip_url?: { ... }
-      override_url?: { ... }
-    }
-  }
 }
 ```
 
@@ -2307,6 +2246,12 @@ type CustomFlowActionComponent = {
       url?: { ... }
       headers?: { ... }
     }
+  } | {
+    name?: string
+    description?: string
+    wait_for_callback?: boolean
+    type: "function"
+    function_name: string
   }
   surfaces?: {
     flow_action_config?: {
@@ -2343,9 +2288,21 @@ type ExternalIntegrationCustomActionConfig = {
 }
 ```
 
+### `FunctionRefCustomActionConfig`
+
+```ts
+type FunctionRefCustomActionConfig = {
+  name?: string
+  description?: string
+  wait_for_callback?: boolean
+  type: "function"
+  function_name: string
+}
+```
+
 ### `CustomFlowConfig`
 
-Configuration of an external-integration flow action. Sandboxed code belongs in the app's `functions` (type `workflow`) instead — workflow functions are selectable directly in the flow builder without a component.
+Configuration of a flow action component. `external_integration` calls an external HTTP endpoint; `function` runs a workflow-type app function in the epilot sandbox.
 
 
 ```ts
@@ -2358,6 +2315,12 @@ type CustomFlowConfig = {
     url?: string
     headers?: Record<string, unknown>
   }
+} | {
+  name?: string
+  description?: string
+  wait_for_callback?: boolean
+  type: "function"
+  function_name: string
 }
 ```
 
@@ -3568,10 +3531,6 @@ type ConfigurationVersion = {
     schedule_timezone?: string
     schedule_overlap?: "skip"
     secrets?: string[]
-    wait_for_callback?: boolean
-    surfaces?: {
-      flow_action_config?: { ... }
-    }
   }>
   visibility?: "public" | "private"
   public?: boolean
@@ -3697,10 +3656,6 @@ type Installation = {
     schedule_timezone?: string
     schedule_overlap?: "skip"
     secrets?: string[]
-    wait_for_callback?: boolean
-    surfaces?: {
-      flow_action_config?: { ... }
-    }
   }>
   installed_version: string
   role?: string
@@ -3784,10 +3739,6 @@ type PublicConfiguration = {
     schedule_timezone?: string
     schedule_overlap?: "skip"
     secrets?: string[]
-    wait_for_callback?: boolean
-    surfaces?: {
-      flow_action_config?: { ... }
-    }
   }>
   is_beta?: boolean
   deprecated_at?: string
@@ -3824,6 +3775,10 @@ type PublicConfiguration = {
       code: { ... }
       schedule?: { ... }
       schedule_timezone?: { ... }
+      schedule_overlap?: { ... }
+      secrets?: { ... }
+    }>
+    visibility?: "public" | "private"
   // ...
 }
 ```
@@ -3907,10 +3862,6 @@ type Configuration = {
     schedule_timezone?: string
     schedule_overlap?: "skip"
     secrets?: string[]
-    wait_for_callback?: boolean
-    surfaces?: {
-      flow_action_config?: { ... }
-    }
   }>
   visibility?: "public" | "private"
   public?: boolean
@@ -3933,6 +3884,10 @@ type Configuration = {
     source_blueprint_file?: string
   }
   version_audit: {
+    created_at?: string
+    created_by?: string
+    updated_at?: string
+    updated_by?: string
   // ...
 }
 ```
