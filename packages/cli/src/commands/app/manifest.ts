@@ -29,7 +29,7 @@ export interface ManifestFunction {
   /** Unique function name within the app (kebab-case) */
   name: string;
   /**
-   * workflow: selectable as an action in the flow builder (entity context).
+   * workflow: referenced by a CUSTOM_FLOW_ACTION component (type "function").
    * scheduled: runs automatically once per installation on its cron schedule.
    */
   type: 'workflow' | 'scheduled';
@@ -44,12 +44,6 @@ export interface ManifestFunction {
   schedule_overlap?: 'skip';
   /** Keys of installation options of type secret exposed to the function */
   secrets?: string[];
-  /** Workflow functions only — wait for the callback_url before completing the action */
-  wait_for_callback?: boolean;
-  /** Workflow functions only — custom config UI shown in the flow builder */
-  surfaces?: Record<string, unknown>;
-  /** Workflow functions only — zip directory deployed as the config UI */
-  assets?: { zip?: string };
 }
 
 export interface ManifestComponent {
@@ -167,10 +161,6 @@ function validateFunctions(functions: unknown[], errors: ValidationError[]): voi
     if (fn.type !== 'scheduled' && fn.schedule !== undefined) {
       errors.push({ path: `${path}/schedule`, message: 'Only functions of type "scheduled" may declare a schedule' });
     }
-    if (fn.type !== 'workflow' && fn.wait_for_callback !== undefined) {
-      errors.push({ path: `${path}/wait_for_callback`, message: 'Only valid for workflow functions' });
-    }
-
     if (typeof fn.name !== 'string' || !FUNCTION_NAME_PATTERN.test(fn.name)) {
       errors.push({ path: `${path}/name`, message: 'Required kebab-case string (a-z, 0-9, dashes; max 64 chars)' });
     } else if (seen.has(fn.name)) {

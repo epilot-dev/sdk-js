@@ -28,6 +28,16 @@ type TemplateInfo = {
 };
 
 const TEMPLATE_REGISTRY: Record<string, TemplateInfo> = {
+  CUSTOM_FLOW_ACTION_FUNCTION: {
+    configOnly: true,
+    manifestType: 'CUSTOM_FLOW_ACTION',
+    templateDir: 'custom-flow-action-function',
+    description: 'Flow action running a workflow function (code in epilot)',
+    configuration: () => ({
+      type: 'function',
+      function_name: '<add-a-workflow-function-name>',
+    }),
+  },
   CUSTOM_FLOW_ACTION_EXTERNAL: {
     configOnly: true,
     manifestType: 'CUSTOM_FLOW_ACTION',

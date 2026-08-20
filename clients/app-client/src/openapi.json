@@ -2113,7 +2113,7 @@
               "workflow",
               "scheduled"
             ],
-            "description": "Where the function can be used. `workflow` functions are selectable as actions in the flow builder and run with entity context. `scheduled` functions run automatically per installation on their cron schedule.\n"
+            "description": "Where the function can be used. `workflow` functions are referenced by CUSTOM_FLOW_ACTION components (type `function`) and run with entity context. `scheduled` functions run automatically per installation on their cron schedule.\n"
           },
           "label": {
             "allOf": [
@@ -2165,19 +2165,6 @@
               "type": "string"
             },
             "description": "Keys of installation options of type secret made available to the function via input.app_options\n"
-          },
-          "wait_for_callback": {
-            "type": "boolean",
-            "description": "Workflow functions only — wait for the callback_url to be called before completing the flow action\n"
-          },
-          "surfaces": {
-            "type": "object",
-            "description": "Workflow functions only — optional custom config UI shown in the flow builder",
-            "properties": {
-              "flow_action_config": {
-                "$ref": "#/components/schemas/AppBridgeSurfaceConfig"
-              }
-            }
           }
         }
       },
@@ -2594,18 +2581,48 @@
           }
         ]
       },
+      "FunctionRefCustomActionConfig": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseCustomActionConfig"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "function"
+                ]
+              },
+              "function_name": {
+                "type": "string",
+                "description": "Name of a `workflow`-type function of the same app version. The component provides the org-facing contract (name, options, config surface); the referenced function provides the code.\n"
+              }
+            },
+            "required": [
+              "type",
+              "function_name"
+            ]
+          }
+        ]
+      },
       "CustomFlowConfig": {
         "type": "object",
-        "description": "Configuration of an external-integration flow action. Sandboxed code belongs in the app's `functions` (type `workflow`) instead — workflow functions are selectable directly in the flow builder without a component.\n",
+        "description": "Configuration of a flow action component. `external_integration` calls an external HTTP endpoint; `function` runs a workflow-type app function in the epilot sandbox.\n",
         "oneOf": [
           {
             "$ref": "#/components/schemas/ExternalIntegrationCustomActionConfig"
+          },
+          {
+            "$ref": "#/components/schemas/FunctionRefCustomActionConfig"
           }
         ],
         "discriminator": {
           "propertyName": "type",
           "mapping": {
-            "external_integration": "#/components/schemas/ExternalIntegrationCustomActionConfig"
+            "external_integration": "#/components/schemas/ExternalIntegrationCustomActionConfig",
+            "function": "#/components/schemas/FunctionRefCustomActionConfig"
           }
         }
       },
