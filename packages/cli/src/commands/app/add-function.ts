@@ -23,7 +23,10 @@ export default defineCommand({
       description:
         'Cron ("0 3 * * *") or rate ("rate(30 minutes)") expression to run the function once per installation',
     },
-    label: { type: 'string', description: "Display name shown to org admins (e.g. in the installed app's functions summary)" },
+    label: {
+      type: 'string',
+      description: "Display name shown to org admins (e.g. in the installed app's functions summary)",
+    },
     timezone: { type: 'string', description: 'IANA timezone for cron schedules (default: Europe/Berlin)' },
     path: { type: 'string', description: 'Path to manifest.json (default: manifest.json)' },
   },
@@ -129,7 +132,9 @@ export default defineCommand({
     if (args.schedule) {
       log.info(`Schedule: ${args.schedule} (runs once per installation, max 60s per run)`);
     } else {
-      log.info('Wire it into the flow builder with: epilot app add-component <name> --type CUSTOM_FLOW_ACTION_FUNCTION');
+      log.info(
+        'Wire it into the flow builder with: epilot app add-component <name> --type CUSTOM_FLOW_ACTION_FUNCTION',
+      );
     }
     log.dim('Build with "npm run build", then "epilot app deploy"');
   },
