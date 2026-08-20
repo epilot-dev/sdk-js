@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Integration Toolkit API",
-    "version": "1.17.0",
+    "version": "1.18.0",
     "description": "API for integrating with external systems in a standardised way."
   },
   "tags": [
@@ -3977,7 +3977,7 @@
       "post": {
         "operationId": "createErpImport",
         "summary": "createErpImport",
-        "description": "Register an already-uploaded file (S3 ref) as a pricing-file import job. Returns the job and a file preview. Nothing runs yet: no use case is chosen and no validation starts here. Optionally rank candidates with POST /v2/erp/imports/{importId}:suggest-use-cases, then start validation with POST /v2/erp/imports/{importId}:validate.",
+        "description": "Register an already-uploaded file (S3 ref) as a pricing-file import job. Returns the job and a file preview. Nothing runs yet: no use case is chosen and no validation starts here. Optionally rank candidates with POST /v2/erp/imports/{importId}:suggest-use-cases, then start validation with POST /v2/erp/imports/{importId}:validate.\nPass `import_id` to repoint an existing PENDING import at a different file instead, keeping its id and its place in the history.",
         "tags": [
           "erp-imports"
         ],
@@ -3992,8 +3992,18 @@
           }
         },
         "responses": {
+          "200": {
+            "description": "The named import now points at this file. Returned only when `import_id` was supplied — no `Location`, because nothing was created.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateErpImportResponse"
+                }
+              }
+            }
+          },
           "201": {
-            "description": "Import job created",
+            "description": "Import job created. Returned only when `import_id` was omitted.",
             "headers": {
               "Location": {
                 "description": "URL of the created job (`/v2/erp/imports/{importId}`).",
@@ -4015,6 +4025,12 @@
           },
           "403": {
             "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
           },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
@@ -4403,6 +4419,10 @@
             "type": "boolean",
             "default": false,
             "description": "Return a sample of the file's first rows in `preview`. Only controls whether the sample comes BACK — the head is read either way, because that read is how an unreadable file gets refused."
+          },
+          "import_id": {
+            "type": "string",
+            "description": "Repoint an EXISTING import at this file instead of registering a new one — same row, same id, so iterating on which file to import leaves one entry in the history rather than one per attempt.\nOnly a PENDING import may be repointed; any other status returns 409 with code `IMPORT_NOT_REPLACEABLE`. Past the first check the previous verdict is what tells the user what to fix, and a job that reached the execute phase may already have published rows under `correlation_id`.\nAn id that names nothing returns 404. It never falls back to registering a new import: a stale id must fail loudly rather than quietly produce a second one."
           }
         }
       },
@@ -8473,7 +8493,7 @@
       },
       "FileProxyUploadConfig": {
         "type": "object",
-        "description": "Upload-side settings for a file_proxy use case with `direction: upload`.\nEverything about WHAT is sent lives on the outbound mapping\n(see `FileProxyDeliveryConfig`); this object only governs HOW the transfer is bounded\nand judged.\n",
+        "description": "Upload-side settings for a file_proxy use case with `direction: upload`.\nThe surrounding file_proxy configuration owns WHAT and HOW to send: `fan_out`,\n`file_source`, `params_mapping`, lookups, constants, auth, and steps. This nested object\ngoverns upload-specific limits and how the final external response is judged. The\noutbound mapping remains a pure pointer to the recipe (see `FileProxyDeliveryConfig`).\n",
         "properties": {
           "max_file_bytes": {
             "type": "integer",
@@ -8486,7 +8506,7 @@
             "minimum": 1,
             "maximum": 100,
             "default": 8,
-            "description": "Maximum delivery attempts per item before the delivery is marked failed and the\nmessage is dead-lettered. Attempts are spaced by an exponential, jittered backoff\nspanning roughly 16 hours over the default 8 attempts, so an ERP maintenance window\ndoes not exhaust them.\n\nLives here rather than on the outbound delivery because how hard to retry is a\nproperty of the transport — the same judgement as `max_file_bytes` — and the outbound\ndelivery is a pure pointer.\n"
+            "description": "Maximum delivery attempts per item before the delivery is marked failed. Attempts\nare spaced by an exponential, jittered backoff. The default 8 attempts schedule at\nmost 7 delays, totaling about 7 hours 40 minutes before jitter, so a normal ERP\nmaintenance window does not immediately exhaust them.\n\nLives here rather than on the outbound delivery because how hard to retry is a\nproperty of the transport — the same judgement as `max_file_bytes` — and the outbound\ndelivery is a pure pointer.\n"
           },
           "success_when": {
             "type": "string",
@@ -9025,7 +9045,7 @@
           "id": {
             "type": "string",
             "format": "uuid",
-            "description": "Unique identifier for this mapping"
+            "description": "Unique identifier for this mapping; generated by the API when omitted"
           },
           "name": {
             "type": "string",
