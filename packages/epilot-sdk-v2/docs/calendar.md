@@ -682,6 +682,7 @@ const { data } = await client.listCalendars({
       "description": "string",
       "color": "string",
       "is_default": true,
+      "is_epilot_default": true,
       "read_only": true,
       "owner_email": "user@example.com",
       "source": {
@@ -732,6 +733,7 @@ const { data } = await client.createCalendar(
   "description": "string",
   "color": "string",
   "is_default": true,
+  "is_epilot_default": true,
   "read_only": true,
   "owner_email": "user@example.com",
   "source": {
@@ -778,6 +780,7 @@ const { data } = await client.addOutlookCalendar(
   "description": "string",
   "color": "string",
   "is_default": true,
+  "is_epilot_default": true,
   "read_only": true,
   "owner_email": "user@example.com",
   "source": {
@@ -882,6 +885,7 @@ const { data } = await client.getCalendar({
   "description": "string",
   "color": "string",
   "is_default": true,
+  "is_epilot_default": true,
   "read_only": true,
   "owner_email": "user@example.com",
   "source": {
@@ -931,6 +935,7 @@ const { data } = await client.updateCalendar(
   "description": "string",
   "color": "string",
   "is_default": true,
+  "is_epilot_default": true,
   "read_only": true,
   "owner_email": "user@example.com",
   "source": {
@@ -1042,7 +1047,7 @@ const { data } = await client.listEvents({
 
 ### `createEvent`
 
-Create a native epilot calendar event.
+Create a native epilot calendar event. Omit `calendar_id` to use the caller’s epilot default calendar.
 
 `POST /v1/calendar/events`
 
@@ -1549,6 +1554,7 @@ type Calendar = {
   description?: string
   color?: string
   is_default: boolean
+  is_epilot_default: boolean
   read_only: boolean
   owner_email?: string // email
   source: {
@@ -1735,7 +1741,7 @@ type EventSource = {
 
 ```ts
 type CalendarEventCreateBody = {
-  calendar_id: string
+  calendar_id?: string
   description?: string
   start_time: string // date-time
   end_time: string // date-time

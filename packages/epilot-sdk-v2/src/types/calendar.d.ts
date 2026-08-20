@@ -120,9 +120,13 @@ export declare namespace Components {
              */
             color?: string | null;
             /**
-             * True if this is the user's primary calendar
+             * True if the source provider marks this calendar as default
              */
             is_default: boolean;
+            /**
+             * True for the epilot default calendar
+             */
+            is_epilot_default: boolean;
             /**
              * True if the caller cannot create, update, or delete events in this calendar
              */
@@ -222,9 +226,9 @@ export declare namespace Components {
         }
         export interface CalendarEventCreateBody {
             /**
-             * epilot calendar this event belongs to
+             * Owned calendar ID. Omit this property to use the epilot default calendar.
              */
-            calendar_id: string;
+            calendar_id?: string;
             /**
              * Preview of the event body, truncated to 255 chars
              */
@@ -1273,6 +1277,7 @@ export declare namespace Paths {
             export interface $204 {
             }
             export type $404 = Components.Schemas.Error;
+            export type $409 = Components.Schemas.Error;
         }
     }
     namespace DeleteEvent {
@@ -1942,7 +1947,7 @@ export interface OperationMethods {
   /**
    * createEvent - createEvent
    * 
-   * Create a native epilot calendar event.
+   * Create a native epilot calendar event. Omit `calendar_id` to use the caller’s epilot default calendar.
    */
   'createEvent'(
     parameters?: Parameters<UnknownParamsObject> | null,
@@ -2271,7 +2276,7 @@ export interface PathsDictionary {
     /**
      * createEvent - createEvent
      * 
-     * Create a native epilot calendar event.
+     * Create a native epilot calendar event. Omit `calendar_id` to use the caller’s epilot default calendar.
      */
     'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
