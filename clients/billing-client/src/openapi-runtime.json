@@ -159,6 +159,12 @@
             "name": "id",
             "in": "path",
             "required": true
+          },
+          {
+            "$ref": "#/components/parameters/HistoryChangeTypes"
+          },
+          {
+            "$ref": "#/components/parameters/IncludeHistory"
           }
         ],
         "responses": {}
@@ -172,6 +178,12 @@
             "name": "id",
             "in": "path",
             "required": true
+          },
+          {
+            "$ref": "#/components/parameters/HistoryChangeTypes"
+          },
+          {
+            "$ref": "#/components/parameters/IncludeHistory"
           }
         ],
         "responses": {}
@@ -188,6 +200,9 @@
           },
           {
             "$ref": "#/components/parameters/ConfigurationHistoryChangeType"
+          },
+          {
+            "$ref": "#/components/parameters/HistoryChangeTypes"
           },
           {
             "$ref": "#/components/parameters/From"
@@ -210,6 +225,9 @@
           },
           {
             "$ref": "#/components/parameters/ConfigurationHistoryChangeType"
+          },
+          {
+            "$ref": "#/components/parameters/HistoryChangeTypes"
           },
           {
             "$ref": "#/components/parameters/From"
@@ -249,6 +267,16 @@
       },
       "ConfigurationHistoryChangeType": {
         "name": "change_type",
+        "in": "query",
+        "required": false
+      },
+      "HistoryChangeTypes": {
+        "name": "history_change_types",
+        "in": "query",
+        "required": false
+      },
+      "IncludeHistory": {
+        "name": "include_history",
         "in": "query",
         "required": false
       }
