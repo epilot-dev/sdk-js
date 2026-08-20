@@ -2025,7 +2025,8 @@ const { data } = await client.getUserLoginParametersV2({
       "cognito_oauth_domain": "epilot-org-123",
       "cognito_oauth_scopes": ["openid"],
       "oauth_response_type": "code",
-      "passkey_enabled": true
+      "passkey_enabled": true,
+      "passkeys_registered": true
     }
   ]
 }
@@ -2124,7 +2125,8 @@ const { data } = await client.resolveDiscoverableCredential(
       "cognito_oauth_domain": "epilot-org-123",
       "cognito_oauth_scopes": ["openid"],
       "oauth_response_type": "code",
-      "passkey_enabled": true
+      "passkey_enabled": true,
+      "passkeys_registered": true
     }
   ]
 }
@@ -2433,7 +2435,8 @@ const { data } = await client.getUserLoginParameters({
       "cognito_oauth_domain": "epilot-org-123",
       "cognito_oauth_scopes": ["openid"],
       "oauth_response_type": "code",
-      "passkey_enabled": true
+      "passkey_enabled": true,
+      "passkeys_registered": true
     }
   ]
 }
@@ -2728,6 +2731,7 @@ type LoginParameters = {
   cognito_oauth_scopes?: string[]
   oauth_response_type?: "code" | "token"
   passkey_enabled?: boolean
+  passkeys_registered?: boolean
 }
 ```
 

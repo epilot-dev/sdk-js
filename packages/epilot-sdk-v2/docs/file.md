@@ -35,6 +35,8 @@ const { data } = await fileClient.uploadFileV2(...)
 - [`createZipJob`](#createzipjob)
 - [`getZipJob`](#getzipjob)
 - [`getFileSummary`](#getfilesummary)
+- [`getFileSummaryFeedback`](#getfilesummaryfeedback)
+- [`putFileSummaryFeedback`](#putfilesummaryfeedback)
 - [`createFileSummaryJob`](#createfilesummaryjob)
 - [`getCurrentFileSummaryJob`](#getcurrentfilesummaryjob)
 - [`getFileSummaryJob`](#getfilesummaryjob)
@@ -77,6 +79,9 @@ const { data } = await fileClient.uploadFileV2(...)
 - [`FileSummaryJobStatus`](#filesummaryjobstatus)
 - [`FileSummaryJob`](#filesummaryjob)
 - [`FileSummary`](#filesummary)
+- [`FileSummaryFeedback`](#filesummaryfeedback)
+- [`FileSummaryFeedbackResponse`](#filesummaryfeedbackresponse)
+- [`PutFileSummaryFeedbackRequest`](#putfilesummaryfeedbackrequest)
 - [`FileTextStatus`](#filetextstatus)
 - [`FileText`](#filetext)
 - [`FileTextReady`](#filetextready)
@@ -194,6 +199,7 @@ const { data } = await client.saveFileV2(
     short_summary_de: 'string',
     preview_summary_en: 'string',
     short_summary_en: 'string',
+    file_summary_execution_id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
     s3ref: {}
   },
 )
@@ -225,6 +231,7 @@ const { data } = await client.saveFileV2(
   "short_summary_de": "string",
   "preview_summary_en": "string",
   "short_summary_en": "string",
+  "file_summary_execution_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
   "source_url": "https://productengineer-content.s3.eu-west-1.amazonaws.com/product-engineer-checklist.pdf",
   "s3ref": {},
   "versions": [
@@ -299,6 +306,7 @@ const { data } = await client.getFile({
   "short_summary_de": "string",
   "preview_summary_en": "string",
   "short_summary_en": "string",
+  "file_summary_execution_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
   "source_url": "https://productengineer-content.s3.eu-west-1.amazonaws.com/product-engineer-checklist.pdf",
   "s3ref": {},
   "versions": [
@@ -373,6 +381,7 @@ const { data } = await client.deleteFile({
   "short_summary_de": "string",
   "preview_summary_en": "string",
   "short_summary_en": "string",
+  "file_summary_execution_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
   "source_url": "https://productengineer-content.s3.eu-west-1.amazonaws.com/product-engineer-checklist.pdf",
   "s3ref": {},
   "versions": [
@@ -417,6 +426,7 @@ const { data } = await client.downloadFile({
   id: '123e4567-e89b-12d3-a456-426614174000',
   version: 1,
   attachment: true,
+  x-track: 'example',
 })
 ```
 
@@ -570,10 +580,77 @@ const { data } = await client.getFileSummary({
 {
   "status": "queued",
   "job_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "feedback_available": true,
   "preview_summary_de": "string",
   "short_summary_de": "string",
   "preview_summary_en": "string",
   "short_summary_en": "string"
+}
+```
+
+</details>
+
+---
+
+### `getFileSummaryFeedback`
+
+Get file summary feedback
+
+`GET /v1/files/{id}/summary/feedback`
+
+```ts
+const { data } = await client.getFileSummaryFeedback({
+  id: '123e4567-e89b-12d3-a456-426614174000',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "feedback": {
+    "rating": "up",
+    "comment": "string",
+    "user_id": "string",
+    "submitted_at": "1970-01-01T00:00:00.000Z"
+  }
+}
+```
+
+</details>
+
+---
+
+### `putFileSummaryFeedback`
+
+Submit file summary feedback
+
+`PUT /v1/files/{id}/summary/feedback`
+
+```ts
+const { data } = await client.putFileSummaryFeedback(
+  {
+    id: '123e4567-e89b-12d3-a456-426614174000',
+  },
+  {
+    rating: 'up',
+    comment: 'string'
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "feedback": {
+    "rating": "up",
+    "comment": "string",
+    "user_id": "string",
+    "submitted_at": "1970-01-01T00:00:00.000Z"
+  }
 }
 ```
 
@@ -1122,6 +1199,7 @@ const { data } = await client.getFilesInCollection({
     "short_summary_de": "string",
     "preview_summary_en": "string",
     "short_summary_en": "string",
+    "file_summary_execution_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
     "source_url": "https://productengineer-content.s3.eu-west-1.amazonaws.com/product-engineer-checklist.pdf",
     "s3ref": {},
     "versions": [
@@ -1243,6 +1321,7 @@ type FileAttributes = {
   short_summary_de?: string
   preview_summary_en?: string
   short_summary_en?: string
+  file_summary_execution_id?: string // uuid
 }
 ```
 
@@ -1280,10 +1359,44 @@ type FileSummaryJob = {
 type FileSummary = {
   status?: "queued" | "waiting_for_extraction" | "processing" | "completed" | "failed" | "unsupported" | "stale"
   job_id?: string // uuid
+  feedback_available?: boolean
   preview_summary_de?: string
   short_summary_de?: string
   preview_summary_en?: string
   short_summary_en?: string
+}
+```
+
+### `FileSummaryFeedback`
+
+```ts
+type FileSummaryFeedback = {
+  rating: "up" | "down"
+  comment?: string
+  user_id: string
+  submitted_at: string // date-time
+}
+```
+
+### `FileSummaryFeedbackResponse`
+
+```ts
+type FileSummaryFeedbackResponse = {
+  feedback: {
+    rating: "up" | "down"
+    comment?: string
+    user_id: string
+    submitted_at: string // date-time
+  }
+}
+```
+
+### `PutFileSummaryFeedbackRequest`
+
+```ts
+type PutFileSummaryFeedbackRequest = {
+  rating: "up" | "down"
+  comment?: string
 }
 ```
 
@@ -1378,6 +1491,7 @@ type FileEntity = {
   short_summary_de?: string
   preview_summary_en?: string
   short_summary_en?: string
+  file_summary_execution_id?: string // uuid
   source_url?: string
   s3ref?: object
   versions: Array<{
@@ -1445,6 +1559,7 @@ type SaveS3FilePayload = {
   short_summary_de?: string
   preview_summary_en?: string
   short_summary_en?: string
+  file_summary_execution_id?: string // uuid
   s3ref?: unknown
 }
 ```
@@ -1477,6 +1592,7 @@ type SaveFileFromSourceURLPayload = {
   short_summary_de?: string
   preview_summary_en?: string
   short_summary_en?: string
+  file_summary_execution_id?: string // uuid
   source_url?: string // uri
 }
 ```
@@ -1509,6 +1625,7 @@ type SaveCustomFilePayload = {
   short_summary_de?: string
   preview_summary_en?: string
   short_summary_en?: string
+  file_summary_execution_id?: string // uuid
 }
 ```
 
@@ -1540,6 +1657,7 @@ type SaveFilePayload = {
   short_summary_de?: string
   preview_summary_en?: string
   short_summary_en?: string
+  file_summary_execution_id?: string // uuid
   s3ref?: unknown
 } | {
   _id?: object
@@ -1566,6 +1684,7 @@ type SaveFilePayload = {
   short_summary_de?: string
   preview_summary_en?: string
   short_summary_en?: string
+  file_summary_execution_id?: string // uuid
   source_url?: string // uri
 } | {
   _id?: object
@@ -1592,6 +1711,7 @@ type SaveFilePayload = {
   short_summary_de?: string
   preview_summary_en?: string
   short_summary_en?: string
+  file_summary_execution_id?: string // uuid
 }
 ```
 
@@ -1623,6 +1743,7 @@ type SaveFilePayloadV2 = {
   short_summary_de?: string
   preview_summary_en?: string
   short_summary_en?: string
+  file_summary_execution_id?: string // uuid
   s3ref?: unknown
 } | {
   _id?: object
@@ -1649,6 +1770,7 @@ type SaveFilePayloadV2 = {
   short_summary_de?: string
   preview_summary_en?: string
   short_summary_en?: string
+  file_summary_execution_id?: string // uuid
   source_url?: string // uri
 } | {
   _id?: object
@@ -1675,6 +1797,7 @@ type SaveFilePayloadV2 = {
   short_summary_de?: string
   preview_summary_en?: string
   short_summary_en?: string
+  file_summary_execution_id?: string // uuid
 }
 ```
 

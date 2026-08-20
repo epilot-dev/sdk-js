@@ -8,6 +8,53 @@
     "/v1/dashboard/dashboards": {
       "get": {
         "operationId": "listDashboards",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Search"
+          },
+          {
+            "$ref": "#/components/parameters/CreatedBy"
+          },
+          {
+            "$ref": "#/components/parameters/CreatedAfter"
+          },
+          {
+            "$ref": "#/components/parameters/CreatedBefore"
+          },
+          {
+            "$ref": "#/components/parameters/UpdatedAfter"
+          },
+          {
+            "$ref": "#/components/parameters/UpdatedBefore"
+          },
+          {
+            "$ref": "#/components/parameters/SharedWith"
+          },
+          {
+            "$ref": "#/components/parameters/Owner"
+          },
+          {
+            "$ref": "#/components/parameters/AccessibleTo"
+          },
+          {
+            "$ref": "#/components/parameters/Favorite"
+          },
+          {
+            "$ref": "#/components/parameters/FavoritesFirst"
+          },
+          {
+            "$ref": "#/components/parameters/Sort"
+          },
+          {
+            "$ref": "#/components/parameters/Order"
+          },
+          {
+            "$ref": "#/components/parameters/Limit"
+          },
+          {
+            "$ref": "#/components/parameters/Offset"
+          }
+        ],
         "responses": {}
       },
       "post": {
@@ -17,6 +64,29 @@
             "application/json": {}
           }
         },
+        "responses": {}
+      }
+    },
+    "/v1/dashboard/dashboards/favorites": {
+      "get": {
+        "operationId": "listFavoriteDashboardIds",
+        "responses": {}
+      }
+    },
+    "/v1/dashboard/dashboards/{id}/favorite": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "put": {
+        "operationId": "favoriteDashboard",
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "unfavoriteDashboard",
         "responses": {}
       }
     },
@@ -41,8 +111,123 @@
         },
         "responses": {}
       },
+      "patch": {
+        "operationId": "patchDashboard",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
       "delete": {
         "operationId": "deleteDashboard",
+        "responses": {}
+      }
+    },
+    "/v1/dashboard/insights": {
+      "get": {
+        "operationId": "listInsights",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Search"
+          },
+          {
+            "$ref": "#/components/parameters/VisualisationIdFilter"
+          },
+          {
+            "$ref": "#/components/parameters/TagsFilter"
+          },
+          {
+            "$ref": "#/components/parameters/TagsMatch"
+          },
+          {
+            "$ref": "#/components/parameters/CreatedBy"
+          },
+          {
+            "$ref": "#/components/parameters/CreatedAfter"
+          },
+          {
+            "$ref": "#/components/parameters/CreatedBefore"
+          },
+          {
+            "$ref": "#/components/parameters/UpdatedAfter"
+          },
+          {
+            "$ref": "#/components/parameters/UpdatedBefore"
+          },
+          {
+            "$ref": "#/components/parameters/SharedWith"
+          },
+          {
+            "$ref": "#/components/parameters/Owner"
+          },
+          {
+            "$ref": "#/components/parameters/AccessibleTo"
+          },
+          {
+            "$ref": "#/components/parameters/Sort"
+          },
+          {
+            "$ref": "#/components/parameters/Order"
+          },
+          {
+            "$ref": "#/components/parameters/Limit"
+          },
+          {
+            "$ref": "#/components/parameters/Offset"
+          }
+        ],
+        "responses": {}
+      },
+      "post": {
+        "operationId": "createInsight",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/dashboard/insights/tags": {
+      "get": {
+        "operationId": "listInsightTags",
+        "responses": {}
+      }
+    },
+    "/v1/dashboard/insights/{id}": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "get": {
+        "operationId": "getInsight",
+        "responses": {}
+      },
+      "put": {
+        "operationId": "putInsight",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "patch": {
+        "operationId": "patchInsight",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteInsight",
         "responses": {}
       }
     },
@@ -59,7 +244,108 @@
       }
     }
   },
-  "components": {},
+  "components": {
+    "parameters": {
+      "Search": {
+        "name": "q",
+        "in": "query",
+        "required": false
+      },
+      "VisualisationIdFilter": {
+        "name": "visualisation_id",
+        "in": "query",
+        "required": false,
+        "style": "form",
+        "explode": true
+      },
+      "TagsFilter": {
+        "name": "tags",
+        "in": "query",
+        "required": false,
+        "style": "form",
+        "explode": true
+      },
+      "TagsMatch": {
+        "name": "tags_match",
+        "in": "query",
+        "required": false
+      },
+      "CreatedBy": {
+        "name": "created_by",
+        "in": "query",
+        "required": false
+      },
+      "CreatedAfter": {
+        "name": "created_after",
+        "in": "query",
+        "required": false
+      },
+      "CreatedBefore": {
+        "name": "created_before",
+        "in": "query",
+        "required": false
+      },
+      "UpdatedAfter": {
+        "name": "updated_after",
+        "in": "query",
+        "required": false
+      },
+      "UpdatedBefore": {
+        "name": "updated_before",
+        "in": "query",
+        "required": false
+      },
+      "SharedWith": {
+        "name": "shared_with",
+        "in": "query",
+        "required": false,
+        "style": "form",
+        "explode": true
+      },
+      "Owner": {
+        "name": "owner",
+        "in": "query",
+        "required": false,
+        "style": "form",
+        "explode": true
+      },
+      "AccessibleTo": {
+        "name": "accessible_to",
+        "in": "query",
+        "required": false
+      },
+      "Favorite": {
+        "name": "favorite",
+        "in": "query",
+        "required": false
+      },
+      "FavoritesFirst": {
+        "name": "favorites_first",
+        "in": "query",
+        "required": false
+      },
+      "Sort": {
+        "name": "sort",
+        "in": "query",
+        "required": false
+      },
+      "Order": {
+        "name": "order",
+        "in": "query",
+        "required": false
+      },
+      "Limit": {
+        "name": "limit",
+        "in": "query",
+        "required": false
+      },
+      "Offset": {
+        "name": "offset",
+        "in": "query",
+        "required": false
+      }
+    }
+  },
   "servers": [
     {
       "url": "https://dashboard.sls.epilot.io"

@@ -2489,6 +2489,10 @@ declare namespace Components {
              * Short English paragraph summary for file preview surfaces.
              */
             short_summary_en?: string;
+            /**
+             * AI execution that produced the current summary. Used to correlate user feedback.
+             */
+            file_summary_execution_id?: string; // uuid
         }
         export interface FileCollectionAttributes {
             /**
@@ -2717,6 +2721,10 @@ declare namespace Components {
              */
             short_summary_en?: string;
             /**
+             * AI execution that produced the current summary. Used to correlate user feedback.
+             */
+            file_summary_execution_id?: string; // uuid
+            /**
              * Source URL for the file. Included if the entity was created from source_url, or when ?source_url=true
              * example:
              * https://productengineer-content.s3.eu-west-1.amazonaws.com/product-engineer-checklist.pdf
@@ -2800,6 +2808,10 @@ declare namespace Components {
              */
             job_id?: string; // uuid
             /**
+             * Whether the current summary can receive user feedback.
+             */
+            feedback_available?: boolean;
+            /**
              * Compact German summary for hover and list preview surfaces.
              */
             preview_summary_de?: string | null;
@@ -2815,6 +2827,20 @@ declare namespace Components {
              * Short English paragraph summary for file preview surfaces.
              */
             short_summary_en?: string | null;
+        }
+        export interface FileSummaryFeedback {
+            rating: "up" | "down";
+            comment?: string;
+            user_id: string;
+            submitted_at: string; // date-time
+        }
+        export interface FileSummaryFeedbackResponse {
+            feedback: {
+                rating: "up" | "down";
+                comment?: string;
+                user_id: string;
+                submitted_at: string; // date-time
+            } | null;
         }
         export interface FileSummaryJob {
             /**
@@ -2902,6 +2928,10 @@ declare namespace Components {
              * The most recent timestamp when the file was accessed
              */
             last_accessed_at?: string;
+        }
+        export interface PutFileSummaryFeedbackRequest {
+            rating: "up" | "down";
+            comment?: string;
         }
         export type S3Ref = S3Reference;
         export interface S3Reference {
@@ -3022,6 +3052,10 @@ declare namespace Components {
              * Short English paragraph summary for file preview surfaces.
              */
             short_summary_en?: string;
+            /**
+             * AI execution that produced the current summary. Used to correlate user feedback.
+             */
+            file_summary_execution_id?: string; // uuid
         }
         export interface SaveFileFromSourceURLPayload {
             [name: string]: any;
@@ -3129,6 +3163,10 @@ declare namespace Components {
              * Short English paragraph summary for file preview surfaces.
              */
             short_summary_en?: string;
+            /**
+             * AI execution that produced the current summary. Used to correlate user feedback.
+             */
+            file_summary_execution_id?: string; // uuid
             source_url?: /**
              * Custom external download url used for the file
              * example:
@@ -3244,6 +3282,10 @@ declare namespace Components {
              * Short English paragraph summary for file preview surfaces.
              */
             short_summary_en?: string;
+            /**
+             * AI execution that produced the current summary. Used to correlate user feedback.
+             */
+            file_summary_execution_id?: string; // uuid
             s3ref?: S3Ref;
         }
         export interface UploadFilePayload {
@@ -3674,6 +3716,9 @@ declare namespace Paths {
              */
             Components.Schemas.FileEntityId;
             export type Version = number;
+            export interface XTrack {
+                [name: string]: string;
+            }
         }
         export interface PathParameters {
             id: Parameters.Id;
@@ -3681,6 +3726,7 @@ declare namespace Paths {
         export interface QueryParameters {
             version?: Parameters.Version;
             attachment?: Parameters.Attachment;
+            "x-track"?: Parameters.XTrack;
         }
         namespace Responses {
             export interface $200 {
@@ -4136,6 +4182,66 @@ declare namespace Paths {
             Components.Responses.InternalServerError;
         }
     }
+    namespace GetFileSummaryFeedback {
+        namespace Parameters {
+            export type Id = /**
+             * example:
+             * ef7d985c-2385-44f4-9c71-ae06a52264f8
+             */
+            Components.Schemas.FileEntityId;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.FileSummaryFeedbackResponse;
+            export type $400 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 400,
+             *   "error": "Bad Request: filename is required"
+             * }
+             */
+            Components.Responses.BadRequestError;
+            export type $401 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 401,
+             *   "error": "Unauthorized: Invalid or expired token"
+             * }
+             */
+            Components.Responses.UnauthorizedError;
+            export type $403 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 403,
+             *   "error": "Forbidden: You do not have permission to access this file"
+             * }
+             */
+            Components.Responses.ForbiddenError;
+            export type $404 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 404,
+             *   "error": "Not Found: File entity not found"
+             * }
+             */
+            Components.Responses.NotFoundError;
+            export type $500 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 500,
+             *   "error": "Internal Server Error"
+             * }
+             */
+            Components.Responses.InternalServerError;
+        }
+    }
     namespace GetFileSummaryJob {
         namespace Parameters {
             export type Id = /**
@@ -4450,6 +4556,15 @@ declare namespace Paths {
              * }
              */
             Components.Responses.UnauthorizedError;
+            export type $403 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 403,
+             *   "error": "Forbidden: You do not have permission to access this file"
+             * }
+             */
+            Components.Responses.ForbiddenError;
             export type $404 = /**
              * A generic error returned by the API
              * example:
@@ -4612,6 +4727,76 @@ declare namespace Paths {
              * }
              */
             Components.Responses.NotFoundError;
+            export type $500 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 500,
+             *   "error": "Internal Server Error"
+             * }
+             */
+            Components.Responses.InternalServerError;
+        }
+    }
+    namespace PutFileSummaryFeedback {
+        namespace Parameters {
+            export type Id = /**
+             * example:
+             * ef7d985c-2385-44f4-9c71-ae06a52264f8
+             */
+            Components.Schemas.FileEntityId;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        export type RequestBody = Components.Schemas.PutFileSummaryFeedbackRequest;
+        namespace Responses {
+            export type $200 = Components.Schemas.FileSummaryFeedbackResponse;
+            export type $400 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 400,
+             *   "error": "Bad Request: filename is required"
+             * }
+             */
+            Components.Responses.BadRequestError;
+            export type $401 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 401,
+             *   "error": "Unauthorized: Invalid or expired token"
+             * }
+             */
+            Components.Responses.UnauthorizedError;
+            export type $403 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 403,
+             *   "error": "Forbidden: You do not have permission to access this file"
+             * }
+             */
+            Components.Responses.ForbiddenError;
+            export type $404 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 404,
+             *   "error": "Not Found: File entity not found"
+             * }
+             */
+            Components.Responses.NotFoundError;
+            export type $409 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 409,
+             *   "error": "Extracted file content is still being prepared"
+             * }
+             */
+            Components.Responses.ConflictError;
             export type $500 = /**
              * A generic error returned by the API
              * example:
@@ -5106,6 +5291,15 @@ export interface OperationMethods {
    * 
    * The returned URL is valid for a limited time (typically 15 minutes) and can be used to download the file directly.
    * 
+   * **Download attribution (`x-track-*`):** any query parameter whose name starts with
+   * `x-track-` is treated as opaque tracking metadata and signed into the returned URL, so it
+   * shows up in the S3 access logs / CloudTrail data events when the link is actually opened.
+   * This is a generic, service-agnostic channel — e.g. the customer portal sends
+   * `x-track-portal-id` and `x-track-contact-id`. Only the `x-track-` namespace is forwarded;
+   * the values cannot affect how S3 resolves or serves the object. Parameter names must match
+   * `^x-track-[a-z0-9](?:[a-z0-9_-]{0,38}[a-z0-9])?$`, values are capped at 256 characters, and
+   * at most 10 such parameters are honoured (see the `x-track` parameter below).
+   * 
    */
   'downloadFile'(
     parameters?: Parameters<Paths.DownloadFile.QueryParameters & Paths.DownloadFile.PathParameters> | null,
@@ -5178,6 +5372,26 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetFileSummary.Responses.$200>
+  /**
+   * getFileSummaryFeedback - Get file summary feedback
+   *
+   * Get the authenticated user's feedback for the current generated file summary.
+   */
+  'getFileSummaryFeedback'(
+    parameters?: Parameters<Paths.GetFileSummaryFeedback.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig
+  ): OperationResponse<Paths.GetFileSummaryFeedback.Responses.$200>
+  /**
+   * putFileSummaryFeedback - Submit file summary feedback
+   *
+   * Upsert thumbs up/down feedback for the current generated file summary.
+   */
+  'putFileSummaryFeedback'(
+    parameters?: Parameters<Paths.PutFileSummaryFeedback.PathParameters> | null,
+    data?: Paths.PutFileSummaryFeedback.RequestBody,
+    config?: AxiosRequestConfig
+  ): OperationResponse<Paths.PutFileSummaryFeedback.Responses.$200>
   /**
    * createFileSummaryJob - createFileSummaryJob
    * 
@@ -5608,6 +5822,15 @@ export interface PathsDictionary {
      * 
      * The returned URL is valid for a limited time (typically 15 minutes) and can be used to download the file directly.
      * 
+     * **Download attribution (`x-track-*`):** any query parameter whose name starts with
+     * `x-track-` is treated as opaque tracking metadata and signed into the returned URL, so it
+     * shows up in the S3 access logs / CloudTrail data events when the link is actually opened.
+     * This is a generic, service-agnostic channel — e.g. the customer portal sends
+     * `x-track-portal-id` and `x-track-contact-id`. Only the `x-track-` namespace is forwarded;
+     * the values cannot affect how S3 resolves or serves the object. Parameter names must match
+     * `^x-track-[a-z0-9](?:[a-z0-9_-]{0,38}[a-z0-9])?$`, values are capped at 256 characters, and
+     * at most 10 such parameters are honoured (see the `x-track` parameter below).
+     * 
      */
     'get'(
       parameters?: Parameters<Paths.DownloadFile.QueryParameters & Paths.DownloadFile.PathParameters> | null,
@@ -5690,6 +5913,28 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetFileSummary.Responses.$200>
+  }
+  ['/v1/files/{id}/summary/feedback']: {
+    /**
+     * getFileSummaryFeedback - Get file summary feedback
+     *
+     * Get the authenticated user's feedback for the current generated file summary.
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetFileSummaryFeedback.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig
+    ): OperationResponse<Paths.GetFileSummaryFeedback.Responses.$200>
+    /**
+     * putFileSummaryFeedback - Submit file summary feedback
+     *
+     * Upsert thumbs up/down feedback for the current generated file summary.
+     */
+    'put'(
+      parameters?: Parameters<Paths.PutFileSummaryFeedback.PathParameters> | null,
+      data?: Paths.PutFileSummaryFeedback.RequestBody,
+      config?: AxiosRequestConfig
+    ): OperationResponse<Paths.PutFileSummaryFeedback.Responses.$200>
   }
   ['/v1/files/{id}/summary-jobs']: {
     /**
@@ -6061,6 +6306,8 @@ export type FileEntityId = Components.Schemas.FileEntityId;
 export type FileItem = Components.Schemas.FileItem;
 export type FileRelationItem = Components.Schemas.FileRelationItem;
 export type FileSummary = Components.Schemas.FileSummary;
+export type FileSummaryFeedback = Components.Schemas.FileSummaryFeedback;
+export type FileSummaryFeedbackResponse = Components.Schemas.FileSummaryFeedbackResponse;
 export type FileSummaryJob = Components.Schemas.FileSummaryJob;
 export type FileSummaryJobStatus = Components.Schemas.FileSummaryJobStatus;
 export type FileText = Components.Schemas.FileText;
@@ -6071,6 +6318,7 @@ export type FileTextUnsupported = Components.Schemas.FileTextUnsupported;
 export type FileType = Components.Schemas.FileType;
 export type FileUpload = Components.Schemas.FileUpload;
 export type PublicLink = Components.Schemas.PublicLink;
+export type PutFileSummaryFeedbackRequest = Components.Schemas.PutFileSummaryFeedbackRequest;
 export type S3Ref = Components.Schemas.S3Ref;
 export type S3Reference = Components.Schemas.S3Reference;
 export type SaveCustomFilePayload = Components.Schemas.SaveCustomFilePayload;

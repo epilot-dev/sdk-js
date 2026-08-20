@@ -176,6 +176,36 @@
         "responses": {}
       }
     },
+    "/v1/executions/{execution_id}/feedback": {
+      "get": {
+        "operationId": "getExecutionFeedback",
+        "parameters": [
+          {
+            "name": "execution_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      },
+      "put": {
+        "operationId": "putExecutionFeedback",
+        "parameters": [
+          {
+            "name": "execution_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v1/executions/{execution_id}/approve": {
       "post": {
         "operationId": "approveExecution",

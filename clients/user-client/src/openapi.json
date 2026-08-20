@@ -2443,6 +2443,10 @@
           "passkey_enabled": {
             "type": "boolean",
             "description": "Whether passkey login is enabled for this organization"
+          },
+          "passkeys_registered": {
+            "type": "boolean",
+            "description": "Whether the user has at least one passkey registered. Lets the login\nUI offer passkey authentication as an alternative to an MFA code.\nDiscloses nothing that :beginPasskeyAuthentication doesn't already\nreveal for a known email address.\n"
           }
         }
       },

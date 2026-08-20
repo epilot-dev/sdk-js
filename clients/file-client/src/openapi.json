@@ -557,7 +557,7 @@
       "get": {
         "operationId": "downloadFile",
         "summary": "downloadFile",
-        "description": "Generate a pre-signed download URL for a file.\n\nThe returned URL is valid for a limited time (typically 15 minutes) and can be used to download the file directly.\n",
+        "description": "Generate a pre-signed download URL for a file.\n\nThe returned URL is valid for a limited time (typically 15 minutes) and can be used to download the file directly.\n\n**Download attribution (`x-track-*`):** any query parameter whose name starts with\n`x-track-` is treated as opaque tracking metadata and signed into the returned URL, so it\nshows up in the S3 access logs / CloudTrail data events when the link is actually opened.\nThis is a generic, service-agnostic channel — e.g. the customer portal sends\n`x-track-portal-id` and `x-track-contact-id`. Only the `x-track-` namespace is forwarded;\nthe values cannot affect how S3 resolves or serves the object. Parameter names must match\n`^x-track-[a-z0-9](?:[a-z0-9_-]{0,38}[a-z0-9])?$`, values are capped at 256 characters, and\nat most 10 such parameters are honoured (see the `x-track` parameter below).\n",
         "tags": [
           "File"
         ],
@@ -587,6 +587,20 @@
             "schema": {
               "type": "boolean",
               "default": true
+            }
+          },
+          {
+            "name": "x-track",
+            "in": "query",
+            "required": false,
+            "style": "form",
+            "explode": true,
+            "description": "Download-attribution channel. Provide any number of query parameters whose names\nstart with `x-track-` (e.g. `x-track-portal-id`, `x-track-contact-id`); each is signed\ninto the pre-signed URL verbatim so the download is recorded in the S3 access logs /\nCloudTrail data events. Only the `x-track-` namespace is forwarded — values cannot\naffect how S3 resolves or serves the object. Parameter names must match\n`^x-track-[a-z0-9](?:[a-z0-9_-]{0,38}[a-z0-9])?$`, values are capped at 256 characters,\nand at most 10 such parameters are honoured.\n",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
             }
           }
         ],
@@ -926,6 +940,113 @@
         }
       }
     },
+    "/v1/files/{id}/summary/feedback": {
+      "get": {
+        "operationId": "getFileSummaryFeedback",
+        "summary": "Get file summary feedback",
+        "description": "Get the authenticated user's feedback for the current generated file summary.",
+        "tags": [
+          "File"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "The UUID of the file entity",
+            "schema": {
+              "$ref": "#/components/schemas/FileEntityId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Current feedback state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FileSummaryFeedbackResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "put": {
+        "operationId": "putFileSummaryFeedback",
+        "summary": "Submit file summary feedback",
+        "description": "Upsert thumbs up/down feedback for the current generated file summary.",
+        "tags": [
+          "File"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "The UUID of the file entity",
+            "schema": {
+              "$ref": "#/components/schemas/FileEntityId"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PutFileSummaryFeedbackRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Feedback recorded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FileSummaryFeedbackResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "409": {
+            "$ref": "#/components/responses/ConflictError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/v1/files/{id}/summary-jobs": {
       "post": {
         "operationId": "createFileSummaryJob",
@@ -1242,6 +1363,9 @@
           },
           "401": {
             "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
           },
           "404": {
             "$ref": "#/components/responses/NotFoundError"
@@ -2495,6 +2619,12 @@
             "type": "string",
             "description": "Short English paragraph summary for file preview surfaces.",
             "readOnly": true
+          },
+          "file_summary_execution_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "AI execution that produced the current summary. Used to correlate user feedback.",
+            "readOnly": true
           }
         }
       },
@@ -2579,6 +2709,10 @@
             "format": "uuid",
             "description": "Current summary job ID when available."
           },
+          "feedback_available": {
+            "type": "boolean",
+            "description": "Whether the current summary can receive user feedback."
+          },
           "preview_summary_de": {
             "type": "string",
             "nullable": true,
@@ -2598,6 +2732,67 @@
             "type": "string",
             "nullable": true,
             "description": "Short English paragraph summary for file preview surfaces."
+          }
+        }
+      },
+      "FileSummaryFeedback": {
+        "type": "object",
+        "required": [
+          "rating",
+          "user_id",
+          "submitted_at"
+        ],
+        "properties": {
+          "rating": {
+            "type": "string",
+            "enum": [
+              "up",
+              "down"
+            ]
+          },
+          "comment": {
+            "type": "string"
+          },
+          "user_id": {
+            "type": "string"
+          },
+          "submitted_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "FileSummaryFeedbackResponse": {
+        "type": "object",
+        "required": [
+          "feedback"
+        ],
+        "properties": {
+          "feedback": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FileSummaryFeedback"
+              }
+            ],
+            "nullable": true
+          }
+        }
+      },
+      "PutFileSummaryFeedbackRequest": {
+        "type": "object",
+        "required": [
+          "rating"
+        ],
+        "properties": {
+          "rating": {
+            "type": "string",
+            "enum": [
+              "up",
+              "down"
+            ]
+          },
+          "comment": {
+            "type": "string"
           }
         }
       },

@@ -86,6 +86,10 @@ const { data } = await automationClient.searchFlows(...)
 - [`AssignThreadAction`](#assignthreadaction)
 - [`MoveThreadConfig`](#movethreadconfig)
 - [`AssignThreadConfig`](#assignthreadconfig)
+- [`EntityAssignee`](#entityassignee)
+- [`AssignEntityConfig`](#assignentityconfig)
+- [`AssignEntityActionConfig`](#assignentityactionconfig)
+- [`AssignEntityAction`](#assignentityaction)
 - [`SendEmailActionConfig`](#sendemailactionconfig)
 - [`SendEmailAction`](#sendemailaction)
 - [`ForwardEmailActionConfig`](#forwardemailactionconfig)
@@ -351,6 +355,7 @@ const { data } = await client.startExecution(
         parent_task_id: 'string',
         depth: 0
       },
+      _automation_chain: ['string'],
       entity_contexts: [
         {
           entity_id: 'string',
@@ -476,6 +481,7 @@ const { data } = await client.startExecution(
       "parent_task_id": "string",
       "depth": 0
     },
+    "_automation_chain": ["string"],
     "entity_contexts": [
       {}
     ]
@@ -841,6 +847,7 @@ const { data } = await client.getExecution({
       "parent_task_id": "string",
       "depth": 0
     },
+    "_automation_chain": ["string"],
     "entity_contexts": [
       {}
     ]
@@ -985,6 +992,7 @@ const { data } = await client.cancelExecution({
       "parent_task_id": "string",
       "depth": 0
     },
+    "_automation_chain": ["string"],
     "entity_contexts": [
       {}
     ]
@@ -1093,6 +1101,7 @@ const { data } = await client.resumeExecutionWithToken(
       "workflow_exec_task_id": "string",
       "workflow_role": "trigger_workflow",
       "_execution_chain": {},
+      "_automation_chain": ["string"],
       "entity_contexts": []
     },
     "loops": [
@@ -1109,6 +1118,7 @@ const { data } = await client.resumeExecutionWithToken(
     "config": {
       "mapping_config": {},
       "target_schema": "string",
+      "use_uniqueness_criteria": true,
       "target_unique": ["string"],
       "mapping_attributes": [],
       "relation_attributes": [],
@@ -1506,6 +1516,7 @@ type AnyAction = {
       version?: { ... }
     }
     target_schema: string
+    use_uniqueness_criteria?: boolean
     target_unique?: string[]
     mapping_attributes?: Array<{
       target?: { ... }
@@ -1596,7 +1607,6 @@ type AnyAction = {
     wait_for_confirmation?: boolean
     reply_to_sender?: boolean
     reply_mode?: "reply_in_thread" | "new_email"
-    mark_as_done?: boolean
   // ...
 }
 ```
@@ -1616,6 +1626,7 @@ type AnyActionConfig = {
       version?: { ... }
     }
     target_schema: string
+    use_uniqueness_criteria?: boolean
     target_unique?: string[]
     mapping_attributes?: Array<{
       target?: { ... }
@@ -1703,7 +1714,6 @@ type AnyActionConfig = {
     payload?: Record<string, unknown>
   }
   condition_id?: string
-  schedule_id?: string
   // ...
 }
 ```
@@ -2053,6 +2063,7 @@ type MapEntityActionConfig = {
       version?: { ... }
     }
     target_schema: string
+    use_uniqueness_criteria?: boolean
     target_unique?: string[]
     mapping_attributes?: Array<{
       target?: { ... }
@@ -2108,6 +2119,7 @@ type MapEntityAction = {
       version?: { ... }
     }
     target_schema: string
+    use_uniqueness_criteria?: boolean
     target_unique?: string[]
     mapping_attributes?: Array<{
       target?: { ... }
@@ -2151,6 +2163,7 @@ type MapEntityConfig = {
     version?: number
   }
   target_schema: string
+  use_uniqueness_criteria?: boolean
   target_unique?: string[]
   mapping_attributes?: Array<{
     target?: string
@@ -2350,6 +2363,7 @@ type AssignThreadAction = {
     add?: string[]
     assignment_type?: "direct" | "even_distribution" | "sequential"
     only_available_users?: boolean
+    hold_until_available?: boolean
     match_user_skills?: boolean
     required_skill_categories?: string[]
     skill_match_mode?: "require_all" | "prefer"
@@ -2375,11 +2389,123 @@ type AssignThreadConfig = {
   add?: string[]
   assignment_type?: "direct" | "even_distribution" | "sequential"
   only_available_users?: boolean
+  hold_until_available?: boolean
   match_user_skills?: boolean
   required_skill_categories?: string[]
   skill_match_mode?: "require_all" | "prefer"
   fallback?: "leave_unassigned" | "assign_to_fallback"
   fallback_assignees?: string[]
+}
+```
+
+### `EntityAssignee`
+
+A single assignee as stored in a user-relation attribute. Written through
+verbatim by the assign-entity worker. Note this object encoding differs
+deliberately from AssignThreadConfig, which stores bare id strings —
+each matches what its own target accepts.
+
+
+```ts
+type EntityAssignee = {
+  type: "user" | "partner_user" | "partner_organization" | "group"
+  user_id?: string
+  group_id?: string
+  org_id?: string
+  partner_id?: string
+  display_name?: string
+  email?: string
+}
+```
+
+### `AssignEntityConfig`
+
+```ts
+type AssignEntityConfig = {
+  attribute?: string
+  assignees?: Array<{
+    type: "user" | "partner_user" | "partner_organization" | "group"
+    user_id?: string
+    group_id?: string
+    org_id?: string
+    partner_id?: string
+    display_name?: string
+    email?: string
+  }>
+  write_mode?: "replace" | "append"
+  assignment_type?: "direct"
+  source?: {
+    id?: string
+    origin?: "trigger" | "action"
+    schema?: string
+  }
+}
+```
+
+### `AssignEntityActionConfig`
+
+```ts
+type AssignEntityActionConfig = {
+  id?: string
+  flow_action_id?: string
+  name?: string
+  type?: "assign-entity"
+  config?: {
+    attribute?: string
+    assignees?: Array<{
+      type: { ... }
+      user_id?: { ... }
+      group_id?: { ... }
+      org_id?: { ... }
+      partner_id?: { ... }
+      display_name?: { ... }
+      email?: { ... }
+    }>
+    write_mode?: "replace" | "append"
+    assignment_type?: "direct"
+    source?: {
+      id?: { ... }
+      origin?: { ... }
+      schema?: { ... }
+    }
+  }
+  allow_failure?: boolean
+  created_automatically?: boolean
+  is_bulk_action?: boolean
+  reason?: {
+    message?: string
+    payload?: Record<string, unknown>
+  }
+  condition_id?: string
+  schedule_id?: string
+  loop_id?: string
+}
+```
+
+### `AssignEntityAction`
+
+```ts
+type AssignEntityAction = {
+  type?: "assign-entity"
+  config?: {
+    attribute?: string
+    assignees?: Array<{
+      type: { ... }
+      user_id?: { ... }
+      group_id?: { ... }
+      org_id?: { ... }
+      partner_id?: { ... }
+      display_name?: { ... }
+      email?: { ... }
+    }>
+    write_mode?: "replace" | "append"
+    assignment_type?: "direct"
+    source?: {
+      id?: { ... }
+      origin?: { ... }
+      schema?: { ... }
+    }
+  }
 }
 ```
 
@@ -3185,6 +3311,7 @@ type AutomationExecution = {
     config?: {
       mapping_config?: { ... }
       target_schema: { ... }
+      use_uniqueness_criteria?: { ... }
       target_unique?: { ... }
       mapping_attributes?: { ... }
       relation_attributes?: { ... }
@@ -3228,7 +3355,6 @@ type AutomationExecution = {
     }
   } | {
     type?: "create-document"
-    config?: {
   // ...
 }
 ```
@@ -3254,6 +3380,7 @@ type WorkflowExecutionContext = {
     parent_task_id?: string
     depth?: number
   }
+  _automation_chain?: string[]
   entity_contexts?: Array<{
     entity_id?: string
     entity_schema?: string
@@ -3474,8 +3601,8 @@ type GetExecutionsResp = {
     } | {
       type?: { ... }
       config?: { ... }
-    }>
-    resume_token?: string
+    } | {
+      type?: { ... }
   // ...
 }
 ```
@@ -3592,8 +3719,8 @@ type SearchExecutionsResp = {
     } | {
       type?: { ... }
       config?: { ... }
-    }>
-    resume_token?: string
+    } | {
+      type?: { ... }
   // ...
 }
 ```
@@ -3613,6 +3740,7 @@ type StartExecutionRequest = {
       parent_task_id?: { ... }
       depth?: { ... }
     }
+    _automation_chain?: string[]
     entity_contexts?: Array<{
       entity_id?: { ... }
       entity_schema?: { ... }
@@ -4542,9 +4670,9 @@ type ResumeResp = {
     } | {
       type?: { ... }
       config?: { ... }
-    }>
-    resume_token?: string
-    trigger_context?: Record<string, string>
+    } | {
+      type?: { ... }
+      config?: { ... }
   // ...
 }
 ```

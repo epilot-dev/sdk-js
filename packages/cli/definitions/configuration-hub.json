@@ -27,6 +27,14 @@
     {
       "name": "Sync",
       "description": "Cross-org configuration sync jobs"
+    },
+    {
+      "name": "Delete",
+      "description": "Bulk-delete jobs for configuration resources"
+    },
+    {
+      "name": "Compare",
+      "description": "Cross-org configuration comparison, match suggestions, and lineage operations"
     }
   ],
   "paths": {
@@ -126,12 +134,13 @@
           {
             "name": "sort",
             "in": "query",
-            "description": "Sort order. `updated_at` (default) sorts by most recently modified.\n`usage` sorts by the type-specific usage metric descending\n(submissions for journeys, executions for automations, entities for schemas, etc.).\n",
+            "description": "Sort order. `updated_at` (default) sorts by most recently modified.\n`usage` sorts by the type-specific usage metric descending\n(submissions for journeys, executions for automations, entities for schemas, etc.).\n`name` sorts alphabetically by title (A–Z, case-insensitive).\n",
             "schema": {
               "type": "string",
               "enum": [
                 "updated_at",
-                "usage"
+                "usage",
+                "name"
               ],
               "default": "updated_at"
             }
@@ -267,6 +276,202 @@
         }
       }
     },
+    "/v1/configs/compare": {
+      "post": {
+        "operationId": "compareConfigs",
+        "summary": "compareConfigs",
+        "description": "Compare the caller org's configs of a single type against another\n(source) org, side by side. Rows are paired via the lineage registry in\nboth sync directions (caller imported from source, or source imported\nfrom caller); configs without a counterpart come back as `only_current`\nor `only_source`.\n\n`source_auth_token` must be a valid token for `source_org_id` — the\nfrontend mints one via the pipeline pairing, mirroring `createSyncJob`'s\n`target_auth_token`. The token is verified against `source_org_id`\nbefore any source-org data is read.\n\nPOST because the request carries a token; the operation reads only.\n",
+        "tags": [
+          "Compare"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CompareRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Side-by-side comparison rows for the requested type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompareResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Unknown type or comparing an org with itself",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "source_auth_token does not belong to source_org_id",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/configs/compare/suggestions": {
+      "post": {
+        "operationId": "suggestMatches",
+        "summary": "suggestMatches",
+        "description": "Run the sync-grade heuristic match (`lookupByHeuristic` — name / slug /\nunique key) for a batch of source-org configs that have no lineage\nentry, and return candidate counterparts in the caller's org.\n\nSuggestions are ephemeral — nothing is persisted. The client offers\neach candidate to the user, and a confirmed pair is written via\n`confirmLineage`. Batches are capped at 25 ids; the client pages\nthrough unmatched rows across successive calls.\n",
+        "tags": [
+          "Compare"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SuggestMatchesRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Heuristic match candidates per source id",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuggestMatchesResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Unknown type or type without heuristic support",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/configs/lineage": {
+      "post": {
+        "operationId": "confirmLineage",
+        "summary": "confirmLineage",
+        "description": "Persist a lineage entry pairing a source-org config with a config in\nthe caller's org — used to confirm a heuristic suggestion from the\nCompare view. Writes to the caller org's lineage partition (caller as\nsync target), so subsequent syncs PATCH the confirmed target instead of\ncreating a duplicate. Conflicts (an existing entry pointing at a\ndifferent target) return 409 so the client can refresh.\n",
+        "tags": [
+          "Compare"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConfirmLineageRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Lineage entry persisted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LineageEntryResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Unknown type or target config not found in caller org",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "A lineage entry for this source config already points at a different target",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "breakLineage",
+        "summary": "breakLineage",
+        "description": "Delete a lineage entry from the caller org's partition (caller as sync\ntarget), identified by `type` + `source_id`. Used to break a wrong or\nstale match from the Compare view. Note: a future sync can re-match the\nsame pair heuristically — the entry is deleted, not blocklisted. To\nbreak a match recorded in the OTHER direction, call this operation\nauthenticated as the other org (pipeline token).\n",
+        "tags": [
+          "Compare"
+        ],
+        "parameters": [
+          {
+            "name": "type",
+            "in": "query",
+            "required": true,
+            "description": "Configuration resource type of the lineage entry",
+            "schema": {
+              "$ref": "#/components/schemas/ResourceType"
+            }
+          },
+          {
+            "name": "source_id",
+            "in": "query",
+            "required": true,
+            "description": "Source-org config id the lineage entry is keyed by",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lineage entry deleted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BreakLineageResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No lineage entry found for this type + source_id",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/configs/sync-jobs": {
       "post": {
         "operationId": "createSyncJob",
@@ -386,7 +591,7 @@
       "post": {
         "operationId": "retrySyncJob",
         "summary": "retrySyncJob",
-        "description": "Retry the failed resources from a prior sync job. Creates a new job whose\nscope is the failed `(type, source_id)` set of the original job and enqueues\nit for execution. Optionally accepts inline payload overrides.\n",
+        "description": "Retry the unresolved resources from a prior sync job: `failed` rows, plus\nrows the original run left at `pending`/`in_progress` because it stopped\nearly. Creates a new job whose scope is that `(type, source_id)` set and\nenqueues it for execution. Optionally accepts inline payload overrides.\n",
         "tags": [
           "Sync"
         ],
@@ -418,6 +623,53 @@
           },
           "404": {
             "description": "Sync job not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/configs/sync-jobs/{id}/cancel": {
+      "post": {
+        "operationId": "cancelSyncJob",
+        "summary": "cancelSyncJob",
+        "description": "Cancel a running sync job. Marks the job `cancelled` with a `finished_at`\nso it stops being reported as in-flight, and the worker stops at its next\nbatch boundary — phases re-read the job status and abort rather than\noverwrite a cancellation with their own outcome.\n\nResources already written to the target are NOT rolled back; cancelling\nstops further work. Jobs already in a terminal state are rejected with\n409.\n",
+        "tags": [
+          "Sync"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SyncJobId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Job cancelled",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SyncJob"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Sync job not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Job already finished",
             "content": {
               "application/json": {
                 "schema": {
@@ -480,6 +732,156 @@
         }
       }
     },
+    "/v1/configs/delete-jobs": {
+      "post": {
+        "operationId": "createDeleteJob",
+        "summary": "createDeleteJob",
+        "description": "Create a bulk-delete job for the caller's organization. The selected\nresources are deleted asynchronously by a worker Lambda; the response\nreturns the persisted job header with status `pending`.\n\nRaw delete — no dependency checks are performed. On completion the\nworker auto-triggers an index rebuild so the config list reflects the\ndeletions.\n",
+        "tags": [
+          "Delete"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteJobRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Delete job accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteJob"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request body",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "operationId": "listDeleteJobs",
+        "summary": "listDeleteJobs",
+        "description": "List bulk-delete jobs scoped to the caller's organization, paginated\nwith an opaque cursor. Most-recent first.\n",
+        "tags": [
+          "Delete"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CursorParam"
+          },
+          {
+            "$ref": "#/components/parameters/SizeParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated delete jobs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteJobListResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/configs/delete-jobs/{id}": {
+      "get": {
+        "operationId": "getDeleteJob",
+        "summary": "getDeleteJob",
+        "description": "Fetch a single bulk-delete job by ID. Returns the job header and counts\nsummary. Frontend polls this endpoint while the job runs.\n",
+        "tags": [
+          "Delete"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/DeleteJobId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Delete job detail",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteJob"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Delete job not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/configs/delete-jobs/{id}/resources": {
+      "get": {
+        "operationId": "listDeleteJobResources",
+        "summary": "listDeleteJobResources",
+        "description": "List the per-resource rows for a delete job, cursor-paginated. Used by\nthe failures view in the frontend.\n",
+        "tags": [
+          "Delete"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/DeleteJobId"
+          },
+          {
+            "$ref": "#/components/parameters/CursorParam"
+          },
+          {
+            "$ref": "#/components/parameters/SizeParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated delete job resources",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteJobResourceListResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Delete job not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/configs/index:rebuild": {
       "post": {
         "operationId": "rebuildIndex",
@@ -495,6 +897,39 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/IndexRebuildResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/configs/inventory": {
+      "get": {
+        "operationId": "getConfigInventory",
+        "summary": "getConfigInventory",
+        "description": "Returns a fresh inventory of an org's configuration resources — `{ type, id }` identities only,\nno full payloads. Calls every adapter's `list()` live (bypasses the 7-day DynamoDB index).\nIntended for snapshot-api to consume when taking a full-org snapshot.\n",
+        "tags": [
+          "Configs"
+        ],
+        "parameters": [
+          {
+            "name": "include_dependency_only",
+            "in": "query",
+            "description": "When true (default), include dependency-only types (e.g. `entity_mapping`)\nin the inventory in addition to the top-level registered types.\n",
+            "schema": {
+              "type": "boolean",
+              "default": true
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Fresh inventory of all org configuration resources",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConfigInventoryResponse"
                 }
               }
             }
@@ -554,6 +989,15 @@
         "in": "path",
         "required": true,
         "description": "Sync job ID",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "DeleteJobId": {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "description": "Delete job ID",
         "schema": {
           "type": "string"
         }
@@ -625,6 +1069,11 @@
             "type": "string",
             "description": "@epilot/sdk subpath for fetching full config payloads",
             "example": "@epilot/sdk/journey"
+          },
+          "deletable": {
+            "type": "boolean",
+            "description": "Whether resources of this type can be deleted via the bulk-delete API",
+            "example": true
           }
         },
         "required": [
@@ -632,7 +1081,8 @@
           "label",
           "icon",
           "source_api",
-          "sdk_client"
+          "sdk_client",
+          "deletable"
         ]
       },
       "ConfigNode": {
@@ -825,6 +1275,10 @@
               "failed"
             ]
           },
+          "org_id": {
+            "type": "string",
+            "description": "Organization the index (and the authenticated token) belongs to.\nEchoed so callers holding a token for another org can resolve and\nverify its identity.\n"
+          },
           "last_built_at": {
             "type": "string",
             "format": "date-time"
@@ -838,6 +1292,281 @@
         },
         "required": [
           "status"
+        ]
+      },
+      "CompareRequest": {
+        "type": "object",
+        "description": "Request body for a per-type cross-org comparison",
+        "properties": {
+          "source_org_id": {
+            "type": "string",
+            "description": "Organization to compare the caller's org against"
+          },
+          "source_auth_token": {
+            "type": "string",
+            "description": "Auth token belonging to `source_org_id` (e.g. a pipeline token).\nVerified before any source-org data is read. Never logged.\n"
+          },
+          "type": {
+            "$ref": "#/components/schemas/ResourceType"
+          }
+        },
+        "required": [
+          "source_org_id",
+          "source_auth_token",
+          "type"
+        ]
+      },
+      "CompareLineage": {
+        "type": "object",
+        "description": "Provenance of a lineage-backed match",
+        "properties": {
+          "direction": {
+            "type": "string",
+            "enum": [
+              "pull",
+              "push"
+            ],
+            "description": "`pull` — the caller org imported this config from the source org\n(entry lives in the caller's lineage partition). `push` — the\nsource org imported it from the caller (entry lives in the source\norg's partition).\n"
+          },
+          "last_synced_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "last_sync_job_id": {
+            "type": "string"
+          },
+          "origin": {
+            "type": "string",
+            "description": "`manual_confirm` when the entry was created by confirming a\nheuristic suggestion in the Compare view; absent for sync-written\nentries.\n"
+          }
+        },
+        "required": [
+          "direction"
+        ]
+      },
+      "CompareRow": {
+        "type": "object",
+        "description": "One row of the side-by-side comparison. `matched` rows carry both\nconfigs plus lineage provenance; one-sided rows carry only the side\nthe config exists on.\n",
+        "properties": {
+          "match_status": {
+            "type": "string",
+            "enum": [
+              "matched",
+              "only_current",
+              "only_source"
+            ]
+          },
+          "current": {
+            "$ref": "#/components/schemas/ConfigNode"
+          },
+          "source": {
+            "$ref": "#/components/schemas/ConfigNode"
+          },
+          "lineage": {
+            "$ref": "#/components/schemas/CompareLineage"
+          }
+        },
+        "required": [
+          "match_status"
+        ]
+      },
+      "CompareCounts": {
+        "type": "object",
+        "description": "Row counts per match status",
+        "properties": {
+          "matched": {
+            "type": "integer"
+          },
+          "only_current": {
+            "type": "integer"
+          },
+          "only_source": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "matched",
+          "only_current",
+          "only_source"
+        ]
+      },
+      "CompareResponse": {
+        "type": "object",
+        "description": "Side-by-side comparison of one config type across two orgs",
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/ResourceType"
+          },
+          "label": {
+            "type": "string"
+          },
+          "icon": {
+            "type": "string"
+          },
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CompareRow"
+            }
+          },
+          "counts": {
+            "$ref": "#/components/schemas/CompareCounts"
+          }
+        },
+        "required": [
+          "type",
+          "label",
+          "icon",
+          "rows",
+          "counts"
+        ]
+      },
+      "SuggestMatchesRequest": {
+        "type": "object",
+        "description": "Request body for batched heuristic match suggestions",
+        "properties": {
+          "source_org_id": {
+            "type": "string"
+          },
+          "source_auth_token": {
+            "type": "string",
+            "description": "Auth token belonging to `source_org_id`. Never logged."
+          },
+          "type": {
+            "$ref": "#/components/schemas/ResourceType"
+          },
+          "source_ids": {
+            "type": "array",
+            "description": "Source-org config ids to find caller-org candidates for",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "maxItems": 25
+          }
+        },
+        "required": [
+          "source_org_id",
+          "source_auth_token",
+          "type",
+          "source_ids"
+        ]
+      },
+      "MatchSuggestion": {
+        "type": "object",
+        "description": "Heuristic candidate for one source config (null candidate = no match)",
+        "properties": {
+          "source_id": {
+            "type": "string"
+          },
+          "candidate": {
+            "type": "object",
+            "nullable": true,
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "title": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id"
+            ]
+          }
+        },
+        "required": [
+          "source_id"
+        ]
+      },
+      "SuggestMatchesResponse": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/ResourceType"
+          },
+          "suggestions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MatchSuggestion"
+            }
+          }
+        },
+        "required": [
+          "type",
+          "suggestions"
+        ]
+      },
+      "ConfirmLineageRequest": {
+        "type": "object",
+        "description": "Persist a source→target lineage pairing (caller org as target)",
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/ResourceType"
+          },
+          "source_org_id": {
+            "type": "string"
+          },
+          "source_id": {
+            "type": "string",
+            "description": "Config id in the source org"
+          },
+          "target_id": {
+            "type": "string",
+            "description": "Config id in the caller's org to pair it with"
+          }
+        },
+        "required": [
+          "type",
+          "source_org_id",
+          "source_id",
+          "target_id"
+        ]
+      },
+      "LineageEntryResponse": {
+        "type": "object",
+        "description": "A persisted lineage entry",
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/ResourceType"
+          },
+          "target_org_id": {
+            "type": "string"
+          },
+          "source_org_id": {
+            "type": "string"
+          },
+          "source_id": {
+            "type": "string"
+          },
+          "target_id": {
+            "type": "string"
+          },
+          "last_synced_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "origin": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "target_org_id",
+          "source_org_id",
+          "source_id",
+          "target_id"
+        ]
+      },
+      "BreakLineageResponse": {
+        "type": "object",
+        "properties": {
+          "deleted": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "deleted"
         ]
       },
       "ErrorResponse": {
@@ -964,7 +1693,7 @@
       },
       "SyncJobRetryRequest": {
         "type": "object",
-        "description": "Optional body for `retrySyncJob`. Defaults to retrying every failed\nresource of the original job.\n",
+        "description": "Optional body for `retrySyncJob`. Defaults to retrying every unresolved\nresource of the original job (failed, pending or in_progress).\n",
         "properties": {
           "payload_overrides": {
             "type": "object",
@@ -1185,6 +1914,10 @@
           "target_id": {
             "type": "string"
           },
+          "title": {
+            "type": "string",
+            "description": "Human-readable resource title captured from the source payload\nduring Phase 0. Lets clients identify rows without resolving\nraw UUIDs. Absent on rows written before this field existed.\n"
+          },
           "status": {
             "$ref": "#/components/schemas/SyncJobResourceStatus"
           },
@@ -1227,6 +1960,289 @@
         },
         "required": [
           "results"
+        ]
+      },
+      "DeleteJobStatus": {
+        "type": "string",
+        "description": "Lifecycle status of a bulk-delete job.",
+        "enum": [
+          "pending",
+          "in_progress",
+          "succeeded",
+          "partial",
+          "failed",
+          "cancelled"
+        ]
+      },
+      "DeleteJobResourceStatus": {
+        "type": "string",
+        "description": "Per-resource delete status. `skipped` is used for protected resources\nthat are intentionally not deleted (e.g. built-in schemas).\n",
+        "enum": [
+          "pending",
+          "in_progress",
+          "deleted",
+          "skipped",
+          "failed"
+        ]
+      },
+      "DeleteJobCounts": {
+        "type": "object",
+        "description": "Aggregate counters by resource delete status.",
+        "properties": {
+          "total": {
+            "type": "integer"
+          },
+          "pending": {
+            "type": "integer"
+          },
+          "in_progress": {
+            "type": "integer"
+          },
+          "deleted": {
+            "type": "integer"
+          },
+          "skipped": {
+            "type": "integer"
+          },
+          "failed": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "total",
+          "pending",
+          "in_progress",
+          "deleted",
+          "skipped",
+          "failed"
+        ]
+      },
+      "DeleteJobRequest": {
+        "type": "object",
+        "description": "Request body for `createDeleteJob`.",
+        "required": [
+          "resources"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Optional human-friendly job name shown in the history list."
+          },
+          "resources": {
+            "type": "array",
+            "description": "The resources to delete, by type + id.",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": [
+                "type",
+                "id"
+              ],
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "description": "Resource type identifier"
+                },
+                "id": {
+                  "type": "string",
+                  "description": "Resource ID"
+                },
+                "title": {
+                  "type": "string",
+                  "description": "Optional human-readable title captured for the failures view."
+                }
+              }
+            }
+          }
+        }
+      },
+      "DeleteJob": {
+        "type": "object",
+        "description": "Bulk-delete job header surfaced by `createDeleteJob`/`getDeleteJob`.",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/DeleteJobStatus"
+          },
+          "org_id": {
+            "type": "string"
+          },
+          "counts": {
+            "$ref": "#/components/schemas/DeleteJobCounts"
+          },
+          "started_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "finished_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "rebuild_triggered": {
+            "type": "boolean",
+            "description": "True once the worker has kicked the index rebuild on completion."
+          }
+        },
+        "required": [
+          "id",
+          "status",
+          "org_id",
+          "counts",
+          "started_at"
+        ]
+      },
+      "DeleteJobListResponse": {
+        "type": "object",
+        "description": "Cursor-paginated list of delete jobs.",
+        "properties": {
+          "next_cursor": {
+            "type": "string"
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DeleteJob"
+            }
+          }
+        },
+        "required": [
+          "results"
+        ]
+      },
+      "DeleteJobResource": {
+        "type": "object",
+        "description": "Per-resource row for a delete job.",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/DeleteJobResourceStatus"
+          },
+          "attempt": {
+            "type": "integer"
+          },
+          "error": {
+            "type": "string"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "type",
+          "id",
+          "status",
+          "attempt",
+          "updated_at"
+        ]
+      },
+      "DeleteJobResourceListResponse": {
+        "type": "object",
+        "description": "Cursor-paginated list of delete job resources.",
+        "properties": {
+          "next_cursor": {
+            "type": "string"
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DeleteJobResource"
+            }
+          }
+        },
+        "required": [
+          "results"
+        ]
+      },
+      "SnapshotInventoryItem": {
+        "type": "object",
+        "description": "Minimal identity of a single configuration resource.",
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/ResourceType"
+          },
+          "id": {
+            "type": "string",
+            "description": "Unique identifier of the resource"
+          }
+        },
+        "required": [
+          "type",
+          "id"
+        ]
+      },
+      "SnapshotInventorySkippedType": {
+        "type": "object",
+        "description": "A type that could not be listed during inventory collection.",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "reason"
+        ]
+      },
+      "ConfigInventoryResponse": {
+        "type": "object",
+        "description": "Fresh inventory of all configuration resources for an org.",
+        "properties": {
+          "inventory_id": {
+            "type": "string",
+            "description": "Unique identifier for this inventory run (UUID)."
+          },
+          "org_id": {
+            "type": "string",
+            "description": "Organization ID the inventory was collected for."
+          },
+          "indexed_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO timestamp of when the inventory was collected."
+          },
+          "resources_count": {
+            "type": "integer",
+            "description": "Total number of resources found across all types."
+          },
+          "resources": {
+            "type": "array",
+            "description": "List of all found resources as `{ type, id }` pairs.",
+            "items": {
+              "$ref": "#/components/schemas/SnapshotInventoryItem"
+            }
+          },
+          "skipped_types": {
+            "type": "array",
+            "description": "Types that failed to list or had no adapter; never fail the whole inventory.",
+            "items": {
+              "$ref": "#/components/schemas/SnapshotInventorySkippedType"
+            }
+          }
+        },
+        "required": [
+          "inventory_id",
+          "org_id",
+          "indexed_at",
+          "resources_count",
+          "resources",
+          "skipped_types"
         ]
       }
     }

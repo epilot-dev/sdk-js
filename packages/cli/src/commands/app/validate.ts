@@ -37,6 +37,15 @@ export default defineCommand({
     log.success(`${manifestPath} is valid`);
     log.info(`${manifest.components.length} component(s) defined`);
 
+    if (manifest.functions?.length) {
+      const scheduled = manifest.functions.filter((f) => f.type === 'scheduled');
+      const workflow = manifest.functions.filter((f) => f.type === 'workflow');
+      log.info(`${manifest.functions.length} function(s): ${workflow.length} workflow, ${scheduled.length} scheduled`);
+      for (const fn of scheduled) {
+        log.dim(`${fn.name}: ${fn.schedule}${fn.schedule_timezone ? ` (${fn.schedule_timezone})` : ''}`);
+      }
+    }
+
     const secretOptions = manifest.components.flatMap((c) => (c.options ?? []).filter((o) => o.type === 'secret'));
     if (secretOptions.length > 0) log.info(`${secretOptions.length} secret option(s) (set per-installation)`);
 

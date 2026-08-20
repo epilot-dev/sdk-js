@@ -154,6 +154,13 @@
           {
             "name": "attachment",
             "in": "query"
+          },
+          {
+            "name": "x-track",
+            "in": "query",
+            "required": false,
+            "style": "form",
+            "explode": true
           }
         ],
         "responses": {}
@@ -226,6 +233,36 @@
             "required": true
           }
         ],
+        "responses": {}
+      }
+    },
+    "/v1/files/{id}/summary/feedback": {
+      "get": {
+        "operationId": "getFileSummaryFeedback",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      },
+      "put": {
+        "operationId": "putFileSummaryFeedback",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
         "responses": {}
       }
     },

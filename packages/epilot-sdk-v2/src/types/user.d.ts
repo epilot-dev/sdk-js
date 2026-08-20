@@ -442,6 +442,14 @@ export declare namespace Components {
              * Whether passkey login is enabled for this organization
              */
             passkey_enabled?: boolean;
+            /**
+             * Whether the user has at least one passkey registered. Lets the login
+             * UI offer passkey authentication as an alternative to an MFA code.
+             * Discloses nothing that :beginPasskeyAuthentication doesn't already
+             * reveal for a known email address.
+             *
+             */
+            passkeys_registered?: boolean;
         }
         /**
          * A customized workplace navigation configuration. The ID is a content-hash, so identical configurations will have the same ID.

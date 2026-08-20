@@ -1,6 +1,6 @@
 {
   "name": "@epilot/deduplication-client",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "JavaScript client library for Epilot's Deduplication API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

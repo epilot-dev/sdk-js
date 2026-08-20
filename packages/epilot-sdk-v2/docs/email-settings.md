@@ -1045,7 +1045,7 @@ const { data } = await client.listSmtpConnections()
     {
       "connection_id": "string",
       "smtp_host": "string",
-      "smtp_port": 0,
+      "smtp_port": "string",
       "smtp_secure": "tls",
       "smtp_username": "string",
       "smtp_password": "string",
@@ -1070,17 +1070,19 @@ const { data } = await client.listSmtpConnections()
 ### `createSmtpConnection`
 
 Creates a new custom SMTP connection. Runs a live verify against the SMTP server
-before persisting; on failure the request is rejected and nothing is saved.
-The password is encrypted via KMS before be
+before persisting; on failure the request is rejected and nothing is saved. Pass
+`skip_test=true` to store the configur
 
 `POST /v2/smtp/connections`
 
 ```ts
 const { data } = await client.createSmtpConnection(
-  null,
+  {
+    skip_test: true,
+  },
   {
     smtp_host: 'string',
-    smtp_port: 1,
+    smtp_port: 'string',
     smtp_secure: 'tls',
     smtp_username: 'string',
     smtp_password: '{{ env.smtp_password }}'
@@ -1095,7 +1097,7 @@ const { data } = await client.createSmtpConnection(
 {
   "connection_id": "string",
   "smtp_host": "string",
-  "smtp_port": 0,
+  "smtp_port": "string",
   "smtp_secure": "tls",
   "smtp_username": "string",
   "smtp_password": "string",
@@ -1133,7 +1135,7 @@ const { data } = await client.getSmtpConnection({
 {
   "connection_id": "string",
   "smtp_host": "string",
-  "smtp_port": 0,
+  "smtp_port": "string",
   "smtp_secure": "tls",
   "smtp_username": "string",
   "smtp_password": "string",
@@ -1155,7 +1157,8 @@ const { data } = await client.getSmtpConnection({
 ### `updateSmtpConnection`
 
 Partial update; omitted fields keep their existing values. The merged
-configuration is verified against the SMTP server before persisting.
+configuration is verified against the SMTP server before persisting. Pass
+`skip_test=true` to store it untested instead, which als
 
 `PUT /v2/smtp/connections/{connectionId}`
 
@@ -1163,10 +1166,11 @@ configuration is verified against the SMTP server before persisting.
 const { data } = await client.updateSmtpConnection(
   {
     connectionId: 'example',
+    skip_test: true,
   },
   {
     smtp_host: 'string',
-    smtp_port: 1,
+    smtp_port: 'string',
     smtp_secure: 'tls',
     smtp_username: 'string',
     smtp_password: 'string'
@@ -1181,7 +1185,7 @@ const { data } = await client.updateSmtpConnection(
 {
   "connection_id": "string",
   "smtp_host": "string",
-  "smtp_port": 0,
+  "smtp_port": "string",
   "smtp_secure": "tls",
   "smtp_username": "string",
   "smtp_password": "string",
@@ -2118,7 +2122,7 @@ type OutlookConnectionStatus = {
 type SmtpConnection = {
   connection_id: string
   smtp_host: string
-  smtp_port: number
+  smtp_port: string
   smtp_secure: "tls" | "starttls"
   smtp_username: string
   smtp_password?: string
@@ -2138,7 +2142,7 @@ type SmtpConnection = {
 ```ts
 type CreateSmtpConnectionRequest = {
   smtp_host: string
-  smtp_port: number
+  smtp_port: string | number
   smtp_secure: "tls" | "starttls"
   smtp_username: string
   smtp_password: string
@@ -2152,7 +2156,7 @@ Partial update; omitted fields keep their existing values.
 ```ts
 type UpdateSmtpConnectionRequest = {
   smtp_host?: string
-  smtp_port?: number
+  smtp_port?: string | number
   smtp_secure?: "tls" | "starttls"
   smtp_username?: string
   smtp_password?: string

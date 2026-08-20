@@ -28,6 +28,13 @@ export interface InitOptions {
   contentHeight?: number;
   /** Timeout in milliseconds for initialization (default: 5000) */
   timeout?: number;
+  /**
+   * Number of retries after a timed-out handshake (default: 2).
+   * The init message is fire-and-forget: if the parent is not listening yet,
+   * it is lost. Retrying covers the parent attaching its listener late.
+   * Set to 0 to make a single attempt.
+   */
+  retries?: number;
 }
 
 /**
@@ -64,6 +71,22 @@ export interface EntityCapability {
 }
 
 /**
+ * The entity being viewed, as delivered by the parent app.
+ */
+export interface Entity {
+  /** Entity ID */
+  _id?: string;
+  /** Owning organization ID */
+  _org?: string;
+  /** Entity schema slug */
+  _schema?: string;
+  /** Entity title */
+  _title?: string;
+  /** Entity attributes */
+  [key: string]: unknown;
+}
+
+/**
  * Context data for entity tab and entity capability surfaces.
  *
  * @example
@@ -71,6 +94,7 @@ export interface EntityCapability {
  * const context = await appBridge.getEntityContext();
  * console.log(context.entityId); // '123e4567-e89b-12d3-a456-426614174000'
  * console.log(context.schema);   // 'contact'
+ * console.log(context.entity);   // the full entity — no Entity API call needed
  * ```
  */
 export interface EntityContext {
@@ -78,6 +102,12 @@ export interface EntityContext {
   entityId: string;
   /** Entity schema slug (e.g., 'contact', 'order', 'opportunity') */
   schema: string;
+  /**
+   * The full entity being viewed. Prefer this over fetching the entity from
+   * the Entity API — it is one round-trip cheaper and requires no permissions
+   * (app tokens are not guaranteed to authorize direct Entity API calls).
+   */
+  entity?: Entity;
   /** Capability configuration (for entity_capability surface) */
   capability?: EntityCapability;
   /** Whether the tab/capability is currently visible (for entity_tab surface) */

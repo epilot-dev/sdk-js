@@ -84,9 +84,19 @@ export default defineCommand({
         if (dryRun) {
           log.info(`[dry-run] Would create new version (cloned from ${targetVersion})`);
         } else {
-          const result = await client.cloneVersion(appId!, targetVersion);
-          targetVersion = result.version;
-          log.success(`Created version ${targetVersion}`);
+          try {
+            const result = await client.cloneVersion(appId!, targetVersion);
+            targetVersion = result.version;
+            log.success(`Created version ${targetVersion}`);
+          } catch (err) {
+            if (err instanceof Error && err.message.includes('disable dev mode')) {
+              log.error('Cannot create a new version while development mode is enabled.');
+              log.info('Disable it first, then re-run the deploy:');
+              log.dim(`  epilot app api patchMetadata --appId ${appId} -d '{"dev_mode": false}'`);
+              process.exit(1);
+            }
+            throw err;
+          }
         }
       }
     }
@@ -111,20 +121,59 @@ export default defineCommand({
       }
     }
 
-    // Step 4: Patch version (permissions, blueprint)
+    // Step 4: Patch version (permissions, blueprint, functions)
     // Permissions flow: a role with the manifest grants is upserted in the
     // developer's own org and attached to the version via role_id. On
     // installation, the App API creates a copy of the role (from the
     // version's grants) in the installer's org, subject to their consent.
-    if (manifest.permissions?.length || manifest.blueprint?.manifest_id) {
+    // Re-patching grants desyncs existing installations' roles, so grants
+    // are only sent when they actually differ from the remote version.
+    // Functions: inline each handler's built JS as `code`. The API treats the
+    // field as a full replacement set, so it is sent whenever the manifest
+    // declares functions (or an empty array to clear previously deployed ones).
+    let functionsPayload: Record<string, unknown>[] | undefined;
+    if (manifest.functions) {
+      functionsPayload = [];
+      for (const fn of manifest.functions) {
+        const handlerPath = resolve(manifestDir, fn.handler);
+        if (!existsSync(handlerPath)) {
+          log.error(`Handler not found for function "${fn.name}": ${handlerPath} — run "npm run build" first`);
+          process.exit(1);
+        }
+        const { handler, ...rest } = fn;
+        functionsPayload.push({ ...rest, code: readFileSync(handlerPath, 'utf-8') });
+        if (dryRun) {
+          log.info(
+            `[dry-run] Would deploy ${fn.type} function ${fn.name}${fn.schedule ? ` (schedule: ${fn.schedule})` : ''}`,
+          );
+        }
+      }
+    }
+
+    if (manifest.permissions?.length || manifest.blueprint?.manifest_id || functionsPayload) {
       if (dryRun) {
         if (manifest.permissions?.length) {
-          log.info('[dry-run] Would upsert app role in developer org');
+          log.info('[dry-run] Would upsert app role in developer org (if grants changed)');
         }
         log.info('[dry-run] Would update version permissions/blueprint');
       } else {
+        let grantsChanged = true;
+        if (!isNew && manifest.permissions?.length) {
+          try {
+            const remoteVersion = await client.getVersion(appId!, targetVersion);
+            const remoteGrants = (
+              remoteVersion.role as { grants?: { action: string; resource?: string }[] } | undefined
+            )?.grants;
+            grantsChanged = normalizeGrants(remoteGrants) !== normalizeGrants(manifest.permissions);
+          } catch {
+            // Cannot compare — keep grantsChanged = true and patch as before
+          }
+        }
+
         let roleId: string | undefined;
-        if (manifest.permissions?.length) {
+        if (manifest.permissions?.length && !grantsChanged) {
+          log.dim('Permissions unchanged — skipping grant re-provisioning');
+        } else if (manifest.permissions?.length) {
           const orgId = resolveOrgId(args.token, args.profile);
           if (orgId) {
             try {
@@ -142,13 +191,19 @@ export default defineCommand({
             log.warn('Could not resolve org id — attaching grants without a developer-org role');
           }
         }
-        await client.patchVersion(appId!, targetVersion, {
-          ...(manifest.permissions?.length
-            ? { grants: manifest.permissions, ...(roleId ? { role_id: roleId } : {}) }
-            : {}),
-          ...(manifest.blueprint?.manifest_id ? { manifest_id: manifest.blueprint.manifest_id } : {}),
-        });
-        log.success(`Updated version ${targetVersion} (permissions/blueprint)`);
+
+        const sendGrants = Boolean(manifest.permissions?.length && grantsChanged);
+
+        if (sendGrants || manifest.blueprint?.manifest_id || functionsPayload) {
+          await client.patchVersion(appId!, targetVersion, {
+            ...(sendGrants ? { grants: manifest.permissions, ...(roleId ? { role_id: roleId } : {}) } : {}),
+            ...(manifest.blueprint?.manifest_id ? { manifest_id: manifest.blueprint.manifest_id } : {}),
+            ...(functionsPayload ? { functions: functionsPayload } : {}),
+          });
+          log.success(
+            `Updated version ${targetVersion} (permissions/blueprint${functionsPayload ? `, ${functionsPayload.length} function(s)` : ''})`,
+          );
+        }
       }
     }
 
@@ -253,6 +308,28 @@ export default defineCommand({
       }
     }
 
+    // Step 7: Re-sync this org's installation if the app is installed here.
+    // Installations hold a frozen snapshot of components/options/grants, so a
+    // deploy alone never reaches them.
+    if (!isNew) {
+      if (dryRun) {
+        log.info('[dry-run] Would re-sync the installation in this org (if installed)');
+      } else {
+        try {
+          const installation = await client.getInstallation(appId!);
+          if (installation) {
+            await client.patchInstallation(appId!, { version: targetVersion });
+            log.success(`Re-synced installation in this org to v${targetVersion}`);
+            log.warn(
+              'Re-syncing disables the installation — open the app in epilot (Settings → Apps) and save its configuration to re-enable it.',
+            );
+          }
+        } catch (err) {
+          log.warn(`Could not re-sync installation: ${(err as Error).message}`);
+        }
+      }
+    }
+
     if (dryRun) {
       log.header('Dry run complete. No changes were made.');
     } else {
@@ -260,3 +337,12 @@ export default defineCommand({
     }
   },
 });
+
+/** Normalize grants for change detection: order- and undefined-insensitive. */
+function normalizeGrants(grants: { action: string; resource?: string }[] = []): string {
+  return JSON.stringify(
+    grants
+      .map((g) => ({ action: g.action, resource: g.resource ?? null }))
+      .sort((a, b) => `${a.action}|${a.resource}`.localeCompare(`${b.action}|${b.resource}`)),
+  );
+}

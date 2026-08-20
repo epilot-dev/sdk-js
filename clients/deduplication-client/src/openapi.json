@@ -132,6 +132,35 @@
         }
       }
     },
+    "/v1/duplicates/dismiss": {
+      "post": {
+        "operationId": "dismissDuplicates",
+        "summary": "dismissDuplicates",
+        "description": "Confirms entities as NOT duplicates: clears the internal duplicate-detection flags (_matching_entities) on each given entity, so they stop appearing as open duplicate sets. The records themselves are not modified otherwise.",
+        "tags": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DismissDuplicatesRequestBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Flags cleared",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DismissDuplicatesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/uniqueness-criteria": {
       "get": {
         "operationId": "listUniquenessCriteria",
@@ -329,10 +358,19 @@
         "minItems": 1
       },
       "DeduplicateRequestResponse": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/Entity"
-        }
+        "type": "object",
+        "properties": {
+          "deduplicatedEntities": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Entity"
+            },
+            "description": "The merged survivor entity of each processed set"
+          }
+        },
+        "required": [
+          "deduplicatedEntities"
+        ]
       },
       "Entity": {
         "type": "object",
@@ -555,6 +593,44 @@
           "entity",
           "confidence",
           "matched_attributes"
+        ]
+      },
+      "DismissDuplicatesRequestBody": {
+        "type": "object",
+        "properties": {
+          "schema": {
+            "type": "string",
+            "minLength": 1
+          },
+          "entityIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 1,
+            "maxItems": 100,
+            "description": "Entities whose duplicate flags (_matching_entities) are cleared — the records are confirmed as NOT duplicates and stay separate"
+          }
+        },
+        "required": [
+          "schema",
+          "entityIds"
+        ]
+      },
+      "DismissDuplicatesResponse": {
+        "type": "object",
+        "properties": {
+          "dismissed": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Entity ids whose duplicate flags were cleared"
+          }
+        },
+        "required": [
+          "dismissed"
         ]
       },
       "UniquenessCriteriaListResponse": {

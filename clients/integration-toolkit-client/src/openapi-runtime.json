@@ -296,6 +296,75 @@
         "responses": {}
       }
     },
+    "/v1/integrations/{integrationId}/documentation": {
+      "get": {
+        "operationId": "listDocumentationPages",
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/integrations/{integrationId}/documentation/{docId}": {
+      "get": {
+        "operationId": "getDocumentationPage",
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "docId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      },
+      "put": {
+        "operationId": "upsertDocumentationPage",
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "docId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteDocumentationPage",
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "docId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v2/integrations": {
       "get": {
         "operationId": "listIntegrationsV2",
@@ -963,6 +1032,49 @@
           }
         ],
         "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteErpImport",
+        "parameters": [
+          {
+            "name": "importId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/erp/imports/{importId}:validate": {
+      "post": {
+        "operationId": "validateErpImport",
+        "parameters": [
+          {
+            "name": "importId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/erp/imports/{importId}:suggest-use-cases": {
+      "post": {
+        "operationId": "suggestErpImportUseCases",
+        "parameters": [
+          {
+            "name": "importId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
       }
     },
     "/v2/erp/imports/{importId}:execute": {
@@ -975,6 +1087,12 @@
             "required": true
           }
         ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {}
+          }
+        },
         "responses": {}
       }
     },

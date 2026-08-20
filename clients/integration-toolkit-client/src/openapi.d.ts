@@ -1341,16 +1341,19 @@ declare namespace Components {
              */
             latest_types_package_name?: string;
         }
+        /**
+         * Register an already-uploaded file as an import. The use case is chosen later, via `:validate` — upload and interpretation are separate decisions.
+         */
         export interface CreateErpImportRequest {
             s3_reference: S3Reference;
-            integration_id: string;
-            use_case_slug?: string;
+            /**
+             * Return a sample of the file's first rows in `preview`. Only controls whether the sample comes BACK — the head is read either way, because that read is how an unreadable file gets refused.
+             */
+            include_preview?: boolean;
         }
         export interface CreateErpImportResponse {
-            /**
-             * `imp_{ULID}` — time-ordered, also used as the job's correlation_id.
-             */
-            import_id: string;
+            job: ErpImportJob;
+            preview?: /* Sample of the file's first rows, using the same parser as `:validate`. Registration refuses a file it cannot read, so a created job always includes this. */ ErpImportFilePreview;
         }
         export interface CreateFileProxyUseCaseRequest {
             /**
@@ -1371,11 +1374,25 @@ declare namespace Components {
              */
             type: "file_proxy";
             configuration?: /**
-             * Configuration for file_proxy use cases. Defines how to authenticate and fetch files from external document systems.
+             * Configuration for file_proxy use cases. Defines how to authenticate and move files
+             * between epilot and an external document system, in either direction (see `direction`).
              *
-             * The file proxy download URL always requires `orgId`, `integrationId`, and either `useCaseSlug` (recommended) or `useCaseId` (legacy UUID) as query parameters.
-             * The `orgId` is included in the signed URL to establish organization context without requiring authentication.
-             * Additional use-case-specific parameters are declared in the `params` array.
+             * **Download** (`direction: download`, the default) fetches a file from the external system
+             * and serves it to a browser. The download URL always requires `orgId`, `integrationId`, and
+             * either `useCaseSlug` (recommended) or `useCaseId` (legacy UUID) as query parameters.
+             * The `orgId` is included in the signed URL to establish organization context without
+             * requiring authentication. Additional use-case-specific parameters are declared in the
+             * `params` array. `response` is REQUIRED for download use cases.
+             *
+             * **Upload** (`direction: upload`) pushes epilot files to the external system. It is not
+             * reachable over the download endpoint; an outbound use case points at it via a `file_proxy`
+             * delivery, and this configuration owns everything about what gets sent: `fan_out` decides
+             * how many deliveries one event produces, `params_mapping` builds the values, and the
+             * `steps` place those values into requests via `{{ params.* }}`.
+             * `upload` and `params_mapping` are REQUIRED and `response` MUST be omitted.
+             *
+             * OpenAPI 3.0 cannot express this conditional requiredness, so it is enforced by the
+             * server-side validator, which returns an explicit message naming the offending field.
              *
              */
             FileProxyUseCaseConfiguration;
@@ -1528,9 +1545,92 @@ declare namespace Components {
             component_id: string; // uuid
         }
         /**
-         * Configuration for how the event should be delivered. webhook = push delivery via svc-webhooks (JSONata-transformed payload); poll = pull-based queue delivery where the consumer fetches items via the poll API (raw event payload)
+         * Configuration for how the event should be delivered. webhook = push delivery via svc-webhooks (JSONata-transformed payload); poll = pull-based queue delivery where the consumer fetches items via the poll API (raw event payload); file_proxy = one push per event attachment to an external document system, through a file_proxy use case (JSONata-transformed payload carrying the file bytes)
          */
-        export type DeliveryConfig = /* Configuration for how the event should be delivered. webhook = push delivery via svc-webhooks (JSONata-transformed payload); poll = pull-based queue delivery where the consumer fetches items via the poll API (raw event payload) */ /* Push delivery of the transformed event to a webhook via svc-webhooks */ WebhookDeliveryConfig | /* Pull-based queue delivery. Items carry the raw standardized event-catalog payload; no JSONata mapping is applied in poll mode. Consumers fetch and acknowledge items via the poll API. */ PollDeliveryConfig;
+        export type DeliveryConfig = /* Configuration for how the event should be delivered. webhook = push delivery via svc-webhooks (JSONata-transformed payload); poll = pull-based queue delivery where the consumer fetches items via the poll API (raw event payload); file_proxy = one push per event attachment to an external document system, through a file_proxy use case (JSONata-transformed payload carrying the file bytes) */ /* Push delivery of the transformed event to a webhook via svc-webhooks */ WebhookDeliveryConfig | /* Pull-based queue delivery. Items carry the raw standardized event-catalog payload; no JSONata mapping is applied in poll mode. Consumers fetch and acknowledge items via the poll API. */ PollDeliveryConfig | /**
+         * Push delivery to an external document system through a `file_proxy` use case.
+         *
+         * A pure pointer, deliberately. The outbound use case decides WHEN to deliver — its event
+         * name plus `event_filter` — and the referenced `file_proxy` use case decides WHAT and HOW:
+         * which items to fan out over (`fan_out`), what values to build (`params_mapping`,
+         * `lookups`, `constants`), and the steps that send them. Keeping every file concern on the
+         * file_proxy side is what lets one upload recipe be shared by several event subscriptions
+         * without duplicating any of it.
+         *
+         * `jsonata_expression` on the mapping is NOT used for this delivery type and is rejected.
+         *
+         * The slug is resolved at delivery time, not at save time, so use cases can be saved in any
+         * order; a dangling reference surfaces as a `USE_CASE_NOT_FOUND` monitoring event naming
+         * the referencing mapping.
+         *
+         */
+        FileProxyDeliveryConfig;
+        /**
+         * A markdown documentation page of an integration
+         */
+        export interface DocumentationPage {
+            /**
+             * 'general' for the integration-wide page, otherwise the use case ID
+             * example:
+             * general
+             */
+            id: string;
+            integration_id: string; // uuid
+            /**
+             * Whether the page documents the whole integration or a single use case
+             */
+            scope: "integration" | "use_case";
+            /**
+             * The linked use case. Only set when scope is use_case.
+             */
+            use_case_id?: string; // uuid
+            title: string;
+            created_at: string; // date-time
+            /**
+             * User ID that created the page
+             */
+            created_by?: string | null;
+            updated_at: string; // date-time
+            /**
+             * User ID of the last edit
+             */
+            updated_by?: string | null;
+            /**
+             * Markdown source of the page
+             */
+            content: string;
+        }
+        /**
+         * Documentation page metadata without the markdown content
+         */
+        export interface DocumentationPageSummary {
+            /**
+             * 'general' for the integration-wide page, otherwise the use case ID
+             * example:
+             * general
+             */
+            id: string;
+            integration_id: string; // uuid
+            /**
+             * Whether the page documents the whole integration or a single use case
+             */
+            scope: "integration" | "use_case";
+            /**
+             * The linked use case. Only set when scope is use_case.
+             */
+            use_case_id?: string; // uuid
+            title: string;
+            created_at: string; // date-time
+            /**
+             * User ID that created the page
+             */
+            created_by?: string | null;
+            updated_at: string; // date-time
+            /**
+             * User ID of the last edit
+             */
+            updated_by?: string | null;
+        }
         export interface EmbeddedFileProxyUseCaseRequest {
             /**
              * Optional use case ID for update matching.
@@ -1562,11 +1662,25 @@ declare namespace Components {
              */
             type: "file_proxy";
             configuration?: /**
-             * Configuration for file_proxy use cases. Defines how to authenticate and fetch files from external document systems.
+             * Configuration for file_proxy use cases. Defines how to authenticate and move files
+             * between epilot and an external document system, in either direction (see `direction`).
              *
-             * The file proxy download URL always requires `orgId`, `integrationId`, and either `useCaseSlug` (recommended) or `useCaseId` (legacy UUID) as query parameters.
-             * The `orgId` is included in the signed URL to establish organization context without requiring authentication.
-             * Additional use-case-specific parameters are declared in the `params` array.
+             * **Download** (`direction: download`, the default) fetches a file from the external system
+             * and serves it to a browser. The download URL always requires `orgId`, `integrationId`, and
+             * either `useCaseSlug` (recommended) or `useCaseId` (legacy UUID) as query parameters.
+             * The `orgId` is included in the signed URL to establish organization context without
+             * requiring authentication. Additional use-case-specific parameters are declared in the
+             * `params` array. `response` is REQUIRED for download use cases.
+             *
+             * **Upload** (`direction: upload`) pushes epilot files to the external system. It is not
+             * reachable over the download endpoint; an outbound use case points at it via a `file_proxy`
+             * delivery, and this configuration owns everything about what gets sent: `fan_out` decides
+             * how many deliveries one event produces, `params_mapping` builds the values, and the
+             * `steps` place those values into requests via `{{ params.* }}`.
+             * `upload` and `params_mapping` are REQUIRED and `response` MUST be omitted.
+             *
+             * OpenAPI 3.0 cannot express this conditional requiredness, so it is enforced by the
+             * server-side validator, which returns an explicit message naming the offending field.
              *
              */
             FileProxyUseCaseConfiguration;
@@ -1731,6 +1845,50 @@ declare namespace Components {
              */
             change_description?: string;
         }
+        /**
+         * A resolved entity prune scope. At runtime, entities of `entity_slug` found within `scope` whose unique identifiers are not listed in `keep_unique_ids` are removed using `deletion_mode`.
+         */
+        export interface EntityPruneScopeUpdate {
+            /**
+             * The entity type that would be pruned
+             */
+            entity_slug: string;
+            /**
+             * The scope configuration resolved against the payload
+             */
+            scope: {
+                /**
+                 * How the entities in scope are found
+                 */
+                scope_mode: "relations" | "query";
+                /**
+                 * Schema of the related entity defining the scope (`relations` scope_mode only)
+                 */
+                schema?: string;
+                /**
+                 * Resolved unique identifiers of the related scope entity (`relations` scope_mode only)
+                 */
+                unique_ids?: {
+                    [name: string]: any;
+                };
+                /**
+                 * Resolved query parameters used to find entities in scope (`query` scope_mode only)
+                 */
+                query?: {
+                    [name: string]: any;
+                };
+            };
+            /**
+             * Unique identifiers of the entities upserted by this payload. Everything else found in scope would be deleted.
+             */
+            keep_unique_ids: {
+                [name: string]: any;
+            }[];
+            /**
+             * `delete` soft deletes the pruned entities, `purge` removes them permanently
+             */
+            deletion_mode: "delete" | "purge";
+        }
         export interface EntityUpdate {
             /**
              * The entity type slug
@@ -1748,6 +1906,27 @@ declare namespace Components {
             attributes: {
                 [name: string]: any;
             };
+            /**
+             * Present when the entity mapping has a `pricing` block. Echoes the pricing configuration and the data extracted for it, so mapping authors can see what would be sent to the pricing service.
+             */
+            pricing?: {
+                /**
+                 * The pricing configuration from the entity mapping
+                 */
+                config: {
+                    [name: string]: any;
+                };
+                /**
+                 * The pricing input data extracted from the payload
+                 */
+                data: {
+                    [name: string]: any;
+                }[];
+            };
+            /**
+             * Effective operation mode applied to this entity at runtime. `upsert-prune-scope-purge` / `upsert-prune-scope-delete` configurations report `upsert` here, because the individual entities in the payload are upserted — the destructive part of those modes is reported separately in `prune_scope_updates`. For `delete` / `purge`, `attributes` are still mapped and returned but ignored at runtime: only `unique_identifiers` are used to locate the entity to remove.
+             */
+            mode: "upsert" | "delete" | "purge";
         }
         /**
          * Resolves to an org-scoped environment variable from the epilot environments-api service at runtime, replacing hard-coded environment-specific values (URLs, prefixes, identifiers) in inbound mappings. Secrets (`SecretString` values) are never exposed; the runtime treats both "missing key" and "secret-typed key" as identical `undefined` outcomes (no info disclosure via error code). For secret-resolving contexts (e.g. authorization headers in managed-call or file-proxy step configurations), use the templated `{{ env.<key> }}` syntax instead — that mechanism does decrypt secrets.
@@ -1965,17 +2144,61 @@ declare namespace Components {
             group_id?: string;
         };
         /**
-         * Why the import failed — present if and only if status = FAILED.
+         * Why the import failed — present if and only if status = FAILED. `code` is the translation key; for VALIDATION_BLOCKED the specifics are in `validation`.
          */
         export interface ErpImportError {
             /**
-             * VALIDATION_BLOCKED = blocking row issues (see `validation`); PROCESSING_ERROR = a named, deterministic failure — retrying the same file cannot help; INTERNAL_ERROR = crashed or never started, so retry.
+             * Enum of possible error codes.
+             *
              */
-            type: "VALIDATION_BLOCKED" | "PROCESSING_ERROR" | "INTERNAL_ERROR";
+            code: "VALIDATION_BLOCKED" | "FILE_FORMAT_UNSUPPORTED" | "FILE_UNAVAILABLE" | "VALIDATE_TIMEOUT" | "IMPORT_TIMEOUT" | "USE_CASE_NOT_USABLE" | "IMPORT_NO_PROGRESS" | "INTERNAL_ERROR";
             /**
-             * User-facing explanation of `type`.
+             * One English sentence, derived from `code` so the two always agree. A fallback for a client that has no translation for this code — prefer translating `code`, and never parse this. It deliberately does NOT restate `validation.issues`.
              */
             message: string;
+        }
+        /**
+         * Sample of the file's first rows, using the same parser as `:validate`. Registration refuses a file it cannot read, so a created job always includes this.
+         */
+        export interface ErpImportFilePreview {
+            /**
+             * Effective column names (trimmed, duplicates collapsed).
+             */
+            columns: string[];
+            /**
+             * Up to the first 3 data rows, aligned to `columns`.
+             */
+            rows: string[][];
+        }
+        /**
+         * A problem found during validation, scoped to the file as a whole rather than to individual rows.
+         * `code` is the translation key and the other fields are its parameters — there is deliberately no message to display. Each code appears at most once, with everything it has to say aggregated into that one entry.
+         */
+        export interface ErpImportIssue {
+            /**
+             * Enum of possible issue codes.
+             *
+             */
+            code: "UNIQUE_ID_COLUMN_MISSING" | "MAPPED_COLUMN_MISSING" | "MALFORMED_ROW" | "INVALID_ENCODING" | "EMPTY_FILE" | "TOO_MANY_ROWS";
+            severity: "warning" | "blocking";
+            /**
+             * The columns this issue is about, at most one entry per column per entity.
+             * On UNIQUE_ID_COLUMN_MISSING the file has NONE of these. Do NOT tell the user that adding one of them is enough: a unique id may read several columns through a JSONata expression, and whether it combines them (`A & B`, both needed) or falls back between them (`A ? A : B`, either will do) is not knowable here.
+             */
+            columns?: {
+                /**
+                 * The column name, spelled as the mapping reads it.
+                 */
+                name: string;
+                /**
+                 * Slug of the entity this column helps identify. UNIQUE_ID_COLUMN_MISSING only.
+                 */
+                entity?: string;
+            }[];
+            /**
+             * The offending data row, 1-based as the user counts rows. MALFORMED_ROW only.
+             */
+            row?: number;
         }
         export interface ErpImportJob {
             /**
@@ -1984,27 +2207,38 @@ declare namespace Components {
             import_id: string;
             org_id: string;
             created_by?: string;
-            integration_id: string;
             /**
-             * The inbound use case whose mapping drives both phases.
+             * The integration owning the chosen use case. Absent until the first `:validate`.
+             */
+            integration_id?: string;
+            /**
+             * The inbound use case whose mapping drives both phases. Absent until the first `:validate`, and MUTABLE — re-validating with a different use case replaces it.
              */
             use_case_slug?: string;
             format: "csv" | "xlsx";
             /**
-             * PENDING → VALIDATING → READY → PROCESSING → IMPORTED, with FAILED reachable from any working status, and CANCELLING → CANCELLED reachable from VALIDATING or PROCESSING via :abort. IMPORTED, FAILED and CANCELLED are terminal and final.
-             * IMPORTED means every row was handed to the platform, not that the platform finished — per-row outcomes live in monitoring, filtered by correlation_id. A file that fails validation is FAILED with error.type = VALIDATION_BLOCKED.
+             * PENDING → VALIDATING → READY → PROCESSING → IMPORTED, with FAILED reachable from any working status, and CANCELLING → CANCELLED reachable from VALIDATING or PROCESSING via :abort. Only IMPORTED and CANCELLED are terminal. READY and FAILED both accept a further `:validate`, which is how a wrong use case is corrected without re-uploading the file.
+             * IMPORTED means every row was handed to the platform, not that the platform finished — per-row outcomes live in monitoring, filtered by correlation_id. A file that fails validation is FAILED with error.code = VALIDATION_BLOCKED.
              * READY is legitimately idle for as long as the user takes to confirm, so it carries no running work and never goes stale.
              * CANCELLING is transient and cooperative: the abort has been recorded but the worker only notices at its next batch boundary. Rows already published stay published — a stop is not a rollback.
              */
             status: "PENDING" | "VALIDATING" | "READY" | "PROCESSING" | "IMPORTED" | "FAILED" | "CANCELLING" | "CANCELLED";
             s3_input_ref: S3Reference;
+            /**
+             * Size of the uploaded file, recorded at registration. Present on every job registered from version 1.17.0 onwards; absent on older rows, which were written before it was captured.
+             */
+            size_bytes?: number; // int64
+            /**
+             * How many effective columns the file's header yielded — the length of the `preview.columns` returned at registration, kept so a job loaded later can still describe its file. The preview ROWS are deliberately not stored: they are a sample for the person about to choose a mapping, not job state. Present on every job registered from version 1.17.0 onwards.
+             */
+            column_count?: number;
             validation?: /* Validate-phase summary: what the file will create, and whether it may be confirmed. Absent until the validate phase completes. No per-row detail is kept — a rejected file is corrected and imported again. */ ErpImportValidation;
             progress?: /**
              * How far the currently running phase has got. Written at every batch boundary, so it advances during long runs rather than only at the end.
              * `total_rows` is ABSENT during the validate phase until the file has been read to the end — there is deliberately no counting pass, since that would be a second unbounded read of the whole file. Render an indeterminate indicator while it is missing: dividing by a missing total yields a determinate bar pinned at 0%, which reads as a hung import.
              */
             ErpImportProgress;
-            error?: /* Why the import failed — present if and only if status = FAILED. */ ErpImportError;
+            error?: /* Why the import failed — present if and only if status = FAILED. `code` is the translation key; for VALIDATION_BLOCKED the specifics are in `validation`. */ ErpImportError;
             /**
              * Scopes this run in monitoring. Always equal to `import_id`.
              */
@@ -2034,6 +2268,20 @@ declare namespace Components {
              */
             total_rows?: number;
         }
+        export interface ErpImportUseCaseSuggestion {
+            integration_id: string;
+            integration_name: string;
+            use_case_slug: string;
+            use_case_name: string;
+            /**
+             * How many distinct entity schemas this mapping uses.
+             */
+            entity_types: number;
+            /**
+             * How many of the FILE's columns this use case reads, by exact trimmed name.
+             */
+            matched_columns: number;
+        }
         /**
          * Validate-phase summary: what the file will create, and whether it may be confirmed. Absent until the validate phase completes. No per-row detail is kept — a rejected file is corrected and imported again.
          */
@@ -2042,6 +2290,9 @@ declare namespace Components {
              * Data rows read from the file.
              */
             total_rows: number;
+            /**
+             * Blocking problems found, counting per-row ones that are not listed in `issues`.
+             */
             blocking: number;
             warnings: number;
             /**
@@ -2050,6 +2301,14 @@ declare namespace Components {
             entities: {
                 [name: string]: number;
             };
+            /**
+             * Whole-file issues, at most one per `code`. Do not expect the length to match blocking + warnings: those also count per-row problems, which are recorded for support but never listed here. Warnings here are what `ack_warnings` on `:execute` acknowledges.
+             */
+            issues?: /**
+             * A problem found during validation, scoped to the file as a whole rather than to individual rows.
+             * `code` is the translation key and the other fields are its parameters — there is deliberately no message to display. Each code appears at most once, with everything it has to say aggregated into that one entry.
+             */
+            ErpImportIssue[];
         }
         export interface ErpUpdatesEventsV2Request {
             /**
@@ -2115,6 +2374,15 @@ declare namespace Components {
              * Error message
              */
             message?: string;
+        }
+        /**
+         * Confirmation options. Required only when the verdict carries warnings — a clean import needs no body at all.
+         */
+        export interface ExecuteErpImportRequest {
+            /**
+             * The caller has seen `validation.issues` and accepts them. Required when `validation.warnings` is greater than 0; ignored otherwise.
+             */
+            ack_warnings?: boolean;
         }
         /**
          * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
@@ -2207,6 +2475,110 @@ declare namespace Components {
                 [name: string]: string;
             };
         }
+        /**
+         * Push delivery to an external document system through a `file_proxy` use case.
+         *
+         * A pure pointer, deliberately. The outbound use case decides WHEN to deliver — its event
+         * name plus `event_filter` — and the referenced `file_proxy` use case decides WHAT and HOW:
+         * which items to fan out over (`fan_out`), what values to build (`params_mapping`,
+         * `lookups`, `constants`), and the steps that send them. Keeping every file concern on the
+         * file_proxy side is what lets one upload recipe be shared by several event subscriptions
+         * without duplicating any of it.
+         *
+         * `jsonata_expression` on the mapping is NOT used for this delivery type and is rejected.
+         *
+         * The slug is resolved at delivery time, not at save time, so use cases can be saved in any
+         * order; a dangling reference surfaces as a `USE_CASE_NOT_FOUND` monitoring event naming
+         * the referencing mapping.
+         *
+         */
+        export interface FileProxyDeliveryConfig {
+            /**
+             * Delivery mechanism type
+             */
+            type: "file_proxy";
+            /**
+             * Slug of a `file_proxy` use case with `direction: upload` in the SAME integration.
+             *
+             * example:
+             * wemag_d3_document_upload
+             */
+            use_case_slug: string;
+        }
+        /**
+         * Splits one event into several independent deliveries.
+         *
+         * Mirrors the inbound mapping idiom, where an entity's JSONata expression returning an array
+         * produces one entity update per element. Made explicit with a toggle here because an upload
+         * is also legitimately used without splitting, and because auto-detecting "array means
+         * split" would make a single-element result ambiguous.
+         *
+         * Each resulting delivery is fully independent: its own idempotency record, its own retry
+         * schedule, its own monitoring events. A four-item event can therefore end up three-of-four
+         * delivered, which is the honest state to report.
+         *
+         * The split is evaluated ONCE, when the event is enqueued, so item indices — and therefore
+         * idempotency keys — stay stable across retries.
+         *
+         */
+        export interface FileProxyFanOutConfig {
+            /**
+             * When false (or absent), the event produces exactly one delivery and `$item` is not
+             * bound in `params_mapping`.
+             *
+             */
+            enabled: boolean;
+            /**
+             * JSONata over the event that MUST return an array; one delivery is created per element,
+             * bound as `$item` in `params_mapping`. Required when `enabled` is true.
+             *
+             * Keep this a plain projection — scoping which events are handled at all belongs in the
+             * outbound use case's `event_filter`, not here. A non-array result fails the event with
+             * `FAN_OUT_INVALID_RESULT`; an empty array produces no deliveries and one info-level
+             * `FAN_OUT_EMPTY`, which is the normal outcome for a catch-all subscription seeing an
+             * event with nothing to send.
+             *
+             * example:
+             * event_attachments
+             */
+            split_expression?: string;
+        }
+        /**
+         * A named translation from a value in the event to a value the external system expects.
+         *
+         */
+        export interface FileProxyLookup {
+            /**
+             * JSONata expression over the event producing the lookup key
+             * example:
+             * ticket._purpose_name[0]
+             */
+            source: string;
+            /**
+             * Key-to-value translation table
+             * example:
+             * {
+             *   "Zählerstandsmeldung": "Zählerstand",
+             *   "Kündigung": "Kündigung"
+             * }
+             */
+            entries: {
+                [name: string]: string;
+            };
+            /**
+             * Value used when the key is absent from `entries`
+             */
+            default?: string;
+            /**
+             * What happens when the key is not in `entries`.
+             * `default` substitutes `default` silently; `warn` substitutes it and emits a
+             * `LOOKUP_UNMAPPED` warning so the gap is visible without stopping delivery;
+             * `fail` aborts the delivery terminally.
+             * Defaults to `default` when a `default` is set, and to `warn` when it is not.
+             *
+             */
+            on_miss?: "default" | "warn" | "fail";
+        }
         export interface FileProxyParam {
             /**
              * Parameter name as it appears in the query string
@@ -2221,6 +2593,11 @@ declare namespace Components {
              */
             description?: string;
         }
+        /**
+         * How to extract the file from the step results. REQUIRED when `direction` is `download`;
+         * rejected when `direction` is `upload` (an upload has no file to extract).
+         *
+         */
         export interface FileProxyResponseConfig {
             /**
              * JSONata expression to extract file content from step results
@@ -2253,7 +2630,7 @@ declare namespace Components {
             /**
              * HTTP method
              */
-            method: "GET" | "POST";
+            method: "GET" | "POST" | "PUT" | "PATCH";
             /**
              * Handlebars templates for request headers
              */
@@ -2261,13 +2638,75 @@ declare namespace Components {
                 [name: string]: string;
             };
             /**
-             * Handlebars template for the request body (POST only)
+             * Handlebars template for the request body (write methods only). On an `upload` use
+             * case this is where the payload is assembled, reading `{{ params.* }}` built by
+             * `params_mapping`, plus `{{ env.* }}` and `{{ steps.N.body }}`.
+             *
+             * **Route every user-controlled value through the `json` helper**: the template engine
+             * does not escape, so `"name":"{{ params.fileName }}"` produces invalid JSON the moment
+             * a filename contains a quote. Write `"name": {{json params.fileName}}` instead — the
+             * helper emits the surrounding quotes itself and renders absent values as `null`. Use
+             * `{{jsonEscape v}}` if you prefer to keep your own quotes. Upload configurations whose
+             * body would break on such input are rejected at save time.
+             *
+             * Handlebars block helpers work, so optional fields can be omitted rather than sent
+             * empty: `{{#if params.pin}},"pin": {{json params.pin}}{{/if}}`. Note that `{{/if}}}`
+             * fails to parse — leave a space before a closing brace: `{{/if}} }`.
+             *
              */
             body?: string;
             /**
              * Expected response type
              */
             response_type: "json" | "binary";
+        }
+        /**
+         * Upload-side settings for a file_proxy use case with `direction: upload`.
+         * Everything about WHAT is sent lives on the outbound mapping
+         * (see `FileProxyDeliveryConfig`); this object only governs HOW the transfer is bounded
+         * and judged.
+         *
+         */
+        export interface FileProxyUploadConfig {
+            /**
+             * Per-file ceiling for this use case, in bytes. Files above it fail terminally with
+             * `FILE_TOO_LARGE` before any bytes are fetched. Defaults to — and is clamped by — the
+             * platform ceiling of 100 MiB (104857600).
+             *
+             */
+            max_file_bytes?: number;
+            /**
+             * Maximum delivery attempts per item before the delivery is marked failed and the
+             * message is dead-lettered. Attempts are spaced by an exponential, jittered backoff
+             * spanning roughly 16 hours over the default 8 attempts, so an ERP maintenance window
+             * does not exhaust them.
+             *
+             * Lives here rather than on the outbound delivery because how hard to retry is a
+             * property of the transport — the same judgement as `max_file_bytes` — and the outbound
+             * delivery is a pure pointer.
+             *
+             */
+            max_delivery_attempts?: number;
+            /**
+             * Optional JSONata predicate evaluated against the final step result
+             * (`{ statusCode, headers, body }`) to decide whether the external system really
+             * accepted the file. When omitted, any 2xx counts as delivered. Use this for systems
+             * that return 200 with an error envelope.
+             *
+             * example:
+             * body.status = 'OK'
+             */
+            success_when?: string;
+            /**
+             * Optional JSONata expression over the step results yielding the external system's
+             * identifier for the stored document. Recorded on the delivery record and on the
+             * `FILE_PROXY_UPLOADED` monitoring event so an operator can find the document in the
+             * target system.
+             *
+             * example:
+             * steps[-1].body.documentId
+             */
+            external_id?: string;
         }
         /**
          * Auto-constructs a file proxy download URL. orgId and integrationId are injected from context. Exactly one of use_case_id or use_case_slug must be provided. Using use_case_slug is recommended as it is portable across environments.
@@ -2341,9 +2780,15 @@ declare namespace Components {
             type: "inbound" | "outbound" | "file_proxy" | "managed_call" | "secure_proxy" | "file_proxy";
             enabled: boolean;
             /**
-             * Description of the last change made to this use case
+             * Reason given for the update that produced the current version. Absent when the update supplied none — it is not inherited from the previous version.
+             *
              */
             change_description?: string;
+            /**
+             * User ID recorded for the update that produced the current version. Absent when the update had no user context, e.g. an automated sync.
+             *
+             */
+            changed_by?: string;
             /**
              * ISO-8601 timestamp when the use case was created
              */
@@ -2353,24 +2798,169 @@ declare namespace Components {
              */
             updated_at: string; // date-time
             configuration?: /**
-             * Configuration for file_proxy use cases. Defines how to authenticate and fetch files from external document systems.
+             * Configuration for file_proxy use cases. Defines how to authenticate and move files
+             * between epilot and an external document system, in either direction (see `direction`).
              *
-             * The file proxy download URL always requires `orgId`, `integrationId`, and either `useCaseSlug` (recommended) or `useCaseId` (legacy UUID) as query parameters.
-             * The `orgId` is included in the signed URL to establish organization context without requiring authentication.
-             * Additional use-case-specific parameters are declared in the `params` array.
+             * **Download** (`direction: download`, the default) fetches a file from the external system
+             * and serves it to a browser. The download URL always requires `orgId`, `integrationId`, and
+             * either `useCaseSlug` (recommended) or `useCaseId` (legacy UUID) as query parameters.
+             * The `orgId` is included in the signed URL to establish organization context without
+             * requiring authentication. Additional use-case-specific parameters are declared in the
+             * `params` array. `response` is REQUIRED for download use cases.
+             *
+             * **Upload** (`direction: upload`) pushes epilot files to the external system. It is not
+             * reachable over the download endpoint; an outbound use case points at it via a `file_proxy`
+             * delivery, and this configuration owns everything about what gets sent: `fan_out` decides
+             * how many deliveries one event produces, `params_mapping` builds the values, and the
+             * `steps` place those values into requests via `{{ params.* }}`.
+             * `upload` and `params_mapping` are REQUIRED and `response` MUST be omitted.
+             *
+             * OpenAPI 3.0 cannot express this conditional requiredness, so it is enforced by the
+             * server-side validator, which returns an explicit message naming the offending field.
              *
              */
             FileProxyUseCaseConfiguration;
         }
         /**
-         * Configuration for file_proxy use cases. Defines how to authenticate and fetch files from external document systems.
+         * Configuration for file_proxy use cases. Defines how to authenticate and move files
+         * between epilot and an external document system, in either direction (see `direction`).
          *
-         * The file proxy download URL always requires `orgId`, `integrationId`, and either `useCaseSlug` (recommended) or `useCaseId` (legacy UUID) as query parameters.
-         * The `orgId` is included in the signed URL to establish organization context without requiring authentication.
-         * Additional use-case-specific parameters are declared in the `params` array.
+         * **Download** (`direction: download`, the default) fetches a file from the external system
+         * and serves it to a browser. The download URL always requires `orgId`, `integrationId`, and
+         * either `useCaseSlug` (recommended) or `useCaseId` (legacy UUID) as query parameters.
+         * The `orgId` is included in the signed URL to establish organization context without
+         * requiring authentication. Additional use-case-specific parameters are declared in the
+         * `params` array. `response` is REQUIRED for download use cases.
+         *
+         * **Upload** (`direction: upload`) pushes epilot files to the external system. It is not
+         * reachable over the download endpoint; an outbound use case points at it via a `file_proxy`
+         * delivery, and this configuration owns everything about what gets sent: `fan_out` decides
+         * how many deliveries one event produces, `params_mapping` builds the values, and the
+         * `steps` place those values into requests via `{{ params.* }}`.
+         * `upload` and `params_mapping` are REQUIRED and `response` MUST be omitted.
+         *
+         * OpenAPI 3.0 cannot express this conditional requiredness, so it is enforced by the
+         * server-side validator, which returns an explicit message naming the offending field.
          *
          */
         export interface FileProxyUseCaseConfiguration {
+            /**
+             * Direction of file travel. `download` (default) pulls a file from the external system
+             * into epilot; `upload` pushes an epilot file out to the external system. Omitted means
+             * `download`, so every pre-existing configuration keeps its exact meaning.
+             *
+             * Note this is the direction of the FILE, not the epilot use-case type — an `upload`
+             * file_proxy use case is still a `file_proxy` use case, never an `outbound` one.
+             *
+             */
+            direction?: "download" | "upload";
+            upload?: /**
+             * Upload-side settings for a file_proxy use case with `direction: upload`.
+             * Everything about WHAT is sent lives on the outbound mapping
+             * (see `FileProxyDeliveryConfig`); this object only governs HOW the transfer is bounded
+             * and judged.
+             *
+             */
+            FileProxyUploadConfig;
+            fan_out?: /**
+             * Splits one event into several independent deliveries.
+             *
+             * Mirrors the inbound mapping idiom, where an entity's JSONata expression returning an array
+             * produces one entity update per element. Made explicit with a toggle here because an upload
+             * is also legitimately used without splitting, and because auto-detecting "array means
+             * split" would make a single-element result ambiguous.
+             *
+             * Each resulting delivery is fully independent: its own idempotency record, its own retry
+             * schedule, its own monitoring events. A four-item event can therefore end up three-of-four
+             * delivered, which is the honest state to report.
+             *
+             * The split is evaluated ONCE, when the event is enqueued, so item indices — and therefore
+             * idempotency keys — stay stable across retries.
+             *
+             */
+            FileProxyFanOutConfig;
+            /**
+             * Upload-only, REQUIRED when `direction` is `upload`. JSONata expression evaluated once
+             * per fan-out item, producing the `params` object that step templates read as
+             * `{{ params.* }}`.
+             *
+             * The evaluation root is the hydrated event, so `contact.customer_pin` and
+             * `ticket._purpose` are reachable directly, unprefixed.
+             *
+             * **Everything per-item is a `$`-prefixed JSONata binding**: `$item` (the fan-out
+             * element, absent when `fan_out` is disabled), `$file_base64` and `$file`
+             * (`{filename, mime_type, size_bytes}`) for the resolved file, plus `$constants`,
+             * `$lookups`, `$ack_id`, `$germanDate(iso)` and `$now()`. Writing `item.filename`
+             * instead of `$item.filename` yields nothing — it reads a field named `item` on the
+             * event, which does not exist.
+             *
+             * Must evaluate to an object. `constants` are shallow-merged underneath the result, so
+             * the expression wins on any key collision.
+             *
+             * example:
+             * { "documentType": $lookups.documentType, "fileName": $item.filename, "fileData": $file_base64, "pin": contact.customer_pin }
+             */
+            params_mapping?: string;
+            /**
+             * Upload-only. Named translation tables resolved BEFORE `params_mapping` runs and bound
+             * as `$lookups`, so an expression reads `$lookups.documentType` rather than carrying a
+             * conditional chain. Deliberately generic: the next ERP calls the same concept
+             * `Belegart`.
+             *
+             */
+            lookups?: {
+                [name: string]: /**
+                 * A named translation from a value in the event to a value the external system expects.
+                 *
+                 */
+                FileProxyLookup;
+            };
+            /**
+             * Upload-only. Fixed values shallow-merged UNDERNEATH the `params_mapping` result — the
+             * expression wins on key collisions, constants only add. Use for the unchanging strings
+             * (tenant, sender, channel) that would otherwise be repeated in every expression.
+             *
+             * example:
+             * {
+             *   "mandant": "EPILOT_WNG",
+             *   "sender": "KSSP"
+             * }
+             */
+            constants?: {
+                [name: string]: any;
+            };
+            /**
+             * Upload-only. JSONata returning the attachment-shaped object (`entity_id`, optionally
+             * `s3ref`) whose bytes should be fetched for this delivery. The evaluation root is the
+             * event; the fan-out element is the `$item` binding, same as in `params_mapping`.
+             *
+             * Usually unnecessary: when the fan-out item is itself attachment-shaped it is used
+             * directly. Supply this only when splitting over something that is not the attachment
+             * — for example one delivery per meter reading, each carrying a file referenced from
+             * elsewhere in the event. When nothing resolves, no file is fetched and `file_base64`
+             * is undefined, which is valid for a fan-out that sends metadata only.
+             *
+             * example:
+             * event_attachments[entity_id = $item.file_id][0]
+             */
+            file_source?: string;
+            /**
+             * Upload-only. Params that MUST be present after `params_mapping` runs. Any listed name
+             * resolving to null or undefined fails the delivery terminally with
+             * `REQUIRED_PARAM_MISSING` before a single step executes.
+             *
+             * This is the generic net behind a lookup's `on_miss: fail`: it catches a required field
+             * going missing for any reason, so the external system never receives a body that is
+             * silently short a field its API requires.
+             *
+             * example:
+             * [
+             *   "documentType",
+             *   "fileName",
+             *   "fileData"
+             * ]
+             */
+            required_params?: string[];
             /**
              * Optional secure proxy attachment for routing all outbound file proxy requests.
              * Only `use_case_slug` is supported and the referenced secure_proxy use case
@@ -2385,22 +2975,37 @@ declare namespace Components {
             };
             auth?: FileProxyAuth;
             /**
-             * Additional use-case-specific parameters expected in the download URL query string (beyond the required orgId, integrationId, and useCaseSlug or useCaseId)
+             * Download-only. Additional use-case-specific parameters expected in the download URL
+             * query string (beyond the required orgId, integrationId, and useCaseSlug or useCaseId).
+             * Rejected when `direction` is `upload`.
+             *
              */
             params?: FileProxyParam[];
             /**
-             * Additional origins permitted to call /download for this use case (CORS, exact match). Portal origins are always allowed.
+             * Download-only. Additional origins permitted to call /download for this use case
+             * (CORS, exact match). Portal origins are always allowed. Rejected when `direction`
+             * is `upload`.
+             *
              */
             allowed_origins?: string /* uri ^https?:// */[];
             /**
-             * Ordered list of HTTP steps to execute to retrieve the file
+             * Ordered list of HTTP steps to execute. For `download` these retrieve the file; for
+             * `upload` they deliver it, each assembling its own request body from `{{ params.* }}`
+             * built by `params_mapping`.
+             *
              */
             steps: [
                 FileProxyStep,
                 ...FileProxyStep[]
             ];
-            response: FileProxyResponseConfig;
+            response?: /**
+             * How to extract the file from the step results. REQUIRED when `direction` is `download`;
+             * rejected when `direction` is `upload` (an upload has no file to extract).
+             *
+             */
+            FileProxyResponseConfig;
             /**
+             * Download-only; rejected when `direction` is `upload`.
              * When `true`, this use case is served via the streaming endpoint: mapped file URLs
              * are built as `/stream/download`, files of any size are streamed inline over HTTP
              * response streaming, and buffered `/download` requests for oversize files are
@@ -2461,11 +3066,25 @@ declare namespace Components {
              */
             type: "file_proxy";
             configuration?: /**
-             * Configuration for file_proxy use cases. Defines how to authenticate and fetch files from external document systems.
+             * Configuration for file_proxy use cases. Defines how to authenticate and move files
+             * between epilot and an external document system, in either direction (see `direction`).
              *
-             * The file proxy download URL always requires `orgId`, `integrationId`, and either `useCaseSlug` (recommended) or `useCaseId` (legacy UUID) as query parameters.
-             * The `orgId` is included in the signed URL to establish organization context without requiring authentication.
-             * Additional use-case-specific parameters are declared in the `params` array.
+             * **Download** (`direction: download`, the default) fetches a file from the external system
+             * and serves it to a browser. The download URL always requires `orgId`, `integrationId`, and
+             * either `useCaseSlug` (recommended) or `useCaseId` (legacy UUID) as query parameters.
+             * The `orgId` is included in the signed URL to establish organization context without
+             * requiring authentication. Additional use-case-specific parameters are declared in the
+             * `params` array. `response` is REQUIRED for download use cases.
+             *
+             * **Upload** (`direction: upload`) pushes epilot files to the external system. It is not
+             * reachable over the download endpoint; an outbound use case points at it via a `file_proxy`
+             * delivery, and this configuration owns everything about what gets sent: `fan_out` decides
+             * how many deliveries one event produces, `params_mapping` builds the values, and the
+             * `steps` place those values into requests via `{{ params.* }}`.
+             * `upload` and `params_mapping` are REQUIRED and `response` MUST be omitted.
+             *
+             * OpenAPI 3.0 cannot express this conditional requiredness, so it is enforced by the
+             * server-side validator, which returns an explicit message naming the offending field.
              *
              */
             FileProxyUseCaseConfiguration;
@@ -2747,9 +3366,15 @@ declare namespace Components {
             type: "inbound" | "outbound" | "file_proxy" | "managed_call" | "secure_proxy" | "inbound";
             enabled: boolean;
             /**
-             * Description of the last change made to this use case
+             * Reason given for the update that produced the current version. Absent when the update supplied none — it is not inherited from the previous version.
+             *
              */
             change_description?: string;
+            /**
+             * User ID recorded for the update that produced the current version. Absent when the update had no user context, e.g. an automated sync.
+             *
+             */
+            changed_by?: string;
             /**
              * ISO-8601 timestamp when the use case was created
              */
@@ -3901,9 +4526,15 @@ declare namespace Components {
             type: "inbound" | "outbound" | "file_proxy" | "managed_call" | "secure_proxy" | "managed_call";
             enabled: boolean;
             /**
-             * Description of the last change made to this use case
+             * Reason given for the update that produced the current version. Absent when the update supplied none — it is not inherited from the previous version.
+             *
              */
             change_description?: string;
+            /**
+             * User ID recorded for the update that produced the current version. Absent when the update had no user context, e.g. an automated sync.
+             *
+             */
+            changed_by?: string;
             /**
              * ISO-8601 timestamp when the use case was created
              */
@@ -3999,6 +4630,14 @@ declare namespace Components {
             entity_updates: EntityUpdate[];
             meter_readings_updates?: MeterReadingUpdate[];
             /**
+             * Resolved prune scopes produced by entity mappings using `upsert-prune-scope-purge` / `upsert-prune-scope-delete`. Each entry describes the entities that would be deleted at runtime because they exist in scope but were not part of this payload.
+             */
+            prune_scope_updates?: /* A resolved entity prune scope. At runtime, entities of `entity_slug` found within `scope` whose unique identifiers are not listed in `keep_unique_ids` are removed using `deletion_mode`. */ EntityPruneScopeUpdate[];
+            /**
+             * Resolved prune scopes produced by meter reading mappings using `upsert-prune-scope`. Each entry describes the readings that would be deleted at runtime for a meter (+ counter) because they were not part of this payload.
+             */
+            meter_readings_prune_scope_updates?: /* A resolved meter reading prune scope. At runtime, readings of the given meter (+ counter) whose external ids are not listed in `keep_external_ids` are deleted. */ MeterReadingPruneScopeUpdate[];
+            /**
              * Validation warnings about the configuration (e.g., unique_ids referencing non-indexed fields)
              */
             warnings?: MappingSimulationWarning[];
@@ -4048,6 +4687,35 @@ declare namespace Components {
              */
             source?: string;
         }
+        /**
+         * A resolved meter reading prune scope. At runtime, readings of the given meter (+ counter) whose external ids are not listed in `keep_external_ids` are deleted.
+         */
+        export interface MeterReadingPruneScopeUpdate {
+            meter: {
+                /**
+                 * Unique identifiers for the meter
+                 */
+                $entity_unique_ids: {
+                    [name: string]: any;
+                };
+            };
+            meter_counter?: {
+                /**
+                 * Unique identifiers for the meter counter
+                 */
+                $entity_unique_ids?: {
+                    [name: string]: any;
+                };
+            };
+            /**
+             * External ids of the readings present in this payload. All other readings in scope would be deleted. An empty array means every reading in scope would be deleted.
+             */
+            keep_external_ids: string[];
+            /**
+             * When set, only readings with this source are eligible for pruning (e.g. `ERP`)
+             */
+            source?: string;
+        }
         export interface MeterReadingUpdate {
             meter: {
                 /**
@@ -4071,6 +4739,10 @@ declare namespace Components {
             attributes: {
                 [name: string]: any;
             };
+            /**
+             * Effective operation mode applied to this reading at runtime. `upsert-prune-scope` configurations report `upsert` here — their destructive part is reported separately in `meter_readings_prune_scope_updates`.
+             */
+            mode: "upsert" | "delete";
         }
         export interface MeterUniqueIdsConfig {
             /**
@@ -4578,6 +5250,49 @@ declare namespace Components {
             expires_at?: string; // date-time
         }
         /**
+         * Resolution state of one file_proxy mapping's referenced upload use case.
+         *
+         * Because the transport lives on a separate use case, edits to the endpoint or credentials
+         * do not appear in THIS use case's history. `target_updated_at` is the hook that lets an
+         * operator notice a target changed underneath a delivery that started failing.
+         *
+         */
+        export interface OutboundFileProxyTargetStatus {
+            /**
+             * The mapping holding this file_proxy delivery
+             */
+            mapping_id: string;
+            /**
+             * Slug of the referenced file_proxy use case
+             */
+            use_case_slug: string;
+            /**
+             * Whether the slug currently resolves to an enabled `file_proxy` use case with
+             * `direction: upload` in this integration. References are resolved at delivery time,
+             * so `false` is a live warning rather than a save-time error.
+             *
+             */
+            resolved: boolean;
+            /**
+             * Id of the referenced use case — absent when unresolved
+             */
+            target_use_case_id?: string; // uuid
+            /**
+             * Whether the referenced use case is enabled — absent when unresolved
+             */
+            target_enabled?: boolean;
+            /**
+             * When the referenced use case was last modified — absent when unresolved. Surfaced
+             * because a change here is invisible in this use case's own history diff.
+             *
+             */
+            target_updated_at?: string; // date-time
+            /**
+             * Why the reference did not resolve — absent when `resolved` is true
+             */
+            unresolved_reason?: "not_found" | "wrong_type" | "wrong_direction" | "disabled";
+        }
+        /**
          * Configuration for outbound use cases. Defines the event that triggers the flow and the webhook mappings.
          */
         export interface OutboundIntegrationEventConfiguration {
@@ -4588,15 +5303,48 @@ declare namespace Components {
              */
             event_catalog_event: string;
             /**
+             * JSONata boolean predicate over the hydrated event payload. The use case handles the
+             * event only when this evaluates truthy; when absent it handles every event of its name,
+             * which is the behaviour of every pre-existing configuration.
+             *
+             * This is where event scoping belongs — narrowing to certain ticket purposes, contract
+             * types or channels. Evaluation input is the full hydrated event, so relation nodes such
+             * as `ticket` and `contact` are populated. An expression that throws is treated as no
+             * match and logged, so one malformed filter cannot block the other use cases subscribed
+             * to the same event.
+             *
+             * example:
+             * $count(ticket._purpose[$ in ['bae4b4d1-d728-49ef-92ff-54486dd301b4']]) > 0
+             */
+            event_filter?: string;
+            /**
              * List of mappings that transform and deliver the event
              */
             mappings: [
-                /* A mapping that delivers an event to an external system — either pushed to a webhook (with a JSONata payload transformation) or made available on the pull-based poll queue (raw event payload, no transformation) */ OutboundMapping,
-                .../* A mapping that delivers an event to an external system — either pushed to a webhook (with a JSONata payload transformation) or made available on the pull-based poll queue (raw event payload, no transformation) */ OutboundMapping[]
+                /* A mapping that delivers an event to an external system by one of three mechanisms — pushed to a webhook (with a JSONata payload transformation), made available on the pull-based poll queue (raw event payload, no transformation), or handed to a file_proxy use case that uploads files to an external document system (a pointer only; the referenced use case owns the payload and the fan-out) */ OutboundMapping,
+                .../* A mapping that delivers an event to an external system by one of three mechanisms — pushed to a webhook (with a JSONata payload transformation), made available on the pull-based poll queue (raw event payload, no transformation), or handed to a file_proxy use case that uploads files to an external document system (a pointer only; the referenced use case owns the payload and the fan-out) */ OutboundMapping[]
             ];
+            /**
+             * Whether this use case participates in the acknowledgement protocol.
+             *
+             * `on` (the default, and the behaviour of every pre-existing use case) records an
+             * ACK_PENDING on each event and expects the consumer to confirm receipt via
+             * `POST /v1/erp/tracking/acknowledgement`; unconfirmed events raise ACK_TIMEOUT after
+             * the timeout window.
+             *
+             * `off` opts the use case out entirely: no tracking row, no ACK_PENDING, no
+             * ACK_TIMEOUT. Set it for consumers that never acknowledge — otherwise every event
+             * produces a guaranteed timeout warning — and for deliveries that already keep their
+             * own durable per-item record, such as `file_proxy`.
+             *
+             * The tracking row is per-event, not per-use-case, so it is suppressed only when EVERY
+             * enabled use case matching the event has opted out.
+             *
+             */
+            ack_tracking?: "on" | "off";
         }
         /**
-         * A mapping that delivers an event to an external system — either pushed to a webhook (with a JSONata payload transformation) or made available on the pull-based poll queue (raw event payload, no transformation)
+         * A mapping that delivers an event to an external system by one of three mechanisms — pushed to a webhook (with a JSONata payload transformation), made available on the pull-based poll queue (raw event payload, no transformation), or handed to a file_proxy use case that uploads files to an external document system (a pointer only; the referenced use case owns the payload and the fan-out)
          */
         export interface OutboundMapping {
             /**
@@ -4610,7 +5358,7 @@ declare namespace Components {
              */
             name: string;
             /**
-             * JSONata expression to transform the event payload. Required for webhook delivery; ignored for poll delivery.
+             * JSONata expression to transform the event payload. Required for webhook delivery, ignored for poll delivery, and rejected for file_proxy delivery — a file_proxy payload is built by the referenced use case's `params_mapping`, so accepting an expression here would silently do nothing.
              * example:
              * { "id": entity._id, "customer": entity.customer_name }
              */
@@ -4619,7 +5367,7 @@ declare namespace Components {
              * Whether this mapping is active
              */
             enabled: boolean;
-            delivery: /* Configuration for how the event should be delivered. webhook = push delivery via svc-webhooks (JSONata-transformed payload); poll = pull-based queue delivery where the consumer fetches items via the poll API (raw event payload) */ DeliveryConfig;
+            delivery: /* Configuration for how the event should be delivered. webhook = push delivery via svc-webhooks (JSONata-transformed payload); poll = pull-based queue delivery where the consumer fetches items via the poll API (raw event payload); file_proxy = one push per event attachment to an external document system, through a file_proxy use case (JSONata-transformed payload carrying the file bytes) */ DeliveryConfig;
             /**
              * Timestamp when the mapping was created
              */
@@ -4792,9 +5540,15 @@ declare namespace Components {
             type: "inbound" | "outbound" | "file_proxy" | "managed_call" | "secure_proxy" | "outbound";
             enabled: boolean;
             /**
-             * Description of the last change made to this use case
+             * Reason given for the update that produced the current version. Absent when the update supplied none — it is not inherited from the previous version.
+             *
              */
             change_description?: string;
+            /**
+             * User ID recorded for the update that produced the current version. Absent when the update had no user context, e.g. an automated sync.
+             *
+             */
+            changed_by?: string;
             /**
              * ISO-8601 timestamp when the use case was created
              */
@@ -4899,6 +5653,20 @@ declare namespace Components {
              *
              */
             OutboundPollStatus;
+            /**
+             * One entry per file_proxy mapping on this use case. Present only on use cases with a
+             * file_proxy delivery mapping.
+             *
+             */
+            file_proxy?: /**
+             * Resolution state of one file_proxy mapping's referenced upload use case.
+             *
+             * Because the transport lives on a separate use case, edits to the endpoint or credentials
+             * do not appear in THIS use case's history. `target_updated_at` is the hook that lets an
+             * operator notice a target changed underneath a delivery that started failing.
+             *
+             */
+            OutboundFileProxyTargetStatus[];
         }
         /**
          * Pull-based queue delivery. Items carry the raw standardized event-catalog payload; no JSONata mapping is applied in poll mode. Consumers fetch and acknowledge items via the poll API.
@@ -5847,9 +6615,15 @@ declare namespace Components {
             type: "inbound" | "outbound" | "file_proxy" | "managed_call" | "secure_proxy" | "secure_proxy";
             enabled: boolean;
             /**
-             * Description of the last change made to this use case
+             * Reason given for the update that produced the current version. Absent when the update supplied none — it is not inherited from the previous version.
+             *
              */
             change_description?: string;
+            /**
+             * User ID recorded for the update that produced the current version. Absent when the update had no user context, e.g. an automated sync.
+             *
+             */
+            changed_by?: string;
             /**
              * ISO-8601 timestamp when the use case was created
              */
@@ -6005,6 +6779,13 @@ declare namespace Components {
              * If true, overwrites existing mapping. If false and mapping exists, returns 409 Conflict.
              */
             overwrite?: boolean;
+        }
+        export interface SuggestErpImportUseCasesResponse {
+            /**
+             * Columns in the file. Present even when `suggestions` is empty.
+             */
+            file_columns: number;
+            suggestions: ErpImportUseCaseSuggestion[];
         }
         export interface TestNotificationRequest {
             /**
@@ -6277,11 +7058,25 @@ declare namespace Components {
              */
             type?: "file_proxy";
             configuration?: /**
-             * Configuration for file_proxy use cases. Defines how to authenticate and fetch files from external document systems.
+             * Configuration for file_proxy use cases. Defines how to authenticate and move files
+             * between epilot and an external document system, in either direction (see `direction`).
              *
-             * The file proxy download URL always requires `orgId`, `integrationId`, and either `useCaseSlug` (recommended) or `useCaseId` (legacy UUID) as query parameters.
-             * The `orgId` is included in the signed URL to establish organization context without requiring authentication.
-             * Additional use-case-specific parameters are declared in the `params` array.
+             * **Download** (`direction: download`, the default) fetches a file from the external system
+             * and serves it to a browser. The download URL always requires `orgId`, `integrationId`, and
+             * either `useCaseSlug` (recommended) or `useCaseId` (legacy UUID) as query parameters.
+             * The `orgId` is included in the signed URL to establish organization context without
+             * requiring authentication. Additional use-case-specific parameters are declared in the
+             * `params` array. `response` is REQUIRED for download use cases.
+             *
+             * **Upload** (`direction: upload`) pushes epilot files to the external system. It is not
+             * reachable over the download endpoint; an outbound use case points at it via a `file_proxy`
+             * delivery, and this configuration owns everything about what gets sent: `fan_out` decides
+             * how many deliveries one event produces, `params_mapping` builds the values, and the
+             * `steps` place those values into requests via `{{ params.* }}`.
+             * `upload` and `params_mapping` are REQUIRED and `response` MUST be omitted.
+             *
+             * OpenAPI 3.0 cannot express this conditional requiredness, so it is enforced by the
+             * server-side validator, which returns an explicit message naming the offending field.
              *
              */
             FileProxyUseCaseConfiguration;
@@ -6408,6 +7203,13 @@ declare namespace Components {
              */
             change_description?: string;
         }
+        export interface UpsertDocumentationPageRequest {
+            title: string;
+            /**
+             * Markdown source of the page
+             */
+            content: string;
+        }
         /**
          * Request to create or update an integration with embedded use cases (upsert).
          * This is a declarative operation - the request represents the desired state.
@@ -6483,9 +7285,15 @@ declare namespace Components {
             type: "inbound" | "outbound" | "file_proxy" | "managed_call" | "secure_proxy";
             enabled: boolean;
             /**
-             * Description of the last change made to this use case
+             * Reason given for the update that produced the current version. Absent when the update supplied none — it is not inherited from the previous version.
+             *
              */
             change_description?: string;
+            /**
+             * User ID recorded for the update that produced the current version. Absent when the update had no user context, e.g. an automated sync.
+             *
+             */
+            changed_by?: string;
             /**
              * ISO-8601 timestamp when the use case was created
              */
@@ -6551,6 +7359,13 @@ declare namespace Components {
             request_shape: /* Describes the inferred type shape of a JSONata expression */ TypeDescriptor;
             response_shape: /* Describes the inferred type shape of a JSONata expression */ TypeDescriptor;
             existing_annotations?: /* Developer-provided type annotations for a use case's request and response fields */ TypeAnnotations;
+        }
+        export interface ValidateErpImportRequest {
+            integration_id: string;
+            /**
+             * An inbound use case's slug, unique within its integration.
+             */
+            use_case_slug: string;
         }
         /**
          * Push delivery of the transformed event to a webhook via svc-webhooks
@@ -6660,9 +7475,9 @@ declare namespace Paths {
         }
     }
     namespace CreateErpImport {
-        export type RequestBody = Components.Schemas.CreateErpImportRequest;
+        export type RequestBody = /* Register an already-uploaded file as an import. The use case is chosen later, via `:validate` — upload and interpretation are separate decisions. */ Components.Schemas.CreateErpImportRequest;
         namespace Responses {
-            export type $202 = Components.Schemas.CreateErpImportResponse;
+            export type $201 = Components.Schemas.CreateErpImportResponse;
             export type $400 = Components.Responses.BadRequest;
             export type $403 = Components.Responses.Forbidden;
             export type $500 = Components.Responses.InternalServerError;
@@ -6705,6 +7520,41 @@ declare namespace Paths {
             export type $401 = Components.Responses.Unauthorized;
             export interface $404 {
             }
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace DeleteDocumentationPage {
+        namespace Parameters {
+            export type DocId = string; // ^(general|[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$
+            export type IntegrationId = string; // uuid
+        }
+        export interface PathParameters {
+            integrationId: Parameters.IntegrationId /* uuid */;
+            docId: Parameters.DocId /* ^(general|[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$ */;
+        }
+        namespace Responses {
+            export interface $200 {
+                message?: string;
+            }
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export interface $404 {
+            }
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace DeleteErpImport {
+        namespace Parameters {
+            export type ImportId = string;
+        }
+        export interface PathParameters {
+            importId: Parameters.ImportId;
+        }
+        namespace Responses {
+            export interface $204 {
+            }
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -6787,11 +7637,13 @@ declare namespace Paths {
         export interface PathParameters {
             importId: Parameters.ImportId;
         }
+        export type RequestBody = /* Confirmation options. Required only when the verdict carries warnings — a clean import needs no body at all. */ Components.Schemas.ExecuteErpImportRequest;
         namespace Responses {
-            export type $200 = Components.Schemas.ErpImportJob;
+            export type $202 = Components.Schemas.ErpImportJob;
             export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
             export type $409 = Components.Responses.Conflict;
+            export type $422 = Components.Schemas.ErrorResponseBase;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -6839,6 +7691,23 @@ declare namespace Paths {
             export type $200 = Components.Responses.GetAssociatedMonitoringEventsResponse;
             export type $400 = Components.Responses.BadRequest;
             export type $401 = Components.Responses.Unauthorized;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace GetDocumentationPage {
+        namespace Parameters {
+            export type DocId = string; // ^(general|[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$
+            export type IntegrationId = string; // uuid
+        }
+        export interface PathParameters {
+            integrationId: Parameters.IntegrationId /* uuid */;
+            docId: Parameters.DocId /* ^(general|[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$ */;
+        }
+        namespace Responses {
+            export type $200 = /* A markdown documentation page of an integration */ Components.Schemas.DocumentationPage;
+            export type $401 = Components.Responses.Unauthorized;
+            export interface $404 {
+            }
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -7055,6 +7924,23 @@ declare namespace Paths {
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace ListDocumentationPages {
+        namespace Parameters {
+            export type IntegrationId = string; // uuid
+        }
+        export interface PathParameters {
+            integrationId: Parameters.IntegrationId /* uuid */;
+        }
+        namespace Responses {
+            export interface $200 {
+                pages: /* Documentation page metadata without the markdown content */ Components.Schemas.DocumentationPageSummary[];
+            }
+            export type $401 = Components.Responses.Unauthorized;
+            export interface $404 {
+            }
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -7486,6 +8372,21 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace SuggestErpImportUseCases {
+        namespace Parameters {
+            export type ImportId = string;
+        }
+        export interface PathParameters {
+            importId: Parameters.ImportId;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.SuggestErpImportUseCasesResponse;
+            export type $400 = Components.Responses.BadRequest;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace TestSendNotification {
         namespace Parameters {
             export type IntegrationId = string; // uuid
@@ -7623,6 +8524,43 @@ declare namespace Paths {
             export type $401 = Components.Responses.Unauthorized;
             export interface $404 {
             }
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace UpsertDocumentationPage {
+        namespace Parameters {
+            export type DocId = string; // ^(general|[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$
+            export type IntegrationId = string; // uuid
+        }
+        export interface PathParameters {
+            integrationId: Parameters.IntegrationId /* uuid */;
+            docId: Parameters.DocId /* ^(general|[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$ */;
+        }
+        export type RequestBody = Components.Schemas.UpsertDocumentationPageRequest;
+        namespace Responses {
+            export type $200 = /* A markdown documentation page of an integration */ Components.Schemas.DocumentationPage;
+            export type $400 = Components.Responses.BadRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export interface $404 {
+            }
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace ValidateErpImport {
+        namespace Parameters {
+            export type ImportId = string;
+        }
+        export interface PathParameters {
+            importId: Parameters.ImportId;
+        }
+        export type RequestBody = Components.Schemas.ValidateErpImportRequest;
+        namespace Responses {
+            export type $202 = Components.Schemas.ErpImportJob;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $409 = Components.Responses.Conflict;
+            export type $422 = Components.Schemas.ErrorResponseBase;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -7850,6 +8788,53 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ListUseCaseHistory.Responses.$200>
   /**
+   * listDocumentationPages - listDocumentationPages
+   * 
+   * Retrieve all documentation pages of an integration, without their markdown content.
+   * An integration has at most one general page plus at most one page per use case.
+   * The page id is 'general' for the integration-wide page, otherwise the use case ID.
+   * 
+   */
+  'listDocumentationPages'(
+    parameters?: Parameters<Paths.ListDocumentationPages.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ListDocumentationPages.Responses.$200>
+  /**
+   * getDocumentationPage - getDocumentationPage
+   * 
+   * Retrieve a single documentation page including its markdown content
+   */
+  'getDocumentationPage'(
+    parameters?: Parameters<Paths.GetDocumentationPage.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetDocumentationPage.Responses.$200>
+  /**
+   * upsertDocumentationPage - upsertDocumentationPage
+   * 
+   * Create or update the documentation page identified by docId.
+   * Upsert semantics enforce the invariant of one general page per
+   * integration and one page per use case. For use case pages the
+   * use case must exist.
+   * 
+   */
+  'upsertDocumentationPage'(
+    parameters?: Parameters<Paths.UpsertDocumentationPage.PathParameters> | null,
+    data?: Paths.UpsertDocumentationPage.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.UpsertDocumentationPage.Responses.$200>
+  /**
+   * deleteDocumentationPage - deleteDocumentationPage
+   * 
+   * Delete a documentation page
+   */
+  'deleteDocumentationPage'(
+    parameters?: Parameters<Paths.DeleteDocumentationPage.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.DeleteDocumentationPage.Responses.$200>
+  /**
    * listIntegrationsV2 - listIntegrationsV2
    * 
    * Retrieve all integrations with embedded use cases for the authenticated organization
@@ -7948,7 +8933,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetNotificationStatus.Responses.$200>
   /**
-   * getSecureProxyWhitelist - Get secure_proxy whitelist (admin portal only)
+   * getSecureProxyWhitelist - getSecureProxyWhitelist
    * 
    * Returns the current allowed_domains, allowed_ips, and vpc_mode for a secure_proxy use case.
    * Staff-only — gated by internal-auth issuer AND admin-portal Cognito user pool membership.
@@ -7961,7 +8946,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetSecureProxyWhitelist.Responses.$200>
   /**
-   * updateSecureProxyWhitelist - Update secure_proxy whitelist (admin portal only)
+   * updateSecureProxyWhitelist - updateSecureProxyWhitelist
    * 
    * Replaces allowed_domains and/or allowed_ips on a secure_proxy use case.
    * At least one of the two fields is required. Validation mirrors the CLI's
@@ -7983,7 +8968,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UpdateSecureProxyWhitelist.Responses.$200>
   /**
-   * listSecureProxyWhitelistHistory - List secure_proxy whitelist change history (admin portal only)
+   * listSecureProxyWhitelistHistory - listSecureProxyWhitelistHistory
    * 
    * Returns the most recent USECASE_HISTORY entries for a secure_proxy use case,
    * in reverse chronological order (newest first). Each entry includes the
@@ -8288,7 +9273,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetMonitoringTraceByCorrelation.Responses.$200>
   /**
-   * listSecureProxies - List all secure proxy use cases
+   * listSecureProxies - listSecureProxies
    * 
    * Lists all secure_proxy use cases across all integrations for the authenticated organization.
    * Returns minimal data suitable for dropdowns and selection UIs.
@@ -8300,7 +9285,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ListSecureProxies.Responses.$200>
   /**
-   * secureProxy - Proxy HTTP request through secure VPC
+   * secureProxy - secureProxy
    * 
    * Routes an HTTP request through a VPC with either static IP egress or VPN secure link access.
    * The VPC mode is determined by the referenced secure_proxy use case configuration.
@@ -8313,7 +9298,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.SecureProxy.Responses.$200>
   /**
-   * managedCallExecute - Execute a managed call operation
+   * managedCallExecute - managedCallExecute
    * 
    * Execute a managed call operation synchronously. The slug in the path acts as the RPC method name.
    * Calls an external partner API with JSONata mapping on both request and response.
@@ -8325,7 +9310,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ManagedCallExecute.Responses.$200>
   /**
-   * generateTypesPreview - Preview scaffolded types for a connector integration
+   * generateTypesPreview - generateTypesPreview
    * 
    * Analyses the JSONata mappings of all managed-call use cases in the integration and returns scaffolded type descriptors. The frontend uses these to show the type editor modal where developers fill in leaf types.
    * 
@@ -8336,7 +9321,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GenerateTypesPreview.Responses.$200>
   /**
-   * generateTypes - Generate a TypeScript npm package for a connector integration
+   * generateTypes - generateTypes
    * 
    * Generates a complete TypeScript npm package with typed interfaces for all managed-call use cases. This is a stateless operation that does not persist any changes. Use the commit-types endpoint to lock configurations after review.
    * 
@@ -8347,7 +9332,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GenerateTypes.Responses.$200>
   /**
-   * commitTypes - Commit generated types and lock use case configurations
+   * commitTypes - commitTypes
    * 
    * Commits the generated types by locking use case configurations and updating version tracking. Should be called after the user reviews and downloads the generated package.
    * 
@@ -8375,13 +9360,13 @@ export interface OperationMethods {
   /**
    * createErpImport - createErpImport
    * 
-   * Create a pricing-file import job from an already-uploaded file (S3 ref). Returns a job id and starts the validate phase asynchronously — poll GET /v2/erp/imports/{importId}.
+   * Register an already-uploaded file (S3 ref) as a pricing-file import job. Returns the job and a file preview. Nothing runs yet: no use case is chosen and no validation starts here. Optionally rank candidates with POST /v2/erp/imports/{importId}:suggest-use-cases, then start validation with POST /v2/erp/imports/{importId}:validate.
    */
   'createErpImport'(
     parameters?: Parameters<UnknownParamsObject> | null,
     data?: Paths.CreateErpImport.RequestBody,
     config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.CreateErpImport.Responses.$202>
+  ): OperationResponse<Paths.CreateErpImport.Responses.$201>
   /**
    * getErpImport - getErpImport
    * 
@@ -8393,15 +9378,48 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetErpImport.Responses.$200>
   /**
+   * deleteErpImport - deleteErpImport
+   * 
+   * Remove an import and the file it owns. Allowed from any status: an import whose run is still in flight is stopped by the deletion, and rows it already wrote stay written.
+   */
+  'deleteErpImport'(
+    parameters?: Parameters<Paths.DeleteErpImport.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.DeleteErpImport.Responses.$204>
+  /**
+   * validateErpImport - validateErpImport
+   * 
+   * Choose the use case to read this file with, and start the validate phase.
+   * Callable from PENDING, READY and FAILED — so a wrong choice is corrected by calling this again with a different use case, rather than re-uploading. Each call replaces any previous verdict. Any other status returns 409.
+   */
+  'validateErpImport'(
+    parameters?: Parameters<Paths.ValidateErpImport.PathParameters> | null,
+    data?: Paths.ValidateErpImport.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ValidateErpImport.Responses.$202>
+  /**
+   * suggestErpImportUseCases - suggestErpImportUseCases
+   * 
+   * Rank the org's inbound use cases against this file's columns — the input to the ranked picker ("matches 6 of your 7 columns"). Optional: skip this and call `:validate` directly when the use case is already known. Reads only the file's first row, not its data.
+   * Every eligible use case is returned, including ones matching nothing: the "nothing fits, pick anyway" view needs the full list. Highest match first.
+   * CSV only — an xlsx import fails with 400 rather than silently returning zero matches, which would look identical to "we checked and nothing matches".
+   */
+  'suggestErpImportUseCases'(
+    parameters?: Parameters<Paths.SuggestErpImportUseCases.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.SuggestErpImportUseCases.Responses.$200>
+  /**
    * executeErpImport - executeErpImport
    * 
    * Confirm and run the write phase of a validated import. Only a READY job may be executed; any other status returns 409.
    */
   'executeErpImport'(
     parameters?: Parameters<Paths.ExecuteErpImport.PathParameters> | null,
-    data?: any,
+    data?: Paths.ExecuteErpImport.RequestBody,
     config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.ExecuteErpImport.Responses.$200>
+  ): OperationResponse<Paths.ExecuteErpImport.Responses.$202>
   /**
    * abortErpImport - abortErpImport
    * 
@@ -8664,6 +9682,57 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ListUseCaseHistory.Responses.$200>
   }
+  ['/v1/integrations/{integrationId}/documentation']: {
+    /**
+     * listDocumentationPages - listDocumentationPages
+     * 
+     * Retrieve all documentation pages of an integration, without their markdown content.
+     * An integration has at most one general page plus at most one page per use case.
+     * The page id is 'general' for the integration-wide page, otherwise the use case ID.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.ListDocumentationPages.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ListDocumentationPages.Responses.$200>
+  }
+  ['/v1/integrations/{integrationId}/documentation/{docId}']: {
+    /**
+     * getDocumentationPage - getDocumentationPage
+     * 
+     * Retrieve a single documentation page including its markdown content
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetDocumentationPage.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetDocumentationPage.Responses.$200>
+    /**
+     * upsertDocumentationPage - upsertDocumentationPage
+     * 
+     * Create or update the documentation page identified by docId.
+     * Upsert semantics enforce the invariant of one general page per
+     * integration and one page per use case. For use case pages the
+     * use case must exist.
+     * 
+     */
+    'put'(
+      parameters?: Parameters<Paths.UpsertDocumentationPage.PathParameters> | null,
+      data?: Paths.UpsertDocumentationPage.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.UpsertDocumentationPage.Responses.$200>
+    /**
+     * deleteDocumentationPage - deleteDocumentationPage
+     * 
+     * Delete a documentation page
+     */
+    'delete'(
+      parameters?: Parameters<Paths.DeleteDocumentationPage.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.DeleteDocumentationPage.Responses.$200>
+  }
   ['/v2/integrations']: {
     /**
      * listIntegrationsV2 - listIntegrationsV2
@@ -8774,7 +9843,7 @@ export interface PathsDictionary {
   }
   ['/v2/integrations/{integrationId}/use-cases/{useCaseId}/secure-proxy-whitelist']: {
     /**
-     * getSecureProxyWhitelist - Get secure_proxy whitelist (admin portal only)
+     * getSecureProxyWhitelist - getSecureProxyWhitelist
      * 
      * Returns the current allowed_domains, allowed_ips, and vpc_mode for a secure_proxy use case.
      * Staff-only — gated by internal-auth issuer AND admin-portal Cognito user pool membership.
@@ -8787,7 +9856,7 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetSecureProxyWhitelist.Responses.$200>
     /**
-     * updateSecureProxyWhitelist - Update secure_proxy whitelist (admin portal only)
+     * updateSecureProxyWhitelist - updateSecureProxyWhitelist
      * 
      * Replaces allowed_domains and/or allowed_ips on a secure_proxy use case.
      * At least one of the two fields is required. Validation mirrors the CLI's
@@ -8811,7 +9880,7 @@ export interface PathsDictionary {
   }
   ['/v2/integrations/{integrationId}/use-cases/{useCaseId}/secure-proxy-whitelist/history']: {
     /**
-     * listSecureProxyWhitelistHistory - List secure_proxy whitelist change history (admin portal only)
+     * listSecureProxyWhitelistHistory - listSecureProxyWhitelistHistory
      * 
      * Returns the most recent USECASE_HISTORY entries for a secure_proxy use case,
      * in reverse chronological order (newest first). Each entry includes the
@@ -9154,7 +10223,7 @@ export interface PathsDictionary {
   }
   ['/v1/integrations/secure-proxies']: {
     /**
-     * listSecureProxies - List all secure proxy use cases
+     * listSecureProxies - listSecureProxies
      * 
      * Lists all secure_proxy use cases across all integrations for the authenticated organization.
      * Returns minimal data suitable for dropdowns and selection UIs.
@@ -9168,7 +10237,7 @@ export interface PathsDictionary {
   }
   ['/v1/secure-proxy']: {
     /**
-     * secureProxy - Proxy HTTP request through secure VPC
+     * secureProxy - secureProxy
      * 
      * Routes an HTTP request through a VPC with either static IP egress or VPN secure link access.
      * The VPC mode is determined by the referenced secure_proxy use case configuration.
@@ -9183,7 +10252,7 @@ export interface PathsDictionary {
   }
   ['/v1/managed-call/{slug}/execute']: {
     /**
-     * managedCallExecute - Execute a managed call operation
+     * managedCallExecute - managedCallExecute
      * 
      * Execute a managed call operation synchronously. The slug in the path acts as the RPC method name.
      * Calls an external partner API with JSONata mapping on both request and response.
@@ -9197,7 +10266,7 @@ export interface PathsDictionary {
   }
   ['/v1/integrations/{integrationId}/generate-types-preview']: {
     /**
-     * generateTypesPreview - Preview scaffolded types for a connector integration
+     * generateTypesPreview - generateTypesPreview
      * 
      * Analyses the JSONata mappings of all managed-call use cases in the integration and returns scaffolded type descriptors. The frontend uses these to show the type editor modal where developers fill in leaf types.
      * 
@@ -9210,7 +10279,7 @@ export interface PathsDictionary {
   }
   ['/v1/integrations/{integrationId}/generate-types']: {
     /**
-     * generateTypes - Generate a TypeScript npm package for a connector integration
+     * generateTypes - generateTypes
      * 
      * Generates a complete TypeScript npm package with typed interfaces for all managed-call use cases. This is a stateless operation that does not persist any changes. Use the commit-types endpoint to lock configurations after review.
      * 
@@ -9223,7 +10292,7 @@ export interface PathsDictionary {
   }
   ['/v1/integrations/{integrationId}/commit-types']: {
     /**
-     * commitTypes - Commit generated types and lock use case configurations
+     * commitTypes - commitTypes
      * 
      * Commits the generated types by locking use case configurations and updating version tracking. Should be called after the user reviews and downloads the generated package.
      * 
@@ -9238,13 +10307,13 @@ export interface PathsDictionary {
     /**
      * createErpImport - createErpImport
      * 
-     * Create a pricing-file import job from an already-uploaded file (S3 ref). Returns a job id and starts the validate phase asynchronously — poll GET /v2/erp/imports/{importId}.
+     * Register an already-uploaded file (S3 ref) as a pricing-file import job. Returns the job and a file preview. Nothing runs yet: no use case is chosen and no validation starts here. Optionally rank candidates with POST /v2/erp/imports/{importId}:suggest-use-cases, then start validation with POST /v2/erp/imports/{importId}:validate.
      */
     'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
       data?: Paths.CreateErpImport.RequestBody,
       config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.CreateErpImport.Responses.$202>
+    ): OperationResponse<Paths.CreateErpImport.Responses.$201>
     /**
      * listErpImports - listErpImports
      * 
@@ -9272,6 +10341,43 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetErpImport.Responses.$200>
+    /**
+     * deleteErpImport - deleteErpImport
+     * 
+     * Remove an import and the file it owns. Allowed from any status: an import whose run is still in flight is stopped by the deletion, and rows it already wrote stay written.
+     */
+    'delete'(
+      parameters?: Parameters<Paths.DeleteErpImport.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.DeleteErpImport.Responses.$204>
+  }
+  ['/v2/erp/imports/{importId}:validate']: {
+    /**
+     * validateErpImport - validateErpImport
+     * 
+     * Choose the use case to read this file with, and start the validate phase.
+     * Callable from PENDING, READY and FAILED — so a wrong choice is corrected by calling this again with a different use case, rather than re-uploading. Each call replaces any previous verdict. Any other status returns 409.
+     */
+    'post'(
+      parameters?: Parameters<Paths.ValidateErpImport.PathParameters> | null,
+      data?: Paths.ValidateErpImport.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ValidateErpImport.Responses.$202>
+  }
+  ['/v2/erp/imports/{importId}:suggest-use-cases']: {
+    /**
+     * suggestErpImportUseCases - suggestErpImportUseCases
+     * 
+     * Rank the org's inbound use cases against this file's columns — the input to the ranked picker ("matches 6 of your 7 columns"). Optional: skip this and call `:validate` directly when the use case is already known. Reads only the file's first row, not its data.
+     * Every eligible use case is returned, including ones matching nothing: the "nothing fits, pick anyway" view needs the full list. Highest match first.
+     * CSV only — an xlsx import fails with 400 rather than silently returning zero matches, which would look identical to "we checked and nothing matches".
+     */
+    'post'(
+      parameters?: Parameters<Paths.SuggestErpImportUseCases.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.SuggestErpImportUseCases.Responses.$200>
   }
   ['/v2/erp/imports/{importId}:execute']: {
     /**
@@ -9281,9 +10387,9 @@ export interface PathsDictionary {
      */
     'post'(
       parameters?: Parameters<Paths.ExecuteErpImport.PathParameters> | null,
-      data?: any,
+      data?: Paths.ExecuteErpImport.RequestBody,
       config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.ExecuteErpImport.Responses.$200>
+    ): OperationResponse<Paths.ExecuteErpImport.Responses.$202>
   }
   ['/v2/erp/imports/{importId}:abort']: {
     /**
@@ -9324,6 +10430,8 @@ export type CreateUseCaseRequest = Components.Schemas.CreateUseCaseRequest;
 export type CreateUseCaseRequestBase = Components.Schemas.CreateUseCaseRequestBase;
 export type DeleteIntegrationAppMappingRequest = Components.Schemas.DeleteIntegrationAppMappingRequest;
 export type DeliveryConfig = Components.Schemas.DeliveryConfig;
+export type DocumentationPage = Components.Schemas.DocumentationPage;
+export type DocumentationPageSummary = Components.Schemas.DocumentationPageSummary;
 export type EmbeddedFileProxyUseCaseRequest = Components.Schemas.EmbeddedFileProxyUseCaseRequest;
 export type EmbeddedInboundUseCaseRequest = Components.Schemas.EmbeddedInboundUseCaseRequest;
 export type EmbeddedManagedCallUseCaseRequest = Components.Schemas.EmbeddedManagedCallUseCaseRequest;
@@ -9331,25 +10439,34 @@ export type EmbeddedOutboundUseCaseRequest = Components.Schemas.EmbeddedOutbound
 export type EmbeddedSecureProxyUseCaseRequest = Components.Schemas.EmbeddedSecureProxyUseCaseRequest;
 export type EmbeddedUseCaseRequest = Components.Schemas.EmbeddedUseCaseRequest;
 export type EmbeddedUseCaseRequestBase = Components.Schemas.EmbeddedUseCaseRequestBase;
+export type EntityPruneScopeUpdate = Components.Schemas.EntityPruneScopeUpdate;
 export type EntityUpdate = Components.Schemas.EntityUpdate;
 export type EnvVarRefConfig = Components.Schemas.EnvVarRefConfig;
 export type EnvironmentFieldConfig = Components.Schemas.EnvironmentFieldConfig;
 export type ErpEvent = Components.Schemas.ErpEvent;
 export type ErpEventV3 = Components.Schemas.ErpEventV3;
 export type ErpImportError = Components.Schemas.ErpImportError;
+export type ErpImportFilePreview = Components.Schemas.ErpImportFilePreview;
+export type ErpImportIssue = Components.Schemas.ErpImportIssue;
 export type ErpImportJob = Components.Schemas.ErpImportJob;
 export type ErpImportList = Components.Schemas.ErpImportList;
 export type ErpImportProgress = Components.Schemas.ErpImportProgress;
+export type ErpImportUseCaseSuggestion = Components.Schemas.ErpImportUseCaseSuggestion;
 export type ErpImportValidation = Components.Schemas.ErpImportValidation;
 export type ErpUpdatesEventsV2Request = Components.Schemas.ErpUpdatesEventsV2Request;
 export type ErpUpdatesEventsV3Request = Components.Schemas.ErpUpdatesEventsV3Request;
 export type ErrorResponseBase = Components.Schemas.ErrorResponseBase;
+export type ExecuteErpImportRequest = Components.Schemas.ExecuteErpImportRequest;
 export type ExternalMonitoringSpan = Components.Schemas.ExternalMonitoringSpan;
 export type FileProxyAuth = Components.Schemas.FileProxyAuth;
+export type FileProxyDeliveryConfig = Components.Schemas.FileProxyDeliveryConfig;
+export type FileProxyFanOutConfig = Components.Schemas.FileProxyFanOutConfig;
+export type FileProxyLookup = Components.Schemas.FileProxyLookup;
 export type FileProxyParam = Components.Schemas.FileProxyParam;
 export type FileProxyResponseConfig = Components.Schemas.FileProxyResponseConfig;
 export type FileProxySecureProxyAttachment = Components.Schemas.FileProxySecureProxyAttachment;
 export type FileProxyStep = Components.Schemas.FileProxyStep;
+export type FileProxyUploadConfig = Components.Schemas.FileProxyUploadConfig;
 export type FileProxyUrlConfig = Components.Schemas.FileProxyUrlConfig;
 export type FileProxyUrlParam = Components.Schemas.FileProxyUrlParam;
 export type FileProxyUrlParams = Components.Schemas.FileProxyUrlParams;
@@ -9395,6 +10512,7 @@ export type MappingSimulationResponse = Components.Schemas.MappingSimulationResp
 export type MappingSimulationV2Request = Components.Schemas.MappingSimulationV2Request;
 export type MappingSimulationWarning = Components.Schemas.MappingSimulationWarning;
 export type MeterReadingPruneScopeConfig = Components.Schemas.MeterReadingPruneScopeConfig;
+export type MeterReadingPruneScopeUpdate = Components.Schemas.MeterReadingPruneScopeUpdate;
 export type MeterReadingUpdate = Components.Schemas.MeterReadingUpdate;
 export type MeterUniqueIdsConfig = Components.Schemas.MeterUniqueIdsConfig;
 export type MonitoringEventV2 = Components.Schemas.MonitoringEventV2;
@@ -9412,6 +10530,7 @@ export type NotificationStatusResponse = Components.Schemas.NotificationStatusRe
 export type OutboundConflict = Components.Schemas.OutboundConflict;
 export type OutboundDlqListResponse = Components.Schemas.OutboundDlqListResponse;
 export type OutboundDlqMessage = Components.Schemas.OutboundDlqMessage;
+export type OutboundFileProxyTargetStatus = Components.Schemas.OutboundFileProxyTargetStatus;
 export type OutboundIntegrationEventConfiguration = Components.Schemas.OutboundIntegrationEventConfiguration;
 export type OutboundMapping = Components.Schemas.OutboundMapping;
 export type OutboundMessage = Components.Schemas.OutboundMessage;
@@ -9457,6 +10576,7 @@ export type SecureProxyUseCaseHistoryEntry = Components.Schemas.SecureProxyUseCa
 export type SecureProxyWhitelist = Components.Schemas.SecureProxyWhitelist;
 export type SecureProxyWhitelistUpdate = Components.Schemas.SecureProxyWhitelistUpdate;
 export type SetIntegrationAppMappingRequest = Components.Schemas.SetIntegrationAppMappingRequest;
+export type SuggestErpImportUseCasesResponse = Components.Schemas.SuggestErpImportUseCasesResponse;
 export type TestNotificationRequest = Components.Schemas.TestNotificationRequest;
 export type TestNotificationResponse = Components.Schemas.TestNotificationResponse;
 export type TimeSeriesBreakdownItemV2 = Components.Schemas.TimeSeriesBreakdownItemV2;
@@ -9476,11 +10596,13 @@ export type UpdateOutboundUseCaseRequest = Components.Schemas.UpdateOutboundUseC
 export type UpdateSecureProxyUseCaseRequest = Components.Schemas.UpdateSecureProxyUseCaseRequest;
 export type UpdateUseCaseRequest = Components.Schemas.UpdateUseCaseRequest;
 export type UpdateUseCaseRequestBase = Components.Schemas.UpdateUseCaseRequestBase;
+export type UpsertDocumentationPageRequest = Components.Schemas.UpsertDocumentationPageRequest;
 export type UpsertIntegrationWithUseCasesRequest = Components.Schemas.UpsertIntegrationWithUseCasesRequest;
 export type UseCase = Components.Schemas.UseCase;
 export type UseCaseBase = Components.Schemas.UseCaseBase;
 export type UseCaseHistoryEntry = Components.Schemas.UseCaseHistoryEntry;
 export type UseCaseHistoryEntryBase = Components.Schemas.UseCaseHistoryEntryBase;
 export type UseCaseTypePreview = Components.Schemas.UseCaseTypePreview;
+export type ValidateErpImportRequest = Components.Schemas.ValidateErpImportRequest;
 export type WebhookDeliveryConfig = Components.Schemas.WebhookDeliveryConfig;
 export type WebhookStatus = Components.Schemas.WebhookStatus;

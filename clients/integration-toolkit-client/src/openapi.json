@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Integration Toolkit API",
-    "version": "1.7.0",
+    "version": "1.17.0",
     "description": "API for integrating with external systems in a standardised way."
   },
   "tags": [
@@ -1628,6 +1628,239 @@
         }
       }
     },
+    "/v1/integrations/{integrationId}/documentation": {
+      "get": {
+        "operationId": "listDocumentationPages",
+        "summary": "listDocumentationPages",
+        "description": "Retrieve all documentation pages of an integration, without their markdown content.\nAn integration has at most one general page plus at most one page per use case.\nThe page id is 'general' for the integration-wide page, otherwise the use case ID.\n",
+        "tags": [
+          "integrations"
+        ],
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true,
+            "description": "The integration ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved documentation pages",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "pages"
+                  ],
+                  "properties": {
+                    "pages": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/DocumentationPageSummary"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "description": "Integration not found"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/integrations/{integrationId}/documentation/{docId}": {
+      "get": {
+        "operationId": "getDocumentationPage",
+        "summary": "getDocumentationPage",
+        "description": "Retrieve a single documentation page including its markdown content",
+        "tags": [
+          "integrations"
+        ],
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true,
+            "description": "The integration ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "docId",
+            "in": "path",
+            "required": true,
+            "description": "'general' for the integration-wide page, otherwise a use case ID",
+            "schema": {
+              "type": "string",
+              "pattern": "^(general|[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved documentation page",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentationPage"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "description": "Documentation page not found"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "put": {
+        "operationId": "upsertDocumentationPage",
+        "summary": "upsertDocumentationPage",
+        "description": "Create or update the documentation page identified by docId.\nUpsert semantics enforce the invariant of one general page per\nintegration and one page per use case. For use case pages the\nuse case must exist.\n",
+        "tags": [
+          "integrations"
+        ],
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true,
+            "description": "The integration ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "docId",
+            "in": "path",
+            "required": true,
+            "description": "'general' for the integration-wide page, otherwise a use case ID",
+            "schema": {
+              "type": "string",
+              "pattern": "^(general|[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpsertDocumentationPageRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Documentation page created or updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentationPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "description": "Integration or use case not found"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteDocumentationPage",
+        "summary": "deleteDocumentationPage",
+        "description": "Delete a documentation page",
+        "tags": [
+          "integrations"
+        ],
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true,
+            "description": "The integration ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "docId",
+            "in": "path",
+            "required": true,
+            "description": "'general' for the integration-wide page, otherwise a use case ID",
+            "schema": {
+              "type": "string",
+              "pattern": "^(general|[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Documentation page deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "description": "Documentation page not found"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/v2/integrations": {
       "get": {
         "operationId": "listIntegrationsV2",
@@ -2075,7 +2308,7 @@
     "/v2/integrations/{integrationId}/use-cases/{useCaseId}/secure-proxy-whitelist": {
       "get": {
         "operationId": "getSecureProxyWhitelist",
-        "summary": "Get secure_proxy whitelist (admin portal only)",
+        "summary": "getSecureProxyWhitelist",
         "description": "Returns the current allowed_domains, allowed_ips, and vpc_mode for a secure_proxy use case.\nStaff-only — gated by internal-auth issuer AND admin-portal Cognito user pool membership.\nRejects Login-As tokens.\n",
         "tags": [
           "integrations",
@@ -2135,7 +2368,7 @@
       },
       "put": {
         "operationId": "updateSecureProxyWhitelist",
-        "summary": "Update secure_proxy whitelist (admin portal only)",
+        "summary": "updateSecureProxyWhitelist",
         "description": "Replaces allowed_domains and/or allowed_ips on a secure_proxy use case.\nAt least one of the two fields is required. Validation mirrors the CLI's\n`validateDomainPatterns` / `validateCidrs`. Writes a USECASE_HISTORY row\nwith the admin user's email as `changed_by`.\n\nUpdate semantics per field:\n  - **omitted** — field is not modified; the stored value is preserved.\n  - **non-empty array** — the stored value is replaced with the supplied list.\n  - **empty array (`[]`)** — the list is cleared (stored as `[]`). This is\n    the canonical way to remove all entries. `null` is not accepted.\n\nStaff-only — same auth gates as GET.\n",
         "tags": [
           "integrations",
@@ -2207,7 +2440,7 @@
     "/v2/integrations/{integrationId}/use-cases/{useCaseId}/secure-proxy-whitelist/history": {
       "get": {
         "operationId": "listSecureProxyWhitelistHistory",
-        "summary": "List secure_proxy whitelist change history (admin portal only)",
+        "summary": "listSecureProxyWhitelistHistory",
         "description": "Returns the most recent USECASE_HISTORY entries for a secure_proxy use case,\nin reverse chronological order (newest first). Each entry includes the\nactor email (`changed_by`), the ISO-8601 timestamp (`history_created_at`),\nthe `change_description` (free-text action), and the full `configuration`\nsnapshot — from which UI-08 computes a before/after diff between consecutive\nentries.\n\nStaff-only — gated by internal-auth issuer AND admin-portal Cognito user pool\nmembership. Rejects Login-As tokens (same auth gate as the GET / PUT\nsecure-proxy-whitelist operations).\n\nThin wrapper over the service-layer `listUseCaseHistory` that powers\n`GET /v1/integrations/{integrationId}/use-cases/{useCaseId}/history` — the\nseparate path exists because the /v1 variant is tenant-gated and admin-portal\ninternal-auth tokens do not carry tenant permissions.\n",
         "tags": [
           "integrations",
@@ -3357,7 +3590,7 @@
     "/v1/integrations/secure-proxies": {
       "get": {
         "operationId": "listSecureProxies",
-        "summary": "List all secure proxy use cases",
+        "summary": "listSecureProxies",
         "description": "Lists all secure_proxy use cases across all integrations for the authenticated organization.\nReturns minimal data suitable for dropdowns and selection UIs.\n",
         "tags": [
           "integrations"
@@ -3401,7 +3634,7 @@
     "/v1/secure-proxy": {
       "post": {
         "operationId": "secureProxy",
-        "summary": "Proxy HTTP request through secure VPC",
+        "summary": "secureProxy",
         "description": "Routes an HTTP request through a VPC with either static IP egress or VPN secure link access.\nThe VPC mode is determined by the referenced secure_proxy use case configuration.\nFor secure_link mode, the target URL must match the use case's allowed_domains whitelist.\n",
         "tags": [
           "proxy"
@@ -3484,7 +3717,7 @@
     "/v1/managed-call/{slug}/execute": {
       "post": {
         "operationId": "managedCallExecute",
-        "summary": "Execute a managed call operation",
+        "summary": "managedCallExecute",
         "description": "Execute a managed call operation synchronously. The slug in the path acts as the RPC method name.\nCalls an external partner API with JSONata mapping on both request and response.\n",
         "tags": [
           "managed-call"
@@ -3573,7 +3806,7 @@
     "/v1/integrations/{integrationId}/generate-types-preview": {
       "post": {
         "operationId": "generateTypesPreview",
-        "summary": "Preview scaffolded types for a connector integration",
+        "summary": "generateTypesPreview",
         "description": "Analyses the JSONata mappings of all managed-call use cases in the integration and returns scaffolded type descriptors. The frontend uses these to show the type editor modal where developers fill in leaf types.\n",
         "tags": [
           "integrations"
@@ -3623,7 +3856,7 @@
     "/v1/integrations/{integrationId}/generate-types": {
       "post": {
         "operationId": "generateTypes",
-        "summary": "Generate a TypeScript npm package for a connector integration",
+        "summary": "generateTypes",
         "description": "Generates a complete TypeScript npm package with typed interfaces for all managed-call use cases. This is a stateless operation that does not persist any changes. Use the commit-types endpoint to lock configurations after review.\n",
         "tags": [
           "integrations"
@@ -3683,7 +3916,7 @@
     "/v1/integrations/{integrationId}/commit-types": {
       "post": {
         "operationId": "commitTypes",
-        "summary": "Commit generated types and lock use case configurations",
+        "summary": "commitTypes",
         "description": "Commits the generated types by locking use case configurations and updating version tracking. Should be called after the user reviews and downloads the generated package.\n",
         "tags": [
           "integrations"
@@ -3744,7 +3977,7 @@
       "post": {
         "operationId": "createErpImport",
         "summary": "createErpImport",
-        "description": "Create a pricing-file import job from an already-uploaded file (S3 ref). Returns a job id and starts the validate phase asynchronously — poll GET /v2/erp/imports/{importId}.",
+        "description": "Register an already-uploaded file (S3 ref) as a pricing-file import job. Returns the job and a file preview. Nothing runs yet: no use case is chosen and no validation starts here. Optionally rank candidates with POST /v2/erp/imports/{importId}:suggest-use-cases, then start validation with POST /v2/erp/imports/{importId}:validate.",
         "tags": [
           "erp-imports"
         ],
@@ -3759,8 +3992,16 @@
           }
         },
         "responses": {
-          "202": {
-            "description": "Import job accepted",
+          "201": {
+            "description": "Import job created",
+            "headers": {
+              "Location": {
+                "description": "URL of the created job (`/v2/erp/imports/{importId}`).",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -3871,6 +4112,146 @@
             "$ref": "#/components/responses/InternalServerError"
           }
         }
+      },
+      "delete": {
+        "operationId": "deleteErpImport",
+        "summary": "deleteErpImport",
+        "description": "Remove an import and the file it owns. Allowed from any status: an import whose run is still in flight is stopped by the deletion, and rows it already wrote stay written.",
+        "tags": [
+          "erp-imports"
+        ],
+        "parameters": [
+          {
+            "name": "importId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "The import and its file were removed"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/erp/imports/{importId}:validate": {
+      "post": {
+        "operationId": "validateErpImport",
+        "summary": "validateErpImport",
+        "description": "Choose the use case to read this file with, and start the validate phase.\nCallable from PENDING, READY and FAILED — so a wrong choice is corrected by calling this again with a different use case, rather than re-uploading. Each call replaces any previous verdict. Any other status returns 409.",
+        "tags": [
+          "erp-imports"
+        ],
+        "parameters": [
+          {
+            "name": "importId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ValidateErpImportRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Validation started",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErpImportJob"
+                }
+              }
+            }
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "422": {
+            "description": "The use case cannot drive an import",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseBase"
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/erp/imports/{importId}:suggest-use-cases": {
+      "post": {
+        "operationId": "suggestErpImportUseCases",
+        "summary": "suggestErpImportUseCases",
+        "description": "Rank the org's inbound use cases against this file's columns — the input to the ranked picker (\"matches 6 of your 7 columns\"). Optional: skip this and call `:validate` directly when the use case is already known. Reads only the file's first row, not its data.\nEvery eligible use case is returned, including ones matching nothing: the \"nothing fits, pick anyway\" view needs the full list. Highest match first.\nCSV only — an xlsx import fails with 400 rather than silently returning zero matches, which would look identical to \"we checked and nothing matches\".",
+        "tags": [
+          "erp-imports"
+        ],
+        "parameters": [
+          {
+            "name": "importId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Ranked use-case suggestions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuggestErpImportUseCasesResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
       }
     },
     "/v2/erp/imports/{importId}:execute": {
@@ -3891,8 +4272,18 @@
             }
           }
         ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExecuteErpImportRequest"
+              }
+            }
+          }
+        },
         "responses": {
-          "200": {
+          "202": {
             "description": "Execution started",
             "content": {
               "application/json": {
@@ -3910,6 +4301,16 @@
           },
           "409": {
             "$ref": "#/components/responses/Conflict"
+          },
+          "422": {
+            "description": "The verdict carries warnings and `ack_warnings` was not true",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseBase"
+                }
+              }
+            }
           },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
@@ -3989,19 +4390,152 @@
       },
       "CreateErpImportRequest": {
         "type": "object",
+        "description": "Register an already-uploaded file as an import. The use case is chosen later, via `:validate` — upload and interpretation are separate decisions.",
         "required": [
-          "s3_reference",
-          "integration_id"
+          "s3_reference"
         ],
+        "additionalProperties": false,
         "properties": {
           "s3_reference": {
             "$ref": "#/components/schemas/S3Reference"
           },
+          "include_preview": {
+            "type": "boolean",
+            "default": false,
+            "description": "Return a sample of the file's first rows in `preview`. Only controls whether the sample comes BACK — the head is read either way, because that read is how an unreadable file gets refused."
+          }
+        }
+      },
+      "ValidateErpImportRequest": {
+        "type": "object",
+        "required": [
+          "integration_id",
+          "use_case_slug"
+        ],
+        "additionalProperties": false,
+        "properties": {
           "integration_id": {
             "type": "string"
           },
           "use_case_slug": {
+            "type": "string",
+            "description": "An inbound use case's slug, unique within its integration."
+          }
+        }
+      },
+      "ErpImportUseCaseSuggestion": {
+        "type": "object",
+        "required": [
+          "integration_id",
+          "integration_name",
+          "use_case_slug",
+          "use_case_name",
+          "matched_columns",
+          "entity_types"
+        ],
+        "properties": {
+          "integration_id": {
             "type": "string"
+          },
+          "integration_name": {
+            "type": "string"
+          },
+          "use_case_slug": {
+            "type": "string"
+          },
+          "use_case_name": {
+            "type": "string"
+          },
+          "entity_types": {
+            "type": "integer",
+            "description": "How many distinct entity schemas this mapping uses."
+          },
+          "matched_columns": {
+            "type": "integer",
+            "description": "How many of the FILE's columns this use case reads, by exact trimmed name."
+          }
+        }
+      },
+      "SuggestErpImportUseCasesResponse": {
+        "type": "object",
+        "required": [
+          "file_columns",
+          "suggestions"
+        ],
+        "properties": {
+          "file_columns": {
+            "type": "integer",
+            "description": "Columns in the file. Present even when `suggestions` is empty."
+          },
+          "suggestions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ErpImportUseCaseSuggestion"
+            }
+          }
+        }
+      },
+      "ExecuteErpImportRequest": {
+        "type": "object",
+        "description": "Confirmation options. Required only when the verdict carries warnings — a clean import needs no body at all.",
+        "additionalProperties": false,
+        "properties": {
+          "ack_warnings": {
+            "type": "boolean",
+            "description": "The caller has seen `validation.issues` and accepts them. Required when `validation.warnings` is greater than 0; ignored otherwise."
+          }
+        }
+      },
+      "ErpImportIssue": {
+        "type": "object",
+        "description": "A problem found during validation, scoped to the file as a whole rather than to individual rows.\n`code` is the translation key and the other fields are its parameters — there is deliberately no message to display. Each code appears at most once, with everything it has to say aggregated into that one entry.",
+        "required": [
+          "code",
+          "severity"
+        ],
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Enum of possible issue codes.\n",
+            "enum": [
+              "UNIQUE_ID_COLUMN_MISSING",
+              "MAPPED_COLUMN_MISSING",
+              "MALFORMED_ROW",
+              "INVALID_ENCODING",
+              "EMPTY_FILE",
+              "TOO_MANY_ROWS"
+            ]
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "warning",
+              "blocking"
+            ]
+          },
+          "columns": {
+            "type": "array",
+            "description": "The columns this issue is about, at most one entry per column per entity.\nOn UNIQUE_ID_COLUMN_MISSING the file has NONE of these. Do NOT tell the user that adding one of them is enough: a unique id may read several columns through a JSONata expression, and whether it combines them (`A & B`, both needed) or falls back between them (`A ? A : B`, either will do) is not knowable here.",
+            "items": {
+              "type": "object",
+              "required": [
+                "name"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "The column name, spelled as the mapping reads it."
+                },
+                "entity": {
+                  "type": "string",
+                  "description": "Slug of the entity this column helps identify. UNIQUE_ID_COLUMN_MISSING only."
+                }
+              }
+            }
+          },
+          "row": {
+            "type": "integer",
+            "description": "The offending data row, 1-based as the user counts rows. MALFORMED_ROW only."
           }
         }
       },
@@ -4020,7 +4554,8 @@
             "description": "Data rows read from the file."
           },
           "blocking": {
-            "type": "integer"
+            "type": "integer",
+            "description": "Blocking problems found, counting per-row ones that are not listed in `issues`."
           },
           "warnings": {
             "type": "integer"
@@ -4031,6 +4566,13 @@
               "type": "integer"
             },
             "description": "Distinct entities the file expresses, keyed by entity slug."
+          },
+          "issues": {
+            "type": "array",
+            "description": "Whole-file issues, at most one per `code`. Do not expect the length to match blocking + warnings: those also count per-row problems, which are recorded for support but never listed here. Warnings here are what `ack_warnings` on `:execute` acknowledges.",
+            "items": {
+              "$ref": "#/components/schemas/ErpImportIssue"
+            }
           }
         }
       },
@@ -4053,36 +4595,70 @@
       },
       "ErpImportError": {
         "type": "object",
-        "description": "Why the import failed — present if and only if status = FAILED.",
+        "description": "Why the import failed — present if and only if status = FAILED. `code` is the translation key; for VALIDATION_BLOCKED the specifics are in `validation`.",
         "required": [
-          "type",
+          "code",
           "message"
         ],
         "properties": {
-          "type": {
+          "code": {
             "type": "string",
-            "description": "VALIDATION_BLOCKED = blocking row issues (see `validation`); PROCESSING_ERROR = a named, deterministic failure — retrying the same file cannot help; INTERNAL_ERROR = crashed or never started, so retry.",
+            "description": "Enum of possible error codes.\n",
             "enum": [
               "VALIDATION_BLOCKED",
-              "PROCESSING_ERROR",
+              "FILE_FORMAT_UNSUPPORTED",
+              "FILE_UNAVAILABLE",
+              "VALIDATE_TIMEOUT",
+              "IMPORT_TIMEOUT",
+              "USE_CASE_NOT_USABLE",
+              "IMPORT_NO_PROGRESS",
               "INTERNAL_ERROR"
             ]
           },
           "message": {
             "type": "string",
-            "description": "User-facing explanation of `type`."
+            "description": "One English sentence, derived from `code` so the two always agree. A fallback for a client that has no translation for this code — prefer translating `code`, and never parse this. It deliberately does NOT restate `validation.issues`."
+          }
+        }
+      },
+      "ErpImportFilePreview": {
+        "type": "object",
+        "description": "Sample of the file's first rows, using the same parser as `:validate`. Registration refuses a file it cannot read, so a created job always includes this.",
+        "required": [
+          "columns",
+          "rows"
+        ],
+        "properties": {
+          "columns": {
+            "type": "array",
+            "description": "Effective column names (trimmed, duplicates collapsed).",
+            "items": {
+              "type": "string"
+            }
+          },
+          "rows": {
+            "type": "array",
+            "description": "Up to the first 3 data rows, aligned to `columns`.",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
           }
         }
       },
       "CreateErpImportResponse": {
         "type": "object",
         "required": [
-          "import_id"
+          "job"
         ],
         "properties": {
-          "import_id": {
-            "type": "string",
-            "description": "`imp_{ULID}` — time-ordered, also used as the job's correlation_id."
+          "job": {
+            "$ref": "#/components/schemas/ErpImportJob"
+          },
+          "preview": {
+            "$ref": "#/components/schemas/ErpImportFilePreview"
           }
         }
       },
@@ -4091,7 +4667,6 @@
         "required": [
           "import_id",
           "org_id",
-          "integration_id",
           "format",
           "status",
           "s3_input_ref",
@@ -4110,11 +4685,12 @@
             "type": "string"
           },
           "integration_id": {
-            "type": "string"
+            "type": "string",
+            "description": "The integration owning the chosen use case. Absent until the first `:validate`."
           },
           "use_case_slug": {
             "type": "string",
-            "description": "The inbound use case whose mapping drives both phases."
+            "description": "The inbound use case whose mapping drives both phases. Absent until the first `:validate`, and MUTABLE — re-validating with a different use case replaces it."
           },
           "format": {
             "type": "string",
@@ -4125,7 +4701,7 @@
           },
           "status": {
             "type": "string",
-            "description": "PENDING → VALIDATING → READY → PROCESSING → IMPORTED, with FAILED reachable from any working status, and CANCELLING → CANCELLED reachable from VALIDATING or PROCESSING via :abort. IMPORTED, FAILED and CANCELLED are terminal and final.\nIMPORTED means every row was handed to the platform, not that the platform finished — per-row outcomes live in monitoring, filtered by correlation_id. A file that fails validation is FAILED with error.type = VALIDATION_BLOCKED.\nREADY is legitimately idle for as long as the user takes to confirm, so it carries no running work and never goes stale.\nCANCELLING is transient and cooperative: the abort has been recorded but the worker only notices at its next batch boundary. Rows already published stay published — a stop is not a rollback.",
+            "description": "PENDING → VALIDATING → READY → PROCESSING → IMPORTED, with FAILED reachable from any working status, and CANCELLING → CANCELLED reachable from VALIDATING or PROCESSING via :abort. Only IMPORTED and CANCELLED are terminal. READY and FAILED both accept a further `:validate`, which is how a wrong use case is corrected without re-uploading the file.\nIMPORTED means every row was handed to the platform, not that the platform finished — per-row outcomes live in monitoring, filtered by correlation_id. A file that fails validation is FAILED with error.code = VALIDATION_BLOCKED.\nREADY is legitimately idle for as long as the user takes to confirm, so it carries no running work and never goes stale.\nCANCELLING is transient and cooperative: the abort has been recorded but the worker only notices at its next batch boundary. Rows already published stay published — a stop is not a rollback.",
             "enum": [
               "PENDING",
               "VALIDATING",
@@ -4139,6 +4715,15 @@
           },
           "s3_input_ref": {
             "$ref": "#/components/schemas/S3Reference"
+          },
+          "size_bytes": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Size of the uploaded file, recorded at registration. Present on every job registered from version 1.17.0 onwards; absent on older rows, which were written before it was captured."
+          },
+          "column_count": {
+            "type": "integer",
+            "description": "How many effective columns the file's header yielded — the length of the `preview.columns` returned at registration, kept so a job loaded later can still describe its file. The preview ROWS are deliberately not stored: they are a sample for the person about to choose a mapping, not job state. Present on every job registered from version 1.17.0 onwards."
           },
           "validation": {
             "$ref": "#/components/schemas/ErpImportValidation"
@@ -5487,6 +6072,11 @@
             "description": "The Event Catalog event name that triggers this outbound flow",
             "example": "contract.created"
           },
+          "event_filter": {
+            "type": "string",
+            "description": "JSONata boolean predicate over the hydrated event payload. The use case handles the\nevent only when this evaluates truthy; when absent it handles every event of its name,\nwhich is the behaviour of every pre-existing configuration.\n\nThis is where event scoping belongs — narrowing to certain ticket purposes, contract\ntypes or channels. Evaluation input is the full hydrated event, so relation nodes such\nas `ticket` and `contact` are populated. An expression that throws is treated as no\nmatch and logged, so one malformed filter cannot block the other use cases subscribed\nto the same event.\n",
+            "example": "$count(ticket._purpose[$ in ['bae4b4d1-d728-49ef-92ff-54486dd301b4']]) > 0"
+          },
           "mappings": {
             "type": "array",
             "minItems": 1,
@@ -5494,6 +6084,15 @@
               "$ref": "#/components/schemas/OutboundMapping"
             },
             "description": "List of mappings that transform and deliver the event"
+          },
+          "ack_tracking": {
+            "type": "string",
+            "enum": [
+              "on",
+              "off"
+            ],
+            "default": "on",
+            "description": "Whether this use case participates in the acknowledgement protocol.\n\n`on` (the default, and the behaviour of every pre-existing use case) records an\nACK_PENDING on each event and expects the consumer to confirm receipt via\n`POST /v1/erp/tracking/acknowledgement`; unconfirmed events raise ACK_TIMEOUT after\nthe timeout window.\n\n`off` opts the use case out entirely: no tracking row, no ACK_PENDING, no\nACK_TIMEOUT. Set it for consumers that never acknowledge — otherwise every event\nproduces a guaranteed timeout warning — and for deliveries that already keep their\nown durable per-item record, such as `file_proxy`.\n\nThe tracking row is per-event, not per-use-case, so it is suppressed only when EVERY\nenabled use case matching the event has opted out.\n"
           }
         }
       },
@@ -6214,7 +6813,11 @@
           "change_description": {
             "type": "string",
             "maxLength": 2000,
-            "description": "Description of the last change made to this use case"
+            "description": "Reason given for the update that produced the current version. Absent when the update supplied none — it is not inherited from the previous version.\n"
+          },
+          "changed_by": {
+            "type": "string",
+            "description": "User ID recorded for the update that produced the current version. Absent when the update had no user context, e.g. an automated sync.\n"
           },
           "created_at": {
             "type": "string",
@@ -7599,11 +8202,63 @@
       "FileProxyUseCaseConfiguration": {
         "type": "object",
         "required": [
-          "steps",
-          "response"
+          "steps"
         ],
-        "description": "Configuration for file_proxy use cases. Defines how to authenticate and fetch files from external document systems.\n\nThe file proxy download URL always requires `orgId`, `integrationId`, and either `useCaseSlug` (recommended) or `useCaseId` (legacy UUID) as query parameters.\nThe `orgId` is included in the signed URL to establish organization context without requiring authentication.\nAdditional use-case-specific parameters are declared in the `params` array.\n",
+        "description": "Configuration for file_proxy use cases. Defines how to authenticate and move files\nbetween epilot and an external document system, in either direction (see `direction`).\n\n**Download** (`direction: download`, the default) fetches a file from the external system\nand serves it to a browser. The download URL always requires `orgId`, `integrationId`, and\neither `useCaseSlug` (recommended) or `useCaseId` (legacy UUID) as query parameters.\nThe `orgId` is included in the signed URL to establish organization context without\nrequiring authentication. Additional use-case-specific parameters are declared in the\n`params` array. `response` is REQUIRED for download use cases.\n\n**Upload** (`direction: upload`) pushes epilot files to the external system. It is not\nreachable over the download endpoint; an outbound use case points at it via a `file_proxy`\ndelivery, and this configuration owns everything about what gets sent: `fan_out` decides\nhow many deliveries one event produces, `params_mapping` builds the values, and the\n`steps` place those values into requests via `{{ params.* }}`.\n`upload` and `params_mapping` are REQUIRED and `response` MUST be omitted.\n\nOpenAPI 3.0 cannot express this conditional requiredness, so it is enforced by the\nserver-side validator, which returns an explicit message naming the offending field.\n",
         "properties": {
+          "direction": {
+            "type": "string",
+            "enum": [
+              "download",
+              "upload"
+            ],
+            "default": "download",
+            "description": "Direction of file travel. `download` (default) pulls a file from the external system\ninto epilot; `upload` pushes an epilot file out to the external system. Omitted means\n`download`, so every pre-existing configuration keeps its exact meaning.\n\nNote this is the direction of the FILE, not the epilot use-case type — an `upload`\nfile_proxy use case is still a `file_proxy` use case, never an `outbound` one.\n"
+          },
+          "upload": {
+            "$ref": "#/components/schemas/FileProxyUploadConfig"
+          },
+          "fan_out": {
+            "$ref": "#/components/schemas/FileProxyFanOutConfig"
+          },
+          "params_mapping": {
+            "type": "string",
+            "description": "Upload-only, REQUIRED when `direction` is `upload`. JSONata expression evaluated once\nper fan-out item, producing the `params` object that step templates read as\n`{{ params.* }}`.\n\nThe evaluation root is the hydrated event, so `contact.customer_pin` and\n`ticket._purpose` are reachable directly, unprefixed.\n\n**Everything per-item is a `$`-prefixed JSONata binding**: `$item` (the fan-out\nelement, absent when `fan_out` is disabled), `$file_base64` and `$file`\n(`{filename, mime_type, size_bytes}`) for the resolved file, plus `$constants`,\n`$lookups`, `$ack_id`, `$germanDate(iso)` and `$now()`. Writing `item.filename`\ninstead of `$item.filename` yields nothing — it reads a field named `item` on the\nevent, which does not exist.\n\nMust evaluate to an object. `constants` are shallow-merged underneath the result, so\nthe expression wins on any key collision.\n",
+            "example": "{ \"documentType\": $lookups.documentType, \"fileName\": $item.filename, \"fileData\": $file_base64, \"pin\": contact.customer_pin }"
+          },
+          "lookups": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/FileProxyLookup"
+            },
+            "description": "Upload-only. Named translation tables resolved BEFORE `params_mapping` runs and bound\nas `$lookups`, so an expression reads `$lookups.documentType` rather than carrying a\nconditional chain. Deliberately generic: the next ERP calls the same concept\n`Belegart`.\n"
+          },
+          "constants": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Upload-only. Fixed values shallow-merged UNDERNEATH the `params_mapping` result — the\nexpression wins on key collisions, constants only add. Use for the unchanging strings\n(tenant, sender, channel) that would otherwise be repeated in every expression.\n",
+            "example": {
+              "mandant": "EPILOT_WNG",
+              "sender": "KSSP"
+            }
+          },
+          "file_source": {
+            "type": "string",
+            "description": "Upload-only. JSONata returning the attachment-shaped object (`entity_id`, optionally\n`s3ref`) whose bytes should be fetched for this delivery. The evaluation root is the\nevent; the fan-out element is the `$item` binding, same as in `params_mapping`.\n\nUsually unnecessary: when the fan-out item is itself attachment-shaped it is used\ndirectly. Supply this only when splitting over something that is not the attachment\n— for example one delivery per meter reading, each carrying a file referenced from\nelsewhere in the event. When nothing resolves, no file is fetched and `file_base64`\nis undefined, which is valid for a fan-out that sends metadata only.\n",
+            "example": "event_attachments[entity_id = $item.file_id][0]"
+          },
+          "required_params": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Upload-only. Params that MUST be present after `params_mapping` runs. Any listed name\nresolving to null or undefined fails the delivery terminally with\n`REQUIRED_PARAM_MISSING` before a single step executes.\n\nThis is the generic net behind a lookup's `on_miss: fail`: it catches a required field\ngoing missing for any reason, so the external system never receives a body that is\nsilently short a field its API requires.\n",
+            "example": [
+              "documentType",
+              "fileName",
+              "fileData"
+            ]
+          },
           "secure_proxy": {
             "description": "Optional secure proxy attachment for routing all outbound file proxy requests.\nOnly `use_case_slug` is supported and the referenced secure_proxy use case\nmust belong to the same integration.\n",
             "allOf": [
@@ -7620,7 +8275,7 @@
             "items": {
               "$ref": "#/components/schemas/FileProxyParam"
             },
-            "description": "Additional use-case-specific parameters expected in the download URL query string (beyond the required orgId, integrationId, and useCaseSlug or useCaseId)"
+            "description": "Download-only. Additional use-case-specific parameters expected in the download URL\nquery string (beyond the required orgId, integrationId, and useCaseSlug or useCaseId).\nRejected when `direction` is `upload`.\n"
           },
           "allowed_origins": {
             "type": "array",
@@ -7629,7 +8284,7 @@
               "format": "uri",
               "pattern": "^https?://"
             },
-            "description": "Additional origins permitted to call /download for this use case (CORS, exact match). Portal origins are always allowed."
+            "description": "Download-only. Additional origins permitted to call /download for this use case\n(CORS, exact match). Portal origins are always allowed. Rejected when `direction`\nis `upload`.\n"
           },
           "steps": {
             "type": "array",
@@ -7637,7 +8292,7 @@
             "items": {
               "$ref": "#/components/schemas/FileProxyStep"
             },
-            "description": "Ordered list of HTTP steps to execute to retrieve the file"
+            "description": "Ordered list of HTTP steps to execute. For `download` these retrieve the file; for\n`upload` they deliver it, each assembling its own request body from `{{ params.* }}`\nbuilt by `params_mapping`.\n"
           },
           "response": {
             "$ref": "#/components/schemas/FileProxyResponseConfig"
@@ -7645,7 +8300,7 @@
           "prevent_indirect_serving": {
             "type": "boolean",
             "default": false,
-            "description": "When `true`, this use case is served via the streaming endpoint: mapped file URLs\nare built as `/stream/download`, files of any size are streamed inline over HTTP\nresponse streaming, and buffered `/download` requests for oversize files are\n307-redirected to `/stream`. Files never transit epilot's temporary S3 storage on\nthe streaming path. Defaults to `false` (small files are served directly and large\nfiles are transparently served via a temporary S3 redirect).\n"
+            "description": "Download-only; rejected when `direction` is `upload`.\nWhen `true`, this use case is served via the streaming endpoint: mapped file URLs\nare built as `/stream/download`, files of any size are streamed inline over HTTP\nresponse streaming, and buffered `/download` requests for oversize files are\n307-redirected to `/stream`. Files never transit epilot's temporary S3 storage on\nthe streaming path. Defaults to `false` (small files are served directly and large\nfiles are transparently served via a temporary S3 redirect).\n"
           }
         }
       },
@@ -7771,7 +8426,9 @@
             "type": "string",
             "enum": [
               "GET",
-              "POST"
+              "POST",
+              "PUT",
+              "PATCH"
             ],
             "description": "HTTP method"
           },
@@ -7784,7 +8441,7 @@
           },
           "body": {
             "type": "string",
-            "description": "Handlebars template for the request body (POST only)"
+            "description": "Handlebars template for the request body (write methods only). On an `upload` use\ncase this is where the payload is assembled, reading `{{ params.* }}` built by\n`params_mapping`, plus `{{ env.* }}` and `{{ steps.N.body }}`.\n\n**Route every user-controlled value through the `json` helper**: the template engine\ndoes not escape, so `\"name\":\"{{ params.fileName }}\"` produces invalid JSON the moment\na filename contains a quote. Write `\"name\": {{json params.fileName}}` instead — the\nhelper emits the surrounding quotes itself and renders absent values as `null`. Use\n`{{jsonEscape v}}` if you prefer to keep your own quotes. Upload configurations whose\nbody would break on such input are rejected at save time.\n\nHandlebars block helpers work, so optional fields can be omitted rather than sent\nempty: `{{#if params.pin}},\"pin\": {{json params.pin}}{{/if}}`. Note that `{{/if}}}`\nfails to parse — leave a space before a closing brace: `{{/if}} }`.\n"
           },
           "response_type": {
             "type": "string",
@@ -7796,8 +8453,56 @@
           }
         }
       },
+      "FileProxyFanOutConfig": {
+        "type": "object",
+        "required": [
+          "enabled"
+        ],
+        "description": "Splits one event into several independent deliveries.\n\nMirrors the inbound mapping idiom, where an entity's JSONata expression returning an array\nproduces one entity update per element. Made explicit with a toggle here because an upload\nis also legitimately used without splitting, and because auto-detecting \"array means\nsplit\" would make a single-element result ambiguous.\n\nEach resulting delivery is fully independent: its own idempotency record, its own retry\nschedule, its own monitoring events. A four-item event can therefore end up three-of-four\ndelivered, which is the honest state to report.\n\nThe split is evaluated ONCE, when the event is enqueued, so item indices — and therefore\nidempotency keys — stay stable across retries.\n",
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "description": "When false (or absent), the event produces exactly one delivery and `$item` is not\nbound in `params_mapping`.\n"
+          },
+          "split_expression": {
+            "type": "string",
+            "description": "JSONata over the event that MUST return an array; one delivery is created per element,\nbound as `$item` in `params_mapping`. Required when `enabled` is true.\n\nKeep this a plain projection — scoping which events are handled at all belongs in the\noutbound use case's `event_filter`, not here. A non-array result fails the event with\n`FAN_OUT_INVALID_RESULT`; an empty array produces no deliveries and one info-level\n`FAN_OUT_EMPTY`, which is the normal outcome for a catch-all subscription seeing an\nevent with nothing to send.\n",
+            "example": "event_attachments"
+          }
+        }
+      },
+      "FileProxyUploadConfig": {
+        "type": "object",
+        "description": "Upload-side settings for a file_proxy use case with `direction: upload`.\nEverything about WHAT is sent lives on the outbound mapping\n(see `FileProxyDeliveryConfig`); this object only governs HOW the transfer is bounded\nand judged.\n",
+        "properties": {
+          "max_file_bytes": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 104857600,
+            "description": "Per-file ceiling for this use case, in bytes. Files above it fail terminally with\n`FILE_TOO_LARGE` before any bytes are fetched. Defaults to — and is clamped by — the\nplatform ceiling of 100 MiB (104857600).\n"
+          },
+          "max_delivery_attempts": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100,
+            "default": 8,
+            "description": "Maximum delivery attempts per item before the delivery is marked failed and the\nmessage is dead-lettered. Attempts are spaced by an exponential, jittered backoff\nspanning roughly 16 hours over the default 8 attempts, so an ERP maintenance window\ndoes not exhaust them.\n\nLives here rather than on the outbound delivery because how hard to retry is a\nproperty of the transport — the same judgement as `max_file_bytes` — and the outbound\ndelivery is a pure pointer.\n"
+          },
+          "success_when": {
+            "type": "string",
+            "description": "Optional JSONata predicate evaluated against the final step result\n(`{ statusCode, headers, body }`) to decide whether the external system really\naccepted the file. When omitted, any 2xx counts as delivered. Use this for systems\nthat return 200 with an error envelope.\n",
+            "example": "body.status = 'OK'"
+          },
+          "external_id": {
+            "type": "string",
+            "description": "Optional JSONata expression over the step results yielding the external system's\nidentifier for the stored document. Recorded on the delivery record and on the\n`FILE_PROXY_UPLOADED` monitoring event so an operator can find the document in the\ntarget system.\n",
+            "example": "steps[-1].body.documentId"
+          }
+        }
+      },
       "FileProxyResponseConfig": {
         "type": "object",
+        "description": "How to extract the file from the step results. REQUIRED when `direction` is `download`;\nrejected when `direction` is `upload` (an upload has no file to extract).\n",
         "required": [
           "body",
           "encoding"
@@ -7928,6 +8633,20 @@
               "$ref": "#/components/schemas/MeterReadingUpdate"
             }
           },
+          "prune_scope_updates": {
+            "type": "array",
+            "description": "Resolved prune scopes produced by entity mappings using `upsert-prune-scope-purge` / `upsert-prune-scope-delete`. Each entry describes the entities that would be deleted at runtime because they exist in scope but were not part of this payload.",
+            "items": {
+              "$ref": "#/components/schemas/EntityPruneScopeUpdate"
+            }
+          },
+          "meter_readings_prune_scope_updates": {
+            "type": "array",
+            "description": "Resolved prune scopes produced by meter reading mappings using `upsert-prune-scope`. Each entry describes the readings that would be deleted at runtime for a meter (+ counter) because they were not part of this payload.",
+            "items": {
+              "$ref": "#/components/schemas/MeterReadingPruneScopeUpdate"
+            }
+          },
           "warnings": {
             "type": "array",
             "description": "Validation warnings about the configuration (e.g., unique_ids referencing non-indexed fields)",
@@ -7964,7 +8683,8 @@
         "required": [
           "entity_slug",
           "unique_identifiers",
-          "attributes"
+          "attributes",
+          "mode"
         ],
         "properties": {
           "entity_slug": {
@@ -7980,6 +8700,38 @@
             "type": "object",
             "description": "Mapped attribute values",
             "additionalProperties": true
+          },
+          "pricing": {
+            "type": "object",
+            "description": "Present when the entity mapping has a `pricing` block. Echoes the pricing configuration and the data extracted for it, so mapping authors can see what would be sent to the pricing service.",
+            "required": [
+              "config",
+              "data"
+            ],
+            "properties": {
+              "config": {
+                "type": "object",
+                "additionalProperties": true,
+                "description": "The pricing configuration from the entity mapping"
+              },
+              "data": {
+                "type": "array",
+                "description": "The pricing input data extracted from the payload",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "upsert",
+              "delete",
+              "purge"
+            ],
+            "description": "Effective operation mode applied to this entity at runtime. `upsert-prune-scope-purge` / `upsert-prune-scope-delete` configurations report `upsert` here, because the individual entities in the payload are upserted — the destructive part of those modes is reported separately in `prune_scope_updates`. For `delete` / `purge`, `attributes` are still mapped and returned but ignored at runtime: only `unique_identifiers` are used to locate the entity to remove."
           }
         }
       },
@@ -7987,7 +8739,8 @@
         "type": "object",
         "required": [
           "meter",
-          "attributes"
+          "attributes",
+          "mode"
         ],
         "properties": {
           "meter": {
@@ -8017,6 +8770,121 @@
             "type": "object",
             "additionalProperties": true,
             "description": "Meter reading attributes. Required: external_id, timestamp, source, value. `timestamp` must be ISO 8601 — either `YYYY-MM-DD` or `YYYY-MM-DDTHH:mm:ss` (with optional fractional seconds and optional `Z` / `±HH:mm` timezone offset); non-ISO formats (e.g. `DD.MM.YYYY` or epoch numbers) are rejected and must be converted upstream via a `jsonataExpression` (e.g. `$fromMillis(...)`). Date-only values are normalized to midnight UTC and offset-less date-times are anchored to UTC before being forwarded to the metering API. `source` must be one of: ECP, ERP, 360, journey-submission. `reason` (optional) must be one of: regular, irregular, last, first, meter_change, contract_change, meter_adjustment (or empty/null)."
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "upsert",
+              "delete"
+            ],
+            "description": "Effective operation mode applied to this reading at runtime. `upsert-prune-scope` configurations report `upsert` here — their destructive part is reported separately in `meter_readings_prune_scope_updates`."
+          }
+        }
+      },
+      "EntityPruneScopeUpdate": {
+        "type": "object",
+        "description": "A resolved entity prune scope. At runtime, entities of `entity_slug` found within `scope` whose unique identifiers are not listed in `keep_unique_ids` are removed using `deletion_mode`.",
+        "required": [
+          "entity_slug",
+          "scope",
+          "keep_unique_ids",
+          "deletion_mode"
+        ],
+        "properties": {
+          "entity_slug": {
+            "type": "string",
+            "description": "The entity type that would be pruned"
+          },
+          "scope": {
+            "type": "object",
+            "description": "The scope configuration resolved against the payload",
+            "required": [
+              "scope_mode"
+            ],
+            "properties": {
+              "scope_mode": {
+                "type": "string",
+                "enum": [
+                  "relations",
+                  "query"
+                ],
+                "description": "How the entities in scope are found"
+              },
+              "schema": {
+                "type": "string",
+                "description": "Schema of the related entity defining the scope (`relations` scope_mode only)"
+              },
+              "unique_ids": {
+                "type": "object",
+                "additionalProperties": true,
+                "description": "Resolved unique identifiers of the related scope entity (`relations` scope_mode only)"
+              },
+              "query": {
+                "type": "object",
+                "additionalProperties": true,
+                "description": "Resolved query parameters used to find entities in scope (`query` scope_mode only)"
+              }
+            }
+          },
+          "keep_unique_ids": {
+            "type": "array",
+            "description": "Unique identifiers of the entities upserted by this payload. Everything else found in scope would be deleted.",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "deletion_mode": {
+            "type": "string",
+            "enum": [
+              "delete",
+              "purge"
+            ],
+            "description": "`delete` soft deletes the pruned entities, `purge` removes them permanently"
+          }
+        }
+      },
+      "MeterReadingPruneScopeUpdate": {
+        "type": "object",
+        "description": "A resolved meter reading prune scope. At runtime, readings of the given meter (+ counter) whose external ids are not listed in `keep_external_ids` are deleted.",
+        "required": [
+          "meter",
+          "keep_external_ids"
+        ],
+        "properties": {
+          "meter": {
+            "type": "object",
+            "required": [
+              "$entity_unique_ids"
+            ],
+            "properties": {
+              "$entity_unique_ids": {
+                "type": "object",
+                "additionalProperties": true,
+                "description": "Unique identifiers for the meter"
+              }
+            }
+          },
+          "meter_counter": {
+            "type": "object",
+            "properties": {
+              "$entity_unique_ids": {
+                "type": "object",
+                "additionalProperties": true,
+                "description": "Unique identifiers for the meter counter"
+              }
+            }
+          },
+          "keep_external_ids": {
+            "type": "array",
+            "description": "External ids of the readings present in this payload. All other readings in scope would be deleted. An empty array means every reading in scope would be deleted.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "source": {
+            "type": "string",
+            "description": "When set, only readings with this source are eligible for pruning (e.g. `ERP`)"
           }
         }
       },
@@ -8152,7 +9020,7 @@
           "enabled",
           "delivery"
         ],
-        "description": "A mapping that delivers an event to an external system — either pushed to a webhook (with a JSONata payload transformation) or made available on the pull-based poll queue (raw event payload, no transformation)",
+        "description": "A mapping that delivers an event to an external system by one of three mechanisms — pushed to a webhook (with a JSONata payload transformation), made available on the pull-based poll queue (raw event payload, no transformation), or handed to a file_proxy use case that uploads files to an external document system (a pointer only; the referenced use case owns the payload and the fan-out)",
         "properties": {
           "id": {
             "type": "string",
@@ -8166,7 +9034,7 @@
           },
           "jsonata_expression": {
             "type": "string",
-            "description": "JSONata expression to transform the event payload. Required for webhook delivery; ignored for poll delivery.",
+            "description": "JSONata expression to transform the event payload. Required for webhook delivery, ignored for poll delivery, and rejected for file_proxy delivery — a file_proxy payload is built by the referenced use case's `params_mapping`, so accepting an expression here would silently do nothing.",
             "example": "{ \"id\": entity._id, \"customer\": entity.customer_name }"
           },
           "enabled": {
@@ -8190,20 +9058,24 @@
         }
       },
       "DeliveryConfig": {
-        "description": "Configuration for how the event should be delivered. webhook = push delivery via svc-webhooks (JSONata-transformed payload); poll = pull-based queue delivery where the consumer fetches items via the poll API (raw event payload)",
+        "description": "Configuration for how the event should be delivered. webhook = push delivery via svc-webhooks (JSONata-transformed payload); poll = pull-based queue delivery where the consumer fetches items via the poll API (raw event payload); file_proxy = one push per event attachment to an external document system, through a file_proxy use case (JSONata-transformed payload carrying the file bytes)",
         "oneOf": [
           {
             "$ref": "#/components/schemas/WebhookDeliveryConfig"
           },
           {
             "$ref": "#/components/schemas/PollDeliveryConfig"
+          },
+          {
+            "$ref": "#/components/schemas/FileProxyDeliveryConfig"
           }
         ],
         "discriminator": {
           "propertyName": "type",
           "mapping": {
             "webhook": "#/components/schemas/WebhookDeliveryConfig",
-            "poll": "#/components/schemas/PollDeliveryConfig"
+            "poll": "#/components/schemas/PollDeliveryConfig",
+            "file_proxy": "#/components/schemas/FileProxyDeliveryConfig"
           }
         }
       },
@@ -8272,6 +9144,67 @@
             "maximum": 100,
             "default": 5,
             "description": "Maximum delivery attempts before the poison_policy is applied"
+          }
+        }
+      },
+      "FileProxyDeliveryConfig": {
+        "type": "object",
+        "required": [
+          "type",
+          "use_case_slug"
+        ],
+        "description": "Push delivery to an external document system through a `file_proxy` use case.\n\nA pure pointer, deliberately. The outbound use case decides WHEN to deliver — its event\nname plus `event_filter` — and the referenced `file_proxy` use case decides WHAT and HOW:\nwhich items to fan out over (`fan_out`), what values to build (`params_mapping`,\n`lookups`, `constants`), and the steps that send them. Keeping every file concern on the\nfile_proxy side is what lets one upload recipe be shared by several event subscriptions\nwithout duplicating any of it.\n\n`jsonata_expression` on the mapping is NOT used for this delivery type and is rejected.\n\nThe slug is resolved at delivery time, not at save time, so use cases can be saved in any\norder; a dangling reference surfaces as a `USE_CASE_NOT_FOUND` monitoring event naming\nthe referencing mapping.\n",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "file_proxy"
+            ],
+            "description": "Delivery mechanism type"
+          },
+          "use_case_slug": {
+            "type": "string",
+            "description": "Slug of a `file_proxy` use case with `direction: upload` in the SAME integration.\n",
+            "example": "wemag_d3_document_upload"
+          }
+        }
+      },
+      "FileProxyLookup": {
+        "type": "object",
+        "required": [
+          "source",
+          "entries"
+        ],
+        "description": "A named translation from a value in the event to a value the external system expects.\n",
+        "properties": {
+          "source": {
+            "type": "string",
+            "description": "JSONata expression over the event producing the lookup key",
+            "example": "ticket._purpose_name[0]"
+          },
+          "entries": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Key-to-value translation table",
+            "example": {
+              "Zählerstandsmeldung": "Zählerstand",
+              "Kündigung": "Kündigung"
+            }
+          },
+          "default": {
+            "type": "string",
+            "description": "Value used when the key is absent from `entries`"
+          },
+          "on_miss": {
+            "type": "string",
+            "enum": [
+              "default",
+              "warn",
+              "fail"
+            ],
+            "description": "What happens when the key is not in `entries`.\n`default` substitutes `default` silently; `warn` substitutes it and emits a\n`LOOKUP_UNMAPPED` warning so the gap is visible without stopping delivery;\n`fail` aborts the delivery terminally.\nDefaults to `default` when a `default` is set, and to `warn` when it is not.\n"
           }
         }
       },
@@ -8345,6 +9278,60 @@
           },
           "poll": {
             "$ref": "#/components/schemas/OutboundPollStatus"
+          },
+          "file_proxy": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OutboundFileProxyTargetStatus"
+            },
+            "description": "One entry per file_proxy mapping on this use case. Present only on use cases with a\nfile_proxy delivery mapping.\n"
+          }
+        }
+      },
+      "OutboundFileProxyTargetStatus": {
+        "type": "object",
+        "description": "Resolution state of one file_proxy mapping's referenced upload use case.\n\nBecause the transport lives on a separate use case, edits to the endpoint or credentials\ndo not appear in THIS use case's history. `target_updated_at` is the hook that lets an\noperator notice a target changed underneath a delivery that started failing.\n",
+        "required": [
+          "mapping_id",
+          "use_case_slug",
+          "resolved"
+        ],
+        "properties": {
+          "mapping_id": {
+            "type": "string",
+            "description": "The mapping holding this file_proxy delivery"
+          },
+          "use_case_slug": {
+            "type": "string",
+            "description": "Slug of the referenced file_proxy use case"
+          },
+          "resolved": {
+            "type": "boolean",
+            "description": "Whether the slug currently resolves to an enabled `file_proxy` use case with\n`direction: upload` in this integration. References are resolved at delivery time,\nso `false` is a live warning rather than a save-time error.\n"
+          },
+          "target_use_case_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Id of the referenced use case — absent when unresolved"
+          },
+          "target_enabled": {
+            "type": "boolean",
+            "description": "Whether the referenced use case is enabled — absent when unresolved"
+          },
+          "target_updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the referenced use case was last modified — absent when unresolved. Surfaced\nbecause a change here is invisible in this use case's own history diff.\n"
+          },
+          "unresolved_reason": {
+            "type": "string",
+            "enum": [
+              "not_found",
+              "wrong_type",
+              "wrong_direction",
+              "disabled"
+            ],
+            "description": "Why the reference did not resolve — absent when `resolved` is true"
           }
         }
       },
@@ -10314,6 +11301,110 @@
             "items": {
               "$ref": "#/components/schemas/TimeSeriesBreakdownItemV2"
             }
+          }
+        }
+      },
+      "DocumentationPageSummary": {
+        "type": "object",
+        "description": "Documentation page metadata without the markdown content",
+        "required": [
+          "id",
+          "integration_id",
+          "scope",
+          "title",
+          "created_at",
+          "updated_at"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "'general' for the integration-wide page, otherwise the use case ID",
+            "example": "general"
+          },
+          "integration_id": {
+            "type": "string",
+            "format": "uuid",
+            "readOnly": true
+          },
+          "scope": {
+            "type": "string",
+            "enum": [
+              "integration",
+              "use_case"
+            ],
+            "description": "Whether the page documents the whole integration or a single use case"
+          },
+          "use_case_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The linked use case. Only set when scope is use_case."
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 150
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "created_by": {
+            "type": "string",
+            "nullable": true,
+            "description": "User ID that created the page",
+            "readOnly": true
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "updated_by": {
+            "type": "string",
+            "nullable": true,
+            "description": "User ID of the last edit",
+            "readOnly": true
+          }
+        }
+      },
+      "DocumentationPage": {
+        "description": "A markdown documentation page of an integration",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/DocumentationPageSummary"
+          },
+          {
+            "type": "object",
+            "required": [
+              "content"
+            ],
+            "properties": {
+              "content": {
+                "type": "string",
+                "maxLength": 100000,
+                "description": "Markdown source of the page"
+              }
+            }
+          }
+        ]
+      },
+      "UpsertDocumentationPageRequest": {
+        "type": "object",
+        "required": [
+          "title",
+          "content"
+        ],
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 150
+          },
+          "content": {
+            "type": "string",
+            "maxLength": 100000,
+            "description": "Markdown source of the page"
           }
         }
       }

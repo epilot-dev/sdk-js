@@ -45,6 +45,10 @@ const { data } = await integrationToolkitClient.acknowledgeTracking(...)
 - [`updateUseCase`](#updateusecase)
 - [`deleteUseCase`](#deleteusecase)
 - [`listUseCaseHistory`](#listusecasehistory)
+- [`listDocumentationPages`](#listdocumentationpages)
+- [`getDocumentationPage`](#getdocumentationpage)
+- [`upsertDocumentationPage`](#upsertdocumentationpage)
+- [`deleteDocumentationPage`](#deletedocumentationpage)
 - [`listIntegrationsV2`](#listintegrationsv2)
 - [`createIntegrationV2`](#createintegrationv2)
 - [`getIntegrationV2`](#getintegrationv2)
@@ -92,15 +96,24 @@ const { data } = await integrationToolkitClient.acknowledgeTracking(...)
 - [`createErpImport`](#createerpimport)
 - [`listErpImports`](#listerpimports)
 - [`getErpImport`](#geterpimport)
+- [`deleteErpImport`](#deleteerpimport)
+- [`validateErpImport`](#validateerpimport)
+- [`suggestErpImportUseCases`](#suggesterpimportusecases)
 - [`executeErpImport`](#executeerpimport)
 - [`abortErpImport`](#aborterpimport)
 
 **Schemas**
 - [`S3Reference`](#s3reference)
 - [`CreateErpImportRequest`](#createerpimportrequest)
+- [`ValidateErpImportRequest`](#validateerpimportrequest)
+- [`ErpImportUseCaseSuggestion`](#erpimportusecasesuggestion)
+- [`SuggestErpImportUseCasesResponse`](#suggesterpimportusecasesresponse)
+- [`ExecuteErpImportRequest`](#executeerpimportrequest)
+- [`ErpImportIssue`](#erpimportissue)
 - [`ErpImportValidation`](#erpimportvalidation)
 - [`ErpImportProgress`](#erpimportprogress)
 - [`ErpImportError`](#erpimporterror)
+- [`ErpImportFilePreview`](#erpimportfilepreview)
 - [`CreateErpImportResponse`](#createerpimportresponse)
 - [`ErpImportJob`](#erpimportjob)
 - [`ErpImportList`](#erpimportlist)
@@ -213,6 +226,8 @@ const { data } = await integrationToolkitClient.acknowledgeTracking(...)
 - [`FileProxyAuth`](#fileproxyauth)
 - [`FileProxyParam`](#fileproxyparam)
 - [`FileProxyStep`](#fileproxystep)
+- [`FileProxyFanOutConfig`](#fileproxyfanoutconfig)
+- [`FileProxyUploadConfig`](#fileproxyuploadconfig)
 - [`FileProxyResponseConfig`](#fileproxyresponseconfig)
 - [`MappingSimulationRequest`](#mappingsimulationrequest)
 - [`MappingSimulationV2Request`](#mappingsimulationv2request)
@@ -220,6 +235,8 @@ const { data } = await integrationToolkitClient.acknowledgeTracking(...)
 - [`MappingSimulationWarning`](#mappingsimulationwarning)
 - [`EntityUpdate`](#entityupdate)
 - [`MeterReadingUpdate`](#meterreadingupdate)
+- [`EntityPruneScopeUpdate`](#entityprunescopeupdate)
+- [`MeterReadingPruneScopeUpdate`](#meterreadingprunescopeupdate)
 - [`IntegrationConfigurationV1`](#integrationconfigurationv1)
 - [`IntegrationObjectV1`](#integrationobjectv1)
 - [`IntegrationFieldV1`](#integrationfieldv1)
@@ -228,8 +245,11 @@ const { data } = await integrationToolkitClient.acknowledgeTracking(...)
 - [`DeliveryConfig`](#deliveryconfig)
 - [`WebhookDeliveryConfig`](#webhookdeliveryconfig)
 - [`PollDeliveryConfig`](#polldeliveryconfig)
+- [`FileProxyDeliveryConfig`](#fileproxydeliveryconfig)
+- [`FileProxyLookup`](#fileproxylookup)
 - [`OutboundStatusResponse`](#outboundstatusresponse)
 - [`OutboundUseCaseStatus`](#outboundusecasestatus)
+- [`OutboundFileProxyTargetStatus`](#outboundfileproxytargetstatus)
 - [`OutboundPollStatus`](#outboundpollstatus)
 - [`WebhookStatus`](#webhookstatus)
 - [`OutboundConflict`](#outboundconflict)
@@ -276,6 +296,9 @@ const { data } = await integrationToolkitClient.acknowledgeTracking(...)
 - [`GetMonitoringTimeSeriesV2Request`](#getmonitoringtimeseriesv2request)
 - [`TimeSeriesBreakdownItemV2`](#timeseriesbreakdownitemv2)
 - [`TimeSeriesBucketV2`](#timeseriesbucketv2)
+- [`DocumentationPageSummary`](#documentationpagesummary)
+- [`DocumentationPage`](#documentationpage)
+- [`UpsertDocumentationPageRequest`](#upsertdocumentationpagerequest)
 
 ### `acknowledgeTracking`
 
@@ -424,7 +447,14 @@ const { data } = await client.simulateMappingV2(
     {
       "entity_slug": "string",
       "unique_identifiers": {},
-      "attributes": {}
+      "attributes": {},
+      "pricing": {
+        "config": {},
+        "data": [
+          {}
+        ]
+      },
+      "mode": "upsert"
     }
   ],
   "meter_readings_updates": [
@@ -435,7 +465,35 @@ const { data } = await client.simulateMappingV2(
       "meter_counter": {
         "$entity_unique_ids": {}
       },
-      "attributes": {}
+      "attributes": {},
+      "mode": "upsert"
+    }
+  ],
+  "prune_scope_updates": [
+    {
+      "entity_slug": "string",
+      "scope": {
+        "scope_mode": "relations",
+        "schema": "string",
+        "unique_ids": {},
+        "query": {}
+      },
+      "keep_unique_ids": [
+        {}
+      ],
+      "deletion_mode": "delete"
+    }
+  ],
+  "meter_readings_prune_scope_updates": [
+    {
+      "meter": {
+        "$entity_unique_ids": {}
+      },
+      "meter_counter": {
+        "$entity_unique_ids": {}
+      },
+      "keep_external_ids": ["string"],
+      "source": "string"
     }
   ],
   "warnings": [
@@ -484,7 +542,14 @@ const { data } = await client.simulateMapping(
     {
       "entity_slug": "string",
       "unique_identifiers": {},
-      "attributes": {}
+      "attributes": {},
+      "pricing": {
+        "config": {},
+        "data": [
+          {}
+        ]
+      },
+      "mode": "upsert"
     }
   ],
   "meter_readings_updates": [
@@ -495,7 +560,35 @@ const { data } = await client.simulateMapping(
       "meter_counter": {
         "$entity_unique_ids": {}
       },
-      "attributes": {}
+      "attributes": {},
+      "mode": "upsert"
+    }
+  ],
+  "prune_scope_updates": [
+    {
+      "entity_slug": "string",
+      "scope": {
+        "scope_mode": "relations",
+        "schema": "string",
+        "unique_ids": {},
+        "query": {}
+      },
+      "keep_unique_ids": [
+        {}
+      ],
+      "deletion_mode": "delete"
+    }
+  ],
+  "meter_readings_prune_scope_updates": [
+    {
+      "meter": {
+        "$entity_unique_ids": {}
+      },
+      "meter_counter": {
+        "$entity_unique_ids": {}
+      },
+      "keep_external_ids": ["string"],
+      "source": "string"
     }
   ],
   "warnings": [
@@ -1011,6 +1104,7 @@ const { data } = await client.listUseCases({
       "type": "inbound",
       "enabled": true,
       "change_description": "string",
+      "changed_by": "string",
       "created_at": "1970-01-01T00:00:00.000Z",
       "updated_at": "1970-01-01T00:00:00.000Z",
       "configuration": {}
@@ -1063,6 +1157,7 @@ const { data } = await client.createUseCase(
   "type": "inbound",
   "enabled": true,
   "change_description": "string",
+  "changed_by": "string",
   "created_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z",
   "configuration": {
@@ -1105,6 +1200,7 @@ const { data } = await client.getUseCase({
   "type": "inbound",
   "enabled": true,
   "change_description": "string",
+  "changed_by": "string",
   "created_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z",
   "configuration": {
@@ -1164,6 +1260,7 @@ const { data } = await client.updateUseCase(
   "type": "inbound",
   "enabled": true,
   "change_description": "string",
+  "changed_by": "string",
   "created_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z",
   "configuration": {
@@ -1246,6 +1343,150 @@ const { data } = await client.listUseCaseHistory({
     }
   ],
   "next_cursor": "string"
+}
+```
+
+</details>
+
+---
+
+### `listDocumentationPages`
+
+Retrieve all documentation pages of an integration, without their markdown content.
+An integration has at most one general page plus at most one page per use case.
+The page id is 'general' for the int
+
+`GET /v1/integrations/{integrationId}/documentation`
+
+```ts
+const { data } = await client.listDocumentationPages({
+  integrationId: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "pages": [
+    {
+      "id": "general",
+      "integration_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "scope": "integration",
+      "use_case_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "title": "string",
+      "created_at": "1970-01-01T00:00:00.000Z",
+      "created_by": "string",
+      "updated_at": "1970-01-01T00:00:00.000Z",
+      "updated_by": "string"
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `getDocumentationPage`
+
+Retrieve a single documentation page including its markdown content
+
+`GET /v1/integrations/{integrationId}/documentation/{docId}`
+
+```ts
+const { data } = await client.getDocumentationPage({
+  integrationId: 'example',
+  docId: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "id": "general",
+  "integration_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "scope": "integration",
+  "use_case_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "title": "string",
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "created_by": "string",
+  "updated_at": "1970-01-01T00:00:00.000Z",
+  "updated_by": "string",
+  "content": "string"
+}
+```
+
+</details>
+
+---
+
+### `upsertDocumentationPage`
+
+Create or update the documentation page identified by docId.
+Upsert semantics enforce the invariant of one general page per
+integration and one page per use case. For use case pages the
+use case must 
+
+`PUT /v1/integrations/{integrationId}/documentation/{docId}`
+
+```ts
+const { data } = await client.upsertDocumentationPage(
+  {
+    integrationId: 'example',
+    docId: 'example',
+  },
+  {
+    title: 'string',
+    content: 'string'
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "id": "general",
+  "integration_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "scope": "integration",
+  "use_case_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "title": "string",
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "created_by": "string",
+  "updated_at": "1970-01-01T00:00:00.000Z",
+  "updated_by": "string",
+  "content": "string"
+}
+```
+
+</details>
+
+---
+
+### `deleteDocumentationPage`
+
+Delete a documentation page
+
+`DELETE /v1/integrations/{integrationId}/documentation/{docId}`
+
+```ts
+const { data } = await client.deleteDocumentationPage({
+  integrationId: 'example',
+  docId: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "message": "string"
 }
 ```
 
@@ -1449,6 +1690,7 @@ const { data } = await client.createIntegrationV2(
       "type": "inbound",
       "enabled": true,
       "change_description": "string",
+      "changed_by": "string",
       "created_at": "1970-01-01T00:00:00.000Z",
       "updated_at": "1970-01-01T00:00:00.000Z",
       "configuration": {}
@@ -1547,6 +1789,7 @@ const { data } = await client.getIntegrationV2({
       "type": "inbound",
       "enabled": true,
       "change_description": "string",
+      "changed_by": "string",
       "created_at": "1970-01-01T00:00:00.000Z",
       "updated_at": "1970-01-01T00:00:00.000Z",
       "configuration": {}
@@ -1720,6 +1963,7 @@ const { data } = await client.updateIntegrationV2(
       "type": "inbound",
       "enabled": true,
       "change_description": "string",
+      "changed_by": "string",
       "created_at": "1970-01-01T00:00:00.000Z",
       "updated_at": "1970-01-01T00:00:00.000Z",
       "configuration": {}
@@ -1879,7 +2123,9 @@ const { data } = await client.getNotificationStatus({
 
 ### `getSecureProxyWhitelist`
 
-Get secure_proxy whitelist (admin portal only)
+Returns the current allowed_domains, allowed_ips, and vpc_mode for a secure_proxy use case.
+Staff-only — gated by internal-auth issuer AND admin-portal Cognito user pool membership.
+Rejects Login-As t
 
 `GET /v2/integrations/{integrationId}/use-cases/{useCaseId}/secure-proxy-whitelist`
 
@@ -1907,7 +2153,9 @@ const { data } = await client.getSecureProxyWhitelist({
 
 ### `updateSecureProxyWhitelist`
 
-Update secure_proxy whitelist (admin portal only)
+Replaces allowed_domains and/or allowed_ips on a secure_proxy use case.
+At least one of the two fields is required. Validation mirrors the CLI's
+`validateDomainPatterns` / `validateCidrs`. Writes a US
 
 `PUT /v2/integrations/{integrationId}/use-cases/{useCaseId}/secure-proxy-whitelist`
 
@@ -1941,7 +2189,9 @@ const { data } = await client.updateSecureProxyWhitelist(
 
 ### `listSecureProxyWhitelistHistory`
 
-List secure_proxy whitelist change history (admin portal only)
+Returns the most recent USECASE_HISTORY entries for a secure_proxy use case,
+in reverse chronological order (newest first). Each entry includes the
+actor email (`changed_by`), the ISO-8601 timestamp (
 
 `GET /v2/integrations/{integrationId}/use-cases/{useCaseId}/secure-proxy-whitelist/history`
 
@@ -2281,7 +2531,18 @@ const { data } = await client.getOutboundStatus({
         "last_ack_at": "1970-01-01T00:00:00.000Z",
         "blocked": true,
         "dlq_count": 0
-      }
+      },
+      "file_proxy": [
+        {
+          "mapping_id": "string",
+          "use_case_slug": "string",
+          "resolved": true,
+          "target_use_case_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+          "target_enabled": true,
+          "target_updated_at": "1970-01-01T00:00:00.000Z",
+          "unresolved_reason": "not_found"
+        }
+      ]
     }
   ]
 }
@@ -2914,7 +3175,8 @@ const { data } = await client.getMonitoringTraceByCorrelation({
 
 ### `listSecureProxies`
 
-List all secure proxy use cases
+Lists all secure_proxy use cases across all integrations for the authenticated organization.
+Returns minimal data suitable for dropdowns and selection UIs.
 
 `GET /v1/integrations/secure-proxies`
 
@@ -2949,7 +3211,9 @@ const { data } = await client.listSecureProxies()
 
 ### `secureProxy`
 
-Proxy HTTP request through secure VPC
+Routes an HTTP request through a VPC with either static IP egress or VPN secure link access.
+The VPC mode is determined by the referenced secure_proxy use case configuration.
+For secure_link mode, the
 
 `POST /v1/secure-proxy`
 
@@ -2986,7 +3250,8 @@ const { data } = await client.secureProxy(
 
 ### `managedCallExecute`
 
-Execute a managed call operation
+Execute a managed call operation synchronously. The slug in the path acts as the RPC method name.
+Calls an external partner API with JSONata mapping on both request and response.
 
 `POST /v1/managed-call/{slug}/execute`
 
@@ -3016,7 +3281,7 @@ const { data } = await client.managedCallExecute(
 
 ### `generateTypesPreview`
 
-Preview scaffolded types for a connector integration
+Analyses the JSONata mappings of all managed-call use cases in the integration and returns scaffolded type descriptors. The frontend uses these to show the type editor modal where developers fill in l
 
 `POST /v1/integrations/{integrationId}/generate-types-preview`
 
@@ -3030,7 +3295,7 @@ const { data } = await client.generateTypesPreview({
 
 ### `generateTypes`
 
-Generate a TypeScript npm package for a connector integration
+Generates a complete TypeScript npm package with typed interfaces for all managed-call use cases. This is a stateless operation that does not persist any changes. Use the commit-types endpoint to lock
 
 `POST /v1/integrations/{integrationId}/generate-types`
 
@@ -3068,7 +3333,7 @@ const { data } = await client.generateTypes(
 
 ### `commitTypes`
 
-Commit generated types and lock use case configurations
+Commits the generated types by locking use case configurations and updating version tracking. Should be called after the user reviews and downloads the generated package.
 
 `POST /v1/integrations/{integrationId}/commit-types`
 
@@ -3101,7 +3366,7 @@ const { data } = await client.commitTypes(
 
 ### `createErpImport`
 
-Create a pricing-file import job from an already-uploaded file (S3 ref). Returns a job id and starts the validate phase asynchronously — poll GET /v2/erp/imports/{importId}.
+Register an already-uploaded file (S3 ref) as a pricing-file import job. Returns the job and a file preview. Nothing runs yet: no use case is chosen and no validation starts here. Optionally rank cand
 
 `POST /v2/erp/imports`
 
@@ -3113,11 +3378,72 @@ const { data } = await client.createErpImport(
       bucket: 'string',
       key: 'string'
     },
-    integration_id: 'string',
-    use_case_slug: 'string'
+    include_preview: false
   },
 )
 ```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "job": {
+    "import_id": "string",
+    "org_id": "string",
+    "created_by": "string",
+    "integration_id": "string",
+    "use_case_slug": "string",
+    "format": "csv",
+    "status": "PENDING",
+    "s3_input_ref": {
+      "bucket": "string",
+      "key": "string"
+    },
+    "size_bytes": 0,
+    "column_count": 0,
+    "validation": {
+      "total_rows": 0,
+      "blocking": 0,
+      "warnings": 0,
+      "entities": {},
+      "issues": [
+        {
+          "code": "UNIQUE_ID_COLUMN_MISSING",
+          "severity": "warning",
+          "columns": [
+            {
+              "name": "string",
+              "entity": "string"
+            }
+          ],
+          "row": 0
+        }
+      ]
+    },
+    "progress": {
+      "processed_rows": 0,
+      "total_rows": 0
+    },
+    "error": {
+      "code": "VALIDATION_BLOCKED",
+      "message": "string"
+    },
+    "correlation_id": "string",
+    "activity_id": "string",
+    "created_at": "1970-01-01T00:00:00.000Z",
+    "updated_at": "1970-01-01T00:00:00.000Z"
+  },
+  "preview": {
+    "columns": ["string"],
+    "rows": [
+      ["string"]
+    ]
+  }
+}
+```
+
+</details>
 
 ---
 
@@ -3152,18 +3478,33 @@ const { data } = await client.listErpImports({
         "bucket": "string",
         "key": "string"
       },
+      "size_bytes": 0,
+      "column_count": 0,
       "validation": {
         "total_rows": 0,
         "blocking": 0,
         "warnings": 0,
-        "entities": {}
+        "entities": {},
+        "issues": [
+          {
+            "code": "UNIQUE_ID_COLUMN_MISSING",
+            "severity": "warning",
+            "columns": [
+              {
+                "name": "string",
+                "entity": "string"
+              }
+            ],
+            "row": 0
+          }
+        ]
       },
       "progress": {
         "processed_rows": 0,
         "total_rows": 0
       },
       "error": {
-        "type": "VALIDATION_BLOCKED",
+        "code": "VALIDATION_BLOCKED",
         "message": "string"
       },
       "correlation_id": "string",
@@ -3208,24 +3549,109 @@ const { data } = await client.getErpImport({
     "bucket": "string",
     "key": "string"
   },
+  "size_bytes": 0,
+  "column_count": 0,
   "validation": {
     "total_rows": 0,
     "blocking": 0,
     "warnings": 0,
-    "entities": {}
+    "entities": {},
+    "issues": [
+      {
+        "code": "UNIQUE_ID_COLUMN_MISSING",
+        "severity": "warning",
+        "columns": [
+          {
+            "name": "string",
+            "entity": "string"
+          }
+        ],
+        "row": 0
+      }
+    ]
   },
   "progress": {
     "processed_rows": 0,
     "total_rows": 0
   },
   "error": {
-    "type": "VALIDATION_BLOCKED",
+    "code": "VALIDATION_BLOCKED",
     "message": "string"
   },
   "correlation_id": "string",
   "activity_id": "string",
   "created_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z"
+}
+```
+
+</details>
+
+---
+
+### `deleteErpImport`
+
+Remove an import and the file it owns. Allowed from any status: an import whose run is still in flight is stopped by the deletion, and rows it already wrote stay written.
+
+`DELETE /v2/erp/imports/{importId}`
+
+```ts
+const { data } = await client.deleteErpImport({
+  importId: 'example',
+})
+```
+
+---
+
+### `validateErpImport`
+
+Choose the use case to read this file with, and start the validate phase.
+Callable from PENDING, READY and FAILED — so a wrong choice is corrected by calling this again with a different use case, rath
+
+`POST /v2/erp/imports/{importId}:validate`
+
+```ts
+const { data } = await client.validateErpImport(
+  {
+    importId: 'example',
+  },
+  {
+    integration_id: 'string',
+    use_case_slug: 'string'
+  },
+)
+```
+
+---
+
+### `suggestErpImportUseCases`
+
+Rank the org's inbound use cases against this file's columns — the input to the ranked picker ("matches 6 of your 7 columns"). Optional: skip this and call `:validate` directly when the use case is al
+
+`POST /v2/erp/imports/{importId}:suggest-use-cases`
+
+```ts
+const { data } = await client.suggestErpImportUseCases({
+  importId: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "file_columns": 0,
+  "suggestions": [
+    {
+      "integration_id": "string",
+      "integration_name": "string",
+      "use_case_slug": "string",
+      "use_case_name": "string",
+      "entity_types": 0,
+      "matched_columns": 0
+    }
+  ]
 }
 ```
 
@@ -3240,49 +3666,15 @@ Confirm and run the write phase of a validated import. Only a READY job may be e
 `POST /v2/erp/imports/{importId}:execute`
 
 ```ts
-const { data } = await client.executeErpImport({
-  importId: 'example',
-})
+const { data } = await client.executeErpImport(
+  {
+    importId: 'example',
+  },
+  {
+    ack_warnings: true
+  },
+)
 ```
-
-<details>
-<summary>Response</summary>
-
-```json
-{
-  "import_id": "string",
-  "org_id": "string",
-  "created_by": "string",
-  "integration_id": "string",
-  "use_case_slug": "string",
-  "format": "csv",
-  "status": "PENDING",
-  "s3_input_ref": {
-    "bucket": "string",
-    "key": "string"
-  },
-  "validation": {
-    "total_rows": 0,
-    "blocking": 0,
-    "warnings": 0,
-    "entities": {}
-  },
-  "progress": {
-    "processed_rows": 0,
-    "total_rows": 0
-  },
-  "error": {
-    "type": "VALIDATION_BLOCKED",
-    "message": "string"
-  },
-  "correlation_id": "string",
-  "activity_id": "string",
-  "created_at": "1970-01-01T00:00:00.000Z",
-  "updated_at": "1970-01-01T00:00:00.000Z"
-}
-```
-
-</details>
 
 ---
 
@@ -3314,14 +3706,80 @@ type S3Reference = {
 
 ### `CreateErpImportRequest`
 
+Register an already-uploaded file as an import. The use case is chosen later, via `:validate` — upload and interpretation are separate decisions.
+
 ```ts
 type CreateErpImportRequest = {
   s3_reference: {
     bucket: string
     key: string
   }
+  include_preview?: boolean
+}
+```
+
+### `ValidateErpImportRequest`
+
+```ts
+type ValidateErpImportRequest = {
   integration_id: string
-  use_case_slug?: string
+  use_case_slug: string
+}
+```
+
+### `ErpImportUseCaseSuggestion`
+
+```ts
+type ErpImportUseCaseSuggestion = {
+  integration_id: string
+  integration_name: string
+  use_case_slug: string
+  use_case_name: string
+  entity_types: number
+  matched_columns: number
+}
+```
+
+### `SuggestErpImportUseCasesResponse`
+
+```ts
+type SuggestErpImportUseCasesResponse = {
+  file_columns: number
+  suggestions: Array<{
+    integration_id: string
+    integration_name: string
+    use_case_slug: string
+    use_case_name: string
+    entity_types: number
+    matched_columns: number
+  }>
+}
+```
+
+### `ExecuteErpImportRequest`
+
+Confirmation options. Required only when the verdict carries warnings — a clean import needs no body at all.
+
+```ts
+type ExecuteErpImportRequest = {
+  ack_warnings?: boolean
+}
+```
+
+### `ErpImportIssue`
+
+A problem found during validation, scoped to the file as a whole rather than to individual rows.
+`code` is the translation key and the other fields are its parameters — there is deliberately no message to display. Each code appears at most once, with everything it has to say aggregated into that one
+
+```ts
+type ErpImportIssue = {
+  code: "UNIQUE_ID_COLUMN_MISSING" | "MAPPED_COLUMN_MISSING" | "MALFORMED_ROW" | "INVALID_ENCODING" | "EMPTY_FILE" | "TOO_MANY_ROWS"
+  severity: "warning" | "blocking"
+  columns?: Array<{
+    name: string
+    entity?: string
+  }>
+  row?: number
 }
 ```
 
@@ -3335,6 +3793,15 @@ type ErpImportValidation = {
   blocking: number
   warnings: number
   entities: Record<string, number>
+  issues?: Array<{
+    code: "UNIQUE_ID_COLUMN_MISSING" | "MAPPED_COLUMN_MISSING" | "MALFORMED_ROW" | "INVALID_ENCODING" | "EMPTY_FILE" | "TOO_MANY_ROWS"
+    severity: "warning" | "blocking"
+    columns?: Array<{
+      name: { ... }
+      entity?: { ... }
+    }>
+    row?: number
+  }>
 }
 ```
 
@@ -3352,12 +3819,23 @@ type ErpImportProgress = {
 
 ### `ErpImportError`
 
-Why the import failed — present if and only if status = FAILED.
+Why the import failed — present if and only if status = FAILED. `code` is the translation key; for VALIDATION_BLOCKED the specifics are in `validation`.
 
 ```ts
 type ErpImportError = {
-  type: "VALIDATION_BLOCKED" | "PROCESSING_ERROR" | "INTERNAL_ERROR"
+  code: "VALIDATION_BLOCKED" | "FILE_FORMAT_UNSUPPORTED" | "FILE_UNAVAILABLE" | "VALIDATE_TIMEOUT" | "IMPORT_TIMEOUT" | "USE_CASE_NOT_USABLE" | "IMPORT_NO_PROGRESS" | "INTERNAL_ERROR"
   message: string
+}
+```
+
+### `ErpImportFilePreview`
+
+Sample of the file's first rows, using the same parser as `:validate`. Registration refuses a file it cannot read, so a created job always includes this.
+
+```ts
+type ErpImportFilePreview = {
+  columns: string[]
+  rows: string[][]
 }
 ```
 
@@ -3365,7 +3843,44 @@ type ErpImportError = {
 
 ```ts
 type CreateErpImportResponse = {
-  import_id: string
+  job: {
+    import_id: string
+    org_id: string
+    created_by?: string
+    integration_id?: string
+    use_case_slug?: string
+    format: "csv" | "xlsx"
+    status: "PENDING" | "VALIDATING" | "READY" | "PROCESSING" | "IMPORTED" | "FAILED" | "CANCELLING" | "CANCELLED"
+    s3_input_ref: {
+      bucket: { ... }
+      key: { ... }
+    }
+    size_bytes?: number
+    column_count?: number
+    validation?: {
+      total_rows: { ... }
+      blocking: { ... }
+      warnings: { ... }
+      entities: { ... }
+      issues?: { ... }
+    }
+    progress?: {
+      processed_rows: { ... }
+      total_rows?: { ... }
+    }
+    error?: {
+      code: { ... }
+      message: { ... }
+    }
+    correlation_id?: string
+    activity_id?: string
+    created_at: string // date-time
+    updated_at: string // date-time
+  }
+  preview?: {
+    columns: string[]
+    rows: string[][]
+  }
 }
 ```
 
@@ -3376,7 +3891,7 @@ type ErpImportJob = {
   import_id: string
   org_id: string
   created_by?: string
-  integration_id: string
+  integration_id?: string
   use_case_slug?: string
   format: "csv" | "xlsx"
   status: "PENDING" | "VALIDATING" | "READY" | "PROCESSING" | "IMPORTED" | "FAILED" | "CANCELLING" | "CANCELLED"
@@ -3384,18 +3899,26 @@ type ErpImportJob = {
     bucket: string
     key: string
   }
+  size_bytes?: number
+  column_count?: number
   validation?: {
     total_rows: number
     blocking: number
     warnings: number
     entities: Record<string, number>
+    issues?: Array<{
+      code: { ... }
+      severity: { ... }
+      columns?: { ... }
+      row?: { ... }
+    }>
   }
   progress?: {
     processed_rows: number
     total_rows?: number
   }
   error?: {
-    type: "VALIDATION_BLOCKED" | "PROCESSING_ERROR" | "INTERNAL_ERROR"
+    code: "VALIDATION_BLOCKED" | "FILE_FORMAT_UNSUPPORTED" | "FILE_UNAVAILABLE" | "VALIDATE_TIMEOUT" | "IMPORT_TIMEOUT" | "USE_CASE_NOT_USABLE" | "IMPORT_NO_PROGRESS" | "INTERNAL_ERROR"
     message: string
   }
   correlation_id?: string
@@ -3413,7 +3936,7 @@ type ErpImportList = {
     import_id: string
     org_id: string
     created_by?: string
-    integration_id: string
+    integration_id?: string
     use_case_slug?: string
     format: "csv" | "xlsx"
     status: "PENDING" | "VALIDATING" | "READY" | "PROCESSING" | "IMPORTED" | "FAILED" | "CANCELLING" | "CANCELLED"
@@ -3421,18 +3944,21 @@ type ErpImportList = {
       bucket: { ... }
       key: { ... }
     }
+    size_bytes?: number
+    column_count?: number
     validation?: {
       total_rows: { ... }
       blocking: { ... }
       warnings: { ... }
       entities: { ... }
+      issues?: { ... }
     }
     progress?: {
       processed_rows: { ... }
       total_rows?: { ... }
     }
     error?: {
-      type: { ... }
+      code: { ... }
       message: { ... }
     }
     correlation_id?: string
@@ -4222,6 +4748,7 @@ type IntegrationWithUseCases = {
     type: "inbound"
     enabled: boolean
     change_description?: string
+    changed_by?: string
     created_at: string // date-time
     updated_at: string // date-time
     configuration?: {
@@ -4236,11 +4763,14 @@ type IntegrationWithUseCases = {
     type: "outbound"
     enabled: boolean
     change_description?: string
+    changed_by?: string
     created_at: string // date-time
     updated_at: string // date-time
     configuration?: {
       event_catalog_event: { ... }
+      event_filter?: { ... }
       mappings: { ... }
+      ack_tracking?: { ... }
     }
   } | {
     id: string // uuid
@@ -4250,15 +4780,24 @@ type IntegrationWithUseCases = {
     type: "file_proxy"
     enabled: boolean
     change_description?: string
+    changed_by?: string
     created_at: string // date-time
     updated_at: string // date-time
     configuration?: {
+      direction?: { ... }
+      upload?: { ... }
+      fan_out?: { ... }
+      params_mapping?: { ... }
+      lookups?: { ... }
+      constants?: { ... }
+      file_source?: { ... }
+      required_params?: { ... }
       secure_proxy?: { ... }
       auth?: { ... }
       params?: { ... }
       allowed_origins?: { ... }
       steps: { ... }
-      response: { ... }
+      response?: { ... }
       prevent_indirect_serving?: { ... }
     }
   } | {
@@ -4269,6 +4808,7 @@ type IntegrationWithUseCases = {
     type: "managed_call"
     enabled: boolean
     change_description?: string
+    changed_by?: string
     created_at: string // date-time
     updated_at: string // date-time
     configuration?: {
@@ -4290,6 +4830,7 @@ type IntegrationWithUseCases = {
     type: "secure_proxy"
     enabled: boolean
     change_description?: string
+    changed_by?: string
     created_at: string // date-time
     updated_at: string // date-time
     configuration?: {
@@ -4298,6 +4839,7 @@ type IntegrationWithUseCases = {
       allowed_ips?: { ... }
     }
   }>
+  // ...
 }
 ```
 
@@ -4383,7 +4925,9 @@ type UpsertIntegrationWithUseCasesRequest = {
     type: "outbound"
     configuration?: {
       event_catalog_event: { ... }
+      event_filter?: { ... }
       mappings: { ... }
+      ack_tracking?: { ... }
     }
   } | {
     id?: string // uuid
@@ -4393,17 +4937,15 @@ type UpsertIntegrationWithUseCasesRequest = {
     change_description?: string
     type: "file_proxy"
     configuration?: {
+      direction?: { ... }
+      upload?: { ... }
+      fan_out?: { ... }
+      params_mapping?: { ... }
+      lookups?: { ... }
+      constants?: { ... }
+      file_source?: { ... }
+      required_params?: { ... }
       secure_proxy?: { ... }
-      auth?: { ... }
-      params?: { ... }
-      allowed_origins?: { ... }
-      steps: { ... }
-      response: { ... }
-      prevent_indirect_serving?: { ... }
-    }
-  } | {
-    id?: string // uuid
-    name: string
   // ...
 }
 ```
@@ -4477,6 +5019,7 @@ Configuration for outbound use cases. Defines the event that triggers the flow a
 ```ts
 type OutboundIntegrationEventConfiguration = {
   event_catalog_event: string
+  event_filter?: string
   mappings: Array<{
     id?: string // uuid
     name: string
@@ -4492,10 +5035,14 @@ type OutboundIntegrationEventConfiguration = {
       retention_days?: { ... }
       poison_policy?: { ... }
       max_delivery_attempts?: { ... }
+    } | {
+      type: { ... }
+      use_case_slug: { ... }
     }
     created_at?: string // date-time
     updated_at?: string // date-time
   }>
+  ack_tracking?: "on" | "off"
 }
 ```
 
@@ -4955,6 +5502,7 @@ type EmbeddedUseCaseRequest = {
   type: "outbound"
   configuration?: {
     event_catalog_event: string
+    event_filter?: string
     mappings: Array<{
       id?: { ... }
       name: { ... }
@@ -4964,6 +5512,7 @@ type EmbeddedUseCaseRequest = {
       created_at?: { ... }
       updated_at?: { ... }
     }>
+    ack_tracking?: "on" | "off"
   }
 } | {
   id?: string // uuid
@@ -4973,6 +5522,27 @@ type EmbeddedUseCaseRequest = {
   change_description?: string
   type: "file_proxy"
   configuration?: {
+    direction?: "download" | "upload"
+    upload?: {
+      max_file_bytes?: { ... }
+      max_delivery_attempts?: { ... }
+      success_when?: { ... }
+      external_id?: { ... }
+    }
+    fan_out?: {
+      enabled: { ... }
+      split_expression?: { ... }
+    }
+    params_mapping?: string
+    lookups?: Record<string, {
+      source: { ... }
+      entries: { ... }
+      default?: { ... }
+      on_miss?: { ... }
+    }>
+    constants?: Record<string, unknown>
+    file_source?: string
+    required_params?: string[]
     secure_proxy?: {
       use_case_slug: { ... }
     }
@@ -4996,29 +5566,6 @@ type EmbeddedUseCaseRequest = {
       description?: { ... }
     }>
     allowed_origins?: string // uri[]
-    steps: Array<{
-      url: { ... }
-      method: { ... }
-      headers?: { ... }
-      body?: { ... }
-      response_type: { ... }
-    }>
-    response: {
-      body: { ... }
-      encoding: { ... }
-      filename?: { ... }
-      content_type?: { ... }
-    }
-    prevent_indirect_serving?: boolean
-  }
-} | {
-  id?: string // uuid
-  name: string
-  slug?: string
-  enabled: boolean
-  change_description?: string
-  type: "managed_call"
-  configuration?: {
   // ...
 }
 ```
@@ -5080,6 +5627,7 @@ type EmbeddedOutboundUseCaseRequest = {
   type: "outbound"
   configuration?: {
     event_catalog_event: string
+    event_filter?: string
     mappings: Array<{
       id?: { ... }
       name: { ... }
@@ -5089,6 +5637,7 @@ type EmbeddedOutboundUseCaseRequest = {
       created_at?: { ... }
       updated_at?: { ... }
     }>
+    ack_tracking?: "on" | "off"
   }
 }
 ```
@@ -5104,6 +5653,27 @@ type EmbeddedFileProxyUseCaseRequest = {
   change_description?: string
   type: "file_proxy"
   configuration?: {
+    direction?: "download" | "upload"
+    upload?: {
+      max_file_bytes?: { ... }
+      max_delivery_attempts?: { ... }
+      success_when?: { ... }
+      external_id?: { ... }
+    }
+    fan_out?: {
+      enabled: { ... }
+      split_expression?: { ... }
+    }
+    params_mapping?: string
+    lookups?: Record<string, {
+      source: { ... }
+      entries: { ... }
+      default?: { ... }
+      on_miss?: { ... }
+    }>
+    constants?: Record<string, unknown>
+    file_source?: string
+    required_params?: string[]
     secure_proxy?: {
       use_case_slug: { ... }
     }
@@ -5134,7 +5704,7 @@ type EmbeddedFileProxyUseCaseRequest = {
       body?: { ... }
       response_type: { ... }
     }>
-    response: {
+    response?: {
       body: { ... }
       encoding: { ... }
       filename?: { ... }
@@ -5198,6 +5768,7 @@ type UseCaseBase = {
   type: "inbound" | "outbound" | "file_proxy" | "managed_call" | "secure_proxy"
   enabled: boolean
   change_description?: string
+  changed_by?: string
   created_at: string // date-time
   updated_at: string // date-time
 }
@@ -5214,6 +5785,7 @@ type InboundUseCase = {
   type: "inbound"
   enabled: boolean
   change_description?: string
+  changed_by?: string
   created_at: string // date-time
   updated_at: string // date-time
   configuration?: {
@@ -5250,10 +5822,12 @@ type OutboundUseCase = {
   type: "outbound"
   enabled: boolean
   change_description?: string
+  changed_by?: string
   created_at: string // date-time
   updated_at: string // date-time
   configuration?: {
     event_catalog_event: string
+    event_filter?: string
     mappings: Array<{
       id?: { ... }
       name: { ... }
@@ -5263,6 +5837,7 @@ type OutboundUseCase = {
       created_at?: { ... }
       updated_at?: { ... }
     }>
+    ack_tracking?: "on" | "off"
   }
 }
 ```
@@ -5278,9 +5853,31 @@ type FileProxyUseCase = {
   type: "file_proxy"
   enabled: boolean
   change_description?: string
+  changed_by?: string
   created_at: string // date-time
   updated_at: string // date-time
   configuration?: {
+    direction?: "download" | "upload"
+    upload?: {
+      max_file_bytes?: { ... }
+      max_delivery_attempts?: { ... }
+      success_when?: { ... }
+      external_id?: { ... }
+    }
+    fan_out?: {
+      enabled: { ... }
+      split_expression?: { ... }
+    }
+    params_mapping?: string
+    lookups?: Record<string, {
+      source: { ... }
+      entries: { ... }
+      default?: { ... }
+      on_miss?: { ... }
+    }>
+    constants?: Record<string, unknown>
+    file_source?: string
+    required_params?: string[]
     secure_proxy?: {
       use_case_slug: { ... }
     }
@@ -5311,7 +5908,7 @@ type FileProxyUseCase = {
       body?: { ... }
       response_type: { ... }
     }>
-    response: {
+    response?: {
       body: { ... }
       encoding: { ... }
       filename?: { ... }
@@ -5333,6 +5930,7 @@ type ManagedCallUseCase = {
   type: "managed_call"
   enabled: boolean
   change_description?: string
+  changed_by?: string
   created_at: string // date-time
   updated_at: string // date-time
   configuration?: {
@@ -5365,6 +5963,7 @@ type SecureProxyUseCase = {
   type: "secure_proxy"
   enabled: boolean
   change_description?: string
+  changed_by?: string
   created_at: string // date-time
   updated_at: string // date-time
   configuration?: {
@@ -5386,6 +5985,7 @@ type UseCase = {
   type: "inbound"
   enabled: boolean
   change_description?: string
+  changed_by?: string
   created_at: string // date-time
   updated_at: string // date-time
   configuration?: {
@@ -5416,10 +6016,12 @@ type UseCase = {
   type: "outbound"
   enabled: boolean
   change_description?: string
+  changed_by?: string
   created_at: string // date-time
   updated_at: string // date-time
   configuration?: {
     event_catalog_event: string
+    event_filter?: string
     mappings: Array<{
       id?: { ... }
       name: { ... }
@@ -5429,6 +6031,7 @@ type UseCase = {
       created_at?: { ... }
       updated_at?: { ... }
     }>
+    ack_tracking?: "on" | "off"
   }
 } | {
   id: string // uuid
@@ -5438,9 +6041,31 @@ type UseCase = {
   type: "file_proxy"
   enabled: boolean
   change_description?: string
+  changed_by?: string
   created_at: string // date-time
   updated_at: string // date-time
   configuration?: {
+    direction?: "download" | "upload"
+    upload?: {
+      max_file_bytes?: { ... }
+      max_delivery_attempts?: { ... }
+      success_when?: { ... }
+      external_id?: { ... }
+    }
+    fan_out?: {
+      enabled: { ... }
+      split_expression?: { ... }
+    }
+    params_mapping?: string
+    lookups?: Record<string, {
+      source: { ... }
+      entries: { ... }
+      default?: { ... }
+      on_miss?: { ... }
+    }>
+    constants?: Record<string, unknown>
+    file_source?: string
+    required_params?: string[]
     secure_proxy?: {
       use_case_slug: { ... }
     }
@@ -5452,32 +6077,6 @@ type UseCase = {
       scope?: { ... }
       audience?: { ... }
       resource?: { ... }
-      username?: { ... }
-      password?: { ... }
-      body_params?: { ... }
-      headers?: { ... }
-      query_params?: { ... }
-    }
-    params?: Array<{
-      name: { ... }
-      required: { ... }
-      description?: { ... }
-    }>
-    allowed_origins?: string // uri[]
-    steps: Array<{
-      url: { ... }
-      method: { ... }
-      headers?: { ... }
-      body?: { ... }
-      response_type: { ... }
-    }>
-    response: {
-      body: { ... }
-      encoding: { ... }
-      filename?: { ... }
-      content_type?: { ... }
-    }
-    prevent_indirect_serving?: boolean
   // ...
 }
 ```
@@ -5517,6 +6116,7 @@ type CreateUseCaseRequest = {
   type: "outbound"
   configuration?: {
     event_catalog_event: string
+    event_filter?: string
     mappings: Array<{
       id?: { ... }
       name: { ... }
@@ -5526,6 +6126,7 @@ type CreateUseCaseRequest = {
       created_at?: { ... }
       updated_at?: { ... }
     }>
+    ack_tracking?: "on" | "off"
   }
 } | {
   name: string
@@ -5533,6 +6134,27 @@ type CreateUseCaseRequest = {
   enabled: boolean
   type: "file_proxy"
   configuration?: {
+    direction?: "download" | "upload"
+    upload?: {
+      max_file_bytes?: { ... }
+      max_delivery_attempts?: { ... }
+      success_when?: { ... }
+      external_id?: { ... }
+    }
+    fan_out?: {
+      enabled: { ... }
+      split_expression?: { ... }
+    }
+    params_mapping?: string
+    lookups?: Record<string, {
+      source: { ... }
+      entries: { ... }
+      default?: { ... }
+      on_miss?: { ... }
+    }>
+    constants?: Record<string, unknown>
+    file_source?: string
+    required_params?: string[]
     secure_proxy?: {
       use_case_slug: { ... }
     }
@@ -5562,29 +6184,6 @@ type CreateUseCaseRequest = {
       headers?: { ... }
       body?: { ... }
       response_type: { ... }
-    }>
-    response: {
-      body: { ... }
-      encoding: { ... }
-      filename?: { ... }
-      content_type?: { ... }
-    }
-    prevent_indirect_serving?: boolean
-  }
-} | {
-  name: string
-  slug: string
-  enabled: boolean
-  type: "managed_call"
-  configuration?: {
-    operation: {
-      method: { ... }
-      path: { ... }
-      headers?: { ... }
-      query_params?: { ... }
-    }
-    request_mapping?: string
-    response_mapping?: string
   // ...
 }
 ```
@@ -5640,6 +6239,7 @@ type CreateOutboundUseCaseRequest = {
   type: "outbound"
   configuration?: {
     event_catalog_event: string
+    event_filter?: string
     mappings: Array<{
       id?: { ... }
       name: { ... }
@@ -5649,6 +6249,7 @@ type CreateOutboundUseCaseRequest = {
       created_at?: { ... }
       updated_at?: { ... }
     }>
+    ack_tracking?: "on" | "off"
   }
 }
 ```
@@ -5662,6 +6263,27 @@ type CreateFileProxyUseCaseRequest = {
   enabled: boolean
   type: "file_proxy"
   configuration?: {
+    direction?: "download" | "upload"
+    upload?: {
+      max_file_bytes?: { ... }
+      max_delivery_attempts?: { ... }
+      success_when?: { ... }
+      external_id?: { ... }
+    }
+    fan_out?: {
+      enabled: { ... }
+      split_expression?: { ... }
+    }
+    params_mapping?: string
+    lookups?: Record<string, {
+      source: { ... }
+      entries: { ... }
+      default?: { ... }
+      on_miss?: { ... }
+    }>
+    constants?: Record<string, unknown>
+    file_source?: string
+    required_params?: string[]
     secure_proxy?: {
       use_case_slug: { ... }
     }
@@ -5692,7 +6314,7 @@ type CreateFileProxyUseCaseRequest = {
       body?: { ... }
       response_type: { ... }
     }>
-    response: {
+    response?: {
       body: { ... }
       encoding: { ... }
       filename?: { ... }
@@ -5778,6 +6400,7 @@ type UpdateUseCaseRequest = {
   type?: "outbound"
   configuration?: {
     event_catalog_event: string
+    event_filter?: string
     mappings: Array<{
       id?: { ... }
       name: { ... }
@@ -5787,6 +6410,7 @@ type UpdateUseCaseRequest = {
       created_at?: { ... }
       updated_at?: { ... }
     }>
+    ack_tracking?: "on" | "off"
   }
 } | {
   name?: string
@@ -5795,6 +6419,27 @@ type UpdateUseCaseRequest = {
   change_description?: string
   type?: "file_proxy"
   configuration?: {
+    direction?: "download" | "upload"
+    upload?: {
+      max_file_bytes?: { ... }
+      max_delivery_attempts?: { ... }
+      success_when?: { ... }
+      external_id?: { ... }
+    }
+    fan_out?: {
+      enabled: { ... }
+      split_expression?: { ... }
+    }
+    params_mapping?: string
+    lookups?: Record<string, {
+      source: { ... }
+      entries: { ... }
+      default?: { ... }
+      on_miss?: { ... }
+    }>
+    constants?: Record<string, unknown>
+    file_source?: string
+    required_params?: string[]
     secure_proxy?: {
       use_case_slug: { ... }
     }
@@ -5821,29 +6466,6 @@ type UpdateUseCaseRequest = {
     steps: Array<{
       url: { ... }
       method: { ... }
-      headers?: { ... }
-      body?: { ... }
-      response_type: { ... }
-    }>
-    response: {
-      body: { ... }
-      encoding: { ... }
-      filename?: { ... }
-      content_type?: { ... }
-    }
-    prevent_indirect_serving?: boolean
-  }
-} | {
-  name?: string
-  slug?: string
-  enabled?: boolean
-  change_description?: string
-  type?: "managed_call"
-  configuration?: {
-    operation: {
-      method: { ... }
-      path: { ... }
-      headers?: { ... }
   // ...
 }
 ```
@@ -5902,6 +6524,7 @@ type UpdateOutboundUseCaseRequest = {
   type?: "outbound"
   configuration?: {
     event_catalog_event: string
+    event_filter?: string
     mappings: Array<{
       id?: { ... }
       name: { ... }
@@ -5911,6 +6534,7 @@ type UpdateOutboundUseCaseRequest = {
       created_at?: { ... }
       updated_at?: { ... }
     }>
+    ack_tracking?: "on" | "off"
   }
 }
 ```
@@ -5925,6 +6549,27 @@ type UpdateFileProxyUseCaseRequest = {
   change_description?: string
   type?: "file_proxy"
   configuration?: {
+    direction?: "download" | "upload"
+    upload?: {
+      max_file_bytes?: { ... }
+      max_delivery_attempts?: { ... }
+      success_when?: { ... }
+      external_id?: { ... }
+    }
+    fan_out?: {
+      enabled: { ... }
+      split_expression?: { ... }
+    }
+    params_mapping?: string
+    lookups?: Record<string, {
+      source: { ... }
+      entries: { ... }
+      default?: { ... }
+      on_miss?: { ... }
+    }>
+    constants?: Record<string, unknown>
+    file_source?: string
+    required_params?: string[]
     secure_proxy?: {
       use_case_slug: { ... }
     }
@@ -5955,7 +6600,7 @@ type UpdateFileProxyUseCaseRequest = {
       body?: { ... }
       response_type: { ... }
     }>
-    response: {
+    response?: {
       body: { ... }
       encoding: { ... }
       filename?: { ... }
@@ -6061,6 +6706,7 @@ type UseCaseHistoryEntry = {
   type: "outbound"
   configuration?: {
     event_catalog_event: string
+    event_filter?: string
     mappings: Array<{
       id?: { ... }
       name: { ... }
@@ -6070,6 +6716,7 @@ type UseCaseHistoryEntry = {
       created_at?: { ... }
       updated_at?: { ... }
     }>
+    ack_tracking?: "on" | "off"
   }
 } | {
   id: string // uuid
@@ -6085,34 +6732,32 @@ type UseCaseHistoryEntry = {
   history_created_at: string // date-time
   type: "file_proxy"
   configuration?: {
+    direction?: "download" | "upload"
+    upload?: {
+      max_file_bytes?: { ... }
+      max_delivery_attempts?: { ... }
+      success_when?: { ... }
+      external_id?: { ... }
+    }
+    fan_out?: {
+      enabled: { ... }
+      split_expression?: { ... }
+    }
+    params_mapping?: string
+    lookups?: Record<string, {
+      source: { ... }
+      entries: { ... }
+      default?: { ... }
+      on_miss?: { ... }
+    }>
+    constants?: Record<string, unknown>
+    file_source?: string
+    required_params?: string[]
     secure_proxy?: {
       use_case_slug: { ... }
     }
     auth?: {
       type: { ... }
-      token_url: { ... }
-      client_id: { ... }
-      client_secret: { ... }
-      scope?: { ... }
-      audience?: { ... }
-      resource?: { ... }
-      username?: { ... }
-      password?: { ... }
-      body_params?: { ... }
-      headers?: { ... }
-      query_params?: { ... }
-    }
-    params?: Array<{
-      name: { ... }
-      required: { ... }
-      description?: { ... }
-    }>
-    allowed_origins?: string // uri[]
-    steps: Array<{
-      url: { ... }
-      method: { ... }
-      headers?: { ... }
-      body?: { ... }
   // ...
 }
 ```
@@ -6192,6 +6837,7 @@ type OutboundUseCaseHistoryEntry = {
   type: "outbound"
   configuration?: {
     event_catalog_event: string
+    event_filter?: string
     mappings: Array<{
       id?: { ... }
       name: { ... }
@@ -6201,6 +6847,7 @@ type OutboundUseCaseHistoryEntry = {
       created_at?: { ... }
       updated_at?: { ... }
     }>
+    ack_tracking?: "on" | "off"
   }
 }
 ```
@@ -6222,6 +6869,27 @@ type FileProxyUseCaseHistoryEntry = {
   history_created_at: string // date-time
   type: "file_proxy"
   configuration?: {
+    direction?: "download" | "upload"
+    upload?: {
+      max_file_bytes?: { ... }
+      max_delivery_attempts?: { ... }
+      success_when?: { ... }
+      external_id?: { ... }
+    }
+    fan_out?: {
+      enabled: { ... }
+      split_expression?: { ... }
+    }
+    params_mapping?: string
+    lookups?: Record<string, {
+      source: { ... }
+      entries: { ... }
+      default?: { ... }
+      on_miss?: { ... }
+    }>
+    constants?: Record<string, unknown>
+    file_source?: string
+    required_params?: string[]
     secure_proxy?: {
       use_case_slug: { ... }
     }
@@ -6252,7 +6920,7 @@ type FileProxyUseCaseHistoryEntry = {
       body?: { ... }
       response_type: { ... }
     }>
-    response: {
+    response?: {
       body: { ... }
       encoding: { ... }
       filename?: { ... }
@@ -6736,13 +7404,35 @@ type CommitTypesResponse = {
 
 ### `FileProxyUseCaseConfiguration`
 
-Configuration for file_proxy use cases. Defines how to authenticate and fetch files from external document systems.
+Configuration for file_proxy use cases. Defines how to authenticate and move files
+between epilot and an external document system, in either direction (see `direction`).
 
-The file proxy download URL always requires `orgId`, `integrationId`, and either `useCaseSlug` (recommended) or `useCaseId` (legacy UUID) as query parameters.
-The `orgId` is included 
+**Download** (`direction: download`, the default) fetches a file from the external system
+and serves it to a browser. The downloa
 
 ```ts
 type FileProxyUseCaseConfiguration = {
+  direction?: "download" | "upload"
+  upload?: {
+    max_file_bytes?: number
+    max_delivery_attempts?: number
+    success_when?: string
+    external_id?: string
+  }
+  fan_out?: {
+    enabled: boolean
+    split_expression?: string
+  }
+  params_mapping?: string
+  lookups?: Record<string, {
+    source: string
+    entries: Record<string, string>
+    default?: string
+    on_miss?: "default" | "warn" | "fail"
+  }>
+  constants?: Record<string, unknown>
+  file_source?: string
+  required_params?: string[]
   secure_proxy?: {
     use_case_slug: string
   }
@@ -6768,12 +7458,12 @@ type FileProxyUseCaseConfiguration = {
   allowed_origins?: string // uri[]
   steps: Array<{
     url: string
-    method: "GET" | "POST"
+    method: "GET" | "POST" | "PUT" | "PATCH"
     headers?: Record<string, string>
     body?: string
     response_type: "json" | "binary"
   }>
-  response: {
+  response?: {
     body: string
     encoding: "base64" | "binary"
     filename?: string
@@ -6825,14 +7515,50 @@ type FileProxyParam = {
 ```ts
 type FileProxyStep = {
   url: string
-  method: "GET" | "POST"
+  method: "GET" | "POST" | "PUT" | "PATCH"
   headers?: Record<string, string>
   body?: string
   response_type: "json" | "binary"
 }
 ```
 
+### `FileProxyFanOutConfig`
+
+Splits one event into several independent deliveries.
+
+Mirrors the inbound mapping idiom, where an entity's JSONata expression returning an array
+produces one entity update per element. Made explicit with a toggle here because an upload
+is also legitimately used without splitting, and because auto-d
+
+```ts
+type FileProxyFanOutConfig = {
+  enabled: boolean
+  split_expression?: string
+}
+```
+
+### `FileProxyUploadConfig`
+
+Upload-side settings for a file_proxy use case with `direction: upload`.
+Everything about WHAT is sent lives on the outbound mapping
+(see `FileProxyDeliveryConfig`); this object only governs HOW the transfer is bounded
+and judged.
+
+
+```ts
+type FileProxyUploadConfig = {
+  max_file_bytes?: number
+  max_delivery_attempts?: number
+  success_when?: string
+  external_id?: string
+}
+```
+
 ### `FileProxyResponseConfig`
+
+How to extract the file from the step results. REQUIRED when `direction` is `download`;
+rejected when `direction` is `upload` (an upload has no file to extract).
+
 
 ```ts
 type FileProxyResponseConfig = {
@@ -6905,6 +7631,11 @@ type MappingSimulationResponse = {
     entity_slug: string
     unique_identifiers: Record<string, unknown>
     attributes: Record<string, unknown>
+    pricing?: {
+      config: { ... }
+      data: { ... }
+    }
+    mode: "upsert" | "delete" | "purge"
   }>
   meter_readings_updates?: Array<{
     meter: {
@@ -6914,6 +7645,28 @@ type MappingSimulationResponse = {
       $entity_unique_ids?: { ... }
     }
     attributes: Record<string, unknown>
+    mode: "upsert" | "delete"
+  }>
+  prune_scope_updates?: Array<{
+    entity_slug: string
+    scope: {
+      scope_mode: { ... }
+      schema?: { ... }
+      unique_ids?: { ... }
+      query?: { ... }
+    }
+    keep_unique_ids: Record<string, unknown>[]
+    deletion_mode: "delete" | "purge"
+  }>
+  meter_readings_prune_scope_updates?: Array<{
+    meter: {
+      $entity_unique_ids: { ... }
+    }
+    meter_counter?: {
+      $entity_unique_ids?: { ... }
+    }
+    keep_external_ids: string[]
+    source?: string
   }>
   warnings?: Array<{
     entity_schema: string
@@ -6940,6 +7693,11 @@ type EntityUpdate = {
   entity_slug: string
   unique_identifiers: Record<string, unknown>
   attributes: Record<string, unknown>
+  pricing?: {
+    config: Record<string, unknown>
+    data: Record<string, unknown>[]
+  }
+  mode: "upsert" | "delete" | "purge"
 }
 ```
 
@@ -6954,6 +7712,42 @@ type MeterReadingUpdate = {
     $entity_unique_ids?: Record<string, unknown>
   }
   attributes: Record<string, unknown>
+  mode: "upsert" | "delete"
+}
+```
+
+### `EntityPruneScopeUpdate`
+
+A resolved entity prune scope. At runtime, entities of `entity_slug` found within `scope` whose unique identifiers are not listed in `keep_unique_ids` are removed using `deletion_mode`.
+
+```ts
+type EntityPruneScopeUpdate = {
+  entity_slug: string
+  scope: {
+    scope_mode: "relations" | "query"
+    schema?: string
+    unique_ids?: Record<string, unknown>
+    query?: Record<string, unknown>
+  }
+  keep_unique_ids: Record<string, unknown>[]
+  deletion_mode: "delete" | "purge"
+}
+```
+
+### `MeterReadingPruneScopeUpdate`
+
+A resolved meter reading prune scope. At runtime, readings of the given meter (+ counter) whose external ids are not listed in `keep_external_ids` are deleted.
+
+```ts
+type MeterReadingPruneScopeUpdate = {
+  meter: {
+    $entity_unique_ids: Record<string, unknown>
+  }
+  meter_counter?: {
+    $entity_unique_ids?: Record<string, unknown>
+  }
+  keep_external_ids: string[]
+  source?: string
 }
 ```
 
@@ -7012,7 +7806,7 @@ type IntegrationConfigurationV2 = {
 
 ### `OutboundMapping`
 
-A mapping that delivers an event to an external system — either pushed to a webhook (with a JSONata payload transformation) or made available on the pull-based poll queue (raw event payload, no transformation)
+A mapping that delivers an event to an external system by one of three mechanisms — pushed to a webhook (with a JSONata payload transformation), made available on the pull-based poll queue (raw event payload, no transformation), or handed to a file_proxy use case that uploads files to an external do
 
 ```ts
 type OutboundMapping = {
@@ -7030,6 +7824,9 @@ type OutboundMapping = {
     retention_days?: number
     poison_policy?: "dead_letter" | "block"
     max_delivery_attempts?: number
+  } | {
+    type: "file_proxy"
+    use_case_slug: string
   }
   created_at?: string // date-time
   updated_at?: string // date-time
@@ -7038,7 +7835,7 @@ type OutboundMapping = {
 
 ### `DeliveryConfig`
 
-Configuration for how the event should be delivered. webhook = push delivery via svc-webhooks (JSONata-transformed payload); poll = pull-based queue delivery where the consumer fetches items via the poll API (raw event payload)
+Configuration for how the event should be delivered. webhook = push delivery via svc-webhooks (JSONata-transformed payload); poll = pull-based queue delivery where the consumer fetches items via the poll API (raw event payload); file_proxy = one push per event attachment to an external document syst
 
 ```ts
 type DeliveryConfig = {
@@ -7051,6 +7848,9 @@ type DeliveryConfig = {
   retention_days?: number
   poison_policy?: "dead_letter" | "block"
   max_delivery_attempts?: number
+} | {
+  type: "file_proxy"
+  use_case_slug: string
 }
 ```
 
@@ -7077,6 +7877,35 @@ type PollDeliveryConfig = {
   retention_days?: number
   poison_policy?: "dead_letter" | "block"
   max_delivery_attempts?: number
+}
+```
+
+### `FileProxyDeliveryConfig`
+
+Push delivery to an external document system through a `file_proxy` use case.
+
+A pure pointer, deliberately. The outbound use case decides WHEN to deliver — its event
+name plus `event_filter` — and the referenced `file_proxy` use case decides WHAT and HOW:
+which items to fan out over (`fan_out`), wh
+
+```ts
+type FileProxyDeliveryConfig = {
+  type: "file_proxy"
+  use_case_slug: string
+}
+```
+
+### `FileProxyLookup`
+
+A named translation from a value in the event to a value the external system expects.
+
+
+```ts
+type FileProxyLookup = {
+  source: string
+  entries: Record<string, string>
+  default?: string
+  on_miss?: "default" | "warn" | "fail"
 }
 ```
 
@@ -7109,6 +7938,15 @@ type OutboundStatusResponse = {
       blocked: { ... }
       dlq_count: { ... }
     }
+    file_proxy?: Array<{
+      mapping_id: { ... }
+      use_case_slug: { ... }
+      resolved: { ... }
+      target_use_case_id?: { ... }
+      target_enabled?: { ... }
+      target_updated_at?: { ... }
+      unresolved_reason?: { ... }
+    }>
   }>
 }
 ```
@@ -7141,6 +7979,35 @@ type OutboundUseCaseStatus = {
     blocked: boolean
     dlq_count: number
   }
+  file_proxy?: Array<{
+    mapping_id: string
+    use_case_slug: string
+    resolved: boolean
+    target_use_case_id?: string // uuid
+    target_enabled?: boolean
+    target_updated_at?: string // date-time
+    unresolved_reason?: "not_found" | "wrong_type" | "wrong_direction" | "disabled"
+  }>
+}
+```
+
+### `OutboundFileProxyTargetStatus`
+
+Resolution state of one file_proxy mapping's referenced upload use case.
+
+Because the transport lives on a separate use case, edits to the endpoint or credentials
+do not appear in THIS use case's history. `target_updated_at` is the hook that lets an
+operator notice a target changed underneath a deli
+
+```ts
+type OutboundFileProxyTargetStatus = {
+  mapping_id: string
+  use_case_slug: string
+  resolved: boolean
+  target_use_case_id?: string // uuid
+  target_enabled?: boolean
+  target_updated_at?: string // date-time
+  unresolved_reason?: "not_found" | "wrong_type" | "wrong_direction" | "disabled"
 }
 ```
 
@@ -7868,5 +8735,51 @@ type TimeSeriesBucketV2 = {
     skipped_count: number
     total_count: number
   }>
+}
+```
+
+### `DocumentationPageSummary`
+
+Documentation page metadata without the markdown content
+
+```ts
+type DocumentationPageSummary = {
+  id: string
+  integration_id: string // uuid
+  scope: "integration" | "use_case"
+  use_case_id?: string // uuid
+  title: string
+  created_at: string // date-time
+  created_by?: string
+  updated_at: string // date-time
+  updated_by?: string
+}
+```
+
+### `DocumentationPage`
+
+A markdown documentation page of an integration
+
+```ts
+type DocumentationPage = {
+  id: string
+  integration_id: string // uuid
+  scope: "integration" | "use_case"
+  use_case_id?: string // uuid
+  title: string
+  created_at: string // date-time
+  created_by?: string
+  updated_at: string // date-time
+  updated_by?: string
+  content: string
+}
+```
+
+### `UpsertDocumentationPageRequest`
+
+```ts
+type UpsertDocumentationPageRequest = {
+  title: string
+  content: string
 }
 ```
