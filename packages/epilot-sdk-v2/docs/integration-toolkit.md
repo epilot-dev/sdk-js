@@ -3378,7 +3378,8 @@ const { data } = await client.createErpImport(
       bucket: 'string',
       key: 'string'
     },
-    include_preview: false
+    include_preview: false,
+    import_id: 'string'
   },
 )
 ```
@@ -3715,6 +3716,7 @@ type CreateErpImportRequest = {
     key: string
   }
   include_preview?: boolean
+  import_id?: string
 }
 ```
 
@@ -7540,10 +7542,9 @@ type FileProxyFanOutConfig = {
 ### `FileProxyUploadConfig`
 
 Upload-side settings for a file_proxy use case with `direction: upload`.
-Everything about WHAT is sent lives on the outbound mapping
-(see `FileProxyDeliveryConfig`); this object only governs HOW the transfer is bounded
-and judged.
-
+The surrounding file_proxy configuration owns WHAT and HOW to send: `fan_out`,
+`file_source`, `params_mapping`, lookups, constants, auth, and steps. This nested object
+governs upload-specific limits and how the final external r
 
 ```ts
 type FileProxyUploadConfig = {
