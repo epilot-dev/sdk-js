@@ -1328,6 +1328,16 @@
                 }
               }
             }
+          },
+          "409": {
+            "description": "The epilot default calendar cannot be deleted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           }
         }
       }
@@ -1430,7 +1440,7 @@
       "post": {
         "operationId": "createEvent",
         "summary": "createEvent",
-        "description": "Create a native epilot calendar event.",
+        "description": "Create a native epilot calendar event. Omit `calendar_id` to use the caller’s epilot default calendar.",
         "tags": [
           "Calendar Events"
         ],
@@ -2323,7 +2333,11 @@
           },
           "is_default": {
             "type": "boolean",
-            "description": "True if this is the user's primary calendar"
+            "description": "True if the source provider marks this calendar as default"
+          },
+          "is_epilot_default": {
+            "type": "boolean",
+            "description": "True for the epilot default calendar"
           },
           "read_only": {
             "type": "boolean",
@@ -2352,6 +2366,7 @@
           "_org",
           "name",
           "is_default",
+          "is_epilot_default",
           "read_only",
           "source"
         ]
@@ -2768,7 +2783,7 @@
           "calendar_id": {
             "type": "string",
             "minLength": 1,
-            "description": "epilot calendar this event belongs to"
+            "description": "Owned calendar ID. Omit this property to use the epilot default calendar."
           },
           "description": {
             "type": "string",
@@ -2815,7 +2830,6 @@
           }
         },
         "required": [
-          "calendar_id",
           "start_time",
           "end_time",
           "timezone",
