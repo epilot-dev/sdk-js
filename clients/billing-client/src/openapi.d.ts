@@ -771,7 +771,15 @@ declare namespace Components {
         }
         export interface ConfigurationHistoryContext {
             base_price?: PriceContext;
+            /**
+             * Canonically ordered base-price components. The singular base_price remains for compatibility.
+             */
+            base_prices?: PriceContext[];
             working_price?: PriceContext;
+            /**
+             * Canonically ordered working-price components, including separate HT and NT prices when present. The singular working_price remains for compatibility.
+             */
+            working_prices?: PriceContext[];
         }
         export interface ConfigurationHistoryResponse {
             history: ConfigurationHistoryRow[];
@@ -1243,20 +1251,56 @@ declare namespace Components {
             change_type: "contract_pricing_changed";
             previous_context: {
                 base_price?: PriceContext;
+                /**
+                 * Canonically ordered base-price components. The singular base_price remains for compatibility.
+                 */
+                base_prices?: PriceContext[];
                 working_price?: PriceContext;
+                /**
+                 * Canonically ordered working-price components, including separate HT and NT prices when present. The singular working_price remains for compatibility.
+                 */
+                working_prices?: PriceContext[];
                 tariff?: ContractTariffContext;
+                /**
+                 * Canonically ordered tariff products for composite Contracts. The singular tariff is populated when exactly one tariff product exists.
+                 */
+                tariffs?: ContractTariffContext[];
             } | null;
             new_context: {
                 base_price?: PriceContext;
+                /**
+                 * Canonically ordered base-price components. The singular base_price remains for compatibility.
+                 */
+                base_prices?: PriceContext[];
                 working_price?: PriceContext;
+                /**
+                 * Canonically ordered working-price components, including separate HT and NT prices when present. The singular working_price remains for compatibility.
+                 */
+                working_prices?: PriceContext[];
                 tariff?: ContractTariffContext;
+                /**
+                 * Canonically ordered tariff products for composite Contracts. The singular tariff is populated when exactly one tariff product exists.
+                 */
+                tariffs?: ContractTariffContext[];
             } | null;
             changed_fields: ("tariff" | "base_price" | "working_price" | "discount" | "dynamic_tariff_configuration")[];
         }
         export interface ContractPricingContext {
             base_price?: PriceContext;
+            /**
+             * Canonically ordered base-price components. The singular base_price remains for compatibility.
+             */
+            base_prices?: PriceContext[];
             working_price?: PriceContext;
+            /**
+             * Canonically ordered working-price components, including separate HT and NT prices when present. The singular working_price remains for compatibility.
+             */
+            working_prices?: PriceContext[];
             tariff?: ContractTariffContext;
+            /**
+             * Canonically ordered tariff products for composite Contracts. The singular tariff is populated when exactly one tariff product exists.
+             */
+            tariffs?: ContractTariffContext[];
         }
         export interface ContractPricingInformation {
             entity_type: "contract";
@@ -2702,6 +2746,10 @@ declare namespace Components {
         export interface PriceContext {
             price_id?: string;
             price_title?: string;
+            /**
+             * Semantic tariff register for the price component, such as HT or NT.
+             */
+            tariff_type?: string;
             pricing_model?: string;
             unit_amount_gross_decimal?: string;
             unit_amount_net_decimal?: string;

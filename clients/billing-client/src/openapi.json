@@ -1896,6 +1896,10 @@
           "price_title": {
             "type": "string"
           },
+          "tariff_type": {
+            "type": "string",
+            "description": "Semantic tariff register for the price component, such as HT or NT."
+          },
           "pricing_model": {
             "type": "string"
           },
@@ -1981,8 +1985,22 @@
           "base_price": {
             "$ref": "#/components/schemas/PriceContext"
           },
+          "base_prices": {
+            "type": "array",
+            "description": "Canonically ordered base-price components. The singular base_price remains for compatibility.",
+            "items": {
+              "$ref": "#/components/schemas/PriceContext"
+            }
+          },
           "working_price": {
             "$ref": "#/components/schemas/PriceContext"
+          },
+          "working_prices": {
+            "type": "array",
+            "description": "Canonically ordered working-price components, including separate HT and NT prices when present. The singular working_price remains for compatibility.",
+            "items": {
+              "$ref": "#/components/schemas/PriceContext"
+            }
           }
         }
       },
@@ -2007,6 +2025,13 @@
             "properties": {
               "tariff": {
                 "$ref": "#/components/schemas/ContractTariffContext"
+              },
+              "tariffs": {
+                "type": "array",
+                "description": "Canonically ordered tariff products for composite Contracts. The singular tariff is populated when exactly one tariff product exists.",
+                "items": {
+                  "$ref": "#/components/schemas/ContractTariffContext"
+                }
               }
             }
           }
