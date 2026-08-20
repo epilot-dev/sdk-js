@@ -9,14 +9,26 @@ import type {
 
 export declare namespace Components {
     namespace Parameters {
-        export type ConfigurationHistoryChangeType = "installment_amount_changed";
+        export type ConfigurationHistoryChangeType = "installment_amount_changed" | "contract_pricing_changed";
         export type From = number;
+        /**
+         * example:
+         * installment_amount_changed,contract_pricing_changed
+         */
+        export type HistoryChangeTypes = string; // ^(installment_amount_changed|contract_pricing_changed)(,(installment_amount_changed|contract_pricing_changed))*$
+        export type IncludeHistory = boolean;
         export type Size = number;
     }
     export interface QueryParameters {
         From?: Parameters.From;
         Size?: Parameters.Size;
         ConfigurationHistoryChangeType?: Parameters.ConfigurationHistoryChangeType;
+        HistoryChangeTypes?: /**
+         * example:
+         * installment_amount_changed,contract_pricing_changed
+         */
+        Parameters.HistoryChangeTypes /* ^(installment_amount_changed|contract_pricing_changed)(,(installment_amount_changed|contract_pricing_changed))*$ */;
+        IncludeHistory?: Parameters.IncludeHistory;
     }
     namespace Responses {
         export type BadRequest = /* Standard error response format */ Schemas.Error;
@@ -760,18 +772,26 @@ export declare namespace Components {
         }
         export interface ConfigurationHistoryContext {
             base_price?: PriceContext;
+            /**
+             * Canonically ordered base-price components. The singular base_price remains for compatibility.
+             */
+            base_prices?: PriceContext[];
             working_price?: PriceContext;
+            /**
+             * Canonically ordered working-price components, including separate HT and NT prices when present. The singular working_price remains for compatibility.
+             */
+            working_prices?: PriceContext[];
         }
         export interface ConfigurationHistoryResponse {
             history: ConfigurationHistoryRow[];
             total: number;
         }
-        export interface ConfigurationHistoryRow {
+        export type ConfigurationHistoryRow = InstallmentAmountChangedHistoryRow | ContractPricingChangedHistoryRow;
+        export interface ConfigurationHistoryRowBase {
             event_id: string;
             org_id: string;
             entity_type: "contract" | "billing_account";
             entity_id: string;
-            change_type: "installment_amount_changed";
             /**
              * example:
              * 1
@@ -784,30 +804,6 @@ export declare namespace Components {
             source_label?: string;
             source_system?: string;
             source_reference?: string;
-            previous_value?: {
-                /**
-                 * Amount in cents when available or derivable.
-                 * example:
-                 * 10050
-                 */
-                amount?: number;
-                /**
-                 * Decimal amount string when available or derivable.
-                 * example:
-                 * 100.50
-                 */
-                amount_decimal?: string;
-                currency?: /**
-                 * Currency code in ISO 4217 format (Währungscode).
-                 * Common values: EUR (Euro), CHF (Swiss Franc)
-                 *
-                 * example:
-                 * EUR
-                 */
-                Currency;
-            } | null;
-            new_value: InstallmentAmountValue;
-            context?: ConfigurationHistoryContext;
         }
         /**
          * Represents a customer contract (Vertrag) for billing purposes.
@@ -1236,6 +1232,77 @@ export declare namespace Components {
              */
             Currency;
         }
+        export interface ContractPricingChangedHistoryRow {
+            event_id: string;
+            org_id: string;
+            entity_type: "contract" | "billing_account";
+            entity_id: string;
+            /**
+             * example:
+             * 1
+             */
+            schema_version: number;
+            effective_at?: string; // date-time
+            changed_at: string; // date-time
+            created_at: string; // date-time
+            source: "portal" | "epilot" | "erp" | "system" | "api" | "external" | "journey" | "automation" | "unknown";
+            source_label?: string;
+            source_system?: string;
+            source_reference?: string;
+            change_type: "contract_pricing_changed";
+            previous_context: {
+                base_price?: PriceContext;
+                /**
+                 * Canonically ordered base-price components. The singular base_price remains for compatibility.
+                 */
+                base_prices?: PriceContext[];
+                working_price?: PriceContext;
+                /**
+                 * Canonically ordered working-price components, including separate HT and NT prices when present. The singular working_price remains for compatibility.
+                 */
+                working_prices?: PriceContext[];
+                tariff?: ContractTariffContext;
+                /**
+                 * Canonically ordered tariff products for composite Contracts. The singular tariff is populated when exactly one tariff product exists.
+                 */
+                tariffs?: ContractTariffContext[];
+            } | null;
+            new_context: {
+                base_price?: PriceContext;
+                /**
+                 * Canonically ordered base-price components. The singular base_price remains for compatibility.
+                 */
+                base_prices?: PriceContext[];
+                working_price?: PriceContext;
+                /**
+                 * Canonically ordered working-price components, including separate HT and NT prices when present. The singular working_price remains for compatibility.
+                 */
+                working_prices?: PriceContext[];
+                tariff?: ContractTariffContext;
+                /**
+                 * Canonically ordered tariff products for composite Contracts. The singular tariff is populated when exactly one tariff product exists.
+                 */
+                tariffs?: ContractTariffContext[];
+            } | null;
+            changed_fields: ("tariff" | "base_price" | "working_price" | "discount" | "dynamic_tariff_configuration")[];
+        }
+        export interface ContractPricingContext {
+            base_price?: PriceContext;
+            /**
+             * Canonically ordered base-price components. The singular base_price remains for compatibility.
+             */
+            base_prices?: PriceContext[];
+            working_price?: PriceContext;
+            /**
+             * Canonically ordered working-price components, including separate HT and NT prices when present. The singular working_price remains for compatibility.
+             */
+            working_prices?: PriceContext[];
+            tariff?: ContractTariffContext;
+            /**
+             * Canonically ordered tariff products for composite Contracts. The singular tariff is populated when exactly one tariff product exists.
+             */
+            tariffs?: ContractTariffContext[];
+        }
         export interface ContractPricingInformation {
             entity_type: "contract";
             entity_id: string;
@@ -1255,6 +1322,10 @@ export declare namespace Components {
             billing_period?: "weekly" | "monthly" | "every_quarter" | "every_6_months" | "yearly";
             installments_per_year?: number;
             inferred: boolean;
+        }
+        export interface ContractTariffContext {
+            product_id?: string;
+            product_title?: string;
         }
         /**
          * Correction event (Korrekturbuchung).
@@ -2051,6 +2122,49 @@ export declare namespace Components {
              */
             internal_note?: string;
         }
+        export interface InstallmentAmountChangedHistoryRow {
+            event_id: string;
+            org_id: string;
+            entity_type: "contract" | "billing_account";
+            entity_id: string;
+            /**
+             * example:
+             * 1
+             */
+            schema_version: number;
+            effective_at?: string; // date-time
+            changed_at: string; // date-time
+            created_at: string; // date-time
+            source: "portal" | "epilot" | "erp" | "system" | "api" | "external" | "journey" | "automation" | "unknown";
+            source_label?: string;
+            source_system?: string;
+            source_reference?: string;
+            change_type: "installment_amount_changed";
+            previous_value?: {
+                /**
+                 * Amount in cents when available or derivable.
+                 * example:
+                 * 10050
+                 */
+                amount?: number;
+                /**
+                 * Decimal amount string when available or derivable.
+                 * example:
+                 * 100.50
+                 */
+                amount_decimal?: string;
+                currency?: /**
+                 * Currency code in ISO 4217 format (Währungscode).
+                 * Common values: EUR (Euro), CHF (Swiss Franc)
+                 *
+                 * example:
+                 * EUR
+                 */
+                Currency;
+            } | null;
+            new_value: InstallmentAmountValue;
+            context?: ConfigurationHistoryContext;
+        }
         export interface InstallmentAmountValue {
             /**
              * Amount in cents when available or derivable.
@@ -2633,6 +2747,10 @@ export declare namespace Components {
         export interface PriceContext {
             price_id?: string;
             price_title?: string;
+            /**
+             * Semantic tariff register for the price component, such as HT or NT.
+             */
+            tariff_type?: string;
             pricing_model?: string;
             unit_amount_gross_decimal?: string;
             unit_amount_net_decimal?: string;
@@ -2948,8 +3066,13 @@ export declare namespace Paths {
     }
     namespace GetBillingAccountConfigurationHistory {
         namespace Parameters {
-            export type ChangeType = "installment_amount_changed";
+            export type ChangeType = "installment_amount_changed" | "contract_pricing_changed";
             export type From = number;
+            /**
+             * example:
+             * installment_amount_changed,contract_pricing_changed
+             */
+            export type HistoryChangeTypes = string; // ^(installment_amount_changed|contract_pricing_changed)(,(installment_amount_changed|contract_pricing_changed))*$
             export type Id = string;
             export type Size = number;
         }
@@ -2958,6 +3081,11 @@ export declare namespace Paths {
         }
         export interface QueryParameters {
             change_type?: Parameters.ChangeType;
+            history_change_types?: /**
+             * example:
+             * installment_amount_changed,contract_pricing_changed
+             */
+            Parameters.HistoryChangeTypes /* ^(installment_amount_changed|contract_pricing_changed)(,(installment_amount_changed|contract_pricing_changed))*$ */;
             from?: Parameters.From;
             size?: Parameters.Size;
         }
@@ -2967,10 +3095,24 @@ export declare namespace Paths {
     }
     namespace GetBillingAccountPricingInformation {
         namespace Parameters {
+            /**
+             * example:
+             * installment_amount_changed,contract_pricing_changed
+             */
+            export type HistoryChangeTypes = string; // ^(installment_amount_changed|contract_pricing_changed)(,(installment_amount_changed|contract_pricing_changed))*$
             export type Id = string;
+            export type IncludeHistory = boolean;
         }
         export interface PathParameters {
             id: Parameters.Id;
+        }
+        export interface QueryParameters {
+            history_change_types?: /**
+             * example:
+             * installment_amount_changed,contract_pricing_changed
+             */
+            Parameters.HistoryChangeTypes /* ^(installment_amount_changed|contract_pricing_changed)(,(installment_amount_changed|contract_pricing_changed))*$ */;
+            include_history?: Parameters.IncludeHistory;
         }
         namespace Responses {
             export type $200 = Components.Schemas.BillingAccountPricingInformation;
@@ -3128,8 +3270,13 @@ export declare namespace Paths {
     }
     namespace GetContractConfigurationHistory {
         namespace Parameters {
-            export type ChangeType = "installment_amount_changed";
+            export type ChangeType = "installment_amount_changed" | "contract_pricing_changed";
             export type From = number;
+            /**
+             * example:
+             * installment_amount_changed,contract_pricing_changed
+             */
+            export type HistoryChangeTypes = string; // ^(installment_amount_changed|contract_pricing_changed)(,(installment_amount_changed|contract_pricing_changed))*$
             export type Id = string;
             export type Size = number;
         }
@@ -3138,6 +3285,11 @@ export declare namespace Paths {
         }
         export interface QueryParameters {
             change_type?: Parameters.ChangeType;
+            history_change_types?: /**
+             * example:
+             * installment_amount_changed,contract_pricing_changed
+             */
+            Parameters.HistoryChangeTypes /* ^(installment_amount_changed|contract_pricing_changed)(,(installment_amount_changed|contract_pricing_changed))*$ */;
             from?: Parameters.From;
             size?: Parameters.Size;
         }
@@ -3147,10 +3299,24 @@ export declare namespace Paths {
     }
     namespace GetContractPricingInformation {
         namespace Parameters {
+            /**
+             * example:
+             * installment_amount_changed,contract_pricing_changed
+             */
+            export type HistoryChangeTypes = string; // ^(installment_amount_changed|contract_pricing_changed)(,(installment_amount_changed|contract_pricing_changed))*$
             export type Id = string;
+            export type IncludeHistory = boolean;
         }
         export interface PathParameters {
             id: Parameters.Id;
+        }
+        export interface QueryParameters {
+            history_change_types?: /**
+             * example:
+             * installment_amount_changed,contract_pricing_changed
+             */
+            Parameters.HistoryChangeTypes /* ^(installment_amount_changed|contract_pricing_changed)(,(installment_amount_changed|contract_pricing_changed))*$ */;
+            include_history?: Parameters.IncludeHistory;
         }
         namespace Responses {
             export type $200 = Components.Schemas.ContractPricingInformation;
@@ -3384,7 +3550,7 @@ export interface OperationMethods {
    * Get current pricing information and recent configuration history for a Contract.
    */
   'getContractPricingInformation'(
-    parameters?: Parameters<Paths.GetContractPricingInformation.PathParameters> | null,
+    parameters?: Parameters<Paths.GetContractPricingInformation.QueryParameters & Paths.GetContractPricingInformation.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetContractPricingInformation.Responses.$200>
@@ -3394,7 +3560,7 @@ export interface OperationMethods {
    * Get current pricing information for the active Contracts linked to a Billing Account.
    */
   'getBillingAccountPricingInformation'(
-    parameters?: Parameters<Paths.GetBillingAccountPricingInformation.PathParameters> | null,
+    parameters?: Parameters<Paths.GetBillingAccountPricingInformation.QueryParameters & Paths.GetBillingAccountPricingInformation.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetBillingAccountPricingInformation.Responses.$200>
@@ -3579,7 +3745,7 @@ export interface PathsDictionary {
      * Get current pricing information and recent configuration history for a Contract.
      */
     'get'(
-      parameters?: Parameters<Paths.GetContractPricingInformation.PathParameters> | null,
+      parameters?: Parameters<Paths.GetContractPricingInformation.QueryParameters & Paths.GetContractPricingInformation.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetContractPricingInformation.Responses.$200>
@@ -3591,7 +3757,7 @@ export interface PathsDictionary {
      * Get current pricing information for the active Contracts linked to a Billing Account.
      */
     'get'(
-      parameters?: Parameters<Paths.GetBillingAccountPricingInformation.PathParameters> | null,
+      parameters?: Parameters<Paths.GetBillingAccountPricingInformation.QueryParameters & Paths.GetBillingAccountPricingInformation.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetBillingAccountPricingInformation.Responses.$200>
@@ -3652,10 +3818,14 @@ export type BonusEvent = Components.Schemas.BonusEvent;
 export type ConfigurationHistoryContext = Components.Schemas.ConfigurationHistoryContext;
 export type ConfigurationHistoryResponse = Components.Schemas.ConfigurationHistoryResponse;
 export type ConfigurationHistoryRow = Components.Schemas.ConfigurationHistoryRow;
+export type ConfigurationHistoryRowBase = Components.Schemas.ConfigurationHistoryRowBase;
 export type Contract = Components.Schemas.Contract;
 export type ContractItem = Components.Schemas.ContractItem;
+export type ContractPricingChangedHistoryRow = Components.Schemas.ContractPricingChangedHistoryRow;
+export type ContractPricingContext = Components.Schemas.ContractPricingContext;
 export type ContractPricingInformation = Components.Schemas.ContractPricingInformation;
 export type ContractPricingSchedule = Components.Schemas.ContractPricingSchedule;
+export type ContractTariffContext = Components.Schemas.ContractTariffContext;
 export type CorrectionEvent = Components.Schemas.CorrectionEvent;
 export type Currency = Components.Schemas.Currency;
 export type CustomEvent = Components.Schemas.CustomEvent;
@@ -3666,6 +3836,7 @@ export type EntityRelationItem = Components.Schemas.EntityRelationItem;
 export type EntitySlug = Components.Schemas.EntitySlug;
 export type Error = Components.Schemas.Error;
 export type FinalBillEvent = Components.Schemas.FinalBillEvent;
+export type InstallmentAmountChangedHistoryRow = Components.Schemas.InstallmentAmountChangedHistoryRow;
 export type InstallmentAmountValue = Components.Schemas.InstallmentAmountValue;
 export type InstallmentEvent = Components.Schemas.InstallmentEvent;
 export type InvoiceEvent = Components.Schemas.InvoiceEvent;
