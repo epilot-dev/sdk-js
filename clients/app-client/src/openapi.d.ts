@@ -1226,9 +1226,6 @@ declare namespace Components {
              *
              */
             type: "workflow" | "scheduled";
-            /**
-             * Human-readable display name, e.g. shown in the flow builder action picker
-             */
             label?: {
                 /**
                  * English translation

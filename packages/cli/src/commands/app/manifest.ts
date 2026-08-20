@@ -33,7 +33,7 @@ export interface ManifestFunction {
    * scheduled: runs automatically once per installation on its cron schedule.
    */
   type: 'workflow' | 'scheduled';
-  /** Human-readable display name, e.g. shown in the flow builder action picker */
+  /**  */
   label?: { en?: string | null; de: string };
   description?: { en?: string | null; de: string };
   /** Local path to the bundled handler JS — inlined as `code` on deploy */
