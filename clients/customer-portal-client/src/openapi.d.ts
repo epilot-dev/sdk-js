@@ -11187,7 +11187,7 @@ declare namespace Paths {
                      */
                     unit?: string;
                     /**
-                     * Optional localized label for this individual value, keyed by ISO 3166-1 alpha-2 language code (same shape as `VisualizationTypeOption.label`). When present, the portal renders it as the bar's label instead of the default timestamp-derived label (e.g. to name billing periods or tariff windows).
+                     * Optional localized label for this individual value, keyed by ISO 3166-1 alpha-2 language code (same shape as `VisualizationTypeOption.label`). When present, the portal renders it as the data point label instead of the default timestamp-derived label (e.g. to name billing periods or tariff windows).
                      * example:
                      * {
                      *   "en": "Billing period 1",
