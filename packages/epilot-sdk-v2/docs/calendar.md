@@ -682,6 +682,7 @@ const { data } = await client.listCalendars({
       "description": "string",
       "color": "string",
       "is_default": true,
+      "is_epilot_default": true,
       "read_only": true,
       "owner_email": "user@example.com",
       "source": {
@@ -732,6 +733,7 @@ const { data } = await client.createCalendar(
   "description": "string",
   "color": "string",
   "is_default": true,
+  "is_epilot_default": true,
   "read_only": true,
   "owner_email": "user@example.com",
   "source": {
@@ -778,6 +780,7 @@ const { data } = await client.addOutlookCalendar(
   "description": "string",
   "color": "string",
   "is_default": true,
+  "is_epilot_default": true,
   "read_only": true,
   "owner_email": "user@example.com",
   "source": {
@@ -882,6 +885,7 @@ const { data } = await client.getCalendar({
   "description": "string",
   "color": "string",
   "is_default": true,
+  "is_epilot_default": true,
   "read_only": true,
   "owner_email": "user@example.com",
   "source": {
@@ -901,7 +905,7 @@ const { data } = await client.getCalendar({
 
 ### `updateCalendar`
 
-Update fields on a calendar.
+Update local calendar details. Changes to synced calendars do not modify the provider calendar.
 
 `PATCH /v1/calendar/{calendar_id}`
 
@@ -931,6 +935,7 @@ const { data } = await client.updateCalendar(
   "description": "string",
   "color": "string",
   "is_default": true,
+  "is_epilot_default": true,
   "read_only": true,
   "owner_email": "user@example.com",
   "source": {
@@ -950,7 +955,7 @@ const { data } = await client.updateCalendar(
 
 ### `deleteCalendar`
 
-Delete a native epilot calendar and its events.
+Delete a native epilot calendar or disconnect a synced calendar, including its locally stored events.
 
 `DELETE /v1/calendar/{calendar_id}`
 
@@ -1001,6 +1006,7 @@ const { data } = await client.listEvents({
       "status": "free",
       "busy": true,
       "is_cancelled": true,
+      "is_draft": true,
       "sensitivity": "normal",
       "importance": "low",
       "is_online_meeting": true,
@@ -1016,6 +1022,7 @@ const { data } = await client.listEvents({
           "type": "required"
         }
       ],
+      "metadata": {},
       "is_recurring": true,
       "series_master_id": "string",
       "source": {
@@ -1040,7 +1047,7 @@ const { data } = await client.listEvents({
 
 ### `createEvent`
 
-Create a native epilot calendar event.
+Create a native epilot calendar event. Omit `calendar_id` to use the caller’s epilot default calendar.
 
 `POST /v1/calendar/events`
 
@@ -1057,6 +1064,7 @@ const { data } = await client.createEvent(
     location: 'string',
     status: 'free',
     sensitivity: 'normal',
+    metadata: {},
     _title: 'string'
   },
 )
@@ -1083,6 +1091,7 @@ const { data } = await client.createEvent(
   "status": "free",
   "busy": true,
   "is_cancelled": true,
+  "is_draft": true,
   "sensitivity": "normal",
   "importance": "low",
   "is_online_meeting": true,
@@ -1098,6 +1107,7 @@ const { data } = await client.createEvent(
       "type": "required"
     }
   ],
+  "metadata": {},
   "is_recurring": true,
   "series_master_id": "string",
   "source": {
@@ -1150,6 +1160,7 @@ const { data } = await client.getEvent({
   "status": "free",
   "busy": true,
   "is_cancelled": true,
+  "is_draft": true,
   "sensitivity": "normal",
   "importance": "low",
   "is_online_meeting": true,
@@ -1165,6 +1176,7 @@ const { data } = await client.getEvent({
       "type": "required"
     }
   ],
+  "metadata": {},
   "is_recurring": true,
   "series_master_id": "string",
   "source": {
@@ -1203,6 +1215,7 @@ const { data } = await client.updateEvent(
     is_all_day: true,
     location: 'string',
     status: 'free',
+    is_cancelled: true,
     sensitivity: 'normal',
     _title: 'string'
   },
@@ -1230,6 +1243,7 @@ const { data } = await client.updateEvent(
   "status": "free",
   "busy": true,
   "is_cancelled": true,
+  "is_draft": true,
   "sensitivity": "normal",
   "importance": "low",
   "is_online_meeting": true,
@@ -1245,6 +1259,7 @@ const { data } = await client.updateEvent(
       "type": "required"
     }
   ],
+  "metadata": {},
   "is_recurring": true,
   "series_master_id": "string",
   "source": {
@@ -1539,6 +1554,7 @@ type Calendar = {
   description?: string
   color?: string
   is_default: boolean
+  is_epilot_default: boolean
   read_only: boolean
   owner_email?: string // email
   source: {
@@ -1633,6 +1649,7 @@ type CalendarEvent = {
   status: "free" | "tentative" | "busy" | "oof" | "workingElsewhere" | "unknown"
   busy: boolean
   is_cancelled: boolean
+  is_draft: boolean
   sensitivity: "normal" | "personal" | "private" | "confidential"
   importance: "low" | "normal" | "high"
   is_online_meeting: boolean
@@ -1646,6 +1663,7 @@ type CalendarEvent = {
     response: "none" | "organizer" | "tentativelyAccepted" | "accepted" | "declined" | "notResponded"
     type: "required" | "optional" | "resource"
   }>
+  metadata?: Record<string, unknown>
   is_recurring: boolean
   series_master_id?: string
   source: {
@@ -1723,7 +1741,7 @@ type EventSource = {
 
 ```ts
 type CalendarEventCreateBody = {
-  calendar_id: string
+  calendar_id?: string
   description?: string
   start_time: string // date-time
   end_time: string // date-time
@@ -1732,6 +1750,7 @@ type CalendarEventCreateBody = {
   location?: string
   status: "free" | "tentative" | "busy" | "oof" | "workingElsewhere" | "unknown"
   sensitivity: "normal" | "personal" | "private" | "confidential"
+  metadata?: Record<string, unknown>
   _title: string
 }
 ```
@@ -1747,6 +1766,7 @@ type CalendarEventPatchBody = {
   is_all_day?: boolean
   location?: string
   status?: "free" | "tentative" | "busy" | "oof" | "workingElsewhere" | "unknown"
+  is_cancelled?: boolean
   sensitivity?: "normal" | "personal" | "private" | "confidential"
   _title?: string
 }

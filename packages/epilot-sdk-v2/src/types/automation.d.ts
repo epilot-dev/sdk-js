@@ -143,7 +143,7 @@ export declare namespace Components {
                 types?: (("CreateMeterReading" | "UpdateMeterReading" | "DocDownloadedFromPortal" | "PortalUserResetPassword" | "PortalUserResetForgotPassword" | "SelfAssignmentFromPortal") | string)[];
             };
         }
-        export type AnyAction = MapEntityAction | TriggerWorkflowAction | TriggerShareEntityAction | TriggerWebhookAction | InformERPAction | TriggerEventAction | CreateDocumentAction | SendEmailAction | /* Creates an order entity with prices from journey */ CartCheckoutAction | CustomAction | AutomationAction | FlowExecutionCancelAction | ForwardEmailAction | ReplyEmailAction;
+        export type AnyAction = MapEntityAction | TriggerWorkflowAction | TriggerShareEntityAction | TriggerWebhookAction | InformERPAction | TriggerEventAction | CreateDocumentAction | SendEmailAction | /* Creates an order entity with prices from journey */ CartCheckoutAction | CustomAction | AutomationAction | FlowExecutionCancelAction | ForwardEmailAction | ReplyEmailAction | AssignEntityAction;
         export type AnyActionConfig = /**
          * example:
          * {
@@ -422,7 +422,29 @@ export declare namespace Components {
          *   }
          * }
          */
-        ReplyEmailActionConfig;
+        ReplyEmailActionConfig | /**
+         * example:
+         * {
+         *   "id": "25jga0-gkasl26-0asg-908sgaj2",
+         *   "name": "Assign Entity",
+         *   "type": "assign-entity",
+         *   "config": {
+         *     "attribute": "assigned_to",
+         *     "write_mode": "replace",
+         *     "assignment_type": "direct",
+         *     "assignees": [
+         *       {
+         *         "type": "user",
+         *         "user_id": "90503",
+         *         "org_id": "66",
+         *         "display_name": "Jane Doe",
+         *         "email": "jane.doe@example.com"
+         *       }
+         *     ]
+         *   }
+         * }
+         */
+        AssignEntityActionConfig;
         export type AnyTrigger = FrontendSubmitTrigger | JourneySubmitTrigger | ApiSubmissionTrigger | /**
          * - If provides filter_config, executes an automation based on the filtered configuration when an entity event occurs.
          * - The conditions on a filter follows the event bridge patterns - `https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-event-patterns.html`
@@ -644,6 +666,214 @@ export declare namespace Components {
              */
             target_unique?: string[];
         }
+        export interface AssignEntityAction {
+            id?: /**
+             * example:
+             * 9ec3711b-db63-449c-b894-54d5bb622a8f
+             */
+            AutomationActionId;
+            flow_action_id?: /**
+             * example:
+             * 9ec3711b-db63-449c-b894-54d5bb622a8f
+             */
+            AutomationActionId;
+            name?: string;
+            type?: "assign-entity";
+            config?: AssignEntityConfig;
+            /**
+             * Whether to stop execution in a failed state if this action fails
+             */
+            allow_failure?: boolean;
+            /**
+             * Flag indicating whether the action was created automatically or manually
+             */
+            created_automatically?: boolean;
+            /**
+             * Flag indicating whether the same action can be in bulk in a single execution. e.g; send-email / map-entity
+             */
+            is_bulk_action?: boolean;
+            reason?: {
+                /**
+                 * Why the action has to be skipped/failed
+                 * example:
+                 * There are no registered portal users for the given emails, hence skipping the action
+                 */
+                message?: string;
+                /**
+                 * Extra metadata about the skipping reason - such as a certain condition not met, etc.
+                 */
+                payload?: {
+                    [name: string]: any;
+                };
+            };
+            /**
+             * Condition Id to be checked before executing the action
+             */
+            condition_id?: string;
+            /**
+             * Schedule Id which indicates the schedule of the action
+             */
+            schedule_id?: string;
+            /**
+             * Id of a loop scope defined on the parent flow. When set, the action runs once per item resolved from the loop's source_path. All actions sharing the same loop_id must be contiguous in the actions array.
+             *
+             */
+            loop_id?: string;
+            execution_status?: ExecutionStatus;
+            started_at?: string;
+            updated_at?: string;
+            /**
+             * example:
+             * {}
+             */
+            outputs?: {
+                [name: string]: any;
+            };
+            error_output?: ErrorOutput;
+            retry_strategy?: /* different behaviors for retrying failed execution actions. */ RetryStrategy;
+            /**
+             * For looped actions, an archive of completed iterations. The action's own execution_status / outputs / error_output always reflect the current (latest) iteration. The previous iteration's state is pushed here before the action is reset for the next pass.
+             *
+             */
+            iterations?: /* A snapshot of a single completed pass through a looped action. */ AutomationActionIteration[];
+        }
+        /**
+         * example:
+         * {
+         *   "id": "25jga0-gkasl26-0asg-908sgaj2",
+         *   "name": "Assign Entity",
+         *   "type": "assign-entity",
+         *   "config": {
+         *     "attribute": "assigned_to",
+         *     "write_mode": "replace",
+         *     "assignment_type": "direct",
+         *     "assignees": [
+         *       {
+         *         "type": "user",
+         *         "user_id": "90503",
+         *         "org_id": "66",
+         *         "display_name": "Jane Doe",
+         *         "email": "jane.doe@example.com"
+         *       }
+         *     ]
+         *   }
+         * }
+         */
+        export interface AssignEntityActionConfig {
+            id?: /**
+             * example:
+             * 9ec3711b-db63-449c-b894-54d5bb622a8f
+             */
+            AutomationActionId;
+            flow_action_id?: /**
+             * example:
+             * 9ec3711b-db63-449c-b894-54d5bb622a8f
+             */
+            AutomationActionId;
+            name?: string;
+            type?: "assign-entity";
+            config?: AssignEntityConfig;
+            /**
+             * Whether to stop execution in a failed state if this action fails
+             */
+            allow_failure?: boolean;
+            /**
+             * Flag indicating whether the action was created automatically or manually
+             */
+            created_automatically?: boolean;
+            /**
+             * Flag indicating whether the same action can be in bulk in a single execution. e.g; send-email / map-entity
+             */
+            is_bulk_action?: boolean;
+            reason?: {
+                /**
+                 * Why the action has to be skipped/failed
+                 * example:
+                 * There are no registered portal users for the given emails, hence skipping the action
+                 */
+                message?: string;
+                /**
+                 * Extra metadata about the skipping reason - such as a certain condition not met, etc.
+                 */
+                payload?: {
+                    [name: string]: any;
+                };
+            };
+            /**
+             * Condition Id to be checked before executing the action
+             */
+            condition_id?: string;
+            /**
+             * Schedule Id which indicates the schedule of the action
+             */
+            schedule_id?: string;
+            /**
+             * Id of a loop scope defined on the parent flow. When set, the action runs once per item resolved from the loop's source_path. All actions sharing the same loop_id must be contiguous in the actions array.
+             *
+             */
+            loop_id?: string;
+        }
+        export interface AssignEntityConfig {
+            /**
+             * Slug of the user-relation attribute on the triggering entity to write to.
+             */
+            attribute?: string;
+            /**
+             * Assignees to write into `attribute`, in the order given.
+             */
+            assignees?: /**
+             * A single assignee as stored in a user-relation attribute. Written through
+             * verbatim by the assign-entity worker. Note this object encoding differs
+             * deliberately from AssignThreadConfig, which stores bare id strings —
+             * each matches what its own target accepts.
+             *
+             */
+            EntityAssignee[];
+            /**
+             * How `assignees` combine with the attribute's current value.
+             * - replace: overwrite the attribute with `assignees` (default).
+             * - append: union with the existing assignees, de-duplicated, existing
+             *   entries first. Two assignees are duplicates when their `type` and
+             *   `org_id` both match and the identifier for that type matches:
+             *   `user_id` for user and partner_user, `group_id` for group,
+             *   `partner_id` for partner_organization. Scoping by `org_id` keeps
+             *   assignees from different organizations distinct even when their
+             *   identifiers coincide.
+             *
+             */
+            write_mode?: "replace" | "append";
+            /**
+             * How assignees are resolved.
+             * - direct: assign exactly the assignees listed (default, and the only
+             *   accepted value).
+             * Reserved for a future routing strategy; widening this enum later is
+             * backwards compatible and needs no migration of existing flows.
+             *
+             */
+            assignment_type?: "direct";
+            /**
+             * Which entity to assign to. Omit for the triggering entity (the
+             * default, and the behaviour of every flow saved before this field
+             * existed).
+             * - trigger: the entity that started the flow.
+             * - action: the entity produced by an earlier action, identified by
+             *   that action's `flow_action_id`.
+             *
+             */
+            source?: {
+                /**
+                 * The producing action's `flow_action_id` when origin is `action`, or the trigger id when origin is `trigger`. Note this is `flow_action_id` (stable across executions), not `id`.
+                 *
+                 */
+                id?: string;
+                origin?: "trigger" | "action";
+                /**
+                 * Entity schema recorded when the source was chosen, for display. The worker uses the schema on the resolved entity itself, since this value goes stale if the producing action's target changes.
+                 *
+                 */
+                schema?: string;
+            };
+        }
         export interface AssignThreadAction {
             id?: /**
              * example:
@@ -739,6 +969,17 @@ export declare namespace Components {
              *
              */
             only_available_users?: boolean;
+            /**
+             * Sub-option of only_available_users: when a day off (weekend / whole
+             * day off with a known return) is what empties the candidate pool, hold
+             * the thread and retry when the soonest candidate is back — bounded to
+             * 7 retries over 7 days — before applying the fallback. Defaults to
+             * true; set false to skip the hold and fall straight through to the
+             * fallback. Out-of-office / vacation and non-availability reasons never
+             * hold regardless.
+             *
+             */
+            hold_until_available?: boolean;
             /**
              * Candidate condition for even_distribution: when true, only assign to
              * users whose skills (tags) match a label on the message. Opt-in;
@@ -1908,6 +2149,43 @@ export declare namespace Components {
         export type DiffAdded = FilterConditionOnEvent;
         export type DiffDeleted = FilterConditionOnEvent;
         export type DiffUpdated = FilterConditionOnEvent;
+        /**
+         * A single assignee as stored in a user-relation attribute. Written through
+         * verbatim by the assign-entity worker. Note this object encoding differs
+         * deliberately from AssignThreadConfig, which stores bare id strings —
+         * each matches what its own target accepts.
+         *
+         */
+        export interface EntityAssignee {
+            /**
+             * Which kind of principal this assignee is. Required: it selects which
+             * of the identifier properties below applies, and forms part of the
+             * append-mode de-duplication key.
+             *
+             */
+            type: "user" | "partner_user" | "partner_organization" | "group";
+            /**
+             * Set for user and partner_user assignees.
+             */
+            user_id?: string;
+            /**
+             * Set for group assignees.
+             */
+            group_id?: string;
+            /**
+             * Organization the assignee belongs to.
+             */
+            org_id?: string;
+            /**
+             * Set for partner_user and partner_organization assignees.
+             */
+            partner_id?: string;
+            /**
+             * Label snapshotted at configuration time; may go stale after a rename.
+             */
+            display_name?: string;
+            email?: string;
+        }
         /**
          * example:
          * e3d3ebac-baab-4395-abf4-50b5bf1f8b74
@@ -3184,6 +3462,11 @@ export declare namespace Components {
              * Schema of target entity
              */
             target_schema: string;
+            /**
+             * Resolve this action's target (contact/account) via the organization's global uniqueness criteria instead of per-action identifiers (target_unique / Unique switches). Forwarded to entity mapping by automation-workers.
+             *
+             */
+            use_uniqueness_criteria?: boolean;
             /**
              * Unique key for target entity (see upsertEntity of Entity API)
              */
@@ -4733,6 +5016,11 @@ export declare namespace Components {
             workflow_role: /* The role this automation plays in the workflow. */ WorkflowContextRole;
             _execution_chain?: /* [Internal] Tracks execution chain for infinite loop prevention. This is an internal property and should not be used by external consumers. */ ExecutionChain;
             /**
+             * [Internal] Ordered automation flow ids that led to the parent flow being started. The started execution appends its own flow id, so entity writes it performs carry the full chain and a loop running through a workflow can be detected. This is an internal property and should not be used by external consumers.
+             *
+             */
+            _automation_chain?: string[];
+            /**
              * Additional entity contexts from the parent flow execution. Used when an automation is triggered from a workflow task to carry all flow contexts into the automation, not just the primary entity.
              *
              */
@@ -5613,6 +5901,9 @@ export type AnythingButCondition = Components.Schemas.AnythingButCondition;
 export type ApiCallerContext = Components.Schemas.ApiCallerContext;
 export type ApiSubmissionTrigger = Components.Schemas.ApiSubmissionTrigger;
 export type AppendValueMapper = Components.Schemas.AppendValueMapper;
+export type AssignEntityAction = Components.Schemas.AssignEntityAction;
+export type AssignEntityActionConfig = Components.Schemas.AssignEntityActionConfig;
+export type AssignEntityConfig = Components.Schemas.AssignEntityConfig;
 export type AssignThreadAction = Components.Schemas.AssignThreadAction;
 export type AssignThreadConfig = Components.Schemas.AssignThreadConfig;
 export type AssignUsersToStep = Components.Schemas.AssignUsersToStep;
@@ -5644,6 +5935,7 @@ export type CustomAction = Components.Schemas.CustomAction;
 export type DiffAdded = Components.Schemas.DiffAdded;
 export type DiffDeleted = Components.Schemas.DiffDeleted;
 export type DiffUpdated = Components.Schemas.DiffUpdated;
+export type EntityAssignee = Components.Schemas.EntityAssignee;
 export type EntityId = Components.Schemas.EntityId;
 export type EntityItemSnapshot = Components.Schemas.EntityItemSnapshot;
 export type EntityManualTrigger = Components.Schemas.EntityManualTrigger;

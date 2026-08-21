@@ -62,7 +62,10 @@ export default defineCommand({
     });
 
     log.success(`Review submitted for v${version}`);
-    log.info(`Status: ${(result.review as Record<string, unknown>)?.review_status ?? 'pending'}`);
+    // createReview may return an empty body — status is pending on creation
+    log.info(
+      `Status: ${((result as Record<string, unknown> | undefined)?.review as Record<string, unknown> | undefined)?.review_status ?? 'pending'}`,
+    );
     log.dim('The epilot team will review your app and update the status.');
   },
 });

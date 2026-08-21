@@ -29,7 +29,7 @@ npm install -g @epilot/cli
 
 <!-- usage-help -->
 ```
-epilot v0.1.51 — CLI for epilot APIs
+epilot v0.1.112 — CLI for epilot APIs
 
 USAGE
   epilot <api> <operationId> [params...] [flags]
@@ -64,7 +64,7 @@ APIs
   access-token         Access Token API
   address              Address API
   address-suggestions  Address Suggestions API
-  ai-agents            AI Agents API - OpenAPI 3.0
+  ai-agents            AI Agents API
   app                  App API
   audit-logs           Audit Log
   automation           Automation API
@@ -321,7 +321,7 @@ Full documentation with sample calls and responses for all APIs:
 | Access Token API | `epilot access-token` | [docs](./docs/access-token.md) |
 | Address API | `epilot address` | [docs](./docs/address.md) |
 | Address Suggestions API | `epilot address-suggestions` | [docs](./docs/address-suggestions.md) |
-| AI Agents API - OpenAPI 3.0 | `epilot ai-agents` | [docs](./docs/ai-agents.md) |
+| AI Agents API | `epilot ai-agents` | [docs](./docs/ai-agents.md) |
 | App API | `epilot app` | [docs](./docs/app.md) |
 | Audit Log | `epilot audit-logs` | [docs](./docs/audit-logs.md) |
 | Automation API | `epilot automation` | [docs](./docs/automation.md) |

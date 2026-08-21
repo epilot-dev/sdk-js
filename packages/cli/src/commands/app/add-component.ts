@@ -28,14 +28,14 @@ type TemplateInfo = {
 };
 
 const TEMPLATE_REGISTRY: Record<string, TemplateInfo> = {
-  CUSTOM_FLOW_ACTION_SANDBOX: {
-    configOnly: false,
+  CUSTOM_FLOW_ACTION_FUNCTION: {
+    configOnly: true,
     manifestType: 'CUSTOM_FLOW_ACTION',
-    templateDir: 'custom-flow-action-sandbox',
-    description: 'Sandboxed flow action (JS runs in epilot)',
+    templateDir: 'custom-flow-action-function',
+    description: 'Flow action running a workflow function (code in epilot)',
     configuration: () => ({
-      type: 'sandbox',
-      sandbox_settings: { code: '// code is read from dist/ during deploy' },
+      type: 'function',
+      function_name: '<add-a-workflow-function-name>',
     }),
   },
   CUSTOM_FLOW_ACTION_EXTERNAL: {

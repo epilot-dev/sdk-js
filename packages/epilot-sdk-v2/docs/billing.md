@@ -72,6 +72,11 @@ const { data } = await billingClient.getBillingEvents(...)
 - [`PriceContext`](#pricecontext)
 - [`DynamicTariffPriceContext`](#dynamictariffpricecontext)
 - [`ConfigurationHistoryContext`](#configurationhistorycontext)
+- [`ContractTariffContext`](#contracttariffcontext)
+- [`ContractPricingContext`](#contractpricingcontext)
+- [`ConfigurationHistoryRowBase`](#configurationhistoryrowbase)
+- [`InstallmentAmountChangedHistoryRow`](#installmentamountchangedhistoryrow)
+- [`ContractPricingChangedHistoryRow`](#contractpricingchangedhistoryrow)
 - [`ConfigurationHistoryRow`](#configurationhistoryrow)
 - [`ConfigurationHistoryResponse`](#configurationhistoryresponse)
 - [`PricingInformationBalance`](#pricinginformationbalance)
@@ -512,6 +517,8 @@ Get current pricing information and recent configuration history for a Contract.
 ```ts
 const { data } = await client.getContractPricingInformation({
   id: '123e4567-e89b-12d3-a456-426614174000',
+  history_change_types: 'example',
+  include_history: true,
 })
 ```
 
@@ -532,6 +539,7 @@ const { data } = await client.getContractPricingInformation({
     "base_price": {
       "price_id": "string",
       "price_title": "string",
+      "tariff_type": "string",
       "pricing_model": "string",
       "unit_amount_gross_decimal": "string",
       "unit_amount_net_decimal": "string",
@@ -546,9 +554,13 @@ const { data } = await client.getContractPricingInformation({
       "is_dynamic_tariff": true,
       "dynamic_tariff": {}
     },
+    "base_prices": [
+      {}
+    ],
     "working_price": {
       "price_id": "string",
       "price_title": "string",
+      "tariff_type": "string",
       "pricing_model": "string",
       "unit_amount_gross_decimal": "string",
       "unit_amount_net_decimal": "string",
@@ -562,7 +574,10 @@ const { data } = await client.getContractPricingInformation({
       "has_discount": true,
       "is_dynamic_tariff": true,
       "dynamic_tariff": {}
-    }
+    },
+    "working_prices": [
+      {}
+    ]
   },
   "balance": {
     "amount": 8990,
@@ -582,7 +597,6 @@ const { data } = await client.getContractPricingInformation({
       "org_id": "string",
       "entity_type": "contract",
       "entity_id": "string",
-      "change_type": "installment_amount_changed",
       "schema_version": 1,
       "effective_at": "1970-01-01T00:00:00.000Z",
       "changed_at": "1970-01-01T00:00:00.000Z",
@@ -591,6 +605,7 @@ const { data } = await client.getContractPricingInformation({
       "source_label": "string",
       "source_system": "string",
       "source_reference": "string",
+      "change_type": "installment_amount_changed",
       "previous_value": {},
       "new_value": {},
       "context": {}
@@ -612,6 +627,8 @@ Get current pricing information for the active Contracts linked to a Billing Acc
 ```ts
 const { data } = await client.getBillingAccountPricingInformation({
   id: '123e4567-e89b-12d3-a456-426614174000',
+  history_change_types: 'example',
+  include_history: true,
 })
 ```
 
@@ -658,6 +675,7 @@ Get billing configuration history for a Contract.
 const { data } = await client.getContractConfigurationHistory({
   id: '123e4567-e89b-12d3-a456-426614174000',
   change_type: 'example',
+  history_change_types: 'example',
   from: 1,
   size: 1,
 })
@@ -674,7 +692,6 @@ const { data } = await client.getContractConfigurationHistory({
       "org_id": "string",
       "entity_type": "contract",
       "entity_id": "string",
-      "change_type": "installment_amount_changed",
       "schema_version": 1,
       "effective_at": "1970-01-01T00:00:00.000Z",
       "changed_at": "1970-01-01T00:00:00.000Z",
@@ -683,76 +700,10 @@ const { data } = await client.getContractConfigurationHistory({
       "source_label": "string",
       "source_system": "string",
       "source_reference": "string",
-      "previous_value": {
-        "amount": 10050,
-        "amount_decimal": "100.50",
-        "currency": "EUR"
-      },
-      "new_value": {
-        "amount": 10050,
-        "amount_decimal": "100.50",
-        "currency": "EUR"
-      },
-      "context": {
-        "base_price": {
-          "price_id": "string",
-          "price_title": "string",
-          "pricing_model": "string",
-          "unit_amount_gross_decimal": "string",
-          "unit_amount_net_decimal": "string",
-          "before_discount_unit_amount_gross_decimal": "string",
-          "before_discount_unit_amount_net_decimal": "string",
-          "unit_discount_amount_decimal": "string",
-          "unit_discount_amount_net_decimal": "string",
-          "currency": "EUR",
-          "billing_period": "string",
-          "unit": "string",
-          "has_discount": true,
-          "is_dynamic_tariff": true,
-          "dynamic_tariff": {
-            "mode": "string",
-            "interval": "string",
-            "average_price_decimal": "string",
-            "markup_amount_decimal": "string",
-            "markup_amount_net_decimal": "string",
-            "markup_amount_gross_decimal": "string",
-            "market_price_decimal": "string",
-            "market_price_currency": "EUR",
-            "market": "string",
-            "bidding_zone": "string",
-            "timestamp": "string"
-          }
-        },
-        "working_price": {
-          "price_id": "string",
-          "price_title": "string",
-          "pricing_model": "string",
-          "unit_amount_gross_decimal": "string",
-          "unit_amount_net_decimal": "string",
-          "before_discount_unit_amount_gross_decimal": "string",
-          "before_discount_unit_amount_net_decimal": "string",
-          "unit_discount_amount_decimal": "string",
-          "unit_discount_amount_net_decimal": "string",
-          "currency": "EUR",
-          "billing_period": "string",
-          "unit": "string",
-          "has_discount": true,
-          "is_dynamic_tariff": true,
-          "dynamic_tariff": {
-            "mode": "string",
-            "interval": "string",
-            "average_price_decimal": "string",
-            "markup_amount_decimal": "string",
-            "markup_amount_net_decimal": "string",
-            "markup_amount_gross_decimal": "string",
-            "market_price_decimal": "string",
-            "market_price_currency": "EUR",
-            "market": "string",
-            "bidding_zone": "string",
-            "timestamp": "string"
-          }
-        }
-      }
+      "change_type": "installment_amount_changed",
+      "previous_value": {},
+      "new_value": {},
+      "context": {}
     }
   ],
   "total": 0
@@ -773,6 +724,7 @@ Get merged billing configuration history for active Contracts linked to a Billin
 const { data } = await client.getBillingAccountConfigurationHistory({
   id: '123e4567-e89b-12d3-a456-426614174000',
   change_type: 'example',
+  history_change_types: 'example',
   from: 1,
   size: 1,
 })
@@ -789,7 +741,6 @@ const { data } = await client.getBillingAccountConfigurationHistory({
       "org_id": "string",
       "entity_type": "contract",
       "entity_id": "string",
-      "change_type": "installment_amount_changed",
       "schema_version": 1,
       "effective_at": "1970-01-01T00:00:00.000Z",
       "changed_at": "1970-01-01T00:00:00.000Z",
@@ -798,76 +749,10 @@ const { data } = await client.getBillingAccountConfigurationHistory({
       "source_label": "string",
       "source_system": "string",
       "source_reference": "string",
-      "previous_value": {
-        "amount": 10050,
-        "amount_decimal": "100.50",
-        "currency": "EUR"
-      },
-      "new_value": {
-        "amount": 10050,
-        "amount_decimal": "100.50",
-        "currency": "EUR"
-      },
-      "context": {
-        "base_price": {
-          "price_id": "string",
-          "price_title": "string",
-          "pricing_model": "string",
-          "unit_amount_gross_decimal": "string",
-          "unit_amount_net_decimal": "string",
-          "before_discount_unit_amount_gross_decimal": "string",
-          "before_discount_unit_amount_net_decimal": "string",
-          "unit_discount_amount_decimal": "string",
-          "unit_discount_amount_net_decimal": "string",
-          "currency": "EUR",
-          "billing_period": "string",
-          "unit": "string",
-          "has_discount": true,
-          "is_dynamic_tariff": true,
-          "dynamic_tariff": {
-            "mode": "string",
-            "interval": "string",
-            "average_price_decimal": "string",
-            "markup_amount_decimal": "string",
-            "markup_amount_net_decimal": "string",
-            "markup_amount_gross_decimal": "string",
-            "market_price_decimal": "string",
-            "market_price_currency": "EUR",
-            "market": "string",
-            "bidding_zone": "string",
-            "timestamp": "string"
-          }
-        },
-        "working_price": {
-          "price_id": "string",
-          "price_title": "string",
-          "pricing_model": "string",
-          "unit_amount_gross_decimal": "string",
-          "unit_amount_net_decimal": "string",
-          "before_discount_unit_amount_gross_decimal": "string",
-          "before_discount_unit_amount_net_decimal": "string",
-          "unit_discount_amount_decimal": "string",
-          "unit_discount_amount_net_decimal": "string",
-          "currency": "EUR",
-          "billing_period": "string",
-          "unit": "string",
-          "has_discount": true,
-          "is_dynamic_tariff": true,
-          "dynamic_tariff": {
-            "mode": "string",
-            "interval": "string",
-            "average_price_decimal": "string",
-            "markup_amount_decimal": "string",
-            "markup_amount_net_decimal": "string",
-            "markup_amount_gross_decimal": "string",
-            "market_price_decimal": "string",
-            "market_price_currency": "EUR",
-            "market": "string",
-            "bidding_zone": "string",
-            "timestamp": "string"
-          }
-        }
-      }
+      "change_type": "installment_amount_changed",
+      "previous_value": {},
+      "new_value": {},
+      "context": {}
     }
   ],
   "total": 0
@@ -1280,6 +1165,7 @@ type InstallmentAmountValue = {
 type PriceContext = {
   price_id?: string
   price_title?: string
+  tariff_type?: string
   pricing_model?: string
   unit_amount_gross_decimal?: string
   unit_amount_net_decimal?: string
@@ -1333,6 +1219,7 @@ type ConfigurationHistoryContext = {
   base_price?: {
     price_id?: string
     price_title?: string
+    tariff_type?: string
     pricing_model?: string
     unit_amount_gross_decimal?: string
     unit_amount_net_decimal?: string
@@ -1359,9 +1246,40 @@ type ConfigurationHistoryContext = {
       timestamp?: { ... }
     }
   }
+  base_prices?: Array<{
+    price_id?: string
+    price_title?: string
+    tariff_type?: string
+    pricing_model?: string
+    unit_amount_gross_decimal?: string
+    unit_amount_net_decimal?: string
+    before_discount_unit_amount_gross_decimal?: string
+    before_discount_unit_amount_net_decimal?: string
+    unit_discount_amount_decimal?: string
+    unit_discount_amount_net_decimal?: string
+    currency?: string
+    billing_period?: string
+    unit?: string
+    has_discount?: boolean
+    is_dynamic_tariff?: boolean
+    dynamic_tariff?: {
+      mode?: { ... }
+      interval?: { ... }
+      average_price_decimal?: { ... }
+      markup_amount_decimal?: { ... }
+      markup_amount_net_decimal?: { ... }
+      markup_amount_gross_decimal?: { ... }
+      market_price_decimal?: { ... }
+      market_price_currency?: { ... }
+      market?: { ... }
+      bidding_zone?: { ... }
+      timestamp?: { ... }
+    }
+  }>
   working_price?: {
     price_id?: string
     price_title?: string
+    tariff_type?: string
     pricing_model?: string
     unit_amount_gross_decimal?: string
     unit_amount_net_decimal?: string
@@ -1388,18 +1306,143 @@ type ConfigurationHistoryContext = {
       timestamp?: { ... }
     }
   }
+  working_prices?: Array<{
+    price_id?: string
+    price_title?: string
+    tariff_type?: string
+    pricing_model?: string
+    unit_amount_gross_decimal?: string
+    unit_amount_net_decimal?: string
+    before_discount_unit_amount_gross_decimal?: string
+    before_discount_unit_amount_net_decimal?: string
+  // ...
 }
 ```
 
-### `ConfigurationHistoryRow`
+### `ContractTariffContext`
 
 ```ts
-type ConfigurationHistoryRow = {
+type ContractTariffContext = {
+  product_id?: string
+  product_title?: string
+}
+```
+
+### `ContractPricingContext`
+
+```ts
+type ContractPricingContext = {
+  base_price?: {
+    price_id?: string
+    price_title?: string
+    tariff_type?: string
+    pricing_model?: string
+    unit_amount_gross_decimal?: string
+    unit_amount_net_decimal?: string
+    before_discount_unit_amount_gross_decimal?: string
+    before_discount_unit_amount_net_decimal?: string
+    unit_discount_amount_decimal?: string
+    unit_discount_amount_net_decimal?: string
+    currency?: string
+    billing_period?: string
+    unit?: string
+    has_discount?: boolean
+    is_dynamic_tariff?: boolean
+    dynamic_tariff?: {
+      mode?: { ... }
+      interval?: { ... }
+      average_price_decimal?: { ... }
+      markup_amount_decimal?: { ... }
+      markup_amount_net_decimal?: { ... }
+      markup_amount_gross_decimal?: { ... }
+      market_price_decimal?: { ... }
+      market_price_currency?: { ... }
+      market?: { ... }
+      bidding_zone?: { ... }
+      timestamp?: { ... }
+    }
+  }
+  base_prices?: Array<{
+    price_id?: string
+    price_title?: string
+    tariff_type?: string
+    pricing_model?: string
+    unit_amount_gross_decimal?: string
+    unit_amount_net_decimal?: string
+    before_discount_unit_amount_gross_decimal?: string
+    before_discount_unit_amount_net_decimal?: string
+    unit_discount_amount_decimal?: string
+    unit_discount_amount_net_decimal?: string
+    currency?: string
+    billing_period?: string
+    unit?: string
+    has_discount?: boolean
+    is_dynamic_tariff?: boolean
+    dynamic_tariff?: {
+      mode?: { ... }
+      interval?: { ... }
+      average_price_decimal?: { ... }
+      markup_amount_decimal?: { ... }
+      markup_amount_net_decimal?: { ... }
+      markup_amount_gross_decimal?: { ... }
+      market_price_decimal?: { ... }
+      market_price_currency?: { ... }
+      market?: { ... }
+      bidding_zone?: { ... }
+      timestamp?: { ... }
+    }
+  }>
+  working_price?: {
+    price_id?: string
+    price_title?: string
+    tariff_type?: string
+    pricing_model?: string
+    unit_amount_gross_decimal?: string
+    unit_amount_net_decimal?: string
+    before_discount_unit_amount_gross_decimal?: string
+    before_discount_unit_amount_net_decimal?: string
+    unit_discount_amount_decimal?: string
+    unit_discount_amount_net_decimal?: string
+    currency?: string
+    billing_period?: string
+    unit?: string
+    has_discount?: boolean
+    is_dynamic_tariff?: boolean
+    dynamic_tariff?: {
+      mode?: { ... }
+      interval?: { ... }
+      average_price_decimal?: { ... }
+      markup_amount_decimal?: { ... }
+      markup_amount_net_decimal?: { ... }
+      markup_amount_gross_decimal?: { ... }
+      market_price_decimal?: { ... }
+      market_price_currency?: { ... }
+      market?: { ... }
+      bidding_zone?: { ... }
+      timestamp?: { ... }
+    }
+  }
+  working_prices?: Array<{
+    price_id?: string
+    price_title?: string
+    tariff_type?: string
+    pricing_model?: string
+    unit_amount_gross_decimal?: string
+    unit_amount_net_decimal?: string
+    before_discount_unit_amount_gross_decimal?: string
+    before_discount_unit_amount_net_decimal?: string
+  // ...
+}
+```
+
+### `ConfigurationHistoryRowBase`
+
+```ts
+type ConfigurationHistoryRowBase = {
   event_id: string
   org_id: string
   entity_type: "contract" | "billing_account"
   entity_id: string
-  change_type: "installment_amount_changed"
   schema_version: number
   effective_at?: string // date-time
   changed_at: string // date-time
@@ -1408,6 +1451,26 @@ type ConfigurationHistoryRow = {
   source_label?: string
   source_system?: string
   source_reference?: string
+}
+```
+
+### `InstallmentAmountChangedHistoryRow`
+
+```ts
+type InstallmentAmountChangedHistoryRow = {
+  event_id: string
+  org_id: string
+  entity_type: "contract" | "billing_account"
+  entity_id: string
+  schema_version: number
+  effective_at?: string // date-time
+  changed_at: string // date-time
+  created_at: string // date-time
+  source: "portal" | "epilot" | "erp" | "system" | "api" | "external" | "journey" | "automation" | "unknown"
+  source_label?: string
+  source_system?: string
+  source_reference?: string
+  change_type: "installment_amount_changed"
   previous_value?: {
     amount?: number
     amount_decimal?: string
@@ -1422,6 +1485,7 @@ type ConfigurationHistoryRow = {
     base_price?: {
       price_id?: { ... }
       price_title?: { ... }
+      tariff_type?: { ... }
       pricing_model?: { ... }
       unit_amount_gross_decimal?: { ... }
       unit_amount_net_decimal?: { ... }
@@ -1436,9 +1500,28 @@ type ConfigurationHistoryRow = {
       is_dynamic_tariff?: { ... }
       dynamic_tariff?: { ... }
     }
+    base_prices?: Array<{
+      price_id?: { ... }
+      price_title?: { ... }
+      tariff_type?: { ... }
+      pricing_model?: { ... }
+      unit_amount_gross_decimal?: { ... }
+      unit_amount_net_decimal?: { ... }
+      before_discount_unit_amount_gross_decimal?: { ... }
+      before_discount_unit_amount_net_decimal?: { ... }
+      unit_discount_amount_decimal?: { ... }
+      unit_discount_amount_net_decimal?: { ... }
+      currency?: { ... }
+      billing_period?: { ... }
+      unit?: { ... }
+      has_discount?: { ... }
+      is_dynamic_tariff?: { ... }
+      dynamic_tariff?: { ... }
+    }>
     working_price?: {
       price_id?: { ... }
       price_title?: { ... }
+      tariff_type?: { ... }
       pricing_model?: { ... }
       unit_amount_gross_decimal?: { ... }
       unit_amount_net_decimal?: { ... }
@@ -1453,7 +1536,239 @@ type ConfigurationHistoryRow = {
       is_dynamic_tariff?: { ... }
       dynamic_tariff?: { ... }
     }
+    working_prices?: Array<{
+      price_id?: { ... }
+      price_title?: { ... }
+      tariff_type?: { ... }
+      pricing_model?: { ... }
+      unit_amount_gross_decimal?: { ... }
+      unit_amount_net_decimal?: { ... }
+      before_discount_unit_amount_gross_decimal?: { ... }
+      before_discount_unit_amount_net_decimal?: { ... }
+      unit_discount_amount_decimal?: { ... }
+      unit_discount_amount_net_decimal?: { ... }
+      currency?: { ... }
+      billing_period?: { ... }
+      unit?: { ... }
+      has_discount?: { ... }
+      is_dynamic_tariff?: { ... }
+      dynamic_tariff?: { ... }
+    }>
   }
+}
+```
+
+### `ContractPricingChangedHistoryRow`
+
+```ts
+type ContractPricingChangedHistoryRow = {
+  event_id: string
+  org_id: string
+  entity_type: "contract" | "billing_account"
+  entity_id: string
+  schema_version: number
+  effective_at?: string // date-time
+  changed_at: string // date-time
+  created_at: string // date-time
+  source: "portal" | "epilot" | "erp" | "system" | "api" | "external" | "journey" | "automation" | "unknown"
+  source_label?: string
+  source_system?: string
+  source_reference?: string
+  change_type: "contract_pricing_changed"
+  previous_context: {
+    base_price?: {
+      price_id?: { ... }
+      price_title?: { ... }
+      tariff_type?: { ... }
+      pricing_model?: { ... }
+      unit_amount_gross_decimal?: { ... }
+      unit_amount_net_decimal?: { ... }
+      before_discount_unit_amount_gross_decimal?: { ... }
+      before_discount_unit_amount_net_decimal?: { ... }
+      unit_discount_amount_decimal?: { ... }
+      unit_discount_amount_net_decimal?: { ... }
+      currency?: { ... }
+      billing_period?: { ... }
+      unit?: { ... }
+      has_discount?: { ... }
+      is_dynamic_tariff?: { ... }
+      dynamic_tariff?: { ... }
+    }
+    base_prices?: Array<{
+      price_id?: { ... }
+      price_title?: { ... }
+      tariff_type?: { ... }
+      pricing_model?: { ... }
+      unit_amount_gross_decimal?: { ... }
+      unit_amount_net_decimal?: { ... }
+      before_discount_unit_amount_gross_decimal?: { ... }
+      before_discount_unit_amount_net_decimal?: { ... }
+      unit_discount_amount_decimal?: { ... }
+      unit_discount_amount_net_decimal?: { ... }
+      currency?: { ... }
+      billing_period?: { ... }
+      unit?: { ... }
+      has_discount?: { ... }
+      is_dynamic_tariff?: { ... }
+      dynamic_tariff?: { ... }
+    }>
+    working_price?: {
+      price_id?: { ... }
+      price_title?: { ... }
+      tariff_type?: { ... }
+      pricing_model?: { ... }
+      unit_amount_gross_decimal?: { ... }
+      unit_amount_net_decimal?: { ... }
+      before_discount_unit_amount_gross_decimal?: { ... }
+      before_discount_unit_amount_net_decimal?: { ... }
+      unit_discount_amount_decimal?: { ... }
+      unit_discount_amount_net_decimal?: { ... }
+      currency?: { ... }
+      billing_period?: { ... }
+      unit?: { ... }
+      has_discount?: { ... }
+      is_dynamic_tariff?: { ... }
+      dynamic_tariff?: { ... }
+    }
+    working_prices?: Array<{
+      price_id?: { ... }
+      price_title?: { ... }
+      tariff_type?: { ... }
+      pricing_model?: { ... }
+      unit_amount_gross_decimal?: { ... }
+      unit_amount_net_decimal?: { ... }
+      before_discount_unit_amount_gross_decimal?: { ... }
+      before_discount_unit_amount_net_decimal?: { ... }
+      unit_discount_amount_decimal?: { ... }
+      unit_discount_amount_net_decimal?: { ... }
+      currency?: { ... }
+      billing_period?: { ... }
+      unit?: { ... }
+      has_discount?: { ... }
+      is_dynamic_tariff?: { ... }
+      dynamic_tariff?: { ... }
+    }>
+    tariff?: {
+      product_id?: { ... }
+      product_title?: { ... }
+    }
+    tariffs?: Array<{
+      product_id?: { ... }
+      product_title?: { ... }
+    }>
+  }
+  new_context: {
+    base_price?: {
+      price_id?: { ... }
+      price_title?: { ... }
+  // ...
+}
+```
+
+### `ConfigurationHistoryRow`
+
+```ts
+type ConfigurationHistoryRow = {
+  event_id: string
+  org_id: string
+  entity_type: "contract" | "billing_account"
+  entity_id: string
+  schema_version: number
+  effective_at?: string // date-time
+  changed_at: string // date-time
+  created_at: string // date-time
+  source: "portal" | "epilot" | "erp" | "system" | "api" | "external" | "journey" | "automation" | "unknown"
+  source_label?: string
+  source_system?: string
+  source_reference?: string
+  change_type: "installment_amount_changed"
+  previous_value?: {
+    amount?: number
+    amount_decimal?: string
+    currency?: string
+  }
+  new_value: {
+    amount?: number
+    amount_decimal?: string
+    currency?: string
+  }
+  context?: {
+    base_price?: {
+      price_id?: { ... }
+      price_title?: { ... }
+      tariff_type?: { ... }
+      pricing_model?: { ... }
+      unit_amount_gross_decimal?: { ... }
+      unit_amount_net_decimal?: { ... }
+      before_discount_unit_amount_gross_decimal?: { ... }
+      before_discount_unit_amount_net_decimal?: { ... }
+      unit_discount_amount_decimal?: { ... }
+      unit_discount_amount_net_decimal?: { ... }
+      currency?: { ... }
+      billing_period?: { ... }
+      unit?: { ... }
+      has_discount?: { ... }
+      is_dynamic_tariff?: { ... }
+      dynamic_tariff?: { ... }
+    }
+    base_prices?: Array<{
+      price_id?: { ... }
+      price_title?: { ... }
+      tariff_type?: { ... }
+      pricing_model?: { ... }
+      unit_amount_gross_decimal?: { ... }
+      unit_amount_net_decimal?: { ... }
+      before_discount_unit_amount_gross_decimal?: { ... }
+      before_discount_unit_amount_net_decimal?: { ... }
+      unit_discount_amount_decimal?: { ... }
+      unit_discount_amount_net_decimal?: { ... }
+      currency?: { ... }
+      billing_period?: { ... }
+      unit?: { ... }
+      has_discount?: { ... }
+      is_dynamic_tariff?: { ... }
+      dynamic_tariff?: { ... }
+    }>
+    working_price?: {
+      price_id?: { ... }
+      price_title?: { ... }
+      tariff_type?: { ... }
+      pricing_model?: { ... }
+      unit_amount_gross_decimal?: { ... }
+      unit_amount_net_decimal?: { ... }
+      before_discount_unit_amount_gross_decimal?: { ... }
+      before_discount_unit_amount_net_decimal?: { ... }
+      unit_discount_amount_decimal?: { ... }
+      unit_discount_amount_net_decimal?: { ... }
+      currency?: { ... }
+      billing_period?: { ... }
+      unit?: { ... }
+      has_discount?: { ... }
+      is_dynamic_tariff?: { ... }
+      dynamic_tariff?: { ... }
+    }
+    working_prices?: Array<{
+      price_id?: { ... }
+      price_title?: { ... }
+      tariff_type?: { ... }
+      pricing_model?: { ... }
+      unit_amount_gross_decimal?: { ... }
+      unit_amount_net_decimal?: { ... }
+      before_discount_unit_amount_gross_decimal?: { ... }
+      before_discount_unit_amount_net_decimal?: { ... }
+      unit_discount_amount_decimal?: { ... }
+      unit_discount_amount_net_decimal?: { ... }
+      currency?: { ... }
+      billing_period?: { ... }
+      unit?: { ... }
+      has_discount?: { ... }
+      is_dynamic_tariff?: { ... }
+      dynamic_tariff?: { ... }
+    }>
+  }
+} | {
+  event_id: string
+  // ...
 }
 ```
 
@@ -1466,7 +1781,6 @@ type ConfigurationHistoryResponse = {
     org_id: string
     entity_type: "contract" | "billing_account"
     entity_id: string
-    change_type: "installment_amount_changed"
     schema_version: number
     effective_at?: string // date-time
     changed_at: string // date-time
@@ -1475,6 +1789,7 @@ type ConfigurationHistoryResponse = {
     source_label?: string
     source_system?: string
     source_reference?: string
+    change_type: "installment_amount_changed"
     previous_value?: {
       amount?: { ... }
       amount_decimal?: { ... }
@@ -1487,8 +1802,41 @@ type ConfigurationHistoryResponse = {
     }
     context?: {
       base_price?: { ... }
+      base_prices?: { ... }
       working_price?: { ... }
+      working_prices?: { ... }
     }
+  } | {
+    event_id: string
+    org_id: string
+    entity_type: "contract" | "billing_account"
+    entity_id: string
+    schema_version: number
+    effective_at?: string // date-time
+    changed_at: string // date-time
+    created_at: string // date-time
+    source: "portal" | "epilot" | "erp" | "system" | "api" | "external" | "journey" | "automation" | "unknown"
+    source_label?: string
+    source_system?: string
+    source_reference?: string
+    change_type: "contract_pricing_changed"
+    previous_context: {
+      base_price?: { ... }
+      base_prices?: { ... }
+      working_price?: { ... }
+      working_prices?: { ... }
+      tariff?: { ... }
+      tariffs?: { ... }
+    }
+    new_context: {
+      base_price?: { ... }
+      base_prices?: { ... }
+      working_price?: { ... }
+      working_prices?: { ... }
+      tariff?: { ... }
+      tariffs?: { ... }
+    }
+    changed_fields: "tariff" | "base_price" | "working_price" | "discount" | "dynamic_tariff_configuration"[]
   }>
   total: number
 }
@@ -1531,6 +1879,7 @@ type ContractPricingInformation = {
     base_price?: {
       price_id?: { ... }
       price_title?: { ... }
+      tariff_type?: { ... }
       pricing_model?: { ... }
       unit_amount_gross_decimal?: { ... }
       unit_amount_net_decimal?: { ... }
@@ -1545,9 +1894,28 @@ type ContractPricingInformation = {
       is_dynamic_tariff?: { ... }
       dynamic_tariff?: { ... }
     }
+    base_prices?: Array<{
+      price_id?: { ... }
+      price_title?: { ... }
+      tariff_type?: { ... }
+      pricing_model?: { ... }
+      unit_amount_gross_decimal?: { ... }
+      unit_amount_net_decimal?: { ... }
+      before_discount_unit_amount_gross_decimal?: { ... }
+      before_discount_unit_amount_net_decimal?: { ... }
+      unit_discount_amount_decimal?: { ... }
+      unit_discount_amount_net_decimal?: { ... }
+      currency?: { ... }
+      billing_period?: { ... }
+      unit?: { ... }
+      has_discount?: { ... }
+      is_dynamic_tariff?: { ... }
+      dynamic_tariff?: { ... }
+    }>
     working_price?: {
       price_id?: { ... }
       price_title?: { ... }
+      tariff_type?: { ... }
       pricing_model?: { ... }
       unit_amount_gross_decimal?: { ... }
       unit_amount_net_decimal?: { ... }
@@ -1562,6 +1930,24 @@ type ContractPricingInformation = {
       is_dynamic_tariff?: { ... }
       dynamic_tariff?: { ... }
     }
+    working_prices?: Array<{
+      price_id?: { ... }
+      price_title?: { ... }
+      tariff_type?: { ... }
+      pricing_model?: { ... }
+      unit_amount_gross_decimal?: { ... }
+      unit_amount_net_decimal?: { ... }
+      before_discount_unit_amount_gross_decimal?: { ... }
+      before_discount_unit_amount_net_decimal?: { ... }
+      unit_discount_amount_decimal?: { ... }
+      unit_discount_amount_net_decimal?: { ... }
+      currency?: { ... }
+      billing_period?: { ... }
+      unit?: { ... }
+      has_discount?: { ... }
+      is_dynamic_tariff?: { ... }
+      dynamic_tariff?: { ... }
+    }>
   }
   balance?: {
     amount?: number
@@ -1580,30 +1966,7 @@ type ContractPricingInformation = {
     org_id: string
     entity_type: "contract" | "billing_account"
     entity_id: string
-    change_type: "installment_amount_changed"
-    schema_version: number
-    effective_at?: string // date-time
-    changed_at: string // date-time
-    created_at: string // date-time
-    source: "portal" | "epilot" | "erp" | "system" | "api" | "external" | "journey" | "automation" | "unknown"
-    source_label?: string
-    source_system?: string
-    source_reference?: string
-    previous_value?: {
-      amount?: { ... }
-      amount_decimal?: { ... }
-      currency?: { ... }
-    }
-    new_value: {
-      amount?: { ... }
-      amount_decimal?: { ... }
-      currency?: { ... }
-    }
-    context?: {
-      base_price?: { ... }
-      working_price?: { ... }
-    }
-  }>
+  // ...
 }
 ```
 
@@ -1630,7 +1993,9 @@ type BillingAccountPricingInformation = {
     }
     context?: {
       base_price?: { ... }
+      base_prices?: { ... }
       working_price?: { ... }
+      working_prices?: { ... }
     }
     balance?: {
       amount?: { ... }
@@ -1649,7 +2014,6 @@ type BillingAccountPricingInformation = {
       org_id: { ... }
       entity_type: { ... }
       entity_id: { ... }
-      change_type: { ... }
       schema_version: { ... }
       effective_at?: { ... }
       changed_at: { ... }
@@ -1658,9 +2022,27 @@ type BillingAccountPricingInformation = {
       source_label?: { ... }
       source_system?: { ... }
       source_reference?: { ... }
+      change_type: { ... }
       previous_value?: { ... }
       new_value: { ... }
       context?: { ... }
+    } | {
+      event_id: { ... }
+      org_id: { ... }
+      entity_type: { ... }
+      entity_id: { ... }
+      schema_version: { ... }
+      effective_at?: { ... }
+      changed_at: { ... }
+      created_at: { ... }
+      source: { ... }
+      source_label?: { ... }
+      source_system?: { ... }
+      source_reference?: { ... }
+      change_type: { ... }
+      previous_context: { ... }
+      new_context: { ... }
+      changed_fields: { ... }
     }>
   }>
 }

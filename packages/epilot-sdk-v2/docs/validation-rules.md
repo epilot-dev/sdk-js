@@ -1,6 +1,5 @@
 # Validation Rules API
 
-- **Base URL:** `https://validation-rules.sls.epilot.io`
 - **Full API Docs:** [https://docs.epilot.io/api/validation-rules](https://docs.epilot.io/api/validation-rules)
 
 ## Usage
@@ -52,10 +51,22 @@ const { data } = await validationRulesClient.getValidationRules(...)
 - [`NumericCondition`](#numericcondition)
 - [`NumericNestedCondition`](#numericnestedcondition)
 - [`NumericFactCondition`](#numericfactcondition)
+- [`ComparisonRuleType`](#comparisonruletype)
+- [`Condition`](#condition)
+- [`Operator`](#operator)
+- [`ConditionValue`](#conditionvalue)
+- [`ScalarValue`](#scalarvalue)
+- [`StaticValue`](#staticvalue)
+- [`ContextValue`](#contextvalue)
+- [`ValueAdjustment`](#valueadjustment)
+- [`RelativeDateValue`](#relativedatevalue)
+- [`RangeValue`](#rangevalue)
+- [`NoValue`](#novalue)
+- [`ContextRequirement`](#contextrequirement)
 
 ### `getValidationRules`
 
-Get all validation rules by organization Id
+Returns all validation rules belonging to the authenticated user's organization.
 
 `GET /v1/validation-rules`
 
@@ -75,8 +86,7 @@ const { data } = await client.getValidationRules()
       "used_by": [
         {
           "type": "journey",
-          "schema_slug": "string",
-          "source_id": "string"
+          "source_id": "journey-xyz789"
         }
       ],
       "rule": {
@@ -106,6 +116,11 @@ const { data } = await client.getValidationRules()
           ]
         }
       },
+      "contexts": [
+        {
+          "schema": "contract"
+        }
+      ],
       "_schema_version": "string",
       "_id": "string",
       "_organization_id": "string",
@@ -124,7 +139,7 @@ const { data } = await client.getValidationRules()
 
 ### `createValidationRule`
 
-Create Validation Rule
+Creates a new validation rule for the authenticated organization.
 
 `POST /v1/validation-rules`
 
@@ -137,8 +152,7 @@ const { data } = await client.createValidationRule(
     used_by: [
       {
         type: 'journey',
-        schema_slug: 'string',
-        source_id: 'string'
+        source_id: 'journey-xyz789'
       }
     ],
     rule: {
@@ -167,7 +181,12 @@ const { data } = await client.createValidationRule(
           }
         ]
       }
-    }
+    },
+    contexts: [
+      {
+        schema: 'contract'
+      }
+    ]
   },
 )
 ```
@@ -182,8 +201,7 @@ const { data } = await client.createValidationRule(
   "used_by": [
     {
       "type": "journey",
-      "schema_slug": "string",
-      "source_id": "string"
+      "source_id": "journey-xyz789"
     }
   ],
   "rule": {
@@ -213,6 +231,11 @@ const { data } = await client.createValidationRule(
       ]
     }
   },
+  "contexts": [
+    {
+      "schema": "contract"
+    }
+  ],
   "_schema_version": "string",
   "_id": "string",
   "_organization_id": "string",
@@ -229,7 +252,7 @@ const { data } = await client.createValidationRule(
 
 ### `getValidationRuleById`
 
-Get validation rule by ID
+Retrieves a specific validation rule by its unique ID.
 
 `GET /v1/validation-rules/{ruleId}`
 
@@ -249,8 +272,7 @@ const { data } = await client.getValidationRuleById({
   "used_by": [
     {
       "type": "journey",
-      "schema_slug": "string",
-      "source_id": "string"
+      "source_id": "journey-xyz789"
     }
   ],
   "rule": {
@@ -280,6 +302,11 @@ const { data } = await client.getValidationRuleById({
       ]
     }
   },
+  "contexts": [
+    {
+      "schema": "contract"
+    }
+  ],
   "_schema_version": "string",
   "_id": "string",
   "_organization_id": "string",
@@ -296,7 +323,7 @@ const { data } = await client.getValidationRuleById({
 
 ### `updateValidationRule`
 
-Update Validation Rule (partial update)
+Partially updates an existing validation rule by ID. Only the fields provided in the request body are updated.
 
 `PATCH /v1/validation-rules/{ruleId}`
 
@@ -311,8 +338,7 @@ const { data } = await client.updateValidationRule(
     used_by: [
       {
         type: 'journey',
-        schema_slug: 'string',
-        source_id: 'string'
+        source_id: 'journey-xyz789'
       }
     ],
     rule: {
@@ -341,7 +367,12 @@ const { data } = await client.updateValidationRule(
           }
         ]
       }
-    }
+    },
+    contexts: [
+      {
+        schema: 'contract'
+      }
+    ]
   },
 )
 ```
@@ -356,8 +387,7 @@ const { data } = await client.updateValidationRule(
   "used_by": [
     {
       "type": "journey",
-      "schema_slug": "string",
-      "source_id": "string"
+      "source_id": "journey-xyz789"
     }
   ],
   "rule": {
@@ -387,6 +417,11 @@ const { data } = await client.updateValidationRule(
       ]
     }
   },
+  "contexts": [
+    {
+      "schema": "contract"
+    }
+  ],
   "_schema_version": "string",
   "_id": "string",
   "_organization_id": "string",
@@ -403,7 +438,7 @@ const { data } = await client.updateValidationRule(
 
 ### `deleteValidationRule`
 
-Delete Validation Rule
+Permanently deletes a validation rule by ID. Any journeys or entity attributes referencing this rule should be updated before deletion.
 
 `DELETE /v1/validation-rules/{ruleId}`
 
@@ -417,7 +452,7 @@ const { data } = await client.deleteValidationRule({
 
 ### `addUsedByReference`
 
-Add a reference to the usedBy array
+Adds a single `used_by` reference to an existing validation rule.
 
 `POST /v1/validation-rules/{ruleId}/used-by`
 
@@ -428,8 +463,7 @@ const { data } = await client.addUsedByReference(
   },
   {
     type: 'journey',
-    schema_slug: 'string',
-    source_id: 'string'
+    source_id: 'journey-xyz789'
   },
 )
 ```
@@ -444,8 +478,7 @@ const { data } = await client.addUsedByReference(
   "used_by": [
     {
       "type": "journey",
-      "schema_slug": "string",
-      "source_id": "string"
+      "source_id": "journey-xyz789"
     }
   ],
   "rule": {
@@ -475,6 +508,11 @@ const { data } = await client.addUsedByReference(
       ]
     }
   },
+  "contexts": [
+    {
+      "schema": "contract"
+    }
+  ],
   "_schema_version": "string",
   "_id": "string",
   "_organization_id": "string",
@@ -491,7 +529,7 @@ const { data } = await client.addUsedByReference(
 
 ### `removeUsedByReference`
 
-Remove a reference from the usedBy array
+Removes a specific `used_by` reference from an existing validation rule.
 
 `DELETE /v1/validation-rules/{ruleId}/used-by`
 
@@ -502,8 +540,7 @@ const { data } = await client.removeUsedByReference(
   },
   {
     type: 'journey',
-    schema_slug: 'string',
-    source_id: 'string'
+    source_id: 'journey-xyz789'
   },
 )
 ```
@@ -518,8 +555,7 @@ const { data } = await client.removeUsedByReference(
   "used_by": [
     {
       "type": "journey",
-      "schema_slug": "string",
-      "source_id": "string"
+      "source_id": "journey-xyz789"
     }
   ],
   "rule": {
@@ -549,6 +585,11 @@ const { data } = await client.removeUsedByReference(
       ]
     }
   },
+  "contexts": [
+    {
+      "schema": "contract"
+    }
+  ],
   "_schema_version": "string",
   "_id": "string",
   "_organization_id": "string",
@@ -566,6 +607,8 @@ const { data } = await client.removeUsedByReference(
 ## Schemas
 
 ### `GetValidationRulesResponse`
+
+Response envelope for listing all validation rules within an organization.
 
 ```ts
 type GetValidationRulesResponse = {
@@ -625,7 +668,19 @@ type UpdateValidationRuleRequest = {
     } | {
       not: { ... }
     }
+  } | {
+    input_type: "number" | "date" | "text"
+    conditions: Array<{
+      id: { ... }
+      operator: { ... }
+      value: { ... }
+      error_message: { ... }
+      allow_failure?: { ... }
+    }>
   }
+  contexts?: Array<{
+    schema: string
+  }>
 }
 ```
 
@@ -667,7 +722,19 @@ type ValidationRuleBase = {
     } | {
       not: { ... }
     }
+  } | {
+    input_type: "number" | "date" | "text"
+    conditions: Array<{
+      id: { ... }
+      operator: { ... }
+      value: { ... }
+      error_message: { ... }
+      allow_failure?: { ... }
+    }>
   }
+  contexts?: Array<{
+    schema: string
+  }>
 }
 ```
 
@@ -689,7 +756,7 @@ type ValidationRule = {
 
 ### `UsedBy`
 
-Describes where and how a validation rule is applied.
+Describes where and how a validation rule is applied. Used to track associations between rules and the journeys or entity schemas that reference them.
 
 ```ts
 type UsedBy = {
@@ -1593,5 +1660,324 @@ type NumericFactCondition = {
   params?: {
     errorMessage?: string
   }
+}
+```
+
+### `ComparisonRuleType`
+
+Declarative validation rule (schema version v2). Supports predefined comparison operators
+over number, date and text inputs, with static, dynamic (context path) and relative-date
+comparison values.
+
+
+```ts
+type ComparisonRuleType = {
+  input_type: "number" | "date" | "text"
+  conditions: Array<{
+    id: string
+    operator: "equal" | "notEqual" | "greaterThan" | "greaterThanInclusive" | "lessThan" | "lessThanInclusive" | "between" | "dateBefore" | "dateOnOrBefore" | "dateAfter" | "dateOnOrAfter" | "dateBetween" | "notInFuture" | "notInPast" | "contains" | "doesNotContain" | "startsWith" | "endsWith" | "regexMatch" | "lengthBetween"
+    value: {
+      source: { ... }
+      data: { ... }
+    } | {
+      source: { ... }
+      path: { ... }
+      adjust?: { ... }
+    } | {
+      source: { ... }
+      offset: { ... }
+      unit: { ... }
+      anchor?: { ... }
+    } | {
+      source: { ... }
+      min: { ... }
+      max: { ... }
+    } | {
+      source: { ... }
+    }
+    error_message: string
+    allow_failure?: boolean
+  }>
+}
+```
+
+### `Condition`
+
+A single comparison the input value must satisfy.
+
+```ts
+type Condition = {
+  id: string
+  operator: "equal" | "notEqual" | "greaterThan" | "greaterThanInclusive" | "lessThan" | "lessThanInclusive" | "between" | "dateBefore" | "dateOnOrBefore" | "dateAfter" | "dateOnOrAfter" | "dateBetween" | "notInFuture" | "notInPast" | "contains" | "doesNotContain" | "startsWith" | "endsWith" | "regexMatch" | "lengthBetween"
+  value: {
+    source: "static"
+    data: number | string | boolean
+  } | {
+    source: "context"
+    path: string
+    adjust?: {
+      type: { ... }
+      value: { ... }
+      direction: { ... }
+    }
+  } | {
+    source: "relative_date"
+    offset: number
+    unit: "days" | "months" | "years"
+    anchor?: "today"
+  } | {
+    source: "range"
+    min: {
+      source: { ... }
+      data: { ... }
+    } | {
+      source: { ... }
+      path: { ... }
+      adjust?: { ... }
+    } | {
+      source: { ... }
+      offset: { ... }
+      unit: { ... }
+      anchor?: { ... }
+    }
+    max: {
+      source: { ... }
+      data: { ... }
+    } | {
+      source: { ... }
+      path: { ... }
+      adjust?: { ... }
+    } | {
+      source: { ... }
+      offset: { ... }
+      unit: { ... }
+      anchor?: { ... }
+    }
+  } | {
+    source: "none"
+  }
+  error_message: string
+  allow_failure?: boolean
+}
+```
+
+### `Operator`
+
+Predefined comparison operator. Compatibility (enforced at write time):
+- number: equal, notEqual, greaterThan, greaterThanInclusive, lessThan, lessThanInclusive, between, regexMatch
+- date: dateBefore, dateOnOrBefore, dateAfter, dateOnOrAfter, dateBetween, notInFuture, notInPast, regexMatch
+- text:
+
+```ts
+type Operator = "equal" | "notEqual" | "greaterThan" | "greaterThanInclusive" | "lessThan" | "lessThanInclusive" | "between" | "dateBefore" | "dateOnOrBefore" | "dateAfter" | "dateOnOrAfter" | "dateBetween" | "notInFuture" | "notInPast" | "contains" | "doesNotContain" | "startsWith" | "endsWith" | "regexMatch" | "lengthBetween"
+```
+
+### `ConditionValue`
+
+The comparison value of a condition - a scalar, a range of scalars, or nothing (unary operators).
+
+```ts
+type ConditionValue = {
+  source: "static"
+  data: number | string | boolean
+} | {
+  source: "context"
+  path: string
+  adjust?: {
+    type: "percent" | "absolute"
+    value: number
+    direction: "increase" | "decrease"
+  }
+} | {
+  source: "relative_date"
+  offset: number
+  unit: "days" | "months" | "years"
+  anchor?: "today"
+} | {
+  source: "range"
+  min: {
+    source: "static"
+    data: number | string | boolean
+  } | {
+    source: "context"
+    path: string
+    adjust?: {
+      type: { ... }
+      value: { ... }
+      direction: { ... }
+    }
+  } | {
+    source: "relative_date"
+    offset: number
+    unit: "days" | "months" | "years"
+    anchor?: "today"
+  }
+  max: {
+    source: "static"
+    data: number | string | boolean
+  } | {
+    source: "context"
+    path: string
+    adjust?: {
+      type: { ... }
+      value: { ... }
+      direction: { ... }
+    }
+  } | {
+    source: "relative_date"
+    offset: number
+    unit: "days" | "months" | "years"
+    anchor?: "today"
+  }
+} | {
+  source: "none"
+}
+```
+
+### `ScalarValue`
+
+A single comparison value - static, resolved from context, or a relative date.
+
+```ts
+type ScalarValue = {
+  source: "static"
+  data: number | string | boolean
+} | {
+  source: "context"
+  path: string
+  adjust?: {
+    type: "percent" | "absolute"
+    value: number
+    direction: "increase" | "decrease"
+  }
+} | {
+  source: "relative_date"
+  offset: number
+  unit: "days" | "months" | "years"
+  anchor?: "today"
+}
+```
+
+### `StaticValue`
+
+A fixed comparison value.
+
+```ts
+type StaticValue = {
+  source: "static"
+  data: number | string | boolean
+}
+```
+
+### `ContextValue`
+
+A dynamic comparison value resolved from runtime context, e.g. `contract.installment_amount`
+or `previous_reading.value`. The first path segment must match the `name` of a declared
+context requirement.
+
+
+```ts
+type ContextValue = {
+  source: "context"
+  path: string
+  adjust?: {
+    type: "percent" | "absolute"
+    value: number
+    direction: "increase" | "decrease"
+  }
+}
+```
+
+### `ValueAdjustment`
+
+Adjusts a context-resolved numeric value before comparison, e.g. "context value plus 10 percent".
+Used to express tolerance bands such as "at most 10% above the current instalment amount".
+
+
+```ts
+type ValueAdjustment = {
+  type: "percent" | "absolute"
+  value: number
+  direction: "increase" | "decrease"
+}
+```
+
+### `RelativeDateValue`
+
+A date relative to the evaluation moment, e.g. "today minus 30 days". Only valid for date rules.
+
+```ts
+type RelativeDateValue = {
+  source: "relative_date"
+  offset: number
+  unit: "days" | "months" | "years"
+  anchor?: "today"
+}
+```
+
+### `RangeValue`
+
+A lower and upper bound for range operators (between, dateBetween, lengthBetween). Bounds are inclusive.
+
+```ts
+type RangeValue = {
+  source: "range"
+  min: {
+    source: "static"
+    data: number | string | boolean
+  } | {
+    source: "context"
+    path: string
+    adjust?: {
+      type: { ... }
+      value: { ... }
+      direction: { ... }
+    }
+  } | {
+    source: "relative_date"
+    offset: number
+    unit: "days" | "months" | "years"
+    anchor?: "today"
+  }
+  max: {
+    source: "static"
+    data: number | string | boolean
+  } | {
+    source: "context"
+    path: string
+    adjust?: {
+      type: { ... }
+      value: { ... }
+      direction: { ... }
+    }
+  } | {
+    source: "relative_date"
+    offset: number
+    unit: "days" | "months" | "years"
+    anchor?: "today"
+  }
+}
+```
+
+### `NoValue`
+
+No comparison value - used by unary operators such as notInFuture / notInPast.
+
+```ts
+type NoValue = {
+  source: "none"
+}
+```
+
+### `ContextRequirement`
+
+An entity context source the rule needs at evaluation time, referenced by `context`
+value paths via the schema slug as their first segment (e.g. `contract.installment_amount`).
+How the source is resolved (which entity instance) is decided by the consuming surface,
+not by the rule. Meter reading comp
+
+```ts
+type ContextRequirement = {
+  schema: string
 }
 ```

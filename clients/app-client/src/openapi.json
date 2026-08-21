@@ -1501,6 +1501,18 @@
             "type": "string"
           },
           "description": "Path to forward to the proxy target"
+        },
+        {
+          "name": "query",
+          "in": "query",
+          "required": false,
+          "style": "form",
+          "explode": true,
+          "schema": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "description": "Free-form query parameters, forwarded unchanged to the proxy target"
         }
       ],
       "get": {
@@ -1812,6 +1824,13 @@
                 },
                 "grants": {
                   "$ref": "#/components/schemas/Grants"
+                },
+                "functions": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FunctionDefinition"
+                  },
+                  "description": "Replaces the full set of server-side functions for this version"
                 }
               }
             }
@@ -2069,9 +2088,85 @@
           "CUSTOM_CAPABILITY",
           "EXTERNAL_PRODUCT_CATALOG",
           "CUSTOM_PAGE",
-          "API_PROXY"
+          "API_PROXY",
+          "APP_FUNCTION"
         ],
         "description": "Type of app component"
+      },
+      "FunctionDefinition": {
+        "type": "object",
+        "description": "A named server-side function belonging to the app. Runs in the epilot code-execution sandbox with an installation-scoped app token. Functions with a schedule are executed automatically once per installation.\n",
+        "required": [
+          "name",
+          "type",
+          "code"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Unique function name within the app",
+            "pattern": "^[a-z0-9][a-z0-9-]{0,63}$"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "workflow",
+              "scheduled"
+            ],
+            "description": "Where the function can be used. `workflow` functions are referenced by CUSTOM_FLOW_ACTION components (type `function`) and run with entity context. `scheduled` functions run automatically per installation on their cron schedule.\n"
+          },
+          "label": {
+            "allOf": [
+              {
+                "description": null
+              },
+              {
+                "$ref": "#/components/schemas/TranslatedString"
+              }
+            ]
+          },
+          "description": {
+            "allOf": [
+              {
+                "description": "Description of the function"
+              },
+              {
+                "$ref": "#/components/schemas/TranslatedString"
+              }
+            ]
+          },
+          "code": {
+            "type": "string",
+            "maxLength": 307200,
+            "description": "JavaScript code to execute. Must declare a top-level `async function handler(input, context)`. Maximum size: 300KB (hard limit). Security restrictions: eval() and Function() constructor are not allowed.\n"
+          },
+          "schedule": {
+            "type": "string",
+            "maxLength": 100,
+            "description": "Cron trigger for the function, executed once per installation. Standard 5-field cron expression (e.g. \"0 3 * * *\") or rate expression (e.g. \"rate(30 minutes)\"). Minimum interval: 15 minutes. Scheduled runs are limited to 60 seconds.\n",
+            "example": "rate(30 minutes)"
+          },
+          "schedule_timezone": {
+            "type": "string",
+            "description": "IANA timezone the cron expression is evaluated in",
+            "default": "Europe/Berlin"
+          },
+          "schedule_overlap": {
+            "type": "string",
+            "enum": [
+              "skip"
+            ],
+            "default": "skip",
+            "description": "Behavior when the previous scheduled run is still active"
+          },
+          "secrets": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Keys of installation options of type secret made available to the function via input.app_options\n"
+          }
+        }
       },
       "Author": {
         "type": "object",
@@ -2486,7 +2581,7 @@
           }
         ]
       },
-      "SandboxCustomActionConfig": {
+      "FunctionRefCustomActionConfig": {
         "allOf": [
           {
             "$ref": "#/components/schemas/BaseCustomActionConfig"
@@ -2497,41 +2592,37 @@
               "type": {
                 "type": "string",
                 "enum": [
-                  "sandbox"
+                  "function"
                 ]
               },
-              "sandbox_settings": {
-                "type": "object",
-                "properties": {
-                  "code": {
-                    "type": "string",
-                    "description": "JavaScript code to execute for the sandbox action. Maximum size: 300KB (hard limit). Code is stored as raw JavaScript and will be syntax-validated on save. Security restrictions: eval() and Function() constructor are not allowed.\n",
-                    "maxLength": 307200
-                  }
-                }
+              "function_name": {
+                "type": "string",
+                "description": "Name of a `workflow`-type function of the same app version. The component provides the org-facing contract (name, options, config surface); the referenced function provides the code.\n"
               }
             },
             "required": [
-              "type"
+              "type",
+              "function_name"
             ]
           }
         ]
       },
       "CustomFlowConfig": {
         "type": "object",
+        "description": "Configuration of a flow action component. `external_integration` calls an external HTTP endpoint; `function` runs a workflow-type app function in the epilot sandbox.\n",
         "oneOf": [
           {
             "$ref": "#/components/schemas/ExternalIntegrationCustomActionConfig"
           },
           {
-            "$ref": "#/components/schemas/SandboxCustomActionConfig"
+            "$ref": "#/components/schemas/FunctionRefCustomActionConfig"
           }
         ],
         "discriminator": {
           "propertyName": "type",
           "mapping": {
             "external_integration": "#/components/schemas/ExternalIntegrationCustomActionConfig",
-            "sandbox": "#/components/schemas/SandboxCustomActionConfig"
+            "function": "#/components/schemas/FunctionRefCustomActionConfig"
           }
         }
       },
@@ -4563,6 +4654,39 @@
           }
         }
       },
+      "InternalReview": {
+        "description": "Review entry including app ownership info, used by internal admin endpoints",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Review"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "app_id": {
+                "type": "string",
+                "description": "ID of the app configuration",
+                "readOnly": true
+              },
+              "org_id": {
+                "type": "string",
+                "description": "Organization ID of the app owner",
+                "readOnly": true
+              },
+              "reviewed_by": {
+                "type": "string",
+                "description": "Identity of the internal reviewer who approved the review",
+                "readOnly": true
+              },
+              "reviewed_at": {
+                "type": "string",
+                "description": "Timestamp of the approval",
+                "readOnly": true
+              }
+            }
+          }
+        ]
+      },
       "ConfigurationMetadata": {
         "description": "Basic metadata about your app configuration which does not get versioned",
         "type": "object",
@@ -4708,6 +4832,14 @@
             },
             "minItems": 0
           },
+          "functions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FunctionDefinition"
+            },
+            "minItems": 0,
+            "description": "Server-side functions of the app, including scheduled functions"
+          },
           "visibility": {
             "type": "string",
             "enum": [
@@ -4816,10 +4948,11 @@
             "enum": [
               "header",
               "bearer",
+              "basic",
               "oauth2",
               "none"
             ],
-            "description": "Authentication strategy"
+            "description": "Authentication strategy. 'basic' sends an HTTP Basic Authorization header built server-side from the 'username' and 'password' component options."
           },
           "auth_header": {
             "type": "string",
@@ -4936,6 +5069,14 @@
             "minLength": 0,
             "readOnly": true
           },
+          "functions": {
+            "description": "Server-side functions of the installed version, including scheduled functions",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FunctionDefinition"
+            },
+            "readOnly": true
+          },
           "installed_version": {
             "type": "string",
             "description": "Version of the app that is installed",
@@ -5042,6 +5183,14 @@
               "$ref": "#/components/schemas/BaseComponent"
             },
             "minItems": 0
+          },
+          "functions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FunctionDefinition"
+            },
+            "minItems": 0,
+            "description": "Server-side functions of the app, including scheduled functions"
           },
           "is_beta": {
             "type": "boolean",

@@ -7,7 +7,7 @@ export default defineCommand({
   args: {
     operation: { type: 'positional', description: 'operationId to call', required: false },
     param: { type: 'string', alias: 'p', description: 'Parameter key=value' },
-    data: { type: 'string', alias: 'd', description: 'Request body JSON' },
+    data: { type: 'string', alias: ['d', 'body'], description: 'Request body JSON' },
     header: { type: 'string', alias: 'H', description: 'Custom header' },
     include: { type: 'boolean', alias: 'i', description: 'Include response headers' },
     definition: { type: 'string', description: 'Override OpenAPI spec file/URL' },
@@ -40,6 +40,7 @@ export default defineCommand({
       help: !!(args as Record<string, unknown>)._ophelp,
       _apihelp: !!(args as Record<string, unknown>)._apihelp,
       _args: positionalArgs,
+      _rawArgs: rawArgs,
     });
   },
 });

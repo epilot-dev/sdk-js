@@ -342,6 +342,49 @@ declare namespace Components {
              */
             template_id?: string;
         }
+        export interface MessageAutoReplySentEvent {
+            type: "MESSAGE_AUTO_REPLY_SENT";
+            /**
+             * ID of the message that was sent as the automatic reply
+             */
+            reply_message_id?: string;
+            /**
+             * ID of the message the automatic reply responded to
+             */
+            parent_message_id?: string;
+        }
+        export interface MessageEntityLinkedEvent {
+            type: "MESSAGE_ENTITY_LINKED";
+            entities?: TimelineLinkedEntity[];
+            link_kind?: "manual" | "auto";
+        }
+        export interface MessageEntityUnlinkedEvent {
+            type: "MESSAGE_ENTITY_UNLINKED";
+            entities?: TimelineLinkedEntity[];
+            link_kind?: "manual" | "auto";
+        }
+        export interface MessageLabelAddedEvent {
+            type: "MESSAGE_LABEL_ADDED";
+            /**
+             * The label that was added (raw tag slug, e.g. `sentiments:angry`)
+             */
+            label: string;
+            /**
+             * Resolved taxonomy classification display name (e.g. `Verärgert`), when the label is a classification. Absent for free-form tags.
+             */
+            label_name?: string;
+        }
+        export interface MessageLabelRemovedEvent {
+            type: "MESSAGE_LABEL_REMOVED";
+            /**
+             * The label that was removed (raw tag slug, e.g. `sentiments:angry`)
+             */
+            label: string;
+            /**
+             * Resolved taxonomy classification display name (e.g. `Verärgert`), when the label is a classification. Absent for free-form tags.
+             */
+            label_name?: string;
+        }
         export interface MessageRequestParams {
             [name: string]: any;
             /**
@@ -724,6 +767,17 @@ declare namespace Components {
              */
             organization_id: string;
         }
+        export interface ThreadMovedToInboxEvent {
+            type: "THREAD_MOVED_TO_INBOX";
+            /**
+             * ID of the shared inbox the thread was moved to
+             */
+            target_inbox_id?: string;
+            /**
+             * Name of the shared inbox the thread was moved to
+             */
+            target_inbox_name?: string;
+        }
         export interface ThreadOpenEvent {
             type: "THREAD_OPEN";
             /**
@@ -739,19 +793,206 @@ declare namespace Components {
              */
             organization_id: string;
         }
+        export interface ThreadRestoredEvent {
+            type: "THREAD_RESTORED";
+        }
         export interface ThreadTimeline {
             events: TimelineEvent[];
         }
+        export interface ThreadTrashedEvent {
+            type: "THREAD_TRASHED";
+        }
+        export interface ThreadUserAssignedEvent {
+            type: "THREAD_USER_ASSIGNED";
+            /**
+             * User IDs assigned to the thread
+             */
+            added?: string[];
+            /**
+             * User IDs unassigned from the thread
+             */
+            removed?: string[];
+        }
+        export interface TimelineActor {
+            user_id?: string;
+            email?: string;
+        }
         export interface TimelineEvent {
+            /**
+             * Activity id (ActivityItem._id), for deep-linking to the item in the activity feed
+             */
+            id?: string;
             data: TimelineEventData;
             /**
              * Timestamp of the event
              * example:
-             * 2024-01-01T00:00:00.000Z
+             * 2024-01-01T00:00:00Z
              */
             timestamp: string;
+            /**
+             * For message-level events, the message the activity is anchored to
+             */
+            message_id?: string;
+            source?: "user" | "automation" | "system";
+            /**
+             * Whether the activity was performed automatically (automation/system)
+             */
+            automated?: boolean;
+            actor?: TimelineActor;
+            automation?: {
+                id?: string;
+                name?: string;
+            };
         }
-        export type TimelineEventData = ThreadDoneEvent | ThreadOpenEvent;
+        export type TimelineEventData = ThreadDoneEvent | ThreadOpenEvent | WorkflowStartedEvent | ThreadUserAssignedEvent | MessageLabelAddedEvent | MessageLabelRemovedEvent | MessageEntityLinkedEvent | MessageEntityUnlinkedEvent | MessageAutoReplySentEvent | ThreadMovedToInboxEvent | ThreadTrashedEvent | ThreadRestoredEvent;
+        export interface TimelineLinkedEntity {
+            entity_id: string;
+            /**
+             * Entity schema slug, e.g. "opportunity"
+             */
+            schema?: string;
+        }
+        export interface UnreadCountBuckets {
+            /**
+             * example:
+             * 14
+             */
+            unread: number;
+            /**
+             * Organization scope only.
+             * example:
+             * 12
+             */
+            drafts?: number;
+            /**
+             * Organization scope only.
+             * example:
+             * 1
+             */
+            unassigned?: number;
+            /**
+             * Organization scope only.
+             * example:
+             * 3
+             */
+            spam?: number;
+        }
+        export interface UnreadCountScope {
+            /**
+             * Caller-chosen key for this scope. Echoed back as the key in `counts`, so it is how the
+             * caller matches a number to the sidebar row it belongs to. Must be unique within the
+             * request; duplicates are refused rather than silently collapsed.
+             *
+             * example:
+             * inbox-support
+             */
+            name: string;
+            /**
+             * Decides which buckets come back, and whether `q` is required. `organization` returns all
+             * four buckets from the canonical central-inbox queries and takes no `q`. `shared_inbox`
+             * and `saved_view` return `unread` alone and require the `q` their list uses.
+             *
+             * A `shared_inbox` scope additionally requires `actor: organization` and is refused with a
+             * 400 otherwise. A shared inbox is an organization-level construct — selecting one always
+             * switches the mailbox to the organization — so it has no per-user read state and the
+             * combination would compute a number no surface renders. `saved_view` accepts either actor,
+             * because a view's own configuration names its mailbox.
+             *
+             */
+            type: "organization" | "shared_inbox" | "saved_view";
+            /**
+             * The scope's own list predicate, in Lucene syntax, exactly as the caller passes it to
+             * `threads:search`. Required for `shared_inbox` and `saved_view`, rejected for
+             * `organization`. The server ANDs the read-state condition onto it and nothing else, which
+             * is what makes the count and the list agree. Until the predicate definition moves
+             * server-side, this is the caller's authored copy.
+             *
+             * example:
+             * _tags.keyword:inbox AND !_tags.keyword:trash
+             */
+            q?: string;
+            /**
+             * Shared inbox ids, resolved to bucket ids the same way `threads:search` resolves them.
+             */
+            inbox_id?: /* Shared inbox ids, resolved to bucket ids the same way `threads:search` resolves them. */ string | string[];
+        }
+        export interface UnreadCountsPayload {
+            /**
+             * Which read state to count against — the org's or the calling user's. Same meaning as
+             * `getUnread`'s path parameter, and unrelated to a scope's `type`.
+             *
+             */
+            actor: "organization" | "user";
+            /**
+             * Restrict every scope to messages involving these addresses.
+             */
+            email_filter?: string[];
+            scopes: [
+                UnreadCountScope,
+                UnreadCountScope?,
+                UnreadCountScope?,
+                UnreadCountScope?,
+                UnreadCountScope?,
+                UnreadCountScope?,
+                UnreadCountScope?,
+                UnreadCountScope?,
+                UnreadCountScope?,
+                UnreadCountScope?,
+                UnreadCountScope?,
+                UnreadCountScope?,
+                UnreadCountScope?,
+                UnreadCountScope?,
+                UnreadCountScope?,
+                UnreadCountScope?,
+                UnreadCountScope?,
+                UnreadCountScope?,
+                UnreadCountScope?,
+                UnreadCountScope?,
+                UnreadCountScope?,
+                UnreadCountScope?,
+                UnreadCountScope?,
+                UnreadCountScope?,
+                UnreadCountScope?
+            ];
+        }
+        export interface UnreadCountsResult {
+            /**
+             * False when the `message-unread-counts` flag is off for the calling org, in which case
+             * `counts` is empty and no Elasticsearch work was done. Callers render no badges rather
+             * than rendering zeroes.
+             *
+             * example:
+             * true
+             */
+            enabled: boolean;
+            /**
+             * One entry per scope, keyed by the scope's `name`. A scope whose predicate could not be
+             * built is **absent** rather than zero, because a zero badge is a claim about the mailbox
+             * and an absent one is a claim about the request.
+             *
+             */
+            counts: {
+                [name: string]: UnreadCountBuckets;
+            };
+            /**
+             * Names of scopes that were accepted but could not be counted — today, a shared inbox whose
+             * ids matched no bucket in this org. Listed explicitly so a caller can tell an omission apart
+             * from a mis-spelled scope name, both of which are otherwise just a missing key in `counts`.
+             *
+             */
+            omitted?: string[];
+        }
+        export interface WorkflowStartedEvent {
+            type: "WORKFLOW_STARTED";
+            /**
+             * ID of the workflow/flow execution that was started
+             */
+            workflow_id?: string;
+            /**
+             * Name of the workflow that was started
+             */
+            workflow_name?: string;
+        }
     }
 }
 declare namespace Paths {
@@ -1467,6 +1708,16 @@ declare namespace Paths {
                  * 3
                  */
                 spam?: number;
+            }
+            export interface $403 {
+            }
+        }
+    }
+    namespace GetUnreadCounts {
+        export type RequestBody = Components.Schemas.UnreadCountsPayload;
+        namespace Responses {
+            export type $200 = Components.Schemas.UnreadCountsResult;
+            export interface $400 {
             }
             export interface $403 {
             }
@@ -2977,6 +3228,35 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetUnread.Responses.$200>
   /**
+   * getUnreadCounts - getUnreadCounts
+   * 
+   * Unread counts for several named scopes in one request.
+   * 
+   * A scope is a name plus the same parameters the thread list already takes (`q`, `inbox_id`),
+   * so a scope's count and the list beneath it are the same predicate and agree by construction.
+   * The server adds only the read-state condition; it does not re-author the caller's view.
+   * 
+   * The `organization` scope is the exception and takes no `q`: it reuses the four canonical
+   * central-inbox queries, so its numbers match `getUnread` exactly.
+   * 
+   * Buckets are not symmetric, across scope types or across actors. Every scope other than
+   * `organization` returns `unread` alone. The `organization` scope returns all four
+   * (`unread`, `drafts`, `unassigned`, `spam`) for `actor: organization`, and only `unread` and
+   * `drafts` for `actor: user` — the agent sidebar has no Spam or Unlinked folder, so those two
+   * numbers have nowhere to render and each one costs a cardinality aggregation. This is a
+   * deliberate divergence from `getUnread`, which computes all four for both actors.
+   * 
+   * Gated on the `message-unread-counts` flag, evaluated once per request against the calling
+   * org. With the flag off the response is `{ "enabled": false, "counts": {} }` and no
+   * Elasticsearch query is issued.
+   * 
+   */
+  'getUnreadCounts'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.GetUnreadCounts.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetUnreadCounts.Responses.$200>
+  /**
    * markUnreadMessageV2 - markUnreadMessageV2
    * 
    * Mark message as unread within a scope
@@ -3568,6 +3848,37 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetUnread.Responses.$200>
   }
+  ['/v1/message/unread:counts']: {
+    /**
+     * getUnreadCounts - getUnreadCounts
+     * 
+     * Unread counts for several named scopes in one request.
+     * 
+     * A scope is a name plus the same parameters the thread list already takes (`q`, `inbox_id`),
+     * so a scope's count and the list beneath it are the same predicate and agree by construction.
+     * The server adds only the read-state condition; it does not re-author the caller's view.
+     * 
+     * The `organization` scope is the exception and takes no `q`: it reuses the four canonical
+     * central-inbox queries, so its numbers match `getUnread` exactly.
+     * 
+     * Buckets are not symmetric, across scope types or across actors. Every scope other than
+     * `organization` returns `unread` alone. The `organization` scope returns all four
+     * (`unread`, `drafts`, `unassigned`, `spam`) for `actor: organization`, and only `unread` and
+     * `drafts` for `actor: user` — the agent sidebar has no Spam or Unlinked folder, so those two
+     * numbers have nowhere to render and each one costs a cardinality aggregation. This is a
+     * deliberate divergence from `getUnread`, which computes all four for both actors.
+     * 
+     * Gated on the `message-unread-counts` flag, evaluated once per request against the calling
+     * org. With the flag off the response is `{ "enabled": false, "counts": {} }` and no
+     * Elasticsearch query is issued.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.GetUnreadCounts.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetUnreadCounts.Responses.$200>
+  }
   ['/v2/message/messages/{id}/unread']: {
     /**
      * markUnreadMessageV2 - markUnreadMessageV2
@@ -4112,6 +4423,11 @@ export type ErrorResponse = Components.Schemas.ErrorResponse;
 export type FieldsParam = Components.Schemas.FieldsParam;
 export type File = Components.Schemas.File;
 export type Message = Components.Schemas.Message;
+export type MessageAutoReplySentEvent = Components.Schemas.MessageAutoReplySentEvent;
+export type MessageEntityLinkedEvent = Components.Schemas.MessageEntityLinkedEvent;
+export type MessageEntityUnlinkedEvent = Components.Schemas.MessageEntityUnlinkedEvent;
+export type MessageLabelAddedEvent = Components.Schemas.MessageLabelAddedEvent;
+export type MessageLabelRemovedEvent = Components.Schemas.MessageLabelRemovedEvent;
 export type MessageRequestParams = Components.Schemas.MessageRequestParams;
 export type MessageV2 = Components.Schemas.MessageV2;
 export type MoveThreadPayload = Components.Schemas.MoveThreadPayload;
@@ -4122,7 +4438,18 @@ export type SearchParams = Components.Schemas.SearchParams;
 export type SearchParamsV2 = Components.Schemas.SearchParamsV2;
 export type Thread = Components.Schemas.Thread;
 export type ThreadDoneEvent = Components.Schemas.ThreadDoneEvent;
+export type ThreadMovedToInboxEvent = Components.Schemas.ThreadMovedToInboxEvent;
 export type ThreadOpenEvent = Components.Schemas.ThreadOpenEvent;
+export type ThreadRestoredEvent = Components.Schemas.ThreadRestoredEvent;
 export type ThreadTimeline = Components.Schemas.ThreadTimeline;
+export type ThreadTrashedEvent = Components.Schemas.ThreadTrashedEvent;
+export type ThreadUserAssignedEvent = Components.Schemas.ThreadUserAssignedEvent;
+export type TimelineActor = Components.Schemas.TimelineActor;
 export type TimelineEvent = Components.Schemas.TimelineEvent;
 export type TimelineEventData = Components.Schemas.TimelineEventData;
+export type TimelineLinkedEntity = Components.Schemas.TimelineLinkedEntity;
+export type UnreadCountBuckets = Components.Schemas.UnreadCountBuckets;
+export type UnreadCountScope = Components.Schemas.UnreadCountScope;
+export type UnreadCountsPayload = Components.Schemas.UnreadCountsPayload;
+export type UnreadCountsResult = Components.Schemas.UnreadCountsResult;
+export type WorkflowStartedEvent = Components.Schemas.WorkflowStartedEvent;

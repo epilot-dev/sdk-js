@@ -2,12 +2,13 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Validation Rules API",
-    "version": "1.0.0"
+    "version": "1.0.0",
+    "description": "The Validation Rules API manages reusable input validation rules for epilot journeys and entity attributes.\n\nValidation rules define constraints for user input (e.g. regex patterns, numeric ranges, character counts) that can be applied to journey blocks or entity schema attributes.\n\nKey capabilities:\n- Define validation rules using regex patterns, character patterns, or numeric constraints\n- Apply rules to journey blocks or entity schema attributes via the `used_by` association\n- Manage the lifecycle of rules (create, read, update, delete)\n- Compose complex validation logic using AND/OR/NOT condition combinators\n\n## Rule schema versions\n\nThe `rule` property holds one of two shapes, identified by the document's `_schema_version`:\n- `v1`: a json-rules-engine condition tree (regex/pattern/numeric) with static comparison values only.\n- `v2`: a declarative rule with predefined comparison operators whose comparison values may be static,\n  dynamic (a path into runtime context declared via `contexts`,\n  e.g. `contract.installment_amount`) or relative dates. v2 shapes carry an `input_type` property.\nConverting a rule between schema versions is not supported.\n"
   },
   "tags": [
     {
       "name": "Validation Rules",
-      "description": "Endpoints for managing validation rules"
+      "description": "CRUD endpoints for managing validation rules within an organization.\nAll endpoints require an epilot bearer token and operate within the authenticated organization's scope.\nRules are identified by a unique `ruleId` and can be referenced by journey blocks or entity attributes via the `used_by` field.\n"
     }
   ],
   "security": [
@@ -19,8 +20,8 @@
     "/v1/validation-rules": {
       "get": {
         "operationId": "getValidationRules",
-        "summary": "Get all validation rules by organization Id",
-        "description": "Gets all validation rules by organization Id",
+        "summary": "getValidationRules",
+        "description": "Returns all validation rules belonging to the authenticated user's organization.\n\nResults are returned as a flat list. Use this endpoint to list available rules when configuring journeys or entity schemas.\n",
         "tags": [
           "Validation Rules"
         ],
@@ -36,6 +37,32 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/GetValidationRulesResponse"
+                },
+                "example": {
+                  "results": [
+                    {
+                      "_id": "rule-abc123",
+                      "_organization_id": "728224",
+                      "_schema_version": "1.0",
+                      "title": "German postal code",
+                      "created_at": "2024-01-10T08:00:00.000Z",
+                      "updated_at": "2024-01-10T08:00:00.000Z",
+                      "created_by": "user-1",
+                      "updated_by": "user-1",
+                      "rule": {
+                        "type": "regex",
+                        "conditions": {
+                          "all": [
+                            {
+                              "fact": "inputValue",
+                              "operator": "regexMatch",
+                              "value": "^[0-9]{5}$"
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ]
                 }
               }
             }
@@ -50,6 +77,38 @@
                     "message": {
                       "type": "string",
                       "example": "Invalid request body"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Unauthorized"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - Insufficient permissions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Forbidden"
                     }
                   }
                 }
@@ -76,8 +135,8 @@
       },
       "post": {
         "operationId": "createValidationRule",
-        "summary": "Create Validation Rule",
-        "description": "Creates a new validation rule",
+        "summary": "createValidationRule",
+        "description": "Creates a new validation rule for the authenticated organization.",
         "tags": [
           "Validation Rules"
         ],
@@ -87,22 +146,127 @@
           }
         ],
         "requestBody": {
+          "description": "Validation rule to create",
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/CreateValidationRuleRequest"
+              },
+              "example": {
+                "title": "German postal code",
+                "rule": {
+                  "type": "regex",
+                  "conditions": {
+                    "all": [
+                      {
+                        "fact": "inputValue",
+                        "operator": "regexMatch",
+                        "value": "^[0-9]{5}$",
+                        "params": {
+                          "errorMessage": "Must be a 5-digit German postal code"
+                        }
+                      }
+                    ]
+                  }
+                }
               }
             }
-          },
-          "description": "Payload"
+          }
         },
         "responses": {
           "201": {
-            "description": "Success",
+            "description": "Validation rule created successfully",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ValidationRule"
+                },
+                "example": {
+                  "_id": "rule-abc123",
+                  "_organization_id": "728224",
+                  "_schema_version": "1.0",
+                  "title": "German postal code",
+                  "created_at": "2024-01-10T08:00:00.000Z",
+                  "updated_at": "2024-01-10T08:00:00.000Z",
+                  "created_by": "user-1",
+                  "updated_by": "user-1",
+                  "rule": {
+                    "type": "regex",
+                    "conditions": {
+                      "all": [
+                        {
+                          "fact": "inputValue",
+                          "operator": "regexMatch",
+                          "value": "^[0-9]{5}$"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid request body",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Invalid request body"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Unauthorized"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - Insufficient permissions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Forbidden"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Unknown API Error"
+                    }
+                  }
                 }
               }
             }
@@ -113,8 +277,8 @@
     "/v1/validation-rules/{ruleId}": {
       "get": {
         "operationId": "getValidationRuleById",
-        "summary": "Get validation rule by ID",
-        "description": "Retrieves a specific validation rule by its ID",
+        "summary": "getValidationRuleById",
+        "description": "Retrieves a specific validation rule by its unique ID.",
         "tags": [
           "Validation Rules"
         ],
@@ -131,16 +295,71 @@
             "schema": {
               "type": "string"
             },
-            "description": "The unique identifier of the validation rule to retrieve."
+            "description": "The unique identifier of the validation rule to retrieve.",
+            "example": "rule-abc123"
           }
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "Validation rule retrieved successfully",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ValidationRule"
+                },
+                "example": {
+                  "_id": "rule-abc123",
+                  "_organization_id": "728224",
+                  "_schema_version": "1.0",
+                  "title": "German postal code",
+                  "created_at": "2024-01-10T08:00:00.000Z",
+                  "updated_at": "2024-01-10T08:00:00.000Z",
+                  "created_by": "user-1",
+                  "updated_by": "user-1",
+                  "rule": {
+                    "type": "regex",
+                    "conditions": {
+                      "all": [
+                        {
+                          "fact": "inputValue",
+                          "operator": "regexMatch",
+                          "value": "^[0-9]{5}$"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Unauthorized"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - Insufficient permissions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Forbidden"
+                    }
+                  }
                 }
               }
             }
@@ -181,8 +400,8 @@
       },
       "patch": {
         "operationId": "updateValidationRule",
-        "summary": "Update Validation Rule (partial update)",
-        "description": "Updates an existing validation rule partially by ID",
+        "summary": "updateValidationRule",
+        "description": "Partially updates an existing validation rule by ID. Only the fields provided in the request body are updated.",
         "tags": [
           "Validation Rules"
         ],
@@ -199,7 +418,8 @@
             "schema": {
               "type": "string"
             },
-            "description": "The unique identifier of the validation rule to update."
+            "description": "The unique identifier of the validation rule to update.",
+            "example": "rule-abc123"
           }
         ],
         "requestBody": {
@@ -207,6 +427,24 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/UpdateValidationRuleRequest"
+              },
+              "example": {
+                "title": "Updated German postal code",
+                "rule": {
+                  "type": "regex",
+                  "conditions": {
+                    "all": [
+                      {
+                        "fact": "inputValue",
+                        "operator": "regexMatch",
+                        "value": "^[0-9]{5}$",
+                        "params": {
+                          "errorMessage": "Must be a valid 5-digit German postal code"
+                        }
+                      }
+                    ]
+                  }
+                }
               }
             }
           },
@@ -214,11 +452,33 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "Validation rule updated successfully",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ValidationRule"
+                },
+                "example": {
+                  "_id": "rule-abc123",
+                  "_organization_id": "728224",
+                  "_schema_version": "1.0",
+                  "title": "Updated German postal code",
+                  "created_at": "2024-01-10T08:00:00.000Z",
+                  "updated_at": "2024-01-20T11:00:00.000Z",
+                  "created_by": "user-1",
+                  "updated_by": "user-2",
+                  "rule": {
+                    "type": "regex",
+                    "conditions": {
+                      "all": [
+                        {
+                          "fact": "inputValue",
+                          "operator": "regexMatch",
+                          "value": "^[0-9]{5}$"
+                        }
+                      ]
+                    }
+                  }
                 }
               }
             }
@@ -233,6 +493,54 @@
                     "message": {
                       "type": "string",
                       "example": "Invalid request body"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Unauthorized"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - Insufficient permissions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Forbidden"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Validation rule not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Validation rule not found"
                     }
                   }
                 }
@@ -259,8 +567,8 @@
       },
       "delete": {
         "operationId": "deleteValidationRule",
-        "summary": "Delete Validation Rule",
-        "description": "Deletes a validation rule by ID",
+        "summary": "deleteValidationRule",
+        "description": "Permanently deletes a validation rule by ID. Any journeys or entity attributes referencing this rule should be updated before deletion.",
         "tags": [
           "Validation Rules"
         ],
@@ -277,12 +585,61 @@
             "schema": {
               "type": "string"
             },
-            "description": "The unique identifier of the validation rule to delete."
+            "description": "The unique identifier of the validation rule to delete.",
+            "example": "rule-abc123"
           }
         ],
         "responses": {
           "204": {
             "description": "Validation rule deleted successfully"
+          },
+          "401": {
+            "description": "Unauthorized - Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Unauthorized"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - Insufficient permissions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Forbidden"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Validation rule not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Validation rule not found"
+                    }
+                  }
+                }
+              }
+            }
           },
           "500": {
             "description": "Internal Server Error",
@@ -306,8 +663,8 @@
     "/v1/validation-rules/{ruleId}/used-by": {
       "post": {
         "operationId": "addUsedByReference",
-        "summary": "Add a reference to the usedBy array",
-        "description": "Adds a single reference to the usedBy array of a validation rule",
+        "summary": "addUsedByReference",
+        "description": "Adds a single `used_by` reference to an existing validation rule.\n\nUse this endpoint when attaching a validation rule to a journey block or entity attribute to track where the rule is applied.\n",
         "tags": [
           "Validation Rules"
         ],
@@ -324,7 +681,8 @@
             "schema": {
               "type": "string"
             },
-            "description": "The unique identifier of the validation rule to update."
+            "description": "The unique identifier of the validation rule to update.",
+            "example": "rule-abc123"
           }
         ],
         "requestBody": {
@@ -332,10 +690,14 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/UsedBy"
+              },
+              "example": {
+                "type": "journey",
+                "source_id": "journey-xyz789"
               }
             }
           },
-          "description": "The usedBy reference to add"
+          "description": "The used_by reference to add"
         },
         "responses": {
           "200": {
@@ -344,6 +706,34 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ValidationRule"
+                },
+                "example": {
+                  "_id": "rule-abc123",
+                  "_organization_id": "728224",
+                  "_schema_version": "1.0",
+                  "title": "German postal code",
+                  "created_at": "2024-01-10T08:00:00.000Z",
+                  "updated_at": "2024-01-20T11:00:00.000Z",
+                  "created_by": "user-1",
+                  "updated_by": "user-1",
+                  "rule": {
+                    "type": "regex",
+                    "conditions": {
+                      "all": [
+                        {
+                          "fact": "inputValue",
+                          "operator": "regexMatch",
+                          "value": "^[0-9]{5}$"
+                        }
+                      ]
+                    }
+                  },
+                  "used_by": [
+                    {
+                      "type": "journey",
+                      "source_id": "journey-xyz789"
+                    }
+                  ]
                 }
               }
             }
@@ -358,6 +748,38 @@
                     "message": {
                       "type": "string",
                       "example": "Invalid request body"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Unauthorized"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - Insufficient permissions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Forbidden"
                     }
                   }
                 }
@@ -400,8 +822,8 @@
       },
       "delete": {
         "operationId": "removeUsedByReference",
-        "summary": "Remove a reference from the usedBy array",
-        "description": "Removes a specific reference from the usedBy array of a validation rule",
+        "summary": "removeUsedByReference",
+        "description": "Removes a specific `used_by` reference from an existing validation rule.\n\nUse this endpoint when detaching a validation rule from a journey block or entity attribute.\n",
         "tags": [
           "Validation Rules"
         ],
@@ -418,7 +840,8 @@
             "schema": {
               "type": "string"
             },
-            "description": "The unique identifier of the validation rule to update."
+            "description": "The unique identifier of the validation rule to update.",
+            "example": "rule-abc123"
           }
         ],
         "requestBody": {
@@ -426,10 +849,14 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/UsedBy"
+              },
+              "example": {
+                "type": "journey",
+                "source_id": "journey-xyz789"
               }
             }
           },
-          "description": "The usedBy reference to remove"
+          "description": "The used_by reference to remove"
         },
         "responses": {
           "200": {
@@ -438,6 +865,29 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ValidationRule"
+                },
+                "example": {
+                  "_id": "rule-abc123",
+                  "_organization_id": "728224",
+                  "_schema_version": "1.0",
+                  "title": "German postal code",
+                  "created_at": "2024-01-10T08:00:00.000Z",
+                  "updated_at": "2024-01-20T11:00:00.000Z",
+                  "created_by": "user-1",
+                  "updated_by": "user-1",
+                  "rule": {
+                    "type": "regex",
+                    "conditions": {
+                      "all": [
+                        {
+                          "fact": "inputValue",
+                          "operator": "regexMatch",
+                          "value": "^[0-9]{5}$"
+                        }
+                      ]
+                    }
+                  },
+                  "used_by": []
                 }
               }
             }
@@ -452,6 +902,38 @@
                     "message": {
                       "type": "string",
                       "example": "Invalid request body"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Unauthorized"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - Insufficient permissions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Forbidden"
                     }
                   }
                 }
@@ -512,9 +994,11 @@
     "schemas": {
       "GetValidationRulesResponse": {
         "type": "object",
+        "description": "Response envelope for listing all validation rules within an organization.",
         "properties": {
           "results": {
             "type": "array",
+            "description": "Flat list of all validation rules belonging to the authenticated organization.",
             "items": {
               "$ref": "#/components/schemas/ValidationRule"
             }
@@ -572,8 +1056,18 @@
                   },
                   {
                     "$ref": "#/components/schemas/NumericRuleType"
+                  },
+                  {
+                    "$ref": "#/components/schemas/ComparisonRuleType"
                   }
                 ]
+              },
+              "contexts": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/ContextRequirement"
+                },
+                "description": "Declares the dynamic context a v2 rule needs at evaluation time.\n`context` condition values reference these sources by using the schema slug\nas the first segment of their `path`. Only applicable to v2 rules.\n"
               }
             }
           }
@@ -633,6 +1127,7 @@
       },
       "UsedBy": {
         "type": "object",
+        "description": "Describes where and how a validation rule is applied. Used to track associations between rules and the journeys or entity schemas that reference them.",
         "required": [
           "type"
         ],
@@ -643,18 +1138,24 @@
               "journey",
               "entity"
             ],
-            "description": "The context in which the rule is used (e.g., journey or entity)."
+            "description": "The context in which the rule is used - either a journey block or an entity schema attribute.",
+            "example": "journey"
           },
           "schema_slug": {
             "type": "string",
-            "description": "Slug of the schema using this rule for entities."
+            "description": "Slug of the entity schema using this rule. Only applicable when `type` is `entity`.",
+            "example": "contact"
           },
           "source_id": {
             "type": "string",
-            "description": "Source identifier for the usage context."
+            "description": "Unique identifier of the source (e.g. journey ID or entity attribute key) that references this rule.",
+            "example": "journey-xyz789"
           }
         },
-        "description": "Describes where and how a validation rule is applied."
+        "example": {
+          "type": "journey",
+          "source_id": "journey-xyz789"
+        }
       },
       "RegexRuleType": {
         "description": "Validation rule that uses a regular expression to validate input.",
@@ -1480,12 +1981,314 @@
             }
           }
         ]
+      },
+      "ComparisonRuleType": {
+        "type": "object",
+        "description": "Declarative validation rule (schema version v2). Supports predefined comparison operators\nover number, date and text inputs, with static, dynamic (context path) and relative-date\ncomparison values.\n",
+        "required": [
+          "input_type",
+          "conditions"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "input_type": {
+            "type": "string",
+            "enum": [
+              "number",
+              "date",
+              "text"
+            ],
+            "description": "The kind of input value the rule validates. Determines which operators are allowed."
+          },
+          "conditions": {
+            "type": "array",
+            "description": "The comparisons the input value must satisfy. All blocking conditions must pass\nfor the input to be valid; `allow_failure` conditions are advisory and excluded\nfrom the verdict. Must contain at least one condition (enforced at write time).\n",
+            "items": {
+              "$ref": "#/components/schemas/Condition"
+            }
+          }
+        }
+      },
+      "Condition": {
+        "type": "object",
+        "description": "A single comparison the input value must satisfy.",
+        "required": [
+          "id",
+          "operator",
+          "value",
+          "error_message"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 50,
+            "description": "Stable identifier of the condition within the rule, used for editing and error reporting."
+          },
+          "operator": {
+            "$ref": "#/components/schemas/Operator"
+          },
+          "value": {
+            "$ref": "#/components/schemas/ConditionValue"
+          },
+          "error_message": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200,
+            "description": "Message shown to the end user when this condition fails."
+          },
+          "allow_failure": {
+            "type": "boolean",
+            "default": false,
+            "description": "When true, the condition is advisory: it is always evaluated and reported\nwhen it fails, but it never takes part in the validity verdict.\nThe input is valid when every blocking (non-advisory) condition passes.\nA rule whose conditions are all advisory is always valid (warnings only).\n"
+          }
+        }
+      },
+      "Operator": {
+        "type": "string",
+        "description": "Predefined comparison operator. Compatibility (enforced at write time):\n- number: equal, notEqual, greaterThan, greaterThanInclusive, lessThan, lessThanInclusive, between, regexMatch\n- date: dateBefore, dateOnOrBefore, dateAfter, dateOnOrAfter, dateBetween, notInFuture, notInPast, regexMatch\n- text: equal, notEqual, contains, doesNotContain, startsWith, endsWith, regexMatch, lengthBetween,\n  greaterThan, greaterThanInclusive, lessThan, lessThanInclusive, between\nRange operators (between, dateBetween, lengthBetween) require a `range` value;\nunary operators (notInFuture, notInPast) require a `none` value; all others require a scalar value.\nregexMatch validates the raw input string's format and always takes a static string pattern.\nNumeric comparison operators on text rules parse the input as a number at evaluation time\n(free-text fields often hold numbers); unparsable input fails the condition.\n",
+        "enum": [
+          "equal",
+          "notEqual",
+          "greaterThan",
+          "greaterThanInclusive",
+          "lessThan",
+          "lessThanInclusive",
+          "between",
+          "dateBefore",
+          "dateOnOrBefore",
+          "dateAfter",
+          "dateOnOrAfter",
+          "dateBetween",
+          "notInFuture",
+          "notInPast",
+          "contains",
+          "doesNotContain",
+          "startsWith",
+          "endsWith",
+          "regexMatch",
+          "lengthBetween"
+        ]
+      },
+      "ConditionValue": {
+        "description": "The comparison value of a condition - a scalar, a range of scalars, or nothing (unary operators).",
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/StaticValue"
+          },
+          {
+            "$ref": "#/components/schemas/ContextValue"
+          },
+          {
+            "$ref": "#/components/schemas/RelativeDateValue"
+          },
+          {
+            "$ref": "#/components/schemas/RangeValue"
+          },
+          {
+            "$ref": "#/components/schemas/NoValue"
+          }
+        ]
+      },
+      "ScalarValue": {
+        "description": "A single comparison value - static, resolved from context, or a relative date.",
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/StaticValue"
+          },
+          {
+            "$ref": "#/components/schemas/ContextValue"
+          },
+          {
+            "$ref": "#/components/schemas/RelativeDateValue"
+          }
+        ]
+      },
+      "StaticValue": {
+        "type": "object",
+        "description": "A fixed comparison value.",
+        "required": [
+          "source",
+          "data"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "source": {
+            "type": "string",
+            "enum": [
+              "static"
+            ]
+          },
+          "data": {
+            "description": "The literal value. Numbers for numeric comparisons, ISO 8601 date strings for date comparisons, strings for text comparisons.",
+            "oneOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "boolean"
+              }
+            ]
+          }
+        }
+      },
+      "ContextValue": {
+        "type": "object",
+        "description": "A dynamic comparison value resolved from runtime context, e.g. `contract.installment_amount`\nor `previous_reading.value`. The first path segment must match the `name` of a declared\ncontext requirement.\n",
+        "required": [
+          "source",
+          "path"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "source": {
+            "type": "string",
+            "enum": [
+              "context"
+            ]
+          },
+          "path": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200,
+            "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*(\\.[a-zA-Z0-9_]+)*$",
+            "description": "Dot-separated path into the resolved context."
+          },
+          "adjust": {
+            "$ref": "#/components/schemas/ValueAdjustment"
+          }
+        }
+      },
+      "ValueAdjustment": {
+        "type": "object",
+        "description": "Adjusts a context-resolved numeric value before comparison, e.g. \"context value plus 10 percent\".\nUsed to express tolerance bands such as \"at most 10% above the current instalment amount\".\n",
+        "required": [
+          "type",
+          "value",
+          "direction"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "percent",
+              "absolute"
+            ]
+          },
+          "value": {
+            "type": "number",
+            "minimum": 0
+          },
+          "direction": {
+            "type": "string",
+            "enum": [
+              "increase",
+              "decrease"
+            ]
+          }
+        }
+      },
+      "RelativeDateValue": {
+        "type": "object",
+        "description": "A date relative to the evaluation moment, e.g. \"today minus 30 days\". Only valid for date rules.",
+        "required": [
+          "source",
+          "offset",
+          "unit"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "source": {
+            "type": "string",
+            "enum": [
+              "relative_date"
+            ]
+          },
+          "offset": {
+            "type": "integer",
+            "minimum": -36500,
+            "maximum": 36500,
+            "description": "Offset from the anchor. Negative values are in the past, positive in the future, 0 is the anchor itself."
+          },
+          "unit": {
+            "type": "string",
+            "enum": [
+              "days",
+              "months",
+              "years"
+            ]
+          },
+          "anchor": {
+            "type": "string",
+            "enum": [
+              "today"
+            ],
+            "default": "today"
+          }
+        }
+      },
+      "RangeValue": {
+        "type": "object",
+        "description": "A lower and upper bound for range operators (between, dateBetween, lengthBetween). Bounds are inclusive.",
+        "required": [
+          "source",
+          "min",
+          "max"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "source": {
+            "type": "string",
+            "enum": [
+              "range"
+            ]
+          },
+          "min": {
+            "$ref": "#/components/schemas/ScalarValue"
+          },
+          "max": {
+            "$ref": "#/components/schemas/ScalarValue"
+          }
+        }
+      },
+      "NoValue": {
+        "type": "object",
+        "description": "No comparison value - used by unary operators such as notInFuture / notInPast.",
+        "required": [
+          "source"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "source": {
+            "type": "string",
+            "enum": [
+              "none"
+            ]
+          }
+        }
+      },
+      "ContextRequirement": {
+        "type": "object",
+        "description": "An entity context source the rule needs at evaluation time, referenced by `context`\nvalue paths via the schema slug as their first segment (e.g. `contract.installment_amount`).\nHow the source is resolved (which entity instance) is decided by the consuming surface,\nnot by the rule. Meter reading comparisons use the meter/meter_counter entity schemas\n(e.g. `meter_counter.current_consumption` for the previous reading value).\n",
+        "required": [
+          "schema"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "schema": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Entity schema slug.",
+            "example": "contract"
+          }
+        }
       }
     }
   },
-  "servers": [
-    {
-      "url": "https://validation-rules.sls.epilot.io"
-    }
-  ]
+  "servers": []
 }

@@ -2,6 +2,7 @@ import { readFileSync, writeFileSync, existsSync, statSync } from 'node:fs';
 import { resolve, extname } from 'node:path';
 import { execSync } from 'node:child_process';
 import { resolveToken, loadCredentials } from '../../lib/auth-store.js';
+import { validateScheduleExpression } from './schedule.js';
 import { getResolvedProfile } from '../../lib/profiles.js';
 import { BOLD, RESET, GREEN, RED, YELLOW, DIM } from '../../lib/utils.js';
 
@@ -20,7 +21,29 @@ export interface AppManifest {
   permissions?: { action: string; resource?: string }[];
   blueprint?: { manifest_id?: string };
   assets?: { logo?: string };
+  functions?: ManifestFunction[];
   components: ManifestComponent[];
+}
+
+export interface ManifestFunction {
+  /** Unique function name within the app (kebab-case) */
+  name: string;
+  /**
+   * workflow: referenced by a CUSTOM_FLOW_ACTION component (type "function").
+   * scheduled: runs automatically once per installation on its cron schedule.
+   */
+  type: 'workflow' | 'scheduled';
+  /**  */
+  label?: { en?: string | null; de: string };
+  description?: { en?: string | null; de: string };
+  /** Local path to the bundled handler JS — inlined as `code` on deploy */
+  handler: string;
+  /** 5-field cron or rate(...) expression; requires type "scheduled" */
+  schedule?: string;
+  schedule_timezone?: string;
+  schedule_overlap?: 'skip';
+  /** Keys of installation options of type secret exposed to the function */
+  secrets?: string[];
 }
 
 export interface ManifestComponent {
@@ -101,8 +124,78 @@ export function validateManifest(data: unknown): { valid: boolean; errors: Valid
     }
   }
 
+  if (obj.functions !== undefined) {
+    if (!Array.isArray(obj.functions)) {
+      errors.push({ path: '/functions', message: 'Must be an array' });
+    } else {
+      validateFunctions(obj.functions, errors);
+    }
+  }
+
   if (errors.length > 0) return { valid: false, errors };
   return { valid: true, errors: [], manifest: data as AppManifest };
+}
+
+const FUNCTION_NAME_PATTERN = /^[a-z0-9][a-z0-9-]{0,63}$/;
+const MAX_FUNCTIONS = 10;
+const MAX_SCHEDULED_FUNCTIONS = 5;
+
+function validateFunctions(functions: unknown[], errors: ValidationError[]): void {
+  if (functions.length > MAX_FUNCTIONS) {
+    errors.push({ path: '/functions', message: `At most ${MAX_FUNCTIONS} functions per app` });
+  }
+
+  const seen = new Set<string>();
+  let scheduled = 0;
+
+  for (let i = 0; i < functions.length; i++) {
+    const fn = functions[i] as Record<string, unknown>;
+    const path = `/functions/${i}`;
+
+    if (fn.type !== 'workflow' && fn.type !== 'scheduled') {
+      errors.push({ path: `${path}/type`, message: 'Required: "workflow" or "scheduled"' });
+    }
+    if (fn.type === 'scheduled' && fn.schedule === undefined) {
+      errors.push({ path: `${path}/schedule`, message: 'Scheduled functions require a schedule expression' });
+    }
+    if (fn.type !== 'scheduled' && fn.schedule !== undefined) {
+      errors.push({ path: `${path}/schedule`, message: 'Only functions of type "scheduled" may declare a schedule' });
+    }
+    if (typeof fn.name !== 'string' || !FUNCTION_NAME_PATTERN.test(fn.name)) {
+      errors.push({ path: `${path}/name`, message: 'Required kebab-case string (a-z, 0-9, dashes; max 64 chars)' });
+    } else if (seen.has(fn.name)) {
+      errors.push({ path: `${path}/name`, message: `Duplicate function name "${fn.name}"` });
+    } else {
+      seen.add(fn.name);
+    }
+
+    if (typeof fn.handler !== 'string' || fn.handler.length === 0) {
+      errors.push({ path: `${path}/handler`, message: 'Required path to the bundled handler JS' });
+    }
+
+    if (fn.schedule !== undefined) {
+      scheduled++;
+      if (typeof fn.schedule !== 'string') {
+        errors.push({ path: `${path}/schedule`, message: 'Must be a cron or rate() expression string' });
+      } else {
+        const result = validateScheduleExpression(fn.schedule);
+        if (!result.valid) {
+          errors.push({ path: `${path}/schedule`, message: result.error ?? 'Invalid schedule expression' });
+        }
+      }
+    }
+
+    if (fn.schedule_overlap !== undefined && fn.schedule_overlap !== 'skip') {
+      errors.push({ path: `${path}/schedule_overlap`, message: 'Only "skip" is supported' });
+    }
+  }
+
+  if (scheduled > MAX_SCHEDULED_FUNCTIONS) {
+    errors.push({
+      path: '/functions',
+      message: `At most ${MAX_SCHEDULED_FUNCTIONS} scheduled functions per app (schedules run once per installation)`,
+    });
+  }
 }
 
 // ─── Manifest I/O ──────────────────────────────────────────────────────────────
@@ -134,6 +227,17 @@ export interface ApiClientOptions {
   token?: string;
   server?: string;
   profile?: string;
+}
+
+/** Bump the patch segment of a semver-ish version string (0.0.1 -> 0.0.2). */
+export function bumpPatchVersion(version: string): string {
+  const parts = version.split('.');
+  const patch = Number.parseInt(parts[parts.length - 1], 10);
+  if (Number.isNaN(patch)) {
+    throw new Error(`Cannot derive next version from "${version}" — pass an explicit target version`);
+  }
+  parts[parts.length - 1] = String(patch + 1);
+  return parts.join('.');
 }
 
 async function request(baseUrl: string, token: string, method: string, path: string, body?: unknown): Promise<unknown> {
@@ -279,13 +383,27 @@ export function createAppApiClient(opts: ApiClientOptions) {
       });
       return roleId;
     },
-    async cloneVersion(appId: string, version: string) {
-      return request(
+    async cloneVersion(appId: string, sourceVersion: string, targetVersion?: string) {
+      const target = targetVersion ?? bumpPatchVersion(sourceVersion);
+      await request(
         baseUrl,
         getToken(),
         'POST',
-        `/v1/app-configurations/${appId}/versions/${version}/clone`,
-      ) as Promise<{ version: string }>;
+        `/v1/app-configurations/${appId}/versions/${sourceVersion}/clone-to/${target}`,
+      );
+      return { version: target };
+    },
+    /** Returns the app's installation in the caller's org, or null if not installed. */
+    async getInstallation(appId: string) {
+      try {
+        return (await request(baseUrl, getToken(), 'GET', `/v1/app/${appId}`)) as Record<string, unknown>;
+      } catch (err) {
+        if ((err as Error).message.includes('(404)')) return null;
+        throw err;
+      }
+    },
+    async patchInstallation(appId: string, payload: Record<string, unknown>) {
+      return request(baseUrl, getToken(), 'PATCH', `/v1/app/${appId}`, payload);
     },
     async upsertComponent(appId: string, version: string, component: Record<string, unknown>) {
       const componentId = component.id as string | undefined;

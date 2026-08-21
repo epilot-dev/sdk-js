@@ -1241,7 +1241,7 @@
       "patch": {
         "operationId": "updateCalendar",
         "summary": "updateCalendar",
-        "description": "Update fields on a calendar.",
+        "description": "Update local calendar details. Changes to synced calendars do not modify the provider calendar.",
         "tags": [
           "Calendars"
         ],
@@ -1286,16 +1286,6 @@
               }
             }
           },
-          "403": {
-            "description": "Calendar is read-only",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
           "404": {
             "description": "Resource not found",
             "content": {
@@ -1311,7 +1301,7 @@
       "delete": {
         "operationId": "deleteCalendar",
         "summary": "deleteCalendar",
-        "description": "Delete a native epilot calendar and its events.",
+        "description": "Delete a native epilot calendar or disconnect a synced calendar, including its locally stored events.",
         "tags": [
           "Calendars"
         ],
@@ -1327,10 +1317,10 @@
         ],
         "responses": {
           "204": {
-            "description": "Calendar deleted"
+            "description": "Calendar deleted or disconnected"
           },
-          "403": {
-            "description": "Calendar is read-only",
+          "404": {
+            "description": "Resource not found",
             "content": {
               "application/json": {
                 "schema": {
@@ -1339,8 +1329,8 @@
               }
             }
           },
-          "404": {
-            "description": "Resource not found",
+          "409": {
+            "description": "The epilot default calendar cannot be deleted",
             "content": {
               "application/json": {
                 "schema": {
@@ -1450,7 +1440,7 @@
       "post": {
         "operationId": "createEvent",
         "summary": "createEvent",
-        "description": "Create a native epilot calendar event.",
+        "description": "Create a native epilot calendar event. Omit `calendar_id` to use the caller’s epilot default calendar.",
         "tags": [
           "Calendar Events"
         ],
@@ -2343,11 +2333,15 @@
           },
           "is_default": {
             "type": "boolean",
-            "description": "True if this is the user's primary calendar"
+            "description": "True if the source provider marks this calendar as default"
+          },
+          "is_epilot_default": {
+            "type": "boolean",
+            "description": "True for the epilot default calendar"
           },
           "read_only": {
             "type": "boolean",
-            "description": "True if the caller cannot modify events in this calendar"
+            "description": "True if the caller cannot create, update, or delete events in this calendar"
           },
           "owner_email": {
             "type": "string",
@@ -2372,6 +2366,7 @@
           "_org",
           "name",
           "is_default",
+          "is_epilot_default",
           "read_only",
           "source"
         ]
@@ -2573,7 +2568,12 @@
             "description": "Convenience flag, true when status is busy/oof/tentative"
           },
           "is_cancelled": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "Whether the event was cancelled but still exists"
+          },
+          "is_draft": {
+            "type": "boolean",
+            "description": "Whether the event is saved as a draft"
           },
           "sensitivity": {
             "$ref": "#/components/schemas/Sensitivity"
@@ -2612,6 +2612,11 @@
             },
             "description": "Null when sensitivity is private or confidential"
           },
+          "metadata": {
+            "type": "object",
+            "nullable": true,
+            "additionalProperties": {}
+          },
           "is_recurring": {
             "type": "boolean"
           },
@@ -2645,6 +2650,7 @@
           "status",
           "busy",
           "is_cancelled",
+          "is_draft",
           "sensitivity",
           "importance",
           "is_online_meeting",
@@ -2777,7 +2783,7 @@
           "calendar_id": {
             "type": "string",
             "minLength": 1,
-            "description": "epilot calendar this event belongs to"
+            "description": "Owned calendar ID. Omit this property to use the epilot default calendar."
           },
           "description": {
             "type": "string",
@@ -2813,13 +2819,17 @@
           "sensitivity": {
             "$ref": "#/components/schemas/Sensitivity"
           },
+          "metadata": {
+            "type": "object",
+            "nullable": true,
+            "additionalProperties": {}
+          },
           "_title": {
             "type": "string",
             "minLength": 1
           }
         },
         "required": [
-          "calendar_id",
           "start_time",
           "end_time",
           "timezone",
@@ -2862,6 +2872,10 @@
           },
           "status": {
             "$ref": "#/components/schemas/EventStatus"
+          },
+          "is_cancelled": {
+            "type": "boolean",
+            "description": "Whether the event was cancelled but still exists"
           },
           "sensitivity": {
             "$ref": "#/components/schemas/Sensitivity"
