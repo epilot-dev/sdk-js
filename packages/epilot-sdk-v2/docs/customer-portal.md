@@ -131,6 +131,7 @@ const { data } = await customerPortalClient.upsertPortal(...)
 - [`createCustomEntityActivity`](#createcustomentityactivity)
 - [`saveEntityFile`](#saveentityfile)
 - [`deleteEntityFile`](#deleteentityfile)
+- [`getFilePreview`](#getfilepreview)
 - [`trackFileDownloaded`](#trackfiledownloaded)
 - [`getBillingEvents`](#getbillingevents)
 - [`triggerEntityAccessEvent`](#triggerentityaccessevent)
@@ -141,6 +142,7 @@ const { data } = await customerPortalClient.upsertPortal(...)
 - [`updateWorkflowStepAsDone`](#updateworkflowstepasdone)
 - [`getEntityWorkflows`](#getentityworkflows)
 - [`getEntityPortalWorkflows`](#getentityportalworkflows)
+- [`getEntityPortalWorkflowsBatch`](#getentityportalworkflowsbatch)
 - [`uploadMeterReadingPhoto`](#uploadmeterreadingphoto)
 - [`createMeterReading`](#createmeterreading)
 - [`getAllowedMeterReadingRange`](#getallowedmeterreadingrange)
@@ -245,6 +247,7 @@ const { data } = await customerPortalClient.upsertPortal(...)
 - [`EntityEditRule`](#entityeditrule)
 - [`ActivityItem`](#activityitem)
 - [`FileItem`](#fileitem)
+- [`FilePreviewResult`](#filepreviewresult)
 - [`EntityFileCount`](#entityfilecount)
 - [`AdminUser`](#adminuser)
 - [`Grant`](#grant)
@@ -256,6 +259,7 @@ const { data } = await customerPortalClient.upsertPortal(...)
 - [`WorkflowStep`](#workflowstep)
 - [`PortalWorkflow`](#portalworkflow)
 - [`PortalWorkflowTask`](#portalworkflowtask)
+- [`EntityPortalWorkflows`](#entityportalworkflows)
 - [`PortalTaskConfig`](#portaltaskconfig)
 - [`BaseBillingEvent`](#basebillingevent)
 - [`InstallmentEvent`](#installmentevent)
@@ -2056,7 +2060,7 @@ const { data } = await client.getPublicPortalExtensionDetailsV3({
 
 ### `getConsumption`
 
-Get Consumption
+Get energy consumption data between a given time period.
 
 `GET /v2/portal/consumption`
 
@@ -2095,7 +2099,7 @@ const { data } = await client.getConsumption({
 
 ### `prepareVisualizationExport`
 
-Prepare Visualization Export
+Asks an installed App to prepare a downloadable export of a visualization (consumption chart, dynamic tariff chart, etc.). The export is produced by the third-party App via a configured portal extensi
 
 `POST /v2/portal/visualization:export`
 
@@ -2136,7 +2140,7 @@ const { data } = await client.prepareVisualizationExport(
 
 ### `getVisualizationMetadata`
 
-Get Visualization Metadata
+Returns runtime metadata describing how a visualization (consumption / price / cost chart) should be rendered for a given portal context (meter, contract, etc). Resolves the extension's `visualization
 
 `GET /v2/portal/visualization/metadata`
 
@@ -2178,7 +2182,7 @@ const { data } = await client.getVisualizationMetadata({
 
 ### `getCosts`
 
-Get Costs
+Get energy cost data between a given time period.
 
 `GET /v2/portal/costs`
 
@@ -2219,7 +2223,7 @@ const { data } = await client.getCosts({
 
 ### `getPrices`
 
-Get Prices
+Get energy prices data between a given time period.
 
 `GET /v2/portal/prices`
 
@@ -5767,6 +5771,33 @@ const { data } = await client.getRegistrationIdentifiers()
 
 ---
 
+### `getFilePreview`
+
+resolves an in-portal preview for a file. Returns a Content-Disposition: inline URL for directly-previewable files (PDF, common image formats), or a document-api PDF conversion result for the Office f
+
+`GET /v2/portal/user/file/{id}/preview`
+
+```ts
+const { data } = await client.getFilePreview({
+  id: '123e4567-e89b-12d3-a456-426614174000',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "kind": "pdf",
+  "url": "https://example.com/path",
+  "download_url": "https://example.com/path"
+}
+```
+
+</details>
+
+---
+
 ### `trackFileDownloaded`
 
 Track that user has downloaded a file
@@ -6386,7 +6417,7 @@ const { data } = await client.updateWorkflowStepAsDone({
 
 ### `getEntityWorkflows`
 
-Get workflows for an entity
+Get all workflows associated with an entity (requires access to the entity)
 
 `GET /v2/portal/entity/{slug}/{id}/workflows`
 
@@ -6448,7 +6479,8 @@ const { data } = await client.getEntityWorkflows({
 
 ### `getEntityPortalWorkflows`
 
-Get linearized workflows for an entity
+Get all portal-relevant workflows associated with an entity (requires access to the entity),
+linearized by the Workflows API into a flat, ordered list of portal-visible tasks.
 
 `GET /v2/portal/entity/{slug}/{id}/workflows/linearized`
 
@@ -6535,9 +6567,112 @@ const { data } = await client.getEntityPortalWorkflows({
 
 ---
 
+### `getEntityPortalWorkflowsBatch`
+
+Batch variant of `getEntityPortalWorkflows`: returns portal-relevant workflows for
+up to 50 entities — schemas may differ — in a single call, each already linearized
+by the Workflows API into a flat, 
+
+`POST /v2/portal/entities/workflows/linearized/batch`
+
+```ts
+const { data } = await client.getEntityPortalWorkflowsBatch(
+  null,
+  {
+    entities: [
+      {
+        id: 'string',
+        slug: 'order'
+      }
+    ]
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "results": [
+    {
+      "entity_id": "string",
+      "portal_workflows": [
+        {
+          "id": "string",
+          "definition_id": "string",
+          "name": "string",
+          "status": "STARTED",
+          "version": 2,
+          "created_at": "string",
+          "updated_at": "string",
+          "completed_at": "string",
+          "due_date": "string",
+          "assigned_to": ["string"],
+          "contexts": [
+            {
+              "entity_id": "string",
+              "entity_schema": "string",
+              "is_primary": true
+            }
+          ],
+          "is_path_complete": true,
+          "tasks": [
+            {
+              "id": "string",
+              "name": "string",
+              "order": 0,
+              "status": "COMPLETED",
+              "is_active": true,
+              "ecp": {
+                "enabled": true,
+                "label": "string",
+                "description": "string",
+                "journey": {
+                  "id": "string",
+                  "journeyId": "string",
+                  "name": "string",
+                  "complete_task_automatically": true
+                }
+              },
+              "installer": {
+                "enabled": true,
+                "label": "string",
+                "description": "string",
+                "journey": {
+                  "id": "string",
+                  "journeyId": "string",
+                  "name": "string",
+                  "complete_task_automatically": true
+                }
+              },
+              "journey": {
+                "id": "string",
+                "journeyId": "string",
+                "name": "string",
+                "complete_task_automatically": true
+              },
+              "assigned_to": ["string"],
+              "phase_id": "string",
+              "phase_name": "string",
+              "completed_at": "string",
+              "updated_at": "string"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
 ### `uploadMeterReadingPhoto`
 
-Upload Meter Reading Photo
+Uploads a Meter Reading photo and - if enabled - gives back data extracted from the photo.
 
 `POST /v2/portal/metering/reading/photo`
 
@@ -6578,7 +6713,7 @@ const { data } = await client.uploadMeterReadingPhoto(
 
 ### `createMeterReading`
 
-Create Meter Reading
+Inserts a new meter reading.
 
 `POST /v2/portal/metering/reading`
 
@@ -6638,6 +6773,10 @@ const { data } = await client.createMeterReading(
 
 ### `getAllowedMeterReadingRange`
 
+Get allowed reading range for all counters of a meter from the configured
+third-party plausibility check hook using 'range' mode. This endpoint requires
+a plausibility check hook to be configured for 
+
 `GET /v2/portal/metering/reading/allowed-range/{meter_id}`
 
 ```ts
@@ -6670,7 +6809,8 @@ const { data } = await client.getAllowedMeterReadingRange({
 
 ### `getMeterReadings`
 
-Get meter readings with optional template resolution
+Fetches meter readings for a counter and optionally resolves Handlebars
+template strings against each reading object using @epilot/variables.
 
 `POST /v2/portal/metering/readings`
 
@@ -7694,7 +7834,7 @@ const { data } = await client.getUserEntryPoint({
 
 ### `updateCampaignPortalBlockStatus`
 
-Update Campaign Portal Block Status
+Updates the status of a campaign portal block for multiple recipients.
 
 `PUT /v2/portal/campaign/{campaign_id}/entity:status`
 
@@ -9422,7 +9562,7 @@ const { data } = await client.swapPortalConfig(
   {
     source_portal_id: '453ad7bf-86d5-46c8-8252-bcc868df5e3c',
     target_portal_id: '453ad7bf-86d5-46c8-8252-bcc868df5e3c',
-    items_to_swap: ['all']
+    items_to_swap: ['email_templates']
   },
 )
 ```
@@ -10338,6 +10478,7 @@ type ContextEntities = Array<{
 ```ts
 type ErrorResp = {
   message?: string
+  reason?: string
 }
 ```
 
@@ -11923,6 +12064,16 @@ type FileItem = {
 }
 ```
 
+### `FilePreviewResult`
+
+```ts
+type FilePreviewResult = {
+  kind: "pdf" | "image" | "unsupported"
+  url?: string // uri
+  download_url?: string // uri
+}
+```
+
 ### `EntityFileCount`
 
 ```ts
@@ -12135,6 +12286,49 @@ type PortalWorkflowTask = {
   phase_name?: string
   completed_at?: string
   updated_at?: string
+}
+```
+
+### `EntityPortalWorkflows`
+
+Linearized portal workflows of a single entity
+
+```ts
+type EntityPortalWorkflows = {
+  entity_id: string
+  portal_workflows: Array<{
+    id: string
+    definition_id?: string
+    name: string
+    status: "STARTED" | "DONE" | "CLOSED"
+    version: 2 | 3
+    created_at?: string
+    updated_at?: string
+    completed_at?: string
+    due_date?: string
+    assigned_to?: string[]
+    contexts?: Array<{
+      entity_id?: { ... }
+      entity_schema?: { ... }
+      is_primary?: { ... }
+    }>
+    is_path_complete: boolean
+    tasks: Array<{
+      id: { ... }
+      name: { ... }
+      order: { ... }
+      status: { ... }
+      is_active: { ... }
+      ecp?: { ... }
+      installer?: { ... }
+      journey?: { ... }
+      assigned_to?: { ... }
+      phase_id?: { ... }
+      phase_name?: { ... }
+      completed_at?: { ... }
+      updated_at?: { ... }
+    }>
+  }>
 }
 ```
 
@@ -14174,8 +14368,10 @@ type JuiceSettings = {
 
 ### `SwappableConfig`
 
+Optional configuration item that a portal swap can additionally include. The swap always transfers the pages and the functional experience config that keep the portal working. These items are opt-in on top of that and are OFF by default. Domain and access/security settings (domain, cognito_details, 
+
 ```ts
-type SwappableConfig = "all" | "domain" | "users" | "email_templates"
+type SwappableConfig = "email_templates"
 ```
 
 ### `PortalUserRegistrationStatus`

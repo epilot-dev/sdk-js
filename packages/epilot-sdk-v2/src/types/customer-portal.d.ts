@@ -14,6 +14,9 @@ export declare namespace Components {
              * Error message
              */
             message?: string;
+            /**
+             * Machine-readable cause, when the API can name one. `PORTAL_USER_PENDING_ACTIVATION` means the portal user is authenticated but not mapped to a contact yet, so re-authenticating will not help.
+             */
             reason: "invalid_token";
         }
         export type Conflict = Schemas.ErrorResp;
@@ -32,6 +35,9 @@ export declare namespace Components {
         export type InternalServerError = Schemas.ErrorResp;
         export type InvalidRequest = Schemas.ErrorResp;
         export type InvalidRequestCreateMeterReading = {
+            /**
+             * Machine-readable cause, when the API can name one. `PORTAL_USER_PENDING_ACTIVATION` means the portal user is authenticated but not mapped to a contact yet, so re-authenticating will not help.
+             */
             reason?: "plausibility_check_failed" | "contract_period" | "no_counter" | "no_direction" | "timestamp_future" | "less_than_previous" | "greater_than_subsequent" | "meter_decommissioned" | "plausibility_check_failed";
             upper_limit: number;
             lower_limit: number;
@@ -2949,6 +2955,22 @@ export declare namespace Components {
             auto_create_cognito_user?: boolean;
         }
         /**
+         * Linearized portal workflows of a single entity
+         */
+        export interface EntityPortalWorkflows {
+            entity_id: string;
+            /**
+             * Empty when the entity has no portal-relevant workflow
+             */
+            portal_workflows: /**
+             * A portal-facing projection of a workflow execution (V1 or V2), with the execution
+             * graph already linearized by the Workflows API into a flat, ordered list of
+             * portal-visible tasks.
+             *
+             */
+            PortalWorkflow[];
+        }
+        /**
          * Response for entity get request
          */
         export interface EntityResponse {
@@ -3300,6 +3322,10 @@ export declare namespace Components {
              * Error message
              */
             message?: string;
+            /**
+             * Machine-readable cause, when the API can name one. `PORTAL_USER_PENDING_ACTIVATION` means the portal user is authenticated but not mapped to a contact yet, so re-authenticating will not help.
+             */
+            reason?: string;
         }
         /**
          * example:
@@ -4716,6 +4742,20 @@ export declare namespace Components {
              * Indicate whether the user has not seen/downloaded the file before
              */
             is_new?: boolean;
+        }
+        export interface FilePreviewResult {
+            /**
+             * What kind of preview (if any) is available. "pdf" covers both native PDFs and Office documents that were converted to PDF server-side. "unsupported" means no preview is available and the caller should fall back to download.
+             */
+            kind: "pdf" | "image" | "unsupported";
+            /**
+             * A Content-Disposition: inline URL to render in a preview viewer. Present only when kind is "pdf" or "image". Short-lived — do not cache across dialog opens.
+             */
+            url?: string; // uri
+            /**
+             * Optional download URL for the file, returned for any kind — including "unsupported" — whenever the file entity exposes one. It is only a Content-Disposition: attachment URL for files with access_control "private", where it is a short-lived signed URL; for any other access level it is the file entity's plain public/CDN object URL, which carries no attachment disposition and may render inline in the browser. Absent when the file entity exposes no usable URL, so clients must handle it being missing.
+             */
+            download_url?: string; // uri
         }
         export interface Grant {
             /**
@@ -6582,9 +6622,10 @@ export declare namespace Components {
              * providers not in the list are deleted. Omit the field to leave SSO
              * configuration unchanged; send an empty array to remove all providers.
              *
-             * Each provider is persisted verbatim — `oidc_config.client_secret` is stored
-             * as sent. Customers are encouraged to reference an org env secret via
-             * `{{ env.VAR }}` rather than embed raw values.
+             * Secrets: a provider sent without `oidc_config.client_secret` keeps the
+             * stored secret for the same slug; an explicit empty string clears it.
+             * `getPortalConfigV3` returns providers with raw secrets redacted;
+             * `{{ env.VAR }}` references pass through.
              *
              */
             identity_providers?: ProviderPublicConfig[];
@@ -8102,7 +8143,10 @@ export declare namespace Components {
             use_case_slug: string;
         }
         export type Source = "ECP" | "ERP" | "360" | "journey-submission";
-        export type SwappableConfig = "all" | "domain" | "users" | "email_templates";
+        /**
+         * Optional configuration item that a portal swap can additionally include. The swap always transfers the pages and the functional experience config that keep the portal working. These items are opt-in on top of that and are OFF by default. Domain and access/security settings (domain, cognito_details, auth_settings) can never be swapped and are therefore not part of this enum.
+         */
+        export type SwappableConfig = "email_templates";
         export type TariffType = "ht" | "nt";
         export interface TeaserWidget {
             id: string;
@@ -8200,9 +8244,10 @@ export declare namespace Components {
              * providers not in the list are deleted. Omit the field to leave SSO
              * configuration unchanged; send an empty array to remove all providers.
              *
-             * Each provider is persisted verbatim — `oidc_config.client_secret` is stored
-             * as sent. Customers are encouraged to reference an org env secret via
-             * `{{ env.VAR }}` rather than embed raw values.
+             * Secrets: a provider sent without `oidc_config.client_secret` keeps the
+             * stored secret for the same slug; an explicit empty string clears it.
+             * `getPortalConfigV3` returns providers with raw secrets redacted;
+             * `{{ env.VAR }}` references pass through.
              *
              */
             identity_providers?: /**
@@ -8268,9 +8313,10 @@ export declare namespace Components {
              * providers not in the list are deleted. Omit the field to leave SSO
              * configuration unchanged; send an empty array to remove all providers.
              *
-             * Each provider is persisted verbatim — `oidc_config.client_secret` is stored
-             * as sent. Customers are encouraged to reference an org env secret via
-             * `{{ env.VAR }}` rather than embed raw values.
+             * Secrets: a provider sent without `oidc_config.client_secret` keeps the
+             * stored secret for the same slug; an explicit empty string clears it.
+             * `getPortalConfigV3` returns providers with raw secrets redacted;
+             * `{{ env.VAR }}` references pass through.
              *
              */
             identity_providers?: /**
@@ -8855,9 +8901,10 @@ export declare namespace Components {
              * providers not in the list are deleted. Omit the field to leave SSO
              * configuration unchanged; send an empty array to remove all providers.
              *
-             * Each provider is persisted verbatim — `oidc_config.client_secret` is stored
-             * as sent. Customers are encouraged to reference an org env secret via
-             * `{{ env.VAR }}` rather than embed raw values.
+             * Secrets: a provider sent without `oidc_config.client_secret` keeps the
+             * stored secret for the same slug; an explicit empty string clears it.
+             * `getPortalConfigV3` returns providers with raw secrets redacted;
+             * `{{ env.VAR }}` references pass through.
              *
              */
             identity_providers?: /**
@@ -11744,6 +11791,621 @@ export declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace GetEntityPortalWorkflowsBatch {
+        export interface RequestBody {
+            entities: [
+                {
+                    /**
+                     * ID of the entity
+                     */
+                    id: string;
+                    /**
+                     * Schema slug of the entity
+                     * example:
+                     * order
+                     */
+                    slug: string;
+                },
+                {
+                    /**
+                     * ID of the entity
+                     */
+                    id: string;
+                    /**
+                     * Schema slug of the entity
+                     * example:
+                     * order
+                     */
+                    slug: string;
+                }?,
+                {
+                    /**
+                     * ID of the entity
+                     */
+                    id: string;
+                    /**
+                     * Schema slug of the entity
+                     * example:
+                     * order
+                     */
+                    slug: string;
+                }?,
+                {
+                    /**
+                     * ID of the entity
+                     */
+                    id: string;
+                    /**
+                     * Schema slug of the entity
+                     * example:
+                     * order
+                     */
+                    slug: string;
+                }?,
+                {
+                    /**
+                     * ID of the entity
+                     */
+                    id: string;
+                    /**
+                     * Schema slug of the entity
+                     * example:
+                     * order
+                     */
+                    slug: string;
+                }?,
+                {
+                    /**
+                     * ID of the entity
+                     */
+                    id: string;
+                    /**
+                     * Schema slug of the entity
+                     * example:
+                     * order
+                     */
+                    slug: string;
+                }?,
+                {
+                    /**
+                     * ID of the entity
+                     */
+                    id: string;
+                    /**
+                     * Schema slug of the entity
+                     * example:
+                     * order
+                     */
+                    slug: string;
+                }?,
+                {
+                    /**
+                     * ID of the entity
+                     */
+                    id: string;
+                    /**
+                     * Schema slug of the entity
+                     * example:
+                     * order
+                     */
+                    slug: string;
+                }?,
+                {
+                    /**
+                     * ID of the entity
+                     */
+                    id: string;
+                    /**
+                     * Schema slug of the entity
+                     * example:
+                     * order
+                     */
+                    slug: string;
+                }?,
+                {
+                    /**
+                     * ID of the entity
+                     */
+                    id: string;
+                    /**
+                     * Schema slug of the entity
+                     * example:
+                     * order
+                     */
+                    slug: string;
+                }?,
+                {
+                    /**
+                     * ID of the entity
+                     */
+                    id: string;
+                    /**
+                     * Schema slug of the entity
+                     * example:
+                     * order
+                     */
+                    slug: string;
+                }?,
+                {
+                    /**
+                     * ID of the entity
+                     */
+                    id: string;
+                    /**
+                     * Schema slug of the entity
+                     * example:
+                     * order
+                     */
+                    slug: string;
+                }?,
+                {
+                    /**
+                     * ID of the entity
+                     */
+                    id: string;
+                    /**
+                     * Schema slug of the entity
+                     * example:
+                     * order
+                     */
+                    slug: string;
+                }?,
+                {
+                    /**
+                     * ID of the entity
+                     */
+                    id: string;
+                    /**
+                     * Schema slug of the entity
+                     * example:
+                     * order
+                     */
+                    slug: string;
+                }?,
+                {
+                    /**
+                     * ID of the entity
+                     */
+                    id: string;
+                    /**
+                     * Schema slug of the entity
+                     * example:
+                     * order
+                     */
+                    slug: string;
+                }?,
+                {
+                    /**
+                     * ID of the entity
+                     */
+                    id: string;
+                    /**
+                     * Schema slug of the entity
+                     * example:
+                     * order
+                     */
+                    slug: string;
+                }?,
+                {
+                    /**
+                     * ID of the entity
+                     */
+                    id: string;
+                    /**
+                     * Schema slug of the entity
+                     * example:
+                     * order
+                     */
+                    slug: string;
+                }?,
+                {
+                    /**
+                     * ID of the entity
+                     */
+                    id: string;
+                    /**
+                     * Schema slug of the entity
+                     * example:
+                     * order
+                     */
+                    slug: string;
+                }?,
+                {
+                    /**
+                     * ID of the entity
+                     */
+                    id: string;
+                    /**
+                     * Schema slug of the entity
+                     * example:
+                     * order
+                     */
+                    slug: string;
+                }?,
+                {
+                    /**
+                     * ID of the entity
+                     */
+                    id: string;
+                    /**
+                     * Schema slug of the entity
+                     * example:
+                     * order
+                     */
+                    slug: string;
+                }?,
+                {
+                    /**
+                     * ID of the entity
+                     */
+                    id: string;
+                    /**
+                     * Schema slug of the entity
+                     * example:
+                     * order
+                     */
+                    slug: string;
+                }?,
+                {
+                    /**
+                     * ID of the entity
+                     */
+                    id: string;
+                    /**
+                     * Schema slug of the entity
+                     * example:
+                     * order
+                     */
+                    slug: string;
+                }?,
+                {
+                    /**
+                     * ID of the entity
+                     */
+                    id: string;
+                    /**
+                     * Schema slug of the entity
+                     * example:
+                     * order
+                     */
+                    slug: string;
+                }?,
+                {
+                    /**
+                     * ID of the entity
+                     */
+                    id: string;
+                    /**
+                     * Schema slug of the entity
+                     * example:
+                     * order
+                     */
+                    slug: string;
+                }?,
+                {
+                    /**
+                     * ID of the entity
+                     */
+                    id: string;
+                    /**
+                     * Schema slug of the entity
+                     * example:
+                     * order
+                     */
+                    slug: string;
+                }?,
+                {
+                    /**
+                     * ID of the entity
+                     */
+                    id: string;
+                    /**
+                     * Schema slug of the entity
+                     * example:
+                     * order
+                     */
+                    slug: string;
+                }?,
+                {
+                    /**
+                     * ID of the entity
+                     */
+                    id: string;
+                    /**
+                     * Schema slug of the entity
+                     * example:
+                     * order
+                     */
+                    slug: string;
+                }?,
+                {
+                    /**
+                     * ID of the entity
+                     */
+                    id: string;
+                    /**
+                     * Schema slug of the entity
+                     * example:
+                     * order
+                     */
+                    slug: string;
+                }?,
+                {
+                    /**
+                     * ID of the entity
+                     */
+                    id: string;
+                    /**
+                     * Schema slug of the entity
+                     * example:
+                     * order
+                     */
+                    slug: string;
+                }?,
+                {
+                    /**
+                     * ID of the entity
+                     */
+                    id: string;
+                    /**
+                     * Schema slug of the entity
+                     * example:
+                     * order
+                     */
+                    slug: string;
+                }?,
+                {
+                    /**
+                     * ID of the entity
+                     */
+                    id: string;
+                    /**
+                     * Schema slug of the entity
+                     * example:
+                     * order
+                     */
+                    slug: string;
+                }?,
+                {
+                    /**
+                     * ID of the entity
+                     */
+                    id: string;
+                    /**
+                     * Schema slug of the entity
+                     * example:
+                     * order
+                     */
+                    slug: string;
+                }?,
+                {
+                    /**
+                     * ID of the entity
+                     */
+                    id: string;
+                    /**
+                     * Schema slug of the entity
+                     * example:
+                     * order
+                     */
+                    slug: string;
+                }?,
+                {
+                    /**
+                     * ID of the entity
+                     */
+                    id: string;
+                    /**
+                     * Schema slug of the entity
+                     * example:
+                     * order
+                     */
+                    slug: string;
+                }?,
+                {
+                    /**
+                     * ID of the entity
+                     */
+                    id: string;
+                    /**
+                     * Schema slug of the entity
+                     * example:
+                     * order
+                     */
+                    slug: string;
+                }?,
+                {
+                    /**
+                     * ID of the entity
+                     */
+                    id: string;
+                    /**
+                     * Schema slug of the entity
+                     * example:
+                     * order
+                     */
+                    slug: string;
+                }?,
+                {
+                    /**
+                     * ID of the entity
+                     */
+                    id: string;
+                    /**
+                     * Schema slug of the entity
+                     * example:
+                     * order
+                     */
+                    slug: string;
+                }?,
+                {
+                    /**
+                     * ID of the entity
+                     */
+                    id: string;
+                    /**
+                     * Schema slug of the entity
+                     * example:
+                     * order
+                     */
+                    slug: string;
+                }?,
+                {
+                    /**
+                     * ID of the entity
+                     */
+                    id: string;
+                    /**
+                     * Schema slug of the entity
+                     * example:
+                     * order
+                     */
+                    slug: string;
+                }?,
+                {
+                    /**
+                     * ID of the entity
+                     */
+                    id: string;
+                    /**
+                     * Schema slug of the entity
+                     * example:
+                     * order
+                     */
+                    slug: string;
+                }?,
+                {
+                    /**
+                     * ID of the entity
+                     */
+                    id: string;
+                    /**
+                     * Schema slug of the entity
+                     * example:
+                     * order
+                     */
+                    slug: string;
+                }?,
+                {
+                    /**
+                     * ID of the entity
+                     */
+                    id: string;
+                    /**
+                     * Schema slug of the entity
+                     * example:
+                     * order
+                     */
+                    slug: string;
+                }?,
+                {
+                    /**
+                     * ID of the entity
+                     */
+                    id: string;
+                    /**
+                     * Schema slug of the entity
+                     * example:
+                     * order
+                     */
+                    slug: string;
+                }?,
+                {
+                    /**
+                     * ID of the entity
+                     */
+                    id: string;
+                    /**
+                     * Schema slug of the entity
+                     * example:
+                     * order
+                     */
+                    slug: string;
+                }?,
+                {
+                    /**
+                     * ID of the entity
+                     */
+                    id: string;
+                    /**
+                     * Schema slug of the entity
+                     * example:
+                     * order
+                     */
+                    slug: string;
+                }?,
+                {
+                    /**
+                     * ID of the entity
+                     */
+                    id: string;
+                    /**
+                     * Schema slug of the entity
+                     * example:
+                     * order
+                     */
+                    slug: string;
+                }?,
+                {
+                    /**
+                     * ID of the entity
+                     */
+                    id: string;
+                    /**
+                     * Schema slug of the entity
+                     * example:
+                     * order
+                     */
+                    slug: string;
+                }?,
+                {
+                    /**
+                     * ID of the entity
+                     */
+                    id: string;
+                    /**
+                     * Schema slug of the entity
+                     * example:
+                     * order
+                     */
+                    slug: string;
+                }?,
+                {
+                    /**
+                     * ID of the entity
+                     */
+                    id: string;
+                    /**
+                     * Schema slug of the entity
+                     * example:
+                     * order
+                     */
+                    slug: string;
+                }?,
+                {
+                    /**
+                     * ID of the entity
+                     */
+                    id: string;
+                    /**
+                     * Schema slug of the entity
+                     * example:
+                     * order
+                     */
+                    slug: string;
+                }?
+            ];
+        }
+        namespace Responses {
+            export interface $200 {
+                results?: /* Linearized portal workflows of a single entity */ Components.Schemas.EntityPortalWorkflows[];
+            }
+            export type $400 = Components.Responses.InvalidRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace GetEntityWorkflows {
         namespace Parameters {
             /**
@@ -11914,6 +12576,26 @@ export declare namespace Paths {
             export interface $200 {
                 file?: /* The file entity */ Components.Schemas.FileItem;
             }
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace GetFilePreview {
+        namespace Parameters {
+            export type Id = /**
+             * Entity ID
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            Components.Schemas.EntityId /* uuid */;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.FilePreviewResult;
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
@@ -15007,6 +15689,10 @@ export declare namespace Paths {
                      * The email address registered in the journey's Login & Registration block
                      */
                     journey_registration_email?: string;
+                    /**
+                     * The portal selected on the journey's Login & Registration block, used to target the registration link to that portal
+                     */
+                    journey_registration_portal_id?: string;
                 };
             };
         }
@@ -15440,9 +16126,9 @@ export declare namespace Paths {
              */
             Components.Schemas.PortalId;
             /**
-             * Items to swap
+             * Optional, opt-in configuration items to additionally swap on top of the always-swapped pages and functional config. Defaults to an empty list (nothing extra swapped). Domain and access/security settings can never be swapped.
              */
-            items_to_swap?: Components.Schemas.SwappableConfig[];
+            items_to_swap?: /* Optional configuration item that a portal swap can additionally include. The swap always transfers the pages and the functional experience config that keep the portal working. These items are opt-in on top of that and are OFF by default. Domain and access/security settings (domain, cognito_details, auth_settings) can never be swapped and are therefore not part of this enum. */ Components.Schemas.SwappableConfig[];
         }
         namespace Responses {
             export interface $200 {
@@ -16435,7 +17121,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetPublicPortalExtensionDetailsV3.Responses.$200>
   /**
-   * getConsumption - Get Consumption
+   * getConsumption - getConsumption
    * 
    * Get energy consumption data between a given time period.
    */
@@ -16445,7 +17131,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetConsumption.Responses.$200>
   /**
-   * prepareVisualizationExport - Prepare Visualization Export
+   * prepareVisualizationExport - prepareVisualizationExport
    * 
    * Asks an installed App to prepare a downloadable export of a visualization (consumption chart, dynamic tariff chart, etc.). The export is produced by the third-party App via a configured portal extension hook of type `dataExport` — this endpoint does not generate the file itself, it forwards the request to the configured hook and returns the descriptor the App provides (typically a `download_url`).
    * 
@@ -16456,7 +17142,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.PrepareVisualizationExport.Responses.$200>
   /**
-   * getVisualizationMetadata - Get Visualization Metadata
+   * getVisualizationMetadata - getVisualizationMetadata
    * 
    * Returns runtime metadata describing how a visualization (consumption / price / cost chart) should be rendered for a given portal context (meter, contract, etc). Resolves the extension's `visualizationMetadata` hook implicitly from `app_id` + `extensionId` and invokes it. Supplies the response as a structured payload that the portal uses to configure type/aggregation options, supported intervals, and the available data range.
    * 
@@ -16467,7 +17153,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetVisualizationMetadata.Responses.$200>
   /**
-   * getCosts - Get Costs
+   * getCosts - getCosts
    * 
    * Get energy cost data between a given time period.
    */
@@ -16477,7 +17163,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetCosts.Responses.$200>
   /**
-   * getPrices - Get Prices
+   * getPrices - getPrices
    * 
    * Get energy prices data between a given time period.
    */
@@ -17314,6 +18000,16 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetFileById.Responses.$200>
   /**
+   * getFilePreview - getFilePreview
+   * 
+   * resolves an in-portal preview for a file. Returns a Content-Disposition: inline URL for directly-previewable files (PDF, common image formats), or a document-api PDF conversion result for the Office formats it currently supports (docx/xls/xlsx/xlsm) -- NOT doc/csv/pptx, which document-api's conversion does not cover today. Returns { kind: "unsupported" } (no url) for anything else, so the caller can fall back to the existing download flow. An optional `download_url` is returned for all kinds — including "unsupported" — whenever the file entity exposes one, so the client can render a real anchor for its Download action; it is only a Content-Disposition: attachment URL for private files, and for other access levels it is the plain object URL, which may render inline. The previewability decision is made server-side from the file's own filename/mime_type — never trust a client-supplied kind for anything security-sensitive.
+   */
+  'getFilePreview'(
+    parameters?: Parameters<Paths.GetFilePreview.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetFilePreview.Responses.$200>
+  /**
    * trackFileDownloaded - trackFileDownloaded
    * 
    * Track that user has downloaded a file
@@ -17324,7 +18020,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.TrackFileDownloaded.Responses.$200>
   /**
-   * getFilesCountByEntity - getFileCountByEntity
+   * getFilesCountByEntity - getFilesCountByEntity
    * 
    * Fetch file counts for all ECP user related entities
    */
@@ -17478,7 +18174,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UpdateWorkflowStepAsDone.Responses.$200>
   /**
-   * getEntityWorkflows - Get workflows for an entity
+   * getEntityWorkflows - getEntityWorkflows
    * 
    * Get all workflows associated with an entity (requires access to the entity)
    */
@@ -17488,7 +18184,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetEntityWorkflows.Responses.$200>
   /**
-   * getEntityPortalWorkflows - Get linearized workflows for an entity
+   * getEntityPortalWorkflows - getEntityPortalWorkflows
    * 
    * Get all portal-relevant workflows associated with an entity (requires access to the entity),
    * linearized by the Workflows API into a flat, ordered list of portal-visible tasks.
@@ -17508,7 +18204,25 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetEntityPortalWorkflows.Responses.$200>
   /**
-   * uploadMeterReadingPhoto - Upload Meter Reading Photo
+   * getEntityPortalWorkflowsBatch - getEntityPortalWorkflowsBatch
+   * 
+   * Batch variant of `getEntityPortalWorkflows`: returns portal-relevant workflows for
+   * up to 50 entities — schemas may differ — in a single call, each already linearized
+   * by the Workflows API into a flat, ordered list of portal-visible tasks.
+   * 
+   * Intended for portal list views (e.g. an entity list where every card shows its
+   * workflow progress). Entities the portal user cannot access are omitted from the
+   * response; an entry with an empty task list means the entity has no portal-relevant
+   * workflow.
+   * 
+   */
+  'getEntityPortalWorkflowsBatch'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.GetEntityPortalWorkflowsBatch.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetEntityPortalWorkflowsBatch.Responses.$200>
+  /**
+   * uploadMeterReadingPhoto - uploadMeterReadingPhoto
    * 
    * Uploads a Meter Reading photo and - if enabled - gives back data extracted from the photo.
    */
@@ -17518,7 +18232,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UploadMeterReadingPhoto.Responses.$200>
   /**
-   * createMeterReading - Create Meter Reading
+   * createMeterReading - createMeterReading
    * 
    * Inserts a new meter reading.
    */
@@ -17528,7 +18242,9 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CreateMeterReading.Responses.$200>
   /**
-   * getAllowedMeterReadingRange - Get allowed reading range for all counters of a meter from the configured
+   * getAllowedMeterReadingRange - getAllowedMeterReadingRange
+   * 
+   * Get allowed reading range for all counters of a meter from the configured
    * third-party plausibility check hook using 'range' mode. This endpoint requires
    * a plausibility check hook to be configured for the portal.
    * 
@@ -17539,7 +18255,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetAllowedMeterReadingRange.Responses.$200>
   /**
-   * getMeterReadings - Get meter readings with optional template resolution
+   * getMeterReadings - getMeterReadings
    * 
    * Fetches meter readings for a counter and optionally resolves Handlebars
    * template strings against each reading object using @epilot/variables.
@@ -17786,7 +18502,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetUserEntryPoint.Responses.$200>
   /**
-   * updateCampaignPortalBlockStatus - Update Campaign Portal Block Status
+   * updateCampaignPortalBlockStatus - updateCampaignPortalBlockStatus
    * 
    * Updates the status of a campaign portal block for multiple recipients.
    */
@@ -18180,7 +18896,7 @@ export interface PathsDictionary {
   }
   ['/v2/portal/consumption']: {
     /**
-     * getConsumption - Get Consumption
+     * getConsumption - getConsumption
      * 
      * Get energy consumption data between a given time period.
      */
@@ -18192,7 +18908,7 @@ export interface PathsDictionary {
   }
   ['/v2/portal/visualization:export']: {
     /**
-     * prepareVisualizationExport - Prepare Visualization Export
+     * prepareVisualizationExport - prepareVisualizationExport
      * 
      * Asks an installed App to prepare a downloadable export of a visualization (consumption chart, dynamic tariff chart, etc.). The export is produced by the third-party App via a configured portal extension hook of type `dataExport` — this endpoint does not generate the file itself, it forwards the request to the configured hook and returns the descriptor the App provides (typically a `download_url`).
      * 
@@ -18205,7 +18921,7 @@ export interface PathsDictionary {
   }
   ['/v2/portal/visualization/metadata']: {
     /**
-     * getVisualizationMetadata - Get Visualization Metadata
+     * getVisualizationMetadata - getVisualizationMetadata
      * 
      * Returns runtime metadata describing how a visualization (consumption / price / cost chart) should be rendered for a given portal context (meter, contract, etc). Resolves the extension's `visualizationMetadata` hook implicitly from `app_id` + `extensionId` and invokes it. Supplies the response as a structured payload that the portal uses to configure type/aggregation options, supported intervals, and the available data range.
      * 
@@ -18218,7 +18934,7 @@ export interface PathsDictionary {
   }
   ['/v2/portal/costs']: {
     /**
-     * getCosts - Get Costs
+     * getCosts - getCosts
      * 
      * Get energy cost data between a given time period.
      */
@@ -18230,7 +18946,7 @@ export interface PathsDictionary {
   }
   ['/v2/portal/prices']: {
     /**
-     * getPrices - Get Prices
+     * getPrices - getPrices
      * 
      * Get energy prices data between a given time period.
      */
@@ -19203,6 +19919,18 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetFileById.Responses.$200>
   }
+  ['/v2/portal/user/file/{id}/preview']: {
+    /**
+     * getFilePreview - getFilePreview
+     * 
+     * resolves an in-portal preview for a file. Returns a Content-Disposition: inline URL for directly-previewable files (PDF, common image formats), or a document-api PDF conversion result for the Office formats it currently supports (docx/xls/xlsx/xlsm) -- NOT doc/csv/pptx, which document-api's conversion does not cover today. Returns { kind: "unsupported" } (no url) for anything else, so the caller can fall back to the existing download flow. An optional `download_url` is returned for all kinds — including "unsupported" — whenever the file entity exposes one, so the client can render a real anchor for its Download action; it is only a Content-Disposition: attachment URL for private files, and for other access levels it is the plain object URL, which may render inline. The previewability decision is made server-side from the file's own filename/mime_type — never trust a client-supplied kind for anything security-sensitive.
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetFilePreview.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetFilePreview.Responses.$200>
+  }
   ['/v2/portal/user/file/{id}/downloaded']: {
     /**
      * trackFileDownloaded - trackFileDownloaded
@@ -19217,7 +19945,7 @@ export interface PathsDictionary {
   }
   ['/v2/portal/user/files/count-by-entity']: {
     /**
-     * getFilesCountByEntity - getFileCountByEntity
+     * getFilesCountByEntity - getFilesCountByEntity
      * 
      * Fetch file counts for all ECP user related entities
      */
@@ -19399,7 +20127,7 @@ export interface PathsDictionary {
   }
   ['/v2/portal/entity/{slug}/{id}/workflows']: {
     /**
-     * getEntityWorkflows - Get workflows for an entity
+     * getEntityWorkflows - getEntityWorkflows
      * 
      * Get all workflows associated with an entity (requires access to the entity)
      */
@@ -19411,7 +20139,7 @@ export interface PathsDictionary {
   }
   ['/v2/portal/entity/{slug}/{id}/workflows/linearized']: {
     /**
-     * getEntityPortalWorkflows - Get linearized workflows for an entity
+     * getEntityPortalWorkflows - getEntityPortalWorkflows
      * 
      * Get all portal-relevant workflows associated with an entity (requires access to the entity),
      * linearized by the Workflows API into a flat, ordered list of portal-visible tasks.
@@ -19431,9 +20159,29 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetEntityPortalWorkflows.Responses.$200>
   }
+  ['/v2/portal/entities/workflows/linearized/batch']: {
+    /**
+     * getEntityPortalWorkflowsBatch - getEntityPortalWorkflowsBatch
+     * 
+     * Batch variant of `getEntityPortalWorkflows`: returns portal-relevant workflows for
+     * up to 50 entities — schemas may differ — in a single call, each already linearized
+     * by the Workflows API into a flat, ordered list of portal-visible tasks.
+     * 
+     * Intended for portal list views (e.g. an entity list where every card shows its
+     * workflow progress). Entities the portal user cannot access are omitted from the
+     * response; an entry with an empty task list means the entity has no portal-relevant
+     * workflow.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.GetEntityPortalWorkflowsBatch.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetEntityPortalWorkflowsBatch.Responses.$200>
+  }
   ['/v2/portal/metering/reading/photo']: {
     /**
-     * uploadMeterReadingPhoto - Upload Meter Reading Photo
+     * uploadMeterReadingPhoto - uploadMeterReadingPhoto
      * 
      * Uploads a Meter Reading photo and - if enabled - gives back data extracted from the photo.
      */
@@ -19445,7 +20193,7 @@ export interface PathsDictionary {
   }
   ['/v2/portal/metering/reading']: {
     /**
-     * createMeterReading - Create Meter Reading
+     * createMeterReading - createMeterReading
      * 
      * Inserts a new meter reading.
      */
@@ -19457,7 +20205,9 @@ export interface PathsDictionary {
   }
   ['/v2/portal/metering/reading/allowed-range/{meter_id}']: {
     /**
-     * getAllowedMeterReadingRange - Get allowed reading range for all counters of a meter from the configured
+     * getAllowedMeterReadingRange - getAllowedMeterReadingRange
+     * 
+     * Get allowed reading range for all counters of a meter from the configured
      * third-party plausibility check hook using 'range' mode. This endpoint requires
      * a plausibility check hook to be configured for the portal.
      * 
@@ -19470,7 +20220,7 @@ export interface PathsDictionary {
   }
   ['/v2/portal/metering/readings']: {
     /**
-     * getMeterReadings - Get meter readings with optional template resolution
+     * getMeterReadings - getMeterReadings
      * 
      * Fetches meter readings for a counter and optionally resolves Handlebars
      * template strings against each reading object using @epilot/variables.
@@ -19747,7 +20497,7 @@ export interface PathsDictionary {
   }
   ['/v2/portal/campaign/{campaign_id}/entity:status']: {
     /**
-     * updateCampaignPortalBlockStatus - Update Campaign Portal Block Status
+     * updateCampaignPortalBlockStatus - updateCampaignPortalBlockStatus
      * 
      * Updates the status of a campaign portal block for multiple recipients.
      */
@@ -20051,6 +20801,7 @@ export type EntityGetParams = Components.Schemas.EntityGetParams;
 export type EntityId = Components.Schemas.EntityId;
 export type EntityItem = Components.Schemas.EntityItem;
 export type EntityMatchingConfig = Components.Schemas.EntityMatchingConfig;
+export type EntityPortalWorkflows = Components.Schemas.EntityPortalWorkflows;
 export type EntityResponse = Components.Schemas.EntityResponse;
 export type EntityResponseGroupedWithHits = Components.Schemas.EntityResponseGroupedWithHits;
 export type EntityResponseWithHits = Components.Schemas.EntityResponseWithHits;
@@ -20083,6 +20834,7 @@ export type ExtraSchemaAttributes = Components.Schemas.ExtraSchemaAttributes;
 export type FailedRuleErrorResp = Components.Schemas.FailedRuleErrorResp;
 export type File = Components.Schemas.File;
 export type FileItem = Components.Schemas.FileItem;
+export type FilePreviewResult = Components.Schemas.FilePreviewResult;
 export type Grant = Components.Schemas.Grant;
 export type IdentifierAttribute = Components.Schemas.IdentifierAttribute;
 export type InstallmentEvent = Components.Schemas.InstallmentEvent;

@@ -73,6 +73,8 @@ const { data } = await aiAgentsClient.createAgent(...)
 - [`PendingAction`](#pendingaction)
 - [`ExecutionError`](#executionerror)
 - [`ExecutionMetrics`](#executionmetrics)
+- [`AgentExecutionEventStatus`](#agentexecutioneventstatus)
+- [`AgentExecutionEvent`](#agentexecutionevent)
 - [`ToolPreview`](#toolpreview)
 - [`PreviewActionType`](#previewactiontype)
 - [`PreviewEntity`](#previewentity)
@@ -105,7 +107,7 @@ const { data } = await aiAgentsClient.createAgent(...)
 
 ### `createAgent`
 
-Create Agent definition
+Creates a new custom agent. System skills cannot be created via this endpoint.
 
 `POST /v1/agents`
 
@@ -215,7 +217,8 @@ const { data } = await client.createAgent(
 
 ### `listAgents`
 
-List all agent configurations
+Lists agents from both system skills and custom agents.
+Use query parameters to filter by source, availability, or entity schema.
 
 `GET /v1/agents`
 
@@ -292,7 +295,9 @@ const { data } = await client.listAgents({
 
 ### `getAgentById`
 
-Get the agent configuration by ID
+Retrieves an agent by ID. Supports both:
+- System skill IDs (prefixed): "skill:email-categorizer"
+- Custom agent IDs (UUID): "0336a235-9417-4dd8-894c-fe81285bba75"
 
 `GET /v1/agents/{agent_id}`
 
@@ -362,7 +367,7 @@ const { data } = await client.getAgentById({
 
 ### `updateAgentById`
 
-Update the agent configuration by ID
+Updates a custom agent. System skills cannot be updated via this endpoint.
 
 `PUT /v1/agents/{agent_id}`
 
@@ -474,7 +479,7 @@ const { data } = await client.updateAgentById(
 
 ### `deleteAgentById`
 
-Delete the agent configuration by ID
+Deletes a custom agent. System skills cannot be deleted via this endpoint.
 
 `DELETE /v1/agents/{agent_id}`
 
@@ -488,7 +493,10 @@ const { data } = await client.deleteAgentById({
 
 ### `executeAgent`
 
-Execute an agent
+Executes an agent (system skill or custom agent).
+Supports both:
+- System skill IDs (prefixed): "skill:email-categorizer"
+- Custom agent IDs (UUID): "0336a235-9417-4dd8-894c-fe81285bba75"
 
 `POST /v1/agents/{agent_id}/execute`
 
@@ -624,7 +632,9 @@ const { data } = await client.executeAgent(
 
 ### `executeAgentStream`
 
-Execute an agent with streaming response
+Executes an agent with real-time streaming of tokens and tool events.
+Returns Server-Sent Events (SSE) stream with token-by-token output,
+tool call progress, and completion status.
 
 `POST /v1/agents/{agent_id}/execute/stream`
 
@@ -1007,7 +1017,7 @@ const { data } = await client.cancelExecution({
 
 ### `getExecutionTrace`
 
-Get execution trace/iterations
+Returns the step-by-step reasoning and tool calls for ReAct mode executions. Returns empty iterations array for direct mode executions.
 
 `GET /v1/executions/{execution_id}/trace`
 
@@ -1113,7 +1123,7 @@ const { data } = await client.putExecutionFeedback(
 
 ### `approveExecution`
 
-Approve pending action
+Approves a pending tool action when execution is in waiting_approval status
 
 `POST /v1/executions/{execution_id}/approve`
 
@@ -1125,8 +1135,7 @@ const { data } = await client.approveExecution(
   {
     reason: 'string',
     approved_action_ids: ['string'],
-    rejected_action_ids: ['string'],
-    share_scope: 'primary_only'
+    rejected_action_ids: ['string']
   },
 )
 ```
@@ -1234,7 +1243,7 @@ const { data } = await client.approveExecution(
 
 ### `rejectExecution`
 
-Reject pending action
+Rejects a pending tool action when execution is in waiting_approval status
 
 `POST /v1/executions/{execution_id}/reject`
 
@@ -1352,7 +1361,7 @@ const { data } = await client.rejectExecution(
 
 ### `streamExecution`
 
-Reconnect to execution stream
+Reconnects to an execution's event stream after approval. Replays missed events from event log and continues streaming if execution is still running.
 
 `GET /v1/executions/{execution_id}/stream`
 
@@ -1367,7 +1376,7 @@ const { data } = await client.streamExecution({
 
 ### `chat`
 
-Streaming chat with AI agent
+Initiates a streaming chat session with an AI agent. Supports server-side conversation memory via conversationId or client-provided history via clientHistory.
 
 `POST /v1/chat`
 
@@ -1409,7 +1418,7 @@ const { data } = await client.chat(
 
 ### `listConversations`
 
-List conversations
+Lists conversations for the authenticated user, sorted by most recent.
 
 `GET /v1/conversations`
 
@@ -1453,7 +1462,7 @@ const { data } = await client.listConversations({
 
 ### `getConversation`
 
-Get conversation with messages
+Retrieves a conversation and its message history.
 
 `GET /v1/conversations/{conversation_id}`
 
@@ -1517,7 +1526,7 @@ const { data } = await client.getConversation({
 
 ### `deleteConversation`
 
-Delete conversation
+Deletes a conversation and all its messages.
 
 `DELETE /v1/conversations/{conversation_id}`
 
@@ -1531,7 +1540,7 @@ const { data } = await client.deleteConversation({
 
 ### `submitConversationFeedback`
 
-Submit feedback for an assistant turn
+Records a thumbs up/down (with optional comment) for the assistant turn identified by its Langfuse trace id. The rating is persisted on the message and mirrored to Langfuse as a trace score.
 
 `POST /v1/conversations/{conversation_id}/feedback`
 
@@ -1827,7 +1836,6 @@ type ApproveExecutionRequest = {
   reason?: string
   approved_action_ids?: string[]
   rejected_action_ids?: string[]
-  share_scope?: "primary_only" | "primary_and_relations"
 }
 ```
 
@@ -2069,6 +2077,55 @@ type ExecutionMetrics = {
   total_cost_usd?: number
   duration_ms?: number
   iteration_count?: number
+}
+```
+
+### `AgentExecutionEventStatus`
+
+Lifecycle status carried on an agent execution event.
+
+Deliberately narrower than `ExecutionStatus`, which is the stored status of
+the execution row: `pending` and `running` both surface as `started`, and
+`cancelled` surfaces as `failed`. Consumers must not assume the two
+vocabularies are interchang
+
+```ts
+type AgentExecutionEventStatus = "started" | "completed" | "failed" | "approval_required"
+```
+
+### `AgentExecutionEvent`
+
+Detail payload of the `agent-execution-status-update` event, published on
+the AI Agents event bus with source `ai-agents`.
+
+`execution_context` and `input` are present on every status, so a consumer
+can tell whether an execution is theirs, and what it belonged to, from the
+terminal event alone — wit
+
+```ts
+type AgentExecutionEvent = {
+  executionId: string
+  agentId: string
+  orgId: string
+  userId?: string
+  execution_status: "started" | "completed" | "failed" | "approval_required"
+  execution_context?: "flows" | "copilot" | "api"
+  input?: Record<string, unknown>
+  output?: Record<string, unknown>
+  error?: {
+    message?: string
+    code?: string
+    stack?: string
+  }
+  duration?: number
+  iterations?: number
+  iteration?: number
+  message?: string
+  toolCalls?: Array<{
+    name?: string
+    args?: Record<string, unknown>
+  }>
+  timestamp?: string // date-time
 }
 ```
 
