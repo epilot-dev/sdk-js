@@ -95,6 +95,7 @@ const { data } = await messageClient.sendMessage(...)
 - [`AttachmentsRelation`](#attachmentsrelation)
 - [`File`](#file)
 - [`MessageRequestParams`](#messagerequestparams)
+- [`ThreadView`](#threadview)
 - [`UnreadCountScope`](#unreadcountscope)
 - [`UnreadCountsPayload`](#unreadcountspayload)
 - [`UnreadCountsResult`](#unreadcountsresult)
@@ -391,6 +392,24 @@ const { data } = await client.searchMessages(
   {
     inbox_id: '3f34ce73-089c-4d45-a5ee-c161234e41c3',
     q: 'subject:"Request for solar panel price" AND _tags:INBOX',
+    view: {
+      folder: 'inbox',
+      mailbox: 'organization',
+      labels: ['string'],
+      purposes: ['string'],
+      filters: ['unread'],
+      from: ['string'],
+      to: ['string'],
+      assigned_to: ['string'],
+      include_unassigned: true,
+      date_from_days_ago: 0,
+      date_to_days_ago: 0,
+      email_filter: ['string'],
+      text: 'string',
+      thread_ids: ['string'],
+      pinned_by: 'string'
+    },
+    user_groups: ['string'],
     fields: ['_id', '_title', 'first_name', 'account', '!account.*._files', '**._product'],
     from: 0,
     size: 10,
@@ -611,11 +630,13 @@ const { data } = await client.getUnreadCounts(
   {
     actor: 'organization',
     email_filter: ['string'],
+    user_groups: ['string'],
     scopes: [
       {
         name: 'inbox-support',
         type: 'organization',
         q: '_tags.keyword:inbox AND !_tags.keyword:trash',
+        view_id: '3f34ce73-089c-4d45-a5ee-c161234e41c3',
         inbox_id: '3f34ce73-089c-4d45-a5ee-c161234e41c3'
       }
     ]
@@ -718,6 +739,24 @@ const { data } = await client.searchThreadsV2(
   {
     inbox_id: '3f34ce73-089c-4d45-a5ee-c161234e41c3',
     q: 'subject:"Request for solar panel price" AND _tags:INBOX',
+    view: {
+      folder: 'inbox',
+      mailbox: 'organization',
+      labels: ['string'],
+      purposes: ['string'],
+      filters: ['unread'],
+      from: ['string'],
+      to: ['string'],
+      assigned_to: ['string'],
+      include_unassigned: true,
+      date_from_days_ago: 0,
+      date_to_days_ago: 0,
+      email_filter: ['string'],
+      text: 'string',
+      thread_ids: ['string'],
+      pinned_by: 'string'
+    },
+    user_groups: ['string'],
     fields: ['_id', '_title', 'first_name', 'account', '!account.*._files', '**._product'],
     from: 0,
     size: 10,
@@ -770,6 +809,24 @@ Search threads and return all id's
 const { data } = await client.searchIds(
   null,
   {
+    view: {
+      folder: 'inbox',
+      mailbox: 'organization',
+      labels: ['string'],
+      purposes: ['string'],
+      filters: ['unread'],
+      from: ['string'],
+      to: ['string'],
+      assigned_to: ['string'],
+      include_unassigned: true,
+      date_from_days_ago: 0,
+      date_to_days_ago: 0,
+      email_filter: ['string'],
+      text: 'string',
+      thread_ids: ['string'],
+      pinned_by: 'string'
+    },
+    user_groups: ['string'],
     inbox_id: '3f34ce73-089c-4d45-a5ee-c161234e41c3',
     q: 'subject:"Request for solar panel price" AND _tags:INBOX'
   },
@@ -1025,7 +1082,7 @@ const { data } = await client.getThreadTimeline({
         "user_id": "123",
         "organization_id": "456"
       },
-      "timestamp": "2024-01-01T00:00:00Z",
+      "timestamp": "2024-01-01T00:00:00.000Z",
       "message_id": "string",
       "source": "user",
       "automated": true,
@@ -2207,6 +2264,34 @@ type MessageRequestParams = {
 }
 ```
 
+### `ThreadView`
+
+A central-inbox view, described structurally so the server compiles the query for it. Both the
+thread list and the unread count for a view are compiled from the same description, so the two
+cannot disagree about what the view means.
+
+Every field is optional and an omitted field adds no condition, so
+
+```ts
+type ThreadView = {
+  folder?: "inbox" | "favorite" | "sent" | "trash" | "spam" | "unassignable" | "draft"
+  mailbox?: "organization" | "agent"
+  labels?: string[]
+  purposes?: string[]
+  filters?: "unread" | "resolved" | "trash"[]
+  from?: string[]
+  to?: string[]
+  assigned_to?: string[]
+  include_unassigned?: boolean
+  date_from_days_ago?: number
+  date_to_days_ago?: number
+  email_filter?: string[]
+  text?: string
+  thread_ids?: string[]
+  pinned_by?: string
+}
+```
+
 ### `UnreadCountScope`
 
 ```ts
@@ -2214,6 +2299,7 @@ type UnreadCountScope = {
   name: string
   type: "organization" | "shared_inbox" | "saved_view"
   q?: string
+  view_id?: string
   inbox_id?: string | string[]
 }
 ```
@@ -2224,10 +2310,12 @@ type UnreadCountScope = {
 type UnreadCountsPayload = {
   actor: "organization" | "user"
   email_filter?: string[]
+  user_groups?: string[]
   scopes: Array<{
     name: string
     type: "organization" | "shared_inbox" | "saved_view"
     q?: string
+    view_id?: string
     inbox_id?: string | string[]
   }>
 }
@@ -2264,7 +2352,25 @@ type UnreadCountBuckets = {
 ```ts
 type SearchParamsV2 = {
   inbox_id?: string | string[]
-  q: string
+  q?: string
+  view?: {
+    folder?: "inbox" | "favorite" | "sent" | "trash" | "spam" | "unassignable" | "draft"
+    mailbox?: "organization" | "agent"
+    labels?: string[]
+    purposes?: string[]
+    filters?: "unread" | "resolved" | "trash"[]
+    from?: string[]
+    to?: string[]
+    assigned_to?: string[]
+    include_unassigned?: boolean
+    date_from_days_ago?: number
+    date_to_days_ago?: number
+    email_filter?: string[]
+    text?: string
+    thread_ids?: string[]
+    pinned_by?: string
+  }
+  user_groups?: string[]
   fields?: string[]
   from?: number
   size?: number
@@ -2290,6 +2396,24 @@ type SearchParams = {
 
 ```ts
 type SearchIDParams = {
+  view?: {
+    folder?: "inbox" | "favorite" | "sent" | "trash" | "spam" | "unassignable" | "draft"
+    mailbox?: "organization" | "agent"
+    labels?: string[]
+    purposes?: string[]
+    filters?: "unread" | "resolved" | "trash"[]
+    from?: string[]
+    to?: string[]
+    assigned_to?: string[]
+    include_unassigned?: boolean
+    date_from_days_ago?: number
+    date_to_days_ago?: number
+    email_filter?: string[]
+    text?: string
+    thread_ids?: string[]
+    pinned_by?: string
+  }
+  user_groups?: string[]
   inbox_id?: string | string[]
   q?: string
 }

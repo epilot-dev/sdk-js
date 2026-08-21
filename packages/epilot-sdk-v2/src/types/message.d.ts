@@ -658,6 +658,102 @@ export declare namespace Components {
          */
         export type ReadingScope = "organization" | "user";
         export interface SearchIDParams {
+            /**
+             * The view to compile, with the same meaning as on `threads:search`. Present here because
+             * this endpoint returns the ordered id set *for that list*: if one compiled its view and the
+             * other ran an authored `q`, the two would disagree inside a single feature, which is the
+             * drift this replaces.
+             *
+             */
+            view?: {
+                [name: string]: any;
+                /**
+                 * Which sidebar folder's membership predicate to apply.
+                 */
+                folder?: "inbox" | "favorite" | "sent" | "trash" | "spam" | "unassignable" | "draft";
+                /**
+                 * Whose mailbox this is. `agent` scopes to threads assigned to the caller or their groups;
+                 * `organization` scopes to the org and is the only mailbox that carries address filtering.
+                 *
+                 */
+                mailbox?: "organization" | "agent";
+                /**
+                 * Saved-filter labels, ANDed. Matched exactly against the tag rather than against its
+                 * tokens, so a label whose words overlap a folder tag no longer lands in that folder.
+                 *
+                 */
+                labels?: string[];
+                /**
+                 * Purpose ids on linked entities, ANDed.
+                 */
+                purposes?: string[];
+                /**
+                 * State filters, independent of the folder. `resolved` and `trash` reach the Inbox folder
+                 * only and are mutually exclusive there; `unread` applies anywhere.
+                 *
+                 */
+                filters?: ("unread" | "resolved" | "trash")[];
+                /**
+                 * Sender addresses to filter on.
+                 */
+                from?: string[];
+                /**
+                 * Recipient addresses to filter on.
+                 */
+                to?: string[];
+                /**
+                 * Assignee user ids.
+                 */
+                assigned_to?: string[];
+                /**
+                 * Whether threads with no assignee join the `assigned_to` set. A separate flag rather than a
+                 * sentinel entry in that list, so `assigned_to` holds user ids and nothing else.
+                 *
+                 */
+                include_unassigned?: boolean;
+                /**
+                 * Lower bound of the date range, in days before now. Omitted means the epoch.
+                 */
+                date_from_days_ago?: number;
+                /**
+                 * Upper bound of the date range, in days before now. Omitted means now.
+                 */
+                date_to_days_ago?: number;
+                /**
+                 * Addresses the user selected in the address filter. Absent and empty differ, and the
+                 * difference is a real UI state: absent is "not filtering by address", empty is "every
+                 * address deselected", which matches nothing.
+                 *
+                 * Distinct from the permission restriction, which the server derives and a caller cannot
+                 * author.
+                 *
+                 */
+                email_filter?: string[];
+                /**
+                 * The user's search string, as typed. Expanded across the searched fields server-side and
+                 * never interpreted as query syntax, so a typed operator or a stray bracket cannot
+                 * re-associate the predicate around it.
+                 *
+                 */
+                text?: string;
+                /**
+                 * Restrict the view to these threads. Exists because "would this thread appear in the view
+                 * the user is looking at?" is a real question the inbox asks when a new thread arrives, and
+                 * it is a membership test against the view rather than a different view.
+                 *
+                 */
+                thread_ids?: string[];
+                /**
+                 * Restrict the view to threads this user pinned. The pinned strip above the list is the same
+                 * view with this one extra condition.
+                 *
+                 */
+                pinned_by?: string;
+            };
+            /**
+             * The caller's group ids, with the same meaning and caveats as on `threads:search`.
+             */
+            user_groups?: string[];
             inbox_id?: string | string[];
             /**
              * Lucene query syntax supported with ElasticSearch
@@ -680,11 +776,127 @@ export declare namespace Components {
         export interface SearchParamsV2 {
             inbox_id?: string | string[];
             /**
-             * Lucene query syntax supported with ElasticSearch
+             * Lucene query syntax supported with ElasticSearch.
+             *
+             * Send this or `view`, not both. At least one is required; a request with neither is refused
+             * with a 400. An empty string is accepted and returns no hits.
+             *
              * example:
              * subject:"Request for solar panel price" AND _tags:INBOX
              */
-            q: string;
+            q?: string;
+            /**
+             * A view for the server to compile into the query, instead of supplying `q`. When a view is
+             * present and compilation is enabled for the calling organization, the compiled query runs and
+             * `q` is not consulted.
+             *
+             * Read by `threads:search` and `threads:searchIds` only. This schema is shared with
+             * `messages:search`, which compiles no view and ignores the field, so a request there must
+             * supply `q`.
+             *
+             * Compilation is enabled per organization by the `message-unread-unified-predicate` feature
+             * flag. While it is off, `q` runs and a request supplying only a view returns no hits.
+             *
+             */
+            view?: {
+                [name: string]: any;
+                /**
+                 * Which sidebar folder's membership predicate to apply.
+                 */
+                folder?: "inbox" | "favorite" | "sent" | "trash" | "spam" | "unassignable" | "draft";
+                /**
+                 * Whose mailbox this is. `agent` scopes to threads assigned to the caller or their groups;
+                 * `organization` scopes to the org and is the only mailbox that carries address filtering.
+                 *
+                 */
+                mailbox?: "organization" | "agent";
+                /**
+                 * Saved-filter labels, ANDed. Matched exactly against the tag rather than against its
+                 * tokens, so a label whose words overlap a folder tag no longer lands in that folder.
+                 *
+                 */
+                labels?: string[];
+                /**
+                 * Purpose ids on linked entities, ANDed.
+                 */
+                purposes?: string[];
+                /**
+                 * State filters, independent of the folder. `resolved` and `trash` reach the Inbox folder
+                 * only and are mutually exclusive there; `unread` applies anywhere.
+                 *
+                 */
+                filters?: ("unread" | "resolved" | "trash")[];
+                /**
+                 * Sender addresses to filter on.
+                 */
+                from?: string[];
+                /**
+                 * Recipient addresses to filter on.
+                 */
+                to?: string[];
+                /**
+                 * Assignee user ids.
+                 */
+                assigned_to?: string[];
+                /**
+                 * Whether threads with no assignee join the `assigned_to` set. A separate flag rather than a
+                 * sentinel entry in that list, so `assigned_to` holds user ids and nothing else.
+                 *
+                 */
+                include_unassigned?: boolean;
+                /**
+                 * Lower bound of the date range, in days before now. Omitted means the epoch.
+                 */
+                date_from_days_ago?: number;
+                /**
+                 * Upper bound of the date range, in days before now. Omitted means now.
+                 */
+                date_to_days_ago?: number;
+                /**
+                 * Addresses the user selected in the address filter. Absent and empty differ, and the
+                 * difference is a real UI state: absent is "not filtering by address", empty is "every
+                 * address deselected", which matches nothing.
+                 *
+                 * Distinct from the permission restriction, which the server derives and a caller cannot
+                 * author.
+                 *
+                 */
+                email_filter?: string[];
+                /**
+                 * The user's search string, as typed. Expanded across the searched fields server-side and
+                 * never interpreted as query syntax, so a typed operator or a stray bracket cannot
+                 * re-associate the predicate around it.
+                 *
+                 */
+                text?: string;
+                /**
+                 * Restrict the view to these threads. Exists because "would this thread appear in the view
+                 * the user is looking at?" is a real question the inbox asks when a new thread arrives, and
+                 * it is a membership test against the view rather than a different view.
+                 *
+                 */
+                thread_ids?: string[];
+                /**
+                 * Restrict the view to threads this user pinned. The pinned strip above the list is the same
+                 * view with this one extra condition.
+                 *
+                 */
+                pinned_by?: string;
+            };
+            /**
+             * The caller's group ids, as `group_<id>`. Read only when a `view` is compiled, where they
+             * determine the agent mailbox's assignee condition and which shared inboxes, and therefore
+             * which addresses, are reachable. Required for those conditions to be correct, because group
+             * membership is not present on the id token this service parses.
+             *
+             * Entries not matching `group_<id>` are dropped.
+             *
+             * Not an authorization input, and not treated as one: naming groups the caller is not in
+             * widens what the response includes, exactly as supplying a broader `q` does. Access control
+             * is enforced elsewhere.
+             *
+             */
+            user_groups?: string[];
             fields?: /**
              * List of entity fields to include or exclude in the response
              *
@@ -814,6 +1026,100 @@ export declare namespace Components {
              */
             removed?: string[];
         }
+        /**
+         * A central-inbox view, described structurally so the server compiles the query for it. Both the
+         * thread list and the unread count for a view are compiled from the same description, so the two
+         * cannot disagree about what the view means.
+         *
+         * Every field is optional and an omitted field adds no condition, so a view narrows the whole
+         * mailbox rather than being a template with required holes. Unknown fields are ignored.
+         *
+         */
+        export interface ThreadView {
+            [name: string]: any;
+            /**
+             * Which sidebar folder's membership predicate to apply.
+             */
+            folder?: "inbox" | "favorite" | "sent" | "trash" | "spam" | "unassignable" | "draft";
+            /**
+             * Whose mailbox this is. `agent` scopes to threads assigned to the caller or their groups;
+             * `organization` scopes to the org and is the only mailbox that carries address filtering.
+             *
+             */
+            mailbox?: "organization" | "agent";
+            /**
+             * Saved-filter labels, ANDed. Matched exactly against the tag rather than against its
+             * tokens, so a label whose words overlap a folder tag no longer lands in that folder.
+             *
+             */
+            labels?: string[];
+            /**
+             * Purpose ids on linked entities, ANDed.
+             */
+            purposes?: string[];
+            /**
+             * State filters, independent of the folder. `resolved` and `trash` reach the Inbox folder
+             * only and are mutually exclusive there; `unread` applies anywhere.
+             *
+             */
+            filters?: ("unread" | "resolved" | "trash")[];
+            /**
+             * Sender addresses to filter on.
+             */
+            from?: string[];
+            /**
+             * Recipient addresses to filter on.
+             */
+            to?: string[];
+            /**
+             * Assignee user ids.
+             */
+            assigned_to?: string[];
+            /**
+             * Whether threads with no assignee join the `assigned_to` set. A separate flag rather than a
+             * sentinel entry in that list, so `assigned_to` holds user ids and nothing else.
+             *
+             */
+            include_unassigned?: boolean;
+            /**
+             * Lower bound of the date range, in days before now. Omitted means the epoch.
+             */
+            date_from_days_ago?: number;
+            /**
+             * Upper bound of the date range, in days before now. Omitted means now.
+             */
+            date_to_days_ago?: number;
+            /**
+             * Addresses the user selected in the address filter. Absent and empty differ, and the
+             * difference is a real UI state: absent is "not filtering by address", empty is "every
+             * address deselected", which matches nothing.
+             *
+             * Distinct from the permission restriction, which the server derives and a caller cannot
+             * author.
+             *
+             */
+            email_filter?: string[];
+            /**
+             * The user's search string, as typed. Expanded across the searched fields server-side and
+             * never interpreted as query syntax, so a typed operator or a stray bracket cannot
+             * re-associate the predicate around it.
+             *
+             */
+            text?: string;
+            /**
+             * Restrict the view to these threads. Exists because "would this thread appear in the view
+             * the user is looking at?" is a real question the inbox asks when a new thread arrives, and
+             * it is a membership test against the view rather than a different view.
+             *
+             */
+            thread_ids?: string[];
+            /**
+             * Restrict the view to threads this user pinned. The pinned strip above the list is the same
+             * view with this one extra condition.
+             *
+             */
+            pinned_by?: string;
+        }
         export interface TimelineActor {
             user_id?: string;
             email?: string;
@@ -827,7 +1133,7 @@ export declare namespace Components {
             /**
              * Timestamp of the event
              * example:
-             * 2024-01-01T00:00:00Z
+             * 2024-01-01T00:00:00.000Z
              */
             timestamp: string;
             /**
@@ -891,7 +1197,8 @@ export declare namespace Components {
             /**
              * Decides which buckets come back, and whether `q` is required. `organization` returns all
              * four buckets from the canonical central-inbox queries and takes no `q`. `shared_inbox`
-             * and `saved_view` return `unread` alone and require the `q` their list uses.
+             * and `saved_view` return `unread` alone. A `saved_view` scope names its view with `view_id`;
+             * a `shared_inbox` scope needs only its `inbox_id`, since the query follows from the type.
              *
              * A `shared_inbox` scope additionally requires `actor: organization` and is refused with a
              * 400 otherwise. A shared inbox is an organization-level construct — selecting one always
@@ -902,16 +1209,40 @@ export declare namespace Components {
              */
             type: "organization" | "shared_inbox" | "saved_view";
             /**
-             * The scope's own list predicate, in Lucene syntax, exactly as the caller passes it to
-             * `threads:search`. Required for `shared_inbox` and `saved_view`, rejected for
-             * `organization`. The server ANDs the read-state condition onto it and nothing else, which
-             * is what makes the count and the list agree. Until the predicate definition moves
-             * server-side, this is the caller's authored copy.
+             * The scope's query, in Lucene syntax, as passed to `threads:search` for the same scope. The
+             * server adds the read-state condition and nothing else, so the count matches that list.
+             *
+             * Accepted for `shared_inbox` and `saved_view`; rejected for `organization`.
+             *
+             * Superseded by server-side compilation. It remains accepted for callers whose counts are
+             * enabled while compilation is not, and is ignored when compilation is enabled. It will be
+             * removed once compilation is enabled everywhere counts are.
              *
              * example:
              * _tags.keyword:inbox AND !_tags.keyword:trash
              */
             q?: string;
+            /**
+             * The id of the saved view this scope counts. The server reads that view and compiles the same
+             * query the thread list runs for it, so the count and the list cannot describe the view
+             * differently.
+             *
+             * Required for `saved_view` scopes unless `q` is supplied instead; rejected for the other two
+             * types. A `shared_inbox` scope needs no predicate field at all, because its query follows from
+             * the type and its `inbox_id`. An `organization` scope uses the canonical folder queries.
+             *
+             * The view's own shared-inbox filter is read from the stored view, so `inbox_id` need not be
+             * sent alongside this.
+             *
+             * Compilation is enabled per organization by the `message-unread-unified-predicate` feature
+             * flag. While it is off, a scope supplying only a `view_id` has no query to run and its name is
+             * returned in `omitted` rather than counted. A named view that this organization does not have,
+             * or whose stored configuration cannot be read, is omitted the same way.
+             *
+             * example:
+             * 3f34ce73-089c-4d45-a5ee-c161234e41c3
+             */
+            view_id?: string;
             /**
              * Shared inbox ids, resolved to bucket ids the same way `threads:search` resolves them.
              */
@@ -928,6 +1259,13 @@ export declare namespace Components {
              * Restrict every scope to messages involving these addresses.
              */
             email_filter?: string[];
+            /**
+             * The caller's group ids, as `group_<id>`, with the same meaning and constraints as on
+             * `threads:search`. Read only when a scope carries a `view`. Entries not matching
+             * `group_<id>` are dropped. Not an authorization input.
+             *
+             */
+            user_groups?: string[];
             scopes: [
                 UnreadCountScope,
                 UnreadCountScope?,
@@ -976,9 +1314,13 @@ export declare namespace Components {
                 [name: string]: UnreadCountBuckets;
             };
             /**
-             * Names of scopes that were accepted but could not be counted — today, a shared inbox whose
-             * ids matched no bucket in this org. Listed explicitly so a caller can tell an omission apart
-             * from a mis-spelled scope name, both of which are otherwise just a missing key in `counts`.
+             * Names of scopes that were accepted but could not be counted. Each appears here and is
+             * absent from `counts`, so an omission is distinguishable from a mis-spelled scope name.
+             *
+             * Causes, not distinguishable from this field: a `shared_inbox` scope whose ids matched no
+             * bucket in the organization; a scope with no query to run because compilation is disabled for
+             * the organization and no `q` was supplied; and a `view_id` naming a view this organization
+             * does not have or whose stored configuration cannot be read.
              *
              */
             omitted?: string[];
@@ -3240,12 +3582,11 @@ export interface OperationMethods {
    * The `organization` scope is the exception and takes no `q`: it reuses the four canonical
    * central-inbox queries, so its numbers match `getUnread` exactly.
    * 
-   * Buckets are not symmetric, across scope types or across actors. Every scope other than
-   * `organization` returns `unread` alone. The `organization` scope returns all four
-   * (`unread`, `drafts`, `unassigned`, `spam`) for `actor: organization`, and only `unread` and
-   * `drafts` for `actor: user` — the agent sidebar has no Spam or Unlinked folder, so those two
-   * numbers have nowhere to render and each one costs a cardinality aggregation. This is a
-   * deliberate divergence from `getUnread`, which computes all four for both actors.
+   * Which buckets come back varies by scope type and actor. Every scope other than `organization`
+   * returns `unread` alone. An `organization` scope returns all four (`unread`, `drafts`,
+   * `unassigned`, `spam`) for `actor: organization`, and `unread` and `drafts` only for
+   * `actor: user`. `getUnread` returns all four for both actors; this endpoint omits the two that
+   * no per-user surface renders, since each costs an aggregation.
    * 
    * Gated on the `message-unread-counts` flag, evaluated once per request against the calling
    * org. With the flag off the response is `{ "enabled": false, "counts": {} }` and no
@@ -3862,12 +4203,11 @@ export interface PathsDictionary {
      * The `organization` scope is the exception and takes no `q`: it reuses the four canonical
      * central-inbox queries, so its numbers match `getUnread` exactly.
      * 
-     * Buckets are not symmetric, across scope types or across actors. Every scope other than
-     * `organization` returns `unread` alone. The `organization` scope returns all four
-     * (`unread`, `drafts`, `unassigned`, `spam`) for `actor: organization`, and only `unread` and
-     * `drafts` for `actor: user` — the agent sidebar has no Spam or Unlinked folder, so those two
-     * numbers have nowhere to render and each one costs a cardinality aggregation. This is a
-     * deliberate divergence from `getUnread`, which computes all four for both actors.
+     * Which buckets come back varies by scope type and actor. Every scope other than `organization`
+     * returns `unread` alone. An `organization` scope returns all four (`unread`, `drafts`,
+     * `unassigned`, `spam`) for `actor: organization`, and `unread` and `drafts` only for
+     * `actor: user`. `getUnread` returns all four for both actors; this endpoint omits the two that
+     * no per-user surface renders, since each costs an aggregation.
      * 
      * Gated on the `message-unread-counts` flag, evaluated once per request against the calling
      * org. With the flag off the response is `{ "enabled": false, "counts": {} }` and no
@@ -4445,6 +4785,7 @@ export type ThreadRestoredEvent = Components.Schemas.ThreadRestoredEvent;
 export type ThreadTimeline = Components.Schemas.ThreadTimeline;
 export type ThreadTrashedEvent = Components.Schemas.ThreadTrashedEvent;
 export type ThreadUserAssignedEvent = Components.Schemas.ThreadUserAssignedEvent;
+export type ThreadView = Components.Schemas.ThreadView;
 export type TimelineActor = Components.Schemas.TimelineActor;
 export type TimelineEvent = Components.Schemas.TimelineEvent;
 export type TimelineEventData = Components.Schemas.TimelineEventData;
