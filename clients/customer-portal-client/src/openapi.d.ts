@@ -1459,6 +1459,10 @@ declare namespace Components {
             global_blocks?: {
                 [name: string]: Block;
             };
+            /**
+             * Configures which 360 events generate an in-app notification for the portal user. Each enabled trigger renders the referenced notification template and creates a notification addressed to the portal user. Admin/builder-only — never exposed via the public portal config.
+             */
+            notification_triggers?: NotificationTriggerConfig[];
         }
         export interface CommonConfigAttributesV3 {
             /**
@@ -4741,6 +4745,10 @@ declare namespace Components {
              * Indicate whether the user has not seen/downloaded the file before
              */
             is_new?: boolean;
+            /**
+             * Authorization mode of an externally hosted file's download url. `presigned` (the default) means `public_url` is HMAC-signed and needs no auth header; `token` means it authorizes the caller's bearer token instead and must be fetched with an `Authorization` header. Because `presigned` is the default, the absence of this property does NOT prove the file is stored in epilot — an external file may omit it.
+             */
+            custom_download_url_auth?: "token" | "presigned";
         }
         export interface FilePreviewResult {
             /**
@@ -4751,6 +4759,10 @@ declare namespace Components {
              * A Content-Disposition: inline URL to render in a preview viewer. Present only when kind is "pdf" or "image". Short-lived — do not cache across dialog opens.
              */
             url?: string; // uri
+            /**
+             * When true, `url` only answers to the portal user's bearer token: fetch the bytes with an `Authorization: Bearer <token>` header and render them from an object URL. Only ever set for URLs on an allow-listed ERP file-proxy host.
+             */
+            requires_auth?: boolean;
             /**
              * Optional download URL for the file, returned for any kind — including "unsupported" — whenever the file entity exposes one. It is only a Content-Disposition: attachment URL for files with access_control "private", where it is a short-lived signed URL; for any other access level it is the file entity's plain public/CDN object URL, which carries no attachment disposition and may render inline in the browser. Absent when the file entity exposes no usable URL, so clients must handle it being missing.
              */
@@ -5331,6 +5343,26 @@ declare namespace Components {
              */
             client_secret?: string;
         }
+        export interface NotificationTriggerConfig {
+            /**
+             * The 360 event that fires this notification trigger.
+             */
+            trigger_type: "entity_created" | "entity_assigned" | "workflow_step_overdue";
+            /**
+             * For `entity_created` / `entity_assigned` triggers, the entity schema slug (e.g. `opportunity`, `order`) whose creation or assignment fires this trigger. Ignored for other trigger types.
+             * example:
+             * opportunity
+             */
+            entity_schema?: string;
+            /**
+             * Whether this trigger is active.
+             */
+            enabled?: boolean;
+            /**
+             * Entity id of the notification_template to render for this trigger.
+             */
+            template_id?: string; // uuid
+        }
         /**
          * OIDC provider configuration. Values are resolved at SSO invocation time
          * (login / callback), so the fields below may reference org env vars via
@@ -5716,6 +5748,44 @@ declare namespace Components {
              * 1.0.0
              */
             minNativeVersion?: string;
+        }
+        export interface OutstandingTask {
+            /**
+             * ID of the entity the task belongs to
+             */
+            entity_id: string;
+            /**
+             * Schema slug of the entity (opportunity, order or contract)
+             */
+            entity_schema: string;
+            /**
+             * Title (_title) of the entity
+             */
+            entity_title: string;
+            /**
+             * Workflow execution id
+             */
+            workflow_id: string;
+            /**
+             * Workflow execution / template name
+             */
+            workflow_name: string;
+            /**
+             * Task (step) id within the workflow execution
+             */
+            step_id: string;
+            /**
+             * Task (step) name
+             */
+            step_name: string;
+            /**
+             * Journey id the customer needs to fill out
+             */
+            journey_id: string;
+            /**
+             * Whether submitting the journey from the portal should auto-complete the task. When false, an internal user completes it.
+             */
+            complete_task_automatically?: boolean;
         }
         export interface Page {
             [name: string]: any;
@@ -6528,6 +6598,10 @@ declare namespace Components {
                 [name: string]: Block;
             };
             /**
+             * Configures which 360 events generate an in-app notification for the portal user. Each enabled trigger renders the referenced notification template and creates a notification addressed to the portal user. Admin/builder-only — never exposed via the public portal config.
+             */
+            notification_triggers?: NotificationTriggerConfig[];
+            /**
              * ID of the organization
              * example:
              * 12345
@@ -7249,6 +7323,57 @@ declare namespace Components {
          */
         export type PortalId = string;
         /**
+         * A 360 notification addressed to a portal user.
+         */
+        export interface PortalNotification {
+            /**
+             * Stable string identifier of the notification (the numeric notification id as a string).
+             * example:
+             * 1234567890
+             */
+            id: string;
+            /**
+             * Numeric id of the notification, used to mark it as read.
+             * example:
+             * 1234567890
+             */
+            notification_id?: number;
+            /**
+             * Type of notification.
+             * example:
+             * workflow_step_overdue
+             */
+            type?: string;
+            /**
+             * Localized, already-rendered notification title.
+             */
+            title?: {
+                en?: string;
+                de?: string;
+            };
+            /**
+             * Localized, already-rendered notification message.
+             */
+            message?: {
+                en?: string;
+                de?: string;
+            };
+            /**
+             * When the notification was created.
+             */
+            created_at?: string; // date-time
+            /**
+             * Whether the notification has been read by the user.
+             * example:
+             * false
+             */
+            read: boolean;
+            /**
+             * Optional URL the notification points to.
+             */
+            redirect_url?: string;
+        }
+        /**
          * Portal-specific (ECP / installer) display config of a workflow task
          */
         export interface PortalTaskConfig {
@@ -7951,7 +8076,7 @@ declare namespace Components {
              */
             ProviderSlug /* [0-9a-z_-]+ */;
             /**
-             * URL of the authorization endpoint
+             * Deprecated and ignored; the token endpoint is derived server-side from the provider config.
              * example:
              * https://www.facebook.com/v12.0/dialog/oauth
              */
@@ -8852,6 +8977,10 @@ declare namespace Components {
             global_blocks?: {
                 [name: string]: Block;
             };
+            /**
+             * Configures which 360 events generate an in-app notification for the portal user. Each enabled trigger renders the referenced notification template and creates a notification addressed to the portal user. Admin/builder-only — never exposed via the public portal config.
+             */
+            notification_triggers?: NotificationTriggerConfig[];
         }
         export interface UpsertPortalConfigV3 {
             /**
@@ -11136,9 +11265,9 @@ declare namespace Paths {
              */
             export type Size = number;
             /**
-             * Key to sort by
+             * Key to sort by. Pass a comma-separated list to apply additional keys as tiebreakers, in order of precedence.
              * example:
-             * due_date:asc
+             * paid_date:desc,booking_date:desc
              */
             export type Sort = string;
         }
@@ -11161,9 +11290,9 @@ declare namespace Paths {
             date_after?: /* List billing events after this date */ Parameters.DateAfter /* date-time */;
             date_before?: /* List billing events before this date */ Parameters.DateBefore /* date-time */;
             sort?: /**
-             * Key to sort by
+             * Key to sort by. Pass a comma-separated list to apply additional keys as tiebreakers, in order of precedence.
              * example:
-             * due_date:asc
+             * paid_date:desc,booking_date:desc
              */
             Parameters.Sort;
         }
@@ -11233,6 +11362,18 @@ declare namespace Paths {
                      * kWh
                      */
                     unit?: string;
+                    /**
+                     * Optional localized label for this individual value, keyed by ISO 3166-1 alpha-2 language code (same shape as `VisualizationTypeOption.label`). When present, the portal renders it as the data point label instead of the default timestamp-derived label (e.g. to name billing periods or tariff windows).
+                     *
+                     * example:
+                     * {
+                     *   "en": "Billing period 1",
+                     *   "de": "Abrechnungszeitraum 1"
+                     * }
+                     */
+                    label?: {
+                        [name: string]: string;
+                    };
                 }[];
             }
             export type $401 = Components.Responses.Unauthorized;
@@ -13376,6 +13517,10 @@ declare namespace Paths {
                     [name: string]: Components.Schemas.Block;
                 };
                 /**
+                 * Configures which 360 events generate an in-app notification for the portal user. Each enabled trigger renders the referenced notification template and creates a notification addressed to the portal user. Admin/builder-only — never exposed via the public portal config.
+                 */
+                notification_triggers?: Components.Schemas.NotificationTriggerConfig[];
+                /**
                  * ID of the organization
                  * example:
                  * 12345
@@ -13994,6 +14139,10 @@ declare namespace Paths {
                     [name: string]: Components.Schemas.Block;
                 };
                 /**
+                 * Configures which 360 events generate an in-app notification for the portal user. Each enabled trigger renders the referenced notification template and creates a notification addressed to the portal user. Admin/builder-only — never exposed via the public portal config.
+                 */
+                notification_triggers?: Components.Schemas.NotificationTriggerConfig[];
+                /**
                  * ID of the organization
                  * example:
                  * 12345
@@ -14111,6 +14260,21 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace GetOutstandingTasks {
+        namespace Responses {
+            export interface $200 {
+                tasks: Components.Schemas.OutstandingTask[];
+                /**
+                 * example:
+                 * 0
+                 */
+                total: number;
+            }
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace GetPortalConfig {
         namespace Parameters {
             export type Origin = /* Origin of the portal */ Components.Schemas.Origin;
@@ -14198,6 +14362,20 @@ declare namespace Paths {
         }
         namespace Responses {
             export type $200 = Components.Schemas.Extension[];
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace GetPortalNotificationsUnreadCount {
+        namespace Responses {
+            export interface $200 {
+                /**
+                 * example:
+                 * 3
+                 */
+                count?: number;
+            }
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
             export type $500 = Components.Responses.InternalServerError;
@@ -15273,12 +15451,6 @@ declare namespace Paths {
              * Email address of the partner to invite
              */
             email: string;
-            represents_contact_list?: /**
-             * Entity ID
-             * example:
-             * 5da0a718-c822-403d-9f5d-20d4584e0528
-             */
-            Components.Schemas.EntityId /* uuid */[];
             /**
              * Additional contact entity fields to set when creating the contact for the invited user.
              * These are mapped directly to contact entity attributes (e.g. first_name, last_name, phone).
@@ -15355,6 +15527,32 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace ListPortalNotifications {
+        namespace Parameters {
+            export type Cursor = string;
+            export type Limit = number;
+        }
+        export interface QueryParameters {
+            cursor?: Parameters.Cursor;
+            limit?: Parameters.Limit;
+        }
+        namespace Responses {
+            export interface $200 {
+                /**
+                 * Base64 encoded cursor to fetch the next page. Absent when there are no more results.
+                 */
+                cursor?: string;
+                /**
+                 * Total number of unread notifications for the user.
+                 */
+                total_unread?: number;
+                results?: /* A 360 notification addressed to a portal user. */ Components.Schemas.PortalNotification[];
+            }
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace LoginToPortalAsUser {
         export interface RequestBody {
             /**
@@ -15380,6 +15578,31 @@ declare namespace Paths {
                  */
                 login_as_token?: string;
             }
+        }
+    }
+    namespace MarkAllPortalNotificationsRead {
+        namespace Responses {
+            export interface $204 {
+            }
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace MarkPortalNotificationRead {
+        namespace Parameters {
+            export type Id = number;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        namespace Responses {
+            export interface $204 {
+            }
+            export type $400 = Components.Responses.InvalidRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $500 = Components.Responses.InternalServerError;
         }
     }
     namespace MigrateEmailTemplateReferences {
@@ -18183,6 +18406,16 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetEntityWorkflows.Responses.$200>
   /**
+   * getOutstandingTasks - Get outstanding workflow tasks for the portal user
+   * 
+   * Returns all outstanding workflow journey tasks for the authenticated portal user, across their opportunity, order and contract entities. Each task is an active workflow step that exposes a journey the customer still needs to fill out.
+   */
+  'getOutstandingTasks'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetOutstandingTasks.Responses.$200>
+  /**
    * getEntityPortalWorkflows - getEntityPortalWorkflows
    * 
    * Get all portal-relevant workflows associated with an entity (requires access to the entity),
@@ -18510,6 +18743,46 @@ export interface OperationMethods {
     data?: Paths.UpdateCampaignPortalBlockStatus.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UpdateCampaignPortalBlockStatus.Responses.$200>
+  /**
+   * listPortalNotifications - listPortalNotifications
+   * 
+   * Lists the 360 notifications addressed to the authenticated portal user, newest first. The organization and the portal user are derived from the authenticated session, so a user can only ever read their own notifications.
+   */
+  'listPortalNotifications'(
+    parameters?: Parameters<Paths.ListPortalNotifications.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ListPortalNotifications.Responses.$200>
+  /**
+   * getPortalNotificationsUnreadCount - getPortalNotificationsUnreadCount
+   * 
+   * Returns the number of unread notifications for the authenticated portal user.
+   */
+  'getPortalNotificationsUnreadCount'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetPortalNotificationsUnreadCount.Responses.$200>
+  /**
+   * markAllPortalNotificationsRead - markAllPortalNotificationsRead
+   * 
+   * Marks all notifications of the authenticated portal user as read.
+   */
+  'markAllPortalNotificationsRead'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.MarkAllPortalNotificationsRead.Responses.$204>
+  /**
+   * markPortalNotificationRead - markPortalNotificationRead
+   * 
+   * Marks a single notification of the authenticated portal user as read.
+   */
+  'markPortalNotificationRead'(
+    parameters?: Parameters<Paths.MarkPortalNotificationRead.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.MarkPortalNotificationRead.Responses.$204>
   /**
    * updateNotificationsStatus - updateNotificationsStatus
    * 
@@ -20136,6 +20409,18 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetEntityWorkflows.Responses.$200>
   }
+  ['/v2/portal/engagement/tasks']: {
+    /**
+     * getOutstandingTasks - Get outstanding workflow tasks for the portal user
+     * 
+     * Returns all outstanding workflow journey tasks for the authenticated portal user, across their opportunity, order and contract entities. Each task is an active workflow step that exposes a journey the customer still needs to fill out.
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetOutstandingTasks.Responses.$200>
+  }
   ['/v2/portal/entity/{slug}/{id}/workflows/linearized']: {
     /**
      * getEntityPortalWorkflows - getEntityPortalWorkflows
@@ -20506,6 +20791,54 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.UpdateCampaignPortalBlockStatus.Responses.$200>
   }
+  ['/v2/portal/notifications']: {
+    /**
+     * listPortalNotifications - listPortalNotifications
+     * 
+     * Lists the 360 notifications addressed to the authenticated portal user, newest first. The organization and the portal user are derived from the authenticated session, so a user can only ever read their own notifications.
+     */
+    'get'(
+      parameters?: Parameters<Paths.ListPortalNotifications.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ListPortalNotifications.Responses.$200>
+  }
+  ['/v2/portal/notifications/unread-count']: {
+    /**
+     * getPortalNotificationsUnreadCount - getPortalNotificationsUnreadCount
+     * 
+     * Returns the number of unread notifications for the authenticated portal user.
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetPortalNotificationsUnreadCount.Responses.$200>
+  }
+  ['/v2/portal/notifications/read-all']: {
+    /**
+     * markAllPortalNotificationsRead - markAllPortalNotificationsRead
+     * 
+     * Marks all notifications of the authenticated portal user as read.
+     */
+    'put'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.MarkAllPortalNotificationsRead.Responses.$204>
+  }
+  ['/v2/portal/notifications/{id}/read']: {
+    /**
+     * markPortalNotificationRead - markPortalNotificationRead
+     * 
+     * Marks a single notification of the authenticated portal user as read.
+     */
+    'put'(
+      parameters?: Parameters<Paths.MarkPortalNotificationRead.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.MarkPortalNotificationRead.Responses.$204>
+  }
   ['/v2/portal/notifications/entity:status']: {
     /**
      * updateNotificationsStatus - updateNotificationsStatus
@@ -20851,6 +21184,7 @@ export type MobileConfig = Components.Schemas.MobileConfig;
 export type MobileConfigUpdate = Components.Schemas.MobileConfigUpdate;
 export type MobileOtaConfig = Components.Schemas.MobileOtaConfig;
 export type MoblieOIDCConfig = Components.Schemas.MoblieOIDCConfig;
+export type NotificationTriggerConfig = Components.Schemas.NotificationTriggerConfig;
 export type OIDCProviderConfig = Components.Schemas.OIDCProviderConfig;
 export type OIDCProviderMetadata = Components.Schemas.OIDCProviderMetadata;
 export type Opportunity = Components.Schemas.Opportunity;
@@ -20858,6 +21192,7 @@ export type Order = Components.Schemas.Order;
 export type OrganizationSettings = Components.Schemas.OrganizationSettings;
 export type Origin = Components.Schemas.Origin;
 export type OtaPortal = Components.Schemas.OtaPortal;
+export type OutstandingTask = Components.Schemas.OutstandingTask;
 export type Page = Components.Schemas.Page;
 export type PageRequest = Components.Schemas.PageRequest;
 export type PaymentWidget = Components.Schemas.PaymentWidget;
@@ -20865,6 +21200,7 @@ export type PortalConfig = Components.Schemas.PortalConfig;
 export type PortalConfigV3 = Components.Schemas.PortalConfigV3;
 export type PortalDataExportColumn = Components.Schemas.PortalDataExportColumn;
 export type PortalId = Components.Schemas.PortalId;
+export type PortalNotification = Components.Schemas.PortalNotification;
 export type PortalTaskConfig = Components.Schemas.PortalTaskConfig;
 export type PortalUser = Components.Schemas.PortalUser;
 export type PortalUserRegistrationStatus = Components.Schemas.PortalUserRegistrationStatus;

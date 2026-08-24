@@ -1008,6 +1008,17 @@
                             "type": "string",
                             "description": "Optional unit of the consumption value. Defaults to unit present on the relevant Meter Counter.",
                             "example": "kWh"
+                          },
+                          "label": {
+                            "type": "object",
+                            "additionalProperties": {
+                              "type": "string"
+                            },
+                            "description": "Optional localized label for this individual value, keyed by ISO 3166-1 alpha-2 language code (same shape as `VisualizationTypeOption.label`). When present, the portal renders it as the data point label instead of the default timestamp-derived label (e.g. to name billing periods or tariff windows).\n",
+                            "example": {
+                              "en": "Billing period 1",
+                              "de": "Abrechnungszeitraum 1"
+                            }
                           }
                         },
                         "required": [
@@ -7213,8 +7224,8 @@
             "in": "query",
             "schema": {
               "type": "string",
-              "description": "Key to sort by",
-              "example": "due_date:asc"
+              "description": "Key to sort by. Pass a comma-separated list to apply additional keys as tiebreakers, in order of precedence.",
+              "example": "paid_date:desc,booking_date:desc"
             }
           }
         ],
@@ -8024,6 +8035,58 @@
           },
           "404": {
             "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/engagement/tasks": {
+      "get": {
+        "operationId": "getOutstandingTasks",
+        "summary": "Get outstanding workflow tasks for the portal user",
+        "description": "Returns all outstanding workflow journey tasks for the authenticated portal user, across their opportunity, order and contract entities. Each task is an active workflow step that exposes a journey the customer still needs to fill out.",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of outstanding workflow tasks for the portal user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "tasks",
+                    "total"
+                  ],
+                  "properties": {
+                    "tasks": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/OutstandingTask"
+                      }
+                    },
+                    "total": {
+                      "type": "integer",
+                      "example": 0
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
           },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
@@ -9881,6 +9944,192 @@
         }
       }
     },
+    "/v2/portal/notifications": {
+      "get": {
+        "operationId": "listPortalNotifications",
+        "summary": "listPortalNotifications",
+        "description": "Lists the 360 notifications addressed to the authenticated portal user, newest first. The organization and the portal user are derived from the authenticated session, so a user can only ever read their own notifications.",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "cursor",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Base64 encoded cursor returned by a previous call, used for pagination."
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "The maximum number of notifications to return."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of notifications for the authenticated portal user.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "cursor": {
+                      "type": "string",
+                      "description": "Base64 encoded cursor to fetch the next page. Absent when there are no more results."
+                    },
+                    "total_unread": {
+                      "type": "integer",
+                      "description": "Total number of unread notifications for the user."
+                    },
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/PortalNotification"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/notifications/unread-count": {
+      "get": {
+        "operationId": "getPortalNotificationsUnreadCount",
+        "summary": "getPortalNotificationsUnreadCount",
+        "description": "Returns the number of unread notifications for the authenticated portal user.",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Unread notification count.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "count": {
+                      "type": "integer",
+                      "example": 3
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/notifications/read-all": {
+      "put": {
+        "operationId": "markAllPortalNotificationsRead",
+        "summary": "markAllPortalNotificationsRead",
+        "description": "Marks all notifications of the authenticated portal user as read.",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "All notifications marked as read."
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/notifications/{id}/read": {
+      "put": {
+        "operationId": "markPortalNotificationRead",
+        "summary": "markPortalNotificationRead",
+        "description": "Marks a single notification of the authenticated portal user as read.",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Numeric id of the notification to mark as read."
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Notification marked as read."
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/v2/portal/notifications/entity:status": {
       "put": {
         "operationId": "updateNotificationsStatus",
@@ -10546,13 +10795,6 @@
                   "email": {
                     "type": "string",
                     "description": "Email address of the partner to invite"
-                  },
-                  "represents_contact_list": {
-                    "type": "array",
-                    "items": {
-                      "$ref": "#/components/schemas/EntityId",
-                      "description": "List of contact IDs representing the contacts / business partners the invited user should be added to.\nWhen omitted, the user is automatically added to all contacts / business partners linked to the account.\n"
-                    }
                   },
                   "contact_data": {
                     "type": "object",
@@ -11404,6 +11646,69 @@
       }
     },
     "schemas": {
+      "PortalNotification": {
+        "type": "object",
+        "description": "A 360 notification addressed to a portal user.",
+        "required": [
+          "id",
+          "read"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Stable string identifier of the notification (the numeric notification id as a string).",
+            "example": "1234567890"
+          },
+          "notification_id": {
+            "type": "number",
+            "description": "Numeric id of the notification, used to mark it as read.",
+            "example": 1234567890
+          },
+          "type": {
+            "type": "string",
+            "description": "Type of notification.",
+            "example": "workflow_step_overdue"
+          },
+          "title": {
+            "type": "object",
+            "description": "Localized, already-rendered notification title.",
+            "properties": {
+              "en": {
+                "type": "string"
+              },
+              "de": {
+                "type": "string"
+              }
+            }
+          },
+          "message": {
+            "type": "object",
+            "description": "Localized, already-rendered notification message.",
+            "properties": {
+              "en": {
+                "type": "string"
+              },
+              "de": {
+                "type": "string"
+              }
+            }
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the notification was created."
+          },
+          "read": {
+            "type": "boolean",
+            "description": "Whether the notification has been read by the user.",
+            "example": false
+          },
+          "redirect_url": {
+            "type": "string",
+            "description": "Optional URL the notification points to."
+          }
+        }
+      },
       "MobileBuildStatus": {
         "type": "object",
         "description": "Latest build/upload status for a platform (system-written).",
@@ -12719,6 +13024,45 @@
             "additionalProperties": {
               "$ref": "#/components/schemas/Block"
             }
+          },
+          "notification_triggers": {
+            "type": "array",
+            "description": "Configures which 360 events generate an in-app notification for the portal user. Each enabled trigger renders the referenced notification template and creates a notification addressed to the portal user. Admin/builder-only — never exposed via the public portal config.",
+            "items": {
+              "$ref": "#/components/schemas/NotificationTriggerConfig"
+            }
+          }
+        }
+      },
+      "NotificationTriggerConfig": {
+        "type": "object",
+        "required": [
+          "trigger_type"
+        ],
+        "properties": {
+          "trigger_type": {
+            "type": "string",
+            "description": "The 360 event that fires this notification trigger.",
+            "enum": [
+              "entity_created",
+              "entity_assigned",
+              "workflow_step_overdue"
+            ]
+          },
+          "entity_schema": {
+            "type": "string",
+            "description": "For `entity_created` / `entity_assigned` triggers, the entity schema slug (e.g. `opportunity`, `order`) whose creation or assignment fires this trigger. Ignored for other trigger types.",
+            "example": "opportunity"
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "Whether this trigger is active.",
+            "default": true
+          },
+          "template_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Entity id of the notification_template to render for this trigger."
           }
         }
       },
@@ -14509,6 +14853,14 @@
               "is_new": {
                 "type": "boolean",
                 "description": "Indicate whether the user has not seen/downloaded the file before"
+              },
+              "custom_download_url_auth": {
+                "type": "string",
+                "enum": [
+                  "token",
+                  "presigned"
+                ],
+                "description": "Authorization mode of an externally hosted file's download url. `presigned` (the default) means `public_url` is HMAC-signed and needs no auth header; `token` means it authorizes the caller's bearer token instead and must be fetched with an `Authorization` header. Because `presigned` is the default, the absence of this property does NOT prove the file is stored in epilot — an external file may omit it."
               }
             }
           }
@@ -14533,6 +14885,10 @@
             "type": "string",
             "format": "uri",
             "description": "A Content-Disposition: inline URL to render in a preview viewer. Present only when kind is \"pdf\" or \"image\". Short-lived — do not cache across dialog opens."
+          },
+          "requires_auth": {
+            "type": "boolean",
+            "description": "When true, `url` only answers to the portal user's bearer token: fetch the bytes with an `Authorization: Bearer <token>` header and render them from an object URL. Only ever set for URLs on an allow-listed ERP file-proxy host."
           },
           "download_url": {
             "type": "string",
@@ -14785,6 +15141,57 @@
           "type",
           "link"
         ]
+      },
+      "OutstandingTask": {
+        "type": "object",
+        "required": [
+          "entity_id",
+          "entity_schema",
+          "entity_title",
+          "workflow_id",
+          "workflow_name",
+          "step_id",
+          "step_name",
+          "journey_id"
+        ],
+        "properties": {
+          "entity_id": {
+            "type": "string",
+            "description": "ID of the entity the task belongs to"
+          },
+          "entity_schema": {
+            "type": "string",
+            "description": "Schema slug of the entity (opportunity, order or contract)"
+          },
+          "entity_title": {
+            "type": "string",
+            "description": "Title (_title) of the entity"
+          },
+          "workflow_id": {
+            "type": "string",
+            "description": "Workflow execution id"
+          },
+          "workflow_name": {
+            "type": "string",
+            "description": "Workflow execution / template name"
+          },
+          "step_id": {
+            "type": "string",
+            "description": "Task (step) id within the workflow execution"
+          },
+          "step_name": {
+            "type": "string",
+            "description": "Task (step) name"
+          },
+          "journey_id": {
+            "type": "string",
+            "description": "Journey id the customer needs to fill out"
+          },
+          "complete_task_automatically": {
+            "type": "boolean",
+            "description": "Whether submitting the journey from the portal should auto-complete the task. When false, an internal user completes it."
+          }
+        }
       },
       "WorkflowExecution": {
         "type": "object",
@@ -18237,7 +18644,8 @@
           },
           "token_endpoint": {
             "type": "string",
-            "description": "URL of the authorization endpoint",
+            "deprecated": true,
+            "description": "Deprecated and ignored; the token endpoint is derived server-side from the provider config.",
             "example": "https://www.facebook.com/v12.0/dialog/oauth"
           },
           "grant_type": {

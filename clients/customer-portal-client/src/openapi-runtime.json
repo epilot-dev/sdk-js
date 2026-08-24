@@ -1967,6 +1967,12 @@
         "responses": {}
       }
     },
+    "/v2/portal/engagement/tasks": {
+      "get": {
+        "operationId": "getOutstandingTasks",
+        "responses": {}
+      }
+    },
     "/v2/portal/entity/{slug}/{id}/workflows/linearized": {
       "get": {
         "operationId": "getEntityPortalWorkflows",
@@ -2423,6 +2429,49 @@
             "application/json": {}
           }
         },
+        "responses": {}
+      }
+    },
+    "/v2/portal/notifications": {
+      "get": {
+        "operationId": "listPortalNotifications",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "cursor",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/portal/notifications/unread-count": {
+      "get": {
+        "operationId": "getPortalNotificationsUnreadCount",
+        "responses": {}
+      }
+    },
+    "/v2/portal/notifications/read-all": {
+      "put": {
+        "operationId": "markAllPortalNotificationsRead",
+        "responses": {}
+      }
+    },
+    "/v2/portal/notifications/{id}/read": {
+      "put": {
+        "operationId": "markPortalNotificationRead",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
         "responses": {}
       }
     },
