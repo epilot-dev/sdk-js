@@ -117,6 +117,97 @@ declare namespace Components {
             created_by?: string;
         }
         /**
+         * Detail payload of the `agent-execution-status-update` event, published on
+         * the AI Agents event bus with source `ai-agents`.
+         *
+         * `execution_context` and `input` are present on every status, so a consumer
+         * can tell whether an execution is theirs, and what it belonged to, from the
+         * terminal event alone — without a secondary lookup.
+         *
+         */
+        export interface AgentExecutionEvent {
+            /**
+             * The agent execution this event reports on
+             */
+            executionId: string;
+            agentId: /**
+             * Agent identifier. Can be either:
+             * - System skill ID (prefixed): "skill:email-categorizer", "skill:email-labeler"
+             * - Custom agent UUID: "0336a235-9417-4dd8-894c-fe81285bba75"
+             *
+             * example:
+             * skill:email-categorizer
+             */
+            AgentId;
+            orgId: string;
+            userId?: string;
+            execution_status: /**
+             * Lifecycle status carried on an agent execution event.
+             *
+             * Deliberately narrower than `ExecutionStatus`, which is the stored status of
+             * the execution row: `pending` and `running` both surface as `started`, and
+             * `cancelled` surfaces as `failed`. Consumers must not assume the two
+             * vocabularies are interchangeable.
+             *
+             */
+            AgentExecutionEventStatus;
+            execution_context?: /**
+             * Where the execution was triggered from:
+             * - flows: Triggered from workflow automation
+             * - copilot: Triggered from copilot assistant
+             * - api: Direct API call
+             *
+             */
+            ExecutionContext;
+            /**
+             * The execution input, as supplied by the caller of the execute endpoint
+             */
+            input?: {
+                [name: string]: any;
+            };
+            /**
+             * Present on `completed` — the execution result
+             */
+            output?: {
+                [name: string]: any;
+            };
+            /**
+             * Present on `failed`
+             */
+            error?: {
+                message?: string;
+                code?: string;
+                stack?: string;
+            };
+            /**
+             * Wall-clock duration in milliseconds, present on `completed`
+             */
+            duration?: number;
+            iterations?: number;
+            iteration?: number;
+            /**
+             * Present on `approval_required` — what is awaiting approval
+             */
+            message?: string;
+            toolCalls?: {
+                name?: string;
+                args?: {
+                    [name: string]: any;
+                };
+            }[];
+            timestamp?: string; // date-time
+        }
+        /**
+         * Lifecycle status carried on an agent execution event.
+         *
+         * Deliberately narrower than `ExecutionStatus`, which is the stored status of
+         * the execution row: `pending` and `running` both surface as `started`, and
+         * `cancelled` surfaces as `failed`. Consumers must not assume the two
+         * vocabularies are interchangeable.
+         *
+         */
+        export type AgentExecutionEventStatus = "started" | "completed" | "failed" | "approval_required";
+        /**
          * Agent identifier. Can be either:
          * - System skill ID (prefixed): "skill:email-categorizer", "skill:email-labeler"
          * - Custom agent UUID: "0336a235-9417-4dd8-894c-fe81285bba75"
@@ -144,11 +235,6 @@ declare namespace Components {
              * For batch approval - list of action IDs to reject. Actions not in approved_action_ids are implicitly rejected.
              */
             rejected_action_ids?: string[];
-            /**
-             * For `partnering.proposeAssignment` approvals. `primary_only` (default) shares only the primary entity; `primary_and_relations` also shares every entity in the proposal's `related_entities` as a child of the primary. Ignored by other tools.
-             *
-             */
-            share_scope?: "primary_only" | "primary_and_relations";
         }
         export interface ChatMessage {
             role: "user" | "assistant" | "tool" | "system";
@@ -1394,7 +1480,7 @@ declare namespace Paths {
 
 export interface OperationMethods {
   /**
-   * listAgents - List all agent configurations
+   * listAgents - listAgents
    * 
    * Lists agents from both system skills and custom agents.
    * Use query parameters to filter by source, availability, or entity schema.
@@ -1406,7 +1492,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ListAgents.Responses.$200>
   /**
-   * createAgent - Create Agent definition
+   * createAgent - createAgent
    * 
    * Creates a new custom agent. System skills cannot be created via this endpoint.
    */
@@ -1416,7 +1502,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CreateAgent.Responses.$201>
   /**
-   * getAgentById - Get the agent configuration by ID
+   * getAgentById - getAgentById
    * 
    * Retrieves an agent by ID. Supports both:
    * - System skill IDs (prefixed): "skill:email-categorizer"
@@ -1429,7 +1515,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetAgentById.Responses.$200>
   /**
-   * updateAgentById - Update the agent configuration by ID
+   * updateAgentById - updateAgentById
    * 
    * Updates a custom agent. System skills cannot be updated via this endpoint.
    */
@@ -1439,7 +1525,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UpdateAgentById.Responses.$200>
   /**
-   * deleteAgentById - Delete the agent configuration by ID
+   * deleteAgentById - deleteAgentById
    * 
    * Deletes a custom agent. System skills cannot be deleted via this endpoint.
    */
@@ -1449,7 +1535,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteAgentById.Responses.$204>
   /**
-   * executeAgent - Execute an agent
+   * executeAgent - executeAgent
    * 
    * Executes an agent (system skill or custom agent).
    * Supports both:
@@ -1463,7 +1549,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ExecuteAgent.Responses.$200>
   /**
-   * executeAgentStream - Execute an agent with streaming response
+   * executeAgentStream - executeAgentStream
    * 
    * Executes an agent with real-time streaming of tokens and tool events.
    * Returns Server-Sent Events (SSE) stream with token-by-token output,
@@ -1483,7 +1569,9 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ExecuteAgentStream.Responses.$200>
   /**
-   * listExecutions - List executions
+   * listExecutions - listExecutions
+   * 
+   * List executions
    */
   'listExecutions'(
     parameters?: Parameters<Paths.ListExecutions.QueryParameters> | null,
@@ -1491,7 +1579,9 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ListExecutions.Responses.$200>
   /**
-   * getExecution - Get execution by ID
+   * getExecution - getExecution
+   * 
+   * Get execution by ID
    */
   'getExecution'(
     parameters?: Parameters<Paths.GetExecution.PathParameters> | null,
@@ -1499,7 +1589,9 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetExecution.Responses.$200>
   /**
-   * cancelExecution - Cancel execution
+   * cancelExecution - cancelExecution
+   * 
+   * Cancel execution
    */
   'cancelExecution'(
     parameters?: Parameters<Paths.CancelExecution.PathParameters> | null,
@@ -1507,7 +1599,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CancelExecution.Responses.$200>
   /**
-   * getExecutionTrace - Get execution trace/iterations
+   * getExecutionTrace - getExecutionTrace
    * 
    * Returns the step-by-step reasoning and tool calls for ReAct mode executions. Returns empty iterations array for direct mode executions.
    */
@@ -1518,26 +1610,26 @@ export interface OperationMethods {
   ): OperationResponse<Paths.GetExecutionTrace.Responses.$200>
   /**
    * getExecutionFeedback - Get execution feedback
-   *
+   * 
    * Returns the authenticated user's feedback for an execution.
    */
   'getExecutionFeedback'(
     parameters?: Parameters<Paths.GetExecutionFeedback.PathParameters> | null,
     data?: any,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetExecutionFeedback.Responses.$200>
   /**
    * putExecutionFeedback - Submit execution feedback
-   *
+   * 
    * Upserts thumbs up/down feedback and mirrors it to the execution's Langfuse trace.
    */
   'putExecutionFeedback'(
     parameters?: Parameters<Paths.PutExecutionFeedback.PathParameters> | null,
     data?: Paths.PutExecutionFeedback.RequestBody,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.PutExecutionFeedback.Responses.$200>
   /**
-   * approveExecution - Approve pending action
+   * approveExecution - approveExecution
    * 
    * Approves a pending tool action when execution is in waiting_approval status
    */
@@ -1547,7 +1639,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ApproveExecution.Responses.$200>
   /**
-   * rejectExecution - Reject pending action
+   * rejectExecution - rejectExecution
    * 
    * Rejects a pending tool action when execution is in waiting_approval status
    */
@@ -1557,7 +1649,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.RejectExecution.Responses.$200>
   /**
-   * streamExecution - Reconnect to execution stream
+   * streamExecution - streamExecution
    * 
    * Reconnects to an execution's event stream after approval. Replays missed events from event log and continues streaming if execution is still running.
    */
@@ -1567,7 +1659,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.StreamExecution.Responses.$200>
   /**
-   * chat - Streaming chat with AI agent
+   * chat - chat
    * 
    * Initiates a streaming chat session with an AI agent. Supports server-side conversation memory via conversationId or client-provided history via clientHistory.
    */
@@ -1577,7 +1669,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.Chat.Responses.$200>
   /**
-   * listConversations - List conversations
+   * listConversations - listConversations
    * 
    * Lists conversations for the authenticated user, sorted by most recent.
    */
@@ -1587,7 +1679,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ListConversations.Responses.$200>
   /**
-   * getConversation - Get conversation with messages
+   * getConversation - getConversation
    * 
    * Retrieves a conversation and its message history.
    */
@@ -1597,7 +1689,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetConversation.Responses.$200>
   /**
-   * deleteConversation - Delete conversation
+   * deleteConversation - deleteConversation
    * 
    * Deletes a conversation and all its messages.
    */
@@ -1607,7 +1699,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteConversation.Responses.$204>
   /**
-   * submitConversationFeedback - Submit feedback for an assistant turn
+   * submitConversationFeedback - submitConversationFeedback
    * 
    * Records a thumbs up/down (with optional comment) for the assistant turn identified by its Langfuse trace id. The rating is persisted on the message and mirrored to Langfuse as a trace score.
    * 
@@ -1622,7 +1714,7 @@ export interface OperationMethods {
 export interface PathsDictionary {
   ['/v1/agents']: {
     /**
-     * createAgent - Create Agent definition
+     * createAgent - createAgent
      * 
      * Creates a new custom agent. System skills cannot be created via this endpoint.
      */
@@ -1632,7 +1724,7 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.CreateAgent.Responses.$201>
     /**
-     * listAgents - List all agent configurations
+     * listAgents - listAgents
      * 
      * Lists agents from both system skills and custom agents.
      * Use query parameters to filter by source, availability, or entity schema.
@@ -1646,7 +1738,7 @@ export interface PathsDictionary {
   }
   ['/v1/agents/{agent_id}']: {
     /**
-     * getAgentById - Get the agent configuration by ID
+     * getAgentById - getAgentById
      * 
      * Retrieves an agent by ID. Supports both:
      * - System skill IDs (prefixed): "skill:email-categorizer"
@@ -1659,7 +1751,7 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetAgentById.Responses.$200>
     /**
-     * updateAgentById - Update the agent configuration by ID
+     * updateAgentById - updateAgentById
      * 
      * Updates a custom agent. System skills cannot be updated via this endpoint.
      */
@@ -1669,7 +1761,7 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.UpdateAgentById.Responses.$200>
     /**
-     * deleteAgentById - Delete the agent configuration by ID
+     * deleteAgentById - deleteAgentById
      * 
      * Deletes a custom agent. System skills cannot be deleted via this endpoint.
      */
@@ -1681,7 +1773,7 @@ export interface PathsDictionary {
   }
   ['/v1/agents/{agent_id}/execute']: {
     /**
-     * executeAgent - Execute an agent
+     * executeAgent - executeAgent
      * 
      * Executes an agent (system skill or custom agent).
      * Supports both:
@@ -1697,7 +1789,7 @@ export interface PathsDictionary {
   }
   ['/v1/agents/{agent_id}/execute/stream']: {
     /**
-     * executeAgentStream - Execute an agent with streaming response
+     * executeAgentStream - executeAgentStream
      * 
      * Executes an agent with real-time streaming of tokens and tool events.
      * Returns Server-Sent Events (SSE) stream with token-by-token output,
@@ -1719,7 +1811,9 @@ export interface PathsDictionary {
   }
   ['/v1/executions']: {
     /**
-     * listExecutions - List executions
+     * listExecutions - listExecutions
+     * 
+     * List executions
      */
     'get'(
       parameters?: Parameters<Paths.ListExecutions.QueryParameters> | null,
@@ -1729,7 +1823,9 @@ export interface PathsDictionary {
   }
   ['/v1/executions/{execution_id}']: {
     /**
-     * getExecution - Get execution by ID
+     * getExecution - getExecution
+     * 
+     * Get execution by ID
      */
     'get'(
       parameters?: Parameters<Paths.GetExecution.PathParameters> | null,
@@ -1737,7 +1833,9 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetExecution.Responses.$200>
     /**
-     * cancelExecution - Cancel execution
+     * cancelExecution - cancelExecution
+     * 
+     * Cancel execution
      */
     'delete'(
       parameters?: Parameters<Paths.CancelExecution.PathParameters> | null,
@@ -1747,7 +1845,7 @@ export interface PathsDictionary {
   }
   ['/v1/executions/{execution_id}/trace']: {
     /**
-     * getExecutionTrace - Get execution trace/iterations
+     * getExecutionTrace - getExecutionTrace
      * 
      * Returns the step-by-step reasoning and tool calls for ReAct mode executions. Returns empty iterations array for direct mode executions.
      */
@@ -1760,28 +1858,28 @@ export interface PathsDictionary {
   ['/v1/executions/{execution_id}/feedback']: {
     /**
      * getExecutionFeedback - Get execution feedback
-     *
+     * 
      * Returns the authenticated user's feedback for an execution.
      */
     'get'(
       parameters?: Parameters<Paths.GetExecutionFeedback.PathParameters> | null,
       data?: any,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetExecutionFeedback.Responses.$200>
     /**
      * putExecutionFeedback - Submit execution feedback
-     *
+     * 
      * Upserts thumbs up/down feedback and mirrors it to the execution's Langfuse trace.
      */
     'put'(
       parameters?: Parameters<Paths.PutExecutionFeedback.PathParameters> | null,
       data?: Paths.PutExecutionFeedback.RequestBody,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.PutExecutionFeedback.Responses.$200>
   }
   ['/v1/executions/{execution_id}/approve']: {
     /**
-     * approveExecution - Approve pending action
+     * approveExecution - approveExecution
      * 
      * Approves a pending tool action when execution is in waiting_approval status
      */
@@ -1793,7 +1891,7 @@ export interface PathsDictionary {
   }
   ['/v1/executions/{execution_id}/reject']: {
     /**
-     * rejectExecution - Reject pending action
+     * rejectExecution - rejectExecution
      * 
      * Rejects a pending tool action when execution is in waiting_approval status
      */
@@ -1805,7 +1903,7 @@ export interface PathsDictionary {
   }
   ['/v1/executions/{execution_id}/stream']: {
     /**
-     * streamExecution - Reconnect to execution stream
+     * streamExecution - streamExecution
      * 
      * Reconnects to an execution's event stream after approval. Replays missed events from event log and continues streaming if execution is still running.
      */
@@ -1817,7 +1915,7 @@ export interface PathsDictionary {
   }
   ['/v1/chat']: {
     /**
-     * chat - Streaming chat with AI agent
+     * chat - chat
      * 
      * Initiates a streaming chat session with an AI agent. Supports server-side conversation memory via conversationId or client-provided history via clientHistory.
      */
@@ -1829,7 +1927,7 @@ export interface PathsDictionary {
   }
   ['/v1/conversations']: {
     /**
-     * listConversations - List conversations
+     * listConversations - listConversations
      * 
      * Lists conversations for the authenticated user, sorted by most recent.
      */
@@ -1841,7 +1939,7 @@ export interface PathsDictionary {
   }
   ['/v1/conversations/{conversation_id}']: {
     /**
-     * getConversation - Get conversation with messages
+     * getConversation - getConversation
      * 
      * Retrieves a conversation and its message history.
      */
@@ -1851,7 +1949,7 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetConversation.Responses.$200>
     /**
-     * deleteConversation - Delete conversation
+     * deleteConversation - deleteConversation
      * 
      * Deletes a conversation and all its messages.
      */
@@ -1863,7 +1961,7 @@ export interface PathsDictionary {
   }
   ['/v1/conversations/{conversation_id}/feedback']: {
     /**
-     * submitConversationFeedback - Submit feedback for an assistant turn
+     * submitConversationFeedback - submitConversationFeedback
      * 
      * Records a thumbs up/down (with optional comment) for the assistant turn identified by its Langfuse trace id. The rating is persisted on the message and mirrored to Langfuse as a trace score.
      * 
@@ -1880,6 +1978,8 @@ export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
 
 export type AgentDefinition = Components.Schemas.AgentDefinition;
+export type AgentExecutionEvent = Components.Schemas.AgentExecutionEvent;
+export type AgentExecutionEventStatus = Components.Schemas.AgentExecutionEventStatus;
 export type AgentId = Components.Schemas.AgentId;
 export type AgentSource = Components.Schemas.AgentSource;
 export type ApproveExecutionRequest = Components.Schemas.ApproveExecutionRequest;
