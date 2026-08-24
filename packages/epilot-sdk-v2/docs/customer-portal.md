@@ -141,6 +141,7 @@ const { data } = await customerPortalClient.upsertPortal(...)
 - [`getAutomationContext`](#getautomationcontext)
 - [`updateWorkflowStepAsDone`](#updateworkflowstepasdone)
 - [`getEntityWorkflows`](#getentityworkflows)
+- [`getOutstandingTasks`](#getoutstandingtasks)
 - [`getEntityPortalWorkflows`](#getentityportalworkflows)
 - [`getEntityPortalWorkflowsBatch`](#getentityportalworkflowsbatch)
 - [`uploadMeterReadingPhoto`](#uploadmeterreadingphoto)
@@ -153,6 +154,10 @@ const { data } = await customerPortalClient.upsertPortal(...)
 - [`getPortalPageBlocks`](#getportalpageblocks)
 - [`getPortalPageBlock`](#getportalpageblock)
 - [`updateCampaignPortalBlockStatus`](#updatecampaignportalblockstatus)
+- [`listPortalNotifications`](#listportalnotifications)
+- [`getPortalNotificationsUnreadCount`](#getportalnotificationsunreadcount)
+- [`markAllPortalNotificationsRead`](#markallportalnotificationsread)
+- [`markPortalNotificationRead`](#markportalnotificationread)
 - [`updateNotificationsStatus`](#updatenotificationsstatus)
 - [`invitePartner`](#invitepartner)
 - [`listBusinessPartners`](#listbusinesspartners)
@@ -176,6 +181,7 @@ const { data } = await customerPortalClient.upsertPortal(...)
 - [`ssoLoginV3`](#ssologinv3)
 
 **Schemas**
+- [`PortalNotification`](#portalnotification)
 - [`MobileBuildStatus`](#mobilebuildstatus)
 - [`MobileBranding`](#mobilebranding)
 - [`MobileConfig`](#mobileconfig)
@@ -195,6 +201,7 @@ const { data } = await customerPortalClient.upsertPortal(...)
 - [`AllowedFileExtensions`](#allowedfileextensions)
 - [`UpdateOnlyPortalConfigAttributes`](#updateonlyportalconfigattributes)
 - [`CommonConfigAttributes`](#commonconfigattributes)
+- [`NotificationTriggerConfig`](#notificationtriggerconfig)
 - [`UpsertPortalConfig`](#upsertportalconfig)
 - [`PortalConfig`](#portalconfig)
 - [`UpsertPortalWidget`](#upsertportalwidget)
@@ -255,6 +262,7 @@ const { data } = await customerPortalClient.upsertPortal(...)
 - [`Rule`](#rule)
 - [`JourneyActions`](#journeyactions)
 - [`ExternalLink`](#externallink)
+- [`OutstandingTask`](#outstandingtask)
 - [`WorkflowExecution`](#workflowexecution)
 - [`WorkflowStep`](#workflowstep)
 - [`PortalWorkflow`](#portalworkflow)
@@ -610,7 +618,15 @@ const { data } = await client.upsertPortal(
     portal_sk_v3: 'PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c',
     origin: 'string',
     pages: {},
-    global_blocks: {}
+    global_blocks: {},
+    notification_triggers: [
+      {
+        trigger_type: 'entity_created',
+        entity_schema: 'opportunity',
+        enabled: true,
+        template_id: '3fa85f64-5717-4562-b3fc-2c963f66afa6'
+      }
+    ]
   },
 )
 ```
@@ -838,6 +854,14 @@ const { data } = await client.upsertPortal(
   "origin": "string",
   "pages": {},
   "global_blocks": {},
+  "notification_triggers": [
+    {
+      "trigger_type": "entity_created",
+      "entity_schema": "opportunity",
+      "enabled": true,
+      "template_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+    }
+  ],
   "id": 12345,
   "organization_id": 12345,
   "org_settings": {
@@ -1203,6 +1227,14 @@ const { data } = await client.getPortalConfigByDomain({
   "origin": "string",
   "pages": {},
   "global_blocks": {},
+  "notification_triggers": [
+    {
+      "trigger_type": "entity_created",
+      "entity_schema": "opportunity",
+      "enabled": true,
+      "template_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+    }
+  ],
   "id": 12345,
   "organization_id": 12345,
   "org_settings": {
@@ -1471,6 +1503,14 @@ const { data } = await client.getPortalConfig({
   "origin": "string",
   "pages": {},
   "global_blocks": {},
+  "notification_triggers": [
+    {
+      "trigger_type": "entity_created",
+      "entity_schema": "opportunity",
+      "enabled": true,
+      "template_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+    }
+  ],
   "id": 12345,
   "organization_id": 12345,
   "org_settings": {
@@ -2087,7 +2127,11 @@ const { data } = await client.getConsumption({
       "timestamp": "1970-01-01T00:00:00.000Z",
       "value": 0,
       "type": "nt",
-      "unit": "kWh"
+      "unit": "kWh",
+      "label": {
+        "en": "Billing period 1",
+        "de": "Abrechnungszeitraum 1"
+      }
     }
   ]
 }
@@ -2624,6 +2668,14 @@ const { data } = await client.getPublicPortalConfig({
   "origin": "string",
   "pages": {},
   "global_blocks": {},
+  "notification_triggers": [
+    {
+      "trigger_type": "entity_created",
+      "entity_schema": "opportunity",
+      "enabled": true,
+      "template_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+    }
+  ],
   "id": 12345,
   "organization_id": 12345,
   "org_settings": {
@@ -2892,6 +2944,14 @@ const { data } = await client.getOrgPortalConfig({
   "origin": "string",
   "pages": {},
   "global_blocks": {},
+  "notification_triggers": [
+    {
+      "trigger_type": "entity_created",
+      "entity_schema": "opportunity",
+      "enabled": true,
+      "template_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+    }
+  ],
   "id": 12345,
   "organization_id": 12345,
   "org_settings": {
@@ -3169,6 +3229,14 @@ const { data } = await client.getPublicPortalConfigV3({
   "origin": "string",
   "pages": {},
   "global_blocks": {},
+  "notification_triggers": [
+    {
+      "trigger_type": "entity_created",
+      "entity_schema": "opportunity",
+      "enabled": true,
+      "template_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+    }
+  ],
   "id": 12345,
   "organization_id": 12345,
   "org_settings": {
@@ -3437,6 +3505,14 @@ const { data } = await client.getOrgPortalConfigV3({
   "origin": "string",
   "pages": {},
   "global_blocks": {},
+  "notification_triggers": [
+    {
+      "trigger_type": "entity_created",
+      "entity_schema": "opportunity",
+      "enabled": true,
+      "template_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+    }
+  ],
   "id": 12345,
   "organization_id": 12345,
   "org_settings": {
@@ -3538,6 +3614,7 @@ const { data } = await client.getAllPortalConfigs()
       "origin": "string",
       "pages": {},
       "global_blocks": {},
+      "notification_triggers": [],
       "id": 12345,
       "organization_id": 12345,
       "org_settings": {},
@@ -5790,6 +5867,7 @@ const { data } = await client.getFilePreview({
 {
   "kind": "pdf",
   "url": "https://example.com/path",
+  "requires_auth": true,
   "download_url": "https://example.com/path"
 }
 ```
@@ -5843,7 +5921,8 @@ const { data } = await client.trackFileDownloaded({
         "_title": "Opportunity ABC"
       }
     ],
-    "is_new": true
+    "is_new": true,
+    "custom_download_url_auth": "token"
   }
 }
 ```
@@ -6470,6 +6549,42 @@ const { data } = await client.getEntityWorkflows({
       ]
     }
   ]
+}
+```
+
+</details>
+
+---
+
+### `getOutstandingTasks`
+
+Get outstanding workflow tasks for the portal user
+
+`GET /v2/portal/engagement/tasks`
+
+```ts
+const { data } = await client.getOutstandingTasks()
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "tasks": [
+    {
+      "entity_id": "string",
+      "entity_schema": "string",
+      "entity_title": "string",
+      "workflow_id": "string",
+      "workflow_name": "string",
+      "step_id": "string",
+      "step_name": "string",
+      "journey_id": "string",
+      "complete_task_automatically": true
+    }
+  ],
+  "total": 0
 }
 ```
 
@@ -7868,6 +7983,100 @@ const { data } = await client.updateCampaignPortalBlockStatus(
 ```
 
 </details>
+
+---
+
+### `listPortalNotifications`
+
+Lists the 360 notifications addressed to the authenticated portal user, newest first. The organization and the portal user are derived from the authenticated session, so a user can only ever read thei
+
+`GET /v2/portal/notifications`
+
+```ts
+const { data } = await client.listPortalNotifications({
+  cursor: 'example',
+  limit: 1,
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "cursor": "string",
+  "total_unread": 0,
+  "results": [
+    {
+      "id": "1234567890",
+      "notification_id": 1234567890,
+      "type": "workflow_step_overdue",
+      "title": {
+        "en": "string",
+        "de": "string"
+      },
+      "message": {
+        "en": "string",
+        "de": "string"
+      },
+      "created_at": "1970-01-01T00:00:00.000Z",
+      "read": false,
+      "redirect_url": "string"
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `getPortalNotificationsUnreadCount`
+
+Returns the number of unread notifications for the authenticated portal user.
+
+`GET /v2/portal/notifications/unread-count`
+
+```ts
+const { data } = await client.getPortalNotificationsUnreadCount()
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "count": 3
+}
+```
+
+</details>
+
+---
+
+### `markAllPortalNotificationsRead`
+
+Marks all notifications of the authenticated portal user as read.
+
+`PUT /v2/portal/notifications/read-all`
+
+```ts
+const { data } = await client.markAllPortalNotificationsRead()
+```
+
+---
+
+### `markPortalNotificationRead`
+
+Marks a single notification of the authenticated portal user as read.
+
+`PUT /v2/portal/notifications/{id}/read`
+
+```ts
+const { data } = await client.markPortalNotificationRead({
+  id: 1,
+})
+```
 
 ---
 
@@ -9909,7 +10118,6 @@ const { data } = await client.invitePartner(
   null,
   {
     email: 'string',
-    represents_contact_list: ['5da0a718-c822-403d-9f5d-20d4584e0528'],
     contact_data: {},
     portal_user_data: {}
   },
@@ -10301,6 +10509,29 @@ const { data } = await client.putMobileConfig(
 ---
 
 ## Schemas
+
+### `PortalNotification`
+
+A 360 notification addressed to a portal user.
+
+```ts
+type PortalNotification = {
+  id: string
+  notification_id?: number
+  type?: string
+  title?: {
+    en?: string
+    de?: string
+  }
+  message?: {
+    en?: string
+    de?: string
+  }
+  created_at?: string // date-time
+  read: boolean
+  redirect_url?: string
+}
+```
 
 ### `MobileBuildStatus`
 
@@ -10768,6 +10999,17 @@ type CommonConfigAttributes = {
   config?: string
   contact_identifiers?: string[]
   // ...
+}
+```
+
+### `NotificationTriggerConfig`
+
+```ts
+type NotificationTriggerConfig = {
+  trigger_type: "entity_created" | "entity_assigned" | "workflow_step_overdue"
+  entity_schema?: string
+  enabled?: boolean
+  template_id?: string // uuid
 }
 ```
 
@@ -12061,6 +12303,7 @@ type FileItem = {
     _title?: string
   }>
   is_new?: boolean
+  custom_download_url_auth?: "token" | "presigned"
 }
 ```
 
@@ -12070,6 +12313,7 @@ type FileItem = {
 type FilePreviewResult = {
   kind: "pdf" | "image" | "unsupported"
   url?: string // uri
+  requires_auth?: boolean
   download_url?: string // uri
 }
 ```
@@ -12169,6 +12413,22 @@ type ExternalLink = {
     size?: number
   }
   extension_link_id?: string[]
+}
+```
+
+### `OutstandingTask`
+
+```ts
+type OutstandingTask = {
+  entity_id: string
+  entity_schema: string
+  entity_title: string
+  workflow_id: string
+  workflow_name: string
+  step_id: string
+  step_name: string
+  journey_id: string
+  complete_task_automatically?: boolean
 }
 ```
 
