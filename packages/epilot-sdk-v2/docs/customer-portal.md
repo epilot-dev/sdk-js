@@ -229,6 +229,7 @@ const { data } = await customerPortalClient.upsertPortal(...)
 - [`Exists`](#exists)
 - [`EntitySlug`](#entityslug)
 - [`EntitySlugConfig`](#entityslugconfig)
+- [`TemplatesRef`](#templatesref)
 - [`EntityId`](#entityid)
 - [`BaseEntity`](#baseentity)
 - [`Schema`](#schema)
@@ -5285,7 +5286,13 @@ const { data } = await client.getContractWithTemplates(
     id: '123e4567-e89b-12d3-a456-426614174000',
   },
   {
-    templates: {}
+    templates: {},
+    templates_ref: {
+      page_id: 'string',
+      block_id: 'string',
+      config_id: 'string',
+      global_search_config_id: 'string'
+    }
   },
 )
 ```
@@ -6217,6 +6224,12 @@ const { data } = await client.getPortalUserEntity(
         subtitle: '{{contract.contract_number}}'
       }
     },
+    templates_ref: {
+      page_id: 'string',
+      block_id: 'string',
+      config_id: 'string',
+      global_search_config_id: 'string'
+    },
     filters: [
       {
         term: {
@@ -6309,6 +6322,12 @@ const { data } = await client.searchPortalUserEntities(
       content_top_name: 'Customer #{{contract.customer_number}}',
       main_content_name: '{{contract.contract_name}} ({{contract.contract_number}})',
       content_bottom_name: '{{custom_contract_delivery_address}}'
+    },
+    templates_ref: {
+      page_id: 'string',
+      block_id: 'string',
+      config_id: 'string',
+      global_search_config_id: 'string'
     },
     filters: [
       {
@@ -6939,7 +6958,13 @@ const { data } = await client.getMeterReadings(
     from: 0,
     size: 10,
     templates: {},
-    counter_templates: {}
+    counter_templates: {},
+    templates_ref: {
+      page_id: 'string',
+      block_id: 'string',
+      config_id: 'string',
+      global_search_config_id: 'string'
+    }
   },
 )
 ```
@@ -7493,7 +7518,7 @@ const { data } = await client.getPublicPages({
 
 ### `interpolatePortalPages`
 
-Interpolate template variables in portal pages without reading from the database. Accepts pages in the request body and returns them with templates resolved.
+Interpolate template variables in portal pages without reading from the database. Accepts pages in the request body and returns them with templates resolved. Portal Builder preview only: requires a 36
 
 `POST /v2/portal/pages/interpolate`
 
@@ -11834,6 +11859,25 @@ type EntitySlugConfig = {
   slug: string
   targets?: string // uuid[]
   templates?: Record<string, string>
+  templates_ref?: {
+    page_id?: string
+    block_id?: string
+    config_id?: string
+    global_search_config_id?: string
+  }
+}
+```
+
+### `TemplatesRef`
+
+Reference to admin-authored portal configuration (a page block or a global search configuration item) from which the API derives Handlebars templates server-side. This replaces client-supplied template strings so portal users can never submit arbitrary templates for resolution. When both a reference
+
+```ts
+type TemplatesRef = {
+  page_id?: string
+  block_id?: string
+  config_id?: string
+  global_search_config_id?: string
 }
 ```
 
@@ -12753,6 +12797,12 @@ type EntityGetParams = {
   hydrate?: boolean
   fields?: string[]
   templates?: Record<string, string | Record<string, string>>
+  templates_ref?: {
+    page_id?: string
+    block_id?: string
+    config_id?: string
+    global_search_config_id?: string
+  }
   filters?: object[]
   filters_context?: Record<string, boolean | string>[]
   targets?: string // uuid[]
@@ -12767,6 +12817,12 @@ type EntitySearchParams = {
     slug: string
     targets?: string // uuid[]
     templates?: Record<string, string>
+    templates_ref?: {
+      page_id?: { ... }
+      block_id?: { ... }
+      config_id?: { ... }
+      global_search_config_id?: { ... }
+    }
   }>
   q?: string
   q_fields?: string[]
@@ -12781,6 +12837,12 @@ type EntitySearchParams = {
   hydrate?: boolean
   fields?: string[]
   templates?: Record<string, string>
+  templates_ref?: {
+    page_id?: string
+    block_id?: string
+    config_id?: string
+    global_search_config_id?: string
+  }
   filters?: object[]
   filters_context?: Record<string, boolean | string>[]
   targets?: string // uuid[]
