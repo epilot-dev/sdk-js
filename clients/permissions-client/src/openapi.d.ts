@@ -346,10 +346,13 @@ declare namespace Components {
              */
             attribute: string;
             operation: "equals";
-            values: any[];
+            values: [
+                any,
+                ...any[]
+            ];
         }
         /**
-         * Check if any relation_user attribute on the entity contains the current user. When attribute is provided, only that specific attribute path is checked.
+         * Check if any relation_user attribute on the entity contains the current user. When attribute is provided, only that specific attribute path is checked. When attributes is provided, it takes precedence over attribute and the condition passes when the current user appears in ANY of the listed attribute paths.
          */
         export interface EqualsCurrentUserCondition {
             /**
@@ -358,6 +361,18 @@ declare namespace Components {
              * assignee.*.user_id
              */
             attribute?: string;
+            /**
+             * Optional list of JSON paths to user attributes. Takes precedence over attribute.
+             * example:
+             * [
+             *   "assignee.*.user_id",
+             *   "owner.*.user_id"
+             * ]
+             */
+            attributes?: [
+                string,
+                ...string[]
+            ];
             operation: "equals_current_user";
         }
         /**
@@ -388,7 +403,7 @@ declare namespace Components {
         /**
          * An additional condition that must be met for the grant
          */
-        export type GrantCondition = /* An additional condition that must be met for the grant */ /* Check if attribute equals to any of the values */ EqualsCondition | /* Check if any relation_user attribute on the entity contains the current user. When attribute is provided, only that specific attribute path is checked. */ EqualsCurrentUserCondition;
+        export type GrantCondition = /* An additional condition that must be met for the grant */ /* Check if attribute equals to any of the values */ EqualsCondition | /* Passes when the attribute does not equal any of the values. Records where the attribute is missing or empty pass the condition. */ NotEqualsCondition | /* Check if any relation_user attribute on the entity contains the current user. When attribute is provided, only that specific attribute path is checked. When attributes is provided, it takes precedence over attribute and the condition passes when the current user appears in ANY of the listed attribute paths. */ EqualsCurrentUserCondition | /* Check if the current user is absent from the relation_user attributes on the entity. When attribute is provided, only that specific attribute path is checked. When attributes is provided, it takes precedence over attribute and the condition passes only when the current user appears in NONE of the listed attribute paths. */ NotEqualsCurrentUserCondition;
         export interface GrantWithDependencies {
             /**
              * example:
@@ -423,6 +438,45 @@ declare namespace Components {
              * 123:owner
              */
             RoleId[];
+        }
+        /**
+         * Passes when the attribute does not equal any of the values. Records where the attribute is missing or empty pass the condition.
+         */
+        export interface NotEqualsCondition {
+            /**
+             * example:
+             * workflows.primary.task_name
+             */
+            attribute: string;
+            operation: "not_equals";
+            values: [
+                any,
+                ...any[]
+            ];
+        }
+        /**
+         * Check if the current user is absent from the relation_user attributes on the entity. When attribute is provided, only that specific attribute path is checked. When attributes is provided, it takes precedence over attribute and the condition passes only when the current user appears in NONE of the listed attribute paths.
+         */
+        export interface NotEqualsCurrentUserCondition {
+            /**
+             * Optional JSON path to a specific user attribute. When omitted, all relation_user attributes on the entity are scanned.
+             * example:
+             * assignee.*.user_id
+             */
+            attribute?: string;
+            /**
+             * Optional list of JSON paths to user attributes. Takes precedence over attribute.
+             * example:
+             * [
+             *   "assignee.*.user_id",
+             *   "owner.*.user_id"
+             * ]
+             */
+            attributes?: [
+                string,
+                ...string[]
+            ];
+            operation: "not_equals_current_user";
         }
         /**
          * All roles attached to an users of an organization
@@ -962,6 +1016,7 @@ declare namespace Paths {
     }
 }
 
+
 export interface OperationMethods {
   /**
    * listCurrentRoles - listCurrentRoles
@@ -1252,6 +1307,7 @@ export interface PathsDictionary {
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
+
 export type Assignment = Components.Schemas.Assignment;
 export type Assignments = Components.Schemas.Assignments;
 export type BaseRole = Components.Schemas.BaseRole;
@@ -1264,6 +1320,8 @@ export type Grant = Components.Schemas.Grant;
 export type GrantCondition = Components.Schemas.GrantCondition;
 export type GrantWithDependencies = Components.Schemas.GrantWithDependencies;
 export type InternalAssignment = Components.Schemas.InternalAssignment;
+export type NotEqualsCondition = Components.Schemas.NotEqualsCondition;
+export type NotEqualsCurrentUserCondition = Components.Schemas.NotEqualsCurrentUserCondition;
 export type OrgAssignments = Components.Schemas.OrgAssignments;
 export type OrgRole = Components.Schemas.OrgRole;
 export type OrgRoles = Components.Schemas.OrgRoles;
