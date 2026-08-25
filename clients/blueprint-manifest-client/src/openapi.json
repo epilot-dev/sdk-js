@@ -3429,7 +3429,7 @@
       "post": {
         "operationId": "restoreBlueprintDeploymentV3",
         "summary": "restoreBlueprintDeploymentV3",
-        "description": "Roll a deployment back to its pre-install state. Two phases:\n\n  1. Upsert — re-applies the captured payloads via snapshot-api's\n     `:restore` (server-side; runs config-engine.apply with captured\n     target ids pre-seeded). Skipped for pure-create deployments\n     whose snapshot was empty.\n  2. Delete sweep — for lineage rows of this blueprint instance not\n     present in the snapshot's captured set, deletes the live\n     resource via the type's adapter. Co-ownership / drift /\n     no-delete-capability skip the entry with the corresponding\n     reason.\n\nResolves `(blueprint_id, job_id)` to the entry in\n`Blueprint.deployments[]` and reads its `snapshot_id` and\n`destination_blueprint_id` — the caller never needs to handle\nsnapshot ids directly.\n\nAsync — returns 202 with a job id. Poll the job to track progress.\nThe per-instance lock (`installation_status === 'IN_PROGRESS'`)\nrejects concurrent installs or restores with 409.\n",
+        "description": "Roll a deployment back to its pre-install state. Two phases:\n\n  1. Upsert — re-applies the captured payloads via snapshot-api's\n     `:restore` (server-side; runs config-engine.apply with captured\n     target ids pre-seeded). Skipped for pure-create deployments\n     whose snapshot was empty.\n  2. Delete sweep — for lineage rows of this blueprint instance not\n     present in the snapshot's captured set, deletes the live\n     resource via the type's adapter. Co-ownership / drift /\n     no-delete-capability skip the entry with the corresponding\n     reason.\n\nResolves `(blueprint_id, job_id)` to the entry in\n`Blueprint.deployments[]` and reads its `snapshot_id` and\n`destination_blueprint_id` — the caller never needs to handle\nsnapshot ids directly.\n\nAsync — returns 202 with a job id. Poll the job to track progress.\nThe restore holds its own per-instance lock (`active_restore_job_id`),\nseparate from `installation_status`. Starting a restore is rejected with\n409 when another restore already holds that lock, or when an install is\nrunning (`installation_status === 'IN_PROGRESS'`). Keeping the two locks\ndistinct keeps installs and reverts decoupled: an in-flight or failed\nrestore never overwrites `installation_status`, which keeps reflecting\nthe actual install outcome (and drives the install badge in the\nBlueprints overview) throughout the revert.\n",
         "tags": [
           "Blueprints"
         ],
@@ -4592,6 +4592,17 @@
               "FAILED"
             ]
           },
+          "active_restore_job_id": {
+            "type": "string",
+            "nullable": true,
+            "description": "ID of the restore (revert) job currently holding a lock on this\nblueprint instance's resources, or null/absent when no revert is\nrunning. Deliberately separate from `installation_status`: installs\nand reverts stay decoupled, so a revert must not overwrite install\nhealth — `installation_status` keeps reflecting the actual install\noutcome (and drives the install badge in the Blueprints overview)\nfor the duration of the revert.\n"
+          },
+          "active_restore_started_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "ISO timestamp of when the current restore lock\n(`active_restore_job_id`) was acquired, or null/absent when no revert\nis running. Written and cleared alongside `active_restore_job_id`.\nLets the lock self-expire: a lock older than the staleness threshold\n(whose job never completed the sweep, e.g. the state machine was\naborted) is treated as stale so a new revert can proceed instead of\nbeing blocked forever.\n"
+          },
           "created_at": {
             "type": "string",
             "format": "date-time"
@@ -5567,6 +5578,15 @@
           },
           "error_message": {
             "type": "string"
+          },
+          "error_code": {
+            "type": "string",
+            "description": "Stable machine code for a failed resource, when config-engine threw a\ntyped error. Keys a translation in the Blueprints UI; `error_message`\nis the English fallback when absent or unrecognised.\n"
+          },
+          "error_data": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Interpolation values for the translated `error_code` message."
           }
         }
       },
@@ -5610,7 +5630,10 @@
               "modified",
               "delete_unsupported",
               "heuristic_match",
-              "co_owned"
+              "co_owned",
+              "dependency_protected",
+              "already_deleted",
+              "non_revertible"
             ]
           },
           "last_synced_at": {
@@ -5647,6 +5670,29 @@
                   "type": "string"
                 },
                 "title": {
+                  "type": "string",
+                  "nullable": true
+                }
+              }
+            }
+          },
+          "protected_by": {
+            "type": "array",
+            "description": "Only set when `reason == dependency_protected`. The surviving\nresource(s) whose 'hard' reference to this one is why it wasn't\ndeleted (e.g. a skipped Journey still triggering this Automation).\n",
+            "items": {
+              "type": "object",
+              "required": [
+                "lineage_id",
+                "type"
+              ],
+              "properties": {
+                "lineage_id": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string"
+                },
+                "target_id": {
                   "type": "string",
                   "nullable": true
                 }

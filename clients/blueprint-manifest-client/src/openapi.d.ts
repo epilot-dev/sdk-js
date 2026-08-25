@@ -206,6 +206,28 @@ declare namespace Components {
              */
             ignored_resource_addresses?: string[];
             installation_status?: "IN_PROGRESS" | "CANCELED" | "PARTIAL" | "SUCCESS" | "FAILED";
+            /**
+             * ID of the restore (revert) job currently holding a lock on this
+             * blueprint instance's resources, or null/absent when no revert is
+             * running. Deliberately separate from `installation_status`: installs
+             * and reverts stay decoupled, so a revert must not overwrite install
+             * health — `installation_status` keeps reflecting the actual install
+             * outcome (and drives the install badge in the Blueprints overview)
+             * for the duration of the revert.
+             *
+             */
+            active_restore_job_id?: string | null;
+            /**
+             * ISO timestamp of when the current restore lock
+             * (`active_restore_job_id`) was acquired, or null/absent when no revert
+             * is running. Written and cleared alongside `active_restore_job_id`.
+             * Lets the lock self-expire: a lock older than the staleness threshold
+             * (whose job never completed the sweep, e.g. the state machine was
+             * aborted) is treated as stale so a new revert can proceed instead of
+             * being blocked forever.
+             *
+             */
+            active_restore_started_at?: string | null; // date-time
             created_at?: string; // date-time
             updated_at?: string; // date-time
             created_by?: CallerIdentity;
@@ -1154,6 +1176,28 @@ declare namespace Components {
              */
             ignored_resource_addresses?: string[];
             installation_status?: "IN_PROGRESS" | "CANCELED" | "PARTIAL" | "SUCCESS" | "FAILED";
+            /**
+             * ID of the restore (revert) job currently holding a lock on this
+             * blueprint instance's resources, or null/absent when no revert is
+             * running. Deliberately separate from `installation_status`: installs
+             * and reverts stay decoupled, so a revert must not overwrite install
+             * health — `installation_status` keeps reflecting the actual install
+             * outcome (and drives the install badge in the Blueprints overview)
+             * for the duration of the revert.
+             *
+             */
+            active_restore_job_id?: string | null;
+            /**
+             * ISO timestamp of when the current restore lock
+             * (`active_restore_job_id`) was acquired, or null/absent when no revert
+             * is running. Written and cleared alongside `active_restore_job_id`.
+             * Lets the lock self-expire: a lock older than the staleness threshold
+             * (whose job never completed the sweep, e.g. the state machine was
+             * aborted) is treated as stale so a new revert can proceed instead of
+             * being blocked forever.
+             *
+             */
+            active_restore_started_at?: string | null; // date-time
             created_at?: string; // date-time
             updated_at?: string; // date-time
             created_by?: CallerIdentity;
@@ -1573,6 +1617,28 @@ declare namespace Components {
              */
             ignored_resource_addresses?: string[];
             installation_status?: "IN_PROGRESS" | "CANCELED" | "PARTIAL" | "SUCCESS" | "FAILED";
+            /**
+             * ID of the restore (revert) job currently holding a lock on this
+             * blueprint instance's resources, or null/absent when no revert is
+             * running. Deliberately separate from `installation_status`: installs
+             * and reverts stay decoupled, so a revert must not overwrite install
+             * health — `installation_status` keeps reflecting the actual install
+             * outcome (and drives the install badge in the Blueprints overview)
+             * for the duration of the revert.
+             *
+             */
+            active_restore_job_id?: string | null;
+            /**
+             * ISO timestamp of when the current restore lock
+             * (`active_restore_job_id`) was acquired, or null/absent when no revert
+             * is running. Written and cleared alongside `active_restore_job_id`.
+             * Lets the lock self-expire: a lock older than the staleness threshold
+             * (whose job never completed the sweep, e.g. the state machine was
+             * aborted) is treated as stale so a new revert can proceed instead of
+             * being blocked forever.
+             *
+             */
+            active_restore_started_at?: string | null; // date-time
             created_at?: string; // date-time
             updated_at?: string; // date-time
             created_by?: CallerIdentity;
@@ -1808,6 +1874,28 @@ declare namespace Components {
              */
             ignored_resource_addresses?: string[];
             installation_status?: "IN_PROGRESS" | "CANCELED" | "PARTIAL" | "SUCCESS" | "FAILED";
+            /**
+             * ID of the restore (revert) job currently holding a lock on this
+             * blueprint instance's resources, or null/absent when no revert is
+             * running. Deliberately separate from `installation_status`: installs
+             * and reverts stay decoupled, so a revert must not overwrite install
+             * health — `installation_status` keeps reflecting the actual install
+             * outcome (and drives the install badge in the Blueprints overview)
+             * for the duration of the revert.
+             *
+             */
+            active_restore_job_id?: string | null;
+            /**
+             * ISO timestamp of when the current restore lock
+             * (`active_restore_job_id`) was acquired, or null/absent when no revert
+             * is running. Written and cleared alongside `active_restore_job_id`.
+             * Lets the lock self-expire: a lock older than the staleness threshold
+             * (whose job never completed the sweep, e.g. the state machine was
+             * aborted) is treated as stale so a new revert can proceed instead of
+             * being blocked forever.
+             *
+             */
+            active_restore_started_at?: string | null; // date-time
             created_at?: string; // date-time
             updated_at?: string; // date-time
             created_by?: CallerIdentity;
@@ -2089,6 +2177,28 @@ declare namespace Components {
              */
             ignored_resource_addresses?: string[];
             installation_status?: "IN_PROGRESS" | "CANCELED" | "PARTIAL" | "SUCCESS" | "FAILED";
+            /**
+             * ID of the restore (revert) job currently holding a lock on this
+             * blueprint instance's resources, or null/absent when no revert is
+             * running. Deliberately separate from `installation_status`: installs
+             * and reverts stay decoupled, so a revert must not overwrite install
+             * health — `installation_status` keeps reflecting the actual install
+             * outcome (and drives the install badge in the Blueprints overview)
+             * for the duration of the revert.
+             *
+             */
+            active_restore_job_id?: string | null;
+            /**
+             * ISO timestamp of when the current restore lock
+             * (`active_restore_job_id`) was acquired, or null/absent when no revert
+             * is running. Written and cleared alongside `active_restore_job_id`.
+             * Lets the lock self-expire: a lock older than the staleness threshold
+             * (whose job never completed the sweep, e.g. the state machine was
+             * aborted) is treated as stale so a new revert can proceed instead of
+             * being blocked forever.
+             *
+             */
+            active_restore_started_at?: string | null; // date-time
             created_at?: string; // date-time
             updated_at?: string; // date-time
             created_by?: CallerIdentity;
@@ -3008,6 +3118,28 @@ declare namespace Components {
              */
             ignored_resource_addresses?: string[];
             installation_status?: "IN_PROGRESS" | "CANCELED" | "PARTIAL" | "SUCCESS" | "FAILED";
+            /**
+             * ID of the restore (revert) job currently holding a lock on this
+             * blueprint instance's resources, or null/absent when no revert is
+             * running. Deliberately separate from `installation_status`: installs
+             * and reverts stay decoupled, so a revert must not overwrite install
+             * health — `installation_status` keeps reflecting the actual install
+             * outcome (and drives the install badge in the Blueprints overview)
+             * for the duration of the revert.
+             *
+             */
+            active_restore_job_id?: string | null;
+            /**
+             * ISO timestamp of when the current restore lock
+             * (`active_restore_job_id`) was acquired, or null/absent when no revert
+             * is running. Written and cleared alongside `active_restore_job_id`.
+             * Lets the lock self-expire: a lock older than the staleness threshold
+             * (whose job never completed the sweep, e.g. the state machine was
+             * aborted) is treated as stale so a new revert can proceed instead of
+             * being blocked forever.
+             *
+             */
+            active_restore_started_at?: string | null; // date-time
             created_at?: string; // date-time
             updated_at?: string; // date-time
             created_by?: CallerIdentity;
@@ -3330,7 +3462,7 @@ declare namespace Components {
             /**
              * Only set when `action == skip`.
              */
-            reason?: "modified" | "delete_unsupported" | "heuristic_match" | "co_owned";
+            reason?: "modified" | "delete_unsupported" | "heuristic_match" | "co_owned" | "dependency_protected" | "already_deleted" | "non_revertible";
             /**
              * Only set when `reason == modified`. From the lineage row's last install write.
              */
@@ -3360,6 +3492,17 @@ declare namespace Components {
             co_owned_by?: {
                 blueprint_id: string;
                 title?: string | null;
+            }[];
+            /**
+             * Only set when `reason == dependency_protected`. The surviving
+             * resource(s) whose 'hard' reference to this one is why it wasn't
+             * deleted (e.g. a skipped Journey still triggering this Automation).
+             *
+             */
+            protected_by?: {
+                lineage_id: string;
+                type: string;
+                target_id?: string | null;
             }[];
         }
         export interface RootResourceNode {
@@ -3508,6 +3651,19 @@ declare namespace Components {
             status: "pending" | "in_progress" | "done" | "failed" | "skipped";
             target_id?: string;
             error_message?: string;
+            /**
+             * Stable machine code for a failed resource, when config-engine threw a
+             * typed error. Keys a translation in the Blueprints UI; `error_message`
+             * is the English fallback when absent or unrecognised.
+             *
+             */
+            error_code?: string;
+            /**
+             * Interpolation values for the translated `error_code` message.
+             */
+            error_data?: {
+                [name: string]: any;
+            };
         }
         export interface VerificationSummary {
             total_resources?: number;
@@ -6098,8 +6254,14 @@ export interface OperationMethods {
    * snapshot ids directly.
    * 
    * Async — returns 202 with a job id. Poll the job to track progress.
-   * The per-instance lock (`installation_status === 'IN_PROGRESS'`)
-   * rejects concurrent installs or restores with 409.
+   * The restore holds its own per-instance lock (`active_restore_job_id`),
+   * separate from `installation_status`. Starting a restore is rejected with
+   * 409 when another restore already holds that lock, or when an install is
+   * running (`installation_status === 'IN_PROGRESS'`). Keeping the two locks
+   * distinct keeps installs and reverts decoupled: an in-flight or failed
+   * restore never overwrites `installation_status`, which keeps reflecting
+   * the actual install outcome (and drives the install badge in the
+   * Blueprints overview) throughout the revert.
    * 
    */
   'restoreBlueprintDeploymentV3'(
@@ -7059,8 +7221,14 @@ export interface PathsDictionary {
      * snapshot ids directly.
      * 
      * Async — returns 202 with a job id. Poll the job to track progress.
-     * The per-instance lock (`installation_status === 'IN_PROGRESS'`)
-     * rejects concurrent installs or restores with 409.
+     * The restore holds its own per-instance lock (`active_restore_job_id`),
+     * separate from `installation_status`. Starting a restore is rejected with
+     * 409 when another restore already holds that lock, or when an install is
+     * running (`installation_status === 'IN_PROGRESS'`). Keeping the two locks
+     * distinct keeps installs and reverts decoupled: an in-flight or failed
+     * restore never overwrites `installation_status`, which keeps reflecting
+     * the actual install outcome (and drives the install badge in the
+     * Blueprints overview) throughout the revert.
      * 
      */
     'post'(
