@@ -241,6 +241,8 @@ const { data } = await client.listBlueprints({
       "latest_verification": {},
       "ignored_resource_addresses": ["string"],
       "installation_status": "IN_PROGRESS",
+      "active_restore_job_id": "string",
+      "active_restore_started_at": "1970-01-01T00:00:00.000Z",
       "created_at": "1970-01-01T00:00:00.000Z",
       "updated_at": "1970-01-01T00:00:00.000Z",
       "created_by": {},
@@ -330,6 +332,8 @@ const { data } = await client.createBlueprint(
     },
     ignored_resource_addresses: ['string'],
     installation_status: 'IN_PROGRESS',
+    active_restore_job_id: 'string',
+    active_restore_started_at: '1970-01-01T00:00:00.000Z',
     created_at: '1970-01-01T00:00:00.000Z',
     updated_at: '1970-01-01T00:00:00.000Z',
     created_by: {
@@ -436,6 +440,8 @@ const { data } = await client.createBlueprint(
   },
   "ignored_resource_addresses": ["string"],
   "installation_status": "IN_PROGRESS",
+  "active_restore_job_id": "string",
+  "active_restore_started_at": "1970-01-01T00:00:00.000Z",
   "created_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z",
   "created_by": {
@@ -744,6 +750,8 @@ const { data } = await client.getBlueprint({
   },
   "ignored_resource_addresses": ["string"],
   "installation_status": "IN_PROGRESS",
+  "active_restore_job_id": "string",
+  "active_restore_started_at": "1970-01-01T00:00:00.000Z",
   "created_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z",
   "created_by": {
@@ -862,6 +870,8 @@ const { data } = await client.updateBlueprint(
     },
     ignored_resource_addresses: ['string'],
     installation_status: 'IN_PROGRESS',
+    active_restore_job_id: 'string',
+    active_restore_started_at: '1970-01-01T00:00:00.000Z',
     created_at: '1970-01-01T00:00:00.000Z',
     updated_at: '1970-01-01T00:00:00.000Z',
     created_by: {
@@ -968,6 +978,8 @@ const { data } = await client.updateBlueprint(
   },
   "ignored_resource_addresses": ["string"],
   "installation_status": "IN_PROGRESS",
+  "active_restore_job_id": "string",
+  "active_restore_started_at": "1970-01-01T00:00:00.000Z",
   "created_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z",
   "created_by": {
@@ -1089,6 +1101,8 @@ const { data } = await client.deleteBlueprint({
   },
   "ignored_resource_addresses": ["string"],
   "installation_status": "IN_PROGRESS",
+  "active_restore_job_id": "string",
+  "active_restore_started_at": "1970-01-01T00:00:00.000Z",
   "created_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z",
   "created_by": {
@@ -2035,7 +2049,9 @@ const { data } = await client.continueInstallationJob(
       "name": "string",
       "status": "pending",
       "target_id": "string",
-      "error_message": "string"
+      "error_message": "string",
+      "error_code": "string",
+      "error_data": {}
     }
   ],
   "status": "IN_PROGRESS"
@@ -2854,6 +2870,13 @@ const { data } = await client.getRestorePreview({
           "blueprint_id": "string",
           "title": "string"
         }
+      ],
+      "protected_by": [
+        {
+          "lineage_id": "string",
+          "type": "string",
+          "target_id": "string"
+        }
       ]
     }
   ],
@@ -3178,7 +3201,9 @@ const { data } = await client.listBulkInstallTargetsV3({
             "name": "string",
             "status": "pending",
             "target_id": "string",
-            "error_message": "string"
+            "error_message": "string",
+            "error_code": "string",
+            "error_data": {}
           }
         ],
         "status": "IN_PROGRESS"
@@ -3281,7 +3306,9 @@ const { data } = await client.retryBulkInstallTargetV3(
         "name": "string",
         "status": "pending",
         "target_id": "string",
-        "error_message": "string"
+        "error_message": "string",
+        "error_code": "string",
+        "error_data": {}
       }
     ],
     "status": "IN_PROGRESS"
@@ -3702,6 +3729,8 @@ type CommonBlueprintFields = {
   }
   ignored_resource_addresses?: string[]
   installation_status?: "IN_PROGRESS" | "CANCELED" | "PARTIAL" | "SUCCESS" | "FAILED"
+  active_restore_job_id?: string
+  active_restore_started_at?: string // date-time
   created_at?: string // date-time
   updated_at?: string // date-time
   created_by?: {
@@ -3919,6 +3948,8 @@ type CustomBlueprint = {
   }
   ignored_resource_addresses?: string[]
   installation_status?: "IN_PROGRESS" | "CANCELED" | "PARTIAL" | "SUCCESS" | "FAILED"
+  active_restore_job_id?: string
+  active_restore_started_at?: string // date-time
   created_at?: string // date-time
   updated_at?: string // date-time
   created_by?: {
@@ -3948,8 +3979,6 @@ type CustomBlueprint = {
     name?: string
     type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
     address?: string
-    is_root?: boolean
-    is_ready?: boolean
   // ...
 }
 ```
@@ -4026,6 +4055,8 @@ type FileBlueprint = {
   }
   ignored_resource_addresses?: string[]
   installation_status?: "IN_PROGRESS" | "CANCELED" | "PARTIAL" | "SUCCESS" | "FAILED"
+  active_restore_job_id?: string
+  active_restore_started_at?: string // date-time
   created_at?: string // date-time
   updated_at?: string // date-time
   created_by?: {
@@ -4055,8 +4086,6 @@ type FileBlueprint = {
     id: string
     name?: string
     type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
-    address?: string
-    is_root?: boolean
   // ...
 }
 ```
@@ -4133,6 +4162,8 @@ type MarketplaceBlueprint = {
   }
   ignored_resource_addresses?: string[]
   installation_status?: "IN_PROGRESS" | "CANCELED" | "PARTIAL" | "SUCCESS" | "FAILED"
+  active_restore_job_id?: string
+  active_restore_started_at?: string // date-time
   created_at?: string // date-time
   updated_at?: string // date-time
   created_by?: {
@@ -4162,8 +4193,6 @@ type MarketplaceBlueprint = {
     id: string
     name?: string
     type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
-    address?: string
-    is_root?: boolean
   // ...
 }
 ```
@@ -4269,6 +4298,8 @@ type DeployedBlueprint = {
   }
   ignored_resource_addresses?: string[]
   installation_status?: "IN_PROGRESS" | "CANCELED" | "PARTIAL" | "SUCCESS" | "FAILED"
+  active_restore_job_id?: string
+  active_restore_started_at?: string // date-time
   created_at?: string // date-time
   updated_at?: string // date-time
   created_by?: {
@@ -4298,8 +4329,6 @@ type DeployedBlueprint = {
     id: string
     name?: string
     type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
-    address?: string
-    is_root?: boolean
   // ...
 }
 ```
@@ -4376,6 +4405,8 @@ type AppBlueprint = {
   }
   ignored_resource_addresses?: string[]
   installation_status?: "IN_PROGRESS" | "CANCELED" | "PARTIAL" | "SUCCESS" | "FAILED"
+  active_restore_job_id?: string
+  active_restore_started_at?: string // date-time
   created_at?: string // date-time
   updated_at?: string // date-time
   created_by?: {
@@ -4405,8 +4436,6 @@ type AppBlueprint = {
     id: string
     name?: string
     type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
-    address?: string
-    is_root?: boolean
   // ...
 }
 ```
@@ -4483,6 +4512,8 @@ type Blueprint = {
   }
   ignored_resource_addresses?: string[]
   installation_status?: "IN_PROGRESS" | "CANCELED" | "PARTIAL" | "SUCCESS" | "FAILED"
+  active_restore_job_id?: string
+  active_restore_started_at?: string // date-time
   created_at?: string // date-time
   updated_at?: string // date-time
   created_by?: {
@@ -4512,8 +4543,6 @@ type Blueprint = {
     name?: string
     type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
     address?: string
-    is_root?: boolean
-    is_ready?: boolean
   // ...
 }
 ```
@@ -4637,6 +4666,8 @@ type BlueprintInstallationJob = {
     status: "pending" | "in_progress" | "done" | "failed" | "skipped"
     target_id?: string
     error_message?: string
+    error_code?: string
+    error_data?: Record<string, unknown>
   }>
   status?: "IN_PROGRESS" | "WAITING_USER_ACTION" | "CANCELED" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED"
 }
@@ -4746,6 +4777,8 @@ type BulkInstallTarget = {
       status: { ... }
       target_id?: { ... }
       error_message?: { ... }
+      error_code?: { ... }
+      error_data?: { ... }
     }>
     status?: "IN_PROGRESS" | "WAITING_USER_ACTION" | "CANCELED" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED"
   }
@@ -4864,6 +4897,7 @@ type BlueprintRestoreJob = {
       error_message?: { ... }
       is_hidden?: { ... }
       co_owned_by?: { ... }
+      protected_by?: { ... }
     }>
     has_effective_changes?: boolean
   }
@@ -4881,6 +4915,8 @@ type V3ResourceProgressEntry = {
   status: "pending" | "in_progress" | "done" | "failed" | "skipped"
   target_id?: string
   error_message?: string
+  error_code?: string
+  error_data?: Record<string, unknown>
 }
 ```
 
@@ -4893,7 +4929,7 @@ type RestoreOutcomeItem = {
   name?: string
   target_id?: string
   action: "restore" | "delete" | "skip" | "failed"
-  reason?: "modified" | "delete_unsupported" | "heuristic_match" | "co_owned"
+  reason?: "modified" | "delete_unsupported" | "heuristic_match" | "co_owned" | "dependency_protected" | "already_deleted" | "non_revertible"
   last_synced_at?: string // date-time
   current_updated_at?: string // date-time
   error_message?: string
@@ -4901,6 +4937,11 @@ type RestoreOutcomeItem = {
   co_owned_by?: Array<{
     blueprint_id: string
     title?: string
+  }>
+  protected_by?: Array<{
+    lineage_id: string
+    type: string
+    target_id?: string
   }>
 }
 ```
@@ -5060,7 +5101,7 @@ type RestoreOutcome = {
     name?: string
     target_id?: string
     action: "restore" | "delete" | "skip" | "failed"
-    reason?: "modified" | "delete_unsupported" | "heuristic_match" | "co_owned"
+    reason?: "modified" | "delete_unsupported" | "heuristic_match" | "co_owned" | "dependency_protected" | "already_deleted" | "non_revertible"
     last_synced_at?: string // date-time
     current_updated_at?: string // date-time
     error_message?: string
@@ -5068,6 +5109,11 @@ type RestoreOutcome = {
     co_owned_by?: Array<{
       blueprint_id: { ... }
       title?: { ... }
+    }>
+    protected_by?: Array<{
+      lineage_id: { ... }
+      type: { ... }
+      target_id?: { ... }
     }>
   }>
   has_effective_changes?: boolean
@@ -5149,6 +5195,8 @@ type BlueprintJob = {
     status: "pending" | "in_progress" | "done" | "failed" | "skipped"
     target_id?: string
     error_message?: string
+    error_code?: string
+    error_data?: Record<string, unknown>
   }>
   status?: "IN_PROGRESS" | "WAITING_USER_ACTION" | "CANCELED" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED"
 } | {
@@ -5175,8 +5223,6 @@ type BlueprintJob = {
     user_id?: string
     token_id?: string
   }
-  job_type?: "restore"
-  destination_blueprint_id?: string
   // ...
 }
 ```
