@@ -2769,7 +2769,7 @@ declare namespace Components {
              */
             fields?: string[];
             /**
-             * Template strings to parse and return as synthetic fields. Supports both string values and nested objects of strings.
+             * DEPRECATED — client-supplied template strings to parse and return as synthetic fields. Supports both string values and nested objects of strings. Use `templates_ref` instead so templates are derived server-side from admin-authored portal configuration; ignored when `templates_ref` is present and rejected once the org has the `portals-reject-client-templates` flag enabled.
              * example:
              * {
              *   "content_top_name": "Customer #{{contract.customer_number}}",
@@ -2786,6 +2786,10 @@ declare namespace Components {
                     [name: string]: string;
                 };
             };
+            /**
+             * Reference to the portal page (or a single block within it) whose admin-configured content provides the templates, derived server-side. With only `page_id`, the derived templates are a nested map keyed by block id, mirroring the entity detail page contract.
+             */
+            templates_ref?: /* Reference to admin-authored portal configuration (a page block or a global search configuration item) from which the API derives Handlebars templates server-side. This replaces client-supplied template strings so portal users can never submit arbitrary templates for resolution. When both a reference and raw `templates` are provided, the reference wins and the raw templates are ignored. */ TemplatesRef;
             /**
              * Additional filters to apply to the search query
              * example:
@@ -3144,7 +3148,7 @@ declare namespace Components {
              */
             group?: string;
             /**
-             * Template for group title using variables
+             * DEPRECATED — client-supplied Handlebars template for the group title. Use `templates_ref` (global_search_config_id) instead; overridden when `templates_ref` derives a group title and rejected once the org has the `portals-reject-client-templates` flag enabled.
              * example:
              * {{customer[Primary].first_name}} {{customer[Primary].last_name}}
              */
@@ -3189,7 +3193,7 @@ declare namespace Components {
              */
             fields?: string[];
             /**
-             * Template strings to parse and return as synthetic fields
+             * DEPRECATED — client-supplied template strings to parse and return as synthetic fields. Use `templates_ref` instead; ignored when `templates_ref` is present and rejected once the org has the `portals-reject-client-templates` flag enabled.
              * example:
              * {
              *   "content_top_name": "Customer #{{contract.customer_number}}",
@@ -3200,6 +3204,10 @@ declare namespace Components {
             templates?: {
                 [name: string]: string;
             };
+            /**
+             * Reference to admin-authored configuration providing the templates, derived server-side. For the global search block pass `global_search_config_id`; the derived templates also supply the group title template (overriding `group_title`).
+             */
+            templates_ref?: /* Reference to admin-authored portal configuration (a page block or a global search configuration item) from which the API derives Handlebars templates server-side. This replaces client-supplied template strings so portal users can never submit arbitrary templates for resolution. When both a reference and raw `templates` are provided, the reference wins and the raw templates are ignored. */ TemplatesRef;
             /**
              * Additional filters to apply to the search query
              * example:
@@ -3279,9 +3287,13 @@ declare namespace Components {
              */
             EntitySlug;
             targets?: string /* uuid */[];
+            /**
+             * DEPRECATED — client-supplied Handlebars templates. Use `templates_ref` instead so templates are derived server-side from admin-authored portal configuration. Ignored when `templates_ref` is present; rejected once the org has the `portals-reject-client-templates` flag enabled.
+             */
             templates?: {
                 [name: string]: string;
             };
+            templates_ref?: /* Reference to admin-authored portal configuration (a page block or a global search configuration item) from which the API derives Handlebars templates server-side. This replaces client-supplied template strings so portal users can never submit arbitrary templates for resolution. When both a reference and raw `templates` are provided, the reference wins and the raw templates are ignored. */ TemplatesRef;
         }
         export interface EntityTemplates {
             /**
@@ -8296,6 +8308,27 @@ declare namespace Components {
                 url?: string;
             };
         }
+        /**
+         * Reference to admin-authored portal configuration (a page block or a global search configuration item) from which the API derives Handlebars templates server-side. This replaces client-supplied template strings so portal users can never submit arbitrary templates for resolution. When both a reference and raw `templates` are provided, the reference wins and the raw templates are ignored.
+         */
+        export interface TemplatesRef {
+            /**
+             * ID of the portal page to derive templates from. When given without `block_id`, templates are derived from every block of the page and returned resolved as a nested map keyed by block id (the entity detail page contract).
+             */
+            page_id?: string;
+            /**
+             * ID of a block within the page. Templates are derived from the block's content according to its block type (e.g. meter_selector, meter_reading, entity_list).
+             */
+            block_id?: string;
+            /**
+             * For blocks carrying a per-schema configuration array (entity_list), the id of the configuration item to derive templates from. Requires `page_id` and `block_id`.
+             */
+            config_id?: string;
+            /**
+             * ID of the portal's `global_search` configuration item to derive search result templates and the group title template from. Mutually exclusive with `page_id`.
+             */
+            global_search_config_id?: string;
+        }
         export interface TriggerPortalFlow {
             /**
              * Id of the activity
@@ -11498,11 +11531,15 @@ declare namespace Paths {
         }
         export interface RequestBody {
             /**
-             * Map of content field name to Handlebars template string. Each template is resolved per related meter and returned as templates_output on the meter.
+             * DEPRECATED — client-supplied map of content field name to Handlebars template string, resolved per related meter and returned as templates_output on the meter. Use `templates_ref` instead; ignored when `templates_ref` is present and rejected once the org has the `portals-reject-client-templates` flag enabled.
              */
             templates?: {
                 [name: string]: string;
             };
+            /**
+             * Reference to the meter selector block whose admin-configured content provides the templates, derived server-side.
+             */
+            templates_ref?: /* Reference to admin-authored portal configuration (a page block or a global search configuration item) from which the API derives Handlebars templates server-side. This replaces client-supplied template strings so portal users can never submit arbitrary templates for resolution. When both a reference and raw `templates` are provided, the reference wins and the raw templates are ignored. */ Components.Schemas.TemplatesRef;
         }
         namespace Responses {
             export interface $200 {
@@ -12759,17 +12796,21 @@ declare namespace Paths {
             from?: number;
             size?: number;
             /**
-             * Template map (key to Handlebars template string). Each template is resolved per reading.
+             * DEPRECATED — client-supplied template map (key to Handlebars template string), resolved per reading. Use `templates_ref` instead; ignored when `templates_ref` is present and rejected once the org has the `portals-reject-client-templates` flag enabled.
              */
             templates?: {
                 [name: string]: string;
             };
             /**
-             * Template map resolved against the counter entity.
+             * DEPRECATED — client-supplied template map resolved against the counter entity. Use `templates_ref` instead; same deprecation rules as `templates`.
              */
             counter_templates?: {
                 [name: string]: string;
             };
+            /**
+             * Reference to the meter reading block whose admin-configured content provides both the per-reading templates (content_top_name, main_content_name, content_bottom_name) and the counter templates (counter_title_name, counter_subtitle_name), derived server-side.
+             */
+            templates_ref?: /* Reference to admin-authored portal configuration (a page block or a global search configuration item) from which the API derives Handlebars templates server-side. This replaces client-supplied template strings so portal users can never submit arbitrary templates for resolution. When both a reference and raw `templates` are provided, the reference wins and the raw templates are ignored. */ Components.Schemas.TemplatesRef;
         }
         namespace Responses {
             export interface $200 {
@@ -18641,7 +18682,7 @@ export interface OperationMethods {
   /**
    * interpolatePortalPages - interpolatePortalPages
    * 
-   * Interpolate template variables in portal pages without reading from the database. Accepts pages in the request body and returns them with templates resolved.
+   * Interpolate template variables in portal pages without reading from the database. Accepts pages in the request body and returns them with templates resolved. Portal Builder preview only: requires a 360 (epilot) token or a `portal_preview` token; plain portal user tokens get 403.
    */
   'interpolatePortalPages'(
     parameters?: Parameters<UnknownParamsObject> | null,
@@ -20676,7 +20717,7 @@ export interface PathsDictionary {
     /**
      * interpolatePortalPages - interpolatePortalPages
      * 
-     * Interpolate template variables in portal pages without reading from the database. Accepts pages in the request body and returns them with templates resolved.
+     * Interpolate template variables in portal pages without reading from the database. Accepts pages in the request body and returns them with templates resolved. Portal Builder preview only: requires a 360 (epilot) token or a `portal_preview` token; plain portal user tokens get 403.
      */
     'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
@@ -21242,6 +21283,7 @@ export type Source = Components.Schemas.Source;
 export type SwappableConfig = Components.Schemas.SwappableConfig;
 export type TariffType = Components.Schemas.TariffType;
 export type TeaserWidget = Components.Schemas.TeaserWidget;
+export type TemplatesRef = Components.Schemas.TemplatesRef;
 export type TriggerPortalFlow = Components.Schemas.TriggerPortalFlow;
 export type UpdateOnlyPortalConfigAttributes = Components.Schemas.UpdateOnlyPortalConfigAttributes;
 export type UpsertPortalConfig = Components.Schemas.UpsertPortalConfig;
