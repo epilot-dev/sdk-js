@@ -10,6 +10,29 @@ import type {
 export declare namespace Components {
     namespace Schemas {
         /**
+         * Optional precondition on a condition: the condition only takes part in the
+         * validation when this comparison over context holds. Examples: apply the
+         * dual-tariff reference only when `contract.htnt` is not empty, or run a
+         * plausibility check only when a context value reaches a threshold.
+         *
+         */
+        export interface AppliesWhen {
+            /**
+             * Dot-separated context path whose first segment must match a declared context schema.
+             */
+            path: string; // ^[a-zA-Z_][a-zA-Z0-9_]*(\.[a-zA-Z0-9_]+)*$
+            /**
+             * Comparison applied to the resolved context value. `isEmpty` / `isNotEmpty`
+             * take no `value`; all other operators require one.
+             *
+             */
+            operator: "equal" | "notEqual" | "greaterThan" | "greaterThanInclusive" | "lessThan" | "lessThanInclusive" | "isEmpty" | "isNotEmpty";
+            /**
+             * Static comparison value for binary operators.
+             */
+            value?: /* Static comparison value for binary operators. */ number | string | boolean;
+        }
+        /**
          * Declarative validation rule (schema version v2). Supports predefined comparison operators
          * over number, date and text inputs, with static, dynamic (context path) and relative-date
          * comparison values.
@@ -55,6 +78,14 @@ export declare namespace Components {
              * Message shown to the end user when this condition fails.
              */
             error_message: string;
+            applies_when?: /**
+             * Optional precondition on a condition: the condition only takes part in the
+             * validation when this comparison over context holds. Examples: apply the
+             * dual-tariff reference only when `contract.htnt` is not empty, or run a
+             * plausibility check only when a context value reaches a threshold.
+             *
+             */
+            AppliesWhen;
             /**
              * When true, the condition is advisory: it is always evaluated and reported
              * when it fails, but it never takes part in the validity verdict.
@@ -765,8 +796,32 @@ export declare namespace Components {
          */
         export interface ValueAdjustment {
             type: "percent" | "absolute";
-            value: number;
+            /**
+             * The adjustment amount - a fixed number, or a context path resolving to a number
+             * (e.g. a per-contract percentage limit). Contextual adjustment values must not
+             * carry a nested adjustment.
+             *
+             */
+            value: /**
+             * The adjustment amount - a fixed number, or a context path resolving to a number
+             * (e.g. a per-contract percentage limit). Contextual adjustment values must not
+             * carry a nested adjustment.
+             *
+             */
+            number | /**
+             * A dynamic comparison value resolved from runtime context, e.g. `contract.installment_amount`
+             * or `previous_reading.value`. The first path segment must match the `name` of a declared
+             * context requirement.
+             *
+             */
+            ContextValue;
             direction: "increase" | "decrease";
+            /**
+             * Rounds the adjusted result to a whole number - `up` (ceiling) or `down` (floor).
+             * Omitted means no rounding. Used for bounds like "round up(current × 0.9) to whole euros".
+             *
+             */
+            rounding?: "up" | "down";
         }
     }
 }
@@ -1250,6 +1305,7 @@ export interface PathsDictionary {
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
 
+export type AppliesWhen = Components.Schemas.AppliesWhen;
 export type ComparisonRuleType = Components.Schemas.ComparisonRuleType;
 export type Condition = Components.Schemas.Condition;
 export type ConditionValue = Components.Schemas.ConditionValue;

@@ -62,6 +62,7 @@ const { data } = await validationRulesClient.getValidationRules(...)
 - [`RelativeDateValue`](#relativedatevalue)
 - [`RangeValue`](#rangevalue)
 - [`NoValue`](#novalue)
+- [`AppliesWhen`](#applieswhen)
 - [`ContextRequirement`](#contextrequirement)
 
 ### `getValidationRules`
@@ -675,6 +676,7 @@ type UpdateValidationRuleRequest = {
       operator: { ... }
       value: { ... }
       error_message: { ... }
+      applies_when?: { ... }
       allow_failure?: { ... }
     }>
   }
@@ -729,6 +731,7 @@ type ValidationRuleBase = {
       operator: { ... }
       value: { ... }
       error_message: { ... }
+      applies_when?: { ... }
       allow_failure?: { ... }
     }>
   }
@@ -1696,6 +1699,11 @@ type ComparisonRuleType = {
       source: { ... }
     }
     error_message: string
+    applies_when?: {
+      path: { ... }
+      operator: { ... }
+      value?: { ... }
+    }
     allow_failure?: boolean
   }>
 }
@@ -1719,6 +1727,7 @@ type Condition = {
       type: { ... }
       value: { ... }
       direction: { ... }
+      rounding?: { ... }
     }
   } | {
     source: "relative_date"
@@ -1757,6 +1766,11 @@ type Condition = {
     source: "none"
   }
   error_message: string
+  applies_when?: {
+    path: string
+    operator: "equal" | "notEqual" | "greaterThan" | "greaterThanInclusive" | "lessThan" | "lessThanInclusive" | "isEmpty" | "isNotEmpty"
+    value?: number | string | boolean
+  }
   allow_failure?: boolean
 }
 ```
@@ -1785,8 +1799,13 @@ type ConditionValue = {
   path: string
   adjust?: {
     type: "percent" | "absolute"
-    value: number
+    value: number | {
+      source: { ... }
+      path: { ... }
+      adjust?: { ... }
+    }
     direction: "increase" | "decrease"
+    rounding?: "up" | "down"
   }
 } | {
   source: "relative_date"
@@ -1805,6 +1824,7 @@ type ConditionValue = {
       type: { ... }
       value: { ... }
       direction: { ... }
+      rounding?: { ... }
     }
   } | {
     source: "relative_date"
@@ -1822,6 +1842,7 @@ type ConditionValue = {
       type: { ... }
       value: { ... }
       direction: { ... }
+      rounding?: { ... }
     }
   } | {
     source: "relative_date"
@@ -1847,8 +1868,13 @@ type ScalarValue = {
   path: string
   adjust?: {
     type: "percent" | "absolute"
-    value: number
+    value: number | {
+      source: { ... }
+      path: { ... }
+      adjust?: { ... }
+    }
     direction: "increase" | "decrease"
+    rounding?: "up" | "down"
   }
 } | {
   source: "relative_date"
@@ -1882,8 +1908,13 @@ type ContextValue = {
   path: string
   adjust?: {
     type: "percent" | "absolute"
-    value: number
+    value: number | {
+      source: { ... }
+      path: { ... }
+      adjust?: { ... }
+    }
     direction: "increase" | "decrease"
+    rounding?: "up" | "down"
   }
 }
 ```
@@ -1897,8 +1928,18 @@ Used to express tolerance bands such as "at most 10% above the current instalmen
 ```ts
 type ValueAdjustment = {
   type: "percent" | "absolute"
-  value: number
+  value: number | {
+    source: "context"
+    path: string
+    adjust?: {
+      type: { ... }
+      value: { ... }
+      direction: { ... }
+      rounding?: { ... }
+    }
+  }
   direction: "increase" | "decrease"
+  rounding?: "up" | "down"
 }
 ```
 
@@ -1932,6 +1973,7 @@ type RangeValue = {
       type: { ... }
       value: { ... }
       direction: { ... }
+      rounding?: { ... }
     }
   } | {
     source: "relative_date"
@@ -1949,6 +1991,7 @@ type RangeValue = {
       type: { ... }
       value: { ... }
       direction: { ... }
+      rounding?: { ... }
     }
   } | {
     source: "relative_date"
@@ -1966,6 +2009,22 @@ No comparison value - used by unary operators such as notInFuture / notInPast.
 ```ts
 type NoValue = {
   source: "none"
+}
+```
+
+### `AppliesWhen`
+
+Optional precondition on a condition: the condition only takes part in the
+validation when this comparison over context holds. Examples: apply the
+dual-tariff reference only when `contract.htnt` is not empty, or run a
+plausibility check only when a context value reaches a threshold.
+
+
+```ts
+type AppliesWhen = {
+  path: string
+  operator: "equal" | "notEqual" | "greaterThan" | "greaterThanInclusive" | "lessThan" | "lessThanInclusive" | "isEmpty" | "isNotEmpty"
+  value?: number | string | boolean
 }
 ```
 
