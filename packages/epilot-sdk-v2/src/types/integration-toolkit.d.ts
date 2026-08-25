@@ -1351,6 +1351,12 @@ export declare namespace Components {
              * Return a sample of the file's first rows in `preview`. Only controls whether the sample comes BACK — the head is read either way, because that read is how an unreadable file gets refused.
              */
             include_preview?: boolean;
+            /**
+             * Repoint an EXISTING import at this file instead of registering a new one — same row, same id, so iterating on which file to import leaves one entry in the history rather than one per attempt.
+             * Only a PENDING import may be repointed; any other status returns 409 with code `IMPORT_NOT_REPLACEABLE`. Past the first check the previous verdict is what tells the user what to fix, and a job that reached the execute phase may already have published rows under `correlation_id`.
+             * An id that names nothing returns 404. It never falls back to registering a new import: a stale id must fail loudly rather than quietly produce a second one.
+             */
+            import_id?: string;
         }
         export interface CreateErpImportResponse {
             job: ErpImportJob;
@@ -1566,6 +1572,72 @@ export declare namespace Components {
          *
          */
         FileProxyDeliveryConfig;
+        /**
+         * A markdown documentation page of an integration
+         */
+        export interface DocumentationPage {
+            /**
+             * 'general' for the integration-wide page, otherwise the use case ID
+             * example:
+             * general
+             */
+            id: string;
+            integration_id: string; // uuid
+            /**
+             * Whether the page documents the whole integration or a single use case
+             */
+            scope: "integration" | "use_case";
+            /**
+             * The linked use case. Only set when scope is use_case.
+             */
+            use_case_id?: string; // uuid
+            title: string;
+            created_at: string; // date-time
+            /**
+             * User ID that created the page
+             */
+            created_by?: string | null;
+            updated_at: string; // date-time
+            /**
+             * User ID of the last edit
+             */
+            updated_by?: string | null;
+            /**
+             * Markdown source of the page
+             */
+            content: string;
+        }
+        /**
+         * Documentation page metadata without the markdown content
+         */
+        export interface DocumentationPageSummary {
+            /**
+             * 'general' for the integration-wide page, otherwise the use case ID
+             * example:
+             * general
+             */
+            id: string;
+            integration_id: string; // uuid
+            /**
+             * Whether the page documents the whole integration or a single use case
+             */
+            scope: "integration" | "use_case";
+            /**
+             * The linked use case. Only set when scope is use_case.
+             */
+            use_case_id?: string; // uuid
+            title: string;
+            created_at: string; // date-time
+            /**
+             * User ID that created the page
+             */
+            created_by?: string | null;
+            updated_at: string; // date-time
+            /**
+             * User ID of the last edit
+             */
+            updated_by?: string | null;
+        }
         export interface EmbeddedFileProxyUseCaseRequest {
             /**
              * Optional use case ID for update matching.
@@ -2159,6 +2231,14 @@ export declare namespace Components {
              */
             status: "PENDING" | "VALIDATING" | "READY" | "PROCESSING" | "IMPORTED" | "FAILED" | "CANCELLING" | "CANCELLED";
             s3_input_ref: S3Reference;
+            /**
+             * Size of the uploaded file, recorded at registration. Present on every job registered from version 1.17.0 onwards; absent on older rows, which were written before it was captured.
+             */
+            size_bytes?: number; // int64
+            /**
+             * How many effective columns the file's header yielded — the length of the `preview.columns` returned at registration, kept so a job loaded later can still describe its file. The preview ROWS are deliberately not stored: they are a sample for the person about to choose a mapping, not job state. Present on every job registered from version 1.17.0 onwards.
+             */
+            column_count?: number;
             validation?: /* Validate-phase summary: what the file will create, and whether it may be confirmed. Absent until the validate phase completes. No per-row detail is kept — a rejected file is corrected and imported again. */ ErpImportValidation;
             progress?: /**
              * How far the currently running phase has got. Written at every batch boundary, so it advances during long runs rather than only at the end.
@@ -2589,9 +2669,10 @@ export declare namespace Components {
         }
         /**
          * Upload-side settings for a file_proxy use case with `direction: upload`.
-         * Everything about WHAT is sent lives on the outbound mapping
-         * (see `FileProxyDeliveryConfig`); this object only governs HOW the transfer is bounded
-         * and judged.
+         * The surrounding file_proxy configuration owns WHAT and HOW to send: `fan_out`,
+         * `file_source`, `params_mapping`, lookups, constants, auth, and steps. This nested object
+         * governs upload-specific limits and how the final external response is judged. The
+         * outbound mapping remains a pure pointer to the recipe (see `FileProxyDeliveryConfig`).
          *
          */
         export interface FileProxyUploadConfig {
@@ -2603,10 +2684,10 @@ export declare namespace Components {
              */
             max_file_bytes?: number;
             /**
-             * Maximum delivery attempts per item before the delivery is marked failed and the
-             * message is dead-lettered. Attempts are spaced by an exponential, jittered backoff
-             * spanning roughly 16 hours over the default 8 attempts, so an ERP maintenance window
-             * does not exhaust them.
+             * Maximum delivery attempts per item before the delivery is marked failed. Attempts
+             * are spaced by an exponential, jittered backoff. The default 8 attempts schedule at
+             * most 7 delays, totaling about 7 hours 40 minutes before jitter, so a normal ERP
+             * maintenance window does not immediately exhaust them.
              *
              * Lives here rather than on the outbound delivery because how hard to retry is a
              * property of the transport — the same judgement as `max_file_bytes` — and the outbound
@@ -2783,9 +2864,10 @@ export declare namespace Components {
             direction?: "download" | "upload";
             upload?: /**
              * Upload-side settings for a file_proxy use case with `direction: upload`.
-             * Everything about WHAT is sent lives on the outbound mapping
-             * (see `FileProxyDeliveryConfig`); this object only governs HOW the transfer is bounded
-             * and judged.
+             * The surrounding file_proxy configuration owns WHAT and HOW to send: `fan_out`,
+             * `file_source`, `params_mapping`, lookups, constants, auth, and steps. This nested object
+             * governs upload-specific limits and how the final external response is judged. The
+             * outbound mapping remains a pure pointer to the recipe (see `FileProxyDeliveryConfig`).
              *
              */
             FileProxyUploadConfig;
@@ -5275,7 +5357,7 @@ export declare namespace Components {
          */
         export interface OutboundMapping {
             /**
-             * Unique identifier for this mapping
+             * Unique identifier for this mapping; generated by the API when omitted
              */
             id?: string; // uuid
             /**
@@ -7130,6 +7212,13 @@ export declare namespace Components {
              */
             change_description?: string;
         }
+        export interface UpsertDocumentationPageRequest {
+            title: string;
+            /**
+             * Markdown source of the page
+             */
+            content: string;
+        }
         /**
          * Request to create or update an integration with embedded use cases (upsert).
          * This is a declarative operation - the request represents the desired state.
@@ -7397,9 +7486,12 @@ export declare namespace Paths {
     namespace CreateErpImport {
         export type RequestBody = /* Register an already-uploaded file as an import. The use case is chosen later, via `:validate` — upload and interpretation are separate decisions. */ Components.Schemas.CreateErpImportRequest;
         namespace Responses {
+            export type $200 = Components.Schemas.CreateErpImportResponse;
             export type $201 = Components.Schemas.CreateErpImportResponse;
             export type $400 = Components.Responses.BadRequest;
             export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $409 = Components.Responses.Conflict;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -7440,6 +7532,41 @@ export declare namespace Paths {
             export type $401 = Components.Responses.Unauthorized;
             export interface $404 {
             }
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace DeleteDocumentationPage {
+        namespace Parameters {
+            export type DocId = string; // ^(general|[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$
+            export type IntegrationId = string; // uuid
+        }
+        export interface PathParameters {
+            integrationId: Parameters.IntegrationId /* uuid */;
+            docId: Parameters.DocId /* ^(general|[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$ */;
+        }
+        namespace Responses {
+            export interface $200 {
+                message?: string;
+            }
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export interface $404 {
+            }
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace DeleteErpImport {
+        namespace Parameters {
+            export type ImportId = string;
+        }
+        export interface PathParameters {
+            importId: Parameters.ImportId;
+        }
+        namespace Responses {
+            export interface $204 {
+            }
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -7576,6 +7703,23 @@ export declare namespace Paths {
             export type $200 = Components.Responses.GetAssociatedMonitoringEventsResponse;
             export type $400 = Components.Responses.BadRequest;
             export type $401 = Components.Responses.Unauthorized;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace GetDocumentationPage {
+        namespace Parameters {
+            export type DocId = string; // ^(general|[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$
+            export type IntegrationId = string; // uuid
+        }
+        export interface PathParameters {
+            integrationId: Parameters.IntegrationId /* uuid */;
+            docId: Parameters.DocId /* ^(general|[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$ */;
+        }
+        namespace Responses {
+            export type $200 = /* A markdown documentation page of an integration */ Components.Schemas.DocumentationPage;
+            export type $401 = Components.Responses.Unauthorized;
+            export interface $404 {
+            }
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -7792,6 +7936,23 @@ export declare namespace Paths {
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace ListDocumentationPages {
+        namespace Parameters {
+            export type IntegrationId = string; // uuid
+        }
+        export interface PathParameters {
+            integrationId: Parameters.IntegrationId /* uuid */;
+        }
+        namespace Responses {
+            export interface $200 {
+                pages: /* Documentation page metadata without the markdown content */ Components.Schemas.DocumentationPageSummary[];
+            }
+            export type $401 = Components.Responses.Unauthorized;
+            export interface $404 {
+            }
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -8378,6 +8539,26 @@ export declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace UpsertDocumentationPage {
+        namespace Parameters {
+            export type DocId = string; // ^(general|[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$
+            export type IntegrationId = string; // uuid
+        }
+        export interface PathParameters {
+            integrationId: Parameters.IntegrationId /* uuid */;
+            docId: Parameters.DocId /* ^(general|[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$ */;
+        }
+        export type RequestBody = Components.Schemas.UpsertDocumentationPageRequest;
+        namespace Responses {
+            export type $200 = /* A markdown documentation page of an integration */ Components.Schemas.DocumentationPage;
+            export type $400 = Components.Responses.BadRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export interface $404 {
+            }
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace ValidateErpImport {
         namespace Parameters {
             export type ImportId = string;
@@ -8618,6 +8799,53 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ListUseCaseHistory.Responses.$200>
+  /**
+   * listDocumentationPages - listDocumentationPages
+   * 
+   * Retrieve all documentation pages of an integration, without their markdown content.
+   * An integration has at most one general page plus at most one page per use case.
+   * The page id is 'general' for the integration-wide page, otherwise the use case ID.
+   * 
+   */
+  'listDocumentationPages'(
+    parameters?: Parameters<Paths.ListDocumentationPages.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ListDocumentationPages.Responses.$200>
+  /**
+   * getDocumentationPage - getDocumentationPage
+   * 
+   * Retrieve a single documentation page including its markdown content
+   */
+  'getDocumentationPage'(
+    parameters?: Parameters<Paths.GetDocumentationPage.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetDocumentationPage.Responses.$200>
+  /**
+   * upsertDocumentationPage - upsertDocumentationPage
+   * 
+   * Create or update the documentation page identified by docId.
+   * Upsert semantics enforce the invariant of one general page per
+   * integration and one page per use case. For use case pages the
+   * use case must exist.
+   * 
+   */
+  'upsertDocumentationPage'(
+    parameters?: Parameters<Paths.UpsertDocumentationPage.PathParameters> | null,
+    data?: Paths.UpsertDocumentationPage.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.UpsertDocumentationPage.Responses.$200>
+  /**
+   * deleteDocumentationPage - deleteDocumentationPage
+   * 
+   * Delete a documentation page
+   */
+  'deleteDocumentationPage'(
+    parameters?: Parameters<Paths.DeleteDocumentationPage.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.DeleteDocumentationPage.Responses.$200>
   /**
    * listIntegrationsV2 - listIntegrationsV2
    * 
@@ -9145,12 +9373,13 @@ export interface OperationMethods {
    * createErpImport - createErpImport
    * 
    * Register an already-uploaded file (S3 ref) as a pricing-file import job. Returns the job and a file preview. Nothing runs yet: no use case is chosen and no validation starts here. Optionally rank candidates with POST /v2/erp/imports/{importId}:suggest-use-cases, then start validation with POST /v2/erp/imports/{importId}:validate.
+   * Pass `import_id` to repoint an existing PENDING import at a different file instead, keeping its id and its place in the history.
    */
   'createErpImport'(
     parameters?: Parameters<UnknownParamsObject> | null,
     data?: Paths.CreateErpImport.RequestBody,
     config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.CreateErpImport.Responses.$201>
+  ): OperationResponse<Paths.CreateErpImport.Responses.$200 | Paths.CreateErpImport.Responses.$201>
   /**
    * getErpImport - getErpImport
    * 
@@ -9161,6 +9390,16 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetErpImport.Responses.$200>
+  /**
+   * deleteErpImport - deleteErpImport
+   * 
+   * Remove an import and the file it owns. Allowed from any status: an import whose run is still in flight is stopped by the deletion, and rows it already wrote stay written.
+   */
+  'deleteErpImport'(
+    parameters?: Parameters<Paths.DeleteErpImport.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.DeleteErpImport.Responses.$204>
   /**
    * validateErpImport - validateErpImport
    * 
@@ -9455,6 +9694,57 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ListUseCaseHistory.Responses.$200>
+  }
+  ['/v1/integrations/{integrationId}/documentation']: {
+    /**
+     * listDocumentationPages - listDocumentationPages
+     * 
+     * Retrieve all documentation pages of an integration, without their markdown content.
+     * An integration has at most one general page plus at most one page per use case.
+     * The page id is 'general' for the integration-wide page, otherwise the use case ID.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.ListDocumentationPages.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ListDocumentationPages.Responses.$200>
+  }
+  ['/v1/integrations/{integrationId}/documentation/{docId}']: {
+    /**
+     * getDocumentationPage - getDocumentationPage
+     * 
+     * Retrieve a single documentation page including its markdown content
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetDocumentationPage.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetDocumentationPage.Responses.$200>
+    /**
+     * upsertDocumentationPage - upsertDocumentationPage
+     * 
+     * Create or update the documentation page identified by docId.
+     * Upsert semantics enforce the invariant of one general page per
+     * integration and one page per use case. For use case pages the
+     * use case must exist.
+     * 
+     */
+    'put'(
+      parameters?: Parameters<Paths.UpsertDocumentationPage.PathParameters> | null,
+      data?: Paths.UpsertDocumentationPage.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.UpsertDocumentationPage.Responses.$200>
+    /**
+     * deleteDocumentationPage - deleteDocumentationPage
+     * 
+     * Delete a documentation page
+     */
+    'delete'(
+      parameters?: Parameters<Paths.DeleteDocumentationPage.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.DeleteDocumentationPage.Responses.$200>
   }
   ['/v2/integrations']: {
     /**
@@ -10031,12 +10321,13 @@ export interface PathsDictionary {
      * createErpImport - createErpImport
      * 
      * Register an already-uploaded file (S3 ref) as a pricing-file import job. Returns the job and a file preview. Nothing runs yet: no use case is chosen and no validation starts here. Optionally rank candidates with POST /v2/erp/imports/{importId}:suggest-use-cases, then start validation with POST /v2/erp/imports/{importId}:validate.
+     * Pass `import_id` to repoint an existing PENDING import at a different file instead, keeping its id and its place in the history.
      */
     'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
       data?: Paths.CreateErpImport.RequestBody,
       config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.CreateErpImport.Responses.$201>
+    ): OperationResponse<Paths.CreateErpImport.Responses.$200 | Paths.CreateErpImport.Responses.$201>
     /**
      * listErpImports - listErpImports
      * 
@@ -10064,6 +10355,16 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetErpImport.Responses.$200>
+    /**
+     * deleteErpImport - deleteErpImport
+     * 
+     * Remove an import and the file it owns. Allowed from any status: an import whose run is still in flight is stopped by the deletion, and rows it already wrote stay written.
+     */
+    'delete'(
+      parameters?: Parameters<Paths.DeleteErpImport.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.DeleteErpImport.Responses.$204>
   }
   ['/v2/erp/imports/{importId}:validate']: {
     /**
@@ -10143,6 +10444,8 @@ export type CreateUseCaseRequest = Components.Schemas.CreateUseCaseRequest;
 export type CreateUseCaseRequestBase = Components.Schemas.CreateUseCaseRequestBase;
 export type DeleteIntegrationAppMappingRequest = Components.Schemas.DeleteIntegrationAppMappingRequest;
 export type DeliveryConfig = Components.Schemas.DeliveryConfig;
+export type DocumentationPage = Components.Schemas.DocumentationPage;
+export type DocumentationPageSummary = Components.Schemas.DocumentationPageSummary;
 export type EmbeddedFileProxyUseCaseRequest = Components.Schemas.EmbeddedFileProxyUseCaseRequest;
 export type EmbeddedInboundUseCaseRequest = Components.Schemas.EmbeddedInboundUseCaseRequest;
 export type EmbeddedManagedCallUseCaseRequest = Components.Schemas.EmbeddedManagedCallUseCaseRequest;
@@ -10307,6 +10610,7 @@ export type UpdateOutboundUseCaseRequest = Components.Schemas.UpdateOutboundUseC
 export type UpdateSecureProxyUseCaseRequest = Components.Schemas.UpdateSecureProxyUseCaseRequest;
 export type UpdateUseCaseRequest = Components.Schemas.UpdateUseCaseRequest;
 export type UpdateUseCaseRequestBase = Components.Schemas.UpdateUseCaseRequestBase;
+export type UpsertDocumentationPageRequest = Components.Schemas.UpsertDocumentationPageRequest;
 export type UpsertIntegrationWithUseCasesRequest = Components.Schemas.UpsertIntegrationWithUseCasesRequest;
 export type UseCase = Components.Schemas.UseCase;
 export type UseCaseBase = Components.Schemas.UseCaseBase;

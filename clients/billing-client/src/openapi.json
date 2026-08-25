@@ -660,6 +660,12 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "$ref": "#/components/parameters/HistoryChangeTypes"
+          },
+          {
+            "$ref": "#/components/parameters/IncludeHistory"
           }
         ],
         "responses": {
@@ -693,6 +699,12 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "$ref": "#/components/parameters/HistoryChangeTypes"
+          },
+          {
+            "$ref": "#/components/parameters/IncludeHistory"
           }
         ],
         "responses": {
@@ -729,6 +741,9 @@
           },
           {
             "$ref": "#/components/parameters/ConfigurationHistoryChangeType"
+          },
+          {
+            "$ref": "#/components/parameters/HistoryChangeTypes"
           },
           {
             "$ref": "#/components/parameters/From"
@@ -771,6 +786,9 @@
           },
           {
             "$ref": "#/components/parameters/ConfigurationHistoryChangeType"
+          },
+          {
+            "$ref": "#/components/parameters/HistoryChangeTypes"
           },
           {
             "$ref": "#/components/parameters/From"
@@ -877,11 +895,33 @@
         "schema": {
           "type": "string",
           "enum": [
-            "installment_amount_changed"
+            "installment_amount_changed",
+            "contract_pricing_changed"
           ],
           "default": "installment_amount_changed"
         },
         "description": "Billing configuration change type to return."
+      },
+      "HistoryChangeTypes": {
+        "name": "history_change_types",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "string",
+          "pattern": "^(installment_amount_changed|contract_pricing_changed)(,(installment_amount_changed|contract_pricing_changed))*$",
+          "example": "installment_amount_changed,contract_pricing_changed"
+        },
+        "description": "Comma-separated billing configuration change types to return. When omitted, installment history is returned by default."
+      },
+      "IncludeHistory": {
+        "name": "include_history",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "boolean",
+          "default": true
+        },
+        "description": "Include recent configuration history in the pricing information response. Set to false when using the dedicated configuration history endpoint."
       }
     },
     "securitySchemes": {
@@ -1856,6 +1896,10 @@
           "price_title": {
             "type": "string"
           },
+          "tariff_type": {
+            "type": "string",
+            "description": "Semantic tariff register for the price component, such as HT or NT."
+          },
           "pricing_model": {
             "type": "string"
           },
@@ -1941,12 +1985,59 @@
           "base_price": {
             "$ref": "#/components/schemas/PriceContext"
           },
+          "base_prices": {
+            "type": "array",
+            "description": "Canonically ordered base-price components. The singular base_price remains for compatibility.",
+            "items": {
+              "$ref": "#/components/schemas/PriceContext"
+            }
+          },
           "working_price": {
             "$ref": "#/components/schemas/PriceContext"
+          },
+          "working_prices": {
+            "type": "array",
+            "description": "Canonically ordered working-price components, including separate HT and NT prices when present. The singular working_price remains for compatibility.",
+            "items": {
+              "$ref": "#/components/schemas/PriceContext"
+            }
           }
         }
       },
-      "ConfigurationHistoryRow": {
+      "ContractTariffContext": {
+        "type": "object",
+        "properties": {
+          "product_id": {
+            "type": "string"
+          },
+          "product_title": {
+            "type": "string"
+          }
+        }
+      },
+      "ContractPricingContext": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ConfigurationHistoryContext"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "tariff": {
+                "$ref": "#/components/schemas/ContractTariffContext"
+              },
+              "tariffs": {
+                "type": "array",
+                "description": "Canonically ordered tariff products for composite Contracts. The singular tariff is populated when exactly one tariff product exists.",
+                "items": {
+                  "$ref": "#/components/schemas/ContractTariffContext"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "ConfigurationHistoryRowBase": {
         "type": "object",
         "required": [
           "event_id",
@@ -1957,8 +2048,7 @@
           "schema_version",
           "changed_at",
           "created_at",
-          "source",
-          "new_value"
+          "source"
         ],
         "properties": {
           "event_id": {
@@ -1976,12 +2066,6 @@
           },
           "entity_id": {
             "type": "string"
-          },
-          "change_type": {
-            "type": "string",
-            "enum": [
-              "installment_amount_changed"
-            ]
           },
           "schema_version": {
             "type": "integer",
@@ -2021,20 +2105,112 @@
           },
           "source_reference": {
             "type": "string"
+          }
+        }
+      },
+      "InstallmentAmountChangedHistoryRow": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ConfigurationHistoryRowBase"
           },
-          "previous_value": {
-            "nullable": true,
-            "allOf": [
-              {
+          {
+            "type": "object",
+            "required": [
+              "change_type",
+              "new_value"
+            ],
+            "properties": {
+              "change_type": {
+                "type": "string",
+                "enum": [
+                  "installment_amount_changed"
+                ]
+              },
+              "previous_value": {
+                "nullable": true,
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/InstallmentAmountValue"
+                  }
+                ]
+              },
+              "new_value": {
                 "$ref": "#/components/schemas/InstallmentAmountValue"
+              },
+              "context": {
+                "$ref": "#/components/schemas/ConfigurationHistoryContext"
               }
-            ]
+            }
+          }
+        ]
+      },
+      "ContractPricingChangedHistoryRow": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ConfigurationHistoryRowBase"
           },
-          "new_value": {
-            "$ref": "#/components/schemas/InstallmentAmountValue"
+          {
+            "type": "object",
+            "required": [
+              "change_type",
+              "previous_context",
+              "new_context",
+              "changed_fields"
+            ],
+            "properties": {
+              "change_type": {
+                "type": "string",
+                "enum": [
+                  "contract_pricing_changed"
+                ]
+              },
+              "previous_context": {
+                "nullable": true,
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/ContractPricingContext"
+                  }
+                ]
+              },
+              "new_context": {
+                "nullable": true,
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/ContractPricingContext"
+                  }
+                ]
+              },
+              "changed_fields": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "tariff",
+                    "base_price",
+                    "working_price",
+                    "discount",
+                    "dynamic_tariff_configuration"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "ConfigurationHistoryRow": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/InstallmentAmountChangedHistoryRow"
           },
-          "context": {
-            "$ref": "#/components/schemas/ConfigurationHistoryContext"
+          {
+            "$ref": "#/components/schemas/ContractPricingChangedHistoryRow"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "change_type",
+          "mapping": {
+            "installment_amount_changed": "#/components/schemas/InstallmentAmountChangedHistoryRow",
+            "contract_pricing_changed": "#/components/schemas/ContractPricingChangedHistoryRow"
           }
         }
       },

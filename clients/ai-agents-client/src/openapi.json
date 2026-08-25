@@ -45,7 +45,7 @@
         "tags": [
           "Agents Configuration"
         ],
-        "summary": "Create Agent definition",
+        "summary": "createAgent",
         "description": "Creates a new custom agent. System skills cannot be created via this endpoint.",
         "operationId": "createAgent",
         "security": [
@@ -90,7 +90,7 @@
         "tags": [
           "Agents Configuration"
         ],
-        "summary": "List all agent configurations",
+        "summary": "listAgents",
         "description": "Lists agents from both system skills and custom agents.\nUse query parameters to filter by source, availability, or entity schema.\n",
         "operationId": "listAgents",
         "parameters": [
@@ -148,7 +148,7 @@
         "tags": [
           "Agents Configuration"
         ],
-        "summary": "Get the agent configuration by ID",
+        "summary": "getAgentById",
         "description": "Retrieves an agent by ID. Supports both:\n- System skill IDs (prefixed): \"skill:email-categorizer\"\n- Custom agent IDs (UUID): \"0336a235-9417-4dd8-894c-fe81285bba75\"\n",
         "operationId": "getAgentById",
         "security": [
@@ -193,7 +193,7 @@
         "tags": [
           "Agents Configuration"
         ],
-        "summary": "Update the agent configuration by ID",
+        "summary": "updateAgentById",
         "description": "Updates a custom agent. System skills cannot be updated via this endpoint.",
         "operationId": "updateAgentById",
         "security": [
@@ -248,7 +248,7 @@
         "tags": [
           "Agents Configuration"
         ],
-        "summary": "Delete the agent configuration by ID",
+        "summary": "deleteAgentById",
         "description": "Deletes a custom agent. System skills cannot be deleted via this endpoint.",
         "security": [
           {
@@ -288,7 +288,7 @@
         "tags": [
           "Agent Execution"
         ],
-        "summary": "Execute an agent",
+        "summary": "executeAgent",
         "description": "Executes an agent (system skill or custom agent).\nSupports both:\n- System skill IDs (prefixed): \"skill:email-categorizer\"\n- Custom agent IDs (UUID): \"0336a235-9417-4dd8-894c-fe81285bba75\"\n",
         "operationId": "executeAgent",
         "security": [
@@ -355,7 +355,7 @@
         "tags": [
           "Agent Execution"
         ],
-        "summary": "Execute an agent with streaming response",
+        "summary": "executeAgentStream",
         "description": "Executes an agent with real-time streaming of tokens and tool events.\nReturns Server-Sent Events (SSE) stream with token-by-token output,\ntool call progress, and completion status.\n\nUnlike the async `/execute` endpoint which returns immediately with\nan execution_id for polling, this endpoint streams all events in real-time.\n\nSupports both:\n- System skill IDs (prefixed): \"skill:email-categorizer\"\n- Custom agent IDs (UUID): \"0336a235-9417-4dd8-894c-fe81285bba75\"\n",
         "operationId": "executeAgentStream",
         "security": [
@@ -422,7 +422,8 @@
         "tags": [
           "Agent Execution"
         ],
-        "summary": "List executions",
+        "summary": "listExecutions",
+        "description": "List executions",
         "operationId": "listExecutions",
         "security": [
           {
@@ -485,7 +486,8 @@
         "tags": [
           "Agent Execution"
         ],
-        "summary": "Get execution by ID",
+        "summary": "getExecution",
+        "description": "Get execution by ID",
         "operationId": "getExecution",
         "security": [
           {
@@ -530,7 +532,8 @@
         "tags": [
           "Agent Execution"
         ],
-        "summary": "Cancel execution",
+        "summary": "cancelExecution",
+        "description": "Cancel execution",
         "operationId": "cancelExecution",
         "security": [
           {
@@ -587,7 +590,7 @@
         "tags": [
           "Agent Execution"
         ],
-        "summary": "Get execution trace/iterations",
+        "summary": "getExecutionTrace",
         "description": "Returns the step-by-step reasoning and tool calls for ReAct mode executions. Returns empty iterations array for direct mode executions.",
         "operationId": "getExecutionTrace",
         "security": [
@@ -759,7 +762,7 @@
         "tags": [
           "Agent Execution"
         ],
-        "summary": "Approve pending action",
+        "summary": "approveExecution",
         "description": "Approves a pending tool action when execution is in waiting_approval status",
         "operationId": "approveExecution",
         "security": [
@@ -826,7 +829,7 @@
         "tags": [
           "Agent Execution"
         ],
-        "summary": "Reject pending action",
+        "summary": "rejectExecution",
         "description": "Rejects a pending tool action when execution is in waiting_approval status",
         "operationId": "rejectExecution",
         "security": [
@@ -894,7 +897,7 @@
         "tags": [
           "Agent Execution"
         ],
-        "summary": "Reconnect to execution stream",
+        "summary": "streamExecution",
         "description": "Reconnects to an execution's event stream after approval. Replays missed events from event log and continues streaming if execution is still running.",
         "operationId": "streamExecution",
         "security": [
@@ -950,7 +953,7 @@
         "tags": [
           "Chat"
         ],
-        "summary": "Streaming chat with AI agent",
+        "summary": "chat",
         "description": "Initiates a streaming chat session with an AI agent. Supports server-side conversation memory via conversationId or client-provided history via clientHistory.",
         "operationId": "chat",
         "security": [
@@ -1007,7 +1010,7 @@
         "tags": [
           "Conversations"
         ],
-        "summary": "List conversations",
+        "summary": "listConversations",
         "description": "Lists conversations for the authenticated user, sorted by most recent.",
         "operationId": "listConversations",
         "security": [
@@ -1071,7 +1074,7 @@
         "tags": [
           "Conversations"
         ],
-        "summary": "Get conversation with messages",
+        "summary": "getConversation",
         "description": "Retrieves a conversation and its message history.",
         "operationId": "getConversation",
         "security": [
@@ -1126,7 +1129,7 @@
         "tags": [
           "Conversations"
         ],
-        "summary": "Delete conversation",
+        "summary": "deleteConversation",
         "description": "Deletes a conversation and all its messages.",
         "operationId": "deleteConversation",
         "security": [
@@ -1167,7 +1170,7 @@
         "tags": [
           "Conversations"
         ],
-        "summary": "Submit feedback for an assistant turn",
+        "summary": "submitConversationFeedback",
         "description": "Records a thumbs up/down (with optional comment) for the assistant turn identified by its Langfuse trace id. The rating is persisted on the message and mirrored to Langfuse as a trace score.\n",
         "operationId": "submitConversationFeedback",
         "security": [
@@ -1505,14 +1508,6 @@
               "type": "string"
             },
             "description": "For batch approval - list of action IDs to reject. Actions not in approved_action_ids are implicitly rejected."
-          },
-          "share_scope": {
-            "type": "string",
-            "enum": [
-              "primary_only",
-              "primary_and_relations"
-            ],
-            "description": "For `partnering.proposeAssignment` approvals. `primary_only` (default) shares only the primary entity; `primary_and_relations` also shares every entity in the proposal's `related_entities` as a child of the primary. Ignored by other tools.\n"
           }
         }
       },
@@ -1884,6 +1879,105 @@
           },
           "iteration_count": {
             "type": "integer"
+          }
+        }
+      },
+      "AgentExecutionEventStatus": {
+        "type": "string",
+        "description": "Lifecycle status carried on an agent execution event.\n\nDeliberately narrower than `ExecutionStatus`, which is the stored status of\nthe execution row: `pending` and `running` both surface as `started`, and\n`cancelled` surfaces as `failed`. Consumers must not assume the two\nvocabularies are interchangeable.\n",
+        "enum": [
+          "started",
+          "completed",
+          "failed",
+          "approval_required"
+        ]
+      },
+      "AgentExecutionEvent": {
+        "type": "object",
+        "description": "Detail payload of the `agent-execution-status-update` event, published on\nthe AI Agents event bus with source `ai-agents`.\n\n`execution_context` and `input` are present on every status, so a consumer\ncan tell whether an execution is theirs, and what it belonged to, from the\nterminal event alone — without a secondary lookup.\n",
+        "required": [
+          "executionId",
+          "agentId",
+          "orgId",
+          "execution_status"
+        ],
+        "properties": {
+          "executionId": {
+            "type": "string",
+            "description": "The agent execution this event reports on"
+          },
+          "agentId": {
+            "$ref": "#/components/schemas/AgentId"
+          },
+          "orgId": {
+            "type": "string"
+          },
+          "userId": {
+            "type": "string"
+          },
+          "execution_status": {
+            "$ref": "#/components/schemas/AgentExecutionEventStatus"
+          },
+          "execution_context": {
+            "$ref": "#/components/schemas/ExecutionContext"
+          },
+          "input": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "The execution input, as supplied by the caller of the execute endpoint"
+          },
+          "output": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Present on `completed` — the execution result"
+          },
+          "error": {
+            "type": "object",
+            "description": "Present on `failed`",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "code": {
+                "type": "string"
+              },
+              "stack": {
+                "type": "string"
+              }
+            }
+          },
+          "duration": {
+            "type": "integer",
+            "description": "Wall-clock duration in milliseconds, present on `completed`"
+          },
+          "iterations": {
+            "type": "integer"
+          },
+          "iteration": {
+            "type": "integer"
+          },
+          "message": {
+            "type": "string",
+            "description": "Present on `approval_required` — what is awaiting approval"
+          },
+          "toolCalls": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "args": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       },

@@ -894,7 +894,7 @@ declare namespace Components {
         export interface CustomFlowActionComponent {
             component_type: "CUSTOM_FLOW_ACTION";
             configuration: /**
-             * Configuration of an external-integration flow action. Sandboxed code belongs in the app's `functions` (type `workflow`) instead — workflow functions are selectable directly in the flow builder without a component.
+             * Configuration of a flow action component. `external_integration` calls an external HTTP endpoint; `function` runs a workflow-type app function in the epilot sandbox.
              *
              */
             CustomFlowConfig;
@@ -903,14 +903,14 @@ declare namespace Components {
             };
         }
         /**
-         * Configuration of an external-integration flow action. Sandboxed code belongs in the app's `functions` (type `workflow`) instead — workflow functions are selectable directly in the flow builder without a component.
+         * Configuration of a flow action component. `external_integration` calls an external HTTP endpoint; `function` runs a workflow-type app function in the epilot sandbox.
          *
          */
         export type CustomFlowConfig = /**
-         * Configuration of an external-integration flow action. Sandboxed code belongs in the app's `functions` (type `workflow`) instead — workflow functions are selectable directly in the flow builder without a component.
+         * Configuration of a flow action component. `external_integration` calls an external HTTP endpoint; `function` runs a workflow-type app function in the epilot sandbox.
          *
          */
-        ExternalIntegrationCustomActionConfig;
+        ExternalIntegrationCustomActionConfig | FunctionRefCustomActionConfig;
         export interface CustomPageComponent {
             component_type: "CUSTOM_PAGE";
             configuration: CustomPageConfig;
@@ -1222,13 +1222,10 @@ declare namespace Components {
              */
             name: string; // ^[a-z0-9][a-z0-9-]{0,63}$
             /**
-             * Where the function can be used. `workflow` functions are selectable as actions in the flow builder and run with entity context. `scheduled` functions run automatically per installation on their cron schedule.
+             * Where the function can be used. `workflow` functions are referenced by CUSTOM_FLOW_ACTION components (type `function`) and run with entity context. `scheduled` functions run automatically per installation on their cron schedule.
              *
              */
             type: "workflow" | "scheduled";
-            /**
-             * Human-readable display name, e.g. shown in the flow builder action picker
-             */
             label?: {
                 /**
                  * English translation
@@ -1277,17 +1274,26 @@ declare namespace Components {
              *
              */
             secrets?: string[];
+        }
+        export interface FunctionRefCustomActionConfig {
             /**
-             * Workflow functions only — wait for the callback_url to be called before completing the flow action
-             *
+             * Name of the custom action
+             */
+            name?: string;
+            /**
+             * Description of the custom action
+             */
+            description?: string;
+            /**
+             * Wait for callback_url to be called before completing the action
              */
             wait_for_callback?: boolean;
+            type: "function";
             /**
-             * Workflow functions only — optional custom config UI shown in the flow builder
+             * Name of a `workflow`-type function of the same app version. The component provides the org-facing contract (name, options, config surface); the referenced function provides the code.
+             *
              */
-            surfaces?: {
-                flow_action_config?: AppBridgeSurfaceConfig;
-            };
+            function_name: string;
         }
         /**
          * Required grants for the app in order to call APIs for the installing tenant
@@ -4359,6 +4365,7 @@ export type ExternalProductCatalogConfig = Components.Schemas.ExternalProductCat
 export type ExternalProductCatalogHookProductRecommendations = Components.Schemas.ExternalProductCatalogHookProductRecommendations;
 export type ExternalProductCatalogHookProducts = Components.Schemas.ExternalProductCatalogHookProducts;
 export type FunctionDefinition = Components.Schemas.FunctionDefinition;
+export type FunctionRefCustomActionConfig = Components.Schemas.FunctionRefCustomActionConfig;
 export type Grants = Components.Schemas.Grants;
 export type Installation = Components.Schemas.Installation;
 export type InternalReview = Components.Schemas.InternalReview;

@@ -162,6 +162,18 @@
         "responses": {}
       }
     },
+    "/v1/message/unread:counts": {
+      "post": {
+        "operationId": "getUnreadCounts",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v2/message/messages/{id}/unread": {
       "post": {
         "operationId": "markUnreadMessageV2",

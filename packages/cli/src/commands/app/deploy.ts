@@ -84,9 +84,19 @@ export default defineCommand({
         if (dryRun) {
           log.info(`[dry-run] Would create new version (cloned from ${targetVersion})`);
         } else {
-          const result = await client.cloneVersion(appId!, targetVersion);
-          targetVersion = result.version;
-          log.success(`Created version ${targetVersion}`);
+          try {
+            const result = await client.cloneVersion(appId!, targetVersion);
+            targetVersion = result.version;
+            log.success(`Created version ${targetVersion}`);
+          } catch (err) {
+            if (err instanceof Error && err.message.includes('disable dev mode')) {
+              log.error('Cannot create a new version while development mode is enabled.');
+              log.info('Disable it first, then re-run the deploy:');
+              log.dim(`  epilot app api patchMetadata --appId ${appId} -d '{"dev_mode": false}'`);
+              process.exit(1);
+            }
+            throw err;
+          }
         }
       }
     }
@@ -130,32 +140,12 @@ export default defineCommand({
           log.error(`Handler not found for function "${fn.name}": ${handlerPath} — run "npm run build" first`);
           process.exit(1);
         }
-        const { handler, assets: fnAssets, ...rest } = fn;
-        const payload: Record<string, unknown> = { ...rest, code: readFileSync(handlerPath, 'utf-8') };
-
-        // Workflow functions may ship a config UI (zip) shown in the flow builder
-        if (fnAssets?.zip) {
-          const zipPath = resolve(manifestDir, fnAssets.zip);
-          if (!existsSync(zipPath)) {
-            log.warn(`Config UI directory not found for function "${fn.name}": ${zipPath} — skipping surface`);
-          } else if (dryRun) {
-            log.info(`[dry-run] Would zip and upload config UI for function ${fn.name}`);
-          } else {
-            const { upload_url, artifact_url } = await client.createZipUploadUrl(appId!, targetVersion, `fn-${fn.name}`);
-            const zipSize = await uploadDirectoryAsZip(upload_url, zipPath);
-            log.success(`Uploaded config UI for function ${fn.name} (${formatFileSize(zipSize)})`);
-            payload.surfaces = {
-              flow_action_config: {
-                app_url: artifact_url.replace(/\/[^/]+$/, '/index.html'),
-                zip_url: artifact_url,
-              },
-            };
-          }
-        }
-
-        functionsPayload.push(payload);
+        const { handler, ...rest } = fn;
+        functionsPayload.push({ ...rest, code: readFileSync(handlerPath, 'utf-8') });
         if (dryRun) {
-          log.info(`[dry-run] Would deploy ${fn.type} function ${fn.name}${fn.schedule ? ` (schedule: ${fn.schedule})` : ''}`);
+          log.info(
+            `[dry-run] Would deploy ${fn.type} function ${fn.name}${fn.schedule ? ` (schedule: ${fn.schedule})` : ''}`,
+          );
         }
       }
     }
@@ -171,8 +161,9 @@ export default defineCommand({
         if (!isNew && manifest.permissions?.length) {
           try {
             const remoteVersion = await client.getVersion(appId!, targetVersion);
-            const remoteGrants = (remoteVersion.role as { grants?: { action: string; resource?: string }[] } | undefined)
-              ?.grants;
+            const remoteGrants = (
+              remoteVersion.role as { grants?: { action: string; resource?: string }[] } | undefined
+            )?.grants;
             grantsChanged = normalizeGrants(remoteGrants) !== normalizeGrants(manifest.permissions);
           } catch {
             // Cannot compare — keep grantsChanged = true and patch as before

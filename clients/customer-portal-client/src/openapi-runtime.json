@@ -1663,6 +1663,19 @@
         "responses": {}
       }
     },
+    "/v2/portal/user/file/{id}/preview": {
+      "get": {
+        "operationId": "getFilePreview",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v2/portal/user/file/{id}/downloaded": {
       "post": {
         "operationId": "trackFileDownloaded",
@@ -1954,6 +1967,12 @@
         "responses": {}
       }
     },
+    "/v2/portal/engagement/tasks": {
+      "get": {
+        "operationId": "getOutstandingTasks",
+        "responses": {}
+      }
+    },
     "/v2/portal/entity/{slug}/{id}/workflows/linearized": {
       "get": {
         "operationId": "getEntityPortalWorkflows",
@@ -1969,6 +1988,18 @@
             "required": true
           }
         ],
+        "responses": {}
+      }
+    },
+    "/v2/portal/entities/workflows/linearized/batch": {
+      "post": {
+        "operationId": "getEntityPortalWorkflowsBatch",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
         "responses": {}
       }
     },
@@ -2398,6 +2429,49 @@
             "application/json": {}
           }
         },
+        "responses": {}
+      }
+    },
+    "/v2/portal/notifications": {
+      "get": {
+        "operationId": "listPortalNotifications",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "cursor",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/portal/notifications/unread-count": {
+      "get": {
+        "operationId": "getPortalNotificationsUnreadCount",
+        "responses": {}
+      }
+    },
+    "/v2/portal/notifications/read-all": {
+      "put": {
+        "operationId": "markAllPortalNotificationsRead",
+        "responses": {}
+      }
+    },
+    "/v2/portal/notifications/{id}/read": {
+      "put": {
+        "operationId": "markPortalNotificationRead",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
         "responses": {}
       }
     },

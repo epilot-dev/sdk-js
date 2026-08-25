@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Integration Toolkit API",
-    "version": "1.15.0",
+    "version": "1.18.0",
     "description": "API for integrating with external systems in a standardised way."
   },
   "tags": [
@@ -1621,6 +1621,239 @@
           },
           "404": {
             "description": "Use case not found"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/integrations/{integrationId}/documentation": {
+      "get": {
+        "operationId": "listDocumentationPages",
+        "summary": "listDocumentationPages",
+        "description": "Retrieve all documentation pages of an integration, without their markdown content.\nAn integration has at most one general page plus at most one page per use case.\nThe page id is 'general' for the integration-wide page, otherwise the use case ID.\n",
+        "tags": [
+          "integrations"
+        ],
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true,
+            "description": "The integration ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved documentation pages",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "pages"
+                  ],
+                  "properties": {
+                    "pages": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/DocumentationPageSummary"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "description": "Integration not found"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/integrations/{integrationId}/documentation/{docId}": {
+      "get": {
+        "operationId": "getDocumentationPage",
+        "summary": "getDocumentationPage",
+        "description": "Retrieve a single documentation page including its markdown content",
+        "tags": [
+          "integrations"
+        ],
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true,
+            "description": "The integration ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "docId",
+            "in": "path",
+            "required": true,
+            "description": "'general' for the integration-wide page, otherwise a use case ID",
+            "schema": {
+              "type": "string",
+              "pattern": "^(general|[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved documentation page",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentationPage"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "description": "Documentation page not found"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "put": {
+        "operationId": "upsertDocumentationPage",
+        "summary": "upsertDocumentationPage",
+        "description": "Create or update the documentation page identified by docId.\nUpsert semantics enforce the invariant of one general page per\nintegration and one page per use case. For use case pages the\nuse case must exist.\n",
+        "tags": [
+          "integrations"
+        ],
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true,
+            "description": "The integration ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "docId",
+            "in": "path",
+            "required": true,
+            "description": "'general' for the integration-wide page, otherwise a use case ID",
+            "schema": {
+              "type": "string",
+              "pattern": "^(general|[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpsertDocumentationPageRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Documentation page created or updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentationPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "description": "Integration or use case not found"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteDocumentationPage",
+        "summary": "deleteDocumentationPage",
+        "description": "Delete a documentation page",
+        "tags": [
+          "integrations"
+        ],
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true,
+            "description": "The integration ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "docId",
+            "in": "path",
+            "required": true,
+            "description": "'general' for the integration-wide page, otherwise a use case ID",
+            "schema": {
+              "type": "string",
+              "pattern": "^(general|[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Documentation page deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "description": "Documentation page not found"
           },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
@@ -3744,7 +3977,7 @@
       "post": {
         "operationId": "createErpImport",
         "summary": "createErpImport",
-        "description": "Register an already-uploaded file (S3 ref) as a pricing-file import job. Returns the job and a file preview. Nothing runs yet: no use case is chosen and no validation starts here. Optionally rank candidates with POST /v2/erp/imports/{importId}:suggest-use-cases, then start validation with POST /v2/erp/imports/{importId}:validate.",
+        "description": "Register an already-uploaded file (S3 ref) as a pricing-file import job. Returns the job and a file preview. Nothing runs yet: no use case is chosen and no validation starts here. Optionally rank candidates with POST /v2/erp/imports/{importId}:suggest-use-cases, then start validation with POST /v2/erp/imports/{importId}:validate.\nPass `import_id` to repoint an existing PENDING import at a different file instead, keeping its id and its place in the history.",
         "tags": [
           "erp-imports"
         ],
@@ -3759,8 +3992,18 @@
           }
         },
         "responses": {
+          "200": {
+            "description": "The named import now points at this file. Returned only when `import_id` was supplied — no `Location`, because nothing was created.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateErpImportResponse"
+                }
+              }
+            }
+          },
           "201": {
-            "description": "Import job created",
+            "description": "Import job created. Returned only when `import_id` was omitted.",
             "headers": {
               "Location": {
                 "description": "URL of the created job (`/v2/erp/imports/{importId}`).",
@@ -3782,6 +4025,12 @@
           },
           "403": {
             "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
           },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
@@ -3868,6 +4117,38 @@
                 }
               }
             }
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteErpImport",
+        "summary": "deleteErpImport",
+        "description": "Remove an import and the file it owns. Allowed from any status: an import whose run is still in flight is stopped by the deletion, and rows it already wrote stay written.",
+        "tags": [
+          "erp-imports"
+        ],
+        "parameters": [
+          {
+            "name": "importId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "The import and its file were removed"
           },
           "403": {
             "$ref": "#/components/responses/Forbidden"
@@ -4138,6 +4419,10 @@
             "type": "boolean",
             "default": false,
             "description": "Return a sample of the file's first rows in `preview`. Only controls whether the sample comes BACK — the head is read either way, because that read is how an unreadable file gets refused."
+          },
+          "import_id": {
+            "type": "string",
+            "description": "Repoint an EXISTING import at this file instead of registering a new one — same row, same id, so iterating on which file to import leaves one entry in the history rather than one per attempt.\nOnly a PENDING import may be repointed; any other status returns 409 with code `IMPORT_NOT_REPLACEABLE`. Past the first check the previous verdict is what tells the user what to fix, and a job that reached the execute phase may already have published rows under `correlation_id`.\nAn id that names nothing returns 404. It never falls back to registering a new import: a stale id must fail loudly rather than quietly produce a second one."
           }
         }
       },
@@ -4450,6 +4735,15 @@
           },
           "s3_input_ref": {
             "$ref": "#/components/schemas/S3Reference"
+          },
+          "size_bytes": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Size of the uploaded file, recorded at registration. Present on every job registered from version 1.17.0 onwards; absent on older rows, which were written before it was captured."
+          },
+          "column_count": {
+            "type": "integer",
+            "description": "How many effective columns the file's header yielded — the length of the `preview.columns` returned at registration, kept so a job loaded later can still describe its file. The preview ROWS are deliberately not stored: they are a sample for the person about to choose a mapping, not job state. Present on every job registered from version 1.17.0 onwards."
           },
           "validation": {
             "$ref": "#/components/schemas/ErpImportValidation"
@@ -8199,7 +8493,7 @@
       },
       "FileProxyUploadConfig": {
         "type": "object",
-        "description": "Upload-side settings for a file_proxy use case with `direction: upload`.\nEverything about WHAT is sent lives on the outbound mapping\n(see `FileProxyDeliveryConfig`); this object only governs HOW the transfer is bounded\nand judged.\n",
+        "description": "Upload-side settings for a file_proxy use case with `direction: upload`.\nThe surrounding file_proxy configuration owns WHAT and HOW to send: `fan_out`,\n`file_source`, `params_mapping`, lookups, constants, auth, and steps. This nested object\ngoverns upload-specific limits and how the final external response is judged. The\noutbound mapping remains a pure pointer to the recipe (see `FileProxyDeliveryConfig`).\n",
         "properties": {
           "max_file_bytes": {
             "type": "integer",
@@ -8212,7 +8506,7 @@
             "minimum": 1,
             "maximum": 100,
             "default": 8,
-            "description": "Maximum delivery attempts per item before the delivery is marked failed and the\nmessage is dead-lettered. Attempts are spaced by an exponential, jittered backoff\nspanning roughly 16 hours over the default 8 attempts, so an ERP maintenance window\ndoes not exhaust them.\n\nLives here rather than on the outbound delivery because how hard to retry is a\nproperty of the transport — the same judgement as `max_file_bytes` — and the outbound\ndelivery is a pure pointer.\n"
+            "description": "Maximum delivery attempts per item before the delivery is marked failed. Attempts\nare spaced by an exponential, jittered backoff. The default 8 attempts schedule at\nmost 7 delays, totaling about 7 hours 40 minutes before jitter, so a normal ERP\nmaintenance window does not immediately exhaust them.\n\nLives here rather than on the outbound delivery because how hard to retry is a\nproperty of the transport — the same judgement as `max_file_bytes` — and the outbound\ndelivery is a pure pointer.\n"
           },
           "success_when": {
             "type": "string",
@@ -8751,7 +9045,7 @@
           "id": {
             "type": "string",
             "format": "uuid",
-            "description": "Unique identifier for this mapping"
+            "description": "Unique identifier for this mapping; generated by the API when omitted"
           },
           "name": {
             "type": "string",
@@ -11027,6 +11321,110 @@
             "items": {
               "$ref": "#/components/schemas/TimeSeriesBreakdownItemV2"
             }
+          }
+        }
+      },
+      "DocumentationPageSummary": {
+        "type": "object",
+        "description": "Documentation page metadata without the markdown content",
+        "required": [
+          "id",
+          "integration_id",
+          "scope",
+          "title",
+          "created_at",
+          "updated_at"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "'general' for the integration-wide page, otherwise the use case ID",
+            "example": "general"
+          },
+          "integration_id": {
+            "type": "string",
+            "format": "uuid",
+            "readOnly": true
+          },
+          "scope": {
+            "type": "string",
+            "enum": [
+              "integration",
+              "use_case"
+            ],
+            "description": "Whether the page documents the whole integration or a single use case"
+          },
+          "use_case_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The linked use case. Only set when scope is use_case."
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 150
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "created_by": {
+            "type": "string",
+            "nullable": true,
+            "description": "User ID that created the page",
+            "readOnly": true
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "updated_by": {
+            "type": "string",
+            "nullable": true,
+            "description": "User ID of the last edit",
+            "readOnly": true
+          }
+        }
+      },
+      "DocumentationPage": {
+        "description": "A markdown documentation page of an integration",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/DocumentationPageSummary"
+          },
+          {
+            "type": "object",
+            "required": [
+              "content"
+            ],
+            "properties": {
+              "content": {
+                "type": "string",
+                "maxLength": 100000,
+                "description": "Markdown source of the page"
+              }
+            }
+          }
+        ]
+      },
+      "UpsertDocumentationPageRequest": {
+        "type": "object",
+        "required": [
+          "title",
+          "content"
+        ],
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 150
+          },
+          "content": {
+            "type": "string",
+            "maxLength": 100000,
+            "description": "Markdown source of the page"
           }
         }
       }

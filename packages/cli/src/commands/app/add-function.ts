@@ -15,13 +15,18 @@ export default defineCommand({
     name: { type: 'positional', description: 'Function name (kebab-case)', required: true },
     type: {
       type: 'string',
-      description: '"workflow" (selectable as flow action) or "scheduled" (cron per installation). Default: scheduled when --schedule is given, workflow otherwise',
+      description:
+        '"workflow" (selectable as flow action) or "scheduled" (cron per installation). Default: scheduled when --schedule is given, workflow otherwise',
     },
     schedule: {
       type: 'string',
-      description: 'Cron ("0 3 * * *") or rate ("rate(30 minutes)") expression to run the function once per installation',
+      description:
+        'Cron ("0 3 * * *") or rate ("rate(30 minutes)") expression to run the function once per installation',
     },
-    label: { type: 'string', description: 'Display name shown to org admins (e.g. in the flow builder)' },
+    label: {
+      type: 'string',
+      description: "Display name shown to org admins (e.g. in the installed app's functions summary)",
+    },
     timezone: { type: 'string', description: 'IANA timezone for cron schedules (default: Europe/Berlin)' },
     path: { type: 'string', description: 'Path to manifest.json (default: manifest.json)' },
   },
@@ -127,13 +132,19 @@ export default defineCommand({
     if (args.schedule) {
       log.info(`Schedule: ${args.schedule} (runs once per installation, max 60s per run)`);
     } else {
-      log.info('Selectable as an action in the flow builder once the app is installed');
+      log.info(
+        'Wire it into the flow builder with: epilot app add-component <name> --type CUSTOM_FLOW_ACTION_FUNCTION',
+      );
     }
     log.dim('Build with "npm run build", then "epilot app deploy"');
   },
 });
 
-const handlerTemplate = (name: string, fnType: 'workflow' | 'scheduled', schedule?: string): string => `// App function: ${name}
+const handlerTemplate = (
+  name: string,
+  fnType: 'workflow' | 'scheduled',
+  schedule?: string,
+): string => `// App function: ${name}
 //${
   fnType === 'scheduled'
     ? `
@@ -141,8 +152,9 @@ const handlerTemplate = (name: string, fnType: 'workflow' | 'scheduled', schedul
 // inside the epilot code-execution sandbox with a 60 second budget. Do a
 // bounded amount of work per run; the next tick picks up the rest.`
     : `
-// Selectable as an action in the flow builder. Runs inside the epilot
-// code-execution sandbox with the triggering entity in \`input.entity\`.`
+// The code behind a flow action: reference it from a CUSTOM_FLOW_ACTION
+// component ({ "type": "function", "function_name": "..." }). Runs inside the
+// epilot code-execution sandbox with the triggering entity in \`input.entity\`.`
 }
 //
 // Runtime contract:
@@ -166,12 +178,12 @@ interface FunctionInput {
   trigger?: { type: string; schedule?: string; scheduled_time?: string };
   org_id?: string;
   app_id?: string;${
-  fnType === 'workflow'
-    ? `
+    fnType === 'workflow'
+      ? `
   entity?: Record<string, unknown>;
   action_config?: Record<string, unknown>;`
-    : ''
-}
+      : ''
+  }
   app_options?: { token?: string; stage?: string } & Record<string, unknown>;
 }
 
