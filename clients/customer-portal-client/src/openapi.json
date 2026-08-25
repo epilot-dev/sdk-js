@@ -6043,10 +6043,15 @@
                 "properties": {
                   "templates": {
                     "type": "object",
+                    "deprecated": true,
                     "additionalProperties": {
                       "type": "string"
                     },
-                    "description": "Map of content field name to Handlebars template string. Each template is resolved per related meter and returned as templates_output on the meter."
+                    "description": "DEPRECATED — client-supplied map of content field name to Handlebars template string, resolved per related meter and returned as templates_output on the meter. Use `templates_ref` instead; ignored when `templates_ref` is present and rejected once the org has the `portals-reject-client-templates` flag enabled."
+                  },
+                  "templates_ref": {
+                    "$ref": "#/components/schemas/TemplatesRef",
+                    "description": "Reference to the meter selector block whose admin-configured content provides the templates, derived server-side."
                   }
                 }
               }
@@ -8521,17 +8526,23 @@
                   },
                   "templates": {
                     "type": "object",
+                    "deprecated": true,
                     "additionalProperties": {
                       "type": "string"
                     },
-                    "description": "Template map (key to Handlebars template string). Each template is resolved per reading."
+                    "description": "DEPRECATED — client-supplied template map (key to Handlebars template string), resolved per reading. Use `templates_ref` instead; ignored when `templates_ref` is present and rejected once the org has the `portals-reject-client-templates` flag enabled."
                   },
                   "counter_templates": {
                     "type": "object",
+                    "deprecated": true,
                     "additionalProperties": {
                       "type": "string"
                     },
-                    "description": "Template map resolved against the counter entity."
+                    "description": "DEPRECATED — client-supplied template map resolved against the counter entity. Use `templates_ref` instead; same deprecation rules as `templates`."
+                  },
+                  "templates_ref": {
+                    "$ref": "#/components/schemas/TemplatesRef",
+                    "description": "Reference to the meter reading block whose admin-configured content provides both the per-reading templates (content_top_name, main_content_name, content_bottom_name) and the counter templates (counter_title_name, counter_subtitle_name), derived server-side."
                   }
                 }
               }
@@ -9303,7 +9314,7 @@
       "post": {
         "operationId": "interpolatePortalPages",
         "summary": "interpolatePortalPages",
-        "description": "Interpolate template variables in portal pages without reading from the database. Accepts pages in the request body and returns them with templates resolved.",
+        "description": "Interpolate template variables in portal pages without reading from the database. Accepts pages in the request body and returns them with templates resolved. Portal Builder preview only: requires a 360 (epilot) token or a `portal_preview` token; plain portal user tokens get 403.",
         "tags": [
           "ECP Admin"
         ],
@@ -13929,9 +13940,36 @@
           },
           "templates": {
             "type": "object",
+            "deprecated": true,
+            "description": "DEPRECATED — client-supplied Handlebars templates. Use `templates_ref` instead so templates are derived server-side from admin-authored portal configuration. Ignored when `templates_ref` is present; rejected once the org has the `portals-reject-client-templates` flag enabled.",
             "additionalProperties": {
               "type": "string"
             }
+          },
+          "templates_ref": {
+            "$ref": "#/components/schemas/TemplatesRef"
+          }
+        }
+      },
+      "TemplatesRef": {
+        "type": "object",
+        "description": "Reference to admin-authored portal configuration (a page block or a global search configuration item) from which the API derives Handlebars templates server-side. This replaces client-supplied template strings so portal users can never submit arbitrary templates for resolution. When both a reference and raw `templates` are provided, the reference wins and the raw templates are ignored.",
+        "properties": {
+          "page_id": {
+            "type": "string",
+            "description": "ID of the portal page to derive templates from. When given without `block_id`, templates are derived from every block of the page and returned resolved as a nested map keyed by block id (the entity detail page contract)."
+          },
+          "block_id": {
+            "type": "string",
+            "description": "ID of a block within the page. Templates are derived from the block's content according to its block type (e.g. meter_selector, meter_reading, entity_list)."
+          },
+          "config_id": {
+            "type": "string",
+            "description": "For blocks carrying a per-schema configuration array (entity_list), the id of the configuration item to derive templates from. Requires `page_id` and `block_id`."
+          },
+          "global_search_config_id": {
+            "type": "string",
+            "description": "ID of the portal's `global_search` configuration item to derive search result templates and the group title template from. Mutually exclusive with `page_id`."
           }
         }
       },
@@ -15773,7 +15811,8 @@
           },
           "templates": {
             "type": "object",
-            "description": "Template strings to parse and return as synthetic fields. Supports both string values and nested objects of strings.",
+            "deprecated": true,
+            "description": "DEPRECATED — client-supplied template strings to parse and return as synthetic fields. Supports both string values and nested objects of strings. Use `templates_ref` instead so templates are derived server-side from admin-authored portal configuration; ignored when `templates_ref` is present and rejected once the org has the `portals-reject-client-templates` flag enabled.",
             "additionalProperties": {
               "oneOf": [
                 {
@@ -15796,6 +15835,10 @@
                 "subtitle": "{{contract.contract_number}}"
               }
             }
+          },
+          "templates_ref": {
+            "$ref": "#/components/schemas/TemplatesRef",
+            "description": "Reference to the portal page (or a single block within it) whose admin-configured content provides the templates, derived server-side. With only `page_id`, the derived templates are a nested map keyed by block id, mirroring the entity detail page contract."
           },
           "filters": {
             "type": "array",
@@ -15913,7 +15956,8 @@
           },
           "group_title": {
             "type": "string",
-            "description": "Template for group title using variables",
+            "deprecated": true,
+            "description": "DEPRECATED — client-supplied Handlebars template for the group title. Use `templates_ref` (global_search_config_id) instead; overridden when `templates_ref` derives a group title and rejected once the org has the `portals-reject-client-templates` flag enabled.",
             "example": "{{customer[Primary].first_name}} {{customer[Primary].last_name}}"
           },
           "group_size": {
@@ -15980,7 +16024,8 @@
           },
           "templates": {
             "type": "object",
-            "description": "Template strings to parse and return as synthetic fields",
+            "deprecated": true,
+            "description": "DEPRECATED — client-supplied template strings to parse and return as synthetic fields. Use `templates_ref` instead; ignored when `templates_ref` is present and rejected once the org has the `portals-reject-client-templates` flag enabled.",
             "additionalProperties": {
               "type": "string"
             },
@@ -15989,6 +16034,10 @@
               "main_content_name": "{{contract.contract_name}} ({{contract.contract_number}})",
               "content_bottom_name": "{{custom_contract_delivery_address}}"
             }
+          },
+          "templates_ref": {
+            "$ref": "#/components/schemas/TemplatesRef",
+            "description": "Reference to admin-authored configuration providing the templates, derived server-side. For the global search block pass `global_search_config_id`; the derived templates also supply the group title template (overriding `group_title`)."
           },
           "filters": {
             "type": "array",
