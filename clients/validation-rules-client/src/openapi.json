@@ -2038,6 +2038,9 @@
             "maxLength": 200,
             "description": "Message shown to the end user when this condition fails."
           },
+          "applies_when": {
+            "$ref": "#/components/schemas/AppliesWhen"
+          },
           "allow_failure": {
             "type": "boolean",
             "default": false,
@@ -2181,8 +2184,16 @@
             ]
           },
           "value": {
-            "type": "number",
-            "minimum": 0
+            "description": "The adjustment amount - a fixed number, or a context path resolving to a number\n(e.g. a per-contract percentage limit). Contextual adjustment values must not\ncarry a nested adjustment.\n",
+            "oneOf": [
+              {
+                "type": "number",
+                "minimum": 0
+              },
+              {
+                "$ref": "#/components/schemas/ContextValue"
+              }
+            ]
           },
           "direction": {
             "type": "string",
@@ -2190,6 +2201,14 @@
               "increase",
               "decrease"
             ]
+          },
+          "rounding": {
+            "type": "string",
+            "enum": [
+              "up",
+              "down"
+            ],
+            "description": "Rounds the adjusted result to a whole number - `up` (ceiling) or `down` (floor).\nOmitted means no rounding. Used for bounds like \"round up(current × 0.9) to whole euros\".\n"
           }
         }
       },
@@ -2268,6 +2287,52 @@
             "type": "string",
             "enum": [
               "none"
+            ]
+          }
+        }
+      },
+      "AppliesWhen": {
+        "type": "object",
+        "description": "Optional precondition on a condition: the condition only takes part in the\nvalidation when this comparison over context holds. Examples: apply the\ndual-tariff reference only when `contract.htnt` is not empty, or run a\nplausibility check only when a context value reaches a threshold.\n",
+        "required": [
+          "path",
+          "operator"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "path": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200,
+            "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*(\\.[a-zA-Z0-9_]+)*$",
+            "description": "Dot-separated context path whose first segment must match a declared context schema."
+          },
+          "operator": {
+            "type": "string",
+            "enum": [
+              "equal",
+              "notEqual",
+              "greaterThan",
+              "greaterThanInclusive",
+              "lessThan",
+              "lessThanInclusive",
+              "isEmpty",
+              "isNotEmpty"
+            ],
+            "description": "Comparison applied to the resolved context value. `isEmpty` / `isNotEmpty`\ntake no `value`; all other operators require one.\n"
+          },
+          "value": {
+            "description": "Static comparison value for binary operators.",
+            "oneOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "boolean"
+              }
             ]
           }
         }
