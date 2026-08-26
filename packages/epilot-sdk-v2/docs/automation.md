@@ -133,6 +133,7 @@ const { data } = await automationClient.searchFlows(...)
 - [`AutomationExecution`](#automationexecution)
 - [`AutomationLoopState`](#automationloopstate)
 - [`WorkflowExecutionContext`](#workflowexecutioncontext)
+- [`WorkflowWaitContext`](#workflowwaitcontext)
 - [`ExecutionChain`](#executionchain)
 - [`TriggerEventManual`](#triggereventmanual)
 - [`TriggerEventFlowAutomationTask`](#triggereventflowautomationtask)
@@ -322,6 +323,7 @@ const { data } = await client.getExecutions({
       "version": 2,
       "trigger_event": {},
       "workflow_context": {},
+      "workflow_wait_context": {},
       "loops": [],
       "loop_state": {},
       "chain": ["string"]
@@ -486,6 +488,11 @@ const { data } = await client.startExecution(
       {}
     ]
   },
+  "workflow_wait_context": {
+    "workflow_execution_id": "string",
+    "workflow_task_id": "string",
+    "source": "journey_submission"
+  },
   "loops": [
     {
       "id": "loop_contracts",
@@ -551,6 +558,7 @@ const { data } = await client.searchExecutions(
       "version": 2,
       "trigger_event": {},
       "workflow_context": {},
+      "workflow_wait_context": {},
       "loops": [],
       "loop_state": {},
       "chain": ["string"]
@@ -852,6 +860,11 @@ const { data } = await client.getExecution({
       {}
     ]
   },
+  "workflow_wait_context": {
+    "workflow_execution_id": "string",
+    "workflow_task_id": "string",
+    "source": "journey_submission"
+  },
   "loops": [
     {
       "id": "loop_contracts",
@@ -997,6 +1010,11 @@ const { data } = await client.cancelExecution({
       {}
     ]
   },
+  "workflow_wait_context": {
+    "workflow_execution_id": "string",
+    "workflow_task_id": "string",
+    "source": "journey_submission"
+  },
   "loops": [
     {
       "id": "loop_contracts",
@@ -1103,6 +1121,11 @@ const { data } = await client.resumeExecutionWithToken(
       "_execution_chain": {},
       "_automation_chain": ["string"],
       "entity_contexts": []
+    },
+    "workflow_wait_context": {
+      "workflow_execution_id": "string",
+      "workflow_task_id": "string",
+      "source": "journey_submission"
     },
     "loops": [
       {}
@@ -1605,8 +1628,8 @@ type AnyAction = {
     notify_portal_user_only?: boolean
     skip_creating_entities?: boolean
     wait_for_confirmation?: boolean
-    reply_to_sender?: boolean
-    reply_mode?: "reply_in_thread" | "new_email"
+    wait_for_journey_submission?: boolean
+    journey_id?: string
   // ...
 }
 ```
@@ -2523,6 +2546,8 @@ type SendEmailActionConfig = {
     notify_portal_user_only?: boolean
     skip_creating_entities?: boolean
     wait_for_confirmation?: boolean
+    wait_for_journey_submission?: boolean
+    journey_id?: string
     reply_to_sender?: boolean
     reply_mode?: "reply_in_thread" | "new_email"
     mark_as_done?: boolean
@@ -2558,6 +2583,8 @@ type SendEmailAction = {
     notify_portal_user_only?: boolean
     skip_creating_entities?: boolean
     wait_for_confirmation?: boolean
+    wait_for_journey_submission?: boolean
+    journey_id?: string
     reply_to_sender?: boolean
     reply_mode?: "reply_in_thread" | "new_email"
     mark_as_done?: boolean
@@ -2700,6 +2727,8 @@ type SendEmailConfig = {
   notify_portal_user_only?: boolean
   skip_creating_entities?: boolean
   wait_for_confirmation?: boolean
+  wait_for_journey_submission?: boolean
+  journey_id?: string
   reply_to_sender?: boolean
   reply_mode?: "reply_in_thread" | "new_email"
   mark_as_done?: boolean
@@ -3370,6 +3399,9 @@ type AutomationLoopState = {
 
 ### `WorkflowExecutionContext`
 
+Automation Executions triggered by workflow task automations will always carry information about the triggering workflow. This information is helpful in correlating workflow executions with all the triggered automation executions
+
+
 ```ts
 type WorkflowExecutionContext = {
   workflow_exec_id: string
@@ -3386,6 +3418,19 @@ type WorkflowExecutionContext = {
     entity_schema?: string
     is_primary?: boolean
   }>
+}
+```
+
+### `WorkflowWaitContext`
+
+Workflow automation tasks can be paused & waiting for journey automation executions to succeed. If such is the case, this context tracks the task_id of the workflow waiting for journey submission success This context is consumed by svc-workflows to resume a task waiting on this journey submission.
+
+
+```ts
+type WorkflowWaitContext = {
+  workflow_execution_id: string
+  workflow_task_id: string
+  source?: string
 }
 ```
 

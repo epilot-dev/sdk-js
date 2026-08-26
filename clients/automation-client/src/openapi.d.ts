@@ -1279,7 +1279,16 @@ declare namespace Components {
              */
             version?: number;
             trigger_event?: TriggerEventManual | TriggerEventEntityActivity | TriggerEventEntityOperation | TriggerEventFlowAutomationTask | TriggerEventMessaging;
-            workflow_context?: WorkflowExecutionContext;
+            workflow_context?: /**
+             * Automation Executions triggered by workflow task automations will always carry information about the triggering workflow. This information is helpful in correlating workflow executions with all the triggered automation executions
+             *
+             */
+            WorkflowExecutionContext;
+            workflow_wait_context?: /**
+             * Workflow automation tasks can be paused & waiting for journey automation executions to succeed. If such is the case, this context tracks the task_id of the workflow waiting for journey submission success This context is consumed by svc-workflows to resume a task waiting on this journey submission.
+             *
+             */
+            WorkflowWaitContext;
             /**
              * Loop scope definitions propagated from the flow onto the execution record. Each loop has an id and a source_path resolved against the trigger entity at execution time. Actions referencing a loop's id via their loop_id property run once per item in the resolved array.
              *
@@ -4130,6 +4139,21 @@ declare namespace Components {
              */
             wait_for_confirmation?: boolean;
             /**
+             * Only relevant when this action runs from a workflow automation task. After the email is sent,
+             * the workflow task waits for the journey referenced in the email template to be submitted and
+             * its submission automation to complete (AL-2521).
+             *
+             * The email template should contain a journey link created with the generateJourneyLink variable.
+             *
+             */
+            wait_for_journey_submission?: boolean;
+            /**
+             * Snapshot of the journey referenced by the selected email template's journey link; set by the
+             * builder UI. Display/validation only — correlation does not depend on it.
+             *
+             */
+            journey_id?: string;
+            /**
              * When enabled, overrides the template's "To" field with the sender address of the triggering incoming email.
              * This is useful for auto-reply scenarios where you want to automatically respond to the person who sent the email.
              * Only works when the automation is triggered by a received email (received_email or new_email_thread triggers).
@@ -4232,7 +4256,11 @@ declare namespace Components {
              * 7791b04a-16d2-44a2-9af9-2d59c25c512f
              */
             AutomationFlowId;
-            workflow_context?: WorkflowExecutionContext;
+            workflow_context?: /**
+             * Automation Executions triggered by workflow task automations will always carry information about the triggering workflow. This information is helpful in correlating workflow executions with all the triggered automation executions
+             *
+             */
+            WorkflowExecutionContext;
             /**
              * Use workflow_context.workflow_exec_id instead
              */
@@ -5009,6 +5037,10 @@ declare namespace Components {
          * The role this automation plays in the workflow.
          */
         export type WorkflowContextRole = "trigger_workflow" | "run_task_automation";
+        /**
+         * Automation Executions triggered by workflow task automations will always carry information about the triggering workflow. This information is helpful in correlating workflow executions with all the triggered automation executions
+         *
+         */
         export interface WorkflowExecutionContext {
             workflow_exec_id: string;
             workflow_exec_task_id?: string;
@@ -5028,6 +5060,19 @@ declare namespace Components {
                 entity_schema?: string;
                 is_primary?: boolean;
             }[];
+        }
+        /**
+         * Workflow automation tasks can be paused & waiting for journey automation executions to succeed. If such is the case, this context tracks the task_id of the workflow waiting for journey submission success This context is consumed by svc-workflows to resume a task waiting on this journey submission.
+         *
+         */
+        export interface WorkflowWaitContext {
+            workflow_execution_id: string;
+            workflow_task_id: string;
+            /**
+             * example:
+             * journey_submission
+             */
+            source?: string;
         }
     }
 }
@@ -6029,3 +6074,4 @@ export type TriggerWorkflowConfig = Components.Schemas.TriggerWorkflowConfig;
 export type WildcardCondition = Components.Schemas.WildcardCondition;
 export type WorkflowContextRole = Components.Schemas.WorkflowContextRole;
 export type WorkflowExecutionContext = Components.Schemas.WorkflowExecutionContext;
+export type WorkflowWaitContext = Components.Schemas.WorkflowWaitContext;

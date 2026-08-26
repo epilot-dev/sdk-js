@@ -2717,6 +2717,15 @@
             "description": "Pause automation execution after sending email to wait for a confirmation link to be clicked.\n\nThe email template should contain a confirmation link using the variable `{{confirmation_url}}`\n",
             "default": false
           },
+          "wait_for_journey_submission": {
+            "type": "boolean",
+            "description": "Only relevant when this action runs from a workflow automation task. After the email is sent,\nthe workflow task waits for the journey referenced in the email template to be submitted and\nits submission automation to complete (AL-2521).\n\nThe email template should contain a journey link created with the generateJourneyLink variable.\n",
+            "default": false
+          },
+          "journey_id": {
+            "type": "string",
+            "description": "Snapshot of the journey referenced by the selected email template's journey link; set by the\nbuilder UI. Display/validation only — correlation does not depend on it.\n"
+          },
           "reply_to_sender": {
             "type": "boolean",
             "description": "When enabled, overrides the template's \"To\" field with the sender address of the triggering incoming email.\nThis is useful for auto-reply scenarios where you want to automatically respond to the person who sent the email.\nOnly works when the automation is triggered by a received email (received_email or new_email_thread triggers).\n",
@@ -3793,6 +3802,9 @@
           "workflow_context": {
             "$ref": "#/components/schemas/WorkflowExecutionContext"
           },
+          "workflow_wait_context": {
+            "$ref": "#/components/schemas/WorkflowWaitContext"
+          },
           "loops": {
             "type": "array",
             "description": "Loop scope definitions propagated from the flow onto the execution record. Each loop has an id and a source_path resolved against the trigger entity at execution time. Actions referencing a loop's id via their loop_id property run once per item in the resolved array.\n",
@@ -3843,6 +3855,7 @@
       },
       "WorkflowExecutionContext": {
         "type": "object",
+        "description": "Automation Executions triggered by workflow task automations will always carry information about the triggering workflow. This information is helpful in correlating workflow executions with all the triggered automation executions\n",
         "required": [
           "workflow_exec_id",
           "workflow_role"
@@ -3884,6 +3897,26 @@
                 }
               }
             }
+          }
+        }
+      },
+      "WorkflowWaitContext": {
+        "type": "object",
+        "description": "Workflow automation tasks can be paused & waiting for journey automation executions to succeed. If such is the case, this context tracks the task_id of the workflow waiting for journey submission success This context is consumed by svc-workflows to resume a task waiting on this journey submission.\n",
+        "required": [
+          "workflow_execution_id",
+          "workflow_task_id"
+        ],
+        "properties": {
+          "workflow_execution_id": {
+            "type": "string"
+          },
+          "workflow_task_id": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string",
+            "example": "journey_submission"
           }
         }
       },

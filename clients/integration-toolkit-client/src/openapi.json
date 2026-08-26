@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Integration Toolkit API",
-    "version": "1.18.0",
+    "version": "1.21.0",
     "description": "API for integrating with external systems in a standardised way."
   },
   "tags": [
@@ -605,6 +605,167 @@
           },
           "422": {
             "description": "Unprocessable entity - mapping configuration or payload validation failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseBase"
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/erp/updates/direct_simulation": {
+      "post": {
+        "operationId": "simulateDirect",
+        "summary": "simulateDirect",
+        "description": "Dry run for direct-mode payloads: validates a `DirectPayload` against a `direct: true`\nuse case configuration and previews the internal entity and meter reading updates the\npipeline would apply — without persisting anything.\n\nUnlike the ingest endpoint, validation does not stop at the first problem: ALL issues\nacross all operations are collected into `errors`, each carrying the index of the\noperation it refers to. When the payload is valid, the response additionally contains\nthe translated update previews plus non-blocking `warnings` (for example unique-id\nfields that are not defined in the target entity schema, or a failed server-side\nunique-id type derivation).\n\nUse this endpoint while designing a direct integration, before sending events to\n`POST /v3/erp/updates/events`. See documentation at /docs/DIRECT_MODE.md.\n",
+        "tags": [
+          "erp"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DirectSimulationRequest"
+              },
+              "examples": {
+                "entity_upsert": {
+                  "summary": "Entity upsert (open mode)",
+                  "value": {
+                    "event_configuration": {
+                      "direct": true
+                    },
+                    "payload": {
+                      "version": "1",
+                      "operations": [
+                        {
+                          "entity_slug": "contact",
+                          "unique_ids": {
+                            "customer_number": "CUST-12345"
+                          },
+                          "attributes": {
+                            "first_name": "Anna",
+                            "last_name": "Schmidt",
+                            "email": "anna.schmidt@example.com"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "allowlist_with_relation": {
+                  "summary": "Allowlisted entities with a relation",
+                  "value": {
+                    "event_configuration": {
+                      "direct": true,
+                      "entities": [
+                        {
+                          "entity_schema": "contract",
+                          "unique_ids": [
+                            "contract_number"
+                          ]
+                        },
+                        {
+                          "entity_schema": "contact",
+                          "unique_ids": [
+                            "customer_number"
+                          ]
+                        }
+                      ]
+                    },
+                    "payload": {
+                      "version": "1",
+                      "operations": [
+                        {
+                          "entity_slug": "contract",
+                          "unique_ids": {
+                            "contract_number": "CTR-001"
+                          },
+                          "attributes": {
+                            "display_name": "Premium Contract",
+                            "customer": {
+                              "$relation": {
+                                "_set": [
+                                  {
+                                    "schema": "contact",
+                                    "unique_ids": {
+                                      "customer_number": "CUST-12345"
+                                    },
+                                    "tags": [
+                                      "primary"
+                                    ]
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "meter_reading": {
+                  "summary": "Meter reading",
+                  "value": {
+                    "event_configuration": {
+                      "direct": true
+                    },
+                    "payload": {
+                      "version": "1",
+                      "operations": [
+                        {
+                          "type": "meter_reading",
+                          "meter": {
+                            "unique_ids": {
+                              "meter_number": "M-001"
+                            }
+                          },
+                          "counter": {
+                            "unique_ids": {
+                              "obis_number": "1-0:1.8.0"
+                            }
+                          },
+                          "reading_matching": "strict-date",
+                          "attributes": {
+                            "external_id": "R-001",
+                            "timestamp": "2026-08-24T06:00:00Z",
+                            "source": "ERP",
+                            "value": 12345.6
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Simulation executed - `valid` reports the verdict, `errors` lists every violation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DirectSimulationResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "422": {
+            "description": "Unprocessable entity - simulation could not be executed",
             "content": {
               "application/json": {
                 "schema": {
@@ -2844,6 +3005,59 @@
         }
       }
     },
+    "/v1/entities/{entityId}/sync-status": {
+      "get": {
+        "operationId": "getEntitySyncStatus",
+        "summary": "getEntitySyncStatus",
+        "description": "Get the inbound ERP sync status of an entity: when each integration last\nsynchronized (checked) the entity against the ERP, and when it last\nactually changed it. `last_synced_at` also advances on no-op checks —\nevents that were received and evaluated but changed nothing — which by\ndesign leave no trace on the entity itself (no activity feed entry, no\n`_updated_at` bump). Use it to tell whether an entity is up to date with\nthe ERP. Returns an empty list for entities no inbound use case has\nprocessed. Org-scoped via the caller's token.\n",
+        "tags": [
+          "integrations"
+        ],
+        "parameters": [
+          {
+            "name": "entityId",
+            "in": "path",
+            "required": true,
+            "description": "The entity ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "integration_id",
+            "in": "query",
+            "required": false,
+            "description": "Narrow the result to a single integration",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved entity sync status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntitySyncStatusResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/v1/integrations/{integrationId}/outbound/messages/poll": {
       "post": {
         "operationId": "pollOutboundMessages",
@@ -4523,7 +4737,8 @@
               "MALFORMED_ROW",
               "INVALID_ENCODING",
               "EMPTY_FILE",
-              "TOO_MANY_ROWS"
+              "TOO_MANY_ROWS",
+              "BLANK_ROWS_SKIPPED"
             ]
           },
           "severity": {
@@ -4571,7 +4786,7 @@
         "properties": {
           "total_rows": {
             "type": "integer",
-            "description": "Data rows read from the file."
+            "description": "Data rows the import will act on. Rows with no value in any column are dropped before they are counted, and reported as BLANK_ROWS_SKIPPED — so this can be lower than the line count of the file."
           },
           "blocking": {
             "type": "integer",
@@ -5261,7 +5476,7 @@
                 "additionalProperties": true
               }
             ],
-            "description": "The object data payload - can be either a serialized string or a direct JSON object",
+            "description": "The object data payload - can be either a serialized string or a direct JSON object.\n\nFor events routed to a mapped (default) use case this is the raw ERP object; the use\ncase's mapping configuration transforms it into entity updates.\n\nFor events routed to a use case whose configuration has `direct: true`, the payload\nMUST be a `DirectPayload` (as an object, or a JSON string): a versioned envelope of\npre-mapped entity and meter reading operations that skip the mapping engine entirely.\nDirect use cases accept JSON only - `format: \"xml\"` events are rejected.\n",
             "example": "{\"id\":\"BP10001\",\"name\":\"Acme Corporation\",\"type\":\"organization\",\"tax_id\":\"DE123456789\",\"status\":\"active\"}"
           },
           "use_case_slug": {
@@ -6063,6 +6278,10 @@
         "type": "object",
         "description": "Configuration for inbound use cases (ERP to epilot)",
         "properties": {
+          "direct": {
+            "type": "boolean",
+            "description": "Enables direct mode for this use case. When `true`, every event routed to this use\ncase must carry a `DirectPayload` - pre-mapped entity and meter reading operations -\ninstead of raw ERP data, and the mapping engine is skipped entirely. Everything else\nin the inbound pipeline (deduplication, ordering, create-vs-update resolution,\nrelation resolution, monitoring) behaves exactly as in mapped mode.\n\nIn direct mode, `entities` doubles as an optional allowlist: when non-empty, each\noperation's `entity_slug` must match an entry's `entity_schema`, and when that entry\ndeclares `unique_ids`, the operation's unique-id keys must be exactly that set (or\njust `_id`). Entries need only `entity_schema` and `unique_ids` - `fields` is not\nrequired and is ignored. `meter_readings` is ignored in direct mode.\n\nFlag changes take up to 5 minutes to propagate (configuration cache).\n"
+          },
           "entities": {
             "type": "array",
             "description": "Array of entity configurations for this event",
@@ -6120,8 +6339,7 @@
         "type": "object",
         "required": [
           "entity_schema",
-          "unique_ids",
-          "fields"
+          "unique_ids"
         ],
         "properties": {
           "entity_schema": {
@@ -6167,7 +6385,7 @@
           },
           "fields": {
             "type": "array",
-            "description": "Field mapping definitions",
+            "description": "Field mapping definitions. Required for mapped-mode entity configurations; may be\nomitted for allowlist entries of a `direct: true` use case, where no mapping runs.\n",
             "items": {
               "$ref": "#/components/schemas/IntegrationEntityField"
             }
@@ -8224,7 +8442,7 @@
         "required": [
           "steps"
         ],
-        "description": "Configuration for file_proxy use cases. Defines how to authenticate and move files\nbetween epilot and an external document system, in either direction (see `direction`).\n\n**Download** (`direction: download`, the default) fetches a file from the external system\nand serves it to a browser. The download URL always requires `orgId`, `integrationId`, and\neither `useCaseSlug` (recommended) or `useCaseId` (legacy UUID) as query parameters.\nThe `orgId` is included in the signed URL to establish organization context without\nrequiring authentication. Additional use-case-specific parameters are declared in the\n`params` array. `response` is REQUIRED for download use cases.\n\n**Upload** (`direction: upload`) pushes epilot files to the external system. It is not\nreachable over the download endpoint; an outbound use case points at it via a `file_proxy`\ndelivery, and this configuration owns everything about what gets sent: `fan_out` decides\nhow many deliveries one event produces, `params_mapping` builds the values, and the\n`steps` place those values into requests via `{{ params.* }}`.\n`upload` and `params_mapping` are REQUIRED and `response` MUST be omitted.\n\nOpenAPI 3.0 cannot express this conditional requiredness, so it is enforced by the\nserver-side validator, which returns an explicit message naming the offending field.\n",
+        "description": "Configuration for file_proxy use cases. Defines how to authenticate and move files\nbetween epilot and an external document system, in either direction (see `direction`).\n\n**Download** (`direction: download`, the default) fetches a file from the external system\nand serves it to a browser. The download URL always requires `orgId`, `integrationId`, and\neither `useCaseSlug` (recommended) or `useCaseId` (legacy UUID) as query parameters.\nThe `orgId` is included in the signed URL to establish organization context without\nrequiring authentication. Additional use-case-specific parameters are declared in the\n`params` array. `response` is REQUIRED for download use cases.\n\n**Upload** (`direction: upload`) pushes epilot files to the external system. It is not\nreachable over the download endpoint; an outbound use case points at it via a `file_proxy`\ndelivery, and this configuration owns everything about what gets sent: `fan_out` decides\nhow many deliveries one event produces, and every step builds its own request body with\n`body_jsonata` — or leaves it empty to send the delivery's files unchanged.\n`upload` is REQUIRED and `response` MUST be omitted.\n\nTwo expression languages, split by what they produce. **Handlebars composes strings**:\n`url` and `headers` on upload, plus a form-encoded, XML or plain-text `body` on\ndownload. **JSONata produces data**: `body_jsonata` and the per-step `enabled`.\nJSONata omits keys whose value is undefined, so an optional field needs no conditional\nguard — it is simply absent from the serialized body.\n\nHandlebars templates are rendered EXACTLY ONCE, against a single context holding `env`,\n`file_data`, `steps` and `auth_token`. Writing\n`{{ env.some_var }}` resolves it. The legacy `\\{{ env.some_var }}` escape belongs to the\ntwo-pass renderer and is NOT rewritten here — it renders as the literal text\n`{{ env.some_var }}`, which is rejected (see below) rather than shipped.\n\nTwo guards run on every rendered upload template, because single-pass rendering fails\nquietly by default. Both are terminal, and each names what to fix:\n\n- **residual `{{` after rendering** — a configuration still carrying the `\\{{` escape.\n  Rewrite it without the backslash.\n- **a referenced `env` key absent from the environment** — checked BEFORE the URL is\n  parsed, because an empty value in host position turns\n  `https://{{env.host}}/document/import` into `https:///document/import`, whose host\n  then parses as `document`. Provision the environment variable. A key that exists and\n  is legitimately empty is fine; only absence fails.\n\nOpenAPI 3.0 cannot express this conditional requiredness, so it is enforced by the\nserver-side validator, which returns an explicit message naming the offending field.\n",
         "properties": {
           "direction": {
             "type": "string",
@@ -8240,44 +8458,6 @@
           },
           "fan_out": {
             "$ref": "#/components/schemas/FileProxyFanOutConfig"
-          },
-          "params_mapping": {
-            "type": "string",
-            "description": "Upload-only, REQUIRED when `direction` is `upload`. JSONata expression evaluated once\nper fan-out item, producing the `params` object that step templates read as\n`{{ params.* }}`.\n\nThe evaluation root is the hydrated event, so `contact.customer_pin` and\n`ticket._purpose` are reachable directly, unprefixed.\n\n**Everything per-item is a `$`-prefixed JSONata binding**: `$item` (the fan-out\nelement, absent when `fan_out` is disabled), `$file_base64` and `$file`\n(`{filename, mime_type, size_bytes}`) for the resolved file, plus `$constants`,\n`$lookups`, `$ack_id`, `$germanDate(iso)` and `$now()`. Writing `item.filename`\ninstead of `$item.filename` yields nothing — it reads a field named `item` on the\nevent, which does not exist.\n\nMust evaluate to an object. `constants` are shallow-merged underneath the result, so\nthe expression wins on any key collision.\n",
-            "example": "{ \"documentType\": $lookups.documentType, \"fileName\": $item.filename, \"fileData\": $file_base64, \"pin\": contact.customer_pin }"
-          },
-          "lookups": {
-            "type": "object",
-            "additionalProperties": {
-              "$ref": "#/components/schemas/FileProxyLookup"
-            },
-            "description": "Upload-only. Named translation tables resolved BEFORE `params_mapping` runs and bound\nas `$lookups`, so an expression reads `$lookups.documentType` rather than carrying a\nconditional chain. Deliberately generic: the next ERP calls the same concept\n`Belegart`.\n"
-          },
-          "constants": {
-            "type": "object",
-            "additionalProperties": true,
-            "description": "Upload-only. Fixed values shallow-merged UNDERNEATH the `params_mapping` result — the\nexpression wins on key collisions, constants only add. Use for the unchanging strings\n(tenant, sender, channel) that would otherwise be repeated in every expression.\n",
-            "example": {
-              "mandant": "EPILOT_WNG",
-              "sender": "KSSP"
-            }
-          },
-          "file_source": {
-            "type": "string",
-            "description": "Upload-only. JSONata returning the attachment-shaped object (`entity_id`, optionally\n`s3ref`) whose bytes should be fetched for this delivery. The evaluation root is the\nevent; the fan-out element is the `$item` binding, same as in `params_mapping`.\n\nUsually unnecessary: when the fan-out item is itself attachment-shaped it is used\ndirectly. Supply this only when splitting over something that is not the attachment\n— for example one delivery per meter reading, each carrying a file referenced from\nelsewhere in the event. When nothing resolves, no file is fetched and `file_base64`\nis undefined, which is valid for a fan-out that sends metadata only.\n",
-            "example": "event_attachments[entity_id = $item.file_id][0]"
-          },
-          "required_params": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "description": "Upload-only. Params that MUST be present after `params_mapping` runs. Any listed name\nresolving to null or undefined fails the delivery terminally with\n`REQUIRED_PARAM_MISSING` before a single step executes.\n\nThis is the generic net behind a lookup's `on_miss: fail`: it catches a required field\ngoing missing for any reason, so the external system never receives a body that is\nsilently short a field its API requires.\n",
-            "example": [
-              "documentType",
-              "fileName",
-              "fileData"
-            ]
           },
           "secure_proxy": {
             "description": "Optional secure proxy attachment for routing all outbound file proxy requests.\nOnly `use_case_slug` is supported and the referenced secure_proxy use case\nmust belong to the same integration.\n",
@@ -8312,7 +8492,7 @@
             "items": {
               "$ref": "#/components/schemas/FileProxyStep"
             },
-            "description": "Ordered list of HTTP steps to execute. For `download` these retrieve the file; for\n`upload` they deliver it, each assembling its own request body from `{{ params.* }}`\nbuilt by `params_mapping`.\n"
+            "description": "Ordered list of HTTP steps to execute. For `download` these retrieve the file; for\n`upload` they deliver it, each assembling its own request body — `body_jsonata` for\nJSON, `body` for anything else.\n"
           },
           "response": {
             "$ref": "#/components/schemas/FileProxyResponseConfig"
@@ -8459,9 +8639,19 @@
             },
             "description": "Handlebars templates for request headers"
           },
+          "body_jsonata": {
+            "type": "string",
+            "description": "Upload-only. JSONata producing the request body as DATA; the result is serialized to\nJSON and sent. Use this for every JSON body — it cannot emit malformed JSON, and it\nomits a key whose value is undefined instead of sending it empty, which is what makes\noptional fields work without a conditional guard.\n\nThe evaluation root is the hydrated event, so `contact.customer_pin` and\n`ticket._purpose` are reachable directly, unprefixed. **Everything else is a\n`$`-prefixed binding**: `$file_data` (the files this delivery carries — see\n`FileProxyFanOutConfig` for what it holds in each mode), `$ack_id`, `$env`,\n`$steps` (results of the steps already executed, each\n`{statusCode, headers, body}`), `$germanDate(iso)` and `$now()`.\nWriting `file_data[0].filename` instead of `$file_data[0].filename` yields\nnothing — it reads a field named `file_data` on the event, which does not exist.\n\nLeave this empty to send the delivery's files exactly as they are: the single\nattachment object when fanning out, the whole array when not. No mapping is\nneeded for the common case.\n\nMust evaluate to an object or an array. Anything else fails the delivery terminally\nwith `MAPPING_EXPRESSION_FAILED`, naming the step.\n\n**Only `undefined` omits a key.** `null`, `\"\"`, `false` and `0` are values and are\nall sent. Two traps follow from that, and one idiom avoids both:\n\n- `x ? $string(x)` omits the key when `x` is `0` or `\"\"`, because JSONata reads both\n  as false. A meter number of `\"0\"` would silently vanish.\n- `: undefined` is not a literal — JSONata has no `undefined` keyword, so it is a\n  path lookup that happens to find nothing. Against an event that really does carry\n  a field named `undefined`, it returns that field's value.\n\nWrite the **two-arm ternary with no else branch**, which omits the key when the test\nis false: `{ \"pin\": $exists(contact.pin) ? $string(contact.pin) }`.\n\nEvery `$` binding is checked at save time against the known set, so a mistyped\nbinding (`$lookup.documentType` for `$file_data[0].filename`) is rejected rather\nthan silently producing a missing key.\n\nNot accepted together with `body`, which the upload direction rejects outright.\n",
+            "example": "{ \"documentType\": \"Zählerstand\", \"fileName\": $file_data[0].filename, \"fileData\": $file_data[0].base64, \"pin\": $exists(contact.customer_pin) ? $string(contact.customer_pin) }"
+          },
+          "enabled": {
+            "type": "string",
+            "description": "Upload-only, OPTIONAL. JSONata returning a boolean, deciding whether this step\nruns at all. Absent means it runs.\n\nA false result is a BREAK: this step is skipped and so is every step after it,\nand the delivery is recorded as `skipped` rather than delivered or failed. It is\nacknowledged and never retried, and a `STEP_DISABLED` monitoring event is emitted\nat level `info` — a disabled step is the configuration working, not a fault.\n\nReads the same bindings a body does, `$steps` included, so it can branch on what\nan earlier step returned. This is how a delivery is filtered out: with one\ndelivery per attachment, a false result on the first step drops that file.\n\nAn expression that throws, or returns a non-boolean, is a terminal\n`MAPPING_EXPRESSION_FAILED` instead — a broken predicate must not read as a\ndeliberate skip.\n",
+            "example": "$file_data[0].mime_type = \"application/pdf\""
+          },
           "body": {
             "type": "string",
-            "description": "Handlebars template for the request body (write methods only). On an `upload` use\ncase this is where the payload is assembled, reading `{{ params.* }}` built by\n`params_mapping`, plus `{{ env.* }}` and `{{ steps.N.body }}`.\n\n**Route every user-controlled value through the `json` helper**: the template engine\ndoes not escape, so `\"name\":\"{{ params.fileName }}\"` produces invalid JSON the moment\na filename contains a quote. Write `\"name\": {{json params.fileName}}` instead — the\nhelper emits the surrounding quotes itself and renders absent values as `null`. Use\n`{{jsonEscape v}}` if you prefer to keep your own quotes. Upload configurations whose\nbody would break on such input are rejected at save time.\n\nHandlebars block helpers work, so optional fields can be omitted rather than sent\nempty: `{{#if params.pin}},\"pin\": {{json params.pin}}{{/if}}`. Note that `{{/if}}}`\nfails to parse — leave a space before a closing brace: `{{/if}} }`.\n"
+            "description": "Handlebars template for the request body (write methods only), for bodies that are\nNOT JSON — form-encoded, XML, plain text. For a JSON body use `body_jsonata`\ninstead; it cannot produce malformed JSON.\n\n**Download-only.** The upload direction rejects it: use `body_jsonata`, or leave\nthat empty to send the files unchanged.\n\nRendered once, against the context described on `FileProxyUseCaseConfiguration`:\n`{{ params.* }}`, `{{ env.* }}`, `{{ steps.N.body }}`, `{{ auth_token }}`.\n\nIf a JSON body is written here anyway, **route every user-controlled value through\nthe `json` helper**: the template engine does not escape, so\n`\"name\":\"{{ params.documentName }}\"` produces invalid JSON the moment a value\ncontains a quote. Write `\"name\": {{json params.documentName}}` instead — the helper\nemits the surrounding quotes itself and renders absent values as `null`.\n\nMutually exclusive with `body_jsonata`, which is upload-only.\n"
           },
           "response_type": {
             "type": "string",
@@ -8478,23 +8668,23 @@
         "required": [
           "enabled"
         ],
-        "description": "Splits one event into several independent deliveries.\n\nMirrors the inbound mapping idiom, where an entity's JSONata expression returning an array\nproduces one entity update per element. Made explicit with a toggle here because an upload\nis also legitimately used without splitting, and because auto-detecting \"array means\nsplit\" would make a single-element result ambiguous.\n\nEach resulting delivery is fully independent: its own idempotency record, its own retry\nschedule, its own monitoring events. A four-item event can therefore end up three-of-four\ndelivered, which is the honest state to report.\n\nThe split is evaluated ONCE, when the event is enqueued, so item indices — and therefore\nidempotency keys — stay stable across retries.\n",
+        "description": "Whether one event produces one delivery per file, or a single delivery carrying all of\nthem. The split is always over the event's `event_attachments` — there is no expression\nto write, because an upload only ever runs on events that declare that field.\n\nEach resulting delivery is fully independent: its own idempotency record, its own retry\nschedule, its own monitoring events. A four-file event can therefore end up three-of-four\ndelivered, which is the honest state to report.\n\nThe split is evaluated ONCE, when the event is enqueued, so item indices — and therefore\nidempotency keys — stay stable across retries.\n\nEither way, expressions read the same `$file_data` binding, so no expression needs to\nknow which mode it runs in. An event carrying no attachments is recorded as `skipped`.\n",
         "properties": {
           "enabled": {
             "type": "boolean",
-            "description": "When false (or absent), the event produces exactly one delivery and `$item` is not\nbound in `params_mapping`.\n"
-          },
-          "split_expression": {
-            "type": "string",
-            "description": "JSONata over the event that MUST return an array; one delivery is created per element,\nbound as `$item` in `params_mapping`. Required when `enabled` is true.\n\nKeep this a plain projection — scoping which events are handled at all belongs in the\noutbound use case's `event_filter`, not here. A non-array result fails the event with\n`FAN_OUT_INVALID_RESULT`; an empty array produces no deliveries and one info-level\n`FAN_OUT_EMPTY`, which is the normal outcome for a catch-all subscription seeing an\nevent with nothing to send.\n",
-            "example": "event_attachments"
+            "description": "When true, one delivery per attachment, and `$file_data` holds exactly that one\nfile. When false (or absent), the event produces exactly one delivery and\n`$file_data` holds every attachment on the event.\n\nAn empty `event_attachments` produces no deliveries and one info-level\n`FAN_OUT_EMPTY`, which is the normal outcome for a catch-all subscription seeing an\nevent with nothing to send.\n"
           }
         }
       },
       "FileProxyUploadConfig": {
         "type": "object",
-        "description": "Upload-side settings for a file_proxy use case with `direction: upload`.\nThe surrounding file_proxy configuration owns WHAT and HOW to send: `fan_out`,\n`file_source`, `params_mapping`, lookups, constants, auth, and steps. This nested object\ngoverns upload-specific limits and how the final external response is judged. The\noutbound mapping remains a pure pointer to the recipe (see `FileProxyDeliveryConfig`).\n",
+        "description": "Upload-side settings for a file_proxy use case with `direction: upload`.\nThe surrounding file_proxy configuration owns WHAT and HOW to send: `fan_out`,\nauth, and the steps with their `body_jsonata`. This nested object governs\nupload-specific limits and how the final external response is judged. The\noutbound mapping remains a pure pointer to the recipe (see `FileProxyDeliveryConfig`).\n",
         "properties": {
+          "max_total_bytes": {
+            "type": "integer",
+            "description": "Ceiling for ALL of a delivery's files together, in bytes. Capped by the platform\nlimit, which it may lower but never raise.\n\nOnly reachable with `fan_out.enabled: false`, where one delivery carries every\nattachment and the worker holds them all resident at once. base64 inflates each\nby about a third, so the combined figure is what matters rather than any single\nfile's size.\n",
+            "example": 26214400
+          },
           "max_file_bytes": {
             "type": "integer",
             "minimum": 1,
@@ -8507,16 +8697,6 @@
             "maximum": 100,
             "default": 8,
             "description": "Maximum delivery attempts per item before the delivery is marked failed. Attempts\nare spaced by an exponential, jittered backoff. The default 8 attempts schedule at\nmost 7 delays, totaling about 7 hours 40 minutes before jitter, so a normal ERP\nmaintenance window does not immediately exhaust them.\n\nLives here rather than on the outbound delivery because how hard to retry is a\nproperty of the transport — the same judgement as `max_file_bytes` — and the outbound\ndelivery is a pure pointer.\n"
-          },
-          "success_when": {
-            "type": "string",
-            "description": "Optional JSONata predicate evaluated against the final step result\n(`{ statusCode, headers, body }`) to decide whether the external system really\naccepted the file. When omitted, any 2xx counts as delivered. Use this for systems\nthat return 200 with an error envelope.\n",
-            "example": "body.status = 'OK'"
-          },
-          "external_id": {
-            "type": "string",
-            "description": "Optional JSONata expression over the step results yielding the external system's\nidentifier for the stored document. Recorded on the delivery record and on the\n`FILE_PROXY_UPLOADED` monitoring event so an operator can find the document in the\ntarget system.\n",
-            "example": "steps[-1].body.documentId"
           }
         }
       },
@@ -8695,6 +8875,610 @@
           "message": {
             "type": "string",
             "description": "Description of the validation issue"
+          }
+        }
+      },
+      "DirectPayload": {
+        "type": "object",
+        "description": "The payload of an ERP event routed to a `direct: true` use case: a versioned envelope of\npre-mapped operations that skip the mapping engine. Sent as the `payload` of an\n`ErpEventV3` - either as a JSON object or as a JSON string (`format` must be `json`;\nXML is rejected for direct use cases).\n\nThe schema is strict: unknown keys on the envelope or on any operation are rejected with\nan error naming the offending path. Attribute values, by contrast, pass through to the\nentity verbatim (except `$relation` / `$relation_ref` envelopes, which are validated and\nresolved).\n\nOne event lands as one queue message, so the whole event (including this payload) must\nstay within the 256 KiB message budget. Identical consecutive payloads within 5 minutes\ncan be deduplicated by the queue - use the event's `deduplication_id` deliberately when\nre-sending identical data.\n",
+        "required": [
+          "version",
+          "operations"
+        ],
+        "properties": {
+          "version": {
+            "type": "string",
+            "enum": [
+              "1"
+            ],
+            "description": "Version of the direct payload contract. Currently only `\"1\"` is supported; an\nunsupported version is rejected with `DIRECT_VERSION_UNSUPPORTED`.\n"
+          },
+          "operations": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 100,
+            "description": "The operations to apply, in order. At most 100 operations per event. Each item is\neither an entity operation (`type` omitted or `\"entity\"`) or a meter reading\noperation (`type: \"meter_reading\"`).\n",
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/DirectEntityOperation"
+                },
+                {
+                  "$ref": "#/components/schemas/DirectMeterReadingOperation"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "DirectEntityOperation": {
+        "type": "object",
+        "description": "A single pre-mapped entity operation: upserts, soft-deletes, or purges one entity,\nidentified by its unique ids. Produces the same internal update as a mapped-mode entity\nconfiguration, so create-vs-update resolution, relation resolution, ordering, and\nmonitoring behave identically.\n",
+        "required": [
+          "entity_slug",
+          "unique_ids"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "entity"
+            ],
+            "description": "Operation discriminator. Optional - an operation without `type` is an entity operation."
+          },
+          "entity_slug": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Target entity schema slug (e.g. `contact`, `contract`).",
+            "example": "contract"
+          },
+          "unique_ids": {
+            "type": "object",
+            "minProperties": 1,
+            "additionalProperties": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "number"
+                }
+              ]
+            },
+            "description": "Attribute values that uniquely identify this entity, as `{ attribute: value }`.\nValues may be strings or numbers (numbers are coerced to strings); values that are\nempty after trimming are rejected. Use `_id` as the sole key to reference an entity\ndirectly by its epilot id.\n\nUnlike mapped mode, the unique-id ATTRIBUTE NAMES are given directly - there is no\nfield-to-attribute mapping step.\n",
+            "example": {
+              "contract_number": "CTR-001"
+            }
+          },
+          "unique_id_types": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "enum": [
+                "email",
+                "phone"
+              ]
+            },
+            "description": "Optional per-field type hints for repeatable unique-id fields (`email` / `phone`),\nneeded so lookups search the repeatable storage format correctly. When omitted, the\nserver derives the types from the entity schema; explicit values always win over\nderivation.\n"
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "upsert",
+              "delete",
+              "purge"
+            ],
+            "default": "upsert",
+            "description": "Operation mode: `upsert` creates or updates the entity (default), `delete` soft\ndeletes it, `purge` removes it permanently. For `delete` / `purge`, `attributes`\nmay be omitted - only `unique_ids` are used to locate the entity.\n"
+          },
+          "attributes": {
+            "type": "object",
+            "description": "Attribute values to write, keyed by attribute name. Required when `mode` is `upsert`\n(an empty object is allowed); optional for `delete` / `purge`.\n\nValues are written verbatim - the server does not validate them against the entity\nschema (attributes not defined in the schema are stored but not indexed; the\nsimulation endpoint surfaces warnings for unique-id fields missing from the schema).\nTwo envelope forms receive special treatment: `$relation` values\n(`DirectRelationValue`) and `$relation_ref` values (`DirectRelationRefValue`) are\nvalidated and resolved to entity relations.\n",
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/DirectRelationValue"
+                },
+                {
+                  "$ref": "#/components/schemas/DirectRelationRefValue"
+                },
+                {
+                  "description": "Any other JSON value - written to the entity attribute verbatim."
+                }
+              ]
+            }
+          }
+        }
+      },
+      "DirectMeterReadingOperation": {
+        "type": "object",
+        "description": "A single pre-mapped meter reading operation: upserts or deletes one reading on a meter\n(and optionally a specific counter), identified by their unique ids. Produces the same\ninternal update as a mapped-mode meter reading configuration.\n",
+        "required": [
+          "type",
+          "meter",
+          "attributes"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "meter_reading"
+            ],
+            "description": "Operation discriminator. Required for meter reading operations."
+          },
+          "meter": {
+            "type": "object",
+            "required": [
+              "unique_ids"
+            ],
+            "additionalProperties": false,
+            "description": "Reference to the meter this reading belongs to.",
+            "properties": {
+              "unique_ids": {
+                "type": "object",
+                "minProperties": 1,
+                "additionalProperties": {
+                  "oneOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "number"
+                    }
+                  ]
+                },
+                "description": "Attribute values that uniquely identify the meter, as `{ attribute: value }`.",
+                "example": {
+                  "meter_number": "M-001"
+                }
+              }
+            }
+          },
+          "counter": {
+            "type": "object",
+            "required": [
+              "unique_ids"
+            ],
+            "additionalProperties": false,
+            "description": "Optional reference to the meter counter (register) the reading belongs to. Required\nwhen `reading_matching` is `strict-date`.\n",
+            "properties": {
+              "unique_ids": {
+                "type": "object",
+                "minProperties": 1,
+                "additionalProperties": {
+                  "oneOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "number"
+                    }
+                  ]
+                },
+                "description": "Attribute values that uniquely identify the counter, as `{ attribute: value }`.",
+                "example": {
+                  "obis_number": "1-0:1.8.0"
+                }
+              }
+            }
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "upsert",
+              "delete"
+            ],
+            "default": "upsert",
+            "description": "Operation mode: `upsert` creates or updates the reading (default), `delete` removes it."
+          },
+          "reading_matching": {
+            "type": "string",
+            "enum": [
+              "external_id",
+              "strict-date"
+            ],
+            "description": "Strategy for matching this reading against existing readings. `external_id` (the\ndefault) matches by the reading's `external_id`; `strict-date` matches by meter +\ncounter + direction + date and REQUIRES `counter`. Useful when readings originate in\nthe portal and are echoed back by the ERP with truncated timestamps.\n"
+          },
+          "attributes": {
+            "type": "object",
+            "required": [
+              "external_id",
+              "timestamp",
+              "source",
+              "value"
+            ],
+            "description": "The reading data. Additional keys (e.g. `direction`, `reason`, `read_by`, `status`,\n`metadata`) pass through to the metering service verbatim.\n",
+            "properties": {
+              "external_id": {
+                "oneOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "number"
+                  }
+                ],
+                "description": "External identifier of the reading (numbers are coerced to strings)."
+              },
+              "timestamp": {
+                "type": "string",
+                "description": "When the reading was taken. ISO 8601 - either `YYYY-MM-DD` or\n`YYYY-MM-DDTHH:mm:ss` (optional fractional seconds and `Z` / `±HH:mm` offset).\nOther formats (e.g. `DD.MM.YYYY`, epoch numbers) are rejected.\n",
+                "example": "2026-08-24T06:00:00Z"
+              },
+              "source": {
+                "type": "string",
+                "enum": [
+                  "ECP",
+                  "ERP",
+                  "360",
+                  "journey-submission"
+                ],
+                "description": "Origin system of the reading."
+              },
+              "value": {
+                "oneOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "string"
+                  }
+                ],
+                "description": "The reading value - a number, or a numeric string (coerced to a number)."
+              }
+            }
+          }
+        }
+      },
+      "DirectRelationValue": {
+        "type": "object",
+        "description": "An entity attribute value that establishes relations to other entities. Written on any\nattribute inside a direct entity operation's `attributes`.\n\nTwo forms are accepted: a bare array of items (shorthand for `_set`, i.e. replace), or\nan object with EXACTLY ONE of the operations `_set` (replace), `_append` (merge,\ndeduplicated by entity id), `_append_all` (merge without deduplication). No other\noperation keys are accepted.\n",
+        "required": [
+          "$relation"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "$relation": {
+            "oneOf": [
+              {
+                "type": "array",
+                "description": "Shorthand for `_set` - replaces the attribute's relations with these items.",
+                "items": {
+                  "$ref": "#/components/schemas/DirectRelationItem"
+                }
+              },
+              {
+                "type": "object",
+                "description": "Exactly one of `_set`, `_append`, `_append_all` must be given.",
+                "additionalProperties": false,
+                "properties": {
+                  "_set": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/DirectRelationItem"
+                    }
+                  },
+                  "_append": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/DirectRelationItem"
+                    }
+                  },
+                  "_append_all": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/DirectRelationItem"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        }
+      },
+      "DirectRelationItem": {
+        "type": "object",
+        "description": "One relation target: either an already-resolved reference (`entity_id`), or a lookup by\nunique ids (`schema` + `unique_ids`, resolved by the pipeline like any other unique-id\nlookup, including stub creation and retry when the target does not exist yet). The two\nforms are mutually exclusive. Use `_id` as the sole `unique_ids` key for a direct-id\nlookup.\n",
+        "additionalProperties": false,
+        "properties": {
+          "entity_id": {
+            "type": "string",
+            "description": "Epilot entity id of the relation target. Must not be combined with `schema` / `unique_ids`."
+          },
+          "schema": {
+            "type": "string",
+            "description": "Entity schema slug of the relation target. Required when `entity_id` is not given.",
+            "example": "contact"
+          },
+          "unique_ids": {
+            "type": "object",
+            "minProperties": 1,
+            "additionalProperties": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "number"
+                }
+              ]
+            },
+            "description": "Attribute values that uniquely identify the target. Required when `entity_id` is not given.",
+            "example": {
+              "customer_number": "CUST-12345"
+            }
+          },
+          "unique_id_types": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "enum": [
+                "email",
+                "phone"
+              ]
+            },
+            "description": "Optional per-field type hints for repeatable unique-id fields, as on the entity operation."
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Optional relation tags (e.g. `primary`, `billing`)."
+          }
+        }
+      },
+      "DirectRelationRefValue": {
+        "type": "object",
+        "description": "An entity attribute value that references an ITEM INSIDE a repeatable attribute of\nanother entity - for example one address out of a contact's `address` list. The target\nentity is looked up by unique ids, then the item at `path` matching `value` is\nreferenced (creating it when missing).\n\nThe same operation envelope as `$relation` applies: a bare array is shorthand for\n`_set`, otherwise exactly one of `_set`, `_append`, `_append_all`.\n",
+        "required": [
+          "$relation_ref"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "$relation_ref": {
+            "oneOf": [
+              {
+                "type": "array",
+                "description": "Shorthand for `_set`.",
+                "items": {
+                  "$ref": "#/components/schemas/DirectRelationRefItem"
+                }
+              },
+              {
+                "type": "object",
+                "description": "Exactly one of `_set`, `_append`, `_append_all` must be given.",
+                "additionalProperties": false,
+                "properties": {
+                  "_set": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/DirectRelationRefItem"
+                    }
+                  },
+                  "_append": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/DirectRelationRefItem"
+                    }
+                  },
+                  "_append_all": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/DirectRelationRefItem"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        }
+      },
+      "DirectRelationRefItem": {
+        "type": "object",
+        "description": "One relation-ref target - the entity to look up, and the repeatable item to reference on it.",
+        "required": [
+          "schema",
+          "unique_ids",
+          "path",
+          "value"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "schema": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Entity schema slug of the target entity.",
+            "example": "contact"
+          },
+          "unique_ids": {
+            "type": "object",
+            "minProperties": 1,
+            "additionalProperties": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "number"
+                }
+              ]
+            },
+            "description": "Attribute values that uniquely identify the target entity."
+          },
+          "unique_id_types": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "enum": [
+                "email",
+                "phone"
+              ]
+            },
+            "description": "Optional per-field type hints for repeatable unique-id fields."
+          },
+          "path": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The attribute on the TARGET entity that holds the repeatable array (e.g. `address`)."
+          },
+          "value": {
+            "description": "The item to match (or create) at `path` - e.g. an address object.",
+            "example": {
+              "street": "Main Street",
+              "city": "Berlin"
+            }
+          }
+        }
+      },
+      "DirectSimulationRequest": {
+        "type": "object",
+        "description": "Request for a direct-mode dry run: the `direct: true` use case configuration to test\nagainst, and the payload to validate and translate.\n",
+        "required": [
+          "event_configuration",
+          "payload"
+        ],
+        "properties": {
+          "event_configuration": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/InboundIntegrationEventConfiguration"
+              }
+            ],
+            "description": "The direct use case configuration to simulate against. `direct` must be `true`;\n`entities` acts as the optional allowlist exactly as at runtime. This is the same\nconfiguration format stored on the inbound use case resource, so a configuration can\nbe tested before saving it.\n"
+          },
+          "payload": {
+            "oneOf": [
+              {
+                "type": "string",
+                "description": "The direct payload as a JSON string (as it would be sent in the event's `payload`)."
+              },
+              {
+                "$ref": "#/components/schemas/DirectPayload"
+              }
+            ],
+            "description": "The direct payload to validate - a `DirectPayload` object, or its JSON string form."
+          }
+        }
+      },
+      "DirectSimulationResponse": {
+        "type": "object",
+        "description": "Result of a direct-mode dry run. `valid: false` responses list EVERY violation found\nacross all operations in `errors`. `valid: true` responses preview the internal updates\nthe pipeline would apply, plus non-blocking `warnings`.\n",
+        "required": [
+          "valid",
+          "errors"
+        ],
+        "properties": {
+          "valid": {
+            "type": "boolean",
+            "description": "Whether the payload would be accepted by the ingest endpoint."
+          },
+          "errors": {
+            "type": "array",
+            "description": "All validation errors found. Empty when `valid` is `true`.",
+            "items": {
+              "$ref": "#/components/schemas/DirectSimulationError"
+            }
+          },
+          "warnings": {
+            "type": "array",
+            "description": "Non-blocking findings - e.g. unique-id fields not defined in the target entity\nschema (lookups would never match), or a failed server-side unique-id type\nderivation.\n",
+            "items": {
+              "$ref": "#/components/schemas/MappingSimulationWarning"
+            }
+          },
+          "entity_updates": {
+            "type": "array",
+            "description": "The translated internal entity updates, exactly as the pipeline would process them.\nOnly present when `valid` is `true`.\n",
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/EntityUpdate"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "unique_identifiers_metadata": {
+                      "type": "object",
+                      "description": "Per-field metadata for repeatable unique-id fields - explicit\n`unique_id_types` merged with server-side schema derivation. Absent when\nno field resolved to a repeatable type.\n",
+                      "additionalProperties": {
+                        "type": "object",
+                        "properties": {
+                          "fieldType": {
+                            "type": "string",
+                            "enum": [
+                              "email",
+                              "phone"
+                            ]
+                          },
+                          "index": {
+                            "type": "integer"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "meter_reading_updates": {
+            "type": "array",
+            "description": "The translated internal meter reading updates. Only present when `valid` is `true`.\n",
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/MeterReadingUpdate"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "_config": {
+                      "type": "object",
+                      "description": "Per-reading pipeline configuration carried by the operation.",
+                      "properties": {
+                        "reading_matching": {
+                          "type": "string",
+                          "enum": [
+                            "external_id",
+                            "strict-date"
+                          ]
+                        }
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      "DirectSimulationError": {
+        "type": "object",
+        "description": "One validation error found during a direct-mode dry run.",
+        "required": [
+          "code",
+          "message"
+        ],
+        "properties": {
+          "code": {
+            "type": "string",
+            "enum": [
+              "DIRECT_PAYLOAD_INVALID",
+              "DIRECT_VERSION_UNSUPPORTED",
+              "DIRECT_ENTITY_NOT_ALLOWED"
+            ],
+            "description": "Error class, matching the monitoring codes the ingest pipeline emits:\n`DIRECT_PAYLOAD_INVALID` (schema violation, JSON parse failure, or XML format),\n`DIRECT_VERSION_UNSUPPORTED` (unknown payload `version`),\n`DIRECT_ENTITY_NOT_ALLOWED` (entity or unique-id keys not permitted by the use\ncase's allowlist).\n"
+          },
+          "message": {
+            "type": "string",
+            "description": "Human-readable description, including the path of the offending element."
+          },
+          "operation_index": {
+            "type": "integer",
+            "description": "Zero-based index of the operation the error refers to, when attributable to one."
           }
         }
       },
@@ -9054,7 +9838,7 @@
           },
           "jsonata_expression": {
             "type": "string",
-            "description": "JSONata expression to transform the event payload. Required for webhook delivery, ignored for poll delivery, and rejected for file_proxy delivery — a file_proxy payload is built by the referenced use case's `params_mapping`, so accepting an expression here would silently do nothing.",
+            "description": "JSONata expression to transform the event payload. Required for webhook delivery, ignored for poll delivery, and rejected for file_proxy delivery — a file_proxy payload is built by the referenced use case's steps, so accepting an expression here would silently do nothing.",
             "example": "{ \"id\": entity._id, \"customer\": entity.customer_name }"
           },
           "enabled": {
@@ -9173,7 +9957,7 @@
           "type",
           "use_case_slug"
         ],
-        "description": "Push delivery to an external document system through a `file_proxy` use case.\n\nA pure pointer, deliberately. The outbound use case decides WHEN to deliver — its event\nname plus `event_filter` — and the referenced `file_proxy` use case decides WHAT and HOW:\nwhich items to fan out over (`fan_out`), what values to build (`params_mapping`,\n`lookups`, `constants`), and the steps that send them. Keeping every file concern on the\nfile_proxy side is what lets one upload recipe be shared by several event subscriptions\nwithout duplicating any of it.\n\n`jsonata_expression` on the mapping is NOT used for this delivery type and is rejected.\n\nThe slug is resolved at delivery time, not at save time, so use cases can be saved in any\norder; a dangling reference surfaces as a `USE_CASE_NOT_FOUND` monitoring event naming\nthe referencing mapping.\n",
+        "description": "Push delivery to an external document system through a `file_proxy` use case.\n\nA pure pointer, deliberately. The outbound use case decides WHEN to deliver — its event\nname plus `event_filter` — and the referenced `file_proxy` use case decides WHAT and HOW:\nwhich items to fan out over (`fan_out`), what values to build (each\nstep's `body_jsonata`), and the steps that send them. Keeping every file concern on the\nfile_proxy side is what lets one upload recipe be shared by several event subscriptions\nwithout duplicating any of it.\n\n`jsonata_expression` on the mapping is NOT used for this delivery type and is rejected.\n\nThe slug is resolved at delivery time, not at save time, so use cases can be saved in any\norder; a dangling reference surfaces as a `USE_CASE_NOT_FOUND` monitoring event naming\nthe referencing mapping.\n",
         "properties": {
           "type": {
             "type": "string",
@@ -9189,42 +9973,79 @@
           }
         }
       },
-      "FileProxyLookup": {
+      "EntitySyncStatusResponse": {
         "type": "object",
         "required": [
-          "source",
-          "entries"
+          "entity_id",
+          "sync_states"
         ],
-        "description": "A named translation from a value in the event to a value the external system expects.\n",
         "properties": {
-          "source": {
+          "entity_id": {
             "type": "string",
-            "description": "JSONata expression over the event producing the lookup key",
-            "example": "ticket._purpose_name[0]"
+            "format": "uuid",
+            "description": "The entity the sync states belong to"
           },
-          "entries": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "string"
-            },
-            "description": "Key-to-value translation table",
-            "example": {
-              "Zählerstandsmeldung": "Zählerstand",
-              "Kündigung": "Kündigung"
+          "sync_states": {
+            "type": "array",
+            "description": "One entry per integration that has processed an inbound event for the entity",
+            "items": {
+              "$ref": "#/components/schemas/EntitySyncState"
             }
-          },
-          "default": {
+          }
+        }
+      },
+      "EntitySyncState": {
+        "type": "object",
+        "required": [
+          "entity_id",
+          "integration_id",
+          "entity_slug",
+          "last_synced_at",
+          "last_operation"
+        ],
+        "properties": {
+          "entity_id": {
             "type": "string",
-            "description": "Value used when the key is absent from `entries`"
+            "format": "uuid",
+            "description": "The entity ID"
           },
-          "on_miss": {
+          "integration_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The integration that synchronized the entity"
+          },
+          "entity_slug": {
+            "type": "string",
+            "description": "The entity schema slug",
+            "example": "contract"
+          },
+          "use_case_id": {
+            "type": "string",
+            "description": "The inbound use case that last processed the entity"
+          },
+          "last_synced_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Last time an inbound ERP event for this entity was processed —\nincluding no-op checks that changed nothing on the entity.\n"
+          },
+          "last_changed_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Last time an inbound ERP event actually changed the entity (create/patch/delete)"
+          },
+          "last_operation": {
             "type": "string",
             "enum": [
-              "default",
-              "warn",
-              "fail"
+              "create",
+              "patch",
+              "delete",
+              "no-op"
             ],
-            "description": "What happens when the key is not in `entries`.\n`default` substitutes `default` silently; `warn` substitutes it and emits a\n`LOOKUP_UNMAPPED` warning so the gap is visible without stopping delivery;\n`fail` aborts the delivery terminally.\nDefaults to `default` when a `default` is set, and to `warn` when it is not.\n"
+            "description": "Outcome of the most recent inbound sync check"
+          },
+          "last_event_id": {
+            "type": "string",
+            "description": "The event ID of the most recent inbound sync check"
           }
         }
       },

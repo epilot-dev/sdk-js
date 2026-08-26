@@ -80,6 +80,18 @@
         "responses": {}
       }
     },
+    "/v1/erp/updates/direct_simulation": {
+      "post": {
+        "operationId": "simulateDirect",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v1/erp/updates/mapping_simulation": {
       "post": {
         "operationId": "simulateMapping",
@@ -651,6 +663,24 @@
             "name": "integrationId",
             "in": "path",
             "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/entities/{entityId}/sync-status": {
+      "get": {
+        "operationId": "getEntitySyncStatus",
+        "parameters": [
+          {
+            "name": "entityId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "integration_id",
+            "in": "query",
+            "required": false
           }
         ],
         "responses": {}

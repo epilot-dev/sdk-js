@@ -1,5 +1,6 @@
 # Permissions API
 
+- **Base URL:** `https://permissions.sls.epilot.io`
 - **Full API Docs:** [https://docs.epilot.io/api/permissions](https://docs.epilot.io/api/permissions)
 
 ## Usage
@@ -45,7 +46,9 @@ const { data } = await permissionsClient.listCurrentRoles(...)
 - [`GrantWithDependencies`](#grantwithdependencies)
 - [`GrantCondition`](#grantcondition)
 - [`EqualsCurrentUserCondition`](#equalscurrentusercondition)
+- [`NotEqualsCurrentUserCondition`](#notequalscurrentusercondition)
 - [`EqualsCondition`](#equalscondition)
+- [`NotEqualsCondition`](#notequalscondition)
 - [`RoleId`](#roleid)
 - [`BaseRole`](#baserole)
 - [`BaseRoleForCreate`](#baseroleforcreate)
@@ -615,12 +618,25 @@ type GrantCondition = object
 
 ### `EqualsCurrentUserCondition`
 
-Check if any relation_user attribute on the entity contains the current user. When attribute is provided, only that specific attribute path is checked.
+Check if any relation_user attribute on the entity contains the current user. When attribute is provided, only that specific attribute path is checked. When attributes is provided, it takes precedence over attribute and the condition passes when the current user appears in ANY of the listed attribut
 
 ```ts
 type EqualsCurrentUserCondition = {
   attribute?: string
+  attributes?: string[]
   operation: "equals_current_user"
+}
+```
+
+### `NotEqualsCurrentUserCondition`
+
+Check if the current user is absent from the relation_user attributes on the entity. When attribute is provided, only that specific attribute path is checked. When attributes is provided, it takes precedence over attribute and the condition passes only when the current user appears in NONE of the li
+
+```ts
+type NotEqualsCurrentUserCondition = {
+  attribute?: string
+  attributes?: string[]
+  operation: "not_equals_current_user"
 }
 ```
 
@@ -632,6 +648,18 @@ Check if attribute equals to any of the values
 type EqualsCondition = {
   attribute: string
   operation: "equals"
+  values: unknown[]
+}
+```
+
+### `NotEqualsCondition`
+
+Passes when the attribute does not equal any of the values. Records where the attribute is missing or empty pass the condition.
+
+```ts
+type NotEqualsCondition = {
+  attribute: string
+  operation: "not_equals"
   values: unknown[]
 }
 ```

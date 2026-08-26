@@ -246,7 +246,6 @@ const { data } = await integrationToolkitClient.acknowledgeTracking(...)
 - [`WebhookDeliveryConfig`](#webhookdeliveryconfig)
 - [`PollDeliveryConfig`](#polldeliveryconfig)
 - [`FileProxyDeliveryConfig`](#fileproxydeliveryconfig)
-- [`FileProxyLookup`](#fileproxylookup)
 - [`OutboundStatusResponse`](#outboundstatusresponse)
 - [`OutboundUseCaseStatus`](#outboundusecasestatus)
 - [`OutboundFileProxyTargetStatus`](#outboundfileproxytargetstatus)
@@ -3775,7 +3774,7 @@ A problem found during validation, scoped to the file as a whole rather than to 
 
 ```ts
 type ErpImportIssue = {
-  code: "UNIQUE_ID_COLUMN_MISSING" | "MAPPED_COLUMN_MISSING" | "MALFORMED_ROW" | "INVALID_ENCODING" | "EMPTY_FILE" | "TOO_MANY_ROWS"
+  code: "UNIQUE_ID_COLUMN_MISSING" | "MAPPED_COLUMN_MISSING" | "MALFORMED_ROW" | "INVALID_ENCODING" | "EMPTY_FILE" | "TOO_MANY_ROWS" | "BLANK_ROWS_SKIPPED"
   severity: "warning" | "blocking"
   columns?: Array<{
     name: string
@@ -3796,7 +3795,7 @@ type ErpImportValidation = {
   warnings: number
   entities: Record<string, number>
   issues?: Array<{
-    code: "UNIQUE_ID_COLUMN_MISSING" | "MAPPED_COLUMN_MISSING" | "MALFORMED_ROW" | "INVALID_ENCODING" | "EMPTY_FILE" | "TOO_MANY_ROWS"
+    code: "UNIQUE_ID_COLUMN_MISSING" | "MAPPED_COLUMN_MISSING" | "MALFORMED_ROW" | "INVALID_ENCODING" | "EMPTY_FILE" | "TOO_MANY_ROWS" | "BLANK_ROWS_SKIPPED"
     severity: "warning" | "blocking"
     columns?: Array<{
       name: { ... }
@@ -4789,11 +4788,6 @@ type IntegrationWithUseCases = {
       direction?: { ... }
       upload?: { ... }
       fan_out?: { ... }
-      params_mapping?: { ... }
-      lookups?: { ... }
-      constants?: { ... }
-      file_source?: { ... }
-      required_params?: { ... }
       secure_proxy?: { ... }
       auth?: { ... }
       params?: { ... }
@@ -4841,7 +4835,6 @@ type IntegrationWithUseCases = {
       allowed_ips?: { ... }
     }
   }>
-  // ...
 }
 ```
 
@@ -4942,12 +4935,12 @@ type UpsertIntegrationWithUseCasesRequest = {
       direction?: { ... }
       upload?: { ... }
       fan_out?: { ... }
-      params_mapping?: { ... }
-      lookups?: { ... }
-      constants?: { ... }
-      file_source?: { ... }
-      required_params?: { ... }
       secure_proxy?: { ... }
+      auth?: { ... }
+      params?: { ... }
+      allowed_origins?: { ... }
+      steps: { ... }
+      response?: { ... }
   // ...
 }
 ```
@@ -5526,25 +5519,13 @@ type EmbeddedUseCaseRequest = {
   configuration?: {
     direction?: "download" | "upload"
     upload?: {
+      max_total_bytes?: { ... }
       max_file_bytes?: { ... }
       max_delivery_attempts?: { ... }
-      success_when?: { ... }
-      external_id?: { ... }
     }
     fan_out?: {
       enabled: { ... }
-      split_expression?: { ... }
     }
-    params_mapping?: string
-    lookups?: Record<string, {
-      source: { ... }
-      entries: { ... }
-      default?: { ... }
-      on_miss?: { ... }
-    }>
-    constants?: Record<string, unknown>
-    file_source?: string
-    required_params?: string[]
     secure_proxy?: {
       use_case_slug: { ... }
     }
@@ -5568,6 +5549,18 @@ type EmbeddedUseCaseRequest = {
       description?: { ... }
     }>
     allowed_origins?: string // uri[]
+    steps: Array<{
+      url: { ... }
+      method: { ... }
+      headers?: { ... }
+      body_jsonata?: { ... }
+      enabled?: { ... }
+      body?: { ... }
+      response_type: { ... }
+    }>
+    response?: {
+      body: { ... }
+      encoding: { ... }
   // ...
 }
 ```
@@ -5657,25 +5650,13 @@ type EmbeddedFileProxyUseCaseRequest = {
   configuration?: {
     direction?: "download" | "upload"
     upload?: {
+      max_total_bytes?: { ... }
       max_file_bytes?: { ... }
       max_delivery_attempts?: { ... }
-      success_when?: { ... }
-      external_id?: { ... }
     }
     fan_out?: {
       enabled: { ... }
-      split_expression?: { ... }
     }
-    params_mapping?: string
-    lookups?: Record<string, {
-      source: { ... }
-      entries: { ... }
-      default?: { ... }
-      on_miss?: { ... }
-    }>
-    constants?: Record<string, unknown>
-    file_source?: string
-    required_params?: string[]
     secure_proxy?: {
       use_case_slug: { ... }
     }
@@ -5703,6 +5684,8 @@ type EmbeddedFileProxyUseCaseRequest = {
       url: { ... }
       method: { ... }
       headers?: { ... }
+      body_jsonata?: { ... }
+      enabled?: { ... }
       body?: { ... }
       response_type: { ... }
     }>
@@ -5861,25 +5844,13 @@ type FileProxyUseCase = {
   configuration?: {
     direction?: "download" | "upload"
     upload?: {
+      max_total_bytes?: { ... }
       max_file_bytes?: { ... }
       max_delivery_attempts?: { ... }
-      success_when?: { ... }
-      external_id?: { ... }
     }
     fan_out?: {
       enabled: { ... }
-      split_expression?: { ... }
     }
-    params_mapping?: string
-    lookups?: Record<string, {
-      source: { ... }
-      entries: { ... }
-      default?: { ... }
-      on_miss?: { ... }
-    }>
-    constants?: Record<string, unknown>
-    file_source?: string
-    required_params?: string[]
     secure_proxy?: {
       use_case_slug: { ... }
     }
@@ -5907,6 +5878,8 @@ type FileProxyUseCase = {
       url: { ... }
       method: { ... }
       headers?: { ... }
+      body_jsonata?: { ... }
+      enabled?: { ... }
       body?: { ... }
       response_type: { ... }
     }>
@@ -6049,25 +6022,13 @@ type UseCase = {
   configuration?: {
     direction?: "download" | "upload"
     upload?: {
+      max_total_bytes?: { ... }
       max_file_bytes?: { ... }
       max_delivery_attempts?: { ... }
-      success_when?: { ... }
-      external_id?: { ... }
     }
     fan_out?: {
       enabled: { ... }
-      split_expression?: { ... }
     }
-    params_mapping?: string
-    lookups?: Record<string, {
-      source: { ... }
-      entries: { ... }
-      default?: { ... }
-      on_miss?: { ... }
-    }>
-    constants?: Record<string, unknown>
-    file_source?: string
-    required_params?: string[]
     secure_proxy?: {
       use_case_slug: { ... }
     }
@@ -6079,6 +6040,18 @@ type UseCase = {
       scope?: { ... }
       audience?: { ... }
       resource?: { ... }
+      username?: { ... }
+      password?: { ... }
+      body_params?: { ... }
+      headers?: { ... }
+      query_params?: { ... }
+    }
+    params?: Array<{
+      name: { ... }
+      required: { ... }
+      description?: { ... }
+    }>
+    allowed_origins?: string // uri[]
   // ...
 }
 ```
@@ -6138,25 +6111,13 @@ type CreateUseCaseRequest = {
   configuration?: {
     direction?: "download" | "upload"
     upload?: {
+      max_total_bytes?: { ... }
       max_file_bytes?: { ... }
       max_delivery_attempts?: { ... }
-      success_when?: { ... }
-      external_id?: { ... }
     }
     fan_out?: {
       enabled: { ... }
-      split_expression?: { ... }
     }
-    params_mapping?: string
-    lookups?: Record<string, {
-      source: { ... }
-      entries: { ... }
-      default?: { ... }
-      on_miss?: { ... }
-    }>
-    constants?: Record<string, unknown>
-    file_source?: string
-    required_params?: string[]
     secure_proxy?: {
       use_case_slug: { ... }
     }
@@ -6184,8 +6145,20 @@ type CreateUseCaseRequest = {
       url: { ... }
       method: { ... }
       headers?: { ... }
+      body_jsonata?: { ... }
+      enabled?: { ... }
       body?: { ... }
       response_type: { ... }
+    }>
+    response?: {
+      body: { ... }
+      encoding: { ... }
+      filename?: { ... }
+      content_type?: { ... }
+    }
+    prevent_indirect_serving?: boolean
+  }
+} | {
   // ...
 }
 ```
@@ -6267,25 +6240,13 @@ type CreateFileProxyUseCaseRequest = {
   configuration?: {
     direction?: "download" | "upload"
     upload?: {
+      max_total_bytes?: { ... }
       max_file_bytes?: { ... }
       max_delivery_attempts?: { ... }
-      success_when?: { ... }
-      external_id?: { ... }
     }
     fan_out?: {
       enabled: { ... }
-      split_expression?: { ... }
     }
-    params_mapping?: string
-    lookups?: Record<string, {
-      source: { ... }
-      entries: { ... }
-      default?: { ... }
-      on_miss?: { ... }
-    }>
-    constants?: Record<string, unknown>
-    file_source?: string
-    required_params?: string[]
     secure_proxy?: {
       use_case_slug: { ... }
     }
@@ -6313,6 +6274,8 @@ type CreateFileProxyUseCaseRequest = {
       url: { ... }
       method: { ... }
       headers?: { ... }
+      body_jsonata?: { ... }
+      enabled?: { ... }
       body?: { ... }
       response_type: { ... }
     }>
@@ -6423,25 +6386,13 @@ type UpdateUseCaseRequest = {
   configuration?: {
     direction?: "download" | "upload"
     upload?: {
+      max_total_bytes?: { ... }
       max_file_bytes?: { ... }
       max_delivery_attempts?: { ... }
-      success_when?: { ... }
-      external_id?: { ... }
     }
     fan_out?: {
       enabled: { ... }
-      split_expression?: { ... }
     }
-    params_mapping?: string
-    lookups?: Record<string, {
-      source: { ... }
-      entries: { ... }
-      default?: { ... }
-      on_miss?: { ... }
-    }>
-    constants?: Record<string, unknown>
-    file_source?: string
-    required_params?: string[]
     secure_proxy?: {
       use_case_slug: { ... }
     }
@@ -6468,6 +6419,18 @@ type UpdateUseCaseRequest = {
     steps: Array<{
       url: { ... }
       method: { ... }
+      headers?: { ... }
+      body_jsonata?: { ... }
+      enabled?: { ... }
+      body?: { ... }
+      response_type: { ... }
+    }>
+    response?: {
+      body: { ... }
+      encoding: { ... }
+      filename?: { ... }
+      content_type?: { ... }
+    }
   // ...
 }
 ```
@@ -6553,25 +6516,13 @@ type UpdateFileProxyUseCaseRequest = {
   configuration?: {
     direction?: "download" | "upload"
     upload?: {
+      max_total_bytes?: { ... }
       max_file_bytes?: { ... }
       max_delivery_attempts?: { ... }
-      success_when?: { ... }
-      external_id?: { ... }
     }
     fan_out?: {
       enabled: { ... }
-      split_expression?: { ... }
     }
-    params_mapping?: string
-    lookups?: Record<string, {
-      source: { ... }
-      entries: { ... }
-      default?: { ... }
-      on_miss?: { ... }
-    }>
-    constants?: Record<string, unknown>
-    file_source?: string
-    required_params?: string[]
     secure_proxy?: {
       use_case_slug: { ... }
     }
@@ -6599,6 +6550,8 @@ type UpdateFileProxyUseCaseRequest = {
       url: { ... }
       method: { ... }
       headers?: { ... }
+      body_jsonata?: { ... }
+      enabled?: { ... }
       body?: { ... }
       response_type: { ... }
     }>
@@ -6736,30 +6689,30 @@ type UseCaseHistoryEntry = {
   configuration?: {
     direction?: "download" | "upload"
     upload?: {
+      max_total_bytes?: { ... }
       max_file_bytes?: { ... }
       max_delivery_attempts?: { ... }
-      success_when?: { ... }
-      external_id?: { ... }
     }
     fan_out?: {
       enabled: { ... }
-      split_expression?: { ... }
     }
-    params_mapping?: string
-    lookups?: Record<string, {
-      source: { ... }
-      entries: { ... }
-      default?: { ... }
-      on_miss?: { ... }
-    }>
-    constants?: Record<string, unknown>
-    file_source?: string
-    required_params?: string[]
     secure_proxy?: {
       use_case_slug: { ... }
     }
     auth?: {
       type: { ... }
+      token_url: { ... }
+      client_id: { ... }
+      client_secret: { ... }
+      scope?: { ... }
+      audience?: { ... }
+      resource?: { ... }
+      username?: { ... }
+      password?: { ... }
+      body_params?: { ... }
+      headers?: { ... }
+      query_params?: { ... }
+    }
   // ...
 }
 ```
@@ -6873,25 +6826,13 @@ type FileProxyUseCaseHistoryEntry = {
   configuration?: {
     direction?: "download" | "upload"
     upload?: {
+      max_total_bytes?: { ... }
       max_file_bytes?: { ... }
       max_delivery_attempts?: { ... }
-      success_when?: { ... }
-      external_id?: { ... }
     }
     fan_out?: {
       enabled: { ... }
-      split_expression?: { ... }
     }
-    params_mapping?: string
-    lookups?: Record<string, {
-      source: { ... }
-      entries: { ... }
-      default?: { ... }
-      on_miss?: { ... }
-    }>
-    constants?: Record<string, unknown>
-    file_source?: string
-    required_params?: string[]
     secure_proxy?: {
       use_case_slug: { ... }
     }
@@ -6919,6 +6860,8 @@ type FileProxyUseCaseHistoryEntry = {
       url: { ... }
       method: { ... }
       headers?: { ... }
+      body_jsonata?: { ... }
+      enabled?: { ... }
       body?: { ... }
       response_type: { ... }
     }>
@@ -7416,25 +7359,13 @@ and serves it to a browser. The downloa
 type FileProxyUseCaseConfiguration = {
   direction?: "download" | "upload"
   upload?: {
+    max_total_bytes?: number
     max_file_bytes?: number
     max_delivery_attempts?: number
-    success_when?: string
-    external_id?: string
   }
   fan_out?: {
     enabled: boolean
-    split_expression?: string
   }
-  params_mapping?: string
-  lookups?: Record<string, {
-    source: string
-    entries: Record<string, string>
-    default?: string
-    on_miss?: "default" | "warn" | "fail"
-  }>
-  constants?: Record<string, unknown>
-  file_source?: string
-  required_params?: string[]
   secure_proxy?: {
     use_case_slug: string
   }
@@ -7462,6 +7393,8 @@ type FileProxyUseCaseConfiguration = {
     url: string
     method: "GET" | "POST" | "PUT" | "PATCH"
     headers?: Record<string, string>
+    body_jsonata?: string
+    enabled?: string
     body?: string
     response_type: "json" | "binary"
   }>
@@ -7519,6 +7452,8 @@ type FileProxyStep = {
   url: string
   method: "GET" | "POST" | "PUT" | "PATCH"
   headers?: Record<string, string>
+  body_jsonata?: string
+  enabled?: string
   body?: string
   response_type: "json" | "binary"
 }
@@ -7526,16 +7461,15 @@ type FileProxyStep = {
 
 ### `FileProxyFanOutConfig`
 
-Splits one event into several independent deliveries.
+Whether one event produces one delivery per file, or a single delivery carrying all of
+them. The split is always over the event's `event_attachments` — there is no expression
+to write, because an upload only ever runs on events that declare that field.
 
-Mirrors the inbound mapping idiom, where an entity's JSONata expression returning an array
-produces one entity update per element. Made explicit with a toggle here because an upload
-is also legitimately used without splitting, and because auto-d
+Each resulting delivery is fully independent: 
 
 ```ts
 type FileProxyFanOutConfig = {
   enabled: boolean
-  split_expression?: string
 }
 ```
 
@@ -7543,15 +7477,15 @@ type FileProxyFanOutConfig = {
 
 Upload-side settings for a file_proxy use case with `direction: upload`.
 The surrounding file_proxy configuration owns WHAT and HOW to send: `fan_out`,
-`file_source`, `params_mapping`, lookups, constants, auth, and steps. This nested object
-governs upload-specific limits and how the final external r
+auth, and the steps with their `body_jsonata`. This nested object governs
+upload-specific limits and how the final external response is judged. The
+
 
 ```ts
 type FileProxyUploadConfig = {
+  max_total_bytes?: number
   max_file_bytes?: number
   max_delivery_attempts?: number
-  success_when?: string
-  external_id?: string
 }
 ```
 
@@ -7893,20 +7827,6 @@ which items to fan out over (`fan_out`), wh
 type FileProxyDeliveryConfig = {
   type: "file_proxy"
   use_case_slug: string
-}
-```
-
-### `FileProxyLookup`
-
-A named translation from a value in the event to a value the external system expects.
-
-
-```ts
-type FileProxyLookup = {
-  source: string
-  entries: Record<string, string>
-  default?: string
-  on_miss?: "default" | "warn" | "fail"
 }
 ```
 

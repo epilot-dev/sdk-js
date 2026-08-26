@@ -1394,9 +1394,32 @@ export declare namespace Components {
              * **Upload** (`direction: upload`) pushes epilot files to the external system. It is not
              * reachable over the download endpoint; an outbound use case points at it via a `file_proxy`
              * delivery, and this configuration owns everything about what gets sent: `fan_out` decides
-             * how many deliveries one event produces, `params_mapping` builds the values, and the
-             * `steps` place those values into requests via `{{ params.* }}`.
-             * `upload` and `params_mapping` are REQUIRED and `response` MUST be omitted.
+             * how many deliveries one event produces, and every step builds its own request body with
+             * `body_jsonata` — or leaves it empty to send the delivery's files unchanged.
+             * `upload` is REQUIRED and `response` MUST be omitted.
+             *
+             * Two expression languages, split by what they produce. **Handlebars composes strings**:
+             * `url` and `headers` on upload, plus a form-encoded, XML or plain-text `body` on
+             * download. **JSONata produces data**: `body_jsonata` and the per-step `enabled`.
+             * JSONata omits keys whose value is undefined, so an optional field needs no conditional
+             * guard — it is simply absent from the serialized body.
+             *
+             * Handlebars templates are rendered EXACTLY ONCE, against a single context holding `env`,
+             * `file_data`, `steps` and `auth_token`. Writing
+             * `{{ env.some_var }}` resolves it. The legacy `\{{ env.some_var }}` escape belongs to the
+             * two-pass renderer and is NOT rewritten here — it renders as the literal text
+             * `{{ env.some_var }}`, which is rejected (see below) rather than shipped.
+             *
+             * Two guards run on every rendered upload template, because single-pass rendering fails
+             * quietly by default. Both are terminal, and each names what to fix:
+             *
+             * - **residual `{{` after rendering** — a configuration still carrying the `\{{` escape.
+             *   Rewrite it without the backslash.
+             * - **a referenced `env` key absent from the environment** — checked BEFORE the URL is
+             *   parsed, because an empty value in host position turns
+             *   `https://{{env.host}}/document/import` into `https:///document/import`, whose host
+             *   then parses as `document`. Provision the environment variable. A key that exists and
+             *   is legitimately empty is fine; only absence fails.
              *
              * OpenAPI 3.0 cannot express this conditional requiredness, so it is enforced by the
              * server-side validator, which returns an explicit message naming the offending field.
@@ -1559,8 +1582,8 @@ export declare namespace Components {
          *
          * A pure pointer, deliberately. The outbound use case decides WHEN to deliver — its event
          * name plus `event_filter` — and the referenced `file_proxy` use case decides WHAT and HOW:
-         * which items to fan out over (`fan_out`), what values to build (`params_mapping`,
-         * `lookups`, `constants`), and the steps that send them. Keeping every file concern on the
+         * which items to fan out over (`fan_out`), what values to build (each
+         * step's `body_jsonata`), and the steps that send them. Keeping every file concern on the
          * file_proxy side is what lets one upload recipe be shared by several event subscriptions
          * without duplicating any of it.
          *
@@ -1682,9 +1705,32 @@ export declare namespace Components {
              * **Upload** (`direction: upload`) pushes epilot files to the external system. It is not
              * reachable over the download endpoint; an outbound use case points at it via a `file_proxy`
              * delivery, and this configuration owns everything about what gets sent: `fan_out` decides
-             * how many deliveries one event produces, `params_mapping` builds the values, and the
-             * `steps` place those values into requests via `{{ params.* }}`.
-             * `upload` and `params_mapping` are REQUIRED and `response` MUST be omitted.
+             * how many deliveries one event produces, and every step builds its own request body with
+             * `body_jsonata` — or leaves it empty to send the delivery's files unchanged.
+             * `upload` is REQUIRED and `response` MUST be omitted.
+             *
+             * Two expression languages, split by what they produce. **Handlebars composes strings**:
+             * `url` and `headers` on upload, plus a form-encoded, XML or plain-text `body` on
+             * download. **JSONata produces data**: `body_jsonata` and the per-step `enabled`.
+             * JSONata omits keys whose value is undefined, so an optional field needs no conditional
+             * guard — it is simply absent from the serialized body.
+             *
+             * Handlebars templates are rendered EXACTLY ONCE, against a single context holding `env`,
+             * `file_data`, `steps` and `auth_token`. Writing
+             * `{{ env.some_var }}` resolves it. The legacy `\{{ env.some_var }}` escape belongs to the
+             * two-pass renderer and is NOT rewritten here — it renders as the literal text
+             * `{{ env.some_var }}`, which is rejected (see below) rather than shipped.
+             *
+             * Two guards run on every rendered upload template, because single-pass rendering fails
+             * quietly by default. Both are terminal, and each names what to fix:
+             *
+             * - **residual `{{` after rendering** — a configuration still carrying the `\{{` escape.
+             *   Rewrite it without the backslash.
+             * - **a referenced `env` key absent from the environment** — checked BEFORE the URL is
+             *   parsed, because an empty value in host position turns
+             *   `https://{{env.host}}/document/import` into `https:///document/import`, whose host
+             *   then parses as `document`. Provision the environment variable. A key that exists and
+             *   is legitimately empty is fine; only absence fails.
              *
              * OpenAPI 3.0 cannot express this conditional requiredness, so it is enforced by the
              * server-side validator, which returns an explicit message naming the offending field.
@@ -2186,7 +2232,7 @@ export declare namespace Components {
              * Enum of possible issue codes.
              *
              */
-            code: "UNIQUE_ID_COLUMN_MISSING" | "MAPPED_COLUMN_MISSING" | "MALFORMED_ROW" | "INVALID_ENCODING" | "EMPTY_FILE" | "TOO_MANY_ROWS";
+            code: "UNIQUE_ID_COLUMN_MISSING" | "MAPPED_COLUMN_MISSING" | "MALFORMED_ROW" | "INVALID_ENCODING" | "EMPTY_FILE" | "TOO_MANY_ROWS" | "BLANK_ROWS_SKIPPED";
             severity: "warning" | "blocking";
             /**
              * The columns this issue is about, at most one entry per column per entity.
@@ -2294,7 +2340,7 @@ export declare namespace Components {
          */
         export interface ErpImportValidation {
             /**
-             * Data rows read from the file.
+             * Data rows the import will act on. Rows with no value in any column are dropped before they are counted, and reported as BLANK_ROWS_SKIPPED — so this can be lower than the line count of the file.
              */
             total_rows: number;
             /**
@@ -2487,8 +2533,8 @@ export declare namespace Components {
          *
          * A pure pointer, deliberately. The outbound use case decides WHEN to deliver — its event
          * name plus `event_filter` — and the referenced `file_proxy` use case decides WHAT and HOW:
-         * which items to fan out over (`fan_out`), what values to build (`params_mapping`,
-         * `lookups`, `constants`), and the steps that send them. Keeping every file concern on the
+         * which items to fan out over (`fan_out`), what values to build (each
+         * step's `body_jsonata`), and the steps that send them. Keeping every file concern on the
          * file_proxy side is what lets one upload recipe be shared by several event subscriptions
          * without duplicating any of it.
          *
@@ -2513,78 +2559,33 @@ export declare namespace Components {
             use_case_slug: string;
         }
         /**
-         * Splits one event into several independent deliveries.
-         *
-         * Mirrors the inbound mapping idiom, where an entity's JSONata expression returning an array
-         * produces one entity update per element. Made explicit with a toggle here because an upload
-         * is also legitimately used without splitting, and because auto-detecting "array means
-         * split" would make a single-element result ambiguous.
+         * Whether one event produces one delivery per file, or a single delivery carrying all of
+         * them. The split is always over the event's `event_attachments` — there is no expression
+         * to write, because an upload only ever runs on events that declare that field.
          *
          * Each resulting delivery is fully independent: its own idempotency record, its own retry
-         * schedule, its own monitoring events. A four-item event can therefore end up three-of-four
+         * schedule, its own monitoring events. A four-file event can therefore end up three-of-four
          * delivered, which is the honest state to report.
          *
          * The split is evaluated ONCE, when the event is enqueued, so item indices — and therefore
          * idempotency keys — stay stable across retries.
          *
+         * Either way, expressions read the same `$file_data` binding, so no expression needs to
+         * know which mode it runs in. An event carrying no attachments is recorded as `skipped`.
+         *
          */
         export interface FileProxyFanOutConfig {
             /**
-             * When false (or absent), the event produces exactly one delivery and `$item` is not
-             * bound in `params_mapping`.
+             * When true, one delivery per attachment, and `$file_data` holds exactly that one
+             * file. When false (or absent), the event produces exactly one delivery and
+             * `$file_data` holds every attachment on the event.
              *
-             */
-            enabled: boolean;
-            /**
-             * JSONata over the event that MUST return an array; one delivery is created per element,
-             * bound as `$item` in `params_mapping`. Required when `enabled` is true.
-             *
-             * Keep this a plain projection — scoping which events are handled at all belongs in the
-             * outbound use case's `event_filter`, not here. A non-array result fails the event with
-             * `FAN_OUT_INVALID_RESULT`; an empty array produces no deliveries and one info-level
+             * An empty `event_attachments` produces no deliveries and one info-level
              * `FAN_OUT_EMPTY`, which is the normal outcome for a catch-all subscription seeing an
              * event with nothing to send.
              *
-             * example:
-             * event_attachments
              */
-            split_expression?: string;
-        }
-        /**
-         * A named translation from a value in the event to a value the external system expects.
-         *
-         */
-        export interface FileProxyLookup {
-            /**
-             * JSONata expression over the event producing the lookup key
-             * example:
-             * ticket._purpose_name[0]
-             */
-            source: string;
-            /**
-             * Key-to-value translation table
-             * example:
-             * {
-             *   "Zählerstandsmeldung": "Zählerstand",
-             *   "Kündigung": "Kündigung"
-             * }
-             */
-            entries: {
-                [name: string]: string;
-            };
-            /**
-             * Value used when the key is absent from `entries`
-             */
-            default?: string;
-            /**
-             * What happens when the key is not in `entries`.
-             * `default` substitutes `default` silently; `warn` substitutes it and emits a
-             * `LOOKUP_UNMAPPED` warning so the gap is visible without stopping delivery;
-             * `fail` aborts the delivery terminally.
-             * Defaults to `default` when a `default` is set, and to `warn` when it is not.
-             *
-             */
-            on_miss?: "default" | "warn" | "fail";
+            enabled: boolean;
         }
         export interface FileProxyParam {
             /**
@@ -2645,20 +2646,88 @@ export declare namespace Components {
                 [name: string]: string;
             };
             /**
-             * Handlebars template for the request body (write methods only). On an `upload` use
-             * case this is where the payload is assembled, reading `{{ params.* }}` built by
-             * `params_mapping`, plus `{{ env.* }}` and `{{ steps.N.body }}`.
+             * Upload-only. JSONata producing the request body as DATA; the result is serialized to
+             * JSON and sent. Use this for every JSON body — it cannot emit malformed JSON, and it
+             * omits a key whose value is undefined instead of sending it empty, which is what makes
+             * optional fields work without a conditional guard.
              *
-             * **Route every user-controlled value through the `json` helper**: the template engine
-             * does not escape, so `"name":"{{ params.fileName }}"` produces invalid JSON the moment
-             * a filename contains a quote. Write `"name": {{json params.fileName}}` instead — the
-             * helper emits the surrounding quotes itself and renders absent values as `null`. Use
-             * `{{jsonEscape v}}` if you prefer to keep your own quotes. Upload configurations whose
-             * body would break on such input are rejected at save time.
+             * The evaluation root is the hydrated event, so `contact.customer_pin` and
+             * `ticket._purpose` are reachable directly, unprefixed. **Everything else is a
+             * `$`-prefixed binding**: `$file_data` (the files this delivery carries — see
+             * `FileProxyFanOutConfig` for what it holds in each mode), `$ack_id`, `$env`,
+             * `$steps` (results of the steps already executed, each
+             * `{statusCode, headers, body}`), `$germanDate(iso)` and `$now()`.
+             * Writing `file_data[0].filename` instead of `$file_data[0].filename` yields
+             * nothing — it reads a field named `file_data` on the event, which does not exist.
              *
-             * Handlebars block helpers work, so optional fields can be omitted rather than sent
-             * empty: `{{#if params.pin}},"pin": {{json params.pin}}{{/if}}`. Note that `{{/if}}}`
-             * fails to parse — leave a space before a closing brace: `{{/if}} }`.
+             * Leave this empty to send the delivery's files exactly as they are: the single
+             * attachment object when fanning out, the whole array when not. No mapping is
+             * needed for the common case.
+             *
+             * Must evaluate to an object or an array. Anything else fails the delivery terminally
+             * with `MAPPING_EXPRESSION_FAILED`, naming the step.
+             *
+             * **Only `undefined` omits a key.** `null`, `""`, `false` and `0` are values and are
+             * all sent. Two traps follow from that, and one idiom avoids both:
+             *
+             * - `x ? $string(x)` omits the key when `x` is `0` or `""`, because JSONata reads both
+             *   as false. A meter number of `"0"` would silently vanish.
+             * - `: undefined` is not a literal — JSONata has no `undefined` keyword, so it is a
+             *   path lookup that happens to find nothing. Against an event that really does carry
+             *   a field named `undefined`, it returns that field's value.
+             *
+             * Write the **two-arm ternary with no else branch**, which omits the key when the test
+             * is false: `{ "pin": $exists(contact.pin) ? $string(contact.pin) }`.
+             *
+             * Every `$` binding is checked at save time against the known set, so a mistyped
+             * binding (`$lookup.documentType` for `$file_data[0].filename`) is rejected rather
+             * than silently producing a missing key.
+             *
+             * Not accepted together with `body`, which the upload direction rejects outright.
+             *
+             * example:
+             * { "documentType": "Zählerstand", "fileName": $file_data[0].filename, "fileData": $file_data[0].base64, "pin": $exists(contact.customer_pin) ? $string(contact.customer_pin) }
+             */
+            body_jsonata?: string;
+            /**
+             * Upload-only, OPTIONAL. JSONata returning a boolean, deciding whether this step
+             * runs at all. Absent means it runs.
+             *
+             * A false result is a BREAK: this step is skipped and so is every step after it,
+             * and the delivery is recorded as `skipped` rather than delivered or failed. It is
+             * acknowledged and never retried, and a `STEP_DISABLED` monitoring event is emitted
+             * at level `info` — a disabled step is the configuration working, not a fault.
+             *
+             * Reads the same bindings a body does, `$steps` included, so it can branch on what
+             * an earlier step returned. This is how a delivery is filtered out: with one
+             * delivery per attachment, a false result on the first step drops that file.
+             *
+             * An expression that throws, or returns a non-boolean, is a terminal
+             * `MAPPING_EXPRESSION_FAILED` instead — a broken predicate must not read as a
+             * deliberate skip.
+             *
+             * example:
+             * $file_data[0].mime_type = "application/pdf"
+             */
+            enabled?: string;
+            /**
+             * Handlebars template for the request body (write methods only), for bodies that are
+             * NOT JSON — form-encoded, XML, plain text. For a JSON body use `body_jsonata`
+             * instead; it cannot produce malformed JSON.
+             *
+             * **Download-only.** The upload direction rejects it: use `body_jsonata`, or leave
+             * that empty to send the files unchanged.
+             *
+             * Rendered once, against the context described on `FileProxyUseCaseConfiguration`:
+             * `{{ params.* }}`, `{{ env.* }}`, `{{ steps.N.body }}`, `{{ auth_token }}`.
+             *
+             * If a JSON body is written here anyway, **route every user-controlled value through
+             * the `json` helper**: the template engine does not escape, so
+             * `"name":"{{ params.documentName }}"` produces invalid JSON the moment a value
+             * contains a quote. Write `"name": {{json params.documentName}}` instead — the helper
+             * emits the surrounding quotes itself and renders absent values as `null`.
+             *
+             * Mutually exclusive with `body_jsonata`, which is upload-only.
              *
              */
             body?: string;
@@ -2670,12 +2739,25 @@ export declare namespace Components {
         /**
          * Upload-side settings for a file_proxy use case with `direction: upload`.
          * The surrounding file_proxy configuration owns WHAT and HOW to send: `fan_out`,
-         * `file_source`, `params_mapping`, lookups, constants, auth, and steps. This nested object
-         * governs upload-specific limits and how the final external response is judged. The
+         * auth, and the steps with their `body_jsonata`. This nested object governs
+         * upload-specific limits and how the final external response is judged. The
          * outbound mapping remains a pure pointer to the recipe (see `FileProxyDeliveryConfig`).
          *
          */
         export interface FileProxyUploadConfig {
+            /**
+             * Ceiling for ALL of a delivery's files together, in bytes. Capped by the platform
+             * limit, which it may lower but never raise.
+             *
+             * Only reachable with `fan_out.enabled: false`, where one delivery carries every
+             * attachment and the worker holds them all resident at once. base64 inflates each
+             * by about a third, so the combined figure is what matters rather than any single
+             * file's size.
+             *
+             * example:
+             * 26214400
+             */
+            max_total_bytes?: number;
             /**
              * Per-file ceiling for this use case, in bytes. Files above it fail terminally with
              * `FILE_TOO_LARGE` before any bytes are fetched. Defaults to — and is clamped by — the
@@ -2695,26 +2777,6 @@ export declare namespace Components {
              *
              */
             max_delivery_attempts?: number;
-            /**
-             * Optional JSONata predicate evaluated against the final step result
-             * (`{ statusCode, headers, body }`) to decide whether the external system really
-             * accepted the file. When omitted, any 2xx counts as delivered. Use this for systems
-             * that return 200 with an error envelope.
-             *
-             * example:
-             * body.status = 'OK'
-             */
-            success_when?: string;
-            /**
-             * Optional JSONata expression over the step results yielding the external system's
-             * identifier for the stored document. Recorded on the delivery record and on the
-             * `FILE_PROXY_UPLOADED` monitoring event so an operator can find the document in the
-             * target system.
-             *
-             * example:
-             * steps[-1].body.documentId
-             */
-            external_id?: string;
         }
         /**
          * Auto-constructs a file proxy download URL. orgId and integrationId are injected from context. Exactly one of use_case_id or use_case_slug must be provided. Using use_case_slug is recommended as it is portable across environments.
@@ -2819,9 +2881,32 @@ export declare namespace Components {
              * **Upload** (`direction: upload`) pushes epilot files to the external system. It is not
              * reachable over the download endpoint; an outbound use case points at it via a `file_proxy`
              * delivery, and this configuration owns everything about what gets sent: `fan_out` decides
-             * how many deliveries one event produces, `params_mapping` builds the values, and the
-             * `steps` place those values into requests via `{{ params.* }}`.
-             * `upload` and `params_mapping` are REQUIRED and `response` MUST be omitted.
+             * how many deliveries one event produces, and every step builds its own request body with
+             * `body_jsonata` — or leaves it empty to send the delivery's files unchanged.
+             * `upload` is REQUIRED and `response` MUST be omitted.
+             *
+             * Two expression languages, split by what they produce. **Handlebars composes strings**:
+             * `url` and `headers` on upload, plus a form-encoded, XML or plain-text `body` on
+             * download. **JSONata produces data**: `body_jsonata` and the per-step `enabled`.
+             * JSONata omits keys whose value is undefined, so an optional field needs no conditional
+             * guard — it is simply absent from the serialized body.
+             *
+             * Handlebars templates are rendered EXACTLY ONCE, against a single context holding `env`,
+             * `file_data`, `steps` and `auth_token`. Writing
+             * `{{ env.some_var }}` resolves it. The legacy `\{{ env.some_var }}` escape belongs to the
+             * two-pass renderer and is NOT rewritten here — it renders as the literal text
+             * `{{ env.some_var }}`, which is rejected (see below) rather than shipped.
+             *
+             * Two guards run on every rendered upload template, because single-pass rendering fails
+             * quietly by default. Both are terminal, and each names what to fix:
+             *
+             * - **residual `{{` after rendering** — a configuration still carrying the `\{{` escape.
+             *   Rewrite it without the backslash.
+             * - **a referenced `env` key absent from the environment** — checked BEFORE the URL is
+             *   parsed, because an empty value in host position turns
+             *   `https://{{env.host}}/document/import` into `https:///document/import`, whose host
+             *   then parses as `document`. Provision the environment variable. A key that exists and
+             *   is legitimately empty is fine; only absence fails.
              *
              * OpenAPI 3.0 cannot express this conditional requiredness, so it is enforced by the
              * server-side validator, which returns an explicit message naming the offending field.
@@ -2843,9 +2928,32 @@ export declare namespace Components {
          * **Upload** (`direction: upload`) pushes epilot files to the external system. It is not
          * reachable over the download endpoint; an outbound use case points at it via a `file_proxy`
          * delivery, and this configuration owns everything about what gets sent: `fan_out` decides
-         * how many deliveries one event produces, `params_mapping` builds the values, and the
-         * `steps` place those values into requests via `{{ params.* }}`.
-         * `upload` and `params_mapping` are REQUIRED and `response` MUST be omitted.
+         * how many deliveries one event produces, and every step builds its own request body with
+         * `body_jsonata` — or leaves it empty to send the delivery's files unchanged.
+         * `upload` is REQUIRED and `response` MUST be omitted.
+         *
+         * Two expression languages, split by what they produce. **Handlebars composes strings**:
+         * `url` and `headers` on upload, plus a form-encoded, XML or plain-text `body` on
+         * download. **JSONata produces data**: `body_jsonata` and the per-step `enabled`.
+         * JSONata omits keys whose value is undefined, so an optional field needs no conditional
+         * guard — it is simply absent from the serialized body.
+         *
+         * Handlebars templates are rendered EXACTLY ONCE, against a single context holding `env`,
+         * `file_data`, `steps` and `auth_token`. Writing
+         * `{{ env.some_var }}` resolves it. The legacy `\{{ env.some_var }}` escape belongs to the
+         * two-pass renderer and is NOT rewritten here — it renders as the literal text
+         * `{{ env.some_var }}`, which is rejected (see below) rather than shipped.
+         *
+         * Two guards run on every rendered upload template, because single-pass rendering fails
+         * quietly by default. Both are terminal, and each names what to fix:
+         *
+         * - **residual `{{` after rendering** — a configuration still carrying the `\{{` escape.
+         *   Rewrite it without the backslash.
+         * - **a referenced `env` key absent from the environment** — checked BEFORE the URL is
+         *   parsed, because an empty value in host position turns
+         *   `https://{{env.host}}/document/import` into `https:///document/import`, whose host
+         *   then parses as `document`. Provision the environment variable. A key that exists and
+         *   is legitimately empty is fine; only absence fails.
          *
          * OpenAPI 3.0 cannot express this conditional requiredness, so it is enforced by the
          * server-side validator, which returns an explicit message naming the offending field.
@@ -2865,111 +2973,29 @@ export declare namespace Components {
             upload?: /**
              * Upload-side settings for a file_proxy use case with `direction: upload`.
              * The surrounding file_proxy configuration owns WHAT and HOW to send: `fan_out`,
-             * `file_source`, `params_mapping`, lookups, constants, auth, and steps. This nested object
-             * governs upload-specific limits and how the final external response is judged. The
+             * auth, and the steps with their `body_jsonata`. This nested object governs
+             * upload-specific limits and how the final external response is judged. The
              * outbound mapping remains a pure pointer to the recipe (see `FileProxyDeliveryConfig`).
              *
              */
             FileProxyUploadConfig;
             fan_out?: /**
-             * Splits one event into several independent deliveries.
-             *
-             * Mirrors the inbound mapping idiom, where an entity's JSONata expression returning an array
-             * produces one entity update per element. Made explicit with a toggle here because an upload
-             * is also legitimately used without splitting, and because auto-detecting "array means
-             * split" would make a single-element result ambiguous.
+             * Whether one event produces one delivery per file, or a single delivery carrying all of
+             * them. The split is always over the event's `event_attachments` — there is no expression
+             * to write, because an upload only ever runs on events that declare that field.
              *
              * Each resulting delivery is fully independent: its own idempotency record, its own retry
-             * schedule, its own monitoring events. A four-item event can therefore end up three-of-four
+             * schedule, its own monitoring events. A four-file event can therefore end up three-of-four
              * delivered, which is the honest state to report.
              *
              * The split is evaluated ONCE, when the event is enqueued, so item indices — and therefore
              * idempotency keys — stay stable across retries.
              *
+             * Either way, expressions read the same `$file_data` binding, so no expression needs to
+             * know which mode it runs in. An event carrying no attachments is recorded as `skipped`.
+             *
              */
             FileProxyFanOutConfig;
-            /**
-             * Upload-only, REQUIRED when `direction` is `upload`. JSONata expression evaluated once
-             * per fan-out item, producing the `params` object that step templates read as
-             * `{{ params.* }}`.
-             *
-             * The evaluation root is the hydrated event, so `contact.customer_pin` and
-             * `ticket._purpose` are reachable directly, unprefixed.
-             *
-             * **Everything per-item is a `$`-prefixed JSONata binding**: `$item` (the fan-out
-             * element, absent when `fan_out` is disabled), `$file_base64` and `$file`
-             * (`{filename, mime_type, size_bytes}`) for the resolved file, plus `$constants`,
-             * `$lookups`, `$ack_id`, `$germanDate(iso)` and `$now()`. Writing `item.filename`
-             * instead of `$item.filename` yields nothing — it reads a field named `item` on the
-             * event, which does not exist.
-             *
-             * Must evaluate to an object. `constants` are shallow-merged underneath the result, so
-             * the expression wins on any key collision.
-             *
-             * example:
-             * { "documentType": $lookups.documentType, "fileName": $item.filename, "fileData": $file_base64, "pin": contact.customer_pin }
-             */
-            params_mapping?: string;
-            /**
-             * Upload-only. Named translation tables resolved BEFORE `params_mapping` runs and bound
-             * as `$lookups`, so an expression reads `$lookups.documentType` rather than carrying a
-             * conditional chain. Deliberately generic: the next ERP calls the same concept
-             * `Belegart`.
-             *
-             */
-            lookups?: {
-                [name: string]: /**
-                 * A named translation from a value in the event to a value the external system expects.
-                 *
-                 */
-                FileProxyLookup;
-            };
-            /**
-             * Upload-only. Fixed values shallow-merged UNDERNEATH the `params_mapping` result — the
-             * expression wins on key collisions, constants only add. Use for the unchanging strings
-             * (tenant, sender, channel) that would otherwise be repeated in every expression.
-             *
-             * example:
-             * {
-             *   "mandant": "EPILOT_WNG",
-             *   "sender": "KSSP"
-             * }
-             */
-            constants?: {
-                [name: string]: any;
-            };
-            /**
-             * Upload-only. JSONata returning the attachment-shaped object (`entity_id`, optionally
-             * `s3ref`) whose bytes should be fetched for this delivery. The evaluation root is the
-             * event; the fan-out element is the `$item` binding, same as in `params_mapping`.
-             *
-             * Usually unnecessary: when the fan-out item is itself attachment-shaped it is used
-             * directly. Supply this only when splitting over something that is not the attachment
-             * — for example one delivery per meter reading, each carrying a file referenced from
-             * elsewhere in the event. When nothing resolves, no file is fetched and `file_base64`
-             * is undefined, which is valid for a fan-out that sends metadata only.
-             *
-             * example:
-             * event_attachments[entity_id = $item.file_id][0]
-             */
-            file_source?: string;
-            /**
-             * Upload-only. Params that MUST be present after `params_mapping` runs. Any listed name
-             * resolving to null or undefined fails the delivery terminally with
-             * `REQUIRED_PARAM_MISSING` before a single step executes.
-             *
-             * This is the generic net behind a lookup's `on_miss: fail`: it catches a required field
-             * going missing for any reason, so the external system never receives a body that is
-             * silently short a field its API requires.
-             *
-             * example:
-             * [
-             *   "documentType",
-             *   "fileName",
-             *   "fileData"
-             * ]
-             */
-            required_params?: string[];
             /**
              * Optional secure proxy attachment for routing all outbound file proxy requests.
              * Only `use_case_slug` is supported and the referenced secure_proxy use case
@@ -2999,8 +3025,8 @@ export declare namespace Components {
             allowed_origins?: string /* uri ^https?:// */[];
             /**
              * Ordered list of HTTP steps to execute. For `download` these retrieve the file; for
-             * `upload` they deliver it, each assembling its own request body from `{{ params.* }}`
-             * built by `params_mapping`.
+             * `upload` they deliver it, each assembling its own request body — `body_jsonata` for
+             * JSON, `body` for anything else.
              *
              */
             steps: [
@@ -3088,9 +3114,32 @@ export declare namespace Components {
              * **Upload** (`direction: upload`) pushes epilot files to the external system. It is not
              * reachable over the download endpoint; an outbound use case points at it via a `file_proxy`
              * delivery, and this configuration owns everything about what gets sent: `fan_out` decides
-             * how many deliveries one event produces, `params_mapping` builds the values, and the
-             * `steps` place those values into requests via `{{ params.* }}`.
-             * `upload` and `params_mapping` are REQUIRED and `response` MUST be omitted.
+             * how many deliveries one event produces, and every step builds its own request body with
+             * `body_jsonata` — or leaves it empty to send the delivery's files unchanged.
+             * `upload` is REQUIRED and `response` MUST be omitted.
+             *
+             * Two expression languages, split by what they produce. **Handlebars composes strings**:
+             * `url` and `headers` on upload, plus a form-encoded, XML or plain-text `body` on
+             * download. **JSONata produces data**: `body_jsonata` and the per-step `enabled`.
+             * JSONata omits keys whose value is undefined, so an optional field needs no conditional
+             * guard — it is simply absent from the serialized body.
+             *
+             * Handlebars templates are rendered EXACTLY ONCE, against a single context holding `env`,
+             * `file_data`, `steps` and `auth_token`. Writing
+             * `{{ env.some_var }}` resolves it. The legacy `\{{ env.some_var }}` escape belongs to the
+             * two-pass renderer and is NOT rewritten here — it renders as the literal text
+             * `{{ env.some_var }}`, which is rejected (see below) rather than shipped.
+             *
+             * Two guards run on every rendered upload template, because single-pass rendering fails
+             * quietly by default. Both are terminal, and each names what to fix:
+             *
+             * - **residual `{{` after rendering** — a configuration still carrying the `\{{` escape.
+             *   Rewrite it without the backslash.
+             * - **a referenced `env` key absent from the environment** — checked BEFORE the URL is
+             *   parsed, because an empty value in host position turns
+             *   `https://{{env.host}}/document/import` into `https:///document/import`, whose host
+             *   then parses as `document`. Provision the environment variable. A key that exists and
+             *   is legitimately empty is fine; only absence fails.
              *
              * OpenAPI 3.0 cannot express this conditional requiredness, so it is enforced by the
              * server-side validator, which returns an explicit message naming the offending field.
@@ -5367,7 +5416,7 @@ export declare namespace Components {
              */
             name: string;
             /**
-             * JSONata expression to transform the event payload. Required for webhook delivery, ignored for poll delivery, and rejected for file_proxy delivery — a file_proxy payload is built by the referenced use case's `params_mapping`, so accepting an expression here would silently do nothing.
+             * JSONata expression to transform the event payload. Required for webhook delivery, ignored for poll delivery, and rejected for file_proxy delivery — a file_proxy payload is built by the referenced use case's steps, so accepting an expression here would silently do nothing.
              * example:
              * { "id": entity._id, "customer": entity.customer_name }
              */
@@ -7080,9 +7129,32 @@ export declare namespace Components {
              * **Upload** (`direction: upload`) pushes epilot files to the external system. It is not
              * reachable over the download endpoint; an outbound use case points at it via a `file_proxy`
              * delivery, and this configuration owns everything about what gets sent: `fan_out` decides
-             * how many deliveries one event produces, `params_mapping` builds the values, and the
-             * `steps` place those values into requests via `{{ params.* }}`.
-             * `upload` and `params_mapping` are REQUIRED and `response` MUST be omitted.
+             * how many deliveries one event produces, and every step builds its own request body with
+             * `body_jsonata` — or leaves it empty to send the delivery's files unchanged.
+             * `upload` is REQUIRED and `response` MUST be omitted.
+             *
+             * Two expression languages, split by what they produce. **Handlebars composes strings**:
+             * `url` and `headers` on upload, plus a form-encoded, XML or plain-text `body` on
+             * download. **JSONata produces data**: `body_jsonata` and the per-step `enabled`.
+             * JSONata omits keys whose value is undefined, so an optional field needs no conditional
+             * guard — it is simply absent from the serialized body.
+             *
+             * Handlebars templates are rendered EXACTLY ONCE, against a single context holding `env`,
+             * `file_data`, `steps` and `auth_token`. Writing
+             * `{{ env.some_var }}` resolves it. The legacy `\{{ env.some_var }}` escape belongs to the
+             * two-pass renderer and is NOT rewritten here — it renders as the literal text
+             * `{{ env.some_var }}`, which is rejected (see below) rather than shipped.
+             *
+             * Two guards run on every rendered upload template, because single-pass rendering fails
+             * quietly by default. Both are terminal, and each names what to fix:
+             *
+             * - **residual `{{` after rendering** — a configuration still carrying the `\{{` escape.
+             *   Rewrite it without the backslash.
+             * - **a referenced `env` key absent from the environment** — checked BEFORE the URL is
+             *   parsed, because an empty value in host position turns
+             *   `https://{{env.host}}/document/import` into `https:///document/import`, whose host
+             *   then parses as `document`. Provision the environment variable. A key that exists and
+             *   is legitimately empty is fine; only absence fails.
              *
              * OpenAPI 3.0 cannot express this conditional requiredness, so it is enforced by the
              * server-side validator, which returns an explicit message naming the offending field.
@@ -10475,7 +10547,6 @@ export type ExternalMonitoringSpan = Components.Schemas.ExternalMonitoringSpan;
 export type FileProxyAuth = Components.Schemas.FileProxyAuth;
 export type FileProxyDeliveryConfig = Components.Schemas.FileProxyDeliveryConfig;
 export type FileProxyFanOutConfig = Components.Schemas.FileProxyFanOutConfig;
-export type FileProxyLookup = Components.Schemas.FileProxyLookup;
 export type FileProxyParam = Components.Schemas.FileProxyParam;
 export type FileProxyResponseConfig = Components.Schemas.FileProxyResponseConfig;
 export type FileProxySecureProxyAttachment = Components.Schemas.FileProxySecureProxyAttachment;
