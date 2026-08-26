@@ -168,6 +168,65 @@ export declare namespace Components {
              */
             before_discount_amount_subtotal_decimal?: string;
         }
+        export interface AppendVersionRequest {
+            /**
+             * When this version takes effect. Defaults to now.
+             *
+             * An RFC 3339 date (`2026-01-01`, read as midnight UTC) or date-time
+             * (`2026-01-01T00:00:00Z`), to at most millisecond precision. Deliberately not declared as
+             * `format: date-time`, which would reject the plain-date form that this accepts.
+             *
+             * A date in the past is accepted and answered with warnings, never refused. A date the
+             * variant already has a version at is refused as `VERSION_CONFLICT`.
+             *
+             * **Omit this to mean "now"** — that is the only spelling of now that is reliably silent. A
+             * timestamp taken from the caller's own clock is already some milliseconds old when the
+             * server judges it, which makes it a backdate, however small, and it is answered with the
+             * warnings a backdate earns.
+             *
+             * example:
+             * 2027-01-01T00:00:00Z
+             */
+            valid_from?: string;
+            values: /**
+             * The attribute values this version overrides on the base entity, keyed by attribute name.
+             *
+             * Only attributes currently declaring `overridable_attribute` are applied. Metadata fields
+             * (anything underscore-prefixed), readonly attributes, hidden attributes and non-overridable
+             * attributes present here are ignored rather than rejected, so a client working from a slightly
+             * stale schema snapshot still succeeds instead of failing on fields it could not have known to
+             * drop. An attribute's `render_condition` says when to show it and has no bearing on whether a
+             * variant may override it.
+             *
+             * Ignored means *not updated*, never *removed*: a value already stored for an attribute that is
+             * not currently overridable is preserved, so removing and restoring the flag deactivates and
+             * then reactivates the same override.
+             *
+             * A composite price's `price_components` is an ordinary overridable relation attribute: a
+             * composite variant pins its component variants here the same way any other relation value is
+             * set, with no special handling.
+             *
+             * example:
+             * {
+             *   "unit_amount": 2499,
+             *   "unit_amount_decimal": "24.99"
+             * }
+             */
+            VariantValues;
+            /**
+             * Optional, and never applied: a variant's conditions are fixed when it is created. Accepted
+             * only so that a client building its body from the version it loaded is not forced to strip
+             * them out, and refused when they describe a different situation from the stored one.
+             *
+             * example:
+             * {
+             *   "postal_code": "46045"
+             * }
+             */
+            conditions?: {
+                [name: string]: any;
+            };
+        }
         /**
          * Availability check request payload
          */
@@ -4116,6 +4175,144 @@ export declare namespace Components {
             [name: string]: /* The computed price */ ComputedBasePrice;
         }
         /**
+         * One condition dimension, in the shape a schema's `conditions` array holds it — copy it in
+         * verbatim.
+         *
+         */
+        export interface ConditionDefinition {
+            /**
+             * How variants and resolve contexts refer to this condition. Independent of attribute
+             * names: a value needed as an attribute too is duplicated onto the variant.
+             *
+             * `default`, and any name beginning with `_`, are reserved for the server: a condition
+             * declared under one is ignored, since nothing could pin it and no context could address it.
+             *
+             * example:
+             * postal_code
+             */
+            name: string;
+            /**
+             * Human-readable name of the condition.
+             * example:
+             * Postal Code
+             */
+            label: string;
+            type: /**
+             * The kind of value a condition holds, which decides how a variant's pinned value is matched
+             * against a resolve context.
+             *
+             * - `string`: an arbitrary string, matched exactly and case-sensitively
+             * - `number`: a numeric value
+             * - `date`: a single date
+             * - `daterange`: a window with a from and an until timestamp; both ends may be left open
+             * - `boolean`: a true/false value
+             * - `select`: one of the values declared in `options`, unless `allow_any` is set
+             * - `location`: a geographic value, shaped by `format`
+             *
+             * There is no condition type for the fallback variant. Being the entity's fallback is a
+             * property of the variant, set by the `default` flag on a variant write, and needs nothing
+             * declared in the schema.
+             *
+             */
+            ConditionType;
+            /**
+             * The declared vocabulary of a `select` condition. Absent for every other type.
+             *
+             * The same shape a `select` attribute's `options` has on the Entity API, item for item: an
+             * entry is either the value itself or an object carrying that value and an optional display
+             * `title`. A `title` is never pinned by a variant and never matched — two entries differing
+             * only in their title are one vocabulary entry.
+             *
+             * Enforced on variant writes, unless `allow_any` is true: a pinned value outside the
+             * vocabulary is rejected with `CONDITION_VALUE_INVALID`. It is *not* enforced on resolve —
+             * a vocabulary says what may be stored, not what may be asked for, so a context value
+             * outside it is a query that simply matches nothing.
+             *
+             * example:
+             * [
+             *   "private",
+             *   "commercial"
+             * ]
+             */
+            options?: ((string | null) | {
+                value: string;
+                title?: string;
+            })[];
+            /**
+             * Allow arbitrary stored values in addition to the declared `options`. Absent means strict:
+             * a variant may only pin a declared option.
+             *
+             * example:
+             * false
+             */
+            allow_any?: boolean;
+            /**
+             * The value shape of a `location` condition. Absent for every other type.
+             */
+            format?: "zipcode" | "zipcode + town";
+        }
+        /**
+         * A named bundle of condition definitions, built in for one entity type.
+         */
+        export interface ConditionSet {
+            /**
+             * Identifies the set within this entity type's catalog.
+             * example:
+             * delivery_area
+             */
+            id: string;
+            /**
+             * Human-readable name of the set.
+             * example:
+             * Delivery Area
+             */
+            label: string;
+            /**
+             * What the set is for, and when to reach for it.
+             */
+            description: string;
+            /**
+             * The condition definitions to copy into the schema's own `conditions` array.
+             */
+            conditions: /**
+             * One condition dimension, in the shape a schema's `conditions` array holds it — copy it in
+             * verbatim.
+             *
+             */
+            ConditionDefinition[];
+        }
+        export interface ConditionSetCatalog {
+            /**
+             * The condition sets built in for the requested entity type, in the order they are offered.
+             *
+             */
+            results: /* A named bundle of condition definitions, built in for one entity type. */ ConditionSet[];
+        }
+        /**
+         * The kind of value a condition holds, which decides how a variant's pinned value is matched
+         * against a resolve context.
+         *
+         * - `string`: an arbitrary string, matched exactly and case-sensitively
+         * - `number`: a numeric value
+         * - `date`: a single date
+         * - `daterange`: a window with a from and an until timestamp; both ends may be left open
+         * - `boolean`: a true/false value
+         * - `select`: one of the values declared in `options`, unless `allow_any` is set
+         * - `location`: a geographic value, shaped by `format`
+         *
+         * There is no condition type for the fallback variant. Being the entity's fallback is a
+         * property of the variant, set by the `default` flag on a variant write, and needs nothing
+         * declared in the schema.
+         *
+         */
+        export type ConditionType = "string" | "number" | "date" | "daterange" | "boolean" | "select" | "location";
+        /**
+         * Schema slug of an entity type that can be conditional — the `{slug}` of every
+         * conditional-pricing route.
+         *
+         */
+        export type ConditionalEntitySlug = "product" | "price" | "coupon";
+        /**
          * An error from a conditional-pricing operation, carrying a machine-readable `code`
          * from the conditional-pricing vocabulary plus any structured data about the failure,
          * so a client can branch on the kind of failure rather than parse the message.
@@ -4153,10 +4350,10 @@ export declare namespace Components {
              * - `AMBIGUOUS_RESOLUTION` (409): several variants match the given context while a single result was requested
              * - `TUPLE_CONFLICT` (409): the condition tuple is already claimed by another variant
              * - `VERSION_CONFLICT` (409): a version already exists at the given `valid_from` on that variant
-             * - `SUPERSEDED_VERSION` (409): the addressed version has been superseded
              * - `CONDITION_UNDEFINED` (400): the context names a condition the entity's schema does not define
              * - `OPERATOR_UNSUPPORTED` (400): the requested operator is not applicable to the condition's type
              * - `CONTEXT_FORMAT_INVALID` (400): a context value is malformed for its condition type
+             * - `CONDITION_VALUE_INVALID` (400): a variant write pins a `select` value the condition's declared `options` do not contain
              * - `TOO_MANY_MATCHES` (400): a multi-match resolve exceeded its result cap
              * - `WRITE_CONFLICT` (409): transient write contention, retryable unlike `TUPLE_CONFLICT`
              *
@@ -4182,17 +4379,17 @@ export declare namespace Components {
          * - `AMBIGUOUS_RESOLUTION` (409): several variants match the given context while a single result was requested
          * - `TUPLE_CONFLICT` (409): the condition tuple is already claimed by another variant
          * - `VERSION_CONFLICT` (409): a version already exists at the given `valid_from` on that variant
-         * - `SUPERSEDED_VERSION` (409): the addressed version has been superseded
          * - `CONDITION_UNDEFINED` (400): the context names a condition the entity's schema does not define
          * - `OPERATOR_UNSUPPORTED` (400): the requested operator is not applicable to the condition's type
          * - `CONTEXT_FORMAT_INVALID` (400): a context value is malformed for its condition type
+         * - `CONDITION_VALUE_INVALID` (400): a variant write pins a `select` value the condition's declared `options` do not contain
          * - `TOO_MANY_MATCHES` (400): a multi-match resolve exceeded its result cap
          * - `WRITE_CONFLICT` (409): transient write contention, retryable unlike `TUPLE_CONFLICT`
          *
          * Each code is emitted with the HTTP status shown above, and only with that status.
          *
          */
-        export type ConditionalPricingErrorCode = "NOT_FOUND" | "AMBIGUOUS_RESOLUTION" | "TUPLE_CONFLICT" | "VERSION_CONFLICT" | "SUPERSEDED_VERSION" | "CONDITION_UNDEFINED" | "OPERATOR_UNSUPPORTED" | "CONTEXT_FORMAT_INVALID" | "TOO_MANY_MATCHES" | "WRITE_CONFLICT";
+        export type ConditionalPricingErrorCode = "NOT_FOUND" | "AMBIGUOUS_RESOLUTION" | "TUPLE_CONFLICT" | "VERSION_CONFLICT" | "CONDITION_UNDEFINED" | "OPERATOR_UNSUPPORTED" | "CONTEXT_FORMAT_INVALID" | "CONDITION_VALUE_INVALID" | "TOO_MANY_MATCHES" | "WRITE_CONFLICT";
         export type ConsumptionTypeGetAg = "household" | "heating_pump" | "night_storage_heating" | "night_storage_heating_common_meter";
         /**
          * The coupon entity
@@ -4517,6 +4714,163 @@ export declare namespace Components {
              */
             Price[];
         }
+        export interface CreateVariantRequest {
+            conditions?: /**
+             * The situation this variant applies to: a flat map keyed by condition name, as the entity's
+             * schema declares them. A condition left out is a wildcard — the variant applies whatever the
+             * context says for it, which is what makes adding a condition to a schema non-breaking for the
+             * variants that already exist.
+             *
+             * Exact values only. Predicates are accepted in a resolve context and nowhere else, so that
+             * matching is decided in exactly one place.
+             *
+             * Values are typed by their condition and stored canonicalized for that type: a `date` becomes
+             * millisecond-precision UTC, a `daterange` an object carrying `from` and `until` where an empty
+             * string is an open end, a `location` of format `zipcode` the postal code itself and one of
+             * format `zipcode + town` an object carrying both. A `select` value must be a string, and must
+             * be one the condition's `options` declare unless it sets `allow_any`.
+             *
+             * `default`, and any name beginning with `_`, are reserved for the server and cannot be pinned
+             * here. Whether a variant is the entity's fallback is set through the request's `default` flag.
+             *
+             * example:
+             * {
+             *   "postal_code": "46045"
+             * }
+             */
+            PinnedConditions;
+            /**
+             * Mark this variant as the entity's fallback: the one served when no other variant applies.
+             *
+             * A property of the variant, never an entry in `conditions` — a variant claiming a value for
+             * the marker would hold a real condition tuple while being permanently unmatchable, since no
+             * resolve context ever supplies it. A default variant cannot pin anything else, and an
+             * entity can have at most one.
+             *
+             * Available to every conditional entity: nothing has to be declared in the schema first.
+             * The variant is stored pinning one reserved condition, which is what makes the ordinary
+             * condition-tuple guard enforce at-most-one-per-entity with no rule of its own.
+             *
+             */
+            default?: boolean;
+            /**
+             * When the first version takes effect. Defaults to now.
+             *
+             * An RFC 3339 date (`2026-01-01`, read as midnight UTC) or date-time
+             * (`2026-01-01T00:00:00Z`), to at most millisecond precision. Deliberately not declared as
+             * `format: date-time`, which would reject the plain-date form that this accepts.
+             *
+             * example:
+             * 2027-01-01T00:00:00Z
+             */
+            valid_from?: string;
+            values: /**
+             * The attribute values this version overrides on the base entity, keyed by attribute name.
+             *
+             * Only attributes currently declaring `overridable_attribute` are applied. Metadata fields
+             * (anything underscore-prefixed), readonly attributes, hidden attributes and non-overridable
+             * attributes present here are ignored rather than rejected, so a client working from a slightly
+             * stale schema snapshot still succeeds instead of failing on fields it could not have known to
+             * drop. An attribute's `render_condition` says when to show it and has no bearing on whether a
+             * variant may override it.
+             *
+             * Ignored means *not updated*, never *removed*: a value already stored for an attribute that is
+             * not currently overridable is preserved, so removing and restoring the flag deactivates and
+             * then reactivates the same override.
+             *
+             * A composite price's `price_components` is an ordinary overridable relation attribute: a
+             * composite variant pins its component variants here the same way any other relation value is
+             * set, with no special handling.
+             *
+             * example:
+             * {
+             *   "unit_amount": 2499,
+             *   "unit_amount_decimal": "24.99"
+             * }
+             */
+            VariantValues;
+        }
+        export interface CreatedVariant {
+            /**
+             * Server-generated, always. This is the durable key orders and contracts pin, so it is never
+             * accepted from a client — a client-suppliable id would risk collisions between independent
+             * importers.
+             *
+             * example:
+             * var-46045
+             */
+            variant_id: string;
+            /**
+             * example:
+             * price-sp26d1yo
+             */
+            entity_id: string;
+            schema: /**
+             * Schema slug of an entity type that can be conditional — the `{slug}` of every
+             * conditional-pricing route.
+             *
+             */
+            ConditionalEntitySlug;
+            /**
+             * The situation this variant applies to, plus the boolean `default` discriminator — the
+             * same shape `_conditions` has on a resolved payload.
+             *
+             * example:
+             * {
+             *   "postal_code": "46045",
+             *   "default": false
+             * }
+             */
+            conditions: {
+                [name: string]: any;
+                default: boolean;
+            };
+            /**
+             * When the first version takes effect, canonicalized to millisecond-precision UTC.
+             * example:
+             * 2027-01-01T00:00:00.000Z
+             */
+            valid_from: string;
+            values: /**
+             * The attribute values this version overrides on the base entity, keyed by attribute name.
+             *
+             * Only attributes currently declaring `overridable_attribute` are applied. Metadata fields
+             * (anything underscore-prefixed), readonly attributes, hidden attributes and non-overridable
+             * attributes present here are ignored rather than rejected, so a client working from a slightly
+             * stale schema snapshot still succeeds instead of failing on fields it could not have known to
+             * drop. An attribute's `render_condition` says when to show it and has no bearing on whether a
+             * variant may override it.
+             *
+             * Ignored means *not updated*, never *removed*: a value already stored for an attribute that is
+             * not currently overridable is preserved, so removing and restoring the flag deactivates and
+             * then reactivates the same override.
+             *
+             * A composite price's `price_components` is an ordinary overridable relation attribute: a
+             * composite variant pins its component variants here the same way any other relation value is
+             * set, with no special handling.
+             *
+             * example:
+             * {
+             *   "unit_amount": 2499,
+             *   "unit_amount_decimal": "24.99"
+             * }
+             */
+            VariantValues;
+            _created_at?: string;
+            _updated_at?: string;
+            /**
+             * The revision a later write to this version must carry to be accepted. Genuinely current,
+             * unlike one read back later from an eventually-consistent read.
+             *
+             */
+            _revision?: number;
+            /**
+             * Things worth knowing that did not stop the write. Empty in the ordinary case — a client
+             * reads its length rather than branching on its absence.
+             *
+             */
+            warnings: VariantWriteWarning[];
+        }
         /**
          * Three-letter ISO currency code, in lowercase. Must be a supported currency.
          * ISO 4217 CURRENCY CODES as specified in the documentation: https://www.iso.org/iso-4217-currency-codes.html
@@ -4545,6 +4899,70 @@ export declare namespace Components {
              */
             email?: string;
             phone?: string;
+        }
+        export interface DeletedVariant {
+            /**
+             * example:
+             * var-46045
+             */
+            variant_id: string;
+            /**
+             * example:
+             * price-sp26d1yo
+             */
+            entity_id: string;
+            schema: /**
+             * Schema slug of an entity type that can be conditional — the `{slug}` of every
+             * conditional-pricing route.
+             *
+             */
+            ConditionalEntitySlug;
+            /**
+             * Whether this call is the one that freed the variant's combination of condition values.
+             * `false` where an earlier, interrupted attempt had already freed it — the delete still
+             * succeeded, and the combination was already reusable.
+             *
+             */
+            tuple_released: boolean;
+            /**
+             * Version rows this call removed.
+             */
+            versions_deleted: number;
+        }
+        export interface DeletedVariantVersion {
+            /**
+             * example:
+             * var-46045
+             */
+            variant_id: string;
+            /**
+             * example:
+             * price-sp26d1yo
+             */
+            entity_id: string;
+            schema: /**
+             * Schema slug of an entity type that can be conditional — the `{slug}` of every
+             * conditional-pricing route.
+             *
+             */
+            ConditionalEntitySlug;
+            /**
+             * The version removed, canonicalized to millisecond-precision UTC.
+             * example:
+             * 2027-01-01T00:00:00.000Z
+             */
+            valid_from: string;
+            /**
+             * What the delete moved, if anything. Empty when a scheduled version was withdrawn.
+             */
+            warnings: /**
+             * Something a version write moved. A version write is never refused for being late — backdating a
+             * version, and editing or deleting one that has already been superseded, are both accepted — so
+             * what a caller gets instead is a warning naming exactly what changed. One write can carry both
+             * codes.
+             *
+             */
+            VersionWriteWarning[];
         }
         export interface DiscountAmounts {
             /**
@@ -6775,6 +7193,47 @@ export declare namespace Components {
          *
          */
         export type OrderStatus = "draft" | "quote" | "placed" | "cancelled" | "completed";
+        export interface PatchVersionRequest {
+            /**
+             * Only the attribute overrides to change. Everything not mentioned is left as stored.
+             *
+             * `null` is a value like any other here rather than a deletion; to stop overriding an
+             * attribute, send the complete snapshot without it through the replace operation.
+             *
+             * example:
+             * {
+             *   "unit_amount": 2499,
+             *   "unit_amount_decimal": "24.99"
+             * }
+             */
+            values: {
+                [name: string]: any;
+            };
+            /**
+             * The revision marker read from the version being written. The write is refused with
+             * `WRITE_CONFLICT` if the version has been written since.
+             *
+             * example:
+             * 3
+             */
+            _revision: number;
+            /**
+             * Optional, never applied, and refused when it names a version other than the one addressed.
+             */
+            valid_from?: string;
+            /**
+             * Optional, and never applied. A partial update that tries to change a pinned condition value
+             * is refused — this is the path that rule is most likely to be broken on by accident.
+             *
+             * example:
+             * {
+             *   "postal_code": "46045"
+             * }
+             */
+            conditions?: {
+                [name: string]: any;
+            };
+        }
         /**
          * A PaymentMethod represent your customer's payment instruments.
          *
@@ -6790,6 +7249,32 @@ export declare namespace Components {
             details?: {
                 [name: string]: any;
             };
+        }
+        /**
+         * The situation this variant applies to: a flat map keyed by condition name, as the entity's
+         * schema declares them. A condition left out is a wildcard — the variant applies whatever the
+         * context says for it, which is what makes adding a condition to a schema non-breaking for the
+         * variants that already exist.
+         *
+         * Exact values only. Predicates are accepted in a resolve context and nowhere else, so that
+         * matching is decided in exactly one place.
+         *
+         * Values are typed by their condition and stored canonicalized for that type: a `date` becomes
+         * millisecond-precision UTC, a `daterange` an object carrying `from` and `until` where an empty
+         * string is an open end, a `location` of format `zipcode` the postal code itself and one of
+         * format `zipcode + town` an object carrying both. A `select` value must be a string, and must
+         * be one the condition's `options` declare unless it sets `allow_any`.
+         *
+         * `default`, and any name beginning with `_`, are reserved for the server and cannot be pinned
+         * here. Whether a variant is the entity's fallback is set through the request's `default` flag.
+         *
+         * example:
+         * {
+         *   "postal_code": "46045"
+         * }
+         */
+        export interface PinnedConditions {
+            [name: string]: any;
         }
         export interface PortalContext {
             [name: string]: any;
@@ -9621,6 +10106,225 @@ export declare namespace Components {
              */
             CouponWithoutPromoCodes[];
         }
+        export interface ReplaceVersionRequest {
+            /**
+             * The complete set of attribute overrides this version carries. An overridable attribute
+             * absent from here stops being overridden.
+             *
+             * Attributes the variant may not override are ignored where this carries them, and their
+             * **stored value is kept rather than dropped** — otherwise a routine full-snapshot write
+             * would erase an override the moment its attribute's `overridable_attribute`, `readonly` or
+             * `hidden` flag happened to be off.
+             *
+             * example:
+             * {
+             *   "unit_amount": 2499,
+             *   "unit_amount_decimal": "24.99"
+             * }
+             */
+            values: {
+                [name: string]: any;
+            };
+            /**
+             * The revision marker read from the version being written. The write is refused with
+             * `WRITE_CONFLICT` if the version has been written since.
+             *
+             * Required rather than optional: an optional one is a guarantee every client can opt out of
+             * by forgetting a field, and the write it protects is the one that overwrites somebody
+             * else's edit.
+             *
+             * example:
+             * 3
+             */
+            _revision: number;
+            /**
+             * Optional, and never applied. Accepted when it names the version being addressed — so a
+             * client building its body from what it loaded need not strip it out — and refused when it
+             * names another: a version's `valid_from` is its identity, and moving it is an append and a
+             * delete rather than an edit.
+             *
+             */
+            valid_from?: string;
+            /**
+             * Optional, and never applied: a variant's conditions are fixed when it is created. Refused
+             * when they describe a different situation from the stored one.
+             *
+             * example:
+             * {
+             *   "postal_code": "46045"
+             * }
+             */
+            conditions?: {
+                [name: string]: any;
+            };
+        }
+        export interface ResolveConditionalEntityRequest {
+            schema: /**
+             * Schema slug of an entity type that can be conditional — the `{slug}` of every
+             * conditional-pricing route.
+             *
+             */
+            ConditionalEntitySlug;
+            /**
+             * The conditional entity to resolve. Resolution is always scoped to exactly one.
+             * example:
+             * price-sp26d1yo
+             */
+            entity_id: string;
+            context?: /**
+             * The situation to resolve for: a flat map keyed by condition name, as the entity's schema
+             * declares them. A condition left out of the map is not a wildcard — it matches only variants
+             * that leave that condition unpinned.
+             *
+             * Each value is either an exact value, typed by its condition, or a single-operator predicate
+             * object:
+             *
+             * - `{ "lt": v }`, `{ "lte": v }`, `{ "gt": v }`, `{ "gte": v }` — order against a `number` or
+             *   `date` condition.
+             * - `{ "in": [...] }` — membership, against a `string`, `select` or `number` condition.
+             * - `{ "between": "2026-03-01" }` — the explicit spelling of `daterange` containment; a plain
+             *   date supplied for a `daterange` condition means the same thing.
+             * - `{ "exists": true }` — pinned to any value. `{ "exists": false }` says what leaving the key
+             *   out says.
+             *
+             * Exact values are typed by their condition: a `string` or `select` matches exactly and
+             * case-sensitively, with no trimming; a `location` of format `zipcode` is the postal code
+             * itself, and one of format `zipcode + town` an object carrying both, whose town is compared
+             * case- and whitespace-insensitively while its postal code is not.
+             *
+             * `default`, and any name beginning with `_`, are reserved for the server and cannot be
+             * supplied here.
+             *
+             * example:
+             * {
+             *   "postal_code": "46045",
+             *   "consumption": {
+             *     "lt": 5000
+             *   }
+             * }
+             */
+            ResolveContext;
+            /**
+             * The instant the version is selected at — the version with the latest `valid_from` at or
+             * before it. Defaults to now. A variant whose first version is later than this is
+             * scheduled rather than applicable, and is excluded from resolution entirely.
+             *
+             * An RFC 3339 date (`2026-01-01`, read as midnight UTC) or date-time
+             * (`2026-01-01T00:00:00Z`), to at most millisecond precision. Deliberately not declared as
+             * `format: date-time`, which would reject the plain-date form that this accepts.
+             *
+             * example:
+             * 2027-03-15T00:00:00Z
+             */
+            as_of?: string;
+            options?: ResolveOptions;
+        }
+        /**
+         * The situation to resolve for: a flat map keyed by condition name, as the entity's schema
+         * declares them. A condition left out of the map is not a wildcard — it matches only variants
+         * that leave that condition unpinned.
+         *
+         * Each value is either an exact value, typed by its condition, or a single-operator predicate
+         * object:
+         *
+         * - `{ "lt": v }`, `{ "lte": v }`, `{ "gt": v }`, `{ "gte": v }` — order against a `number` or
+         *   `date` condition.
+         * - `{ "in": [...] }` — membership, against a `string`, `select` or `number` condition.
+         * - `{ "between": "2026-03-01" }` — the explicit spelling of `daterange` containment; a plain
+         *   date supplied for a `daterange` condition means the same thing.
+         * - `{ "exists": true }` — pinned to any value. `{ "exists": false }` says what leaving the key
+         *   out says.
+         *
+         * Exact values are typed by their condition: a `string` or `select` matches exactly and
+         * case-sensitively, with no trimming; a `location` of format `zipcode` is the postal code
+         * itself, and one of format `zipcode + town` an object carrying both, whose town is compared
+         * case- and whitespace-insensitively while its postal code is not.
+         *
+         * `default`, and any name beginning with `_`, are reserved for the server and cannot be
+         * supplied here.
+         *
+         * example:
+         * {
+         *   "postal_code": "46045",
+         *   "consumption": {
+         *     "lt": 5000
+         *   }
+         * }
+         */
+        export interface ResolveContext {
+            [name: string]: any;
+        }
+        export interface ResolveOptions {
+            /**
+             * Ask for an unambiguous answer. Several applicable variants become `AMBIGUOUS_RESOLUTION`
+             * rather than a set, and nothing applicable becomes `NOT_FOUND` rather than an empty one.
+             * The response shape does not change: `results` simply carries exactly one entry.
+             *
+             */
+            resolve_one?: boolean;
+        }
+        /**
+         * The entity as this variant leaves it — every attribute of a plain entity read, with the
+         * applicable version's overrides applied — plus the discriminators saying where the numbers
+         * came from.
+         *
+         */
+        export interface ResolvedVariant {
+            [name: string]: any;
+            /**
+             * The logical entity's id — the same one a plain entity read returns. Resolution never
+             * mints a new identity; a variant is a set of values for *this* entity, not another one.
+             *
+             * example:
+             * price-sp26d1yo
+             */
+            _id: string;
+            /**
+             * The variant these values came from. Durable: this is what an order or a contract pins to
+             * read the same numbers back later.
+             *
+             * example:
+             * var-46045
+             */
+            _variant_id: string;
+            /**
+             * The `valid_from` of the version applied for the requested `as_of`.
+             * example:
+             * 2027-01-01T00:00:00.000Z
+             */
+            _version_valid_from: string;
+            /**
+             * The conditions this variant pins, plus the boolean `default` discriminator.
+             *
+             * Underscore-prefixed, like every other discriminator here, so that it cannot collide with
+             * an attribute an organization happens to have called `conditions`.
+             *
+             * example:
+             * {
+             *   "postal_code": "46045",
+             *   "default": false
+             * }
+             */
+            _conditions: {
+                [name: string]: any;
+                default: boolean;
+            };
+        }
+        export interface ResolvedVariants {
+            /**
+             * One composed payload per applicable variant, capped at 100 — a context selecting more
+             * than that is answered with `TOO_MANY_MATCHES` instead, since each result costs its own
+             * version lookup. No dominance or specificity ordering is applied between them.
+             *
+             */
+            results: /**
+             * The entity as this variant leaves it — every attribute of a plain entity read, with the
+             * applicable version's overrides applied — plus the discriminators saying where the numbers
+             * came from.
+             *
+             */
+            ResolvedVariant[];
+        }
         export type SalesTax = "nontaxable" | "reduced" | "standard";
         export type SaveIntegrationCredentialsParams = /* The auth credentials for external integrations */ IntegrationAuthCredentials;
         export interface SearchExternalCatalogParams {
@@ -10004,9 +10708,336 @@ export declare namespace Components {
              */
             errors: /* The availability rule error */ ValidateAvailabilityFileError[];
         }
+        /**
+         * A variant's pinned conditions as a reader sees them: the pins the schema declares, plus a
+         * boolean `default` saying whether this is the entity's fallback.
+         *
+         * `default` is always present and always a boolean, so a client can branch on "did I get the
+         * fallback?" without knowing how one is stored. The reserved condition a fallback is actually
+         * pinned under never appears here.
+         *
+         * example:
+         * {
+         *   "postal_code": "46045",
+         *   "default": false
+         * }
+         */
+        export interface VariantConditions {
+            [name: string]: any;
+            default: boolean;
+        }
+        /**
+         * The attribute values this version overrides on the base entity, keyed by attribute name.
+         *
+         * Only attributes currently declaring `overridable_attribute` are applied. Metadata fields
+         * (anything underscore-prefixed), readonly attributes, hidden attributes and non-overridable
+         * attributes present here are ignored rather than rejected, so a client working from a slightly
+         * stale schema snapshot still succeeds instead of failing on fields it could not have known to
+         * drop. An attribute's `render_condition` says when to show it and has no bearing on whether a
+         * variant may override it.
+         *
+         * Ignored means *not updated*, never *removed*: a value already stored for an attribute that is
+         * not currently overridable is preserved, so removing and restoring the flag deactivates and
+         * then reactivates the same override.
+         *
+         * A composite price's `price_components` is an ordinary overridable relation attribute: a
+         * composite variant pins its component variants here the same way any other relation value is
+         * set, with no special handling.
+         *
+         * example:
+         * {
+         *   "unit_amount": 2499,
+         *   "unit_amount_decimal": "24.99"
+         * }
+         */
+        export interface VariantValues {
+            [name: string]: any;
+        }
+        /**
+         * One version of one variant: the attribute overrides it carries, the instant it takes effect,
+         * and the variant it belongs to.
+         *
+         * These are the version's **own** overrides, not the base entity overlaid with them — this is
+         * what an editing screen loads and saves, and what it edits is the overrides. Composing them onto
+         * the entity is what `:resolve` answers.
+         *
+         */
+        export interface VariantVersion {
+            /**
+             * example:
+             * var-46045
+             */
+            variant_id: string;
+            /**
+             * example:
+             * price-sp26d1yo
+             */
+            entity_id: string;
+            schema: /**
+             * Schema slug of an entity type that can be conditional — the `{slug}` of every
+             * conditional-pricing route.
+             *
+             */
+            ConditionalEntitySlug;
+            /**
+             * The situation the variant applies to, plus the boolean `default` discriminator. A property
+             * of the variant rather than of this version: every version of a variant carries the same
+             * one, and no version write can change it.
+             *
+             * example:
+             * {
+             *   "postal_code": "46045",
+             *   "default": false
+             * }
+             */
+            conditions: {
+                [name: string]: any;
+                default: boolean;
+            };
+            /**
+             * When this version takes effect, canonicalized to millisecond-precision UTC. A version's
+             * identity within its variant — it never moves.
+             *
+             * example:
+             * 2027-01-01T00:00:00.000Z
+             */
+            valid_from: string;
+            values: /**
+             * The attribute values this version overrides on the base entity, keyed by attribute name.
+             *
+             * Only attributes currently declaring `overridable_attribute` are applied. Metadata fields
+             * (anything underscore-prefixed), readonly attributes, hidden attributes and non-overridable
+             * attributes present here are ignored rather than rejected, so a client working from a slightly
+             * stale schema snapshot still succeeds instead of failing on fields it could not have known to
+             * drop. An attribute's `render_condition` says when to show it and has no bearing on whether a
+             * variant may override it.
+             *
+             * Ignored means *not updated*, never *removed*: a value already stored for an attribute that is
+             * not currently overridable is preserved, so removing and restoring the flag deactivates and
+             * then reactivates the same override.
+             *
+             * A composite price's `price_components` is an ordinary overridable relation attribute: a
+             * composite variant pins its component variants here the same way any other relation value is
+             * set, with no special handling.
+             *
+             * example:
+             * {
+             *   "unit_amount": 2499,
+             *   "unit_amount_decimal": "24.99"
+             * }
+             */
+            VariantValues;
+            _created_at?: string;
+            _updated_at?: string;
+            /**
+             * The revision a write to this version must carry to be accepted. Always current: every read
+             * that returns one is strongly consistent, so it is never a marker a write would be refused
+             * for having read too early.
+             *
+             * example:
+             * 3
+             */
+            _revision?: number;
+        }
+        export interface VariantWriteWarning {
+            /**
+             * - `VARIANT_COUNT_APPROACHING_CAP`: this entity is nearing the number of variants it may
+             *   hold. Surfaced rather than rejected, so an importer finds out with a whole run's notice
+             *   instead of discovering the limit halfway through a refresh.
+             *
+             */
+            code: "VARIANT_COUNT_APPROACHING_CAP";
+            message: string;
+            /**
+             * Variants this entity holds, including the one just created.
+             */
+            variant_count?: number;
+            /**
+             * Variants this entity may hold. Configurable per organization.
+             */
+            cap?: number;
+        }
+        /**
+         * Something a version write moved. A version write is never refused for being late — backdating a
+         * version, and editing or deleting one that has already been superseded, are both accepted — so
+         * what a caller gets instead is a warning naming exactly what changed. One write can carry both
+         * codes.
+         *
+         */
+        export interface VersionWriteWarning {
+            /**
+             * - `ACTIVE_VERSION_REPLACED`: what resolves **now** changed, other than by a newer version
+             *   taking effect. The version in effect was written behind, or removed.
+             * - `SUPERSEDED_VERSION_WRITTEN`: what a past-dated (`as_of`) read returns changed. The write
+             *   landed on, or created, a version that is not the one currently in effect.
+             *
+             */
+            code: "ACTIVE_VERSION_REPLACED" | "SUPERSEDED_VERSION_WRITTEN";
+            message: string;
+            /**
+             * The version this write created, changed or removed.
+             * example:
+             * 2026-08-01T00:00:00.000Z
+             */
+            valid_from: string;
+            /**
+             * The version in effect when the write landed, before it did. Absent when the variant had
+             * none — every version of it still scheduled.
+             *
+             * example:
+             * 2026-01-01T00:00:00.000Z
+             */
+            active_valid_from?: string;
+        }
+        /**
+         * A version as a write left it, together with anything the write moved.
+         *
+         */
+        export interface WrittenVariantVersion {
+            /**
+             * example:
+             * var-46045
+             */
+            variant_id: string;
+            /**
+             * example:
+             * price-sp26d1yo
+             */
+            entity_id: string;
+            schema: /**
+             * Schema slug of an entity type that can be conditional — the `{slug}` of every
+             * conditional-pricing route.
+             *
+             */
+            ConditionalEntitySlug;
+            /**
+             * The situation the variant applies to, plus the boolean `default` discriminator. A property
+             * of the variant rather than of this version: every version of a variant carries the same
+             * one, and no version write can change it.
+             *
+             * example:
+             * {
+             *   "postal_code": "46045",
+             *   "default": false
+             * }
+             */
+            conditions: {
+                [name: string]: any;
+                default: boolean;
+            };
+            /**
+             * When this version takes effect, canonicalized to millisecond-precision UTC. A version's
+             * identity within its variant — it never moves.
+             *
+             * example:
+             * 2027-01-01T00:00:00.000Z
+             */
+            valid_from: string;
+            values: /**
+             * The attribute values this version overrides on the base entity, keyed by attribute name.
+             *
+             * Only attributes currently declaring `overridable_attribute` are applied. Metadata fields
+             * (anything underscore-prefixed), readonly attributes, hidden attributes and non-overridable
+             * attributes present here are ignored rather than rejected, so a client working from a slightly
+             * stale schema snapshot still succeeds instead of failing on fields it could not have known to
+             * drop. An attribute's `render_condition` says when to show it and has no bearing on whether a
+             * variant may override it.
+             *
+             * Ignored means *not updated*, never *removed*: a value already stored for an attribute that is
+             * not currently overridable is preserved, so removing and restoring the flag deactivates and
+             * then reactivates the same override.
+             *
+             * A composite price's `price_components` is an ordinary overridable relation attribute: a
+             * composite variant pins its component variants here the same way any other relation value is
+             * set, with no special handling.
+             *
+             * example:
+             * {
+             *   "unit_amount": 2499,
+             *   "unit_amount_decimal": "24.99"
+             * }
+             */
+            VariantValues;
+            _created_at?: string;
+            _updated_at?: string;
+            /**
+             * The revision a write to this version must carry to be accepted. Always current: every read
+             * that returns one is strongly consistent, so it is never a marker a write would be refused
+             * for having read too early.
+             *
+             * example:
+             * 3
+             */
+            _revision?: number;
+            /**
+             * What this write moved, if anything. Empty in the ordinary case — a client reads its
+             * length rather than branching on its absence.
+             *
+             */
+            warnings: /**
+             * Something a version write moved. A version write is never refused for being late — backdating a
+             * version, and editing or deleting one that has already been superseded, are both accepted — so
+             * what a caller gets instead is a warning naming exactly what changed. One write can carry both
+             * codes.
+             *
+             */
+            VersionWriteWarning[];
+        }
     }
 }
 export declare namespace Paths {
+    namespace $AppendConditionalVariantVersion {
+        namespace Parameters {
+            export type EntityId = string;
+            export type Slug = /**
+             * Schema slug of an entity type that can be conditional — the `{slug}` of every
+             * conditional-pricing route.
+             *
+             */
+            Components.Schemas.ConditionalEntitySlug;
+            export type VariantId = string;
+        }
+        export interface PathParameters {
+            slug: Parameters.Slug;
+            entity_id: Parameters.EntityId;
+            variant_id: Parameters.VariantId;
+        }
+        export type RequestBody = Components.Schemas.AppendVersionRequest;
+        namespace Responses {
+            export type $201 = /**
+             * A version as a write left it, together with anything the write moved.
+             *
+             */
+            Components.Schemas.WrittenVariantVersion;
+            export type $400 = /**
+             * An error from a conditional-pricing operation, carrying a machine-readable `code`
+             * from the conditional-pricing vocabulary plus any structured data about the failure,
+             * so a client can branch on the kind of failure rather than parse the message.
+             * Referenced only by the operations that emit these codes; every other operation
+             * keeps the plain `Error` shape.
+             *
+             */
+            Components.Schemas.ConditionalPricingError;
+            export type $404 = /**
+             * An error from a conditional-pricing operation, carrying a machine-readable `code`
+             * from the conditional-pricing vocabulary plus any structured data about the failure,
+             * so a client can branch on the kind of failure rather than parse the message.
+             * Referenced only by the operations that emit these codes; every other operation
+             * keeps the plain `Error` shape.
+             *
+             */
+            Components.Schemas.ConditionalPricingError;
+            export type $409 = /**
+             * An error from a conditional-pricing operation, carrying a machine-readable `code`
+             * from the conditional-pricing vocabulary plus any structured data about the failure,
+             * so a client can branch on the kind of failure rather than parse the message.
+             * Referenced only by the operations that emit these codes; every other operation
+             * keeps the plain `Error` shape.
+             *
+             */
+            Components.Schemas.ConditionalPricingError;
+        }
+    }
     namespace $AvailabilityCheck {
         export interface HeaderParameters {
             "X-Ivy-Org-ID": Parameters.XIvyOrgID;
@@ -10097,6 +11128,152 @@ export declare namespace Paths {
             export type $403 = Components.Schemas.Error;
         }
     }
+    namespace $CreateConditionalVariant {
+        namespace Parameters {
+            export type EntityId = string;
+            export type Slug = /**
+             * Schema slug of an entity type that can be conditional — the `{slug}` of every
+             * conditional-pricing route.
+             *
+             */
+            Components.Schemas.ConditionalEntitySlug;
+        }
+        export interface PathParameters {
+            slug: Parameters.Slug;
+            entity_id: Parameters.EntityId;
+        }
+        export type RequestBody = Components.Schemas.CreateVariantRequest;
+        namespace Responses {
+            export type $201 = Components.Schemas.CreatedVariant;
+            export type $400 = /**
+             * An error from a conditional-pricing operation, carrying a machine-readable `code`
+             * from the conditional-pricing vocabulary plus any structured data about the failure,
+             * so a client can branch on the kind of failure rather than parse the message.
+             * Referenced only by the operations that emit these codes; every other operation
+             * keeps the plain `Error` shape.
+             *
+             */
+            Components.Schemas.ConditionalPricingError;
+            export type $404 = /**
+             * An error from a conditional-pricing operation, carrying a machine-readable `code`
+             * from the conditional-pricing vocabulary plus any structured data about the failure,
+             * so a client can branch on the kind of failure rather than parse the message.
+             * Referenced only by the operations that emit these codes; every other operation
+             * keeps the plain `Error` shape.
+             *
+             */
+            Components.Schemas.ConditionalPricingError;
+            export type $409 = /**
+             * An error from a conditional-pricing operation, carrying a machine-readable `code`
+             * from the conditional-pricing vocabulary plus any structured data about the failure,
+             * so a client can branch on the kind of failure rather than parse the message.
+             * Referenced only by the operations that emit these codes; every other operation
+             * keeps the plain `Error` shape.
+             *
+             */
+            Components.Schemas.ConditionalPricingError;
+        }
+    }
+    namespace $DeleteConditionalVariant {
+        namespace Parameters {
+            export type EntityId = string;
+            export type Slug = /**
+             * Schema slug of an entity type that can be conditional — the `{slug}` of every
+             * conditional-pricing route.
+             *
+             */
+            Components.Schemas.ConditionalEntitySlug;
+            export type VariantId = string;
+        }
+        export interface PathParameters {
+            slug: Parameters.Slug;
+            entity_id: Parameters.EntityId;
+            variant_id: Parameters.VariantId;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.DeletedVariant;
+            export type $400 = /**
+             * An error from a conditional-pricing operation, carrying a machine-readable `code`
+             * from the conditional-pricing vocabulary plus any structured data about the failure,
+             * so a client can branch on the kind of failure rather than parse the message.
+             * Referenced only by the operations that emit these codes; every other operation
+             * keeps the plain `Error` shape.
+             *
+             */
+            Components.Schemas.ConditionalPricingError;
+            export type $404 = /**
+             * An error from a conditional-pricing operation, carrying a machine-readable `code`
+             * from the conditional-pricing vocabulary plus any structured data about the failure,
+             * so a client can branch on the kind of failure rather than parse the message.
+             * Referenced only by the operations that emit these codes; every other operation
+             * keeps the plain `Error` shape.
+             *
+             */
+            Components.Schemas.ConditionalPricingError;
+            export type $409 = /**
+             * An error from a conditional-pricing operation, carrying a machine-readable `code`
+             * from the conditional-pricing vocabulary plus any structured data about the failure,
+             * so a client can branch on the kind of failure rather than parse the message.
+             * Referenced only by the operations that emit these codes; every other operation
+             * keeps the plain `Error` shape.
+             *
+             */
+            Components.Schemas.ConditionalPricingError;
+        }
+    }
+    namespace $DeleteConditionalVariantVersion {
+        namespace Parameters {
+            export type EntityId = string;
+            export type Revision = number;
+            export type Slug = /**
+             * Schema slug of an entity type that can be conditional — the `{slug}` of every
+             * conditional-pricing route.
+             *
+             */
+            Components.Schemas.ConditionalEntitySlug;
+            export type ValidFrom = string;
+            export type VariantId = string;
+        }
+        export interface PathParameters {
+            slug: Parameters.Slug;
+            entity_id: Parameters.EntityId;
+            variant_id: Parameters.VariantId;
+            valid_from: Parameters.ValidFrom;
+        }
+        export interface QueryParameters {
+            _revision: Parameters.Revision;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.DeletedVariantVersion;
+            export type $400 = /**
+             * An error from a conditional-pricing operation, carrying a machine-readable `code`
+             * from the conditional-pricing vocabulary plus any structured data about the failure,
+             * so a client can branch on the kind of failure rather than parse the message.
+             * Referenced only by the operations that emit these codes; every other operation
+             * keeps the plain `Error` shape.
+             *
+             */
+            Components.Schemas.ConditionalPricingError;
+            export type $404 = /**
+             * An error from a conditional-pricing operation, carrying a machine-readable `code`
+             * from the conditional-pricing vocabulary plus any structured data about the failure,
+             * so a client can branch on the kind of failure rather than parse the message.
+             * Referenced only by the operations that emit these codes; every other operation
+             * keeps the plain `Error` shape.
+             *
+             */
+            Components.Schemas.ConditionalPricingError;
+            export type $409 = /**
+             * An error from a conditional-pricing operation, carrying a machine-readable `code`
+             * from the conditional-pricing vocabulary plus any structured data about the failure,
+             * so a client can branch on the kind of failure rather than parse the message.
+             * Referenced only by the operations that emit these codes; every other operation
+             * keeps the plain `Error` shape.
+             *
+             */
+            Components.Schemas.ConditionalPricingError;
+        }
+    }
     namespace $DeleteCredentials {
         namespace Parameters {
             export type IntegrationId = Components.Schemas.IntegrationId;
@@ -10108,6 +11285,119 @@ export declare namespace Paths {
             export interface $204 {
             }
             export type $400 = Components.Schemas.Error;
+        }
+    }
+    namespace $GetActiveConditionalVariantVersion {
+        namespace Parameters {
+            export type EntityId = string;
+            export type Slug = /**
+             * Schema slug of an entity type that can be conditional — the `{slug}` of every
+             * conditional-pricing route.
+             *
+             */
+            Components.Schemas.ConditionalEntitySlug;
+            export type VariantId = string;
+        }
+        export interface PathParameters {
+            slug: Parameters.Slug;
+            entity_id: Parameters.EntityId;
+            variant_id: Parameters.VariantId;
+        }
+        namespace Responses {
+            export type $200 = /**
+             * One version of one variant: the attribute overrides it carries, the instant it takes effect,
+             * and the variant it belongs to.
+             *
+             * These are the version's **own** overrides, not the base entity overlaid with them — this is
+             * what an editing screen loads and saves, and what it edits is the overrides. Composing them onto
+             * the entity is what `:resolve` answers.
+             *
+             */
+            Components.Schemas.VariantVersion;
+            export type $400 = /**
+             * An error from a conditional-pricing operation, carrying a machine-readable `code`
+             * from the conditional-pricing vocabulary plus any structured data about the failure,
+             * so a client can branch on the kind of failure rather than parse the message.
+             * Referenced only by the operations that emit these codes; every other operation
+             * keeps the plain `Error` shape.
+             *
+             */
+            Components.Schemas.ConditionalPricingError;
+            export type $404 = /**
+             * An error from a conditional-pricing operation, carrying a machine-readable `code`
+             * from the conditional-pricing vocabulary plus any structured data about the failure,
+             * so a client can branch on the kind of failure rather than parse the message.
+             * Referenced only by the operations that emit these codes; every other operation
+             * keeps the plain `Error` shape.
+             *
+             */
+            Components.Schemas.ConditionalPricingError;
+        }
+    }
+    namespace $GetConditionSets {
+        namespace Parameters {
+            export type Slug = /**
+             * Schema slug of an entity type that can be conditional — the `{slug}` of every
+             * conditional-pricing route.
+             *
+             */
+            Components.Schemas.ConditionalEntitySlug;
+        }
+        export interface PathParameters {
+            slug: Parameters.Slug;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.ConditionSetCatalog;
+            export type $400 = Components.Schemas.Error;
+        }
+    }
+    namespace $GetConditionalVariantVersion {
+        namespace Parameters {
+            export type EntityId = string;
+            export type Slug = /**
+             * Schema slug of an entity type that can be conditional — the `{slug}` of every
+             * conditional-pricing route.
+             *
+             */
+            Components.Schemas.ConditionalEntitySlug;
+            export type ValidFrom = string;
+            export type VariantId = string;
+        }
+        export interface PathParameters {
+            slug: Parameters.Slug;
+            entity_id: Parameters.EntityId;
+            variant_id: Parameters.VariantId;
+            valid_from: Parameters.ValidFrom;
+        }
+        namespace Responses {
+            export type $200 = /**
+             * One version of one variant: the attribute overrides it carries, the instant it takes effect,
+             * and the variant it belongs to.
+             *
+             * These are the version's **own** overrides, not the base entity overlaid with them — this is
+             * what an editing screen loads and saves, and what it edits is the overrides. Composing them onto
+             * the entity is what `:resolve` answers.
+             *
+             */
+            Components.Schemas.VariantVersion;
+            export type $400 = /**
+             * An error from a conditional-pricing operation, carrying a machine-readable `code`
+             * from the conditional-pricing vocabulary plus any structured data about the failure,
+             * so a client can branch on the kind of failure rather than parse the message.
+             * Referenced only by the operations that emit these codes; every other operation
+             * keeps the plain `Error` shape.
+             *
+             */
+            Components.Schemas.ConditionalPricingError;
+            export type $404 = /**
+             * An error from a conditional-pricing operation, carrying a machine-readable `code`
+             * from the conditional-pricing vocabulary plus any structured data about the failure,
+             * so a client can branch on the kind of failure rather than parse the message.
+             * Referenced only by the operations that emit these codes; every other operation
+             * keeps the plain `Error` shape.
+             *
+             */
+            Components.Schemas.ConditionalPricingError;
         }
     }
     namespace $GetCredentials {
@@ -10256,6 +11546,112 @@ export declare namespace Paths {
             export type $404 = Components.Schemas.Error;
         }
     }
+    namespace $PatchActiveConditionalVariantVersion {
+        namespace Parameters {
+            export type EntityId = string;
+            export type Slug = /**
+             * Schema slug of an entity type that can be conditional — the `{slug}` of every
+             * conditional-pricing route.
+             *
+             */
+            Components.Schemas.ConditionalEntitySlug;
+            export type VariantId = string;
+        }
+        export interface PathParameters {
+            slug: Parameters.Slug;
+            entity_id: Parameters.EntityId;
+            variant_id: Parameters.VariantId;
+        }
+        export type RequestBody = Components.Schemas.PatchVersionRequest;
+        namespace Responses {
+            export type $200 = /**
+             * A version as a write left it, together with anything the write moved.
+             *
+             */
+            Components.Schemas.WrittenVariantVersion;
+            export type $400 = /**
+             * An error from a conditional-pricing operation, carrying a machine-readable `code`
+             * from the conditional-pricing vocabulary plus any structured data about the failure,
+             * so a client can branch on the kind of failure rather than parse the message.
+             * Referenced only by the operations that emit these codes; every other operation
+             * keeps the plain `Error` shape.
+             *
+             */
+            Components.Schemas.ConditionalPricingError;
+            export type $404 = /**
+             * An error from a conditional-pricing operation, carrying a machine-readable `code`
+             * from the conditional-pricing vocabulary plus any structured data about the failure,
+             * so a client can branch on the kind of failure rather than parse the message.
+             * Referenced only by the operations that emit these codes; every other operation
+             * keeps the plain `Error` shape.
+             *
+             */
+            Components.Schemas.ConditionalPricingError;
+            export type $409 = /**
+             * An error from a conditional-pricing operation, carrying a machine-readable `code`
+             * from the conditional-pricing vocabulary plus any structured data about the failure,
+             * so a client can branch on the kind of failure rather than parse the message.
+             * Referenced only by the operations that emit these codes; every other operation
+             * keeps the plain `Error` shape.
+             *
+             */
+            Components.Schemas.ConditionalPricingError;
+        }
+    }
+    namespace $PatchConditionalVariantVersion {
+        namespace Parameters {
+            export type EntityId = string;
+            export type Slug = /**
+             * Schema slug of an entity type that can be conditional — the `{slug}` of every
+             * conditional-pricing route.
+             *
+             */
+            Components.Schemas.ConditionalEntitySlug;
+            export type ValidFrom = string;
+            export type VariantId = string;
+        }
+        export interface PathParameters {
+            slug: Parameters.Slug;
+            entity_id: Parameters.EntityId;
+            variant_id: Parameters.VariantId;
+            valid_from: Parameters.ValidFrom;
+        }
+        export type RequestBody = Components.Schemas.PatchVersionRequest;
+        namespace Responses {
+            export type $200 = /**
+             * A version as a write left it, together with anything the write moved.
+             *
+             */
+            Components.Schemas.WrittenVariantVersion;
+            export type $400 = /**
+             * An error from a conditional-pricing operation, carrying a machine-readable `code`
+             * from the conditional-pricing vocabulary plus any structured data about the failure,
+             * so a client can branch on the kind of failure rather than parse the message.
+             * Referenced only by the operations that emit these codes; every other operation
+             * keeps the plain `Error` shape.
+             *
+             */
+            Components.Schemas.ConditionalPricingError;
+            export type $404 = /**
+             * An error from a conditional-pricing operation, carrying a machine-readable `code`
+             * from the conditional-pricing vocabulary plus any structured data about the failure,
+             * so a client can branch on the kind of failure rather than parse the message.
+             * Referenced only by the operations that emit these codes; every other operation
+             * keeps the plain `Error` shape.
+             *
+             */
+            Components.Schemas.ConditionalPricingError;
+            export type $409 = /**
+             * An error from a conditional-pricing operation, carrying a machine-readable `code`
+             * from the conditional-pricing vocabulary plus any structured data about the failure,
+             * so a client can branch on the kind of failure rather than parse the message.
+             * Referenced only by the operations that emit these codes; every other operation
+             * keeps the plain `Error` shape.
+             *
+             */
+            Components.Schemas.ConditionalPricingError;
+        }
+    }
     namespace $PrivateSearchCatalog {
         export type RequestBody = /**
          * A catalog search payload
@@ -10301,6 +11697,145 @@ export declare namespace Paths {
         namespace Responses {
             export type $200 = /* Product recommendations request payload */ Components.Schemas.ProductRecommendationResponse;
             export type $400 = Components.Schemas.Error;
+        }
+    }
+    namespace $ReplaceActiveConditionalVariantVersion {
+        namespace Parameters {
+            export type EntityId = string;
+            export type Slug = /**
+             * Schema slug of an entity type that can be conditional — the `{slug}` of every
+             * conditional-pricing route.
+             *
+             */
+            Components.Schemas.ConditionalEntitySlug;
+            export type VariantId = string;
+        }
+        export interface PathParameters {
+            slug: Parameters.Slug;
+            entity_id: Parameters.EntityId;
+            variant_id: Parameters.VariantId;
+        }
+        export type RequestBody = Components.Schemas.ReplaceVersionRequest;
+        namespace Responses {
+            export type $200 = /**
+             * A version as a write left it, together with anything the write moved.
+             *
+             */
+            Components.Schemas.WrittenVariantVersion;
+            export type $400 = /**
+             * An error from a conditional-pricing operation, carrying a machine-readable `code`
+             * from the conditional-pricing vocabulary plus any structured data about the failure,
+             * so a client can branch on the kind of failure rather than parse the message.
+             * Referenced only by the operations that emit these codes; every other operation
+             * keeps the plain `Error` shape.
+             *
+             */
+            Components.Schemas.ConditionalPricingError;
+            export type $404 = /**
+             * An error from a conditional-pricing operation, carrying a machine-readable `code`
+             * from the conditional-pricing vocabulary plus any structured data about the failure,
+             * so a client can branch on the kind of failure rather than parse the message.
+             * Referenced only by the operations that emit these codes; every other operation
+             * keeps the plain `Error` shape.
+             *
+             */
+            Components.Schemas.ConditionalPricingError;
+            export type $409 = /**
+             * An error from a conditional-pricing operation, carrying a machine-readable `code`
+             * from the conditional-pricing vocabulary plus any structured data about the failure,
+             * so a client can branch on the kind of failure rather than parse the message.
+             * Referenced only by the operations that emit these codes; every other operation
+             * keeps the plain `Error` shape.
+             *
+             */
+            Components.Schemas.ConditionalPricingError;
+        }
+    }
+    namespace $ReplaceConditionalVariantVersion {
+        namespace Parameters {
+            export type EntityId = string;
+            export type Slug = /**
+             * Schema slug of an entity type that can be conditional — the `{slug}` of every
+             * conditional-pricing route.
+             *
+             */
+            Components.Schemas.ConditionalEntitySlug;
+            export type ValidFrom = string;
+            export type VariantId = string;
+        }
+        export interface PathParameters {
+            slug: Parameters.Slug;
+            entity_id: Parameters.EntityId;
+            variant_id: Parameters.VariantId;
+            valid_from: Parameters.ValidFrom;
+        }
+        export type RequestBody = Components.Schemas.ReplaceVersionRequest;
+        namespace Responses {
+            export type $200 = /**
+             * A version as a write left it, together with anything the write moved.
+             *
+             */
+            Components.Schemas.WrittenVariantVersion;
+            export type $400 = /**
+             * An error from a conditional-pricing operation, carrying a machine-readable `code`
+             * from the conditional-pricing vocabulary plus any structured data about the failure,
+             * so a client can branch on the kind of failure rather than parse the message.
+             * Referenced only by the operations that emit these codes; every other operation
+             * keeps the plain `Error` shape.
+             *
+             */
+            Components.Schemas.ConditionalPricingError;
+            export type $404 = /**
+             * An error from a conditional-pricing operation, carrying a machine-readable `code`
+             * from the conditional-pricing vocabulary plus any structured data about the failure,
+             * so a client can branch on the kind of failure rather than parse the message.
+             * Referenced only by the operations that emit these codes; every other operation
+             * keeps the plain `Error` shape.
+             *
+             */
+            Components.Schemas.ConditionalPricingError;
+            export type $409 = /**
+             * An error from a conditional-pricing operation, carrying a machine-readable `code`
+             * from the conditional-pricing vocabulary plus any structured data about the failure,
+             * so a client can branch on the kind of failure rather than parse the message.
+             * Referenced only by the operations that emit these codes; every other operation
+             * keeps the plain `Error` shape.
+             *
+             */
+            Components.Schemas.ConditionalPricingError;
+        }
+    }
+    namespace $ResolveConditionalEntity {
+        export type RequestBody = Components.Schemas.ResolveConditionalEntityRequest;
+        namespace Responses {
+            export type $200 = Components.Schemas.ResolvedVariants;
+            export type $400 = /**
+             * An error from a conditional-pricing operation, carrying a machine-readable `code`
+             * from the conditional-pricing vocabulary plus any structured data about the failure,
+             * so a client can branch on the kind of failure rather than parse the message.
+             * Referenced only by the operations that emit these codes; every other operation
+             * keeps the plain `Error` shape.
+             *
+             */
+            Components.Schemas.ConditionalPricingError;
+            export type $404 = /**
+             * An error from a conditional-pricing operation, carrying a machine-readable `code`
+             * from the conditional-pricing vocabulary plus any structured data about the failure,
+             * so a client can branch on the kind of failure rather than parse the message.
+             * Referenced only by the operations that emit these codes; every other operation
+             * keeps the plain `Error` shape.
+             *
+             */
+            Components.Schemas.ConditionalPricingError;
+            export type $409 = /**
+             * An error from a conditional-pricing operation, carrying a machine-readable `code`
+             * from the conditional-pricing vocabulary plus any structured data about the failure,
+             * so a client can branch on the kind of failure rather than parse the message.
+             * Referenced only by the operations that emit these codes; every other operation
+             * keeps the plain `Error` shape.
+             *
+             */
+            Components.Schemas.ConditionalPricingError;
         }
     }
     namespace $SaveCredentials {
@@ -11040,7 +12575,7 @@ export declare namespace Paths {
     }
     namespace PutOrder {
         namespace Parameters {
-            export type Id = string;
+            export type Id = Components.Schemas.EntityId /* uuid */;
         }
         export interface PathParameters {
             id: Parameters.Id;
@@ -11617,7 +13152,7 @@ export declare namespace Paths {
 
 export interface OperationMethods {
   /**
-   * $calculatePricingDetails - calculatePricingDetails
+   * $calculatePricingDetails - $calculatePricingDetails
    * 
    * Computes a set of pricing details that can be persisted on an entity with the pricing capability enabled, e.g: Orders or Contracts.
    */
@@ -11647,7 +13182,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.PutOrder.Responses.$200>
   /**
-   * $checkoutCart - checkoutCart
+   * $checkoutCart - $checkoutCart
    * 
    * Checkouts a cart and executes the specified checkout `mode` process.
    * 
@@ -11668,7 +13203,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.$CheckoutCart.Responses.$200>
   /**
-   * $searchCatalog - searchCatalog
+   * $searchCatalog - $searchCatalog
    * 
    * Provides a querying functionalities over products and prices of the Catalog for a given organization.
    */
@@ -11678,7 +13213,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.$SearchCatalog.Responses.$200>
   /**
-   * $privateSearchCatalog - privateSearchCatalog
+   * $privateSearchCatalog - $privateSearchCatalog
    * 
    * Provides a querying functionalities over products and prices of the Catalog for a given organization.
    */
@@ -11688,7 +13223,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.$PrivateSearchCatalog.Responses.$200>
   /**
-   * $validatePromoCodes - validatePromoCodes
+   * $validatePromoCodes - $validatePromoCodes
    * 
    * Validate a list of promo codes against a list of coupons
    */
@@ -11698,7 +13233,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.$ValidatePromoCodes.Responses.$200>
   /**
-   * $availabilityCheck - availabilityCheck
+   * $availabilityCheck - $availabilityCheck
    * 
    * The availability check endpoint
    */
@@ -11708,7 +13243,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.$AvailabilityCheck.Responses.$200>
   /**
-   * $validateAvailabilityFile - validateAvailabilityFile
+   * $validateAvailabilityFile - $validateAvailabilityFile
    * 
    * Validates an availability file, it returns an array of errors if the file is invalid
    */
@@ -11718,7 +13253,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.$ValidateAvailabilityFile.Responses.$200>
   /**
-   * $historicMarketPrices - historicMarketPrices
+   * $historicMarketPrices - $historicMarketPrices
    * 
    * Get a series of historic energy prices for a given time period, market and bidding zone.
    */
@@ -11728,7 +13263,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.$HistoricMarketPrices.Responses.$200>
   /**
-   * $averageMarketPrice - averageMarketPrice
+   * $averageMarketPrice - $averageMarketPrice
    * 
    * Get the average energy prices for a given time period, market and bidding zone.
    */
@@ -11738,7 +13273,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.$AverageMarketPrice.Responses.$200>
   /**
-   * $searchExternalProducts - searchExternalProducts
+   * $searchExternalProducts - $searchExternalProducts
    * 
    * Returns the list of available products with computed prices based on a given context and for a given org integration.
    */
@@ -11748,7 +13283,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.$SearchExternalProducts.Responses.$200>
   /**
-   * $searchExternalProductRecommendations - searchExternalProductRecommendations
+   * $searchExternalProductRecommendations - $searchExternalProductRecommendations
    * 
    * Returns the list of available product recommendations with computed prices based on a given context and for a given org integration.
    */
@@ -11758,7 +13293,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.$SearchExternalProductRecommendations.Responses.$200>
   /**
-   * $searchProviders - searchProviders
+   * $searchProviders - $searchProviders
    * 
    * Returns the list of providers available based on a given location
    */
@@ -11768,7 +13303,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.$SearchProviders.Responses.$200>
   /**
-   * $searchStreets - searchStreets
+   * $searchStreets - $searchStreets
    * 
    * Returns the list of streets available for a given postal code and city
    */
@@ -11778,7 +13313,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.$SearchStreets.Responses.$200>
   /**
-   * $computePrice - calculatePricingDetails
+   * $computePrice - $computePrice
    * 
    * Returns the price for a given product type based on location and consumption
    */
@@ -11788,7 +13323,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.$ComputePrice.Responses.$200>
   /**
-   * $getCredentials - getCredentials
+   * $getCredentials - $getCredentials
    * 
    * Gets the credentials for a given integration / organization
    */
@@ -11798,7 +13333,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.$GetCredentials.Responses.$200>
   /**
-   * $saveCredentials - saveCredentials
+   * $saveCredentials - $saveCredentials
    * 
    * Saves the credentials for a given integration / organization
    */
@@ -11808,7 +13343,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.$SaveCredentials.Responses.$204>
   /**
-   * $deleteCredentials - deleteCredentials
+   * $deleteCredentials - $deleteCredentials
    * 
    * Delete the credentials for a given integration / organization
    */
@@ -11818,7 +13353,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.$DeleteCredentials.Responses.$204>
   /**
-   * $getExternalCatalogProducts - getExternalCatalogProducts
+   * $getExternalCatalogProducts - $getExternalCatalogProducts
    * 
    * Returns the list of available external catalog products with computed prices based on a given context
    */
@@ -11828,7 +13363,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.$GetExternalCatalogProducts.Responses.$200>
   /**
-   * $getExternalCatalogProductRecommendations - getExternalCatalogProductRecommendations
+   * $getExternalCatalogProductRecommendations - $getExternalCatalogProductRecommendations
    * 
    * Returns the list of available external catalog products recommendations based on a given context
    */
@@ -11838,7 +13373,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.$GetExternalCatalogProductRecommendations.Responses.$200>
   /**
-   * $productRecommendations - productRecommendations
+   * $productRecommendations - $productRecommendations
    * 
    * Get a list of product recommendations based on the search parameters.
    */
@@ -11847,12 +13382,294 @@ export interface OperationMethods {
     data?: Paths.$ProductRecommendations.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.$ProductRecommendations.Responses.$200>
+  /**
+   * $getConditionSets - $getConditionSets
+   * 
+   * Returns the condition sets built in for one conditional entity type: the situations a
+   * conditional Product, Price or Coupon is commonly varied by, ready to be copied into that
+   * schema's `conditions` array and extended or modified from there.
+   * 
+   * Which sets exist depends on the schema — an offer window is a Product's dimension, a delivery
+   * area is a Price's and a Coupon's — so only the sets built in for `slug` are returned.
+   * 
+   * Static, read-only reference data. The catalog is the same for every organization and is not
+   * applied to any schema by this endpoint — adding conditions to a schema stays an Entity API
+   * write.
+   * 
+   */
+  '$getConditionSets'(
+    parameters?: Parameters<Paths.$GetConditionSets.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.$GetConditionSets.Responses.$200>
+  /**
+   * $resolveConditionalEntity - $resolveConditionalEntity
+   * 
+   * Resolves which of a conditional entity's variants apply to a situation, and returns each one
+   * composed: the base entity overlaid with the values of the version in effect at `as_of`.
+   * 
+   * Resolution is two selections in a fixed order — the variant, by matching `context` against
+   * the conditions each variant pins; then the version, by `as_of`. It is always scoped to one
+   * logical entity, so it stays a cheap, predictable lookup rather than an open search.
+   * 
+   * Matching follows two rules worth knowing before assembling a context. A condition a variant
+   * does **not** pin matches any value, which is what lets a condition be added to a schema
+   * without breaking the variants that already exist. A condition **missing from `context`**,
+   * however, does not satisfy one a variant pinned: an incomplete integration resolves to
+   * nothing rather than silently matching another segment's variants.
+   * 
+   * When nothing matches, the entity's `default` variant is returned if it has one. There is no
+   * implicit fallback to the unmodified base entity — its values are the ones no variant
+   * overrode, which is not an answer to "what applies here".
+   * 
+   * Availability is a separate mechanism and is never consulted here.
+   * 
+   */
+  '$resolveConditionalEntity'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.$ResolveConditionalEntity.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.$ResolveConditionalEntity.Responses.$200>
+  /**
+   * $createConditionalVariant - $createConditionalVariant
+   * 
+   * Creates one variant of a conditional entity, together with the first version carrying its
+   * values. Never two calls: a variant that existed without a version would be an entity holding
+   * a condition tuple it cannot answer with.
+   * 
+   * The body pins the situation the variant applies to. Pins are exact values only — predicates
+   * are a read-side concept and are rejected here — and are stored canonicalized for their
+   * condition's type, so two spellings of one instant, or one town written two ways, are one
+   * variant rather than two that no context can tell apart.
+   * 
+   * Three write rules are worth knowing before the first call:
+   * 
+   * - A variant must pin at least one condition or be marked `default`. A variant pinning nothing
+   *   would be a universal wildcard matching every resolve, which is a far more dangerous thing
+   *   than a fallback and far easier to create by accident.
+   * - `default` is a property of the variant, set by the `default` flag, and is never a value in
+   *   `conditions` — not even `false`. A `default` variant cannot pin anything else, and an entity
+   *   can have only one, enforced by the ordinary condition-tuple guard rather than by a rule of
+   *   its own. Any entity may have one; nothing is declared in the schema to allow it.
+   * - Condition values are immutable afterwards. A variant's identity is the situation it applies
+   *   to, and orders and contracts pin it. **A condition added to a schema that already has
+   *   variants is effectively one-way**: every existing variant is a wildcard on the new
+   *   dimension, but the first variant that pins it is ambiguous against all of them, and
+   *   retro-pinning the others is blocked by this same rule.
+   * 
+   * Attribute values are applied only for attributes currently carrying `overridable_attribute`.
+   * Metadata and non-overridable fields present in the body are ignored rather than rejected, so a
+   * client working from a slightly stale schema snapshot still succeeds.
+   * 
+   * `variant_id` is always server-generated and returned, and is not accepted in the body — the
+   * request schema admits no such property. It is the durable key orders and contracts pin, so it
+   * cannot be something two independent importers could collide on.
+   * 
+   */
+  '$createConditionalVariant'(
+    parameters?: Parameters<Paths.$CreateConditionalVariant.PathParameters> | null,
+    data?: Paths.$CreateConditionalVariant.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.$CreateConditionalVariant.Responses.$201>
+  /**
+   * $getActiveConditionalVariantVersion - $getActiveConditionalVariantVersion
+   * 
+   * Returns the version of this variant that is currently in effect — the one with the latest
+   * `valid_from` at or before now.
+   * 
+   * The "open this variant" read: no date arithmetic is asked of the caller, and what comes back
+   * carries the `_revision` a write to that version has to be sent with, so an editing screen can
+   * load and save without working out which version it is looking at.
+   * 
+   * What is returned is the version's own attribute overrides, not the base entity overlaid with
+   * them. Composing the two is what `:resolve` answers.
+   * 
+   * A variant staged ahead of its launch has versions but none of them in effect, and is reported
+   * as having none rather than as not existing — the two are fixed differently.
+   * 
+   */
+  '$getActiveConditionalVariantVersion'(
+    parameters?: Parameters<Paths.$GetActiveConditionalVariantVersion.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.$GetActiveConditionalVariantVersion.Responses.$200>
+  /**
+   * $replaceActiveConditionalVariantVersion - $replaceActiveConditionalVariantVersion
+   * 
+   * Replaces the values of the version currently in effect, wholesale.
+   * 
+   * The body is the complete set of attribute overrides: an attribute the variant may override and
+   * that is absent from it stops being overridden. Attributes the variant may **not** override are
+   * ignored where the body carries them, and their stored value is kept rather than dropped — a
+   * routine full-snapshot write must not erase an override the moment its attribute's flag happens
+   * to be off.
+   * 
+   * Editing the version in effect is the ordinary way a live price is corrected, and warns about
+   * nothing: what changes is what that version *says*, not which version is in effect.
+   * 
+   * Neither `valid_from` nor `conditions` can be changed here. Both are accepted when they match
+   * what is stored, so a client building its body from the version it loaded need not strip them
+   * out first, and both are refused when they name something else.
+   * 
+   */
+  '$replaceActiveConditionalVariantVersion'(
+    parameters?: Parameters<Paths.$ReplaceActiveConditionalVariantVersion.PathParameters> | null,
+    data?: Paths.$ReplaceActiveConditionalVariantVersion.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.$ReplaceActiveConditionalVariantVersion.Responses.$200>
+  /**
+   * $patchActiveConditionalVariantVersion - $patchActiveConditionalVariantVersion
+   * 
+   * Changes only the fields it names on the version currently in effect.
+   * 
+   * Everything the body does not mention is left as stored — the "just nudge this number" write. A
+   * `null` is a value like any other rather than a deletion; a client that wants an attribute to
+   * stop being overridden sends the complete snapshot without it through `PUT`.
+   * 
+   * Attempting to change a pinned condition value is refused here in particular: a partial update
+   * is the path a caller reaches for by accident, and a variant's conditions are the situation it
+   * applies to, which the orders and contracts pinning it depend on not shifting.
+   * 
+   */
+  '$patchActiveConditionalVariantVersion'(
+    parameters?: Parameters<Paths.$PatchActiveConditionalVariantVersion.PathParameters> | null,
+    data?: Paths.$PatchActiveConditionalVariantVersion.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.$PatchActiveConditionalVariantVersion.Responses.$200>
+  /**
+   * $deleteConditionalVariant - $deleteConditionalVariant
+   * 
+   * Removes one variant of a conditional entity: the condition tuple it holds, its registration
+   * in the search index, and every version it accumulated.
+   * 
+   * Two phases. The first frees the tuple and deregisters the variant, and is what makes the
+   * combination of condition values immediately reusable — the second removes the version rows in
+   * batches afterwards. A response arrives only once both have finished for this request, but the
+   * tuple is reusable from the moment the first completes, whether or not the second did: a
+   * variant with more versions than one transaction can carry is the ordinary case, not an edge
+   * one. An interrupted delete is safe to send again; it picks up where it stopped.
+   * 
+   * Nothing is archived. A variant an order or contract pins stops resolving, and hydration drops
+   * the reference leniently rather than failing the read.
+   * 
+   * This removes the **variant**, not one of its versions. To remove a single version, name it on
+   * `…/variants/{variant_id}/versions/{valid_from}` — including the one currently in effect, which
+   * deliberately has no "delete whichever is live" shorthand: that is exactly the write nobody
+   * should be able to ask for without saying which version they meant.
+   * 
+   */
+  '$deleteConditionalVariant'(
+    parameters?: Parameters<Paths.$DeleteConditionalVariant.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.$DeleteConditionalVariant.Responses.$200>
+  /**
+   * $appendConditionalVariantVersion - $appendConditionalVariantVersion
+   * 
+   * Appends a version to a variant: a new set of values taking effect at its own instant.
+   * 
+   * This is how a price changes. No version carries an end date and nothing is superseded
+   * explicitly — the version in effect at an instant is simply the one with the latest `valid_from`
+   * at or before it, so appending a later version is the whole of "this is the new price from then
+   * on". A version dated in the future is staged and excluded from resolution until its date.
+   * 
+   * **A version is never refused for being late.** A `valid_from` in the past is written like any
+   * other and answered with warnings in `warnings` naming what it moved — what resolves now, what a
+   * past-dated read returns, or both. Correcting a price that took effect last week is ordinary
+   * work; the alternative, deleting and recreating the variant, breaks every order and contract
+   * pinning its id.
+   * 
+   * What is refused is appending at a `valid_from` the variant already has: that write means either
+   * "replace it" or "and also this", and only the caller knows which. The two operations both
+   * exist, on the dated version path.
+   * 
+   * The variant's `conditions` are its identity and are fixed at creation; they may be sent back
+   * unchanged but never changed.
+   * 
+   */
+  '$appendConditionalVariantVersion'(
+    parameters?: Parameters<Paths.$AppendConditionalVariantVersion.PathParameters> | null,
+    data?: Paths.$AppendConditionalVariantVersion.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.$AppendConditionalVariantVersion.Responses.$201>
+  /**
+   * $getConditionalVariantVersion - $getConditionalVariantVersion
+   * 
+   * Returns one specific version of a variant, by the instant it takes effect — what a form editing
+   * that version loads.
+   * 
+   * Exact, never nearest: an instant the variant has no version at is a not-found rather than the
+   * version that would be in effect at it. That question is the shorthand read's, or `:resolve`'s.
+   * 
+   */
+  '$getConditionalVariantVersion'(
+    parameters?: Parameters<Paths.$GetConditionalVariantVersion.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.$GetConditionalVariantVersion.Responses.$200>
+  /**
+   * $replaceConditionalVariantVersion - $replaceConditionalVariantVersion
+   * 
+   * Replaces one version's values wholesale, addressed by its `valid_from`.
+   * 
+   * Editable whatever its date, at both ends of the timeline: a scheduled version must stay
+   * editable so a staged price can be corrected before it goes live rather than accumulating dead
+   * versions beside it, and a past one must stay editable because correcting history is ordinary
+   * work. Writing a superseded version is answered with a warning naming what a past-dated read now
+   * returns; it is not refused.
+   * 
+   * Attributes the variant may not override are ignored where the body carries them, and their
+   * stored value is preserved rather than dropped.
+   * 
+   */
+  '$replaceConditionalVariantVersion'(
+    parameters?: Parameters<Paths.$ReplaceConditionalVariantVersion.PathParameters> | null,
+    data?: Paths.$ReplaceConditionalVariantVersion.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.$ReplaceConditionalVariantVersion.Responses.$200>
+  /**
+   * $patchConditionalVariantVersion - $patchConditionalVariantVersion
+   * 
+   * Changes only the fields it names on one version, addressed by its `valid_from`.
+   * 
+   * Everything the body does not mention is left as stored. A partial update that tries to change a
+   * pinned condition value is refused: condition values are immutable after a variant is created,
+   * and this is the path that rule is most likely to be broken on by accident.
+   * 
+   */
+  '$patchConditionalVariantVersion'(
+    parameters?: Parameters<Paths.$PatchConditionalVariantVersion.PathParameters> | null,
+    data?: Paths.$PatchConditionalVariantVersion.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.$PatchConditionalVariantVersion.Responses.$200>
+  /**
+   * $deleteConditionalVariantVersion - $deleteConditionalVariantVersion
+   * 
+   * Removes one version of a variant.
+   * 
+   * Withdrawing a scheduled adjustment is what this is for, and deleting a future version warns
+   * about nothing — nothing that has resolved, or could have resolved, changes. Deleting a version
+   * that has taken effect is allowed too and answered with a warning: it changes what a past-dated
+   * read returns, and if it was the version in effect it changes what resolves now.
+   * 
+   * **A variant's last remaining version cannot be deleted.** Such a variant would still hold its
+   * condition tuple and still be selectable, and then resolve to nothing — which is a variant delete
+   * wearing a version delete's clothes. Delete the variant instead; that frees the tuple too.
+   * 
+   * The variant itself is untouched: it keeps its conditions, its tuple and its place in the index.
+   * 
+   */
+  '$deleteConditionalVariantVersion'(
+    parameters?: Parameters<Paths.$DeleteConditionalVariantVersion.QueryParameters & Paths.$DeleteConditionalVariantVersion.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.$DeleteConditionalVariantVersion.Responses.$200>
 }
 
 export interface PathsDictionary {
   ['/v1/pricing:compute']: {
     /**
-     * $calculatePricingDetails - calculatePricingDetails
+     * $calculatePricingDetails - $calculatePricingDetails
      * 
      * Computes a set of pricing details that can be persisted on an entity with the pricing capability enabled, e.g: Orders or Contracts.
      */
@@ -11888,7 +13705,7 @@ export interface PathsDictionary {
   }
   ['/v1/public/cart:checkout']: {
     /**
-     * $checkoutCart - checkoutCart
+     * $checkoutCart - $checkoutCart
      * 
      * Checkouts a cart and executes the specified checkout `mode` process.
      * 
@@ -11911,7 +13728,7 @@ export interface PathsDictionary {
   }
   ['/v1/public/catalog']: {
     /**
-     * $searchCatalog - searchCatalog
+     * $searchCatalog - $searchCatalog
      * 
      * Provides a querying functionalities over products and prices of the Catalog for a given organization.
      */
@@ -11923,7 +13740,7 @@ export interface PathsDictionary {
   }
   ['/v1/catalog']: {
     /**
-     * $privateSearchCatalog - privateSearchCatalog
+     * $privateSearchCatalog - $privateSearchCatalog
      * 
      * Provides a querying functionalities over products and prices of the Catalog for a given organization.
      */
@@ -11935,7 +13752,7 @@ export interface PathsDictionary {
   }
   ['/v1/public/validate-promo-codes']: {
     /**
-     * $validatePromoCodes - validatePromoCodes
+     * $validatePromoCodes - $validatePromoCodes
      * 
      * Validate a list of promo codes against a list of coupons
      */
@@ -11947,7 +13764,7 @@ export interface PathsDictionary {
   }
   ['/v1/public/availability:check']: {
     /**
-     * $availabilityCheck - availabilityCheck
+     * $availabilityCheck - $availabilityCheck
      * 
      * The availability check endpoint
      */
@@ -11959,7 +13776,7 @@ export interface PathsDictionary {
   }
   ['/v1/validate-availability/{id}']: {
     /**
-     * $validateAvailabilityFile - validateAvailabilityFile
+     * $validateAvailabilityFile - $validateAvailabilityFile
      * 
      * Validates an availability file, it returns an array of errors if the file is invalid
      */
@@ -11971,7 +13788,7 @@ export interface PathsDictionary {
   }
   ['/v1/public/historicMarketPrices']: {
     /**
-     * $historicMarketPrices - historicMarketPrices
+     * $historicMarketPrices - $historicMarketPrices
      * 
      * Get a series of historic energy prices for a given time period, market and bidding zone.
      */
@@ -11983,7 +13800,7 @@ export interface PathsDictionary {
   }
   ['/v1/public/averageMarketPrice']: {
     /**
-     * $averageMarketPrice - averageMarketPrice
+     * $averageMarketPrice - $averageMarketPrice
      * 
      * Get the average energy prices for a given time period, market and bidding zone.
      */
@@ -11995,7 +13812,7 @@ export interface PathsDictionary {
   }
   ['/v1/public/integration/{integrationId}/products']: {
     /**
-     * $searchExternalProducts - searchExternalProducts
+     * $searchExternalProducts - $searchExternalProducts
      * 
      * Returns the list of available products with computed prices based on a given context and for a given org integration.
      */
@@ -12007,7 +13824,7 @@ export interface PathsDictionary {
   }
   ['/v1/public/integration/{integrationId}/product-recommendations']: {
     /**
-     * $searchExternalProductRecommendations - searchExternalProductRecommendations
+     * $searchExternalProductRecommendations - $searchExternalProductRecommendations
      * 
      * Returns the list of available product recommendations with computed prices based on a given context and for a given org integration.
      */
@@ -12019,7 +13836,7 @@ export interface PathsDictionary {
   }
   ['/v1/public/integration/{integrationId}/providers:search']: {
     /**
-     * $searchProviders - searchProviders
+     * $searchProviders - $searchProviders
      * 
      * Returns the list of providers available based on a given location
      */
@@ -12031,7 +13848,7 @@ export interface PathsDictionary {
   }
   ['/v1/public/integration/{integrationId}/streets:search']: {
     /**
-     * $searchStreets - searchStreets
+     * $searchStreets - $searchStreets
      * 
      * Returns the list of streets available for a given postal code and city
      */
@@ -12043,7 +13860,7 @@ export interface PathsDictionary {
   }
   ['/v1/public/integration/{integrationId}/compute-price']: {
     /**
-     * $computePrice - calculatePricingDetails
+     * $computePrice - $computePrice
      * 
      * Returns the price for a given product type based on location and consumption
      */
@@ -12055,7 +13872,7 @@ export interface PathsDictionary {
   }
   ['/v1/integration/{integrationId}/credentials']: {
     /**
-     * $getCredentials - getCredentials
+     * $getCredentials - $getCredentials
      * 
      * Gets the credentials for a given integration / organization
      */
@@ -12067,7 +13884,7 @@ export interface PathsDictionary {
   }
   ['/v1/integration/{integrationId}/credentials:save']: {
     /**
-     * $saveCredentials - saveCredentials
+     * $saveCredentials - $saveCredentials
      * 
      * Saves the credentials for a given integration / organization
      */
@@ -12079,7 +13896,7 @@ export interface PathsDictionary {
   }
   ['/v1/integration/{integrationId}/credentials:delete']: {
     /**
-     * $deleteCredentials - deleteCredentials
+     * $deleteCredentials - $deleteCredentials
      * 
      * Delete the credentials for a given integration / organization
      */
@@ -12091,7 +13908,7 @@ export interface PathsDictionary {
   }
   ['/v1/public/external-catalog/products']: {
     /**
-     * $getExternalCatalogProducts - getExternalCatalogProducts
+     * $getExternalCatalogProducts - $getExternalCatalogProducts
      * 
      * Returns the list of available external catalog products with computed prices based on a given context
      */
@@ -12103,7 +13920,7 @@ export interface PathsDictionary {
   }
   ['/v1/public/external-catalog/product-recommendations']: {
     /**
-     * $getExternalCatalogProductRecommendations - getExternalCatalogProductRecommendations
+     * $getExternalCatalogProductRecommendations - $getExternalCatalogProductRecommendations
      * 
      * Returns the list of available external catalog products recommendations based on a given context
      */
@@ -12115,7 +13932,7 @@ export interface PathsDictionary {
   }
   ['/v1/public/product-recommendations']: {
     /**
-     * $productRecommendations - productRecommendations
+     * $productRecommendations - $productRecommendations
      * 
      * Get a list of product recommendations based on the search parameters.
      */
@@ -12125,6 +13942,300 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.$ProductRecommendations.Responses.$200>
   }
+  ['/v1/conditional-pricing/{slug}/condition-sets']: {
+    /**
+     * $getConditionSets - $getConditionSets
+     * 
+     * Returns the condition sets built in for one conditional entity type: the situations a
+     * conditional Product, Price or Coupon is commonly varied by, ready to be copied into that
+     * schema's `conditions` array and extended or modified from there.
+     * 
+     * Which sets exist depends on the schema — an offer window is a Product's dimension, a delivery
+     * area is a Price's and a Coupon's — so only the sets built in for `slug` are returned.
+     * 
+     * Static, read-only reference data. The catalog is the same for every organization and is not
+     * applied to any schema by this endpoint — adding conditions to a schema stays an Entity API
+     * write.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.$GetConditionSets.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.$GetConditionSets.Responses.$200>
+  }
+  ['/v1/conditional-pricing:resolve']: {
+    /**
+     * $resolveConditionalEntity - $resolveConditionalEntity
+     * 
+     * Resolves which of a conditional entity's variants apply to a situation, and returns each one
+     * composed: the base entity overlaid with the values of the version in effect at `as_of`.
+     * 
+     * Resolution is two selections in a fixed order — the variant, by matching `context` against
+     * the conditions each variant pins; then the version, by `as_of`. It is always scoped to one
+     * logical entity, so it stays a cheap, predictable lookup rather than an open search.
+     * 
+     * Matching follows two rules worth knowing before assembling a context. A condition a variant
+     * does **not** pin matches any value, which is what lets a condition be added to a schema
+     * without breaking the variants that already exist. A condition **missing from `context`**,
+     * however, does not satisfy one a variant pinned: an incomplete integration resolves to
+     * nothing rather than silently matching another segment's variants.
+     * 
+     * When nothing matches, the entity's `default` variant is returned if it has one. There is no
+     * implicit fallback to the unmodified base entity — its values are the ones no variant
+     * overrode, which is not an answer to "what applies here".
+     * 
+     * Availability is a separate mechanism and is never consulted here.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.$ResolveConditionalEntity.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.$ResolveConditionalEntity.Responses.$200>
+  }
+  ['/v1/conditional-pricing/{slug}/entities/{entity_id}/variants']: {
+    /**
+     * $createConditionalVariant - $createConditionalVariant
+     * 
+     * Creates one variant of a conditional entity, together with the first version carrying its
+     * values. Never two calls: a variant that existed without a version would be an entity holding
+     * a condition tuple it cannot answer with.
+     * 
+     * The body pins the situation the variant applies to. Pins are exact values only — predicates
+     * are a read-side concept and are rejected here — and are stored canonicalized for their
+     * condition's type, so two spellings of one instant, or one town written two ways, are one
+     * variant rather than two that no context can tell apart.
+     * 
+     * Three write rules are worth knowing before the first call:
+     * 
+     * - A variant must pin at least one condition or be marked `default`. A variant pinning nothing
+     *   would be a universal wildcard matching every resolve, which is a far more dangerous thing
+     *   than a fallback and far easier to create by accident.
+     * - `default` is a property of the variant, set by the `default` flag, and is never a value in
+     *   `conditions` — not even `false`. A `default` variant cannot pin anything else, and an entity
+     *   can have only one, enforced by the ordinary condition-tuple guard rather than by a rule of
+     *   its own. Any entity may have one; nothing is declared in the schema to allow it.
+     * - Condition values are immutable afterwards. A variant's identity is the situation it applies
+     *   to, and orders and contracts pin it. **A condition added to a schema that already has
+     *   variants is effectively one-way**: every existing variant is a wildcard on the new
+     *   dimension, but the first variant that pins it is ambiguous against all of them, and
+     *   retro-pinning the others is blocked by this same rule.
+     * 
+     * Attribute values are applied only for attributes currently carrying `overridable_attribute`.
+     * Metadata and non-overridable fields present in the body are ignored rather than rejected, so a
+     * client working from a slightly stale schema snapshot still succeeds.
+     * 
+     * `variant_id` is always server-generated and returned, and is not accepted in the body — the
+     * request schema admits no such property. It is the durable key orders and contracts pin, so it
+     * cannot be something two independent importers could collide on.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.$CreateConditionalVariant.PathParameters> | null,
+      data?: Paths.$CreateConditionalVariant.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.$CreateConditionalVariant.Responses.$201>
+  }
+  ['/v1/conditional-pricing/{slug}/entities/{entity_id}/variants/{variant_id}']: {
+    /**
+     * $getActiveConditionalVariantVersion - $getActiveConditionalVariantVersion
+     * 
+     * Returns the version of this variant that is currently in effect — the one with the latest
+     * `valid_from` at or before now.
+     * 
+     * The "open this variant" read: no date arithmetic is asked of the caller, and what comes back
+     * carries the `_revision` a write to that version has to be sent with, so an editing screen can
+     * load and save without working out which version it is looking at.
+     * 
+     * What is returned is the version's own attribute overrides, not the base entity overlaid with
+     * them. Composing the two is what `:resolve` answers.
+     * 
+     * A variant staged ahead of its launch has versions but none of them in effect, and is reported
+     * as having none rather than as not existing — the two are fixed differently.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.$GetActiveConditionalVariantVersion.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.$GetActiveConditionalVariantVersion.Responses.$200>
+    /**
+     * $replaceActiveConditionalVariantVersion - $replaceActiveConditionalVariantVersion
+     * 
+     * Replaces the values of the version currently in effect, wholesale.
+     * 
+     * The body is the complete set of attribute overrides: an attribute the variant may override and
+     * that is absent from it stops being overridden. Attributes the variant may **not** override are
+     * ignored where the body carries them, and their stored value is kept rather than dropped — a
+     * routine full-snapshot write must not erase an override the moment its attribute's flag happens
+     * to be off.
+     * 
+     * Editing the version in effect is the ordinary way a live price is corrected, and warns about
+     * nothing: what changes is what that version *says*, not which version is in effect.
+     * 
+     * Neither `valid_from` nor `conditions` can be changed here. Both are accepted when they match
+     * what is stored, so a client building its body from the version it loaded need not strip them
+     * out first, and both are refused when they name something else.
+     * 
+     */
+    'put'(
+      parameters?: Parameters<Paths.$ReplaceActiveConditionalVariantVersion.PathParameters> | null,
+      data?: Paths.$ReplaceActiveConditionalVariantVersion.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.$ReplaceActiveConditionalVariantVersion.Responses.$200>
+    /**
+     * $patchActiveConditionalVariantVersion - $patchActiveConditionalVariantVersion
+     * 
+     * Changes only the fields it names on the version currently in effect.
+     * 
+     * Everything the body does not mention is left as stored — the "just nudge this number" write. A
+     * `null` is a value like any other rather than a deletion; a client that wants an attribute to
+     * stop being overridden sends the complete snapshot without it through `PUT`.
+     * 
+     * Attempting to change a pinned condition value is refused here in particular: a partial update
+     * is the path a caller reaches for by accident, and a variant's conditions are the situation it
+     * applies to, which the orders and contracts pinning it depend on not shifting.
+     * 
+     */
+    'patch'(
+      parameters?: Parameters<Paths.$PatchActiveConditionalVariantVersion.PathParameters> | null,
+      data?: Paths.$PatchActiveConditionalVariantVersion.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.$PatchActiveConditionalVariantVersion.Responses.$200>
+    /**
+     * $deleteConditionalVariant - $deleteConditionalVariant
+     * 
+     * Removes one variant of a conditional entity: the condition tuple it holds, its registration
+     * in the search index, and every version it accumulated.
+     * 
+     * Two phases. The first frees the tuple and deregisters the variant, and is what makes the
+     * combination of condition values immediately reusable — the second removes the version rows in
+     * batches afterwards. A response arrives only once both have finished for this request, but the
+     * tuple is reusable from the moment the first completes, whether or not the second did: a
+     * variant with more versions than one transaction can carry is the ordinary case, not an edge
+     * one. An interrupted delete is safe to send again; it picks up where it stopped.
+     * 
+     * Nothing is archived. A variant an order or contract pins stops resolving, and hydration drops
+     * the reference leniently rather than failing the read.
+     * 
+     * This removes the **variant**, not one of its versions. To remove a single version, name it on
+     * `…/variants/{variant_id}/versions/{valid_from}` — including the one currently in effect, which
+     * deliberately has no "delete whichever is live" shorthand: that is exactly the write nobody
+     * should be able to ask for without saying which version they meant.
+     * 
+     */
+    'delete'(
+      parameters?: Parameters<Paths.$DeleteConditionalVariant.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.$DeleteConditionalVariant.Responses.$200>
+  }
+  ['/v1/conditional-pricing/{slug}/entities/{entity_id}/variants/{variant_id}/versions']: {
+    /**
+     * $appendConditionalVariantVersion - $appendConditionalVariantVersion
+     * 
+     * Appends a version to a variant: a new set of values taking effect at its own instant.
+     * 
+     * This is how a price changes. No version carries an end date and nothing is superseded
+     * explicitly — the version in effect at an instant is simply the one with the latest `valid_from`
+     * at or before it, so appending a later version is the whole of "this is the new price from then
+     * on". A version dated in the future is staged and excluded from resolution until its date.
+     * 
+     * **A version is never refused for being late.** A `valid_from` in the past is written like any
+     * other and answered with warnings in `warnings` naming what it moved — what resolves now, what a
+     * past-dated read returns, or both. Correcting a price that took effect last week is ordinary
+     * work; the alternative, deleting and recreating the variant, breaks every order and contract
+     * pinning its id.
+     * 
+     * What is refused is appending at a `valid_from` the variant already has: that write means either
+     * "replace it" or "and also this", and only the caller knows which. The two operations both
+     * exist, on the dated version path.
+     * 
+     * The variant's `conditions` are its identity and are fixed at creation; they may be sent back
+     * unchanged but never changed.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.$AppendConditionalVariantVersion.PathParameters> | null,
+      data?: Paths.$AppendConditionalVariantVersion.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.$AppendConditionalVariantVersion.Responses.$201>
+  }
+  ['/v1/conditional-pricing/{slug}/entities/{entity_id}/variants/{variant_id}/versions/{valid_from}']: {
+    /**
+     * $getConditionalVariantVersion - $getConditionalVariantVersion
+     * 
+     * Returns one specific version of a variant, by the instant it takes effect — what a form editing
+     * that version loads.
+     * 
+     * Exact, never nearest: an instant the variant has no version at is a not-found rather than the
+     * version that would be in effect at it. That question is the shorthand read's, or `:resolve`'s.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.$GetConditionalVariantVersion.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.$GetConditionalVariantVersion.Responses.$200>
+    /**
+     * $replaceConditionalVariantVersion - $replaceConditionalVariantVersion
+     * 
+     * Replaces one version's values wholesale, addressed by its `valid_from`.
+     * 
+     * Editable whatever its date, at both ends of the timeline: a scheduled version must stay
+     * editable so a staged price can be corrected before it goes live rather than accumulating dead
+     * versions beside it, and a past one must stay editable because correcting history is ordinary
+     * work. Writing a superseded version is answered with a warning naming what a past-dated read now
+     * returns; it is not refused.
+     * 
+     * Attributes the variant may not override are ignored where the body carries them, and their
+     * stored value is preserved rather than dropped.
+     * 
+     */
+    'put'(
+      parameters?: Parameters<Paths.$ReplaceConditionalVariantVersion.PathParameters> | null,
+      data?: Paths.$ReplaceConditionalVariantVersion.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.$ReplaceConditionalVariantVersion.Responses.$200>
+    /**
+     * $patchConditionalVariantVersion - $patchConditionalVariantVersion
+     * 
+     * Changes only the fields it names on one version, addressed by its `valid_from`.
+     * 
+     * Everything the body does not mention is left as stored. A partial update that tries to change a
+     * pinned condition value is refused: condition values are immutable after a variant is created,
+     * and this is the path that rule is most likely to be broken on by accident.
+     * 
+     */
+    'patch'(
+      parameters?: Parameters<Paths.$PatchConditionalVariantVersion.PathParameters> | null,
+      data?: Paths.$PatchConditionalVariantVersion.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.$PatchConditionalVariantVersion.Responses.$200>
+    /**
+     * $deleteConditionalVariantVersion - $deleteConditionalVariantVersion
+     * 
+     * Removes one version of a variant.
+     * 
+     * Withdrawing a scheduled adjustment is what this is for, and deleting a future version warns
+     * about nothing — nothing that has resolved, or could have resolved, changes. Deleting a version
+     * that has taken effect is allowed too and answered with a warning: it changes what a past-dated
+     * read returns, and if it was the version in effect it changes what resolves now.
+     * 
+     * **A variant's last remaining version cannot be deleted.** Such a variant would still hold its
+     * condition tuple and still be selectable, and then resolve to nothing — which is a variant delete
+     * wearing a version delete's clothes. Delete the variant instead; that frees the tuple too.
+     * 
+     * The variant itself is untouched: it keeps its conditions, its tuple and its place in the index.
+     * 
+     */
+    'delete'(
+      parameters?: Parameters<Paths.$DeleteConditionalVariantVersion.QueryParameters & Paths.$DeleteConditionalVariantVersion.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.$DeleteConditionalVariantVersion.Responses.$200>
+  }
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
@@ -12133,6 +14244,7 @@ export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 export type AdditionalProviderData = Components.Schemas.AdditionalProviderData;
 export type Address = Components.Schemas.Address;
 export type Amounts = Components.Schemas.Amounts;
+export type AppendVersionRequest = Components.Schemas.AppendVersionRequest;
 export type AvailabilityCheckParams = Components.Schemas.AvailabilityCheckParams;
 export type AvailabilityFilters = Components.Schemas.AvailabilityFilters;
 export type AvailabilityLocation = Components.Schemas.AvailabilityLocation;
@@ -12169,15 +14281,24 @@ export type ComputePriceResult = Components.Schemas.ComputePriceResult;
 export type ComputedBasePrice = Components.Schemas.ComputedBasePrice;
 export type ComputedPriceBreakdown = Components.Schemas.ComputedPriceBreakdown;
 export type ComputedPriceComponents = Components.Schemas.ComputedPriceComponents;
+export type ConditionDefinition = Components.Schemas.ConditionDefinition;
+export type ConditionSet = Components.Schemas.ConditionSet;
+export type ConditionSetCatalog = Components.Schemas.ConditionSetCatalog;
+export type ConditionType = Components.Schemas.ConditionType;
+export type ConditionalEntitySlug = Components.Schemas.ConditionalEntitySlug;
 export type ConditionalPricingError = Components.Schemas.ConditionalPricingError;
 export type ConditionalPricingErrorCode = Components.Schemas.ConditionalPricingErrorCode;
 export type ConsumptionTypeGetAg = Components.Schemas.ConsumptionTypeGetAg;
 export type Coupon = Components.Schemas.Coupon;
 export type CouponItem = Components.Schemas.CouponItem;
 export type CouponWithoutPromoCodes = Components.Schemas.CouponWithoutPromoCodes;
+export type CreateVariantRequest = Components.Schemas.CreateVariantRequest;
+export type CreatedVariant = Components.Schemas.CreatedVariant;
 export type Currency = Components.Schemas.Currency;
 export type CustomContext = Components.Schemas.CustomContext;
 export type Customer = Components.Schemas.Customer;
+export type DeletedVariant = Components.Schemas.DeletedVariant;
+export type DeletedVariantVersion = Components.Schemas.DeletedVariantVersion;
 export type DiscountAmounts = Components.Schemas.DiscountAmounts;
 export type DynamicTariffInterval = Components.Schemas.DynamicTariffInterval;
 export type DynamicTariffMode = Components.Schemas.DynamicTariffMode;
@@ -12221,7 +14342,9 @@ export type OrderPayload = Components.Schemas.OrderPayload;
 export type OrderRelation = Components.Schemas.OrderRelation;
 export type OrderSource = Components.Schemas.OrderSource;
 export type OrderStatus = Components.Schemas.OrderStatus;
+export type PatchVersionRequest = Components.Schemas.PatchVersionRequest;
 export type PaymentMethod = Components.Schemas.PaymentMethod;
+export type PinnedConditions = Components.Schemas.PinnedConditions;
 export type PortalContext = Components.Schemas.PortalContext;
 export type PowerMarketAreaDetails = Components.Schemas.PowerMarketAreaDetails;
 export type PowerMeterType = Components.Schemas.PowerMeterType;
@@ -12255,6 +14378,12 @@ export type RecurrenceAmount = Components.Schemas.RecurrenceAmount;
 export type RecurrenceAmountDto = Components.Schemas.RecurrenceAmountDto;
 export type RecurrenceAmountWithTax = Components.Schemas.RecurrenceAmountWithTax;
 export type RedeemedPromo = Components.Schemas.RedeemedPromo;
+export type ReplaceVersionRequest = Components.Schemas.ReplaceVersionRequest;
+export type ResolveConditionalEntityRequest = Components.Schemas.ResolveConditionalEntityRequest;
+export type ResolveContext = Components.Schemas.ResolveContext;
+export type ResolveOptions = Components.Schemas.ResolveOptions;
+export type ResolvedVariant = Components.Schemas.ResolvedVariant;
+export type ResolvedVariants = Components.Schemas.ResolvedVariants;
 export type SalesTax = Components.Schemas.SalesTax;
 export type SaveIntegrationCredentialsParams = Components.Schemas.SaveIntegrationCredentialsParams;
 export type SearchExternalCatalogParams = Components.Schemas.SearchExternalCatalogParams;
@@ -12281,3 +14410,9 @@ export type TotalDetails = Components.Schemas.TotalDetails;
 export type TypeGetAg = Components.Schemas.TypeGetAg;
 export type ValidateAvailabilityFileError = Components.Schemas.ValidateAvailabilityFileError;
 export type ValidateAvailabilityFileResult = Components.Schemas.ValidateAvailabilityFileResult;
+export type VariantConditions = Components.Schemas.VariantConditions;
+export type VariantValues = Components.Schemas.VariantValues;
+export type VariantVersion = Components.Schemas.VariantVersion;
+export type VariantWriteWarning = Components.Schemas.VariantWriteWarning;
+export type VersionWriteWarning = Components.Schemas.VersionWriteWarning;
+export type WrittenVariantVersion = Components.Schemas.WrittenVariantVersion;

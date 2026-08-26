@@ -64,9 +64,47 @@ const { data } = await pricingClient.$calculatePricingDetails(...)
 **Product Recommendations API**
 - [`$productRecommendations`](#$productrecommendations)
 
+**Conditional Pricing API**
+- [`$getConditionSets`](#$getconditionsets)
+- [`$resolveConditionalEntity`](#$resolveconditionalentity)
+- [`$createConditionalVariant`](#$createconditionalvariant)
+- [`$getActiveConditionalVariantVersion`](#$getactiveconditionalvariantversion)
+- [`$replaceActiveConditionalVariantVersion`](#$replaceactiveconditionalvariantversion)
+- [`$patchActiveConditionalVariantVersion`](#$patchactiveconditionalvariantversion)
+- [`$deleteConditionalVariant`](#$deleteconditionalvariant)
+- [`$appendConditionalVariantVersion`](#$appendconditionalvariantversion)
+- [`$getConditionalVariantVersion`](#$getconditionalvariantversion)
+- [`$replaceConditionalVariantVersion`](#$replaceconditionalvariantversion)
+- [`$patchConditionalVariantVersion`](#$patchconditionalvariantversion)
+- [`$deleteConditionalVariantVersion`](#$deleteconditionalvariantversion)
+
 **Schemas**
 - [`IntegrationId`](#integrationid)
+- [`ConditionalEntitySlug`](#conditionalentityslug)
+- [`ConditionType`](#conditiontype)
+- [`ConditionDefinition`](#conditiondefinition)
+- [`ConditionSet`](#conditionset)
+- [`ConditionSetCatalog`](#conditionsetcatalog)
 - [`ConditionalPricingErrorCode`](#conditionalpricingerrorcode)
+- [`ResolveConditionalEntityRequest`](#resolveconditionalentityrequest)
+- [`ResolveContext`](#resolvecontext)
+- [`ResolveOptions`](#resolveoptions)
+- [`ResolvedVariants`](#resolvedvariants)
+- [`ResolvedVariant`](#resolvedvariant)
+- [`CreateVariantRequest`](#createvariantrequest)
+- [`VariantConditions`](#variantconditions)
+- [`PinnedConditions`](#pinnedconditions)
+- [`VariantValues`](#variantvalues)
+- [`CreatedVariant`](#createdvariant)
+- [`VariantWriteWarning`](#variantwritewarning)
+- [`DeletedVariant`](#deletedvariant)
+- [`VariantVersion`](#variantversion)
+- [`WrittenVariantVersion`](#writtenvariantversion)
+- [`DeletedVariantVersion`](#deletedvariantversion)
+- [`VersionWriteWarning`](#versionwritewarning)
+- [`AppendVersionRequest`](#appendversionrequest)
+- [`ReplaceVersionRequest`](#replaceversionrequest)
+- [`PatchVersionRequest`](#patchversionrequest)
 - [`Error`](#error)
 - [`ConditionalPricingError`](#conditionalpricingerror)
 - [`Product`](#product)
@@ -219,7 +257,7 @@ const { data } = await pricingClient.$calculatePricingDetails(...)
 
 ### `$calculatePricingDetails`
 
-calculatePricingDetails
+Computes a set of pricing details that can be persisted on an entity with the pricing capability enabled, e.g: Orders or Contracts.
 
 `POST /v1/pricing:compute`
 
@@ -760,7 +798,7 @@ const { data } = await client.putOrder(
 
 ### `$checkoutCart`
 
-checkoutCart
+Checkouts a cart and executes the specified checkout `mode` process.
 
 `POST /v1/public/cart:checkout`
 
@@ -865,7 +903,7 @@ const { data } = await client.$checkoutCart(
 
 ### `$searchCatalog`
 
-searchCatalog
+Provides a querying functionalities over products and prices of the Catalog for a given organization.
 
 `POST /v1/public/catalog`
 
@@ -909,7 +947,7 @@ const { data } = await client.$searchCatalog(
 
 ### `$privateSearchCatalog`
 
-privateSearchCatalog
+Provides a querying functionalities over products and prices of the Catalog for a given organization.
 
 `POST /v1/catalog`
 
@@ -950,7 +988,7 @@ const { data } = await client.$privateSearchCatalog(
 
 ### `$validatePromoCodes`
 
-validatePromoCodes
+Validate a list of promo codes against a list of coupons
 
 `POST /v1/public/validate-promo-codes`
 
@@ -1003,7 +1041,7 @@ const { data } = await client.$validatePromoCodes(
 
 ### `$availabilityCheck`
 
-availabilityCheck
+The availability check endpoint
 
 `POST /v1/public/availability:check`
 
@@ -1053,7 +1091,7 @@ const { data } = await client.$availabilityCheck(
 
 ### `$validateAvailabilityFile`
 
-validateAvailabilityFile
+Validates an availability file, it returns an array of errors if the file is invalid
 
 `GET /v1/validate-availability/{id}`
 
@@ -1081,7 +1119,7 @@ const { data } = await client.$validateAvailabilityFile({
 
 ### `$historicMarketPrices`
 
-historicMarketPrices
+Get a series of historic energy prices for a given time period, market and bidding zone.
 
 `GET /v1/public/historicMarketPrices`
 
@@ -1119,7 +1157,7 @@ const { data } = await client.$historicMarketPrices({
 
 ### `$averageMarketPrice`
 
-averageMarketPrice
+Get the average energy prices for a given time period, market and bidding zone.
 
 `GET /v1/public/averageMarketPrice`
 
@@ -1158,7 +1196,7 @@ const { data } = await client.$averageMarketPrice({
 
 ### `$searchExternalProducts`
 
-searchExternalProducts
+Returns the list of available products with computed prices based on a given context and for a given org integration.
 
 `POST /v1/public/integration/{integrationId}/products`
 
@@ -1217,7 +1255,7 @@ const { data } = await client.$searchExternalProducts(
 
 ### `$searchExternalProductRecommendations`
 
-searchExternalProductRecommendations
+Returns the list of available product recommendations with computed prices based on a given context and for a given org integration.
 
 `POST /v1/public/integration/{integrationId}/product-recommendations`
 
@@ -1292,7 +1330,7 @@ const { data } = await client.$searchExternalProductRecommendations(
 
 ### `$searchProviders`
 
-searchProviders
+Returns the list of providers available based on a given location
 
 `POST /v1/public/integration/{integrationId}/providers:search`
 
@@ -1358,7 +1396,7 @@ const { data } = await client.$searchProviders(
 
 ### `$searchStreets`
 
-searchStreets
+Returns the list of streets available for a given postal code and city
 
 `POST /v1/public/integration/{integrationId}/streets:search`
 
@@ -1392,7 +1430,7 @@ const { data } = await client.$searchStreets(
 
 ### `$computePrice`
 
-calculatePricingDetails
+Returns the price for a given product type based on location and consumption
 
 `POST /v1/public/integration/{integrationId}/compute-price`
 
@@ -1455,7 +1493,7 @@ const { data } = await client.$computePrice(
 
 ### `$getCredentials`
 
-getCredentials
+Gets the credentials for a given integration / organization
 
 `GET /v1/integration/{integrationId}/credentials`
 
@@ -1478,7 +1516,7 @@ const { data } = await client.$getCredentials({
 
 ### `$saveCredentials`
 
-saveCredentials
+Saves the credentials for a given integration / organization
 
 `PUT /v1/integration/{integrationId}/credentials:save`
 
@@ -1495,7 +1533,7 @@ const { data } = await client.$saveCredentials(
 
 ### `$deleteCredentials`
 
-deleteCredentials
+Delete the credentials for a given integration / organization
 
 `DELETE /v1/integration/{integrationId}/credentials:delete`
 
@@ -1509,7 +1547,7 @@ const { data } = await client.$deleteCredentials({
 
 ### `$getExternalCatalogProducts`
 
-getExternalCatalogProducts
+Returns the list of available external catalog products with computed prices based on a given context
 
 `POST /v1/public/external-catalog/products`
 
@@ -1577,7 +1615,7 @@ const { data } = await client.$getExternalCatalogProducts(
 
 ### `$getExternalCatalogProductRecommendations`
 
-getExternalCatalogProductRecommendations
+Returns the list of available external catalog products recommendations based on a given context
 
 `POST /v1/public/external-catalog/product-recommendations`
 
@@ -1661,7 +1699,7 @@ const { data } = await client.$getExternalCatalogProductRecommendations(
 
 ### `$productRecommendations`
 
-productRecommendations
+Get a list of product recommendations based on the search parameters.
 
 `POST /v1/public/product-recommendations`
 
@@ -1777,12 +1815,723 @@ const { data } = await client.$productRecommendations(
 
 ---
 
+### `$getConditionSets`
+
+Returns the condition sets built in for one conditional entity type: the situations a
+conditional Product, Price or Coupon is commonly varied by, ready to be copied into that
+schema's `conditions` arr
+
+`GET /v1/conditional-pricing/{slug}/condition-sets`
+
+```ts
+const { data } = await client.$getConditionSets({
+  slug: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "results": [
+    {
+      "id": "delivery_area",
+      "label": "Delivery Area",
+      "description": "string",
+      "conditions": [
+        {
+          "name": "postal_code",
+          "label": "Postal Code",
+          "type": "string",
+          "options": ["private", "commercial"],
+          "allow_any": false,
+          "format": "zipcode"
+        }
+      ]
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `$resolveConditionalEntity`
+
+Resolves which of a conditional entity's variants apply to a situation, and returns each one
+composed: the base entity overlaid with the values of the version in effect at `as_of`.
+
+`POST /v1/conditional-pricing:resolve`
+
+```ts
+const { data } = await client.$resolveConditionalEntity(
+  null,
+  {
+    schema: 'product',
+    entity_id: 'price-sp26d1yo',
+    context: {
+      postal_code: '46045',
+      consumption: {
+        lt: 5000
+      }
+    },
+    as_of: '2027-03-15T00:00:00Z',
+    options: {
+      resolve_one: false
+    }
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "results": [
+    {
+      "_id": "price-sp26d1yo",
+      "_variant_id": "var-46045",
+      "_version_valid_from": "2027-01-01T00:00:00.000Z",
+      "_conditions": {
+        "postal_code": "46045",
+        "default": false
+      }
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `$createConditionalVariant`
+
+Creates one variant of a conditional entity, together with the first version carrying its
+values. Never two calls: a variant that existed without a version would be an entity holding
+a condition tuple
+
+`POST /v1/conditional-pricing/{slug}/entities/{entity_id}/variants`
+
+```ts
+const { data } = await client.$createConditionalVariant(
+  {
+    slug: 'example',
+    entity_id: 'example',
+  },
+  {
+    conditions: {
+      postal_code: '46045'
+    },
+    default: false,
+    valid_from: '2027-01-01T00:00:00Z',
+    values: {
+      unit_amount: 2499,
+      unit_amount_decimal: '24.99'
+    }
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "variant_id": "var-46045",
+  "entity_id": "price-sp26d1yo",
+  "schema": "product",
+  "conditions": {
+    "postal_code": "46045",
+    "default": false
+  },
+  "valid_from": "2027-01-01T00:00:00.000Z",
+  "values": {
+    "unit_amount": 2499,
+    "unit_amount_decimal": "24.99"
+  },
+  "_created_at": "string",
+  "_updated_at": "string",
+  "_revision": 0,
+  "warnings": [
+    {
+      "code": "VARIANT_COUNT_APPROACHING_CAP",
+      "message": "string",
+      "variant_count": 0,
+      "cap": 0
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `$getActiveConditionalVariantVersion`
+
+Returns the version of this variant that is currently in effect — the one with the latest
+`valid_from` at or before now.
+
+`GET /v1/conditional-pricing/{slug}/entities/{entity_id}/variants/{variant_id}`
+
+```ts
+const { data } = await client.$getActiveConditionalVariantVersion({
+  slug: 'example',
+  entity_id: 'example',
+  variant_id: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "variant_id": "var-46045",
+  "entity_id": "price-sp26d1yo",
+  "schema": "product",
+  "conditions": {
+    "postal_code": "46045",
+    "default": false
+  },
+  "valid_from": "2027-01-01T00:00:00.000Z",
+  "values": {
+    "unit_amount": 2499,
+    "unit_amount_decimal": "24.99"
+  },
+  "_created_at": "string",
+  "_updated_at": "string",
+  "_revision": 3
+}
+```
+
+</details>
+
+---
+
+### `$replaceActiveConditionalVariantVersion`
+
+Replaces the values of the version currently in effect, wholesale.
+
+`PUT /v1/conditional-pricing/{slug}/entities/{entity_id}/variants/{variant_id}`
+
+```ts
+const { data } = await client.$replaceActiveConditionalVariantVersion(
+  {
+    slug: 'example',
+    entity_id: 'example',
+    variant_id: 'example',
+  },
+  {
+    values: {
+      unit_amount: 2499,
+      unit_amount_decimal: '24.99'
+    },
+    _revision: 3,
+    valid_from: 'string',
+    conditions: {
+      postal_code: '46045'
+    }
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "variant_id": "var-46045",
+  "entity_id": "price-sp26d1yo",
+  "schema": "product",
+  "conditions": {
+    "postal_code": "46045",
+    "default": false
+  },
+  "valid_from": "2027-01-01T00:00:00.000Z",
+  "values": {
+    "unit_amount": 2499,
+    "unit_amount_decimal": "24.99"
+  },
+  "_created_at": "string",
+  "_updated_at": "string",
+  "_revision": 3,
+  "warnings": [
+    {
+      "code": "ACTIVE_VERSION_REPLACED",
+      "message": "string",
+      "valid_from": "2026-08-01T00:00:00.000Z",
+      "active_valid_from": "2026-01-01T00:00:00.000Z"
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `$patchActiveConditionalVariantVersion`
+
+Changes only the fields it names on the version currently in effect.
+
+`PATCH /v1/conditional-pricing/{slug}/entities/{entity_id}/variants/{variant_id}`
+
+```ts
+const { data } = await client.$patchActiveConditionalVariantVersion(
+  {
+    slug: 'example',
+    entity_id: 'example',
+    variant_id: 'example',
+  },
+  {
+    values: {
+      unit_amount: 2499,
+      unit_amount_decimal: '24.99'
+    },
+    _revision: 3,
+    valid_from: 'string',
+    conditions: {
+      postal_code: '46045'
+    }
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "variant_id": "var-46045",
+  "entity_id": "price-sp26d1yo",
+  "schema": "product",
+  "conditions": {
+    "postal_code": "46045",
+    "default": false
+  },
+  "valid_from": "2027-01-01T00:00:00.000Z",
+  "values": {
+    "unit_amount": 2499,
+    "unit_amount_decimal": "24.99"
+  },
+  "_created_at": "string",
+  "_updated_at": "string",
+  "_revision": 3,
+  "warnings": [
+    {
+      "code": "ACTIVE_VERSION_REPLACED",
+      "message": "string",
+      "valid_from": "2026-08-01T00:00:00.000Z",
+      "active_valid_from": "2026-01-01T00:00:00.000Z"
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `$deleteConditionalVariant`
+
+Removes one variant of a conditional entity: the condition tuple it holds, its registration
+in the search index, and every version it accumulated.
+
+`DELETE /v1/conditional-pricing/{slug}/entities/{entity_id}/variants/{variant_id}`
+
+```ts
+const { data } = await client.$deleteConditionalVariant({
+  slug: 'example',
+  entity_id: 'example',
+  variant_id: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "variant_id": "var-46045",
+  "entity_id": "price-sp26d1yo",
+  "schema": "product",
+  "tuple_released": true,
+  "versions_deleted": 0
+}
+```
+
+</details>
+
+---
+
+### `$appendConditionalVariantVersion`
+
+Appends a version to a variant: a new set of values taking effect at its own instant.
+
+`POST /v1/conditional-pricing/{slug}/entities/{entity_id}/variants/{variant_id}/versions`
+
+```ts
+const { data } = await client.$appendConditionalVariantVersion(
+  {
+    slug: 'example',
+    entity_id: 'example',
+    variant_id: 'example',
+  },
+  {
+    valid_from: '2027-01-01T00:00:00Z',
+    values: {
+      unit_amount: 2499,
+      unit_amount_decimal: '24.99'
+    },
+    conditions: {
+      postal_code: '46045'
+    }
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "variant_id": "var-46045",
+  "entity_id": "price-sp26d1yo",
+  "schema": "product",
+  "conditions": {
+    "postal_code": "46045",
+    "default": false
+  },
+  "valid_from": "2027-01-01T00:00:00.000Z",
+  "values": {
+    "unit_amount": 2499,
+    "unit_amount_decimal": "24.99"
+  },
+  "_created_at": "string",
+  "_updated_at": "string",
+  "_revision": 3,
+  "warnings": [
+    {
+      "code": "ACTIVE_VERSION_REPLACED",
+      "message": "string",
+      "valid_from": "2026-08-01T00:00:00.000Z",
+      "active_valid_from": "2026-01-01T00:00:00.000Z"
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `$getConditionalVariantVersion`
+
+Returns one specific version of a variant, by the instant it takes effect — what a form editing
+that version loads.
+
+`GET /v1/conditional-pricing/{slug}/entities/{entity_id}/variants/{variant_id}/versions/{valid_from}`
+
+```ts
+const { data } = await client.$getConditionalVariantVersion({
+  slug: 'example',
+  entity_id: 'example',
+  variant_id: 'example',
+  valid_from: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "variant_id": "var-46045",
+  "entity_id": "price-sp26d1yo",
+  "schema": "product",
+  "conditions": {
+    "postal_code": "46045",
+    "default": false
+  },
+  "valid_from": "2027-01-01T00:00:00.000Z",
+  "values": {
+    "unit_amount": 2499,
+    "unit_amount_decimal": "24.99"
+  },
+  "_created_at": "string",
+  "_updated_at": "string",
+  "_revision": 3
+}
+```
+
+</details>
+
+---
+
+### `$replaceConditionalVariantVersion`
+
+Replaces one version's values wholesale, addressed by its `valid_from`.
+
+`PUT /v1/conditional-pricing/{slug}/entities/{entity_id}/variants/{variant_id}/versions/{valid_from}`
+
+```ts
+const { data } = await client.$replaceConditionalVariantVersion(
+  {
+    slug: 'example',
+    entity_id: 'example',
+    variant_id: 'example',
+    valid_from: 'example',
+  },
+  {
+    values: {
+      unit_amount: 2499,
+      unit_amount_decimal: '24.99'
+    },
+    _revision: 3,
+    valid_from: 'string',
+    conditions: {
+      postal_code: '46045'
+    }
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "variant_id": "var-46045",
+  "entity_id": "price-sp26d1yo",
+  "schema": "product",
+  "conditions": {
+    "postal_code": "46045",
+    "default": false
+  },
+  "valid_from": "2027-01-01T00:00:00.000Z",
+  "values": {
+    "unit_amount": 2499,
+    "unit_amount_decimal": "24.99"
+  },
+  "_created_at": "string",
+  "_updated_at": "string",
+  "_revision": 3,
+  "warnings": [
+    {
+      "code": "ACTIVE_VERSION_REPLACED",
+      "message": "string",
+      "valid_from": "2026-08-01T00:00:00.000Z",
+      "active_valid_from": "2026-01-01T00:00:00.000Z"
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `$patchConditionalVariantVersion`
+
+Changes only the fields it names on one version, addressed by its `valid_from`.
+
+`PATCH /v1/conditional-pricing/{slug}/entities/{entity_id}/variants/{variant_id}/versions/{valid_from}`
+
+```ts
+const { data } = await client.$patchConditionalVariantVersion(
+  {
+    slug: 'example',
+    entity_id: 'example',
+    variant_id: 'example',
+    valid_from: 'example',
+  },
+  {
+    values: {
+      unit_amount: 2499,
+      unit_amount_decimal: '24.99'
+    },
+    _revision: 3,
+    valid_from: 'string',
+    conditions: {
+      postal_code: '46045'
+    }
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "variant_id": "var-46045",
+  "entity_id": "price-sp26d1yo",
+  "schema": "product",
+  "conditions": {
+    "postal_code": "46045",
+    "default": false
+  },
+  "valid_from": "2027-01-01T00:00:00.000Z",
+  "values": {
+    "unit_amount": 2499,
+    "unit_amount_decimal": "24.99"
+  },
+  "_created_at": "string",
+  "_updated_at": "string",
+  "_revision": 3,
+  "warnings": [
+    {
+      "code": "ACTIVE_VERSION_REPLACED",
+      "message": "string",
+      "valid_from": "2026-08-01T00:00:00.000Z",
+      "active_valid_from": "2026-01-01T00:00:00.000Z"
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `$deleteConditionalVariantVersion`
+
+Removes one version of a variant.
+
+`DELETE /v1/conditional-pricing/{slug}/entities/{entity_id}/variants/{variant_id}/versions/{valid_from}`
+
+```ts
+const { data } = await client.$deleteConditionalVariantVersion({
+  slug: 'example',
+  entity_id: 'example',
+  variant_id: 'example',
+  valid_from: 'example',
+  _revision: 1,
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "variant_id": "var-46045",
+  "entity_id": "price-sp26d1yo",
+  "schema": "product",
+  "valid_from": "2027-01-01T00:00:00.000Z",
+  "warnings": [
+    {
+      "code": "ACTIVE_VERSION_REPLACED",
+      "message": "string",
+      "valid_from": "2026-08-01T00:00:00.000Z",
+      "active_valid_from": "2026-01-01T00:00:00.000Z"
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
 ## Schemas
 
 ### `IntegrationId`
 
 ```ts
 type IntegrationId = "getag" | "external-catalog"
+```
+
+### `ConditionalEntitySlug`
+
+Schema slug of an entity type that can be conditional — the `{slug}` of every
+conditional-pricing route.
+
+
+```ts
+type ConditionalEntitySlug = "product" | "price" | "coupon"
+```
+
+### `ConditionType`
+
+The kind of value a condition holds, which decides how a variant's pinned value is matched
+against a resolve context.
+
+- `string`: an arbitrary string, matched exactly and case-sensitively
+- `number`: a numeric value
+- `date`: a single date
+- `daterange`: a window with a from and an until timestamp;
+
+```ts
+type ConditionType = "string" | "number" | "date" | "daterange" | "boolean" | "select" | "location"
+```
+
+### `ConditionDefinition`
+
+One condition dimension, in the shape a schema's `conditions` array holds it — copy it in
+verbatim.
+
+
+```ts
+type ConditionDefinition = {
+  name: string
+  label: string
+  type: "string" | "number" | "date" | "daterange" | "boolean" | "select" | "location"
+  options?: Array<string | {
+    value: string
+    title?: string
+  }>
+  allow_any?: boolean
+  format?: "zipcode" | "zipcode + town"
+}
+```
+
+### `ConditionSet`
+
+A named bundle of condition definitions, built in for one entity type.
+
+```ts
+type ConditionSet = {
+  id: string
+  label: string
+  description: string
+  conditions: Array<{
+    name: string
+    label: string
+    type: "string" | "number" | "date" | "daterange" | "boolean" | "select" | "location"
+    options?: Array<string | {
+      value: { ... }
+      title?: { ... }
+    }>
+    allow_any?: boolean
+    format?: "zipcode" | "zipcode + town"
+  }>
+}
+```
+
+### `ConditionSetCatalog`
+
+```ts
+type ConditionSetCatalog = {
+  results: Array<{
+    id: string
+    label: string
+    description: string
+    conditions: Array<{
+      name: { ... }
+      label: { ... }
+      type: { ... }
+      options?: { ... }
+      allow_any?: { ... }
+      format?: { ... }
+    }>
+  }>
+}
 ```
 
 ### `ConditionalPricingErrorCode`
@@ -1794,7 +2543,286 @@ to branch on the kind of failure instead of parsing the error message.
 - `AMBIGUOUS_RESOLUTION` (409): several variants match the given con
 
 ```ts
-type ConditionalPricingErrorCode = "NOT_FOUND" | "AMBIGUOUS_RESOLUTION" | "TUPLE_CONFLICT" | "VERSION_CONFLICT" | "SUPERSEDED_VERSION" | "CONDITION_UNDEFINED" | "OPERATOR_UNSUPPORTED" | "CONTEXT_FORMAT_INVALID" | "TOO_MANY_MATCHES" | "WRITE_CONFLICT"
+type ConditionalPricingErrorCode = "NOT_FOUND" | "AMBIGUOUS_RESOLUTION" | "TUPLE_CONFLICT" | "VERSION_CONFLICT" | "CONDITION_UNDEFINED" | "OPERATOR_UNSUPPORTED" | "CONTEXT_FORMAT_INVALID" | "CONDITION_VALUE_INVALID" | "TOO_MANY_MATCHES" | "WRITE_CONFLICT"
+```
+
+### `ResolveConditionalEntityRequest`
+
+```ts
+type ResolveConditionalEntityRequest = {
+  schema: "product" | "price" | "coupon"
+  entity_id: string
+  context?: Record<string, unknown>
+  as_of?: string
+  options?: {
+    resolve_one?: boolean
+  }
+}
+```
+
+### `ResolveContext`
+
+The situation to resolve for: a flat map keyed by condition name, as the entity's schema
+declares them. A condition left out of the map is not a wildcard — it matches only variants
+that leave that condition unpinned.
+
+Each value is either an exact value, typed by its condition, or a single-operator 
+
+```ts
+type ResolveContext = Record<string, unknown>
+```
+
+### `ResolveOptions`
+
+```ts
+type ResolveOptions = {
+  resolve_one?: boolean
+}
+```
+
+### `ResolvedVariants`
+
+```ts
+type ResolvedVariants = {
+  results: Array<{
+    _id: string
+    _variant_id: string
+    _version_valid_from: string
+    _conditions: {
+      default: { ... }
+    }
+  }>
+}
+```
+
+### `ResolvedVariant`
+
+The entity as this variant leaves it — every attribute of a plain entity read, with the
+applicable version's overrides applied — plus the discriminators saying where the numbers
+came from.
+
+
+```ts
+type ResolvedVariant = {
+  _id: string
+  _variant_id: string
+  _version_valid_from: string
+  _conditions: {
+    default: boolean
+  }
+}
+```
+
+### `CreateVariantRequest`
+
+```ts
+type CreateVariantRequest = {
+  conditions?: Record<string, unknown>
+  default?: boolean
+  valid_from?: string
+  values: Record<string, unknown>
+}
+```
+
+### `VariantConditions`
+
+A variant's pinned conditions as a reader sees them: the pins the schema declares, plus a
+boolean `default` saying whether this is the entity's fallback.
+
+`default` is always present and always a boolean, so a client can branch on "did I get the
+fallback?" without knowing how one is stored. The rese
+
+```ts
+type VariantConditions = {
+  default: boolean
+}
+```
+
+### `PinnedConditions`
+
+The situation this variant applies to: a flat map keyed by condition name, as the entity's
+schema declares them. A condition left out is a wildcard — the variant applies whatever the
+context says for it, which is what makes adding a condition to a schema non-breaking for the
+variants that already ex
+
+```ts
+type PinnedConditions = Record<string, unknown>
+```
+
+### `VariantValues`
+
+The attribute values this version overrides on the base entity, keyed by attribute name.
+
+Only attributes currently declaring `overridable_attribute` are applied. Metadata fields
+(anything underscore-prefixed), readonly attributes, hidden attributes and non-overridable
+attributes present here are ig
+
+```ts
+type VariantValues = Record<string, unknown>
+```
+
+### `CreatedVariant`
+
+```ts
+type CreatedVariant = {
+  variant_id: string
+  entity_id: string
+  schema: "product" | "price" | "coupon"
+  conditions: {
+    default: boolean
+  }
+  valid_from: string
+  values: Record<string, unknown>
+  _created_at?: string
+  _updated_at?: string
+  _revision?: number
+  warnings: Array<{
+    code: "VARIANT_COUNT_APPROACHING_CAP"
+    message: string
+    variant_count?: number
+    cap?: number
+  }>
+}
+```
+
+### `VariantWriteWarning`
+
+```ts
+type VariantWriteWarning = {
+  code: "VARIANT_COUNT_APPROACHING_CAP"
+  message: string
+  variant_count?: number
+  cap?: number
+}
+```
+
+### `DeletedVariant`
+
+```ts
+type DeletedVariant = {
+  variant_id: string
+  entity_id: string
+  schema: "product" | "price" | "coupon"
+  tuple_released: boolean
+  versions_deleted: number
+}
+```
+
+### `VariantVersion`
+
+One version of one variant: the attribute overrides it carries, the instant it takes effect,
+and the variant it belongs to.
+
+These are the version's **own** overrides, not the base entity overlaid with them — this is
+what an editing screen loads and saves, and what it edits is the overrides. Composi
+
+```ts
+type VariantVersion = {
+  variant_id: string
+  entity_id: string
+  schema: "product" | "price" | "coupon"
+  conditions: {
+    default: boolean
+  }
+  valid_from: string
+  values: Record<string, unknown>
+  _created_at?: string
+  _updated_at?: string
+  _revision?: number
+}
+```
+
+### `WrittenVariantVersion`
+
+A version as a write left it, together with anything the write moved.
+
+
+```ts
+type WrittenVariantVersion = {
+  variant_id: string
+  entity_id: string
+  schema: "product" | "price" | "coupon"
+  conditions: {
+    default: boolean
+  }
+  valid_from: string
+  values: Record<string, unknown>
+  _created_at?: string
+  _updated_at?: string
+  _revision?: number
+  warnings: Array<{
+    code: "ACTIVE_VERSION_REPLACED" | "SUPERSEDED_VERSION_WRITTEN"
+    message: string
+    valid_from: string
+    active_valid_from?: string
+  }>
+}
+```
+
+### `DeletedVariantVersion`
+
+```ts
+type DeletedVariantVersion = {
+  variant_id: string
+  entity_id: string
+  schema: "product" | "price" | "coupon"
+  valid_from: string
+  warnings: Array<{
+    code: "ACTIVE_VERSION_REPLACED" | "SUPERSEDED_VERSION_WRITTEN"
+    message: string
+    valid_from: string
+    active_valid_from?: string
+  }>
+}
+```
+
+### `VersionWriteWarning`
+
+Something a version write moved. A version write is never refused for being late — backdating a
+version, and editing or deleting one that has already been superseded, are both accepted — so
+what a caller gets instead is a warning naming exactly what changed. One write can carry both
+codes.
+
+
+```ts
+type VersionWriteWarning = {
+  code: "ACTIVE_VERSION_REPLACED" | "SUPERSEDED_VERSION_WRITTEN"
+  message: string
+  valid_from: string
+  active_valid_from?: string
+}
+```
+
+### `AppendVersionRequest`
+
+```ts
+type AppendVersionRequest = {
+  valid_from?: string
+  values: Record<string, unknown>
+  conditions?: Record<string, unknown>
+}
+```
+
+### `ReplaceVersionRequest`
+
+```ts
+type ReplaceVersionRequest = {
+  values: Record<string, unknown>
+  _revision: number
+  valid_from?: string
+  conditions?: Record<string, unknown>
+}
+```
+
+### `PatchVersionRequest`
+
+```ts
+type PatchVersionRequest = {
+  values: Record<string, unknown>
+  _revision: number
+  valid_from?: string
+  conditions?: Record<string, unknown>
+}
 ```
 
 ### `Error`
@@ -1820,7 +2848,7 @@ type ConditionalPricingError = {
   status?: number
   cause?: string
   error?: string
-  code?: "NOT_FOUND" | "AMBIGUOUS_RESOLUTION" | "TUPLE_CONFLICT" | "VERSION_CONFLICT" | "SUPERSEDED_VERSION" | "CONDITION_UNDEFINED" | "OPERATOR_UNSUPPORTED" | "CONTEXT_FORMAT_INVALID" | "TOO_MANY_MATCHES" | "WRITE_CONFLICT"
+  code?: "NOT_FOUND" | "AMBIGUOUS_RESOLUTION" | "TUPLE_CONFLICT" | "VERSION_CONFLICT" | "CONDITION_UNDEFINED" | "OPERATOR_UNSUPPORTED" | "CONTEXT_FORMAT_INVALID" | "CONDITION_VALUE_INVALID" | "TOO_MANY_MATCHES" | "WRITE_CONFLICT"
   details?: Record<string, unknown>
 }
 ```
