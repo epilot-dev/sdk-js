@@ -4856,14 +4856,20 @@ export declare namespace Components {
              * }
              */
             VariantValues;
-            _created_at?: string;
-            _updated_at?: string;
+            /**
+             * When the first version was created.
+             */
+            _created_at: string;
+            /**
+             * When the first version was last written.
+             */
+            _updated_at: string;
             /**
              * The revision a later write to this version must carry to be accepted. Genuinely current,
              * unlike one read back later from an eventually-consistent read.
              *
              */
-            _revision?: number;
+            _revision: number;
             /**
              * Things worth knowing that did not stop the write. Empty in the ordinary case — a client
              * reads its length rather than branching on its absence.
@@ -10827,8 +10833,14 @@ export declare namespace Components {
              * }
              */
             VariantValues;
-            _created_at?: string;
-            _updated_at?: string;
+            /**
+             * When this version was created.
+             */
+            _created_at: string;
+            /**
+             * When this version was last written.
+             */
+            _updated_at: string;
             /**
              * The revision a write to this version must carry to be accepted. Always current: every read
              * that returns one is strongly consistent, so it is never a marker a write would be refused
@@ -10837,7 +10849,7 @@ export declare namespace Components {
              * example:
              * 3
              */
-            _revision?: number;
+            _revision: number;
         }
         export interface VariantWriteWarning {
             /**
@@ -10851,11 +10863,11 @@ export declare namespace Components {
             /**
              * Variants this entity holds, including the one just created.
              */
-            variant_count?: number;
+            variant_count: number;
             /**
              * Variants this entity may hold. Configurable per organization.
              */
-            cap?: number;
+            cap: number;
         }
         /**
          * Something a version write moved. A version write is never refused for being late — backdating a
@@ -10958,8 +10970,14 @@ export declare namespace Components {
              * }
              */
             VariantValues;
-            _created_at?: string;
-            _updated_at?: string;
+            /**
+             * When this version was created.
+             */
+            _created_at: string;
+            /**
+             * When this version was last written.
+             */
+            _updated_at: string;
             /**
              * The revision a write to this version must carry to be accepted. Always current: every read
              * that returns one is strongly consistent, so it is never a marker a write would be refused
@@ -10968,7 +10986,7 @@ export declare namespace Components {
              * example:
              * 3
              */
-            _revision?: number;
+            _revision: number;
             /**
              * What this write moved, if anything. Empty in the ordinary case — a client reads its
              * length rather than branching on its absence.

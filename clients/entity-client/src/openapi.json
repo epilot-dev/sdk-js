@@ -2,7 +2,7 @@
   "openapi": "3.0.2",
   "info": {
     "title": "Entity API",
-    "version": "2.9.0",
+    "version": "2.10.0",
     "description": "Flexible data layer for epilot Entities.\n\nUse this API configure and access your business objects like Contacts, Opportunities and Products.\n\n[Feature Documentation](https://docs.epilot.io/docs/entities/flexible-entities)\n"
   },
   "tags": [
@@ -5072,7 +5072,8 @@
               },
               "grid_layout": {
                 "type": "object",
-                "description": "Widget-grid layout for the entity-details page (builder-authored); columns/cells drive the grid geometry.",
+                "deprecated": true,
+                "description": "Superseded by `widget_widths`. A whole-grid layout preset that assigned each widget a width by its POSITION, so a widget that rendered nothing shifted every width after it. Neither the entity app nor the entity builder reads it any more; values stored before it was replaced are left in place rather than migrated.",
                 "properties": {
                   "id": {
                     "type": "string",
@@ -5107,6 +5108,23 @@
                 "example": {
                   "next_best_action": true,
                   "address_map": false
+                }
+              },
+              "widget_widths": {
+                "type": "object",
+                "description": "Per-widget width in the entity-details widget grid, keyed by widget id (a capability widget's `component`, or `summary` for the synthesized summary card). Spans a 12-column grid: `one_third_width` = 4, `half_width` = 6, `two_third_width` = 8, `full_width` = 12. Holds only the admin's deviations from each widget's declared default: a widget absent from this map falls back to its ui_hook `default_width`, and then to `full_width`. Do not seed this map from migrations — doing so would freeze today's defaults into the schema. Replaces the positional `grid_layout` preset.",
+                "additionalProperties": {
+                  "type": "string",
+                  "enum": [
+                    "one_third_width",
+                    "half_width",
+                    "two_third_width",
+                    "full_width"
+                  ]
+                },
+                "example": {
+                  "address_map": "full_width",
+                  "recent_communications": "one_third_width"
                 }
               }
             }
@@ -7577,6 +7595,17 @@
                   "description": "Whether this widget is switched on by default for entity types that have the capability. Only meaningful on the `EntityDetailsV2:Widget` hook. Defaults to true when omitted. An admin's explicit choice in the entity builder is stored in the schema's `ui_config.widget_visibility` and wins over this.",
                   "example": false
                 },
+                "default_width": {
+                  "type": "string",
+                  "enum": [
+                    "one_third_width",
+                    "half_width",
+                    "two_third_width",
+                    "full_width"
+                  ],
+                  "description": "How wide this widget is by default in the entity-details widget grid. Only meaningful on the `EntityDetailsV2:Widget` and `EntityDetailsV2:Header` hooks. Defaults to `full_width` when omitted — deliberately unlike the attribute layout default of `half_width`, because a full-width widget can never leave a hole in a row. An admin's explicit choice in the entity builder is stored in the schema's `ui_config.widget_widths` and wins over this.",
+                  "example": "half_width"
+                },
                 "pricing_tier_setting": {
                   "type": "string",
                   "description": "The pricing-tier settings key an organisation must have enabled to use this widget. Omit for widgets available to everyone. Resolved against `GET /v2/pricing-tiers/me` as `override_settings[key].enabled ?? settings[key].enabled`. Note this is commercial packaging enforced in the UI, not a security control — the key must also be added to the pricing tier settings list in epilot-admin-portal, or it can never be switched on for a tier.",
@@ -8964,6 +8993,39 @@
                 "description": "Optional array of field names to include in the hydrated entity response for this node.\nWhen specified, only the requested fields plus required internal fields (_id, _schema, _org) will be returned.\nOnly applies when hydrate=true.\n"
               }
             ]
+          },
+          "filter": {
+            "type": "array",
+            "description": "Narrows this node's traversal results to entities matching every filter (AND semantics). Useful for\ndisambiguating among multiple entities reachable via the same graph edge.\n",
+            "items": {
+              "$ref": "#/components/schemas/GraphNodeFilter"
+            }
+          }
+        }
+      },
+      "GraphNodeFilter": {
+        "type": "object",
+        "description": "Entities are included in this node's result only if `attribute` exactly equals the literal `value`.",
+        "required": [
+          "attribute",
+          "value"
+        ],
+        "properties": {
+          "attribute": {
+            "type": "string",
+            "description": "Entity attribute name to match against. Must be a plain attribute name, not an Elasticsearch field path.",
+            "example": "order_number"
+          },
+          "value": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SearchFilterValue"
+              },
+              {
+                "description": "Literal value the attribute must exactly equal for the entity to be included in this node's result."
+              }
+            ],
+            "example": "OR-113"
           }
         }
       },
