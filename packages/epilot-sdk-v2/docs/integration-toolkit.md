@@ -29,6 +29,7 @@ const { data } = await integrationToolkitClient.acknowledgeTracking(...)
 - [`triggerErp`](#triggererp)
 - [`processErpUpdatesEventsV3`](#processerpupdateseventsv3)
 - [`simulateMappingV2`](#simulatemappingv2)
+- [`simulateDirect`](#simulatedirect)
 - [`simulateMapping`](#simulatemapping)
 
 **integrations**
@@ -63,6 +64,7 @@ const { data } = await integrationToolkitClient.acknowledgeTracking(...)
 - [`setIntegrationAppMapping`](#setintegrationappmapping)
 - [`deleteIntegrationAppMapping`](#deleteintegrationappmapping)
 - [`getOutboundStatus`](#getoutboundstatus)
+- [`getEntitySyncStatus`](#getentitysyncstatus)
 - [`pollOutboundMessages`](#polloutboundmessages)
 - [`ackOutboundMessages`](#ackoutboundmessages)
 - [`listOutboundDlqMessages`](#listoutbounddlqmessages)
@@ -233,6 +235,16 @@ const { data } = await integrationToolkitClient.acknowledgeTracking(...)
 - [`MappingSimulationV2Request`](#mappingsimulationv2request)
 - [`MappingSimulationResponse`](#mappingsimulationresponse)
 - [`MappingSimulationWarning`](#mappingsimulationwarning)
+- [`DirectPayload`](#directpayload)
+- [`DirectEntityOperation`](#directentityoperation)
+- [`DirectMeterReadingOperation`](#directmeterreadingoperation)
+- [`DirectRelationValue`](#directrelationvalue)
+- [`DirectRelationItem`](#directrelationitem)
+- [`DirectRelationRefValue`](#directrelationrefvalue)
+- [`DirectRelationRefItem`](#directrelationrefitem)
+- [`DirectSimulationRequest`](#directsimulationrequest)
+- [`DirectSimulationResponse`](#directsimulationresponse)
+- [`DirectSimulationError`](#directsimulationerror)
 - [`EntityUpdate`](#entityupdate)
 - [`MeterReadingUpdate`](#meterreadingupdate)
 - [`EntityPruneScopeUpdate`](#entityprunescopeupdate)
@@ -246,6 +258,8 @@ const { data } = await integrationToolkitClient.acknowledgeTracking(...)
 - [`WebhookDeliveryConfig`](#webhookdeliveryconfig)
 - [`PollDeliveryConfig`](#polldeliveryconfig)
 - [`FileProxyDeliveryConfig`](#fileproxydeliveryconfig)
+- [`EntitySyncStatusResponse`](#entitysyncstatusresponse)
+- [`EntitySyncState`](#entitysyncstate)
 - [`OutboundStatusResponse`](#outboundstatusresponse)
 - [`OutboundUseCaseStatus`](#outboundusecasestatus)
 - [`OutboundFileProxyTargetStatus`](#outboundfileproxytargetstatus)
@@ -424,6 +438,7 @@ const { data } = await client.simulateMappingV2(
   null,
   {
     event_configuration: {
+      direct: true,
       entities: [
         { /* ... */ }
       ],
@@ -500,6 +515,89 @@ const { data } = await client.simulateMappingV2(
       "entity_schema": "string",
       "field": "string",
       "message": "string"
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `simulateDirect`
+
+Dry run for direct-mode payloads: validates a `DirectPayload` against a `direct: true`
+use case configuration and previews the internal entity and meter reading updates the
+pipeline would apply — with
+
+`POST /v1/erp/updates/direct_simulation`
+
+```ts
+const { data } = await client.simulateDirect(
+  null,
+  {
+    event_configuration: {
+      direct: true,
+      entities: [
+        { /* ... */ }
+      ],
+      meter_readings: [
+        { /* ... */ }
+      ]
+    },
+    payload: 'string'
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "valid": true,
+  "errors": [
+    {
+      "code": "DIRECT_PAYLOAD_INVALID",
+      "message": "string",
+      "operation_index": 0
+    }
+  ],
+  "warnings": [
+    {
+      "entity_schema": "string",
+      "field": "string",
+      "message": "string"
+    }
+  ],
+  "entity_updates": [
+    {
+      "entity_slug": "string",
+      "unique_identifiers": {},
+      "attributes": {},
+      "pricing": {
+        "config": {},
+        "data": [
+          {}
+        ]
+      },
+      "mode": "upsert",
+      "unique_identifiers_metadata": {}
+    }
+  ],
+  "meter_reading_updates": [
+    {
+      "meter": {
+        "$entity_unique_ids": {}
+      },
+      "meter_counter": {
+        "$entity_unique_ids": {}
+      },
+      "attributes": {},
+      "mode": "upsert",
+      "_config": {
+        "reading_matching": "external_id"
+      }
     }
   ]
 }
@@ -1133,6 +1231,7 @@ const { data } = await client.createUseCase(
     enabled: true,
     type: 'inbound',
     configuration: {
+      direct: true,
       entities: [
         { /* ... */ }
       ],
@@ -1160,6 +1259,7 @@ const { data } = await client.createUseCase(
   "created_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z",
   "configuration": {
+    "direct": true,
     "entities": [
       {}
     ],
@@ -1203,6 +1303,7 @@ const { data } = await client.getUseCase({
   "created_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z",
   "configuration": {
+    "direct": true,
     "entities": [
       {}
     ],
@@ -1236,6 +1337,7 @@ const { data } = await client.updateUseCase(
     change_description: 'string',
     type: 'inbound',
     configuration: {
+      direct: true,
       entities: [
         { /* ... */ }
       ],
@@ -1263,6 +1365,7 @@ const { data } = await client.updateUseCase(
   "created_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z",
   "configuration": {
+    "direct": true,
     "entities": [
       {}
     ],
@@ -2542,6 +2645,46 @@ const { data } = await client.getOutboundStatus({
           "unresolved_reason": "not_found"
         }
       ]
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `getEntitySyncStatus`
+
+Get the inbound ERP sync status of an entity: when each integration last
+synchronized (checked) the entity against the ERP, and when it last
+actually changed it. `last_synced_at` also advances on no-o
+
+`GET /v1/entities/{entityId}/sync-status`
+
+```ts
+const { data } = await client.getEntitySyncStatus({
+  entityId: 'example',
+  integration_id: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "entity_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "sync_states": [
+    {
+      "entity_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "integration_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "entity_slug": "contract",
+      "use_case_id": "string",
+      "last_synced_at": "1970-01-01T00:00:00.000Z",
+      "last_changed_at": "1970-01-01T00:00:00.000Z",
+      "last_operation": "create",
+      "last_event_id": "string"
     }
   ]
 }
@@ -4753,6 +4896,7 @@ type IntegrationWithUseCases = {
     created_at: string // date-time
     updated_at: string // date-time
     configuration?: {
+      direct?: { ... }
       entities?: { ... }
       meter_readings?: { ... }
     }
@@ -4908,6 +5052,7 @@ type UpsertIntegrationWithUseCasesRequest = {
     change_description?: string
     type: "inbound"
     configuration?: {
+      direct?: { ... }
       entities?: { ... }
       meter_readings?: { ... }
     }
@@ -4940,7 +5085,6 @@ type UpsertIntegrationWithUseCasesRequest = {
       params?: { ... }
       allowed_origins?: { ... }
       steps: { ... }
-      response?: { ... }
   // ...
 }
 ```
@@ -4951,6 +5095,7 @@ Configuration for inbound use cases (ERP to epilot)
 
 ```ts
 type InboundIntegrationEventConfiguration = {
+  direct?: boolean
   entities?: Array<{
     entity_schema: string
     unique_ids: string[]
@@ -4963,7 +5108,7 @@ type InboundIntegrationEventConfiguration = {
       unique_ids?: { ... }
       query?: { ... }
     }
-    fields: Array<{
+    fields?: Array<{
       attribute: { ... }
       field?: { ... }
       jsonataExpression?: { ... }
@@ -5068,7 +5213,7 @@ type IntegrationEntity = {
       constant?: { ... }
     }>
   }
-  fields: Array<{
+  fields?: Array<{
     attribute: string
     field?: string
     jsonataExpression?: string
@@ -5469,6 +5614,7 @@ type EmbeddedUseCaseRequest = {
   change_description?: string
   type: "inbound"
   configuration?: {
+    direct?: boolean
     entities?: Array<{
       entity_schema: { ... }
       unique_ids: { ... }
@@ -5476,7 +5622,7 @@ type EmbeddedUseCaseRequest = {
       enabled?: { ... }
       mode?: { ... }
       scope?: { ... }
-      fields: { ... }
+      fields?: { ... }
     }>
     meter_readings?: Array<{
       jsonataExpression?: { ... }
@@ -5560,7 +5706,6 @@ type EmbeddedUseCaseRequest = {
     }>
     response?: {
       body: { ... }
-      encoding: { ... }
   // ...
 }
 ```
@@ -5588,6 +5733,7 @@ type EmbeddedInboundUseCaseRequest = {
   change_description?: string
   type: "inbound"
   configuration?: {
+    direct?: boolean
     entities?: Array<{
       entity_schema: { ... }
       unique_ids: { ... }
@@ -5595,7 +5741,7 @@ type EmbeddedInboundUseCaseRequest = {
       enabled?: { ... }
       mode?: { ... }
       scope?: { ... }
-      fields: { ... }
+      fields?: { ... }
     }>
     meter_readings?: Array<{
       jsonataExpression?: { ... }
@@ -5774,6 +5920,7 @@ type InboundUseCase = {
   created_at: string // date-time
   updated_at: string // date-time
   configuration?: {
+    direct?: boolean
     entities?: Array<{
       entity_schema: { ... }
       unique_ids: { ... }
@@ -5781,7 +5928,7 @@ type InboundUseCase = {
       enabled?: { ... }
       mode?: { ... }
       scope?: { ... }
-      fields: { ... }
+      fields?: { ... }
     }>
     meter_readings?: Array<{
       jsonataExpression?: { ... }
@@ -5964,6 +6111,7 @@ type UseCase = {
   created_at: string // date-time
   updated_at: string // date-time
   configuration?: {
+    direct?: boolean
     entities?: Array<{
       entity_schema: { ... }
       unique_ids: { ... }
@@ -5971,7 +6119,7 @@ type UseCase = {
       enabled?: { ... }
       mode?: { ... }
       scope?: { ... }
-      fields: { ... }
+      fields?: { ... }
     }>
     meter_readings?: Array<{
       jsonataExpression?: { ... }
@@ -6051,7 +6199,6 @@ type UseCase = {
       required: { ... }
       description?: { ... }
     }>
-    allowed_origins?: string // uri[]
   // ...
 }
 ```
@@ -6065,6 +6212,7 @@ type CreateUseCaseRequest = {
   enabled: boolean
   type: "inbound"
   configuration?: {
+    direct?: boolean
     entities?: Array<{
       entity_schema: { ... }
       unique_ids: { ... }
@@ -6072,7 +6220,7 @@ type CreateUseCaseRequest = {
       enabled?: { ... }
       mode?: { ... }
       scope?: { ... }
-      fields: { ... }
+      fields?: { ... }
     }>
     meter_readings?: Array<{
       jsonataExpression?: { ... }
@@ -6158,7 +6306,6 @@ type CreateUseCaseRequest = {
     }
     prevent_indirect_serving?: boolean
   }
-} | {
   // ...
 }
 ```
@@ -6182,6 +6329,7 @@ type CreateInboundUseCaseRequest = {
   enabled: boolean
   type: "inbound"
   configuration?: {
+    direct?: boolean
     entities?: Array<{
       entity_schema: { ... }
       unique_ids: { ... }
@@ -6189,7 +6337,7 @@ type CreateInboundUseCaseRequest = {
       enabled?: { ... }
       mode?: { ... }
       scope?: { ... }
-      fields: { ... }
+      fields?: { ... }
     }>
     meter_readings?: Array<{
       jsonataExpression?: { ... }
@@ -6338,6 +6486,7 @@ type UpdateUseCaseRequest = {
   change_description?: string
   type?: "inbound"
   configuration?: {
+    direct?: boolean
     entities?: Array<{
       entity_schema: { ... }
       unique_ids: { ... }
@@ -6345,7 +6494,7 @@ type UpdateUseCaseRequest = {
       enabled?: { ... }
       mode?: { ... }
       scope?: { ... }
-      fields: { ... }
+      fields?: { ... }
     }>
     meter_readings?: Array<{
       jsonataExpression?: { ... }
@@ -6430,7 +6579,6 @@ type UpdateUseCaseRequest = {
       encoding: { ... }
       filename?: { ... }
       content_type?: { ... }
-    }
   // ...
 }
 ```
@@ -6456,6 +6604,7 @@ type UpdateInboundUseCaseRequest = {
   change_description?: string
   type?: "inbound"
   configuration?: {
+    direct?: boolean
     entities?: Array<{
       entity_schema: { ... }
       unique_ids: { ... }
@@ -6463,7 +6612,7 @@ type UpdateInboundUseCaseRequest = {
       enabled?: { ... }
       mode?: { ... }
       scope?: { ... }
-      fields: { ... }
+      fields?: { ... }
     }>
     meter_readings?: Array<{
       jsonataExpression?: { ... }
@@ -6627,6 +6776,7 @@ type UseCaseHistoryEntry = {
   history_created_at: string // date-time
   type: "inbound"
   configuration?: {
+    direct?: boolean
     entities?: Array<{
       entity_schema: { ... }
       unique_ids: { ... }
@@ -6634,7 +6784,7 @@ type UseCaseHistoryEntry = {
       enabled?: { ... }
       mode?: { ... }
       scope?: { ... }
-      fields: { ... }
+      fields?: { ... }
     }>
     meter_readings?: Array<{
       jsonataExpression?: { ... }
@@ -6712,7 +6862,6 @@ type UseCaseHistoryEntry = {
       body_params?: { ... }
       headers?: { ... }
       query_params?: { ... }
-    }
   // ...
 }
 ```
@@ -6752,6 +6901,7 @@ type InboundUseCaseHistoryEntry = {
   history_created_at: string // date-time
   type: "inbound"
   configuration?: {
+    direct?: boolean
     entities?: Array<{
       entity_schema: { ... }
       unique_ids: { ... }
@@ -6759,7 +6909,7 @@ type InboundUseCaseHistoryEntry = {
       enabled?: { ... }
       mode?: { ... }
       scope?: { ... }
-      fields: { ... }
+      fields?: { ... }
     }>
     meter_readings?: Array<{
       jsonataExpression?: { ... }
@@ -7534,6 +7684,7 @@ making it easier to test configurations before saving them.
 ```ts
 type MappingSimulationV2Request = {
   event_configuration: {
+    direct?: boolean
     entities?: Array<{
       entity_schema: { ... }
       unique_ids: { ... }
@@ -7541,7 +7692,7 @@ type MappingSimulationV2Request = {
       enabled?: { ... }
       mode?: { ... }
       scope?: { ... }
-      fields: { ... }
+      fields?: { ... }
     }>
     meter_readings?: Array<{
       jsonataExpression?: { ... }
@@ -7618,6 +7769,347 @@ type MappingSimulationWarning = {
   entity_schema: string
   field: string
   message: string
+}
+```
+
+### `DirectPayload`
+
+The payload of an ERP event routed to a `direct: true` use case: a versioned envelope of
+pre-mapped operations that skip the mapping engine. Sent as the `payload` of an
+`ErpEventV3` - either as a JSON object or as a JSON string (`format` must be `json`;
+XML is rejected for direct use cases).
+
+The sc
+
+```ts
+type DirectPayload = {
+  version: "1"
+  operations: Array<{
+    type?: "entity"
+    entity_slug: string
+    unique_ids: Record<string, string | number>
+    unique_id_types?: Record<string, "email" | "phone">
+    mode?: "upsert" | "delete" | "purge"
+    attributes?: Record<string, {
+      $relation: { ... }
+    } | {
+      $relation_ref: { ... }
+    } | unknown>
+  } | {
+    type: "meter_reading"
+    meter: {
+      unique_ids: { ... }
+    }
+    counter?: {
+      unique_ids: { ... }
+    }
+    mode?: "upsert" | "delete"
+    reading_matching?: "external_id" | "strict-date"
+    attributes: {
+      external_id: { ... }
+      timestamp: { ... }
+      source: { ... }
+      value: { ... }
+    }
+  }>
+}
+```
+
+### `DirectEntityOperation`
+
+A single pre-mapped entity operation: upserts, soft-deletes, or purges one entity,
+identified by its unique ids. Produces the same internal update as a mapped-mode entity
+configuration, so create-vs-update resolution, relation resolution, ordering, and
+monitoring behave identically.
+
+
+```ts
+type DirectEntityOperation = {
+  type?: "entity"
+  entity_slug: string
+  unique_ids: Record<string, string | number>
+  unique_id_types?: Record<string, "email" | "phone">
+  mode?: "upsert" | "delete" | "purge"
+  attributes?: Record<string, {
+    $relation: Array<{
+      entity_id?: { ... }
+      schema?: { ... }
+      unique_ids?: { ... }
+      unique_id_types?: { ... }
+      tags?: { ... }
+    }> | {
+      _set?: { ... }
+      _append?: { ... }
+      _append_all?: { ... }
+    }
+  } | {
+    $relation_ref: Array<{
+      schema: { ... }
+      unique_ids: { ... }
+      unique_id_types?: { ... }
+      path: { ... }
+      value: { ... }
+    }> | {
+      _set?: { ... }
+      _append?: { ... }
+      _append_all?: { ... }
+    }
+  } | unknown>
+}
+```
+
+### `DirectMeterReadingOperation`
+
+A single pre-mapped meter reading operation: upserts or deletes one reading on a meter
+(and optionally a specific counter), identified by their unique ids. Produces the same
+internal update as a mapped-mode meter reading configuration.
+
+
+```ts
+type DirectMeterReadingOperation = {
+  type: "meter_reading"
+  meter: {
+    unique_ids: Record<string, string | number>
+  }
+  counter?: {
+    unique_ids: Record<string, string | number>
+  }
+  mode?: "upsert" | "delete"
+  reading_matching?: "external_id" | "strict-date"
+  attributes: {
+    external_id: string | number
+    timestamp: string
+    source: "ECP" | "ERP" | "360" | "journey-submission"
+    value: number | string
+  }
+}
+```
+
+### `DirectRelationValue`
+
+An entity attribute value that establishes relations to other entities. Written on any
+attribute inside a direct entity operation's `attributes`.
+
+Two forms are accepted: a bare array of items (shorthand for `_set`, i.e. replace), or
+an object with EXACTLY ONE of the operations `_set` (replace), `_a
+
+```ts
+type DirectRelationValue = {
+  $relation: Array<{
+    entity_id?: string
+    schema?: string
+    unique_ids?: Record<string, string | number>
+    unique_id_types?: Record<string, "email" | "phone">
+    tags?: string[]
+  }> | {
+    _set?: Array<{
+      entity_id?: { ... }
+      schema?: { ... }
+      unique_ids?: { ... }
+      unique_id_types?: { ... }
+      tags?: { ... }
+    }>
+    _append?: Array<{
+      entity_id?: { ... }
+      schema?: { ... }
+      unique_ids?: { ... }
+      unique_id_types?: { ... }
+      tags?: { ... }
+    }>
+    _append_all?: Array<{
+      entity_id?: { ... }
+      schema?: { ... }
+      unique_ids?: { ... }
+      unique_id_types?: { ... }
+      tags?: { ... }
+    }>
+  }
+}
+```
+
+### `DirectRelationItem`
+
+One relation target: either an already-resolved reference (`entity_id`), or a lookup by
+unique ids (`schema` + `unique_ids`, resolved by the pipeline like any other unique-id
+lookup, including stub creation and retry when the target does not exist yet). The two
+forms are mutually exclusive. Use `_id
+
+```ts
+type DirectRelationItem = {
+  entity_id?: string
+  schema?: string
+  unique_ids?: Record<string, string | number>
+  unique_id_types?: Record<string, "email" | "phone">
+  tags?: string[]
+}
+```
+
+### `DirectRelationRefValue`
+
+An entity attribute value that references an ITEM INSIDE a repeatable attribute of
+another entity - for example one address out of a contact's `address` list. The target
+entity is looked up by unique ids, then the item at `path` matching `value` is
+referenced (creating it when missing).
+
+The same op
+
+```ts
+type DirectRelationRefValue = {
+  $relation_ref: Array<{
+    schema: string
+    unique_ids: Record<string, string | number>
+    unique_id_types?: Record<string, "email" | "phone">
+    path: string
+    value: unknown
+  }> | {
+    _set?: Array<{
+      schema: { ... }
+      unique_ids: { ... }
+      unique_id_types?: { ... }
+      path: { ... }
+      value: { ... }
+    }>
+    _append?: Array<{
+      schema: { ... }
+      unique_ids: { ... }
+      unique_id_types?: { ... }
+      path: { ... }
+      value: { ... }
+    }>
+    _append_all?: Array<{
+      schema: { ... }
+      unique_ids: { ... }
+      unique_id_types?: { ... }
+      path: { ... }
+      value: { ... }
+    }>
+  }
+}
+```
+
+### `DirectRelationRefItem`
+
+One relation-ref target - the entity to look up, and the repeatable item to reference on it.
+
+```ts
+type DirectRelationRefItem = {
+  schema: string
+  unique_ids: Record<string, string | number>
+  unique_id_types?: Record<string, "email" | "phone">
+  path: string
+  value: unknown
+}
+```
+
+### `DirectSimulationRequest`
+
+Request for a direct-mode dry run: the `direct: true` use case configuration to test
+against, and the payload to validate and translate.
+
+
+```ts
+type DirectSimulationRequest = {
+  event_configuration: {
+    direct?: boolean
+    entities?: Array<{
+      entity_schema: { ... }
+      unique_ids: { ... }
+      jsonataExpression?: { ... }
+      enabled?: { ... }
+      mode?: { ... }
+      scope?: { ... }
+      fields?: { ... }
+    }>
+    meter_readings?: Array<{
+      jsonataExpression?: { ... }
+      reading_matching?: { ... }
+      mode?: { ... }
+      scope?: { ... }
+      meter: { ... }
+      meter_counter?: { ... }
+      fields: { ... }
+    }>
+  }
+  payload: string | {
+    version: "1"
+    operations: Array<{
+      type?: { ... }
+      entity_slug: { ... }
+      unique_ids: { ... }
+      unique_id_types?: { ... }
+      mode?: { ... }
+      attributes?: { ... }
+    } | {
+      type: { ... }
+      meter: { ... }
+      counter?: { ... }
+      mode?: { ... }
+      reading_matching?: { ... }
+      attributes: { ... }
+    }>
+  }
+}
+```
+
+### `DirectSimulationResponse`
+
+Result of a direct-mode dry run. `valid: false` responses list EVERY violation found
+across all operations in `errors`. `valid: true` responses preview the internal updates
+the pipeline would apply, plus non-blocking `warnings`.
+
+
+```ts
+type DirectSimulationResponse = {
+  valid: boolean
+  errors: Array<{
+    code: "DIRECT_PAYLOAD_INVALID" | "DIRECT_VERSION_UNSUPPORTED" | "DIRECT_ENTITY_NOT_ALLOWED"
+    message: string
+    operation_index?: number
+  }>
+  warnings?: Array<{
+    entity_schema: string
+    field: string
+    message: string
+  }>
+  entity_updates?: Array<{
+    entity_slug: string
+    unique_identifiers: Record<string, unknown>
+    attributes: Record<string, unknown>
+    pricing?: {
+      config: { ... }
+      data: { ... }
+    }
+    mode: "upsert" | "delete" | "purge"
+    unique_identifiers_metadata?: Record<string, {
+      fieldType?: { ... }
+      index?: { ... }
+    }>
+  }>
+  meter_reading_updates?: Array<{
+    meter: {
+      $entity_unique_ids: { ... }
+    }
+    meter_counter?: {
+      $entity_unique_ids?: { ... }
+    }
+    attributes: Record<string, unknown>
+    mode: "upsert" | "delete"
+    _config?: {
+      reading_matching?: { ... }
+    }
+  }>
+}
+```
+
+### `DirectSimulationError`
+
+One validation error found during a direct-mode dry run.
+
+```ts
+type DirectSimulationError = {
+  code: "DIRECT_PAYLOAD_INVALID" | "DIRECT_VERSION_UNSUPPORTED" | "DIRECT_ENTITY_NOT_ALLOWED"
+  message: string
+  operation_index?: number
 }
 ```
 
@@ -7732,6 +8224,7 @@ type IntegrationConfigurationV2 = {
   version: "2.0"
   mapping: {
     events: Record<string, {
+      direct?: { ... }
       entities?: { ... }
       meter_readings?: { ... }
     }>
@@ -7827,6 +8320,39 @@ which items to fan out over (`fan_out`), wh
 type FileProxyDeliveryConfig = {
   type: "file_proxy"
   use_case_slug: string
+}
+```
+
+### `EntitySyncStatusResponse`
+
+```ts
+type EntitySyncStatusResponse = {
+  entity_id: string // uuid
+  sync_states: Array<{
+    entity_id: string // uuid
+    integration_id: string // uuid
+    entity_slug: string
+    use_case_id?: string
+    last_synced_at: string // date-time
+    last_changed_at?: string // date-time
+    last_operation: "create" | "patch" | "delete" | "no-op"
+    last_event_id?: string
+  }>
+}
+```
+
+### `EntitySyncState`
+
+```ts
+type EntitySyncState = {
+  entity_id: string // uuid
+  integration_id: string // uuid
+  entity_slug: string
+  use_case_id?: string
+  last_synced_at: string // date-time
+  last_changed_at?: string // date-time
+  last_operation: "create" | "patch" | "delete" | "no-op"
+  last_event_id?: string
 }
 ```
 
