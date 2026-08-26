@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Integration Toolkit API",
-    "version": "1.21.0",
+    "version": "1.22.0",
     "description": "API for integrating with external systems in a standardised way."
   },
   "tags": [
@@ -5500,6 +5500,13 @@
             "description": "Optional per-event ordering group. Overrides the request-level `group_id` for THIS event; when absent, the event inherits the request-level `group_id` (or the default strict per-integration ordering). Use it when a single batch carries events for unrelated business objects that may be processed in parallel. See the request-level `group_id` for semantics.\n",
             "maxLength": 128,
             "example": "customer-42"
+          },
+          "correlation_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255,
+            "description": "Optional per-event trace id. Overrides the request-level `correlation_id` for THIS event, so a batch carrying several distinct business operations keeps its traces segregated in monitoring instead of merged under one request-level id. When absent, the event inherits the request-level `correlation_id`.\n",
+            "example": "customer-42-sync-2026-08-26"
           }
         }
       },
@@ -8888,16 +8895,11 @@
         "properties": {
           "version": {
             "type": "string",
-            "enum": [
-              "1"
-            ],
-            "description": "Version of the direct payload contract. Currently only `\"1\"` is supported; an\nunsupported version is rejected with `DIRECT_VERSION_UNSUPPORTED`.\n"
+            "description": "Version of the direct payload contract. Currently only `\"1\"` is supported; an\nunsupported version is rejected with `DIRECT_VERSION_UNSUPPORTED`. Deliberately not\nan enum: the constraint is enforced by the handler so the dry-run endpoint returns\na structured `valid: false` verdict instead of a schema-level 400.\n"
           },
           "operations": {
             "type": "array",
-            "minItems": 1,
-            "maxItems": 100,
-            "description": "The operations to apply, in order. At most 100 operations per event. Each item is\neither an entity operation (`type` omitted or `\"entity\"`) or a meter reading\noperation (`type: \"meter_reading\"`).\n",
+            "description": "The operations to apply, in order. At most 100 operations per event (enforced by\nthe handler, with a structured error naming the limit). Each item is either an\nentity operation (`type` omitted or `\"entity\"`) or a meter reading operation\n(`type: \"meter_reading\"`).\n",
             "items": {
               "anyOf": [
                 {
@@ -9996,12 +9998,11 @@
       },
       "EntitySyncState": {
         "type": "object",
+        "description": "Inbound sync state of one entity for one integration. Carries two\nindependent groups: the entity-level fields (`last_synced_at`, …) and,\non meter/meter_counter entities, the readings-level fields\n(`readings_last_synced_at`, …). Either group can be present alone — a\nmeter whose readings sync via the ERP but whose entity was never\nitself inbound-mapped carries only the readings group.\n",
         "required": [
           "entity_id",
           "integration_id",
-          "entity_slug",
-          "last_synced_at",
-          "last_operation"
+          "entity_slug"
         ],
         "properties": {
           "entity_id": {
@@ -10046,6 +10047,23 @@
           "last_event_id": {
             "type": "string",
             "description": "The event ID of the most recent inbound sync check"
+          },
+          "readings_last_synced_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Last time meter readings for this meter/meter_counter entity were\nreceived and processed from the ERP. Only present on meter and\nmeter_counter entities. The metering path cannot detect no-ops,\nso there is no separate readings changed-at.\n"
+          },
+          "readings_last_operation": {
+            "type": "string",
+            "enum": [
+              "upsert",
+              "delete"
+            ],
+            "description": "Outcome of the most recent inbound readings sync"
+          },
+          "readings_last_event_id": {
+            "type": "string",
+            "description": "The event ID of the most recent inbound readings sync"
           }
         }
       },
