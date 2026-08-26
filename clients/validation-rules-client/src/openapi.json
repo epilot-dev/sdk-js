@@ -2050,7 +2050,7 @@
       },
       "Operator": {
         "type": "string",
-        "description": "Predefined comparison operator. Compatibility (enforced at write time):\n- number: equal, notEqual, greaterThan, greaterThanInclusive, lessThan, lessThanInclusive, between, regexMatch\n- date: dateBefore, dateOnOrBefore, dateAfter, dateOnOrAfter, dateBetween, notInFuture, notInPast, regexMatch\n- text: equal, notEqual, contains, doesNotContain, startsWith, endsWith, regexMatch, lengthBetween,\n  greaterThan, greaterThanInclusive, lessThan, lessThanInclusive, between\nRange operators (between, dateBetween, lengthBetween) require a `range` value;\nunary operators (notInFuture, notInPast) require a `none` value; all others require a scalar value.\nregexMatch validates the raw input string's format and always takes a static string pattern.\nNumeric comparison operators on text rules parse the input as a number at evaluation time\n(free-text fields often hold numbers); unparsable input fails the condition.\n",
+        "description": "Predefined comparison operator. Compatibility (enforced at write time):\n- number: equal, notEqual, greaterThan, greaterThanInclusive, lessThan, lessThanInclusive, between, regexMatch,\n  maxDigits, maxDecimals\n- date: dateBefore, dateOnOrBefore, dateAfter, dateOnOrAfter, dateBetween, notInFuture, notInPast, regexMatch\n- text: equal, notEqual, contains, doesNotContain, startsWith, endsWith, regexMatch, lengthBetween,\n  greaterThan, greaterThanInclusive, lessThan, lessThanInclusive, between, maxDigits, maxDecimals\nRange operators (between, dateBetween, lengthBetween) require a `range` value;\nunary operators (notInFuture, notInPast) require a `none` value; all others require a scalar value.\nregexMatch validates the raw input string's format and always takes a static string pattern.\nNumeric comparison operators on text rules parse the input as a number at evaluation time\n(free-text fields often hold numbers); unparsable input fails the condition.\nmaxDigits limits how many digits the written input may contain in total (grouping\nseparators, sign and the decimal separator are not counted); maxDecimals limits how many\ndigits may follow the decimal separator. Both take a non-negative integer comparison value\nand, like the other numeric operators, are also allowed on text rules.\n",
         "enum": [
           "equal",
           "notEqual",
@@ -2071,7 +2071,9 @@
           "startsWith",
           "endsWith",
           "regexMatch",
-          "lengthBetween"
+          "lengthBetween",
+          "maxDigits",
+          "maxDecimals"
         ]
       },
       "ConditionValue": {
@@ -2355,5 +2357,9 @@
       }
     }
   },
-  "servers": []
+  "servers": [
+    {
+      "url": "https://validation-rules.sls.epilot.io"
+    }
+  ]
 }
