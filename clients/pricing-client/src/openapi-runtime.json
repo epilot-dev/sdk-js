@@ -431,6 +431,305 @@
         },
         "responses": {}
       }
+    },
+    "/v1/conditional-pricing/{slug}/condition-sets": {
+      "get": {
+        "operationId": "$getConditionSets",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/conditional-pricing:resolve": {
+      "post": {
+        "operationId": "$resolveConditionalEntity",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/conditional-pricing/{slug}/entities/{entity_id}/variants": {
+      "post": {
+        "operationId": "$createConditionalVariant",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/conditional-pricing/{slug}/entities/{entity_id}/variants/{variant_id}": {
+      "get": {
+        "operationId": "$getActiveConditionalVariantVersion",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "variant_id",
+            "required": true
+          }
+        ],
+        "responses": {}
+      },
+      "put": {
+        "operationId": "$replaceActiveConditionalVariantVersion",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "variant_id",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "patch": {
+        "operationId": "$patchActiveConditionalVariantVersion",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "variant_id",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "$deleteConditionalVariant",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "variant_id",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/conditional-pricing/{slug}/entities/{entity_id}/variants/{variant_id}/versions": {
+      "post": {
+        "operationId": "$appendConditionalVariantVersion",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "variant_id",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/conditional-pricing/{slug}/entities/{entity_id}/variants/{variant_id}/versions/{valid_from}": {
+      "get": {
+        "operationId": "$getConditionalVariantVersion",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "variant_id",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "valid_from",
+            "required": true
+          }
+        ],
+        "responses": {}
+      },
+      "put": {
+        "operationId": "$replaceConditionalVariantVersion",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "variant_id",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "valid_from",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "patch": {
+        "operationId": "$patchConditionalVariantVersion",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "variant_id",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "valid_from",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "$deleteConditionalVariantVersion",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "variant_id",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "valid_from",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "_revision",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
     }
   },
   "components": {}
