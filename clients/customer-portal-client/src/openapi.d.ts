@@ -9667,7 +9667,7 @@ declare namespace Components {
             /**
              * Intervals supported for the current context. If omitted, all intervals are assumed supported.
              */
-            intervals?: ("PT15M" | "PT1H" | "P1D" | "P1M")[];
+            intervals?: ("PT15M" | "PT1H" | "P1D" | "P1M" | "P1Y")[];
             data_range?: /* Earliest / latest timestamps for which data is available in the current context. */ VisualizationDataRange;
         }
         export interface VisualizationTypeOption {
@@ -11358,7 +11358,7 @@ declare namespace Paths {
             export type ExtensionId = string;
             export type From = string; // date-time
             export type HookId = string;
-            export type Interval = "PT15M" | "PT1H" | "P1D" | "P1M";
+            export type Interval = "PT15M" | "PT1H" | "P1D" | "P1M" | "P1Y";
             export type MeterId = string;
             export type To = string; // date-time
         }
@@ -11715,7 +11715,7 @@ declare namespace Paths {
             export type ExtensionId = string;
             export type From = string; // date-time
             export type HookId = string;
-            export type Interval = "PT15M" | "PT1H" | "P1D" | "P1M";
+            export type Interval = "PT15M" | "PT1H" | "P1D" | "P1M" | "P1Y";
             export type MeterId = string;
             export type To = string; // date-time
         }
@@ -14583,7 +14583,7 @@ declare namespace Paths {
             export type ExtensionId = string;
             export type From = string; // date-time
             export type HookId = string;
-            export type Interval = "PT15M" | "PT1H" | "P1D" | "P1M";
+            export type Interval = "PT15M" | "PT1H" | "P1D" | "P1M" | "P1Y";
             export type MeterId = string;
             export type To = string; // date-time
         }

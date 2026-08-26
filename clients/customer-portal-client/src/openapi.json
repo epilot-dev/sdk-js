@@ -961,7 +961,8 @@
                 "PT15M",
                 "PT1H",
                 "P1D",
-                "P1M"
+                "P1M",
+                "P1Y"
               ]
             },
             "required": true,
@@ -1299,7 +1300,8 @@
                 "PT15M",
                 "PT1H",
                 "P1D",
-                "P1M"
+                "P1M",
+                "P1Y"
               ]
             },
             "required": true,
@@ -1473,7 +1475,8 @@
                 "PT15M",
                 "PT1H",
                 "P1D",
-                "P1M"
+                "P1M",
+                "P1Y"
               ]
             },
             "required": true,
@@ -16578,7 +16581,8 @@
                 "PT15M",
                 "PT1H",
                 "P1D",
-                "P1M"
+                "P1M",
+                "P1Y"
               ]
             }
           },
