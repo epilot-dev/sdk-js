@@ -40,11 +40,15 @@ export interface Cart extends Amounts {
    */
   org_id?: string;
   /**
-   * The status of the Cart:
-   * - open - the cart checkout is still in progress. Payment processing has not started
-   * - complete - the cart checkout is complete. Payment processing may still be in progress
-   * - expired - the cart checkout has expired. No further processing will occur
+   * The status of the Cart, using the shared Order status values:
    *
+   * | status      | description |
+   * |-------------|-------|
+   * | `draft`     | Starting state for all orders, at this point we can still edit the order |
+   * | `quote`     | The order is in a quoting phase, bound to an expiration date |
+   * | `placed`    | The order has been paid and can now be fulfilled (shipped, delivered, complete) or canceled |
+   * | `cancelled` | The order has been cancelled |
+   * | `completed` | The order is now closed and finalized |
    */
   status?: OrderStatus;
   customer?: Customer;
