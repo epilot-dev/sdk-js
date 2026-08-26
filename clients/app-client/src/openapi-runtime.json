@@ -490,6 +490,24 @@
         "responses": {}
       }
     },
+    "/v1/app/{appId}/options/resolve": {
+      "post": {
+        "operationId": "resolveOptions",
+        "parameters": [
+          {
+            "name": "appId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v1/app-events": {
       "post": {
         "operationId": "ingestEvent",
