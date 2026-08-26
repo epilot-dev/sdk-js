@@ -4773,6 +4773,9 @@
           "conditions",
           "valid_from",
           "values",
+          "_created_at",
+          "_updated_at",
+          "_revision",
           "warnings"
         ],
         "properties": {
@@ -4805,14 +4808,19 @@
             "$ref": "#/components/schemas/VariantValues"
           },
           "_created_at": {
-            "type": "string"
+            "type": "string",
+            "description": "When the first version was created.",
+            "readOnly": true
           },
           "_updated_at": {
-            "type": "string"
+            "type": "string",
+            "description": "When the first version was last written.",
+            "readOnly": true
           },
           "_revision": {
             "type": "number",
-            "description": "The revision a later write to this version must carry to be accepted. Genuinely current,\nunlike one read back later from an eventually-consistent read.\n"
+            "description": "The revision a later write to this version must carry to be accepted. Genuinely current,\nunlike one read back later from an eventually-consistent read.\n",
+            "readOnly": true
           },
           "warnings": {
             "type": "array",
@@ -4827,7 +4835,9 @@
         "type": "object",
         "required": [
           "code",
-          "message"
+          "message",
+          "variant_count",
+          "cap"
         ],
         "properties": {
           "code": {
@@ -4890,7 +4900,10 @@
           "schema",
           "conditions",
           "valid_from",
-          "values"
+          "values",
+          "_created_at",
+          "_updated_at",
+          "_revision"
         ],
         "properties": {
           "variant_id": {
@@ -4921,14 +4934,19 @@
             "$ref": "#/components/schemas/VariantValues"
           },
           "_created_at": {
-            "type": "string"
+            "type": "string",
+            "description": "When this version was created.",
+            "readOnly": true
           },
           "_updated_at": {
-            "type": "string"
+            "type": "string",
+            "description": "When this version was last written.",
+            "readOnly": true
           },
           "_revision": {
             "type": "integer",
             "description": "The revision a write to this version must carry to be accepted. Always current: every read\nthat returns one is strongly consistent, so it is never a marker a write would be refused\nfor having read too early.\n",
+            "readOnly": true,
             "example": 3
           }
         }
