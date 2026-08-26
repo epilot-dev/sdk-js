@@ -61,15 +61,20 @@ export declare namespace Components {
             id: string;
             operator: /**
              * Predefined comparison operator. Compatibility (enforced at write time):
-             * - number: equal, notEqual, greaterThan, greaterThanInclusive, lessThan, lessThanInclusive, between, regexMatch
+             * - number: equal, notEqual, greaterThan, greaterThanInclusive, lessThan, lessThanInclusive, between, regexMatch,
+             *   maxDigits, maxDecimals
              * - date: dateBefore, dateOnOrBefore, dateAfter, dateOnOrAfter, dateBetween, notInFuture, notInPast, regexMatch
              * - text: equal, notEqual, contains, doesNotContain, startsWith, endsWith, regexMatch, lengthBetween,
-             *   greaterThan, greaterThanInclusive, lessThan, lessThanInclusive, between
+             *   greaterThan, greaterThanInclusive, lessThan, lessThanInclusive, between, maxDigits, maxDecimals
              * Range operators (between, dateBetween, lengthBetween) require a `range` value;
              * unary operators (notInFuture, notInPast) require a `none` value; all others require a scalar value.
              * regexMatch validates the raw input string's format and always takes a static string pattern.
              * Numeric comparison operators on text rules parse the input as a number at evaluation time
              * (free-text fields often hold numbers); unparsable input fails the condition.
+             * maxDigits limits how many digits the written input may contain in total (grouping
+             * separators, sign and the decimal separator are not counted); maxDecimals limits how many
+             * digits may follow the decimal separator. Both take a non-negative integer comparison value
+             * and, like the other numeric operators, are also allowed on text rules.
              *
              */
             Operator;
@@ -330,18 +335,23 @@ export declare namespace Components {
         }
         /**
          * Predefined comparison operator. Compatibility (enforced at write time):
-         * - number: equal, notEqual, greaterThan, greaterThanInclusive, lessThan, lessThanInclusive, between, regexMatch
+         * - number: equal, notEqual, greaterThan, greaterThanInclusive, lessThan, lessThanInclusive, between, regexMatch,
+         *   maxDigits, maxDecimals
          * - date: dateBefore, dateOnOrBefore, dateAfter, dateOnOrAfter, dateBetween, notInFuture, notInPast, regexMatch
          * - text: equal, notEqual, contains, doesNotContain, startsWith, endsWith, regexMatch, lengthBetween,
-         *   greaterThan, greaterThanInclusive, lessThan, lessThanInclusive, between
+         *   greaterThan, greaterThanInclusive, lessThan, lessThanInclusive, between, maxDigits, maxDecimals
          * Range operators (between, dateBetween, lengthBetween) require a `range` value;
          * unary operators (notInFuture, notInPast) require a `none` value; all others require a scalar value.
          * regexMatch validates the raw input string's format and always takes a static string pattern.
          * Numeric comparison operators on text rules parse the input as a number at evaluation time
          * (free-text fields often hold numbers); unparsable input fails the condition.
+         * maxDigits limits how many digits the written input may contain in total (grouping
+         * separators, sign and the decimal separator are not counted); maxDecimals limits how many
+         * digits may follow the decimal separator. Both take a non-negative integer comparison value
+         * and, like the other numeric operators, are also allowed on text rules.
          *
          */
-        export type Operator = "equal" | "notEqual" | "greaterThan" | "greaterThanInclusive" | "lessThan" | "lessThanInclusive" | "between" | "dateBefore" | "dateOnOrBefore" | "dateAfter" | "dateOnOrAfter" | "dateBetween" | "notInFuture" | "notInPast" | "contains" | "doesNotContain" | "startsWith" | "endsWith" | "regexMatch" | "lengthBetween";
+        export type Operator = "equal" | "notEqual" | "greaterThan" | "greaterThanInclusive" | "lessThan" | "lessThanInclusive" | "between" | "dateBefore" | "dateOnOrBefore" | "dateAfter" | "dateOnOrAfter" | "dateBetween" | "notInFuture" | "notInPast" | "contains" | "doesNotContain" | "startsWith" | "endsWith" | "regexMatch" | "lengthBetween" | "maxDigits" | "maxDecimals";
         /**
          * Condition definition for a pattern-based validation rule (2 levels deep)
          */
