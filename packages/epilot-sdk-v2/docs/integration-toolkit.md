@@ -2684,7 +2684,10 @@ const { data } = await client.getEntitySyncStatus({
       "last_synced_at": "1970-01-01T00:00:00.000Z",
       "last_changed_at": "1970-01-01T00:00:00.000Z",
       "last_operation": "create",
-      "last_event_id": "string"
+      "last_event_id": "string",
+      "readings_last_synced_at": "1970-01-01T00:00:00.000Z",
+      "readings_last_operation": "upsert",
+      "readings_last_event_id": "string"
     }
   ]
 }
@@ -7783,7 +7786,7 @@ The sc
 
 ```ts
 type DirectPayload = {
-  version: "1"
+  version: string
   operations: Array<{
     type?: "entity"
     entity_slug: string
@@ -8031,7 +8034,7 @@ type DirectSimulationRequest = {
     }>
   }
   payload: string | {
-    version: "1"
+    version: string
     operations: Array<{
       type?: { ... }
       entity_slug: { ... }
@@ -8333,15 +8336,24 @@ type EntitySyncStatusResponse = {
     integration_id: string // uuid
     entity_slug: string
     use_case_id?: string
-    last_synced_at: string // date-time
+    last_synced_at?: string // date-time
     last_changed_at?: string // date-time
-    last_operation: "create" | "patch" | "delete" | "no-op"
+    last_operation?: "create" | "patch" | "delete" | "no-op"
     last_event_id?: string
+    readings_last_synced_at?: string // date-time
+    readings_last_operation?: "upsert" | "delete"
+    readings_last_event_id?: string
   }>
 }
 ```
 
 ### `EntitySyncState`
+
+Inbound sync state of one entity for one integration. Carries two
+independent groups: the entity-level fields (`last_synced_at`, …) and,
+on meter/meter_counter entities, the readings-level fields
+(`readings_last_synced_at`, …). Either group can be present alone — a
+meter whose readings sync via the 
 
 ```ts
 type EntitySyncState = {
@@ -8349,10 +8361,13 @@ type EntitySyncState = {
   integration_id: string // uuid
   entity_slug: string
   use_case_id?: string
-  last_synced_at: string // date-time
+  last_synced_at?: string // date-time
   last_changed_at?: string // date-time
-  last_operation: "create" | "patch" | "delete" | "no-op"
+  last_operation?: "create" | "patch" | "delete" | "no-op"
   last_event_id?: string
+  readings_last_synced_at?: string // date-time
+  readings_last_operation?: "upsert" | "delete"
+  readings_last_event_id?: string
 }
 ```
 
