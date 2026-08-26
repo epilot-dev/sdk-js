@@ -1,6 +1,6 @@
 {
   "name": "epilot",
-  "version": "0.1.125",
+  "version": "0.1.126",
   "description": "CLI for epilot APIs (wrapper for @epilot/cli)",
   "bin": {
     "epilot": "./bin/epilot.js"
