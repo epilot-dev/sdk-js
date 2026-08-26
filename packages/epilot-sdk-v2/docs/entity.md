@@ -190,6 +190,7 @@ const { data } = await entityClient.listSchemas(...)
 - [`LocationConditionDefinition`](#locationconditiondefinition)
 - [`ConditionDefinition`](#conditiondefinition)
 - [`EntitySlug`](#entityslug)
+- [`AdjustInstallmentCapabilityConfig`](#adjustinstallmentcapabilityconfig)
 - [`EntityCapability`](#entitycapability)
 - [`EntityCapabilityWithCompositeID`](#entitycapabilitywithcompositeid)
 - [`EntityViewDisabled`](#entityviewdisabled)
@@ -231,6 +232,7 @@ const { data } = await entityClient.listSchemas(...)
 - [`GraphSeed`](#graphseed)
 - [`GraphDefinition`](#graphdefinition)
 - [`GraphNode`](#graphnode)
+- [`GraphNodeFilter`](#graphnodefilter)
 - [`GraphEdge`](#graphedge)
 - [`GraphQueryResponse`](#graphqueryresponse)
 - [`EntitySearchResults`](#entitysearchresults)
@@ -486,7 +488,15 @@ const { data } = await client.getSchema({
       "columns": 0,
       "cells": [0]
     },
-    "widget_order": ["string"]
+    "widget_order": ["string"],
+    "widget_visibility": {
+      "next_best_action": true,
+      "address_map": false
+    },
+    "widget_widths": {
+      "address_map": "full_width",
+      "recent_communications": "one_third_width"
+    }
   },
   "capabilities": [
     {
@@ -494,9 +504,11 @@ const { data } = await client.getSchema({
       "name": "customer_messaging",
       "title": "Messaging",
       "attributes": [],
+      "variant_overridable": false,
       "_purpose": ["taxonomy-slug:classification-slug"],
       "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
       "app_id": "123e4567-e89b-12d3-a456-426614174000",
+      "adjust_installment": {},
       "ui_config": {},
       "ui_hooks": [],
       "feature_flag": "FF_MY_FEATURE_FLAG",
@@ -638,7 +650,15 @@ const { data } = await client.putSchema(
         columns: 0,
         cells: [0]
       },
-      widget_order: ['string']
+      widget_order: ['string'],
+      widget_visibility: {
+        next_best_action: true,
+        address_map: false
+      },
+      widget_widths: {
+        address_map: 'full_width',
+        recent_communications: 'one_third_width'
+      }
     },
     capabilities: [
       {
@@ -646,9 +666,11 @@ const { data } = await client.putSchema(
         name: 'customer_messaging',
         title: 'Messaging',
         attributes: [ /* ... */ ],
+        variant_overridable: false,
         _purpose: ['taxonomy-slug:classification-slug'],
         _manifest: ['123e4567-e89b-12d3-a456-426614174000'],
         app_id: '123e4567-e89b-12d3-a456-426614174000',
+        adjust_installment: { /* ... */ },
         ui_config: { /* ... */ },
         ui_hooks: [ /* ... */ ],
         feature_flag: 'FF_MY_FEATURE_FLAG',
@@ -790,7 +812,15 @@ const { data } = await client.putSchema(
       "columns": 0,
       "cells": [0]
     },
-    "widget_order": ["string"]
+    "widget_order": ["string"],
+    "widget_visibility": {
+      "next_best_action": true,
+      "address_map": false
+    },
+    "widget_widths": {
+      "address_map": "full_width",
+      "recent_communications": "one_third_width"
+    }
   },
   "capabilities": [
     {
@@ -798,9 +828,11 @@ const { data } = await client.putSchema(
       "name": "customer_messaging",
       "title": "Messaging",
       "attributes": [],
+      "variant_overridable": false,
       "_purpose": ["taxonomy-slug:classification-slug"],
       "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
       "app_id": "123e4567-e89b-12d3-a456-426614174000",
+      "adjust_installment": {},
       "ui_config": {},
       "ui_hooks": [],
       "feature_flag": "FF_MY_FEATURE_FLAG",
@@ -1234,7 +1266,15 @@ const { data } = await client.freezeSchema(
       "columns": 0,
       "cells": [0]
     },
-    "widget_order": ["string"]
+    "widget_order": ["string"],
+    "widget_visibility": {
+      "next_best_action": true,
+      "address_map": false
+    },
+    "widget_widths": {
+      "address_map": "full_width",
+      "recent_communications": "one_third_width"
+    }
   },
   "capabilities": [
     {
@@ -1242,9 +1282,11 @@ const { data } = await client.freezeSchema(
       "name": "customer_messaging",
       "title": "Messaging",
       "attributes": [],
+      "variant_overridable": false,
       "_purpose": ["taxonomy-slug:classification-slug"],
       "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
       "app_id": "123e4567-e89b-12d3-a456-426614174000",
+      "adjust_installment": {},
       "ui_config": {},
       "ui_hooks": [],
       "feature_flag": "FF_MY_FEATURE_FLAG",
@@ -1400,7 +1442,15 @@ const { data } = await client.unfreezeSchema({
       "columns": 0,
       "cells": [0]
     },
-    "widget_order": ["string"]
+    "widget_order": ["string"],
+    "widget_visibility": {
+      "next_best_action": true,
+      "address_map": false
+    },
+    "widget_widths": {
+      "address_map": "full_width",
+      "recent_communications": "one_third_width"
+    }
   },
   "capabilities": [
     {
@@ -1408,9 +1458,11 @@ const { data } = await client.unfreezeSchema({
       "name": "customer_messaging",
       "title": "Messaging",
       "attributes": [],
+      "variant_overridable": false,
       "_purpose": ["taxonomy-slug:classification-slug"],
       "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
       "app_id": "123e4567-e89b-12d3-a456-426614174000",
+      "adjust_installment": {},
       "ui_config": {},
       "ui_hooks": [],
       "feature_flag": "FF_MY_FEATURE_FLAG",
@@ -1512,9 +1564,11 @@ const { data } = await client.listAvailableCapabilities({
       "name": "customer_messaging",
       "title": "Messaging",
       "attributes": [],
+      "variant_overridable": false,
       "_purpose": ["taxonomy-slug:classification-slug"],
       "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
       "app_id": "123e4567-e89b-12d3-a456-426614174000",
+      "adjust_installment": {},
       "ui_config": {},
       "ui_hooks": [],
       "feature_flag": "FF_MY_FEATURE_FLAG",
@@ -5157,9 +5211,13 @@ const { data } = await client.createSchemaCapability(
       },
       /* ... 33 more */
     ],
+    variant_overridable: false,
     _purpose: ['taxonomy-slug:classification-slug'],
     _manifest: ['123e4567-e89b-12d3-a456-426614174000'],
     app_id: '123e4567-e89b-12d3-a456-426614174000',
+    adjust_installment: {
+      journey_id: 'adjust-installment-flow'
+    },
     ui_config: {
       is_filterable: true
     },
@@ -5176,7 +5234,10 @@ const { data } = await client.createSchemaCapability(
         icon: 'email',
         disabled: true,
         header: true,
-        requiredPermission: { /* ... */ }
+        requiredPermission: { /* ... */ },
+        default_visible: false,
+        default_width: 'half_width',
+        pricing_tier_setting: 'entity_address_maps'
       }
     ],
     feature_flag: 'FF_MY_FEATURE_FLAG',
@@ -5286,9 +5347,13 @@ const { data } = await client.createSchemaCapability(
       "type": "link"
     }
   ],
+  "variant_overridable": false,
   "_purpose": ["taxonomy-slug:classification-slug"],
   "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
   "app_id": "123e4567-e89b-12d3-a456-426614174000",
+  "adjust_installment": {
+    "journey_id": "adjust-installment-flow"
+  },
   "ui_config": {
     "is_filterable": true
   },
@@ -5305,7 +5370,10 @@ const { data } = await client.createSchemaCapability(
       "icon": "email",
       "disabled": true,
       "header": true,
-      "requiredPermission": {}
+      "requiredPermission": {},
+      "default_visible": false,
+      "default_width": "half_width",
+      "pricing_tier_setting": "entity_address_maps"
     }
   ],
   "feature_flag": "FF_MY_FEATURE_FLAG",
@@ -5430,9 +5498,13 @@ const { data } = await client.getSchemaCapability({
       "type": "link"
     }
   ],
+  "variant_overridable": false,
   "_purpose": ["taxonomy-slug:classification-slug"],
   "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
   "app_id": "123e4567-e89b-12d3-a456-426614174000",
+  "adjust_installment": {
+    "journey_id": "adjust-installment-flow"
+  },
   "ui_config": {
     "is_filterable": true
   },
@@ -5449,7 +5521,10 @@ const { data } = await client.getSchemaCapability({
       "icon": "email",
       "disabled": true,
       "header": true,
-      "requiredPermission": {}
+      "requiredPermission": {},
+      "default_visible": false,
+      "default_width": "half_width",
+      "pricing_tier_setting": "entity_address_maps"
     }
   ],
   "feature_flag": "FF_MY_FEATURE_FLAG",
@@ -5570,9 +5645,13 @@ const { data } = await client.putSchemaCapability(
       },
       /* ... 33 more */
     ],
+    variant_overridable: false,
     _purpose: ['taxonomy-slug:classification-slug'],
     _manifest: ['123e4567-e89b-12d3-a456-426614174000'],
     app_id: '123e4567-e89b-12d3-a456-426614174000',
+    adjust_installment: {
+      journey_id: 'adjust-installment-flow'
+    },
     ui_config: {
       is_filterable: true
     },
@@ -5589,7 +5668,10 @@ const { data } = await client.putSchemaCapability(
         icon: 'email',
         disabled: true,
         header: true,
-        requiredPermission: { /* ... */ }
+        requiredPermission: { /* ... */ },
+        default_visible: false,
+        default_width: 'half_width',
+        pricing_tier_setting: 'entity_address_maps'
       }
     ],
     feature_flag: 'FF_MY_FEATURE_FLAG',
@@ -5699,9 +5781,13 @@ const { data } = await client.putSchemaCapability(
       "type": "link"
     }
   ],
+  "variant_overridable": false,
   "_purpose": ["taxonomy-slug:classification-slug"],
   "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
   "app_id": "123e4567-e89b-12d3-a456-426614174000",
+  "adjust_installment": {
+    "journey_id": "adjust-installment-flow"
+  },
   "ui_config": {
     "is_filterable": true
   },
@@ -5718,7 +5804,10 @@ const { data } = await client.putSchemaCapability(
       "icon": "email",
       "disabled": true,
       "header": true,
-      "requiredPermission": {}
+      "requiredPermission": {},
+      "default_visible": false,
+      "default_width": "half_width",
+      "pricing_tier_setting": "entity_address_maps"
     }
   ],
   "feature_flag": "FF_MY_FEATURE_FLAG",
@@ -5843,9 +5932,13 @@ const { data } = await client.deleteSchemaCapability({
       "type": "link"
     }
   ],
+  "variant_overridable": false,
   "_purpose": ["taxonomy-slug:classification-slug"],
   "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
   "app_id": "123e4567-e89b-12d3-a456-426614174000",
+  "adjust_installment": {
+    "journey_id": "adjust-installment-flow"
+  },
   "ui_config": {
     "is_filterable": true
   },
@@ -5862,7 +5955,10 @@ const { data } = await client.deleteSchemaCapability({
       "icon": "email",
       "disabled": true,
       "header": true,
-      "requiredPermission": {}
+      "requiredPermission": {},
+      "default_visible": false,
+      "default_width": "half_width",
+      "pricing_tier_setting": "entity_address_maps"
     }
   ],
   "feature_flag": "FF_MY_FEATURE_FLAG",
@@ -6398,6 +6494,8 @@ type EntitySchema = {
       cells?: { ... }
     }
     widget_order?: string[]
+    widget_visibility?: Record<string, boolean>
+    widget_widths?: Record<string, "one_third_width" | "half_width" | "two_third_width" | "full_width">
   }
   capabilities: Array<{
     id?: string
@@ -6425,8 +6523,6 @@ type EntitySchema = {
       data_classification?: { ... }
       _purpose?: { ... }
       _manifest?: { ... }
-      constraints?: { ... }
-      feature_flag?: { ... }
   // ...
 }
 ```
@@ -6516,6 +6612,8 @@ type EntitySchemaItem = {
       cells?: { ... }
     }
     widget_order?: string[]
+    widget_visibility?: Record<string, boolean>
+    widget_widths?: Record<string, "one_third_width" | "half_width" | "two_third_width" | "full_width">
   }
   capabilities: Array<{
     id?: string
@@ -6532,8 +6630,6 @@ type EntitySchemaItem = {
       required?: { ... }
       readonly?: { ... }
       deprecated?: { ... }
-      variant_overridable?: { ... }
-      default_value?: { ... }
   // ...
 }
 ```
@@ -9511,6 +9607,16 @@ URL-friendly identifier for the entity schema
 type EntitySlug = string
 ```
 
+### `AdjustInstallmentCapabilityConfig`
+
+Configuration for adjusting a contract installment through a Journey.
+
+```ts
+type AdjustInstallmentCapabilityConfig = {
+  journey_id: string
+}
+```
+
 ### `EntityCapability`
 
 Capabilities the Entity has. Turn features on/off for entities.
@@ -10557,6 +10663,7 @@ type GraphQueryRequest = {
       schema: { ... }
       cardinality?: { ... }
       fields?: { ... }
+      filter?: { ... }
     }>
     edges: Array<{
       from: { ... }
@@ -10586,6 +10693,10 @@ type GraphDefinition = {
     schema: string
     cardinality?: "one" | "many"
     fields?: object
+    filter?: Array<{
+      attribute: { ... }
+      value: { ... }
+    }>
   }>
   edges: Array<{
     from: string
@@ -10602,6 +10713,21 @@ type GraphNode = {
   schema: string
   cardinality?: "one" | "many"
   fields?: object
+  filter?: Array<{
+    attribute: string
+    value: object
+  }>
+}
+```
+
+### `GraphNodeFilter`
+
+Entities are included in this node's result only if `attribute` exactly equals the literal `value`.
+
+```ts
+type GraphNodeFilter = {
+  attribute: string
+  value: object
 }
 ```
 

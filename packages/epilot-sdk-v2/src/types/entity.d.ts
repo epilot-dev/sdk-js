@@ -835,6 +835,19 @@ export declare namespace Components {
              */
             DefaultAddressFields;
         }
+        /**
+         * Configuration for adjusting a contract installment through a Journey.
+         * example:
+         * {
+         *   "journey_id": "adjust-installment-flow"
+         * }
+         */
+        export interface AdjustInstallmentCapabilityConfig {
+            /**
+             * ID of the Flow Journey to open when adjusting the installment.
+             */
+            journey_id: string;
+        }
         export type Attribute = /* Textarea or text input */ TextAttribute | /* Link with title and href */ LinkAttribute | /* Date or Datetime picker */ DateAttribute | /* Country picker */ CountryAttribute | /* Yes / No Toggle */ BooleanAttribute | /* Dropdown select */ SelectAttribute | /* Multi Choice Selection */ MultiSelectAttribute | /* Status select */ StatusAttribute | /* Sequence of unique identifiers */ SequenceAttribute | /* Entity Relationship */ RelationAttribute | /* User Relationship */ UserRelationAttribute | /* Address attribute */ AddressAttribute | /* Reference to an address attribute of another entity */ AddressRelationAttribute | /* Reference to a payment method attribute of another entity */ PaymentMethodRelationAttribute | /* Currency input */ CurrencyAttribute | /* Tags */ TagsAttribute | /* Message emil address */ MessageEmailAddressAttribute | /* Numeric input */ NumberAttribute | /* Dynamic data table with configurable columns. Data is stored as an array of objects where each object represents a row. */ TableAttribute | /* Consent Management */ ConsentAttribute | /* No UI representation */ InternalAttribute | /* Type of attribute to render N number of ordered fields */ OrderedListAttribute | /* File or Image Attachment */ FileAttribute | /* An attribute that is computed from the entity data. For more details on how to use them, check the docs [here](https://e-pilot.atlassian.net/wiki/spaces/EO/pages/5642977476/How+To+Computed+Schema+Attributes) */ ComputedAttribute | /* Partner Status */ PartnerStatusAttribute | /* Email address for send invitation */ InvitationEmailAttribute | /* Automation entity */ AutomationAttribute | /* Epilot internal user info */ InternalUserAttribute | /* Entity Taxonomy */ PurposeAttribute | /* Shared Partner Organisations */ PartnerOrganisationAttribute | /* Portal access configuration */ PortalAccessAttribute | /* Phone number */ PhoneAttribute | /* Email address */ EmailAttribute | /* Payment method */ PaymentAttribute | /* Price component */ PriceComponentAttribute;
         /**
          * a readonly computed ID for the attribute including schema slug and the attribute ID
@@ -3298,6 +3311,15 @@ export declare namespace Components {
              */
             title?: string;
             attributes?: Attribute[];
+            /**
+             * Allow conditional variants of the entity to override the values managed by this
+             * capability. Only meaningful on schemas that declare `conditions` and on capabilities
+             * that render an attribute group (`EntityAttributes:Group` ui hook), e.g. pricing tiers.
+             * Attributes carried by the capability opt in individually via their own
+             * `variant_overridable` flag.
+             *
+             */
+            variant_overridable?: boolean;
             _purpose?: /**
              * example:
              * taxonomy-slug:classification-slug
@@ -3313,6 +3335,14 @@ export declare namespace Components {
              * 123e4567-e89b-12d3-a456-426614174000
              */
             app_id?: string;
+            adjust_installment?: /**
+             * Configuration for adjusting a contract installment through a Journey.
+             * example:
+             * {
+             *   "journey_id": "adjust-installment-flow"
+             * }
+             */
+            AdjustInstallmentCapabilityConfig;
             ui_config?: {
                 /**
                  * Whether the capability is filterable
@@ -3396,6 +3426,24 @@ export declare namespace Components {
                      */
                     resource?: string;
                 };
+                /**
+                 * Whether this widget is switched on by default for entity types that have the capability. Only meaningful on the `EntityDetailsV2:Widget` hook. Defaults to true when omitted. An admin's explicit choice in the entity builder is stored in the schema's `ui_config.widget_visibility` and wins over this.
+                 * example:
+                 * false
+                 */
+                default_visible?: boolean;
+                /**
+                 * How wide this widget is by default in the entity-details widget grid. Only meaningful on the `EntityDetailsV2:Widget` and `EntityDetailsV2:Header` hooks. Defaults to `full_width` when omitted — deliberately unlike the attribute layout default of `half_width`, because a full-width widget can never leave a hole in a row. An admin's explicit choice in the entity builder is stored in the schema's `ui_config.widget_widths` and wins over this.
+                 * example:
+                 * half_width
+                 */
+                default_width?: "one_third_width" | "half_width" | "two_third_width" | "full_width";
+                /**
+                 * The pricing-tier settings key an organisation must have enabled to use this widget. Omit for widgets available to everyone. Resolved against `GET /v2/pricing-tiers/me` as `override_settings[key].enabled ?? settings[key].enabled`. Note this is commercial packaging enforced in the UI, not a security control — the key must also be added to the pricing tier settings list in epilot-admin-portal, or it can never be switched on for a tier.
+                 * example:
+                 * entity_address_maps
+                 */
+                pricing_tier_setting?: string;
             }[];
             /**
              * This capability should only be active when the feature flag is enabled
@@ -3443,6 +3491,15 @@ export declare namespace Components {
              */
             title?: string;
             attributes?: Attribute[];
+            /**
+             * Allow conditional variants of the entity to override the values managed by this
+             * capability. Only meaningful on schemas that declare `conditions` and on capabilities
+             * that render an attribute group (`EntityAttributes:Group` ui hook), e.g. pricing tiers.
+             * Attributes carried by the capability opt in individually via their own
+             * `variant_overridable` flag.
+             *
+             */
+            variant_overridable?: boolean;
             _purpose?: /**
              * example:
              * taxonomy-slug:classification-slug
@@ -3458,6 +3515,14 @@ export declare namespace Components {
              * 123e4567-e89b-12d3-a456-426614174000
              */
             app_id?: string;
+            adjust_installment?: /**
+             * Configuration for adjusting a contract installment through a Journey.
+             * example:
+             * {
+             *   "journey_id": "adjust-installment-flow"
+             * }
+             */
+            AdjustInstallmentCapabilityConfig;
             ui_config?: {
                 /**
                  * Whether the capability is filterable
@@ -3541,6 +3606,24 @@ export declare namespace Components {
                      */
                     resource?: string;
                 };
+                /**
+                 * Whether this widget is switched on by default for entity types that have the capability. Only meaningful on the `EntityDetailsV2:Widget` hook. Defaults to true when omitted. An admin's explicit choice in the entity builder is stored in the schema's `ui_config.widget_visibility` and wins over this.
+                 * example:
+                 * false
+                 */
+                default_visible?: boolean;
+                /**
+                 * How wide this widget is by default in the entity-details widget grid. Only meaningful on the `EntityDetailsV2:Widget` and `EntityDetailsV2:Header` hooks. Defaults to `full_width` when omitted — deliberately unlike the attribute layout default of `half_width`, because a full-width widget can never leave a hole in a row. An admin's explicit choice in the entity builder is stored in the schema's `ui_config.widget_widths` and wins over this.
+                 * example:
+                 * half_width
+                 */
+                default_width?: "one_third_width" | "half_width" | "two_third_width" | "full_width";
+                /**
+                 * The pricing-tier settings key an organisation must have enabled to use this widget. Omit for widgets available to everyone. Resolved against `GET /v2/pricing-tiers/me` as `override_settings[key].enabled ?? settings[key].enabled`. Note this is commercial packaging enforced in the UI, not a security control — the key must also be added to the pricing tier settings list in epilot-admin-portal, or it can never be switched on for a tier.
+                 * example:
+                 * entity_address_maps
+                 */
+                pricing_tier_setting?: string;
             }[];
             /**
              * This capability should only be active when the feature flag is enabled
@@ -4536,7 +4619,7 @@ export declare namespace Components {
                     show_sharing_button?: boolean;
                 };
                 /**
-                 * Widget-grid layout for the entity-details page (builder-authored); columns/cells drive the grid geometry.
+                 * Superseded by `widget_widths`. A whole-grid layout preset that assigned each widget a width by its POSITION, so a widget that rendered nothing shifted every width after it. Neither the entity app nor the entity builder reads it any more; values stored before it was replaced are left in place rather than migrated.
                  */
                 grid_layout?: {
                     /**
@@ -4556,6 +4639,28 @@ export declare namespace Components {
                  * Ordered list of widget ids controlling the entity-details widget-grid order. Each id is a capability widget's `component` (or `summary` for the synthesized summary card); widgets absent from the list keep their natural order at the end.
                  */
                 widget_order?: string[];
+                /**
+                 * Per-widget on/off state for the entity-details widget grid, keyed by widget id (a capability widget's `component`, or `summary` for the synthesized summary card). Holds only the admin's deviations from each widget's declared default: a widget absent from this map falls back to its ui_hook `default_visible`, and then to visible. Do not seed this map from migrations — doing so would freeze today's defaults into the schema.
+                 * example:
+                 * {
+                 *   "next_best_action": true,
+                 *   "address_map": false
+                 * }
+                 */
+                widget_visibility?: {
+                    [name: string]: boolean;
+                };
+                /**
+                 * Per-widget width in the entity-details widget grid, keyed by widget id (a capability widget's `component`, or `summary` for the synthesized summary card). Spans a 12-column grid: `one_third_width` = 4, `half_width` = 6, `two_third_width` = 8, `full_width` = 12. Holds only the admin's deviations from each widget's declared default: a widget absent from this map falls back to its ui_hook `default_width`, and then to `full_width`. Do not seed this map from migrations — doing so would freeze today's defaults into the schema. Replaces the positional `grid_layout` preset.
+                 * example:
+                 * {
+                 *   "address_map": "full_width",
+                 *   "recent_communications": "one_third_width"
+                 * }
+                 */
+                widget_widths?: {
+                    [name: string]: "one_third_width" | "half_width" | "two_third_width" | "full_width";
+                };
             };
             capabilities: /* Capabilities the Entity has. Turn features on/off for entities. */ EntityCapability[];
             /**
@@ -4967,7 +5072,7 @@ export declare namespace Components {
                     show_sharing_button?: boolean;
                 };
                 /**
-                 * Widget-grid layout for the entity-details page (builder-authored); columns/cells drive the grid geometry.
+                 * Superseded by `widget_widths`. A whole-grid layout preset that assigned each widget a width by its POSITION, so a widget that rendered nothing shifted every width after it. Neither the entity app nor the entity builder reads it any more; values stored before it was replaced are left in place rather than migrated.
                  */
                 grid_layout?: {
                     /**
@@ -4987,6 +5092,28 @@ export declare namespace Components {
                  * Ordered list of widget ids controlling the entity-details widget-grid order. Each id is a capability widget's `component` (or `summary` for the synthesized summary card); widgets absent from the list keep their natural order at the end.
                  */
                 widget_order?: string[];
+                /**
+                 * Per-widget on/off state for the entity-details widget grid, keyed by widget id (a capability widget's `component`, or `summary` for the synthesized summary card). Holds only the admin's deviations from each widget's declared default: a widget absent from this map falls back to its ui_hook `default_visible`, and then to visible. Do not seed this map from migrations — doing so would freeze today's defaults into the schema.
+                 * example:
+                 * {
+                 *   "next_best_action": true,
+                 *   "address_map": false
+                 * }
+                 */
+                widget_visibility?: {
+                    [name: string]: boolean;
+                };
+                /**
+                 * Per-widget width in the entity-details widget grid, keyed by widget id (a capability widget's `component`, or `summary` for the synthesized summary card). Spans a 12-column grid: `one_third_width` = 4, `half_width` = 6, `two_third_width` = 8, `full_width` = 12. Holds only the admin's deviations from each widget's declared default: a widget absent from this map falls back to its ui_hook `default_width`, and then to `full_width`. Do not seed this map from migrations — doing so would freeze today's defaults into the schema. Replaces the positional `grid_layout` preset.
+                 * example:
+                 * {
+                 *   "address_map": "full_width",
+                 *   "recent_communications": "one_third_width"
+                 * }
+                 */
+                widget_widths?: {
+                    [name: string]: "one_third_width" | "half_width" | "two_third_width" | "full_width";
+                };
             };
             capabilities: /* Capabilities the Entity has. Turn features on/off for entities. */ EntityCapability[];
             /**
@@ -6077,6 +6204,34 @@ export declare namespace Components {
              * ]
              */
             fields?: string[];
+            /**
+             * Narrows this node's traversal results to entities matching every filter (AND semantics). Useful for
+             * disambiguating among multiple entities reachable via the same graph edge.
+             *
+             */
+            filter?: /* Entities are included in this node's result only if `attribute` exactly equals the literal `value`. */ GraphNodeFilter[];
+        }
+        /**
+         * Entities are included in this node's result only if `attribute` exactly equals the literal `value`.
+         */
+        export interface GraphNodeFilter {
+            /**
+             * Entity attribute name to match against. Must be a plain attribute name, not an Elasticsearch field path.
+             * example:
+             * order_number
+             */
+            attribute: string;
+            /**
+             * Literal value the attribute must exactly equal for the entity to be included in this node's result.
+             * example:
+             * OR-113
+             */
+            value: /**
+             * Literal value the attribute must exactly equal for the entity to be included in this node's result.
+             * example:
+             * OR-113
+             */
+            (string | null) | number | boolean;
         }
         export interface GraphQueryRequest {
             seed: GraphSeed;
@@ -19437,6 +19592,7 @@ export type ActivityItem = Components.Schemas.ActivityItem;
 export type ActivityType = Components.Schemas.ActivityType;
 export type AddressAttribute = Components.Schemas.AddressAttribute;
 export type AddressRelationAttribute = Components.Schemas.AddressRelationAttribute;
+export type AdjustInstallmentCapabilityConfig = Components.Schemas.AdjustInstallmentCapabilityConfig;
 export type Attribute = Components.Schemas.Attribute;
 export type AttributeWithCompositeID = Components.Schemas.AttributeWithCompositeID;
 export type AutomationAttribute = Components.Schemas.AutomationAttribute;
@@ -19512,6 +19668,7 @@ export type GetRelationsRespWithPagination = Components.Schemas.GetRelationsResp
 export type GraphDefinition = Components.Schemas.GraphDefinition;
 export type GraphEdge = Components.Schemas.GraphEdge;
 export type GraphNode = Components.Schemas.GraphNode;
+export type GraphNodeFilter = Components.Schemas.GraphNodeFilter;
 export type GraphQueryRequest = Components.Schemas.GraphQueryRequest;
 export type GraphQueryResponse = Components.Schemas.GraphQueryResponse;
 export type GraphSeed = Components.Schemas.GraphSeed;
