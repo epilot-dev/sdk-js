@@ -32,6 +32,7 @@ const { data } = await appClient.getPublicFacingComponent(...)
 - [`patchInstallation`](#patchinstallation)
 - [`uninstall`](#uninstall)
 - [`promoteVersion`](#promoteversion)
+- [`resolveOptions`](#resolveoptions)
 
 **App Configuration**
 - [`listConfigurations`](#listconfigurations)
@@ -419,6 +420,22 @@ const { data } = await client.getPublicConfiguration({
       "secrets": ["string"]
     }
   ],
+  "options": [
+    {
+      "key": "string",
+      "label": "string",
+      "required": true,
+      "description": "string",
+      "repeatable": true,
+      "fields": [],
+      "value": {},
+      "type": "text",
+      "sensitive": true,
+      "configured": true,
+      "lifted": true,
+      "value_updated_at": "string"
+    }
+  ],
   "is_beta": true,
   "deprecated_at": "string",
   "version": "string",
@@ -441,6 +458,7 @@ const { data } = await client.getPublicConfiguration({
       "owner_org_id": "string",
       "components": [],
       "functions": [],
+      "options": [],
       "visibility": "private",
       "public": false,
       "pending": false,
@@ -531,6 +549,22 @@ const { data } = await client.getConfiguration({
       "schedule_timezone": "Europe/Berlin",
       "schedule_overlap": "skip",
       "secrets": ["string"]
+    }
+  ],
+  "options": [
+    {
+      "key": "string",
+      "label": "string",
+      "required": true,
+      "description": "string",
+      "repeatable": true,
+      "fields": [],
+      "value": {},
+      "type": "text",
+      "sensitive": true,
+      "configured": true,
+      "lifted": true,
+      "value_updated_at": "string"
     }
   ],
   "visibility": "private",
@@ -638,7 +672,8 @@ const { data } = await client.queryEvents(
       source: ['CUSTOM_JOURNEY_BLOCK'],
       component_id: ['string'],
       event_type: ['ERROR'],
-      correlation_id: 'string'
+      correlation_id: 'string',
+      search: 'string'
     },
     aggregation: {
       group_by: ['source'],
@@ -646,7 +681,8 @@ const { data } = await client.queryEvents(
     },
     pagination: {
       page: 1,
-      page_size: 100
+      page_size: 100,
+      before: '1970-01-01T00:00:00.000Z'
     },
     sort: {
       field: 'timestamp',
@@ -671,7 +707,8 @@ const { data } = await client.queryEvents(
       "source": ["CUSTOM_JOURNEY_BLOCK"],
       "component_id": ["string"],
       "event_type": ["ERROR"],
-      "correlation_id": "string"
+      "correlation_id": "string",
+      "search": "string"
     },
     "aggregation": {
       "group_by": ["source"],
@@ -679,7 +716,8 @@ const { data } = await client.queryEvents(
     },
     "pagination": {
       "page": 1,
-      "page_size": 100
+      "page_size": 100,
+      "before": "1970-01-01T00:00:00.000Z"
     },
     "sort": {
       "field": "timestamp",
@@ -870,44 +908,9 @@ const { data } = await client.listVersions({
     {
       "app_id": "string",
       "owner_org_id": "string",
-      "components": [
-        {
-          "component_type": "CUSTOM_JOURNEY_BLOCK",
-          "configuration": {
-            "override_dev_mode": {
-              "override_url": "http://localhost:3000"
-            },
-            "component_url": "https://cdn.apps.com/123/v1.0.0/bundle.js",
-            "component_tag": "string",
-            "component_args": [
-              {
-                "type": "text"
-              }
-            ],
-            "component_size": 0,
-            "component_mapping": {}
-          }
-        }
-      ],
-      "functions": [
-        {
-          "name": "string",
-          "type": "workflow",
-          "label": {
-            "en": "string",
-            "de": "string"
-          },
-          "description": {
-            "en": "string",
-            "de": "string"
-          },
-          "code": "string",
-          "schedule": "rate(30 minutes)",
-          "schedule_timezone": "Europe/Berlin",
-          "schedule_overlap": "skip",
-          "secrets": ["string"]
-        }
-      ],
+      "components": [],
+      "functions": [],
+      "options": [],
       "visibility": "private",
       "public": false,
       "pending": false,
@@ -916,28 +919,9 @@ const { data } = await client.listVersions({
       "deprecated_at": "string",
       "changelog": "string",
       "review_status": "approved",
-      "role": {
-        "id": "string",
-        "grants": [
-          {
-            "action": "string",
-            "resource": "string"
-          }
-        ]
-      },
-      "blueprint_ref": {
-        "manifest_id": "string",
-        "job_id": "string",
-        "source_blueprint_file": "string"
-      },
-      "version_audit": {
-        "created_at": "string",
-        "created_by": "string",
-        "updated_at": "string",
-        "updated_by": "string",
-        "versioned_at": "string",
-        "versioned_by": "string"
-      }
+      "role": {},
+      "blueprint_ref": {},
+      "version_audit": {}
     }
   ],
   "pagination": {
@@ -1022,6 +1006,22 @@ const { data } = await client.getVersion({
       "schedule_timezone": "Europe/Berlin",
       "schedule_overlap": "skip",
       "secrets": ["string"]
+    }
+  ],
+  "options": [
+    {
+      "key": "string",
+      "label": "string",
+      "required": true,
+      "description": "string",
+      "repeatable": true,
+      "fields": [],
+      "value": {},
+      "type": "text",
+      "sensitive": true,
+      "configured": true,
+      "lifted": true,
+      "value_updated_at": "string"
     }
   ],
   "visibility": "private",
@@ -1111,6 +1111,30 @@ const { data } = await client.patchVersion(
         schedule_timezone: 'Europe/Berlin',
         schedule_overlap: 'skip',
         secrets: ['string']
+      }
+    ],
+    options: [
+      {
+        key: 'string',
+        label: 'string',
+        required: true,
+        description: 'string',
+        repeatable: true,
+        fields: [
+          {
+            key: 'string',
+            label: 'string',
+            description: 'string',
+            required: true,
+            type: 'text'
+          }
+        ],
+        value: {},
+        type: 'text',
+        sensitive: true,
+        configured: true,
+        lifted: true,
+        value_updated_at: 'string'
       }
     ]
   },
@@ -1363,68 +1387,14 @@ const { data } = await client.listInstallations({
       "enabled": true,
       "name": "string",
       "icon_url": "string",
-      "option_values": [
-        {
-          "component_id": "string",
-          "options": [
-            {
-              "key": "string",
-              "value": {}
-            }
-          ]
-        }
-      ],
-      "components": [
-        {
-          "component_type": "CUSTOM_JOURNEY_BLOCK",
-          "configuration": {
-            "override_dev_mode": {
-              "override_url": "http://localhost:3000"
-            },
-            "component_url": "https://cdn.apps.com/123/v1.0.0/bundle.js",
-            "component_tag": "string",
-            "component_args": [
-              {
-                "type": "text"
-              }
-            ],
-            "component_size": 0,
-            "component_mapping": {}
-          }
-        }
-      ],
-      "functions": [
-        {
-          "name": "string",
-          "type": "workflow",
-          "label": {
-            "en": "string",
-            "de": "string"
-          },
-          "description": {
-            "en": "string",
-            "de": "string"
-          },
-          "code": "string",
-          "schedule": "rate(30 minutes)",
-          "schedule_timezone": "Europe/Berlin",
-          "schedule_overlap": "skip",
-          "secrets": ["string"]
-        }
-      ],
+      "option_values": [],
+      "components": [],
+      "functions": [],
+      "options": [],
       "installed_version": "string",
       "role": "string",
-      "blueprint_ref": {
-        "manifest_id": "string",
-        "job_id": "string",
-        "source_blueprint_file": "string"
-      },
-      "installation_audit": {
-        "created_at": "string",
-        "created_by": "string",
-        "updated_at": "string",
-        "updated_by": "string"
-      },
+      "blueprint_ref": {},
+      "installation_audit": {},
       "_manifest": ["123e4567-e89b-12d3-a456-426614174000"]
     }
   ],
@@ -1510,6 +1480,30 @@ const { data } = await client.getInstallation({
       "schedule_timezone": "Europe/Berlin",
       "schedule_overlap": "skip",
       "secrets": ["string"]
+    }
+  ],
+  "options": [
+    {
+      "key": "string",
+      "label": "string",
+      "required": true,
+      "description": "string",
+      "repeatable": true,
+      "fields": [
+        {
+          "key": "string",
+          "label": "string",
+          "description": "string",
+          "required": true,
+          "type": "text"
+        }
+      ],
+      "value": {},
+      "type": "text",
+      "sensitive": true,
+      "configured": true,
+      "lifted": true,
+      "value_updated_at": "string"
     }
   ],
   "installed_version": "string",
@@ -1620,6 +1614,30 @@ const { data } = await client.install(
       "schedule_timezone": "Europe/Berlin",
       "schedule_overlap": "skip",
       "secrets": ["string"]
+    }
+  ],
+  "options": [
+    {
+      "key": "string",
+      "label": "string",
+      "required": true,
+      "description": "string",
+      "repeatable": true,
+      "fields": [
+        {
+          "key": "string",
+          "label": "string",
+          "description": "string",
+          "required": true,
+          "type": "text"
+        }
+      ],
+      "value": {},
+      "type": "text",
+      "sensitive": true,
+      "configured": true,
+      "lifted": true,
+      "value_updated_at": "string"
     }
   ],
   "installed_version": "string",
@@ -1761,6 +1779,30 @@ const { data } = await client.promoteVersion({
       "secrets": ["string"]
     }
   ],
+  "options": [
+    {
+      "key": "string",
+      "label": "string",
+      "required": true,
+      "description": "string",
+      "repeatable": true,
+      "fields": [
+        {
+          "key": "string",
+          "label": "string",
+          "description": "string",
+          "required": true,
+          "type": "text"
+        }
+      ],
+      "value": {},
+      "type": "text",
+      "sensitive": true,
+      "configured": true,
+      "lifted": true,
+      "value_updated_at": "string"
+    }
+  ],
   "installed_version": "string",
   "role": "string",
   "blueprint_ref": {
@@ -1775,6 +1817,59 @@ const { data } = await client.promoteVersion({
     "updated_by": "string"
   },
   "_manifest": ["123e4567-e89b-12d3-a456-426614174000"]
+}
+```
+
+</details>
+
+---
+
+### `resolveOptions`
+
+Resolve the effective app-level options of an installation, including decrypted sensitive values (secrets). This endpoint accepts epilot internal-auth tokens exclusively (internal service calls, e.g. 
+
+`POST /v1/app/{appId}/options/resolve`
+
+```ts
+const { data } = await client.resolveOptions(
+  {
+    appId: 'example',
+  },
+  {
+    keys: ['string']
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "options": [
+    {
+      "key": "string",
+      "label": "string",
+      "required": true,
+      "description": "string",
+      "repeatable": true,
+      "fields": [
+        {
+          "key": "string",
+          "label": "string",
+          "description": "string",
+          "required": true,
+          "type": "text"
+        }
+      ],
+      "value": {},
+      "type": "text",
+      "sensitive": true,
+      "configured": true,
+      "lifted": true,
+      "value_updated_at": "string"
+    }
+  ]
 }
 ```
 
@@ -1940,6 +2035,10 @@ type Options = {
   }>
   value?: unknown
   type: "text" | "number" | "boolean" | "secret" | "object"
+  sensitive?: boolean
+  configured?: boolean
+  lifted?: boolean
+  value_updated_at?: string
 }
 ```
 
@@ -2075,7 +2174,12 @@ type BaseComponentCommon = {
     }>
     value?: unknown
     type: "text" | "number" | "boolean" | "secret" | "object"
+    sensitive?: boolean
+    configured?: boolean
+    lifted?: boolean
+    value_updated_at?: string
   }>
+  uses_options?: string[]
   surfaces?: object
 }
 ```
@@ -2108,7 +2212,12 @@ type BaseComponent = {
     }>
     value?: unknown
     type: "text" | "number" | "boolean" | "secret" | "object"
+    sensitive?: boolean
+    configured?: boolean
+    lifted?: boolean
+    value_updated_at?: string
   }>
+  uses_options?: string[]
   surfaces?: object
 }
 ```
@@ -3512,7 +3621,12 @@ type ConfigurationVersion = {
       fields?: { ... }
       value?: { ... }
       type: { ... }
+      sensitive?: { ... }
+      configured?: { ... }
+      lifted?: { ... }
+      value_updated_at?: { ... }
     }>
+    uses_options?: string[]
     surfaces?: object
   }>
   functions?: Array<{
@@ -3531,6 +3645,26 @@ type ConfigurationVersion = {
     schedule_timezone?: string
     schedule_overlap?: "skip"
     secrets?: string[]
+  }>
+  options?: Array<{
+    key: string
+    label?: string
+    required?: boolean
+    description?: string
+    repeatable?: boolean
+    fields?: Array<{
+      key: { ... }
+      label?: { ... }
+      description?: { ... }
+      required?: { ... }
+      type: { ... }
+    }>
+    value?: unknown
+    type: "text" | "number" | "boolean" | "secret" | "object"
+    sensitive?: boolean
+    configured?: boolean
+    lifted?: boolean
+    value_updated_at?: string
   }>
   visibility?: "public" | "private"
   public?: boolean
@@ -3637,7 +3771,12 @@ type Installation = {
       fields?: { ... }
       value?: { ... }
       type: { ... }
+      sensitive?: { ... }
+      configured?: { ... }
+      lifted?: { ... }
+      value_updated_at?: { ... }
     }>
+    uses_options?: string[]
     surfaces?: object
   }>
   functions?: Array<{
@@ -3656,6 +3795,26 @@ type Installation = {
     schedule_timezone?: string
     schedule_overlap?: "skip"
     secrets?: string[]
+  }>
+  options?: Array<{
+    key: string
+    label?: string
+    required?: boolean
+    description?: string
+    repeatable?: boolean
+    fields?: Array<{
+      key: { ... }
+      label?: { ... }
+      description?: { ... }
+      required?: { ... }
+      type: { ... }
+    }>
+    value?: unknown
+    type: "text" | "number" | "boolean" | "secret" | "object"
+    sensitive?: boolean
+    configured?: boolean
+    lifted?: boolean
+    value_updated_at?: string
   }>
   installed_version: string
   role?: string
@@ -3720,7 +3879,12 @@ type PublicConfiguration = {
       fields?: { ... }
       value?: { ... }
       type: { ... }
+      sensitive?: { ... }
+      configured?: { ... }
+      lifted?: { ... }
+      value_updated_at?: { ... }
     }>
+    uses_options?: string[]
     surfaces?: object
   }>
   functions?: Array<{
@@ -3740,6 +3904,26 @@ type PublicConfiguration = {
     schedule_overlap?: "skip"
     secrets?: string[]
   }>
+  options?: Array<{
+    key: string
+    label?: string
+    required?: boolean
+    description?: string
+    repeatable?: boolean
+    fields?: Array<{
+      key: { ... }
+      label?: { ... }
+      description?: { ... }
+      required?: { ... }
+      type: { ... }
+    }>
+    value?: unknown
+    type: "text" | "number" | "boolean" | "secret" | "object"
+    sensitive?: boolean
+    configured?: boolean
+    lifted?: boolean
+    value_updated_at?: string
+  }>
   is_beta?: boolean
   deprecated_at?: string
   version: string
@@ -3754,31 +3938,6 @@ type PublicConfiguration = {
     manifest_id?: string
     job_id?: string
     source_blueprint_file?: string
-  }
-  latest_version?: string
-  public?: boolean
-  versions?: Array<{
-    app_id: string
-    owner_org_id: string
-    components: Array<{
-      id: { ... }
-      name?: { ... }
-      description?: { ... }
-      options?: { ... }
-      surfaces?: { ... }
-    }>
-    functions?: Array<{
-      name: { ... }
-      type: { ... }
-      label?: { ... }
-      description?: { ... }
-      code: { ... }
-      schedule?: { ... }
-      schedule_timezone?: { ... }
-      schedule_overlap?: { ... }
-      secrets?: { ... }
-    }>
-    visibility?: "public" | "private"
   // ...
 }
 ```
@@ -3843,7 +4002,12 @@ type Configuration = {
       fields?: { ... }
       value?: { ... }
       type: { ... }
+      sensitive?: { ... }
+      configured?: { ... }
+      lifted?: { ... }
+      value_updated_at?: { ... }
     }>
+    uses_options?: string[]
     surfaces?: object
   }>
   functions?: Array<{
@@ -3863,31 +4027,26 @@ type Configuration = {
     schedule_overlap?: "skip"
     secrets?: string[]
   }>
-  visibility?: "public" | "private"
-  public?: boolean
-  pending?: boolean
-  version: string
-  is_beta?: boolean
-  deprecated_at?: string
-  changelog?: string
-  review_status?: "approved" | "rejected" | "pending"
-  role?: {
-    id?: string
-    grants?: Array<{
-      action: { ... }
-      resource?: { ... }
+  options?: Array<{
+    key: string
+    label?: string
+    required?: boolean
+    description?: string
+    repeatable?: boolean
+    fields?: Array<{
+      key: { ... }
+      label?: { ... }
+      description?: { ... }
+      required?: { ... }
+      type: { ... }
     }>
-  }
-  blueprint_ref?: {
-    manifest_id?: string
-    job_id?: string
-    source_blueprint_file?: string
-  }
-  version_audit: {
-    created_at?: string
-    created_by?: string
-    updated_at?: string
-    updated_by?: string
+    value?: unknown
+    type: "text" | "number" | "boolean" | "secret" | "object"
+    sensitive?: boolean
+    configured?: boolean
+    lifted?: boolean
+    value_updated_at?: string
+  }>
   // ...
 }
 ```
@@ -3980,6 +4139,7 @@ type EventsQuery = {
     component_id?: string[]
     event_type?: "ERROR" | "WARNING" | "INFO"[]
     correlation_id?: string
+    search?: string
   }
   aggregation?: {
     group_by?: "source" | "component_id" | "event_type" | "hour" | "day"[]
@@ -3988,6 +4148,7 @@ type EventsQuery = {
   pagination?: {
     page?: number
     page_size?: number
+    before?: string // date-time
   }
   sort?: {
     field?: "timestamp" | "event_type" | "component_id"
@@ -4011,6 +4172,7 @@ type EventsQueryResponse = {
       component_id?: { ... }
       event_type?: { ... }
       correlation_id?: { ... }
+      search?: { ... }
     }
     aggregation?: {
       group_by?: { ... }
@@ -4019,6 +4181,7 @@ type EventsQueryResponse = {
     pagination?: {
       page?: { ... }
       page_size?: { ... }
+      before?: { ... }
     }
     sort?: {
       field?: { ... }

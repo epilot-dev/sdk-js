@@ -114,6 +114,13 @@ export declare namespace Components {
              *
              */
             Schemas.FunctionDefinition[];
+            /**
+             * Replaces the full set of app-level option declarations for this version.
+             * Option keys must be unique app-wide; `secret`-touching options are always
+             * sensitive and must not declare `sensitive: false`.
+             *
+             */
+            options?: /* Options for the component configuration */ Schemas.Options[];
         }
         export type UpsertComponentRequest = Schemas.BaseComponent;
     }
@@ -286,6 +293,15 @@ export declare namespace Components {
              * List of options for the app component
              */
             options?: /* Options for the component configuration */ Options[];
+            /**
+             * Keys of app-level options this component uses. Narrows which options are
+             * folded back into `options` for legacy consumers (e.g. which values a journey
+             * block receives in its public args) — a scoping hint, never a security
+             * boundary. Stamped automatically by the component-options migration; may also
+             * be declared by the app developer.
+             *
+             */
+            uses_options?: string[];
             surfaces?: {
                 [key: string]: any;
             };
@@ -325,6 +341,15 @@ export declare namespace Components {
              * List of options for the app component
              */
             options?: /* Options for the component configuration */ Options[];
+            /**
+             * Keys of app-level options this component uses. Narrows which options are
+             * folded back into `options` for legacy consumers (e.g. which values a journey
+             * block receives in its public args) — a scoping hint, never a security
+             * boundary. Stamped automatically by the component-options migration; may also
+             * be declared by the app developer.
+             *
+             */
+            uses_options?: string[];
             surfaces?: {
                 [key: string]: any;
             };
@@ -630,6 +655,10 @@ export declare namespace Components {
              */
             FunctionDefinition[];
             /**
+             * App-level option declarations (with sensitivity) of this version
+             */
+            options?: /* Options for the component configuration */ Options[];
+            /**
              * Visibility of the app version
              */
             visibility?: "public" | "private";
@@ -815,6 +844,10 @@ export declare namespace Components {
              *
              */
             FunctionDefinition[];
+            /**
+             * App-level option declarations (with sensitivity) of this version
+             */
+            options?: /* Options for the component configuration */ Options[];
             /**
              * Visibility of the app version
              */
@@ -1034,6 +1067,10 @@ export declare namespace Components {
                  * Filter by correlation ID for tracing
                  */
                 correlation_id?: string;
+                /**
+                 * Case-insensitive substring match over event details and component id
+                 */
+                search?: string;
             };
             aggregation?: {
                 /**
@@ -1048,6 +1085,11 @@ export declare namespace Components {
             pagination?: {
                 page?: number;
                 page_size?: number;
+                /**
+                 * Cursor: only return events strictly older than this timestamp. Use the timestamp of the last received event to fetch the next page; more efficient than increasing page/page_size.
+                 *
+                 */
+                before?: string; // date-time
             };
             sort?: {
                 field?: "timestamp" | "event_type" | "component_id";
@@ -1227,6 +1269,10 @@ export declare namespace Components {
              *
              */
             type: "workflow" | "scheduled";
+            /**
+             * Human-readable display name of the function, shown to installing organizations (e.g. in the scheduled-functions summary)
+             *
+             */
             label?: {
                 /**
                  * English translation
@@ -1271,7 +1317,7 @@ export declare namespace Components {
              */
             schedule_overlap?: "skip";
             /**
-             * Keys of installation options of type secret made available to the function via input.app_options
+             * DEPRECATED and ignored — functions receive the app's full effective option keyspace (sensitive values included) via input.app_options. Kept for manifest compatibility.
              *
              */
             secrets?: string[];
@@ -1353,6 +1399,14 @@ export declare namespace Components {
              *
              */
             FunctionDefinition[];
+            /**
+             * Effective app-level options of the installation: declared top-level options plus
+             * component-level options lifted to the app keyspace, each with its configured
+             * `value`. Values of sensitive options (secrets) are never included — they carry
+             * `configured` and `value_updated_at` instead.
+             *
+             */
+            options?: /* Options for the component configuration */ Options[];
             /**
              * Version of the app that is installed
              */
@@ -1620,10 +1674,42 @@ export declare namespace Components {
              *
              */
             type: "text" | "number" | "boolean" | "secret" | "object";
+            /**
+             * Write-only, server-side only value — like a sensitive environment variable
+             * (app-level options only). Sensitive values are never serialized in any response;
+             * they are resolvable only via server-side channels (API proxy injection, function
+             * `secrets` allowlist, the internal options/resolve endpoint). Non-sensitive values
+             * are readable wherever the app runs, including the end-customer browser (journey and
+             * portal runtime). Forced to true for `secret`-touching options. Default: false.
+             *
+             */
+            sensitive?: boolean;
+            /**
+             * Serialized instead of `value` for sensitive options (secrets): true when a
+             * value is stored.
+             *
+             */
+            configured?: boolean;
+            /**
+             * Compatibility marker: this option is declared at app level and folded back
+             * into the component's options so existing consumers (journey runtime, portal
+             * blocks, older services) keep working unchanged. New consumers should read
+             * app-level options from the installation's `options` array instead.
+             *
+             */
+            lifted?: boolean;
+            /**
+             * Timestamp of the last value change. Only returned for sensitive options
+             * (alongside `configured`) so installers can see when a secret was last rotated.
+             *
+             */
+            value_updated_at?: string;
         }
         export interface OptionsRef {
             /**
-             * ID of the component these values are for
+             * ID of the component these values are for. Use the sentinel `$app` for
+             * app-level option values (options declared at the manifest top level).
+             *
              */
             component_id: string;
             options: Option[];
@@ -2833,6 +2919,10 @@ export declare namespace Components {
              */
             FunctionDefinition[];
             /**
+             * App-level option declarations (with sensitivity) of this version
+             */
+            options?: /* Options for the component configuration */ Options[];
+            /**
              * Flag to indicate if the app is in beta.
              */
             is_beta?: boolean;
@@ -3509,6 +3599,29 @@ export declare namespace Paths {
             }
         }
     }
+    namespace ResolveOptions {
+        namespace Parameters {
+            export type AppId = string;
+        }
+        export interface PathParameters {
+            appId: Parameters.AppId;
+        }
+        export interface RequestBody {
+            /**
+             * Narrow the response to these option keys
+             */
+            keys?: string[];
+        }
+        namespace Responses {
+            export interface $200 {
+                options?: /* Options for the component configuration */ Components.Schemas.Options[];
+            }
+            export interface $403 {
+            }
+            export interface $404 {
+            }
+        }
+    }
     namespace Uninstall {
         namespace Parameters {
             export type AppId = string;
@@ -3870,6 +3983,16 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.PromoteVersion.Responses.$200>
+  /**
+   * resolveOptions - resolveOptions
+   * 
+   * Resolve the effective app-level options of an installation, including decrypted sensitive values (secrets). This endpoint accepts epilot internal-auth tokens exclusively (internal service calls, e.g. automation-workers or the customer portal API) — no user token, API key, or app token can call it, regardless of roles. Every call is audit-logged with the caller identity.
+   */
+  'resolveOptions'(
+    parameters?: Parameters<Paths.ResolveOptions.PathParameters> | null,
+    data?: Paths.ResolveOptions.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ResolveOptions.Responses.$200>
   /**
    * ingestEvent - ingestEvent
    * 
@@ -4259,6 +4382,18 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.PromoteVersion.Responses.$200>
+  }
+  ['/v1/app/{appId}/options/resolve']: {
+    /**
+     * resolveOptions - resolveOptions
+     * 
+     * Resolve the effective app-level options of an installation, including decrypted sensitive values (secrets). This endpoint accepts epilot internal-auth tokens exclusively (internal service calls, e.g. automation-workers or the customer portal API) — no user token, API key, or app token can call it, regardless of roles. Every call is audit-logged with the caller identity.
+     */
+    'post'(
+      parameters?: Parameters<Paths.ResolveOptions.PathParameters> | null,
+      data?: Paths.ResolveOptions.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ResolveOptions.Responses.$200>
   }
   ['/v1/app-events']: {
     /**

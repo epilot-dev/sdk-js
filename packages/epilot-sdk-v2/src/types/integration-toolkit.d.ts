@@ -1596,6 +1596,569 @@ export declare namespace Components {
          */
         FileProxyDeliveryConfig;
         /**
+         * A single pre-mapped entity operation: upserts, soft-deletes, or purges one entity,
+         * identified by its unique ids. Produces the same internal update as a mapped-mode entity
+         * configuration, so create-vs-update resolution, relation resolution, ordering, and
+         * monitoring behave identically.
+         *
+         */
+        export interface DirectEntityOperation {
+            /**
+             * Operation discriminator. Optional - an operation without `type` is an entity operation.
+             */
+            type?: "entity";
+            /**
+             * Target entity schema slug (e.g. `contact`, `contract`).
+             * example:
+             * contract
+             */
+            entity_slug: string;
+            /**
+             * Attribute values that uniquely identify this entity, as `{ attribute: value }`.
+             * Values may be strings or numbers (numbers are coerced to strings); values that are
+             * empty after trimming are rejected. Use `_id` as the sole key to reference an entity
+             * directly by its epilot id.
+             *
+             * Unlike mapped mode, the unique-id ATTRIBUTE NAMES are given directly - there is no
+             * field-to-attribute mapping step.
+             *
+             * example:
+             * {
+             *   "contract_number": "CTR-001"
+             * }
+             */
+            unique_ids: {
+                [name: string]: string | number;
+            };
+            /**
+             * Optional per-field type hints for repeatable unique-id fields (`email` / `phone`),
+             * needed so lookups search the repeatable storage format correctly. When omitted, the
+             * server derives the types from the entity schema; explicit values always win over
+             * derivation.
+             *
+             */
+            unique_id_types?: {
+                [name: string]: "email" | "phone";
+            };
+            /**
+             * Operation mode: `upsert` creates or updates the entity (default), `delete` soft
+             * deletes it, `purge` removes it permanently. For `delete` / `purge`, `attributes`
+             * may be omitted - only `unique_ids` are used to locate the entity.
+             *
+             */
+            mode?: "upsert" | "delete" | "purge";
+            /**
+             * Attribute values to write, keyed by attribute name. Required when `mode` is `upsert`
+             * (an empty object is allowed); optional for `delete` / `purge`.
+             *
+             * Values are written verbatim - the server does not validate them against the entity
+             * schema (attributes not defined in the schema are stored but not indexed; the
+             * simulation endpoint surfaces warnings for unique-id fields missing from the schema).
+             * Two envelope forms receive special treatment: `$relation` values
+             * (`DirectRelationValue`) and `$relation_ref` values (`DirectRelationRefValue`) are
+             * validated and resolved to entity relations.
+             *
+             */
+            attributes?: {
+                [name: string]: /**
+                 * An entity attribute value that establishes relations to other entities. Written on any
+                 * attribute inside a direct entity operation's `attributes`.
+                 *
+                 * Two forms are accepted: a bare array of items (shorthand for `_set`, i.e. replace), or
+                 * an object with EXACTLY ONE of the operations `_set` (replace), `_append` (merge,
+                 * deduplicated by entity id), `_append_all` (merge without deduplication). No other
+                 * operation keys are accepted.
+                 *
+                 */
+                DirectRelationValue | /**
+                 * An entity attribute value that references an ITEM INSIDE a repeatable attribute of
+                 * another entity - for example one address out of a contact's `address` list. The target
+                 * entity is looked up by unique ids, then the item at `path` matching `value` is
+                 * referenced (creating it when missing).
+                 *
+                 * The same operation envelope as `$relation` applies: a bare array is shorthand for
+                 * `_set`, otherwise exactly one of `_set`, `_append`, `_append_all`.
+                 *
+                 */
+                DirectRelationRefValue | any;
+            };
+        }
+        /**
+         * A single pre-mapped meter reading operation: upserts or deletes one reading on a meter
+         * (and optionally a specific counter), identified by their unique ids. Produces the same
+         * internal update as a mapped-mode meter reading configuration.
+         *
+         */
+        export interface DirectMeterReadingOperation {
+            /**
+             * Operation discriminator. Required for meter reading operations.
+             */
+            type: "meter_reading";
+            /**
+             * Reference to the meter this reading belongs to.
+             */
+            meter: {
+                /**
+                 * Attribute values that uniquely identify the meter, as `{ attribute: value }`.
+                 * example:
+                 * {
+                 *   "meter_number": "M-001"
+                 * }
+                 */
+                unique_ids: {
+                    [name: string]: string | number;
+                };
+            };
+            /**
+             * Optional reference to the meter counter (register) the reading belongs to. Required
+             * when `reading_matching` is `strict-date`.
+             *
+             */
+            counter?: {
+                /**
+                 * Attribute values that uniquely identify the counter, as `{ attribute: value }`.
+                 * example:
+                 * {
+                 *   "obis_number": "1-0:1.8.0"
+                 * }
+                 */
+                unique_ids: {
+                    [name: string]: string | number;
+                };
+            };
+            /**
+             * Operation mode: `upsert` creates or updates the reading (default), `delete` removes it.
+             */
+            mode?: "upsert" | "delete";
+            /**
+             * Strategy for matching this reading against existing readings. `external_id` (the
+             * default) matches by the reading's `external_id`; `strict-date` matches by meter +
+             * counter + direction + date and REQUIRES `counter`. Useful when readings originate in
+             * the portal and are echoed back by the ERP with truncated timestamps.
+             *
+             */
+            reading_matching?: "external_id" | "strict-date";
+            /**
+             * The reading data. Additional keys (e.g. `direction`, `reason`, `read_by`, `status`,
+             * `metadata`) pass through to the metering service verbatim.
+             *
+             */
+            attributes: {
+                /**
+                 * External identifier of the reading (numbers are coerced to strings).
+                 */
+                external_id: /* External identifier of the reading (numbers are coerced to strings). */ string | number;
+                /**
+                 * When the reading was taken. ISO 8601 - either `YYYY-MM-DD` or
+                 * `YYYY-MM-DDTHH:mm:ss` (optional fractional seconds and `Z` / `±HH:mm` offset).
+                 * Other formats (e.g. `DD.MM.YYYY`, epoch numbers) are rejected.
+                 *
+                 * example:
+                 * 2026-08-24T06:00:00Z
+                 */
+                timestamp: string;
+                /**
+                 * Origin system of the reading.
+                 */
+                source: "ECP" | "ERP" | "360" | "journey-submission";
+                /**
+                 * The reading value - a number, or a numeric string (coerced to a number).
+                 */
+                value: /* The reading value - a number, or a numeric string (coerced to a number). */ number | string;
+            };
+        }
+        /**
+         * The payload of an ERP event routed to a `direct: true` use case: a versioned envelope of
+         * pre-mapped operations that skip the mapping engine. Sent as the `payload` of an
+         * `ErpEventV3` - either as a JSON object or as a JSON string (`format` must be `json`;
+         * XML is rejected for direct use cases).
+         *
+         * The schema is strict: unknown keys on the envelope or on any operation are rejected with
+         * an error naming the offending path. Attribute values, by contrast, pass through to the
+         * entity verbatim (except `$relation` / `$relation_ref` envelopes, which are validated and
+         * resolved).
+         *
+         * One event lands as one queue message, so the whole event (including this payload) must
+         * stay within the 256 KiB message budget. Identical consecutive payloads within 5 minutes
+         * can be deduplicated by the queue - use the event's `deduplication_id` deliberately when
+         * re-sending identical data.
+         *
+         */
+        export interface DirectPayload {
+            /**
+             * Version of the direct payload contract. Currently only `"1"` is supported; an
+             * unsupported version is rejected with `DIRECT_VERSION_UNSUPPORTED`. Deliberately not
+             * an enum: the constraint is enforced by the handler so the dry-run endpoint returns
+             * a structured `valid: false` verdict instead of a schema-level 400.
+             *
+             */
+            version: string;
+            /**
+             * The operations to apply, in order. At most 100 operations per event (enforced by
+             * the handler, with a structured error naming the limit). Each item is either an
+             * entity operation (`type` omitted or `"entity"`) or a meter reading operation
+             * (`type: "meter_reading"`).
+             *
+             */
+            operations: (/**
+             * A single pre-mapped entity operation: upserts, soft-deletes, or purges one entity,
+             * identified by its unique ids. Produces the same internal update as a mapped-mode entity
+             * configuration, so create-vs-update resolution, relation resolution, ordering, and
+             * monitoring behave identically.
+             *
+             */
+            DirectEntityOperation | /**
+             * A single pre-mapped meter reading operation: upserts or deletes one reading on a meter
+             * (and optionally a specific counter), identified by their unique ids. Produces the same
+             * internal update as a mapped-mode meter reading configuration.
+             *
+             */
+            DirectMeterReadingOperation)[];
+        }
+        /**
+         * One relation target: either an already-resolved reference (`entity_id`), or a lookup by
+         * unique ids (`schema` + `unique_ids`, resolved by the pipeline like any other unique-id
+         * lookup, including stub creation and retry when the target does not exist yet). The two
+         * forms are mutually exclusive. Use `_id` as the sole `unique_ids` key for a direct-id
+         * lookup.
+         *
+         */
+        export interface DirectRelationItem {
+            /**
+             * Epilot entity id of the relation target. Must not be combined with `schema` / `unique_ids`.
+             */
+            entity_id?: string;
+            /**
+             * Entity schema slug of the relation target. Required when `entity_id` is not given.
+             * example:
+             * contact
+             */
+            schema?: string;
+            /**
+             * Attribute values that uniquely identify the target. Required when `entity_id` is not given.
+             * example:
+             * {
+             *   "customer_number": "CUST-12345"
+             * }
+             */
+            unique_ids?: {
+                [name: string]: string | number;
+            };
+            /**
+             * Optional per-field type hints for repeatable unique-id fields, as on the entity operation.
+             */
+            unique_id_types?: {
+                [name: string]: "email" | "phone";
+            };
+            /**
+             * Optional relation tags (e.g. `primary`, `billing`).
+             */
+            tags?: string[];
+        }
+        /**
+         * One relation-ref target - the entity to look up, and the repeatable item to reference on it.
+         */
+        export interface DirectRelationRefItem {
+            /**
+             * Entity schema slug of the target entity.
+             * example:
+             * contact
+             */
+            schema: string;
+            /**
+             * Attribute values that uniquely identify the target entity.
+             */
+            unique_ids: {
+                [name: string]: string | number;
+            };
+            /**
+             * Optional per-field type hints for repeatable unique-id fields.
+             */
+            unique_id_types?: {
+                [name: string]: "email" | "phone";
+            };
+            /**
+             * The attribute on the TARGET entity that holds the repeatable array (e.g. `address`).
+             */
+            path: string;
+            /**
+             * The item to match (or create) at `path` - e.g. an address object.
+             * example:
+             * {
+             *   "street": "Main Street",
+             *   "city": "Berlin"
+             * }
+             */
+            value: any;
+        }
+        /**
+         * An entity attribute value that references an ITEM INSIDE a repeatable attribute of
+         * another entity - for example one address out of a contact's `address` list. The target
+         * entity is looked up by unique ids, then the item at `path` matching `value` is
+         * referenced (creating it when missing).
+         *
+         * The same operation envelope as `$relation` applies: a bare array is shorthand for
+         * `_set`, otherwise exactly one of `_set`, `_append`, `_append_all`.
+         *
+         */
+        export interface DirectRelationRefValue {
+            $relation_ref: /* One relation-ref target - the entity to look up, and the repeatable item to reference on it. */ DirectRelationRefItem[] | {
+                _set?: /* One relation-ref target - the entity to look up, and the repeatable item to reference on it. */ DirectRelationRefItem[];
+                _append?: /* One relation-ref target - the entity to look up, and the repeatable item to reference on it. */ DirectRelationRefItem[];
+                _append_all?: /* One relation-ref target - the entity to look up, and the repeatable item to reference on it. */ DirectRelationRefItem[];
+            };
+        }
+        /**
+         * An entity attribute value that establishes relations to other entities. Written on any
+         * attribute inside a direct entity operation's `attributes`.
+         *
+         * Two forms are accepted: a bare array of items (shorthand for `_set`, i.e. replace), or
+         * an object with EXACTLY ONE of the operations `_set` (replace), `_append` (merge,
+         * deduplicated by entity id), `_append_all` (merge without deduplication). No other
+         * operation keys are accepted.
+         *
+         */
+        export interface DirectRelationValue {
+            $relation: /**
+             * One relation target: either an already-resolved reference (`entity_id`), or a lookup by
+             * unique ids (`schema` + `unique_ids`, resolved by the pipeline like any other unique-id
+             * lookup, including stub creation and retry when the target does not exist yet). The two
+             * forms are mutually exclusive. Use `_id` as the sole `unique_ids` key for a direct-id
+             * lookup.
+             *
+             */
+            DirectRelationItem[] | {
+                _set?: /**
+                 * One relation target: either an already-resolved reference (`entity_id`), or a lookup by
+                 * unique ids (`schema` + `unique_ids`, resolved by the pipeline like any other unique-id
+                 * lookup, including stub creation and retry when the target does not exist yet). The two
+                 * forms are mutually exclusive. Use `_id` as the sole `unique_ids` key for a direct-id
+                 * lookup.
+                 *
+                 */
+                DirectRelationItem[];
+                _append?: /**
+                 * One relation target: either an already-resolved reference (`entity_id`), or a lookup by
+                 * unique ids (`schema` + `unique_ids`, resolved by the pipeline like any other unique-id
+                 * lookup, including stub creation and retry when the target does not exist yet). The two
+                 * forms are mutually exclusive. Use `_id` as the sole `unique_ids` key for a direct-id
+                 * lookup.
+                 *
+                 */
+                DirectRelationItem[];
+                _append_all?: /**
+                 * One relation target: either an already-resolved reference (`entity_id`), or a lookup by
+                 * unique ids (`schema` + `unique_ids`, resolved by the pipeline like any other unique-id
+                 * lookup, including stub creation and retry when the target does not exist yet). The two
+                 * forms are mutually exclusive. Use `_id` as the sole `unique_ids` key for a direct-id
+                 * lookup.
+                 *
+                 */
+                DirectRelationItem[];
+            };
+        }
+        /**
+         * One validation error found during a direct-mode dry run.
+         */
+        export interface DirectSimulationError {
+            /**
+             * Error class, matching the monitoring codes the ingest pipeline emits:
+             * `DIRECT_PAYLOAD_INVALID` (schema violation, JSON parse failure, or XML format),
+             * `DIRECT_VERSION_UNSUPPORTED` (unknown payload `version`),
+             * `DIRECT_ENTITY_NOT_ALLOWED` (entity or unique-id keys not permitted by the use
+             * case's allowlist).
+             *
+             */
+            code: "DIRECT_PAYLOAD_INVALID" | "DIRECT_VERSION_UNSUPPORTED" | "DIRECT_ENTITY_NOT_ALLOWED";
+            /**
+             * Human-readable description, including the path of the offending element.
+             */
+            message: string;
+            /**
+             * Zero-based index of the operation the error refers to, when attributable to one.
+             */
+            operation_index?: number;
+        }
+        /**
+         * Request for a direct-mode dry run: the `direct: true` use case configuration to test
+         * against, and the payload to validate and translate.
+         *
+         */
+        export interface DirectSimulationRequest {
+            /**
+             * The direct use case configuration to simulate against. `direct` must be `true`;
+             * `entities` acts as the optional allowlist exactly as at runtime. This is the same
+             * configuration format stored on the inbound use case resource, so a configuration can
+             * be tested before saving it.
+             *
+             */
+            event_configuration: {
+                /**
+                 * Enables direct mode for this use case. When `true`, every event routed to this use
+                 * case must carry a `DirectPayload` - pre-mapped entity and meter reading operations -
+                 * instead of raw ERP data, and the mapping engine is skipped entirely. Everything else
+                 * in the inbound pipeline (deduplication, ordering, create-vs-update resolution,
+                 * relation resolution, monitoring) behaves exactly as in mapped mode.
+                 *
+                 * In direct mode, `entities` doubles as an optional allowlist: when non-empty, each
+                 * operation's `entity_slug` must match an entry's `entity_schema`, and when that entry
+                 * declares `unique_ids`, the operation's unique-id keys must be exactly that set (or
+                 * just `_id`). Entries need only `entity_schema` and `unique_ids` - `fields` is not
+                 * required and is ignored. `meter_readings` is ignored in direct mode.
+                 *
+                 * Flag changes take up to 5 minutes to propagate (configuration cache).
+                 *
+                 */
+                direct?: boolean;
+                /**
+                 * Array of entity configurations for this event
+                 */
+                entities?: IntegrationEntity[];
+                /**
+                 * Array of meter reading configurations for this event
+                 */
+                meter_readings?: IntegrationMeterReading[];
+            };
+            /**
+             * The direct payload to validate - a `DirectPayload` object, or its JSON string form.
+             */
+            payload: /* The direct payload to validate - a `DirectPayload` object, or its JSON string form. */ string | /**
+             * The payload of an ERP event routed to a `direct: true` use case: a versioned envelope of
+             * pre-mapped operations that skip the mapping engine. Sent as the `payload` of an
+             * `ErpEventV3` - either as a JSON object or as a JSON string (`format` must be `json`;
+             * XML is rejected for direct use cases).
+             *
+             * The schema is strict: unknown keys on the envelope or on any operation are rejected with
+             * an error naming the offending path. Attribute values, by contrast, pass through to the
+             * entity verbatim (except `$relation` / `$relation_ref` envelopes, which are validated and
+             * resolved).
+             *
+             * One event lands as one queue message, so the whole event (including this payload) must
+             * stay within the 256 KiB message budget. Identical consecutive payloads within 5 minutes
+             * can be deduplicated by the queue - use the event's `deduplication_id` deliberately when
+             * re-sending identical data.
+             *
+             */
+            DirectPayload;
+        }
+        /**
+         * Result of a direct-mode dry run. `valid: false` responses list EVERY violation found
+         * across all operations in `errors`. `valid: true` responses preview the internal updates
+         * the pipeline would apply, plus non-blocking `warnings`.
+         *
+         */
+        export interface DirectSimulationResponse {
+            /**
+             * Whether the payload would be accepted by the ingest endpoint.
+             */
+            valid: boolean;
+            /**
+             * All validation errors found. Empty when `valid` is `true`.
+             */
+            errors: /* One validation error found during a direct-mode dry run. */ DirectSimulationError[];
+            /**
+             * Non-blocking findings - e.g. unique-id fields not defined in the target entity
+             * schema (lookups would never match), or a failed server-side unique-id type
+             * derivation.
+             *
+             */
+            warnings?: MappingSimulationWarning[];
+            /**
+             * The translated internal entity updates, exactly as the pipeline would process them.
+             * Only present when `valid` is `true`.
+             *
+             */
+            entity_updates?: {
+                /**
+                 * The entity type slug
+                 */
+                entity_slug: string;
+                /**
+                 * Unique identifier mappings for this entity
+                 */
+                unique_identifiers: {
+                    [name: string]: any;
+                };
+                /**
+                 * Mapped attribute values
+                 */
+                attributes: {
+                    [name: string]: any;
+                };
+                /**
+                 * Present when the entity mapping has a `pricing` block. Echoes the pricing configuration and the data extracted for it, so mapping authors can see what would be sent to the pricing service.
+                 */
+                pricing?: {
+                    /**
+                     * The pricing configuration from the entity mapping
+                     */
+                    config: {
+                        [name: string]: any;
+                    };
+                    /**
+                     * The pricing input data extracted from the payload
+                     */
+                    data: {
+                        [name: string]: any;
+                    }[];
+                };
+                /**
+                 * Effective operation mode applied to this entity at runtime. `upsert-prune-scope-purge` / `upsert-prune-scope-delete` configurations report `upsert` here, because the individual entities in the payload are upserted — the destructive part of those modes is reported separately in `prune_scope_updates`. For `delete` / `purge`, `attributes` are still mapped and returned but ignored at runtime: only `unique_identifiers` are used to locate the entity to remove.
+                 */
+                mode: "upsert" | "delete" | "purge";
+                /**
+                 * Per-field metadata for repeatable unique-id fields - explicit
+                 * `unique_id_types` merged with server-side schema derivation. Absent when
+                 * no field resolved to a repeatable type.
+                 *
+                 */
+                unique_identifiers_metadata?: {
+                    [name: string]: {
+                        fieldType?: "email" | "phone";
+                        index?: number;
+                    };
+                };
+            }[];
+            /**
+             * The translated internal meter reading updates. Only present when `valid` is `true`.
+             *
+             */
+            meter_reading_updates?: {
+                meter: {
+                    /**
+                     * Unique identifiers for the meter
+                     */
+                    $entity_unique_ids: {
+                        [name: string]: any;
+                    };
+                };
+                meter_counter?: {
+                    /**
+                     * Unique identifiers for the meter counter
+                     */
+                    $entity_unique_ids?: {
+                        [name: string]: any;
+                    };
+                };
+                /**
+                 * Meter reading attributes. Required: external_id, timestamp, source, value. `timestamp` must be ISO 8601 — either `YYYY-MM-DD` or `YYYY-MM-DDTHH:mm:ss` (with optional fractional seconds and optional `Z` / `±HH:mm` timezone offset); non-ISO formats (e.g. `DD.MM.YYYY` or epoch numbers) are rejected and must be converted upstream via a `jsonataExpression` (e.g. `$fromMillis(...)`). Date-only values are normalized to midnight UTC and offset-less date-times are anchored to UTC before being forwarded to the metering API. `source` must be one of: ECP, ERP, 360, journey-submission. `reason` (optional) must be one of: regular, irregular, last, first, meter_change, contract_change, meter_adjustment (or empty/null).
+                 */
+                attributes: {
+                    [name: string]: any;
+                };
+                /**
+                 * Effective operation mode applied to this reading at runtime. `upsert-prune-scope` configurations report `upsert` here — their destructive part is reported separately in `meter_readings_prune_scope_updates`.
+                 */
+                mode: "upsert" | "delete";
+                /**
+                 * Per-reading pipeline configuration carried by the operation.
+                 */
+                _config?: {
+                    reading_matching?: "external_id" | "strict-date";
+                };
+            }[];
+        }
+        /**
          * A markdown documentation page of an integration
          */
         export interface DocumentationPage {
@@ -1942,6 +2505,88 @@ export declare namespace Components {
              */
             deletion_mode: "delete" | "purge";
         }
+        /**
+         * Inbound sync state of one entity for one integration. Carries two
+         * independent groups: the entity-level fields (`last_synced_at`, …) and,
+         * on meter/meter_counter entities, the readings-level fields
+         * (`readings_last_synced_at`, …). Either group can be present alone — a
+         * meter whose readings sync via the ERP but whose entity was never
+         * itself inbound-mapped carries only the readings group.
+         *
+         */
+        export interface EntitySyncState {
+            /**
+             * The entity ID
+             */
+            entity_id: string; // uuid
+            /**
+             * The integration that synchronized the entity
+             */
+            integration_id: string; // uuid
+            /**
+             * The entity schema slug
+             * example:
+             * contract
+             */
+            entity_slug: string;
+            /**
+             * The inbound use case that last processed the entity
+             */
+            use_case_id?: string;
+            /**
+             * Last time an inbound ERP event for this entity was processed —
+             * including no-op checks that changed nothing on the entity.
+             *
+             */
+            last_synced_at?: string; // date-time
+            /**
+             * Last time an inbound ERP event actually changed the entity (create/patch/delete)
+             */
+            last_changed_at?: string; // date-time
+            /**
+             * Outcome of the most recent inbound sync check
+             */
+            last_operation?: "create" | "patch" | "delete" | "no-op";
+            /**
+             * The event ID of the most recent inbound sync check
+             */
+            last_event_id?: string;
+            /**
+             * Last time meter readings for this meter/meter_counter entity were
+             * received and processed from the ERP. Only present on meter and
+             * meter_counter entities. The metering path cannot detect no-ops,
+             * so there is no separate readings changed-at.
+             *
+             */
+            readings_last_synced_at?: string; // date-time
+            /**
+             * Outcome of the most recent inbound readings sync
+             */
+            readings_last_operation?: "upsert" | "delete";
+            /**
+             * The event ID of the most recent inbound readings sync
+             */
+            readings_last_event_id?: string;
+        }
+        export interface EntitySyncStatusResponse {
+            /**
+             * The entity the sync states belong to
+             */
+            entity_id: string; // uuid
+            /**
+             * One entry per integration that has processed an inbound event for the entity
+             */
+            sync_states: /**
+             * Inbound sync state of one entity for one integration. Carries two
+             * independent groups: the entity-level fields (`last_synced_at`, …) and,
+             * on meter/meter_counter entities, the readings-level fields
+             * (`readings_last_synced_at`, …). Either group can be present alone — a
+             * meter whose readings sync via the ERP but whose entity was never
+             * itself inbound-mapped carries only the readings group.
+             *
+             */
+            EntitySyncState[];
+        }
         export interface EntityUpdate {
             /**
              * The entity type slug
@@ -2108,12 +2753,30 @@ export declare namespace Components {
              */
             format: "json" | "xml";
             /**
-             * The object data payload - can be either a serialized string or a direct JSON object
+             * The object data payload - can be either a serialized string or a direct JSON object.
+             *
+             * For events routed to a mapped (default) use case this is the raw ERP object; the use
+             * case's mapping configuration transforms it into entity updates.
+             *
+             * For events routed to a use case whose configuration has `direct: true`, the payload
+             * MUST be a `DirectPayload` (as an object, or a JSON string): a versioned envelope of
+             * pre-mapped entity and meter reading operations that skip the mapping engine entirely.
+             * Direct use cases accept JSON only - `format: "xml"` events are rejected.
+             *
              * example:
              * {"id":"BP10001","name":"Acme Corporation","type":"organization","tax_id":"DE123456789","status":"active"}
              */
             payload: /**
-             * The object data payload - can be either a serialized string or a direct JSON object
+             * The object data payload - can be either a serialized string or a direct JSON object.
+             *
+             * For events routed to a mapped (default) use case this is the raw ERP object; the use
+             * case's mapping configuration transforms it into entity updates.
+             *
+             * For events routed to a use case whose configuration has `direct: true`, the payload
+             * MUST be a `DirectPayload` (as an object, or a JSON string): a versioned envelope of
+             * pre-mapped entity and meter reading operations that skip the mapping engine entirely.
+             * Direct use cases accept JSON only - `format: "xml"` events are rejected.
+             *
              * example:
              * {"id":"BP10001","name":"Acme Corporation","type":"organization","tax_id":"DE123456789","status":"active"}
              */
@@ -2141,6 +2804,13 @@ export declare namespace Components {
              * customer-42
              */
             group_id?: string;
+            /**
+             * Optional per-event trace id. Overrides the request-level `correlation_id` for THIS event, so a batch carrying several distinct business operations keeps its traces segregated in monitoring instead of merged under one request-level id. When absent, the event inherits the request-level `correlation_id`.
+             *
+             * example:
+             * customer-42-sync-2026-08-26
+             */
+            correlation_id?: string;
         } | {
             /**
              * Event name from integration mapping (e.g., business_partner, contract_account). Required when use_case_slug is not provided.
@@ -2162,12 +2832,30 @@ export declare namespace Components {
              */
             format: "json" | "xml";
             /**
-             * The object data payload - can be either a serialized string or a direct JSON object
+             * The object data payload - can be either a serialized string or a direct JSON object.
+             *
+             * For events routed to a mapped (default) use case this is the raw ERP object; the use
+             * case's mapping configuration transforms it into entity updates.
+             *
+             * For events routed to a use case whose configuration has `direct: true`, the payload
+             * MUST be a `DirectPayload` (as an object, or a JSON string): a versioned envelope of
+             * pre-mapped entity and meter reading operations that skip the mapping engine entirely.
+             * Direct use cases accept JSON only - `format: "xml"` events are rejected.
+             *
              * example:
              * {"id":"BP10001","name":"Acme Corporation","type":"organization","tax_id":"DE123456789","status":"active"}
              */
             payload: /**
-             * The object data payload - can be either a serialized string or a direct JSON object
+             * The object data payload - can be either a serialized string or a direct JSON object.
+             *
+             * For events routed to a mapped (default) use case this is the raw ERP object; the use
+             * case's mapping configuration transforms it into entity updates.
+             *
+             * For events routed to a use case whose configuration has `direct: true`, the payload
+             * MUST be a `DirectPayload` (as an object, or a JSON string): a versioned envelope of
+             * pre-mapped entity and meter reading operations that skip the mapping engine entirely.
+             * Direct use cases accept JSON only - `format: "xml"` events are rejected.
+             *
              * example:
              * {"id":"BP10001","name":"Acme Corporation","type":"organization","tax_id":"DE123456789","status":"active"}
              */
@@ -2195,6 +2883,13 @@ export declare namespace Components {
              * customer-42
              */
             group_id?: string;
+            /**
+             * Optional per-event trace id. Overrides the request-level `correlation_id` for THIS event, so a batch carrying several distinct business operations keeps its traces segregated in monitoring instead of merged under one request-level id. When absent, the event inherits the request-level `correlation_id`.
+             *
+             * example:
+             * customer-42-sync-2026-08-26
+             */
+            correlation_id?: string;
         };
         /**
          * Why the import failed — present if and only if status = FAILED. `code` is the translation key; for VALIDATION_BLOCKED the specifics are in `validation`.
@@ -3330,6 +4025,23 @@ export declare namespace Components {
          */
         export interface InboundIntegrationEventConfiguration {
             /**
+             * Enables direct mode for this use case. When `true`, every event routed to this use
+             * case must carry a `DirectPayload` - pre-mapped entity and meter reading operations -
+             * instead of raw ERP data, and the mapping engine is skipped entirely. Everything else
+             * in the inbound pipeline (deduplication, ordering, create-vs-update resolution,
+             * relation resolution, monitoring) behaves exactly as in mapped mode.
+             *
+             * In direct mode, `entities` doubles as an optional allowlist: when non-empty, each
+             * operation's `entity_slug` must match an entry's `entity_schema`, and when that entry
+             * declares `unique_ids`, the operation's unique-id keys must be exactly that set (or
+             * just `_id`). Entries need only `entity_schema` and `unique_ids` - `fields` is not
+             * required and is ignored. `meter_readings` is ignored in direct mode.
+             *
+             * Flag changes take up to 5 minutes to propagate (configuration cache).
+             *
+             */
+            direct?: boolean;
+            /**
              * Array of entity configurations for this event
              */
             entities?: IntegrationEntity[];
@@ -4187,9 +4899,11 @@ export declare namespace Components {
              */
             PruneScopeConfig;
             /**
-             * Field mapping definitions
+             * Field mapping definitions. Required for mapped-mode entity configurations; may be
+             * omitted for allowlist entries of a `direct: true` use case, where no mapping runs.
+             *
              */
-            fields: IntegrationEntityField[];
+            fields?: IntegrationEntityField[];
         }
         export interface IntegrationEntityField {
             /**
@@ -7795,6 +8509,24 @@ export declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace GetEntitySyncStatus {
+        namespace Parameters {
+            export type EntityId = string; // uuid
+            export type IntegrationId = string; // uuid
+        }
+        export interface PathParameters {
+            entityId: Parameters.EntityId /* uuid */;
+        }
+        export interface QueryParameters {
+            integration_id?: Parameters.IntegrationId /* uuid */;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.EntitySyncStatusResponse;
+            export type $400 = Components.Responses.BadRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace GetErpImport {
         namespace Parameters {
             export type ImportId = string;
@@ -8431,6 +9163,27 @@ export declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace SimulateDirect {
+        export type RequestBody = /**
+         * Request for a direct-mode dry run: the `direct: true` use case configuration to test
+         * against, and the payload to validate and translate.
+         *
+         */
+        Components.Schemas.DirectSimulationRequest;
+        namespace Responses {
+            export type $200 = /**
+             * Result of a direct-mode dry run. `valid: false` responses list EVERY violation found
+             * across all operations in `errors`. `valid: true` responses preview the internal updates
+             * the pipeline would apply, plus non-blocking `warnings`.
+             *
+             */
+            Components.Schemas.DirectSimulationResponse;
+            export type $400 = Components.Responses.BadRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $422 = Components.Schemas.ErrorResponseBase;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace SimulateMapping {
         export type RequestBody = Components.Schemas.MappingSimulationRequest;
         namespace Responses {
@@ -8724,6 +9477,29 @@ export interface OperationMethods {
     data?: Paths.SimulateMappingV2.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.SimulateMappingV2.Responses.$200>
+  /**
+   * simulateDirect - simulateDirect
+   * 
+   * Dry run for direct-mode payloads: validates a `DirectPayload` against a `direct: true`
+   * use case configuration and previews the internal entity and meter reading updates the
+   * pipeline would apply — without persisting anything.
+   * 
+   * Unlike the ingest endpoint, validation does not stop at the first problem: ALL issues
+   * across all operations are collected into `errors`, each carrying the index of the
+   * operation it refers to. When the payload is valid, the response additionally contains
+   * the translated update previews plus non-blocking `warnings` (for example unique-id
+   * fields that are not defined in the target entity schema, or a failed server-side
+   * unique-id type derivation).
+   * 
+   * Use this endpoint while designing a direct integration, before sending events to
+   * `POST /v3/erp/updates/events`. See documentation at /docs/DIRECT_MODE.md.
+   * 
+   */
+  'simulateDirect'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.SimulateDirect.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.SimulateDirect.Responses.$200>
   /**
    * simulateMapping - simulateMapping
    * 
@@ -9151,6 +9927,24 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetOutboundStatus.Responses.$200>
+  /**
+   * getEntitySyncStatus - getEntitySyncStatus
+   * 
+   * Get the inbound ERP sync status of an entity: when each integration last
+   * synchronized (checked) the entity against the ERP, and when it last
+   * actually changed it. `last_synced_at` also advances on no-op checks —
+   * events that were received and evaluated but changed nothing — which by
+   * design leave no trace on the entity itself (no activity feed entry, no
+   * `_updated_at` bump). Use it to tell whether an entity is up to date with
+   * the ERP. Returns an empty list for entities no inbound use case has
+   * processed. Org-scoped via the caller's token.
+   * 
+   */
+  'getEntitySyncStatus'(
+    parameters?: Parameters<Paths.GetEntitySyncStatus.QueryParameters & Paths.GetEntitySyncStatus.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetEntitySyncStatus.Responses.$200>
   /**
    * pollOutboundMessages - pollOutboundMessages
    * 
@@ -9603,6 +10397,31 @@ export interface PathsDictionary {
       data?: Paths.SimulateMappingV2.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.SimulateMappingV2.Responses.$200>
+  }
+  ['/v1/erp/updates/direct_simulation']: {
+    /**
+     * simulateDirect - simulateDirect
+     * 
+     * Dry run for direct-mode payloads: validates a `DirectPayload` against a `direct: true`
+     * use case configuration and previews the internal entity and meter reading updates the
+     * pipeline would apply — without persisting anything.
+     * 
+     * Unlike the ingest endpoint, validation does not stop at the first problem: ALL issues
+     * across all operations are collected into `errors`, each carrying the index of the
+     * operation it refers to. When the payload is valid, the response additionally contains
+     * the translated update previews plus non-blocking `warnings` (for example unique-id
+     * fields that are not defined in the target entity schema, or a failed server-side
+     * unique-id type derivation).
+     * 
+     * Use this endpoint while designing a direct integration, before sending events to
+     * `POST /v3/erp/updates/events`. See documentation at /docs/DIRECT_MODE.md.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.SimulateDirect.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.SimulateDirect.Responses.$200>
   }
   ['/v1/erp/updates/mapping_simulation']: {
     /**
@@ -10075,6 +10894,26 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetOutboundStatus.Responses.$200>
   }
+  ['/v1/entities/{entityId}/sync-status']: {
+    /**
+     * getEntitySyncStatus - getEntitySyncStatus
+     * 
+     * Get the inbound ERP sync status of an entity: when each integration last
+     * synchronized (checked) the entity against the ERP, and when it last
+     * actually changed it. `last_synced_at` also advances on no-op checks —
+     * events that were received and evaluated but changed nothing — which by
+     * design leave no trace on the entity itself (no activity feed entry, no
+     * `_updated_at` bump). Use it to tell whether an entity is up to date with
+     * the ERP. Returns an empty list for entities no inbound use case has
+     * processed. Org-scoped via the caller's token.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetEntitySyncStatus.QueryParameters & Paths.GetEntitySyncStatus.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetEntitySyncStatus.Responses.$200>
+  }
   ['/v1/integrations/{integrationId}/outbound/messages/poll']: {
     /**
      * pollOutboundMessages - pollOutboundMessages
@@ -10516,6 +11355,16 @@ export type CreateUseCaseRequest = Components.Schemas.CreateUseCaseRequest;
 export type CreateUseCaseRequestBase = Components.Schemas.CreateUseCaseRequestBase;
 export type DeleteIntegrationAppMappingRequest = Components.Schemas.DeleteIntegrationAppMappingRequest;
 export type DeliveryConfig = Components.Schemas.DeliveryConfig;
+export type DirectEntityOperation = Components.Schemas.DirectEntityOperation;
+export type DirectMeterReadingOperation = Components.Schemas.DirectMeterReadingOperation;
+export type DirectPayload = Components.Schemas.DirectPayload;
+export type DirectRelationItem = Components.Schemas.DirectRelationItem;
+export type DirectRelationRefItem = Components.Schemas.DirectRelationRefItem;
+export type DirectRelationRefValue = Components.Schemas.DirectRelationRefValue;
+export type DirectRelationValue = Components.Schemas.DirectRelationValue;
+export type DirectSimulationError = Components.Schemas.DirectSimulationError;
+export type DirectSimulationRequest = Components.Schemas.DirectSimulationRequest;
+export type DirectSimulationResponse = Components.Schemas.DirectSimulationResponse;
 export type DocumentationPage = Components.Schemas.DocumentationPage;
 export type DocumentationPageSummary = Components.Schemas.DocumentationPageSummary;
 export type EmbeddedFileProxyUseCaseRequest = Components.Schemas.EmbeddedFileProxyUseCaseRequest;
@@ -10526,6 +11375,8 @@ export type EmbeddedSecureProxyUseCaseRequest = Components.Schemas.EmbeddedSecur
 export type EmbeddedUseCaseRequest = Components.Schemas.EmbeddedUseCaseRequest;
 export type EmbeddedUseCaseRequestBase = Components.Schemas.EmbeddedUseCaseRequestBase;
 export type EntityPruneScopeUpdate = Components.Schemas.EntityPruneScopeUpdate;
+export type EntitySyncState = Components.Schemas.EntitySyncState;
+export type EntitySyncStatusResponse = Components.Schemas.EntitySyncStatusResponse;
 export type EntityUpdate = Components.Schemas.EntityUpdate;
 export type EnvVarRefConfig = Components.Schemas.EnvVarRefConfig;
 export type EnvironmentFieldConfig = Components.Schemas.EnvironmentFieldConfig;

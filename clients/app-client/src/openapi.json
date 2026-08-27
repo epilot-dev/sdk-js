@@ -1438,6 +1438,70 @@
         }
       }
     },
+    "/v1/app/{appId}/options/resolve": {
+      "post": {
+        "summary": "resolveOptions",
+        "description": "Resolve the effective app-level options of an installation, including decrypted sensitive values (secrets). This endpoint accepts epilot internal-auth tokens exclusively (internal service calls, e.g. automation-workers or the customer portal API) — no user token, API key, or app token can call it, regardless of roles. Every call is audit-logged with the caller identity.",
+        "operationId": "resolveOptions",
+        "tags": [
+          "App Installation"
+        ],
+        "parameters": [
+          {
+            "name": "appId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "keys": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Narrow the response to these option keys"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Effective options with resolved values",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "options": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Options"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Caller is not authenticated with an internal-auth token"
+          },
+          "404": {
+            "description": "App installation not found"
+          }
+        }
+      }
+    },
     "/v1/app-events": {
       "post": {
         "summary": "ingestEvent",
@@ -1831,6 +1895,13 @@
                     "$ref": "#/components/schemas/FunctionDefinition"
                   },
                   "description": "Replaces the full set of server-side functions for this version"
+                },
+                "options": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Options"
+                  },
+                  "description": "Replaces the full set of app-level option declarations for this version.\nOption keys must be unique app-wide; `secret`-touching options are always\nsensitive and must not declare `sensitive: false`.\n"
                 }
               }
             }
@@ -1984,6 +2055,25 @@
               "object"
             ],
             "description": "The type of this option. `object` declares a structured value whose fields are listed\nunder `fields`. Combine with `repeatable: true` to express a list of these objects.\n"
+          },
+          "sensitive": {
+            "type": "boolean",
+            "description": "Write-only, server-side only value — like a sensitive environment variable\n(app-level options only). Sensitive values are never serialized in any response;\nthey are resolvable only via server-side channels (API proxy injection, function\n`secrets` allowlist, the internal options/resolve endpoint). Non-sensitive values\nare readable wherever the app runs, including the end-customer browser (journey and\nportal runtime). Forced to true for `secret`-touching options. Default: false.\n"
+          },
+          "configured": {
+            "type": "boolean",
+            "readOnly": true,
+            "description": "Serialized instead of `value` for sensitive options (secrets): true when a\nvalue is stored.\n"
+          },
+          "lifted": {
+            "type": "boolean",
+            "readOnly": true,
+            "description": "Compatibility marker: this option is declared at app level and folded back\ninto the component's options so existing consumers (journey runtime, portal\nblocks, older services) keep working unchanged. New consumers should read\napp-level options from the installation's `options` array instead.\n"
+          },
+          "value_updated_at": {
+            "type": "string",
+            "readOnly": true,
+            "description": "Timestamp of the last value change. Only returned for sensitive options\n(alongside `configured`) so installers can see when a secret was last rotated.\n"
           }
         }
       },
@@ -2048,7 +2138,7 @@
         "properties": {
           "component_id": {
             "type": "string",
-            "description": "ID of the component these values are for"
+            "description": "ID of the component these values are for. Use the sentinel `$app` for\napp-level option values (options declared at the manifest top level).\n"
           },
           "options": {
             "type": "array",
@@ -2118,7 +2208,7 @@
           "label": {
             "allOf": [
               {
-                "description": null
+                "description": "Human-readable display name of the function, shown to installing organizations (e.g. in the scheduled-functions summary)\n"
               },
               {
                 "$ref": "#/components/schemas/TranslatedString"
@@ -2164,7 +2254,8 @@
             "items": {
               "type": "string"
             },
-            "description": "Keys of installation options of type secret made available to the function via input.app_options\n"
+            "deprecated": true,
+            "description": "DEPRECATED and ignored — functions receive the app's full effective option keyspace (sensitive values included) via input.app_options. Kept for manifest compatibility.\n"
           }
         }
       },
@@ -2253,6 +2344,13 @@
               "$ref": "#/components/schemas/Options"
             },
             "description": "List of options for the app component"
+          },
+          "uses_options": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Keys of app-level options this component uses. Narrows which options are\nfolded back into `options` for legacy consumers (e.g. which values a journey\nblock receives in its public args) — a scoping hint, never a security\nboundary. Stamped automatically by the component-options migration; may also\nbe declared by the app developer.\n"
           },
           "surfaces": {
             "type": "object"
@@ -4840,6 +4938,14 @@
             "minItems": 0,
             "description": "Server-side functions of the app, including scheduled functions"
           },
+          "options": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Options"
+            },
+            "minItems": 0,
+            "description": "App-level option declarations (with sensitivity) of this version"
+          },
           "visibility": {
             "type": "string",
             "enum": [
@@ -5077,6 +5183,14 @@
             },
             "readOnly": true
           },
+          "options": {
+            "description": "Effective app-level options of the installation: declared top-level options plus\ncomponent-level options lifted to the app keyspace, each with its configured\n`value`. Values of sensitive options (secrets) are never included — they carry\n`configured` and `value_updated_at` instead.\n",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Options"
+            },
+            "readOnly": true
+          },
           "installed_version": {
             "type": "string",
             "description": "Version of the app that is installed",
@@ -5191,6 +5305,14 @@
             },
             "minItems": 0,
             "description": "Server-side functions of the app, including scheduled functions"
+          },
+          "options": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Options"
+            },
+            "minItems": 0,
+            "description": "App-level option declarations (with sensitivity) of this version"
           },
           "is_beta": {
             "type": "boolean",
@@ -5442,6 +5564,11 @@
               "correlation_id": {
                 "type": "string",
                 "description": "Filter by correlation ID for tracing"
+              },
+              "search": {
+                "type": "string",
+                "maxLength": 200,
+                "description": "Case-insensitive substring match over event details and component id"
               }
             }
           },
@@ -5492,6 +5619,11 @@
                 "minimum": 1,
                 "maximum": 1000,
                 "default": 100
+              },
+              "before": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Cursor: only return events strictly older than this timestamp. Use the timestamp of the last received event to fetch the next page; more efficient than increasing page/page_size.\n"
               }
             }
           },

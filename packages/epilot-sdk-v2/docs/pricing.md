@@ -2673,14 +2673,14 @@ type CreatedVariant = {
   }
   valid_from: string
   values: Record<string, unknown>
-  _created_at?: string
-  _updated_at?: string
-  _revision?: number
+  _created_at: string
+  _updated_at: string
+  _revision: number
   warnings: Array<{
     code: "VARIANT_COUNT_APPROACHING_CAP"
     message: string
-    variant_count?: number
-    cap?: number
+    variant_count: number
+    cap: number
   }>
 }
 ```
@@ -2691,8 +2691,8 @@ type CreatedVariant = {
 type VariantWriteWarning = {
   code: "VARIANT_COUNT_APPROACHING_CAP"
   message: string
-  variant_count?: number
-  cap?: number
+  variant_count: number
+  cap: number
 }
 ```
 
@@ -2726,9 +2726,9 @@ type VariantVersion = {
   }
   valid_from: string
   values: Record<string, unknown>
-  _created_at?: string
-  _updated_at?: string
-  _revision?: number
+  _created_at: string
+  _updated_at: string
+  _revision: number
 }
 ```
 
@@ -2747,9 +2747,9 @@ type WrittenVariantVersion = {
   }
   valid_from: string
   values: Record<string, unknown>
-  _created_at?: string
-  _updated_at?: string
-  _revision?: number
+  _created_at: string
+  _updated_at: string
+  _revision: number
   warnings: Array<{
     code: "ACTIVE_VERSION_REPLACED" | "SUPERSEDED_VERSION_WRITTEN"
     message: string

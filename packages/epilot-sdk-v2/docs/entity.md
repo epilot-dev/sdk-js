@@ -232,6 +232,7 @@ const { data } = await entityClient.listSchemas(...)
 - [`GraphSeed`](#graphseed)
 - [`GraphDefinition`](#graphdefinition)
 - [`GraphNode`](#graphnode)
+- [`GraphNodeFilter`](#graphnodefilter)
 - [`GraphEdge`](#graphedge)
 - [`GraphQueryResponse`](#graphqueryresponse)
 - [`EntitySearchResults`](#entitysearchresults)
@@ -491,6 +492,10 @@ const { data } = await client.getSchema({
     "widget_visibility": {
       "next_best_action": true,
       "address_map": false
+    },
+    "widget_widths": {
+      "address_map": "full_width",
+      "recent_communications": "one_third_width"
     }
   },
   "capabilities": [
@@ -649,6 +654,10 @@ const { data } = await client.putSchema(
       widget_visibility: {
         next_best_action: true,
         address_map: false
+      },
+      widget_widths: {
+        address_map: 'full_width',
+        recent_communications: 'one_third_width'
       }
     },
     capabilities: [
@@ -807,6 +816,10 @@ const { data } = await client.putSchema(
     "widget_visibility": {
       "next_best_action": true,
       "address_map": false
+    },
+    "widget_widths": {
+      "address_map": "full_width",
+      "recent_communications": "one_third_width"
     }
   },
   "capabilities": [
@@ -1257,6 +1270,10 @@ const { data } = await client.freezeSchema(
     "widget_visibility": {
       "next_best_action": true,
       "address_map": false
+    },
+    "widget_widths": {
+      "address_map": "full_width",
+      "recent_communications": "one_third_width"
     }
   },
   "capabilities": [
@@ -1429,6 +1446,10 @@ const { data } = await client.unfreezeSchema({
     "widget_visibility": {
       "next_best_action": true,
       "address_map": false
+    },
+    "widget_widths": {
+      "address_map": "full_width",
+      "recent_communications": "one_third_width"
     }
   },
   "capabilities": [
@@ -5215,6 +5236,7 @@ const { data } = await client.createSchemaCapability(
         header: true,
         requiredPermission: { /* ... */ },
         default_visible: false,
+        default_width: 'half_width',
         pricing_tier_setting: 'entity_address_maps'
       }
     ],
@@ -5350,6 +5372,7 @@ const { data } = await client.createSchemaCapability(
       "header": true,
       "requiredPermission": {},
       "default_visible": false,
+      "default_width": "half_width",
       "pricing_tier_setting": "entity_address_maps"
     }
   ],
@@ -5500,6 +5523,7 @@ const { data } = await client.getSchemaCapability({
       "header": true,
       "requiredPermission": {},
       "default_visible": false,
+      "default_width": "half_width",
       "pricing_tier_setting": "entity_address_maps"
     }
   ],
@@ -5646,6 +5670,7 @@ const { data } = await client.putSchemaCapability(
         header: true,
         requiredPermission: { /* ... */ },
         default_visible: false,
+        default_width: 'half_width',
         pricing_tier_setting: 'entity_address_maps'
       }
     ],
@@ -5781,6 +5806,7 @@ const { data } = await client.putSchemaCapability(
       "header": true,
       "requiredPermission": {},
       "default_visible": false,
+      "default_width": "half_width",
       "pricing_tier_setting": "entity_address_maps"
     }
   ],
@@ -5931,6 +5957,7 @@ const { data } = await client.deleteSchemaCapability({
       "header": true,
       "requiredPermission": {},
       "default_visible": false,
+      "default_width": "half_width",
       "pricing_tier_setting": "entity_address_maps"
     }
   ],
@@ -6468,6 +6495,7 @@ type EntitySchema = {
     }
     widget_order?: string[]
     widget_visibility?: Record<string, boolean>
+    widget_widths?: Record<string, "one_third_width" | "half_width" | "two_third_width" | "full_width">
   }
   capabilities: Array<{
     id?: string
@@ -6495,7 +6523,6 @@ type EntitySchema = {
       data_classification?: { ... }
       _purpose?: { ... }
       _manifest?: { ... }
-      constraints?: { ... }
   // ...
 }
 ```
@@ -6586,6 +6613,7 @@ type EntitySchemaItem = {
     }
     widget_order?: string[]
     widget_visibility?: Record<string, boolean>
+    widget_widths?: Record<string, "one_third_width" | "half_width" | "two_third_width" | "full_width">
   }
   capabilities: Array<{
     id?: string
@@ -6602,7 +6630,6 @@ type EntitySchemaItem = {
       required?: { ... }
       readonly?: { ... }
       deprecated?: { ... }
-      variant_overridable?: { ... }
   // ...
 }
 ```
@@ -10636,6 +10663,7 @@ type GraphQueryRequest = {
       schema: { ... }
       cardinality?: { ... }
       fields?: { ... }
+      filter?: { ... }
     }>
     edges: Array<{
       from: { ... }
@@ -10665,6 +10693,10 @@ type GraphDefinition = {
     schema: string
     cardinality?: "one" | "many"
     fields?: object
+    filter?: Array<{
+      attribute: { ... }
+      value: { ... }
+    }>
   }>
   edges: Array<{
     from: string
@@ -10681,6 +10713,21 @@ type GraphNode = {
   schema: string
   cardinality?: "one" | "many"
   fields?: object
+  filter?: Array<{
+    attribute: string
+    value: object
+  }>
+}
+```
+
+### `GraphNodeFilter`
+
+Entities are included in this node's result only if `attribute` exactly equals the literal `value`.
+
+```ts
+type GraphNodeFilter = {
+  attribute: string
+  value: object
 }
 ```
 

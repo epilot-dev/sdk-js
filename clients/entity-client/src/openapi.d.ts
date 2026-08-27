@@ -3432,6 +3432,12 @@ declare namespace Components {
                  */
                 default_visible?: boolean;
                 /**
+                 * How wide this widget is by default in the entity-details widget grid. Only meaningful on the `EntityDetailsV2:Widget` and `EntityDetailsV2:Header` hooks. Defaults to `full_width` when omitted — deliberately unlike the attribute layout default of `half_width`, because a full-width widget can never leave a hole in a row. An admin's explicit choice in the entity builder is stored in the schema's `ui_config.widget_widths` and wins over this.
+                 * example:
+                 * half_width
+                 */
+                default_width?: "one_third_width" | "half_width" | "two_third_width" | "full_width";
+                /**
                  * The pricing-tier settings key an organisation must have enabled to use this widget. Omit for widgets available to everyone. Resolved against `GET /v2/pricing-tiers/me` as `override_settings[key].enabled ?? settings[key].enabled`. Note this is commercial packaging enforced in the UI, not a security control — the key must also be added to the pricing tier settings list in epilot-admin-portal, or it can never be switched on for a tier.
                  * example:
                  * entity_address_maps
@@ -3605,6 +3611,12 @@ declare namespace Components {
                  * false
                  */
                 default_visible?: boolean;
+                /**
+                 * How wide this widget is by default in the entity-details widget grid. Only meaningful on the `EntityDetailsV2:Widget` and `EntityDetailsV2:Header` hooks. Defaults to `full_width` when omitted — deliberately unlike the attribute layout default of `half_width`, because a full-width widget can never leave a hole in a row. An admin's explicit choice in the entity builder is stored in the schema's `ui_config.widget_widths` and wins over this.
+                 * example:
+                 * half_width
+                 */
+                default_width?: "one_third_width" | "half_width" | "two_third_width" | "full_width";
                 /**
                  * The pricing-tier settings key an organisation must have enabled to use this widget. Omit for widgets available to everyone. Resolved against `GET /v2/pricing-tiers/me` as `override_settings[key].enabled ?? settings[key].enabled`. Note this is commercial packaging enforced in the UI, not a security control — the key must also be added to the pricing tier settings list in epilot-admin-portal, or it can never be switched on for a tier.
                  * example:
@@ -4606,7 +4618,7 @@ declare namespace Components {
                     show_sharing_button?: boolean;
                 };
                 /**
-                 * Widget-grid layout for the entity-details page (builder-authored); columns/cells drive the grid geometry.
+                 * Superseded by `widget_widths`. A whole-grid layout preset that assigned each widget a width by its POSITION, so a widget that rendered nothing shifted every width after it. Neither the entity app nor the entity builder reads it any more; values stored before it was replaced are left in place rather than migrated.
                  */
                 grid_layout?: {
                     /**
@@ -4636,6 +4648,17 @@ declare namespace Components {
                  */
                 widget_visibility?: {
                     [name: string]: boolean;
+                };
+                /**
+                 * Per-widget width in the entity-details widget grid, keyed by widget id (a capability widget's `component`, or `summary` for the synthesized summary card). Spans a 12-column grid: `one_third_width` = 4, `half_width` = 6, `two_third_width` = 8, `full_width` = 12. Holds only the admin's deviations from each widget's declared default: a widget absent from this map falls back to its ui_hook `default_width`, and then to `full_width`. Do not seed this map from migrations — doing so would freeze today's defaults into the schema. Replaces the positional `grid_layout` preset.
+                 * example:
+                 * {
+                 *   "address_map": "full_width",
+                 *   "recent_communications": "one_third_width"
+                 * }
+                 */
+                widget_widths?: {
+                    [name: string]: "one_third_width" | "half_width" | "two_third_width" | "full_width";
                 };
             };
             capabilities: /* Capabilities the Entity has. Turn features on/off for entities. */ EntityCapability[];
@@ -5048,7 +5071,7 @@ declare namespace Components {
                     show_sharing_button?: boolean;
                 };
                 /**
-                 * Widget-grid layout for the entity-details page (builder-authored); columns/cells drive the grid geometry.
+                 * Superseded by `widget_widths`. A whole-grid layout preset that assigned each widget a width by its POSITION, so a widget that rendered nothing shifted every width after it. Neither the entity app nor the entity builder reads it any more; values stored before it was replaced are left in place rather than migrated.
                  */
                 grid_layout?: {
                     /**
@@ -5078,6 +5101,17 @@ declare namespace Components {
                  */
                 widget_visibility?: {
                     [name: string]: boolean;
+                };
+                /**
+                 * Per-widget width in the entity-details widget grid, keyed by widget id (a capability widget's `component`, or `summary` for the synthesized summary card). Spans a 12-column grid: `one_third_width` = 4, `half_width` = 6, `two_third_width` = 8, `full_width` = 12. Holds only the admin's deviations from each widget's declared default: a widget absent from this map falls back to its ui_hook `default_width`, and then to `full_width`. Do not seed this map from migrations — doing so would freeze today's defaults into the schema. Replaces the positional `grid_layout` preset.
+                 * example:
+                 * {
+                 *   "address_map": "full_width",
+                 *   "recent_communications": "one_third_width"
+                 * }
+                 */
+                widget_widths?: {
+                    [name: string]: "one_third_width" | "half_width" | "two_third_width" | "full_width";
                 };
             };
             capabilities: /* Capabilities the Entity has. Turn features on/off for entities. */ EntityCapability[];
@@ -6169,6 +6203,34 @@ declare namespace Components {
              * ]
              */
             fields?: string[];
+            /**
+             * Narrows this node's traversal results to entities matching every filter (AND semantics). Useful for
+             * disambiguating among multiple entities reachable via the same graph edge.
+             *
+             */
+            filter?: /* Entities are included in this node's result only if `attribute` exactly equals the literal `value`. */ GraphNodeFilter[];
+        }
+        /**
+         * Entities are included in this node's result only if `attribute` exactly equals the literal `value`.
+         */
+        export interface GraphNodeFilter {
+            /**
+             * Entity attribute name to match against. Must be a plain attribute name, not an Elasticsearch field path.
+             * example:
+             * order_number
+             */
+            attribute: string;
+            /**
+             * Literal value the attribute must exactly equal for the entity to be included in this node's result.
+             * example:
+             * OR-113
+             */
+            value: /**
+             * Literal value the attribute must exactly equal for the entity to be included in this node's result.
+             * example:
+             * OR-113
+             */
+            (string | null) | number | boolean;
         }
         export interface GraphQueryRequest {
             seed: GraphSeed;
@@ -19605,6 +19667,7 @@ export type GetRelationsRespWithPagination = Components.Schemas.GetRelationsResp
 export type GraphDefinition = Components.Schemas.GraphDefinition;
 export type GraphEdge = Components.Schemas.GraphEdge;
 export type GraphNode = Components.Schemas.GraphNode;
+export type GraphNodeFilter = Components.Schemas.GraphNodeFilter;
 export type GraphQueryRequest = Components.Schemas.GraphQueryRequest;
 export type GraphQueryResponse = Components.Schemas.GraphQueryResponse;
 export type GraphSeed = Components.Schemas.GraphSeed;
