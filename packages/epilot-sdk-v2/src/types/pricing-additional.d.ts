@@ -1,3 +1,4 @@
+/* Auto-copied from pricing-client/src/additional-types.ts */
 /**
  * Additional legacy types that were removed from the OpenAPI specification
  * because they are no longer used by the API.
@@ -6,7 +7,7 @@
  * removed once all dependent code has been migrated.
  */
 
-import type { Address, Amounts, Customer, MetaData, OrderStatus, PriceItems, PriceTier, TotalDetails } from './openapi';
+import type { Address, Amounts, Customer, MetaData, OrderStatus, PriceItems, PriceTier, TotalDetails } from './pricing';
 
 export interface AvailabilityDate {
   /**

@@ -197,6 +197,20 @@
         "responses": {}
       }
     },
+    "/v1/campaign/{campaign_id}/recipient/{recipient_id}/entity_ui:restore": {
+      "post": {
+        "operationId": "restoreRecipientEntityUiStatus",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CampaignIdPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/RecipientIdPathParam"
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v1/campaign/{campaign_id}/recipients": {
       "get": {
         "operationId": "getRecipients",
@@ -225,6 +239,21 @@
           {
             "name": "portal_status",
             "in": "query"
+          },
+          {
+            "name": "email_status",
+            "in": "query"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/campaign/{campaign_id}/email-stats": {
+      "get": {
+        "operationId": "getEmailStats",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CampaignIdPathParam"
           }
         ],
         "responses": {}
@@ -271,6 +300,11 @@
         }
       },
       "RecipientsResponse": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "EmailStatsResponse": {
         "content": {
           "application/json": {}
         }
