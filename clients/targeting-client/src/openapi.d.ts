@@ -70,35 +70,47 @@ declare namespace Components {
         Schemas.ClientError;
         export interface DiscoverCampaignsResponse {
             /**
-             * Number of matching NBAs.
+             * Number of matching NBAs. Counts `results` only — dismissed ones are excluded.
              */
             hits: number;
             /**
              * Matching NBAs, sorted by priority (desc); one entry per campaign.
              */
-            results: {
-                campaign_id: /**
-                 * example:
-                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
-                 */
-                Schemas.BaseUUID /* uuid */;
-                nba: /**
-                 * A Next Best Action configured on a campaign's Entity-UI channel.
-                 * This is the canonical NBA contract shared by discovery (this API), authoring, and rendering.
-                 * NBA content is single-language in v1; text fields may contain `{{placeholders}}` resolved at render time.
-                 *
-                 */
-                Schemas.NextBestAction;
-                /**
-                 * The recipient's current Entity-UI status for this campaign, present only
-                 * when a recipient record already exists (i.e. the entity has previously seen
-                 * or clicked this NBA). Absent when the entity has not yet interacted with it.
-                 * Dismissed NBAs are filtered out server-side, so this is only ever `seen` or
-                 * `clicked`. Lets the client skip a redundant `seen` call for NBAs already seen.
-                 *
-                 */
-                status?: "seen" | "dismissed" | "clicked";
-            }[];
+            results: /* One discovered Next Best Action, plus this entity's interaction state for it. */ Schemas.DiscoverResult[];
+            /**
+             * NBAs this entity has dismissed that would otherwise be in `results` — same shape,
+             * also priority-sorted. Returned so the client can show the agent what it hid and
+             * offer to restore it, without a second round-trip.
+             *
+             * Only currently-relevant dismissals appear: each one is matched against its
+             * campaign's target exactly like a visible NBA, so a dismissal is dropped once the
+             * campaign ends or the entity stops matching. Capped, so this is not a complete
+             * dismissal history.
+             *
+             */
+            dismissed: /* One discovered Next Best Action, plus this entity's interaction state for it. */ Schemas.DiscoverResult[];
+        }
+        export interface EmailStatsResponse {
+            /**
+             * Recipients with a recorded email status (the KPI denominator).
+             */
+            total_emailed: number;
+            sent: number;
+            /**
+             * Currently always 0 (Delivery events are not published yet).
+             */
+            delivered: number;
+            bounced: number;
+            /**
+             * Bounces classified permanent (bounced_hard + bounced_soft = bounced).
+             */
+            bounced_hard: number;
+            /**
+             * Bounces classified transient.
+             */
+            bounced_soft: number;
+            complained: number;
+            failed: number;
         }
         export interface GetTargetQueriesResponse {
             /**
@@ -325,7 +337,7 @@ declare namespace Components {
              * example:
              * CAMPAIGN_NOT_FOUND
              */
-            code: "CAMPAIGN_NOT_FOUND" | "CAMPAIGN_HAS_NO_TARGET" | "CAMPAIGN_HAS_NO_DELIVERY_METHOD" | "CAMPAIGN_HAS_JOB_IN_PROGRESS" | "CAMPAIGN_HAS_UNEXPECTED_STATUS" | "JOB_TOKEN_MISSING" | "TARGET_WITHOUT_FILTERS";
+            code: "CAMPAIGN_NOT_FOUND" | "CAMPAIGN_HAS_NO_TARGET" | "CAMPAIGN_HAS_NO_DELIVERY_METHOD" | "INVALID_NEXT_BEST_ACTION" | "CAMPAIGN_HAS_JOB_IN_PROGRESS" | "CAMPAIGN_HAS_UNEXPECTED_STATUS" | "JOB_TOKEN_MISSING" | "TARGET_WITHOUT_FILTERS";
         } | {
             /**
              * A descriptive error message.
@@ -385,6 +397,52 @@ declare namespace Components {
              */
             entity_schema: string;
         }
+        /**
+         * One discovered Next Best Action, plus this entity's interaction state for it.
+         */
+        export interface DiscoverResult {
+            campaign_id: /**
+             * example:
+             * b8c01433-5556-4e2b-aad4-6f5348d1df84
+             */
+            BaseUUID /* uuid */;
+            nba: /**
+             * A Next Best Action configured on a campaign's Entity-UI channel.
+             * This is the canonical NBA contract shared by discovery (this API), authoring, and rendering.
+             * NBA content is single-language in v1; text fields may contain `{{placeholders}}` resolved at render time.
+             *
+             */
+            NextBestAction;
+            /**
+             * The recipient's current Entity-UI status for this campaign, present only when a
+             * recipient record already exists (i.e. the entity has previously seen, clicked or
+             * dismissed this NBA). Absent when the entity has not yet interacted with it.
+             *
+             * In `results` this is only ever `seen` or `clicked`; in `dismissed` it is always
+             * `dismissed`. Lets the client skip a redundant `seen` call for NBAs already seen.
+             *
+             */
+            status?: "seen" | "dismissed" | "clicked";
+            /**
+             * When `status` was last written. Present whenever `status` is. Lets the client show how
+             * long ago an NBA was dismissed.
+             *
+             */
+            status_updated_at?: string; // date-time
+        }
+        /**
+         * SES bounce classification: `permanent` (hard) or `transient` (soft).
+         */
+        export type EmailBounceType = "permanent" | "transient";
+        /**
+         * Delivery status of the email a campaign's automation sends to a recipient. Set to `sent`
+         * once the automation hands the email off, then updated asynchronously as SES notifications
+         * arrive (`bounced` / `complained`; an SES Reject maps to `bounced`). `failed` is a send-time
+         * failure (the automation execution could not send at all), distinct from an asynchronous
+         * bounce. `delivered` is reserved for when Delivery events are published.
+         *
+         */
+        export type EmailStatus = "sent" | "delivered" | "bounced" | "complained" | "failed";
         /**
          * Lifecycle status of a Next Best Action on the Entity-UI channel. Unlike the portal
          * channel there is no `sent` state: an NBA recipient is born at `seen`, the moment the
@@ -1512,15 +1570,11 @@ declare namespace Components {
              * The NBA's single call-to-action.
              */
             cta: {
-                type: "journey" | "workflow" | "url";
+                type: "journey" | "workflow" | "flow";
                 /**
-                 * Journey id, workflow definition id, or URL, depending on `type`.
+                 * Journey id, workflow definition id, or flow template id, depending on `type`.
                  */
                 target: string;
-                /**
-                 * Optional CTA button label.
-                 */
-                label?: string;
                 /**
                  * Journey context parameters (journey CTA only). Maps the journey's declared
                  * context parameters so the journey knows which entity it is about. Discovery
@@ -1563,24 +1617,57 @@ declare namespace Components {
              */
             EntityUiStatus;
             entity_ui_status_updated_at?: string; // date-time
-            resolution?: /**
-             * Cross-channel resolution of a campaign for a recipient. Unlike the per-channel `*_status`
-             * fields (where `dismissed` is channel-local), a resolution suppresses the campaign on EVERY
-             * channel — the 360 Entity-UI card and the portal teaser alike. Server-managed and read-only:
-             * never sent by a client. Absence means unresolved.
+            /**
+             * The Entity-UI status the recipient held immediately before it was dismissed, so
+             * `entity_ui:restore` can put it back without losing a recorded click.
+             *
+             * Server-managed — never send this from a client; it is ignored on write. Meaningful
+             * **only while** `entity_ui_status` is `dismissed`: a restore intentionally leaves the
+             * value behind rather than clearing it, so a stale value after a restore is expected and
+             * must not be read.
              *
              */
-            Resolution;
+            entity_ui_status_before_dismiss?: "seen" | "dismissed" | "clicked";
+            /**
+             * The message entity id of the email sent to this recipient by the campaign's automation
+             * (not the SES/provider message id), used to correlate SES delivery notifications back to
+             * the recipient. Server-managed.
+             *
+             */
+            message_entity_id?: string;
+            email_status?: /**
+             * Delivery status of the email a campaign's automation sends to a recipient. Set to `sent`
+             * once the automation hands the email off, then updated asynchronously as SES notifications
+             * arrive (`bounced` / `complained`; an SES Reject maps to `bounced`). `failed` is a send-time
+             * failure (the automation execution could not send at all), distinct from an asynchronous
+             * bounce. `delivered` is reserved for when Delivery events are published.
+             *
+             */
+            EmailStatus;
+            email_status_updated_at?: string; // date-time
+            email_bounce_type?: /* SES bounce classification: `permanent` (hard) or `transient` (soft). */ EmailBounceType;
+            /**
+             * SES bounce sub-type (e.g. `General`, `NoEmail`, `MailboxFull`).
+             */
+            email_bounce_subtype?: string;
+            /**
+             * SES complaint feedback type (e.g. `abuse`, `fraud`), set for complaints.
+             */
+            email_complaint_type?: string;
+            /**
+             * Human-readable failure reason — the SES bounce `diagnosticCode`, the complaint
+             * feedback type, or a send-time error message.
+             *
+             */
+            email_bounce_reason?: string;
+            /**
+             * The raw SES notification (or send error) kept verbatim for a detail view.
+             */
+            email_send_error?: {
+                [name: string]: any;
+            };
             updated_at?: string; // date-time
         }
-        /**
-         * Cross-channel resolution of a campaign for a recipient. Unlike the per-channel `*_status`
-         * fields (where `dismissed` is channel-local), a resolution suppresses the campaign on EVERY
-         * channel — the 360 Entity-UI card and the portal teaser alike. Server-managed and read-only:
-         * never sent by a client. Absence means unresolved.
-         *
-         */
-        export type Resolution = "accepted";
         export interface RetriggerAutomationsRequest {
             /**
              * List of recipient IDs to retrigger automations for
@@ -1917,6 +2004,23 @@ declare namespace Paths {
             export type $500 = Components.Responses.ServerErrorResponse;
         }
     }
+    namespace GetEmailStats {
+        namespace Parameters {
+            export type CampaignId = /**
+             * example:
+             * b8c01433-5556-4e2b-aad4-6f5348d1df84
+             */
+            Components.Schemas.BaseUUID /* uuid */;
+        }
+        export interface PathParameters {
+            campaign_id: Parameters.CampaignId;
+        }
+        namespace Responses {
+            export type $200 = Components.Responses.EmailStatsResponse;
+            export type $400 = Components.Responses.ClientErrorResponse;
+            export type $500 = Components.Responses.ServerErrorResponse;
+        }
+    }
     namespace GetRecipients {
         namespace Parameters {
             export type AutomationStatus = Components.Schemas.AutomationStatus[];
@@ -1925,6 +2029,15 @@ declare namespace Paths {
              * b8c01433-5556-4e2b-aad4-6f5348d1df84
              */
             Components.Schemas.BaseUUID /* uuid */;
+            export type EmailStatus = /**
+             * Delivery status of the email a campaign's automation sends to a recipient. Set to `sent`
+             * once the automation hands the email off, then updated asynchronously as SES notifications
+             * arrive (`bounced` / `complained`; an SES Reject maps to `bounced`). `failed` is a send-time
+             * failure (the automation execution could not send at all), distinct from an asynchronous
+             * bounce. `delivered` is reserved for when Delivery events are published.
+             *
+             */
+            Components.Schemas.EmailStatus;
             export type Limit = number;
             export type Next = string;
             export type PortalStatus = Components.Schemas.PortalStatus;
@@ -1939,6 +2052,7 @@ declare namespace Paths {
             q?: Parameters.Q;
             automation_status?: Parameters.AutomationStatus;
             portal_status?: Parameters.PortalStatus;
+            email_status?: Parameters.EmailStatus;
         }
         namespace Responses {
             export type $200 = Components.Responses.RecipientsResponse;
@@ -1967,6 +2081,30 @@ declare namespace Paths {
         namespace Responses {
             export type $200 = Components.Responses.MatchTargetsResponse;
             export type $400 = Components.Responses.ClientErrorResponse;
+            export type $500 = Components.Responses.ServerErrorResponse;
+        }
+    }
+    namespace RestoreRecipientEntityUiStatus {
+        namespace Parameters {
+            export type CampaignId = /**
+             * example:
+             * b8c01433-5556-4e2b-aad4-6f5348d1df84
+             */
+            Components.Schemas.BaseUUID /* uuid */;
+            export type RecipientId = /**
+             * example:
+             * b8c01433-5556-4e2b-aad4-6f5348d1df84
+             */
+            Components.Schemas.BaseUUID /* uuid */;
+        }
+        export interface PathParameters {
+            campaign_id: Parameters.CampaignId;
+            recipient_id: Parameters.RecipientId;
+        }
+        namespace Responses {
+            export type $200 = Components.Responses.RecipientResponse;
+            export type $404 = Components.Responses.ClientErrorResponse;
+            export type $409 = Components.Responses.ClientErrorResponse;
             export type $500 = Components.Responses.ServerErrorResponse;
         }
     }
@@ -2083,7 +2221,7 @@ declare namespace Paths {
 
 export interface OperationMethods {
   /**
-   * changeCampaignStatus - Change the status of a campaign
+   * changeCampaignStatus - changeCampaignStatus
    * 
    * Change the status of a campaign to a desired status.
    * 
@@ -2098,7 +2236,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ChangeCampaignStatus.Responses.$200>
   /**
-   * getCampaignJobStatus - Get the status of a campaign's automation job
+   * getCampaignJobStatus - getCampaignJobStatus
    * 
    * Get the status of a campaign's automation job
    */
@@ -2108,7 +2246,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetCampaignJobStatus.Responses.$200>
   /**
-   * getCampaignPortals - Get portals usage info for a campaign
+   * getCampaignPortals - getCampaignPortals
    * 
    * Get the list of portals and its widgets where the campaign is used.
    * 
@@ -2119,7 +2257,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetCampaignPortals.Responses.$200>
   /**
-   * retriggerCampaignAutomations - Retrigger automations for campaign recipients
+   * retriggerCampaignAutomations - retriggerCampaignAutomations
    * 
    * Retrigger automation executions for specific campaign recipients that have failed.
    * 
@@ -2136,7 +2274,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.RetriggerCampaignAutomations.Responses.$200>
   /**
-   * setupCampaign - Set up a campaign with related entities and configurations
+   * setupCampaign - setupCampaign
    * 
    * Creates a `campaign` entity together with its related entities and configurations in a single call.
    * Used by the campaign wizard UI, but not restricted to it.
@@ -2148,7 +2286,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.SetupCampaign.Responses.$201>
   /**
-   * matchCampaigns - Match campaigns
+   * matchCampaigns - matchCampaigns
    * 
    * Match campaigns based on target entities.
    * 
@@ -2161,7 +2299,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.MatchCampaigns.Responses.$200>
   /**
-   * discoverCampaigns - Discover Entity-UI Next Best Actions for an entity
+   * discoverCampaigns - discoverCampaigns
    * 
    * Given an entity, returns the Next Best Actions it should see on the Entity-UI channel.
    * 
@@ -2179,7 +2317,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DiscoverCampaigns.Responses.$200>
   /**
-   * matchTargets - Match targets
+   * matchTargets - matchTargets
    * 
    * Find targets from the provided list that include the provide entities.
    * 
@@ -2190,7 +2328,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.MatchTargets.Responses.$200>
   /**
-   * getTargetQueries - Get target queries
+   * getTargetQueries - getTargetQueries
    * 
    * Transform target filters into Lucene queries for the provided target IDs.
    * Returns the transformed query string for each target along with any errors encountered.
@@ -2202,7 +2340,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetTargetQueries.Responses.$200>
   /**
-   * createRecipient - Create a recipient associated with a campaign
+   * createRecipient - createRecipient
    * 
    * Creates a new recipient associated with a campaign.
    */
@@ -2212,7 +2350,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CreateRecipient.Responses.$201>
   /**
-   * updateRecipient - Update a recipient
+   * updateRecipient - updateRecipient
    * 
    * Updates a recipient's attributes.
    */
@@ -2222,7 +2360,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UpdateRecipient.Responses.$200>
   /**
-   * updateRecipientPortalStatus - Update portal status for a campaign recipient
+   * updateRecipientPortalStatus - updateRecipientPortalStatus
    * 
    * Updates the portal status for a specific campaign recipient.
    * The portal_status_updated_at timestamp is automatically set when the status changes.
@@ -2239,7 +2377,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UpdateRecipientPortalStatus.Responses.$200>
   /**
-   * updateRecipientEntityUiStatus - Update Entity-UI (Next Best Action) status for a campaign recipient
+   * updateRecipientEntityUiStatus - updateRecipientEntityUiStatus
    * 
    * Records a Next Best Action interaction for a recipient on the Entity-UI channel.
    * 
@@ -2251,7 +2389,7 @@ export interface OperationMethods {
    * - `seen`: lazily creates the recipient; a no-op success if a status already exists
    * - From `seen`: can change to `clicked` or `dismissed`
    * - From `clicked`: can change to `dismissed`
-   * - From `dismissed`: cannot be changed (final state)
+   * - From `dismissed`: cannot be changed via this operation — use `entity_ui:restore`
    * 
    * `dismissed` and `clicked` require an existing recipient (404 otherwise, since an NBA is
    * born at `seen`) and reject invalid transitions (409).
@@ -2265,7 +2403,30 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UpdateRecipientEntityUiStatus.Responses.$200>
   /**
-   * getRecipients - Get campaign recipients
+   * restoreRecipientEntityUiStatus - Undo a dismissal on the Entity-UI (Next Best Action) channel
+   * 
+   * Reverses a dismissal so the Next Best Action becomes visible to the entity again. This is
+   * the only way out of `dismissed` — `entity_ui:status` cannot leave that state.
+   * 
+   * The recipient's status is restored to whatever it was immediately before the dismissal
+   * (recorded in `entity_ui_status_before_dismiss`), so a `clicked` NBA that was dismissed
+   * returns to `clicked` and does not lose its recorded click. Falls back to `seen` when no
+   * previous status was recorded.
+   * 
+   * Scoped to the Entity-UI channel only: the recipient's portal and automation state is never
+   * touched. Takes no request body — the recipient's current state fully determines the result.
+   * 
+   * Returns 404 when the recipient has no Entity-UI status at all, and 409 when it has one but
+   * is not currently `dismissed` (there is nothing to undo).
+   * 
+   */
+  'restoreRecipientEntityUiStatus'(
+    parameters?: Parameters<Paths.RestoreRecipientEntityUiStatus.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.RestoreRecipientEntityUiStatus.Responses.$200>
+  /**
+   * getRecipients - getRecipients
    * 
    * Get a paginated list of recipients for a campaign.
    */
@@ -2274,12 +2435,26 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetRecipients.Responses.$200>
+  /**
+   * getEmailStats - getEmailStats
+   * 
+   * Aggregate email delivery counts for a campaign, for the KPI summary on the campaign UI.
+   * Counts cover the email (automation) channel only; `total_emailed` is the number of
+   * recipients with a recorded email status. `delivered` is derivable as
+   * `total_emailed - bounced - complained - failed`.
+   * 
+   */
+  'getEmailStats'(
+    parameters?: Parameters<Paths.GetEmailStats.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetEmailStats.Responses.$200>
 }
 
 export interface PathsDictionary {
   ['/v1/campaign/{campaign_id}/status']: {
     /**
-     * changeCampaignStatus - Change the status of a campaign
+     * changeCampaignStatus - changeCampaignStatus
      * 
      * Change the status of a campaign to a desired status.
      * 
@@ -2296,7 +2471,7 @@ export interface PathsDictionary {
   }
   ['/v1/campaign/{campaign_id}/job']: {
     /**
-     * getCampaignJobStatus - Get the status of a campaign's automation job
+     * getCampaignJobStatus - getCampaignJobStatus
      * 
      * Get the status of a campaign's automation job
      */
@@ -2308,7 +2483,7 @@ export interface PathsDictionary {
   }
   ['/v1/campaign/{campaign_id}/portals']: {
     /**
-     * getCampaignPortals - Get portals usage info for a campaign
+     * getCampaignPortals - getCampaignPortals
      * 
      * Get the list of portals and its widgets where the campaign is used.
      * 
@@ -2321,7 +2496,7 @@ export interface PathsDictionary {
   }
   ['/v1/campaign/{campaign_id}/automations:retrigger']: {
     /**
-     * retriggerCampaignAutomations - Retrigger automations for campaign recipients
+     * retriggerCampaignAutomations - retriggerCampaignAutomations
      * 
      * Retrigger automation executions for specific campaign recipients that have failed.
      * 
@@ -2340,7 +2515,7 @@ export interface PathsDictionary {
   }
   ['/v1/campaign:setup']: {
     /**
-     * setupCampaign - Set up a campaign with related entities and configurations
+     * setupCampaign - setupCampaign
      * 
      * Creates a `campaign` entity together with its related entities and configurations in a single call.
      * Used by the campaign wizard UI, but not restricted to it.
@@ -2354,7 +2529,7 @@ export interface PathsDictionary {
   }
   ['/v1/campaign:match']: {
     /**
-     * matchCampaigns - Match campaigns
+     * matchCampaigns - matchCampaigns
      * 
      * Match campaigns based on target entities.
      * 
@@ -2369,7 +2544,7 @@ export interface PathsDictionary {
   }
   ['/v1/campaign:discover']: {
     /**
-     * discoverCampaigns - Discover Entity-UI Next Best Actions for an entity
+     * discoverCampaigns - discoverCampaigns
      * 
      * Given an entity, returns the Next Best Actions it should see on the Entity-UI channel.
      * 
@@ -2389,7 +2564,7 @@ export interface PathsDictionary {
   }
   ['/v1/target:match']: {
     /**
-     * matchTargets - Match targets
+     * matchTargets - matchTargets
      * 
      * Find targets from the provided list that include the provide entities.
      * 
@@ -2402,7 +2577,7 @@ export interface PathsDictionary {
   }
   ['/v1/target/queries']: {
     /**
-     * getTargetQueries - Get target queries
+     * getTargetQueries - getTargetQueries
      * 
      * Transform target filters into Lucene queries for the provided target IDs.
      * Returns the transformed query string for each target along with any errors encountered.
@@ -2416,7 +2591,7 @@ export interface PathsDictionary {
   }
   ['/v1/campaign/{campaign_id}/recipient']: {
     /**
-     * createRecipient - Create a recipient associated with a campaign
+     * createRecipient - createRecipient
      * 
      * Creates a new recipient associated with a campaign.
      */
@@ -2428,7 +2603,7 @@ export interface PathsDictionary {
   }
   ['/v1/campaign/{campaign_id}/recipient/{recipient_id}']: {
     /**
-     * updateRecipient - Update a recipient
+     * updateRecipient - updateRecipient
      * 
      * Updates a recipient's attributes.
      */
@@ -2440,7 +2615,7 @@ export interface PathsDictionary {
   }
   ['/v1/campaign/{campaign_id}/recipient/{recipient_id}/portal:status']: {
     /**
-     * updateRecipientPortalStatus - Update portal status for a campaign recipient
+     * updateRecipientPortalStatus - updateRecipientPortalStatus
      * 
      * Updates the portal status for a specific campaign recipient.
      * The portal_status_updated_at timestamp is automatically set when the status changes.
@@ -2459,7 +2634,7 @@ export interface PathsDictionary {
   }
   ['/v1/campaign/{campaign_id}/recipient/{recipient_id}/entity_ui:status']: {
     /**
-     * updateRecipientEntityUiStatus - Update Entity-UI (Next Best Action) status for a campaign recipient
+     * updateRecipientEntityUiStatus - updateRecipientEntityUiStatus
      * 
      * Records a Next Best Action interaction for a recipient on the Entity-UI channel.
      * 
@@ -2471,7 +2646,7 @@ export interface PathsDictionary {
      * - `seen`: lazily creates the recipient; a no-op success if a status already exists
      * - From `seen`: can change to `clicked` or `dismissed`
      * - From `clicked`: can change to `dismissed`
-     * - From `dismissed`: cannot be changed (final state)
+     * - From `dismissed`: cannot be changed via this operation — use `entity_ui:restore`
      * 
      * `dismissed` and `clicked` require an existing recipient (404 otherwise, since an NBA is
      * born at `seen`) and reject invalid transitions (409).
@@ -2485,9 +2660,34 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.UpdateRecipientEntityUiStatus.Responses.$200>
   }
+  ['/v1/campaign/{campaign_id}/recipient/{recipient_id}/entity_ui:restore']: {
+    /**
+     * restoreRecipientEntityUiStatus - Undo a dismissal on the Entity-UI (Next Best Action) channel
+     * 
+     * Reverses a dismissal so the Next Best Action becomes visible to the entity again. This is
+     * the only way out of `dismissed` — `entity_ui:status` cannot leave that state.
+     * 
+     * The recipient's status is restored to whatever it was immediately before the dismissal
+     * (recorded in `entity_ui_status_before_dismiss`), so a `clicked` NBA that was dismissed
+     * returns to `clicked` and does not lose its recorded click. Falls back to `seen` when no
+     * previous status was recorded.
+     * 
+     * Scoped to the Entity-UI channel only: the recipient's portal and automation state is never
+     * touched. Takes no request body — the recipient's current state fully determines the result.
+     * 
+     * Returns 404 when the recipient has no Entity-UI status at all, and 409 when it has one but
+     * is not currently `dismissed` (there is nothing to undo).
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.RestoreRecipientEntityUiStatus.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.RestoreRecipientEntityUiStatus.Responses.$200>
+  }
   ['/v1/campaign/{campaign_id}/recipients']: {
     /**
-     * getRecipients - Get campaign recipients
+     * getRecipients - getRecipients
      * 
      * Get a paginated list of recipients for a campaign.
      */
@@ -2496,6 +2696,22 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetRecipients.Responses.$200>
+  }
+  ['/v1/campaign/{campaign_id}/email-stats']: {
+    /**
+     * getEmailStats - getEmailStats
+     * 
+     * Aggregate email delivery counts for a campaign, for the KPI summary on the campaign UI.
+     * Counts cover the email (automation) channel only; `total_emailed` is the number of
+     * recipients with a recorded email status. `delivered` is derivable as
+     * `total_emailed - bounced - complained - failed`.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetEmailStats.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetEmailStats.Responses.$200>
   }
 }
 
@@ -2520,6 +2736,9 @@ export type CampaignStatus = Components.Schemas.CampaignStatus;
 export type ClientError = Components.Schemas.ClientError;
 export type CreateRecipientPayload = Components.Schemas.CreateRecipientPayload;
 export type DiscoverCampaignsParams = Components.Schemas.DiscoverCampaignsParams;
+export type DiscoverResult = Components.Schemas.DiscoverResult;
+export type EmailBounceType = Components.Schemas.EmailBounceType;
+export type EmailStatus = Components.Schemas.EmailStatus;
 export type EntityUiStatus = Components.Schemas.EntityUiStatus;
 export type ExecutionSummaryItem = Components.Schemas.ExecutionSummaryItem;
 export type GetTargetQueriesParams = Components.Schemas.GetTargetQueriesParams;
@@ -2530,7 +2749,6 @@ export type NextBestAction = Components.Schemas.NextBestAction;
 export type PortalRecipientPayload = Components.Schemas.PortalRecipientPayload;
 export type PortalStatus = Components.Schemas.PortalStatus;
 export type Recipient = Components.Schemas.Recipient;
-export type Resolution = Components.Schemas.Resolution;
 export type RetriggerAutomationsRequest = Components.Schemas.RetriggerAutomationsRequest;
 export type RetriggerAutomationsResult = Components.Schemas.RetriggerAutomationsResult;
 export type ServerError = Components.Schemas.ServerError;
