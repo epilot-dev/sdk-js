@@ -627,6 +627,7 @@ const { data } = await client.createRecipient(
   "email_complaint_type": "string",
   "email_bounce_reason": "string",
   "email_send_error": {},
+  "email_unsubscribed_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z"
 }
 ```
@@ -680,6 +681,7 @@ const { data } = await client.updateRecipient(
   "email_complaint_type": "string",
   "email_bounce_reason": "string",
   "email_send_error": {},
+  "email_unsubscribed_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z"
 }
 ```
@@ -731,6 +733,7 @@ const { data } = await client.updateRecipientPortalStatus(
   "email_complaint_type": "string",
   "email_bounce_reason": "string",
   "email_send_error": {},
+  "email_unsubscribed_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z"
 }
 ```
@@ -782,6 +785,7 @@ const { data } = await client.updateRecipientEntityUiStatus(
   "email_complaint_type": "string",
   "email_bounce_reason": "string",
   "email_send_error": {},
+  "email_unsubscribed_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z"
 }
 ```
@@ -827,6 +831,7 @@ const { data } = await client.restoreRecipientEntityUiStatus({
   "email_complaint_type": "string",
   "email_bounce_reason": "string",
   "email_send_error": {},
+  "email_unsubscribed_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z"
 }
 ```
@@ -879,6 +884,7 @@ const { data } = await client.getRecipients({
       "email_complaint_type": "string",
       "email_bounce_reason": "string",
       "email_send_error": {},
+      "email_unsubscribed_at": "1970-01-01T00:00:00.000Z",
       "updated_at": "1970-01-01T00:00:00.000Z"
     }
   ],
@@ -917,7 +923,8 @@ const { data } = await client.getEmailStats({
   "bounced_hard": 0,
   "bounced_soft": 0,
   "complained": 0,
-  "failed": 0
+  "failed": 0,
+  "unsubscribed": 0
 }
 ```
 
@@ -1318,6 +1325,7 @@ type Recipient = {
   email_complaint_type?: string
   email_bounce_reason?: string
   email_send_error?: Record<string, unknown>
+  email_unsubscribed_at?: string // date-time
   updated_at?: string // date-time
 }
 ```

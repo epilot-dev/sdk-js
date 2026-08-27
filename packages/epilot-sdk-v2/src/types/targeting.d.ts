@@ -112,6 +112,10 @@ export declare namespace Components {
             bounced_soft: number;
             complained: number;
             failed: number;
+            /**
+             * Recipients who opted out of email marketing.
+             */
+            unsubscribed: number;
         }
         export interface GetTargetQueriesResponse {
             /**
@@ -1667,6 +1671,10 @@ export declare namespace Components {
             email_send_error?: {
                 [name: string]: any;
             };
+            /**
+             * When the contact unsubscribed from email marketing (opted out). Server-managed.
+             */
+            email_unsubscribed_at?: string; // date-time
             updated_at?: string; // date-time
         }
         export interface RetriggerAutomationsRequest {
