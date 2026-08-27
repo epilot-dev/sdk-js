@@ -1432,6 +1432,11 @@
             "additionalProperties": true,
             "description": "The raw SES notification (or send error) kept verbatim for a detail view."
           },
+          "email_unsubscribed_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the contact unsubscribed from email marketing (opted out). Server-managed."
+          },
           "updated_at": {
             "type": "string",
             "format": "date-time"
@@ -1941,7 +1946,8 @@
                 "bounced_hard",
                 "bounced_soft",
                 "complained",
-                "failed"
+                "failed",
+                "unsubscribed"
               ],
               "properties": {
                 "total_emailed": {
@@ -1971,6 +1977,10 @@
                 },
                 "failed": {
                   "type": "integer"
+                },
+                "unsubscribed": {
+                  "type": "integer",
+                  "description": "Recipients who opted out of email marketing."
                 }
               }
             }
