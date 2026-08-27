@@ -1463,6 +1463,10 @@ declare namespace Components {
              * Configures which 360 events generate an in-app notification for the portal user. Each enabled trigger renders the referenced notification template and creates a notification addressed to the portal user. Admin/builder-only — never exposed via the public portal config.
              */
             notification_triggers?: NotificationTriggerConfig[];
+            /**
+             * Master toggle for the portal's engagement center (in-app notifications including the notification triggers above). Off when absent — portal users only see the engagement center and receive trigger notifications after an admin enables it.
+             */
+            engagement_center_enabled?: boolean;
         }
         export interface CommonConfigAttributesV3 {
             /**
@@ -3293,7 +3297,27 @@ declare namespace Components {
             templates?: {
                 [name: string]: string;
             };
-            templates_ref?: /* Reference to admin-authored portal configuration (a page block or a global search configuration item) from which the API derives Handlebars templates server-side. This replaces client-supplied template strings so portal users can never submit arbitrary templates for resolution. When both a reference and raw `templates` are provided, the reference wins and the raw templates are ignored. */ TemplatesRef;
+            /**
+             * Reference to admin-authored portal configuration (a page block or a global search configuration item) from which the API derives Handlebars templates server-side. This replaces client-supplied template strings so portal users can never submit arbitrary templates for resolution. When both a reference and raw `templates` are provided, the reference wins and the raw templates are ignored.
+             */
+            templates_ref?: {
+                /**
+                 * ID of the portal page to derive templates from. When given without `block_id`, templates are derived from every block of the page and returned resolved as a nested map keyed by block id (the entity detail page contract).
+                 */
+                page_id?: string;
+                /**
+                 * ID of a block within the page. Templates are derived from the block's content according to its block type (e.g. meter_selector, meter_reading, entity_list).
+                 */
+                block_id?: string;
+                /**
+                 * For blocks carrying a per-schema configuration array (entity_list), the id of the configuration item to derive templates from. Requires `page_id` and `block_id`.
+                 */
+                config_id?: string;
+                /**
+                 * ID of the portal's `global_search` configuration item to derive search result templates and the group title template from. Mutually exclusive with `page_id`.
+                 */
+                global_search_config_id?: string;
+            };
         }
         export interface EntityTemplates {
             /**
@@ -6614,6 +6638,10 @@ declare namespace Components {
              */
             notification_triggers?: NotificationTriggerConfig[];
             /**
+             * Master toggle for the portal's engagement center (in-app notifications including the notification triggers above). Off when absent — portal users only see the engagement center and receive trigger notifications after an admin enables it.
+             */
+            engagement_center_enabled?: boolean;
+            /**
              * ID of the organization
              * example:
              * 12345
@@ -8106,11 +8134,14 @@ declare namespace Components {
              */
             code: string;
             /**
-             * The redirect uri
+             * The redirect uri used in the authorization request. Optional: when omitted it is
+             * resolved server-side from the provider's configured `redirect_uri`, falling back to
+             * the portal's own callback route (`https://<domain>/sso`).
+             *
              * example:
-             * https://customer-portal.com/login
+             * https://customer-portal.com/sso
              */
-            redirect_uri: string;
+            redirect_uri?: string;
             /**
              * The client id
              * example:
@@ -9014,6 +9045,10 @@ declare namespace Components {
              * Configures which 360 events generate an in-app notification for the portal user. Each enabled trigger renders the referenced notification template and creates a notification addressed to the portal user. Admin/builder-only — never exposed via the public portal config.
              */
             notification_triggers?: NotificationTriggerConfig[];
+            /**
+             * Master toggle for the portal's engagement center (in-app notifications including the notification triggers above). Off when absent — portal users only see the engagement center and receive trigger notifications after an admin enables it.
+             */
+            engagement_center_enabled?: boolean;
         }
         export interface UpsertPortalConfigV3 {
             /**
@@ -13562,6 +13597,10 @@ declare namespace Paths {
                  */
                 notification_triggers?: Components.Schemas.NotificationTriggerConfig[];
                 /**
+                 * Master toggle for the portal's engagement center (in-app notifications including the notification triggers above). Off when absent — portal users only see the engagement center and receive trigger notifications after an admin enables it.
+                 */
+                engagement_center_enabled?: boolean;
+                /**
                  * ID of the organization
                  * example:
                  * 12345
@@ -14183,6 +14222,10 @@ declare namespace Paths {
                  * Configures which 360 events generate an in-app notification for the portal user. Each enabled trigger renders the referenced notification template and creates a notification addressed to the portal user. Admin/builder-only — never exposed via the public portal config.
                  */
                 notification_triggers?: Components.Schemas.NotificationTriggerConfig[];
+                /**
+                 * Master toggle for the portal's engagement center (in-app notifications including the notification triggers above). Off when absent — portal users only see the engagement center and receive trigger notifications after an admin enables it.
+                 */
+                engagement_center_enabled?: boolean;
                 /**
                  * ID of the organization
                  * example:
