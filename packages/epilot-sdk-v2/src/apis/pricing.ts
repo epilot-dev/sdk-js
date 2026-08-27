@@ -9,6 +9,7 @@ export { authorize } from '../authorize';
 export type { TokenArg } from '../authorize';
 import type { Client } from '../types/pricing';
 export type * from '../types/pricing';
+export type * from '../types/pricing-additional';
 export type { OpenAPIClient } from 'openapi-client-axios';
 
 /* eslint-disable @typescript-eslint/no-require-imports */
