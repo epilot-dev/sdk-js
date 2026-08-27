@@ -627,7 +627,8 @@ const { data } = await client.upsertPortal(
         enabled: true,
         template_id: '3fa85f64-5717-4562-b3fc-2c963f66afa6'
       }
-    ]
+    ],
+    engagement_center_enabled: true
   },
 )
 ```
@@ -863,6 +864,7 @@ const { data } = await client.upsertPortal(
       "template_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
     }
   ],
+  "engagement_center_enabled": true,
   "id": 12345,
   "organization_id": 12345,
   "org_settings": {
@@ -1236,6 +1238,7 @@ const { data } = await client.getPortalConfigByDomain({
       "template_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
     }
   ],
+  "engagement_center_enabled": true,
   "id": 12345,
   "organization_id": 12345,
   "org_settings": {
@@ -1512,6 +1515,7 @@ const { data } = await client.getPortalConfig({
       "template_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
     }
   ],
+  "engagement_center_enabled": true,
   "id": 12345,
   "organization_id": 12345,
   "org_settings": {
@@ -2677,6 +2681,7 @@ const { data } = await client.getPublicPortalConfig({
       "template_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
     }
   ],
+  "engagement_center_enabled": true,
   "id": 12345,
   "organization_id": 12345,
   "org_settings": {
@@ -2953,6 +2958,7 @@ const { data } = await client.getOrgPortalConfig({
       "template_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
     }
   ],
+  "engagement_center_enabled": true,
   "id": 12345,
   "organization_id": 12345,
   "org_settings": {
@@ -3238,6 +3244,7 @@ const { data } = await client.getPublicPortalConfigV3({
       "template_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
     }
   ],
+  "engagement_center_enabled": true,
   "id": 12345,
   "organization_id": 12345,
   "org_settings": {
@@ -3514,6 +3521,7 @@ const { data } = await client.getOrgPortalConfigV3({
       "template_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
     }
   ],
+  "engagement_center_enabled": true,
   "id": 12345,
   "organization_id": 12345,
   "org_settings": {
@@ -3616,6 +3624,7 @@ const { data } = await client.getAllPortalConfigs()
       "pages": {},
       "global_blocks": {},
       "notification_triggers": [],
+      "engagement_center_enabled": true,
       "id": 12345,
       "organization_id": 12345,
       "org_settings": {},
@@ -7144,7 +7153,7 @@ const { data } = await client.ssoCallback(
     token_endpoint: 'https://www.facebook.com/v12.0/dialog/oauth',
     grant_type: 'authorization_code',
     code: '123456',
-    redirect_uri: 'https://customer-portal.com/login',
+    redirect_uri: 'https://customer-portal.com/sso',
     client_id: '123456',
     code_verifier: '123456'
   },
@@ -13166,7 +13175,7 @@ type VisualizationMetadata = {
     color?: "primary" | "slate" | "mauve" | "orange" | "red" | "tomato" | "amber" | "green" | "blue"
     precision?: number
   }>
-  intervals?: "PT15M" | "PT1H" | "P1D" | "P1M"[]
+  intervals?: "PT15M" | "PT1H" | "P1D" | "P1M" | "P1Y"[]
   data_range?: {
     from?: string // date-time
     to?: string // date-time
@@ -14134,7 +14143,7 @@ type SSOCallbackRequest = {
   token_endpoint: string
   grant_type: string
   code: string
-  redirect_uri: string
+  redirect_uri?: string
   client_id: string
   code_verifier: string
 }
