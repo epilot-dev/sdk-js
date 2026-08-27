@@ -3,7 +3,8 @@
 /**
  * Generates the epilot-sdk v2 package files from existing clients:
  * - Copies openapi-runtime.json definitions
- * - Copies openapi.d.ts type files (plus any additional-types.ts)
+ * - Copies openapi.d.ts type files
+ * - Copies hand-written additional-types.ts type files
  * - Generates per-API lazy loader files (apis/*.ts)
  * - Generates the API registry (apis/_registry.ts)
  * - Updates package.json subpath exports
@@ -33,6 +34,7 @@ type ClientInfo = {
   kebabName: string; // e.g. "entity" or "entity-mapping" (kebab-case, used for file names & exports)
   hasDefinition: boolean;
   hasTypes: boolean;
+  hasAdditionalTypes: boolean;
 };
 
 const discoverClients = (): ClientInfo[] => {
@@ -51,6 +53,7 @@ const discoverClients = (): ClientInfo[] => {
       kebabName: baseName, // baseName is already kebab-case (e.g. "entity-mapping")
       hasDefinition: existsSync(resolve(clientDir, 'openapi-runtime.json')),
       hasTypes: existsSync(resolve(clientDir, 'openapi.d.ts')),
+      hasAdditionalTypes: existsSync(resolve(clientDir, 'additional-types.ts')),
     };
   });
 };
@@ -175,20 +178,31 @@ const copyTypes = (clients: ClientInfo[]) => {
     content = content.replace(/^declare namespace /gm, 'export declare namespace ');
     content = `/* Auto-copied from ${client.dirName} */\n${content}`;
 
-    // Append hand-written types that live outside the OpenAPI spec (e.g. legacy
-    // schemas kept for backwards compatibility). The client re-exports them from
-    // its index, so the SDK subpath must too.
-    const additionalSrc = resolve(CLIENTS_DIR, client.dirName, 'src/additional-types.ts');
-    if (existsSync(additionalSrc)) {
-      // Drop the import from './openapi' - those types are declared in this same file
-      const additional = readFileSync(additionalSrc, 'utf-8').replace(
-        /^import type \{[\s\S]*?\} from '\.\/openapi';\n/m,
-        '',
-      );
-      content += `\n/* Auto-copied from ${client.dirName}/src/additional-types.ts */\n${additional}`;
-    }
-
     const dest = resolve(TYPES_DIR, `${client.kebabName}.d.ts`);
+    writeFileSync(dest, content);
+  }
+};
+
+/**
+ * Copies the hand-written `additional-types.ts` of a client (types that are not
+ * part of the OpenAPI specification but are still part of the client's public
+ * API surface) into the SDK types directory, so the SDK exposes the exact same
+ * types as the standalone client package.
+ */
+const copyAdditionalTypes = (clients: ClientInfo[]) => {
+  mkdirSync(TYPES_DIR, { recursive: true });
+
+  for (const client of clients) {
+    if (!client.hasAdditionalTypes) continue;
+    const src = resolve(CLIENTS_DIR, client.dirName, 'src/additional-types.ts');
+    let content = readFileSync(src, 'utf-8');
+
+    // The client resolves generated types via './openapi', in the SDK they live
+    // in a sibling file named after the API.
+    content = content.replace(/(\bfrom\s+')\.\/openapi(')/g, `$1./${client.kebabName}$2`);
+    content = `/* Auto-copied from ${client.dirName}/src/additional-types.ts */\n${content}`;
+
+    const dest = resolve(TYPES_DIR, `${client.kebabName}-additional.d.ts`);
     writeFileSync(dest, content);
   }
 };
@@ -346,6 +360,9 @@ const generateApiFile = (client: ClientInfo): string => {
     lines.push(`import type { Client } from '../types/${client.kebabName}'`);
 
     lines.push(`export type * from '../types/${client.kebabName}'`);
+    if (client.hasAdditionalTypes) {
+      lines.push(`export type * from '../types/${client.kebabName}-additional'`);
+    }
     lines.push(`export type { OpenAPIClient } from 'openapi-client-axios'`);
   } else {
     lines.push(`import type { AxiosInstance } from 'axios'`);
@@ -1052,6 +1069,7 @@ const main = () => {
 
   console.log('Copying types...');
   copyTypes(clients);
+  copyAdditionalTypes(clients);
 
   console.log('Generating per-API files...');
   mkdirSync(APIS_DIR, { recursive: true });
@@ -1089,6 +1107,7 @@ const main = () => {
   console.log(`\nGenerated:`);
   console.log(`  - ${validClients.length} definition files`);
   console.log(`  - ${clients.filter((c) => c.hasTypes).length} type files`);
+  console.log(`  - ${clients.filter((c) => c.hasAdditionalTypes).length} additional type files`);
   console.log(`  - ${validClients.length} API entry files`);
   console.log(`  - 1 registry file`);
   console.log(`  - ${docCount} API docs + index`);
