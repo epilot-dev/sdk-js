@@ -3,7 +3,7 @@
 /**
  * Generates the epilot-sdk v2 package files from existing clients:
  * - Copies openapi-runtime.json definitions
- * - Copies openapi.d.ts type files
+ * - Copies openapi.d.ts type files (plus any additional-types.ts)
  * - Generates per-API lazy loader files (apis/*.ts)
  * - Generates the API registry (apis/_registry.ts)
  * - Updates package.json subpath exports
@@ -174,6 +174,19 @@ const copyTypes = (clients: ClientInfo[]) => {
     // Make ambient namespaces explicitly exported so they can be re-exported
     content = content.replace(/^declare namespace /gm, 'export declare namespace ');
     content = `/* Auto-copied from ${client.dirName} */\n${content}`;
+
+    // Append hand-written types that live outside the OpenAPI spec (e.g. legacy
+    // schemas kept for backwards compatibility). The client re-exports them from
+    // its index, so the SDK subpath must too.
+    const additionalSrc = resolve(CLIENTS_DIR, client.dirName, 'src/additional-types.ts');
+    if (existsSync(additionalSrc)) {
+      // Drop the import from './openapi' - those types are declared in this same file
+      const additional = readFileSync(additionalSrc, 'utf-8').replace(
+        /^import type \{[\s\S]*?\} from '\.\/openapi';\n/m,
+        '',
+      );
+      content += `\n/* Auto-copied from ${client.dirName}/src/additional-types.ts */\n${additional}`;
+    }
 
     const dest = resolve(TYPES_DIR, `${client.kebabName}.d.ts`);
     writeFileSync(dest, content);
