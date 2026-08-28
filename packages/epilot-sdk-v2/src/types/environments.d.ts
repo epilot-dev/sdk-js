@@ -21,44 +21,129 @@ export declare namespace Components {
         export interface EnvironmentGroupUpsertRequest {
             description?: string;
         }
-        export type EnvironmentValueType = "String" | "SecretString";
+        export type EnvironmentOption = {
+            value: string;
+            label: string;
+        } | {
+            value: string;
+            labels: {
+                [name: string]: string;
+            };
+        };
+        /**
+         * A variable's value. The JSON type corresponds to the variable's `type`:
+         * `String`, `SecretString` and `Text` are strings, `Number` is a number,
+         * `Boolean` is a boolean, and `Options` is an object. Numbers are IEEE 754
+         * doubles; integers above 2^53 may lose precision on round-trip.
+         *
+         */
+        export type EnvironmentValue = /**
+         * A variable's value. The JSON type corresponds to the variable's `type`:
+         * `String`, `SecretString` and `Text` are strings, `Number` is a number,
+         * `Boolean` is a boolean, and `Options` is an object. Numbers are IEEE 754
+         * doubles; integers above 2^53 may lose precision on round-trip.
+         *
+         */
+        string | number | boolean | OptionsValue;
+        /**
+         * The structure a variable's value holds. `SecretString` is encrypted at rest and
+         * its value is never returned. `Text`, `Number`, `Boolean` and `Options` may be
+         * served to browser-facing consumers; `String` and `SecretString` may not.
+         *
+         */
+        export type EnvironmentValueType = "String" | "SecretString" | "Text" | "Number" | "Boolean" | "Options";
         export interface EnvironmentVariable {
             key: string; // ^[a-z0-9][a-z0-9_.\-]{0,127}$
-            type: EnvironmentValueType;
+            type: /**
+             * The structure a variable's value holds. `SecretString` is encrypted at rest and
+             * its value is never returned. `Text`, `Number`, `Boolean` and `Options` may be
+             * served to browser-facing consumers; `String` and `SecretString` may not.
+             *
+             */
+            EnvironmentValueType;
             description?: string;
             /**
              * Optional group name for organising variables in the UI
              */
             group?: string;
             /**
-             * Value is returned for String type, omitted for SecretString
+             * Returned for non-secret types, omitted for SecretString. Also omitted when
+             * the variable has been created without a value — for example by a blueprint
+             * install, which syncs a variable's key and type but never its value.
+             *
              */
-            value?: string;
+            value?: /**
+             * Returned for non-secret types, omitted for SecretString. Also omitted when
+             * the variable has been created without a value — for example by a blueprint
+             * install, which syncs a variable's key and type but never its value.
+             *
+             */
+            string | number | boolean | OptionsValue;
+            /**
+             * Whether the variable is protected from editing
+             */
+            protected?: boolean;
             created_at: string; // date-time
             updated_at: string; // date-time
         }
         export interface EnvironmentVariableCreateRequest {
             key: string; // ^[a-z0-9][a-z0-9_.\-]{0,127}$
-            type: EnvironmentValueType;
+            type: /**
+             * The structure a variable's value holds. `SecretString` is encrypted at rest and
+             * its value is never returned. `Text`, `Number`, `Boolean` and `Options` may be
+             * served to browser-facing consumers; `String` and `SecretString` may not.
+             *
+             */
+            EnvironmentValueType;
             description?: string;
             group?: string;
-            value?: string;
+            value?: /**
+             * A variable's value. The JSON type corresponds to the variable's `type`:
+             * `String`, `SecretString` and `Text` are strings, `Number` is a number,
+             * `Boolean` is a boolean, and `Options` is an object. Numbers are IEEE 754
+             * doubles; integers above 2^53 may lose precision on round-trip.
+             *
+             */
+            EnvironmentValue;
+            /**
+             * Whether the variable is protected from editing
+             */
+            protected?: boolean;
         }
         export interface EnvironmentVariableList {
             items: EnvironmentVariableListItem[];
         }
         export interface EnvironmentVariableListItem {
             key: string;
-            type: EnvironmentValueType;
+            type: /**
+             * The structure a variable's value holds. `SecretString` is encrypted at rest and
+             * its value is never returned. `Text`, `Number`, `Boolean` and `Options` may be
+             * served to browser-facing consumers; `String` and `SecretString` may not.
+             *
+             */
+            EnvironmentValueType;
             description?: string;
             /**
              * Optional group name for organising variables in the UI
              */
             group?: string;
             /**
-             * Value is returned for String type, omitted for SecretString
+             * Returned for non-secret types, omitted for SecretString. Also omitted when
+             * the variable has been created without a value — for example by a blueprint
+             * install, which syncs a variable's key and type but never its value.
+             *
              */
-            value?: string;
+            value?: /**
+             * Returned for non-secret types, omitted for SecretString. Also omitted when
+             * the variable has been created without a value — for example by a blueprint
+             * install, which syncs a variable's key and type but never its value.
+             *
+             */
+            string | number | boolean | OptionsValue;
+            /**
+             * Whether the variable is protected from editing
+             */
+            protected?: boolean;
             created_at: string; // date-time
             updated_at: string; // date-time
         }
@@ -66,10 +151,28 @@ export declare namespace Components {
             /**
              * Type of variable. Used when creating a new variable. Defaults to String.
              */
-            type?: "String" | "SecretString";
-            value?: string;
+            type?: "String" | "SecretString" | "Text" | "Number" | "Boolean" | "Options";
+            value?: /**
+             * A variable's value. The JSON type corresponds to the variable's `type`:
+             * `String`, `SecretString` and `Text` are strings, `Number` is a number,
+             * `Boolean` is a boolean, and `Options` is an object. Numbers are IEEE 754
+             * doubles; integers above 2^53 may lose precision on round-trip.
+             *
+             */
+            EnvironmentValue;
             description?: string;
             group?: string;
+            /**
+             * Whether the variable is protected from editing
+             */
+            protected?: boolean;
+        }
+        export interface OptionsValue {
+            fallbackLanguage?: string;
+            options: [
+                EnvironmentOption,
+                ...EnvironmentOption[]
+            ];
         }
     }
 }
@@ -177,6 +280,8 @@ export declare namespace Paths {
             }
             export interface $403 {
             }
+            export interface $409 {
+            }
             export interface $500 {
             }
         }
@@ -202,7 +307,7 @@ export declare namespace Paths {
 
 export interface OperationMethods {
   /**
-   * listEnvironmentVariables - List environment variables
+   * listEnvironmentVariables - listEnvironmentVariables
    * 
    * List all environment variables for the organization. Returns metadata only, no secret values.
    */
@@ -212,9 +317,9 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ListEnvironmentVariables.Responses.$200>
   /**
-   * createEnvironmentVariable - Create environment variable
+   * createEnvironmentVariable - createEnvironmentVariable
    * 
-   * Create a new environment variable or secret for the organization.
+   * Create a new environment variable or secret for the organization. If `group` is provided and the group does not yet exist, it is created automatically.
    */
   'createEnvironmentVariable'(
     parameters?: Parameters<UnknownParamsObject> | null,
@@ -222,7 +327,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CreateEnvironmentVariable.Responses.$201>
   /**
-   * listEnvironmentGroups - List environment groups
+   * listEnvironmentGroups - listEnvironmentGroups
    * 
    * List all environment groups for the organization.
    */
@@ -233,6 +338,8 @@ export interface OperationMethods {
   ): OperationResponse<Paths.ListEnvironmentGroups.Responses.$200>
   /**
    * putEnvironmentGroup - putEnvironmentGroup
+   * 
+   * Create or update an environment group by name. Acts as an upsert — creates the group if it does not exist.
    */
   'putEnvironmentGroup'(
     parameters?: Parameters<Paths.V1EnvironmentsGroups$Name.PathParameters> | null,
@@ -240,7 +347,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.PutEnvironmentGroup.Responses.$200 | Paths.PutEnvironmentGroup.Responses.$201>
   /**
-   * deleteEnvironmentGroup - Delete an environment group
+   * deleteEnvironmentGroup - deleteEnvironmentGroup
    * 
    * Deletes a group. Variables assigned to this group become ungrouped.
    */
@@ -250,9 +357,9 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteEnvironmentGroup.Responses.$204>
   /**
-   * getEnvironmentVariable - Get environment variable
+   * getEnvironmentVariable - getEnvironmentVariable
    * 
-   * Get an environment variable by key. Returns value only for String type, omitted for SecretString.
+   * Get an environment variable by key. Returns value for non-secret types, omitted for SecretString.
    */
   'getEnvironmentVariable'(
     parameters?: Parameters<Paths.V1Environments$Key.PathParameters> | null,
@@ -260,9 +367,9 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetEnvironmentVariable.Responses.$200>
   /**
-   * updateEnvironmentVariable - Update environment variable
+   * updateEnvironmentVariable - updateEnvironmentVariable
    * 
-   * Create or update an environment variable. Acts as an upsert — creates the variable if it does not exist.
+   * Create or update an environment variable. Acts as an upsert — creates the variable if it does not exist. If `group` is provided and the group does not yet exist, it is created automatically.
    */
   'updateEnvironmentVariable'(
     parameters?: Parameters<Paths.V1Environments$Key.PathParameters> | null,
@@ -270,7 +377,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UpdateEnvironmentVariable.Responses.$200 | Paths.UpdateEnvironmentVariable.Responses.$201>
   /**
-   * deleteEnvironmentVariable - Delete environment variable
+   * deleteEnvironmentVariable - deleteEnvironmentVariable
    * 
    * Delete an environment variable by key.
    */
@@ -284,7 +391,7 @@ export interface OperationMethods {
 export interface PathsDictionary {
   ['/v1/environments']: {
     /**
-     * listEnvironmentVariables - List environment variables
+     * listEnvironmentVariables - listEnvironmentVariables
      * 
      * List all environment variables for the organization. Returns metadata only, no secret values.
      */
@@ -294,9 +401,9 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ListEnvironmentVariables.Responses.$200>
     /**
-     * createEnvironmentVariable - Create environment variable
+     * createEnvironmentVariable - createEnvironmentVariable
      * 
-     * Create a new environment variable or secret for the organization.
+     * Create a new environment variable or secret for the organization. If `group` is provided and the group does not yet exist, it is created automatically.
      */
     'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
@@ -306,7 +413,7 @@ export interface PathsDictionary {
   }
   ['/v1/environments/groups']: {
     /**
-     * listEnvironmentGroups - List environment groups
+     * listEnvironmentGroups - listEnvironmentGroups
      * 
      * List all environment groups for the organization.
      */
@@ -319,6 +426,8 @@ export interface PathsDictionary {
   ['/v1/environments/groups/{name}']: {
     /**
      * putEnvironmentGroup - putEnvironmentGroup
+     * 
+     * Create or update an environment group by name. Acts as an upsert — creates the group if it does not exist.
      */
     'put'(
       parameters?: Parameters<Paths.V1EnvironmentsGroups$Name.PathParameters> | null,
@@ -326,7 +435,7 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.PutEnvironmentGroup.Responses.$200 | Paths.PutEnvironmentGroup.Responses.$201>
     /**
-     * deleteEnvironmentGroup - Delete an environment group
+     * deleteEnvironmentGroup - deleteEnvironmentGroup
      * 
      * Deletes a group. Variables assigned to this group become ungrouped.
      */
@@ -338,9 +447,9 @@ export interface PathsDictionary {
   }
   ['/v1/environments/{key}']: {
     /**
-     * getEnvironmentVariable - Get environment variable
+     * getEnvironmentVariable - getEnvironmentVariable
      * 
-     * Get an environment variable by key. Returns value only for String type, omitted for SecretString.
+     * Get an environment variable by key. Returns value for non-secret types, omitted for SecretString.
      */
     'get'(
       parameters?: Parameters<Paths.V1Environments$Key.PathParameters> | null,
@@ -348,9 +457,9 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetEnvironmentVariable.Responses.$200>
     /**
-     * updateEnvironmentVariable - Update environment variable
+     * updateEnvironmentVariable - updateEnvironmentVariable
      * 
-     * Create or update an environment variable. Acts as an upsert — creates the variable if it does not exist.
+     * Create or update an environment variable. Acts as an upsert — creates the variable if it does not exist. If `group` is provided and the group does not yet exist, it is created automatically.
      */
     'put'(
       parameters?: Parameters<Paths.V1Environments$Key.PathParameters> | null,
@@ -358,7 +467,7 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.UpdateEnvironmentVariable.Responses.$200 | Paths.UpdateEnvironmentVariable.Responses.$201>
     /**
-     * deleteEnvironmentVariable - Delete environment variable
+     * deleteEnvironmentVariable - deleteEnvironmentVariable
      * 
      * Delete an environment variable by key.
      */
@@ -376,9 +485,12 @@ export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 export type EnvironmentGroup = Components.Schemas.EnvironmentGroup;
 export type EnvironmentGroupList = Components.Schemas.EnvironmentGroupList;
 export type EnvironmentGroupUpsertRequest = Components.Schemas.EnvironmentGroupUpsertRequest;
+export type EnvironmentOption = Components.Schemas.EnvironmentOption;
+export type EnvironmentValue = Components.Schemas.EnvironmentValue;
 export type EnvironmentValueType = Components.Schemas.EnvironmentValueType;
 export type EnvironmentVariable = Components.Schemas.EnvironmentVariable;
 export type EnvironmentVariableCreateRequest = Components.Schemas.EnvironmentVariableCreateRequest;
 export type EnvironmentVariableList = Components.Schemas.EnvironmentVariableList;
 export type EnvironmentVariableListItem = Components.Schemas.EnvironmentVariableListItem;
 export type EnvironmentVariableUpdateRequest = Components.Schemas.EnvironmentVariableUpdateRequest;
+export type OptionsValue = Components.Schemas.OptionsValue;
