@@ -2753,7 +2753,7 @@ type PortalExtensionConfig = {
       de: { ... }
     }
     type: "priceDataRetrieval"
-    intervals?: "PT15M" | "PT1H" | "P1D" | "P1M"[]
+    intervals?: "PT15M" | "PT1H" | "P1D" | "P1M" | "P1Y"[]
     auth?: {
       method?: { ... }
       url: { ... }
@@ -2942,7 +2942,7 @@ type PortalExtensionHookPriceDataRetrieval = {
     de: string
   }
   type: "priceDataRetrieval"
-  intervals?: "PT15M" | "PT1H" | "P1D" | "P1M"[]
+  intervals?: "PT15M" | "PT1H" | "P1D" | "P1M" | "P1Y"[]
   auth?: {
     method?: string
     url: string
@@ -2988,7 +2988,7 @@ type PortalExtensionHookConsumptionDataRetrieval = {
     de: string
   }
   type: "consumptionDataRetrieval"
-  intervals?: "PT15M" | "PT1H" | "P1D" | "P1M"[]
+  intervals?: "PT15M" | "PT1H" | "P1D" | "P1M" | "P1Y"[]
   auth?: {
     method?: string
     url: string
@@ -3119,7 +3119,7 @@ type PortalExtensionHookCostDataRetrieval = {
     de: string
   }
   type: "costDataRetrieval"
-  intervals?: "PT15M" | "PT1H" | "P1D" | "P1M"[]
+  intervals?: "PT15M" | "PT1H" | "P1D" | "P1M" | "P1Y"[]
   auth?: {
     method?: string
     url: string
