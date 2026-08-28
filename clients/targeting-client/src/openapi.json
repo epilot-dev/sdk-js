@@ -1437,6 +1437,49 @@
             "format": "date-time",
             "description": "When the contact unsubscribed from email marketing (opted out). Server-managed."
           },
+          "email_open_count": {
+            "type": "integer",
+            "description": "Number of SES opens recorded for this recipient (only where open tracking is on)."
+          },
+          "email_first_opened_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the recipient first opened the email."
+          },
+          "email_last_opened_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the recipient most recently opened the email."
+          },
+          "email_click_count": {
+            "type": "integer",
+            "description": "Number of SES link clicks recorded for this recipient (only where click tracking is on)."
+          },
+          "email_first_clicked_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the recipient first clicked a link."
+          },
+          "email_clicked_links": {
+            "type": "array",
+            "description": "Raw click events (URL + timestamp); aggregate per-URL on the client.",
+            "items": {
+              "type": "object",
+              "required": [
+                "url",
+                "clicked_at"
+              ],
+              "properties": {
+                "url": {
+                  "type": "string"
+                },
+                "clicked_at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              }
+            }
+          },
           "updated_at": {
             "type": "string",
             "format": "date-time"
@@ -1947,7 +1990,11 @@
                 "bounced_soft",
                 "complained",
                 "failed",
-                "unsubscribed"
+                "unsubscribed",
+                "opened",
+                "clicked",
+                "total_opens",
+                "total_clicks"
               ],
               "properties": {
                 "total_emailed": {
@@ -1959,7 +2006,7 @@
                 },
                 "delivered": {
                   "type": "integer",
-                  "description": "Currently always 0 (Delivery events are not published yet)."
+                  "description": "Recipients whose SES Delivery event was recorded (needs Delivery publishing enabled)."
                 },
                 "bounced": {
                   "type": "integer"
@@ -1981,6 +2028,22 @@
                 "unsubscribed": {
                   "type": "integer",
                   "description": "Recipients who opted out of email marketing."
+                },
+                "opened": {
+                  "type": "integer",
+                  "description": "Unique recipients with at least one open (only where open tracking is on)."
+                },
+                "clicked": {
+                  "type": "integer",
+                  "description": "Unique recipients with at least one link click (only where click tracking is on)."
+                },
+                "total_opens": {
+                  "type": "integer",
+                  "description": "Total opens across all recipients."
+                },
+                "total_clicks": {
+                  "type": "integer",
+                  "description": "Total link clicks across all recipients."
                 }
               }
             }
