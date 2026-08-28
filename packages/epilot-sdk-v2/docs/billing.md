@@ -1837,6 +1837,11 @@ type ConfigurationHistoryResponse = {
       tariffs?: { ... }
     }
     changed_fields: "tariff" | "base_price" | "working_price" | "discount" | "dynamic_tariff_configuration"[]
+    installment_amount?: {
+      amount?: { ... }
+      amount_decimal?: { ... }
+      currency?: { ... }
+    }
   }>
   total: number
 }
@@ -2043,6 +2048,7 @@ type BillingAccountPricingInformation = {
       previous_context: { ... }
       new_context: { ... }
       changed_fields: { ... }
+      installment_amount?: { ... }
     }>
   }>
 }

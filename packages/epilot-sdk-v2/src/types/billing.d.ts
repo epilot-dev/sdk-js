@@ -1285,6 +1285,31 @@ export declare namespace Components {
                 tariffs?: ContractTariffContext[];
             } | null;
             changed_fields: ("tariff" | "base_price" | "working_price" | "discount" | "dynamic_tariff_configuration")[];
+            /**
+             * Installment amount effective when the pricing change was recorded.
+             */
+            installment_amount?: {
+                /**
+                 * Amount in cents when available or derivable.
+                 * example:
+                 * 10050
+                 */
+                amount?: number;
+                /**
+                 * Decimal amount string when available or derivable.
+                 * example:
+                 * 100.50
+                 */
+                amount_decimal?: string;
+                currency?: /**
+                 * Currency code in ISO 4217 format (Währungscode).
+                 * Common values: EUR (Euro), CHF (Swiss Franc)
+                 *
+                 * example:
+                 * EUR
+                 */
+                Currency;
+            };
         }
         export interface ContractPricingContext {
             base_price?: PriceContext;
