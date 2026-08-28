@@ -628,6 +628,17 @@ const { data } = await client.createRecipient(
   "email_bounce_reason": "string",
   "email_send_error": {},
   "email_unsubscribed_at": "1970-01-01T00:00:00.000Z",
+  "email_open_count": 0,
+  "email_first_opened_at": "1970-01-01T00:00:00.000Z",
+  "email_last_opened_at": "1970-01-01T00:00:00.000Z",
+  "email_click_count": 0,
+  "email_first_clicked_at": "1970-01-01T00:00:00.000Z",
+  "email_clicked_links": [
+    {
+      "url": "string",
+      "clicked_at": "1970-01-01T00:00:00.000Z"
+    }
+  ],
   "updated_at": "1970-01-01T00:00:00.000Z"
 }
 ```
@@ -682,6 +693,17 @@ const { data } = await client.updateRecipient(
   "email_bounce_reason": "string",
   "email_send_error": {},
   "email_unsubscribed_at": "1970-01-01T00:00:00.000Z",
+  "email_open_count": 0,
+  "email_first_opened_at": "1970-01-01T00:00:00.000Z",
+  "email_last_opened_at": "1970-01-01T00:00:00.000Z",
+  "email_click_count": 0,
+  "email_first_clicked_at": "1970-01-01T00:00:00.000Z",
+  "email_clicked_links": [
+    {
+      "url": "string",
+      "clicked_at": "1970-01-01T00:00:00.000Z"
+    }
+  ],
   "updated_at": "1970-01-01T00:00:00.000Z"
 }
 ```
@@ -734,6 +756,17 @@ const { data } = await client.updateRecipientPortalStatus(
   "email_bounce_reason": "string",
   "email_send_error": {},
   "email_unsubscribed_at": "1970-01-01T00:00:00.000Z",
+  "email_open_count": 0,
+  "email_first_opened_at": "1970-01-01T00:00:00.000Z",
+  "email_last_opened_at": "1970-01-01T00:00:00.000Z",
+  "email_click_count": 0,
+  "email_first_clicked_at": "1970-01-01T00:00:00.000Z",
+  "email_clicked_links": [
+    {
+      "url": "string",
+      "clicked_at": "1970-01-01T00:00:00.000Z"
+    }
+  ],
   "updated_at": "1970-01-01T00:00:00.000Z"
 }
 ```
@@ -786,6 +819,17 @@ const { data } = await client.updateRecipientEntityUiStatus(
   "email_bounce_reason": "string",
   "email_send_error": {},
   "email_unsubscribed_at": "1970-01-01T00:00:00.000Z",
+  "email_open_count": 0,
+  "email_first_opened_at": "1970-01-01T00:00:00.000Z",
+  "email_last_opened_at": "1970-01-01T00:00:00.000Z",
+  "email_click_count": 0,
+  "email_first_clicked_at": "1970-01-01T00:00:00.000Z",
+  "email_clicked_links": [
+    {
+      "url": "string",
+      "clicked_at": "1970-01-01T00:00:00.000Z"
+    }
+  ],
   "updated_at": "1970-01-01T00:00:00.000Z"
 }
 ```
@@ -832,6 +876,17 @@ const { data } = await client.restoreRecipientEntityUiStatus({
   "email_bounce_reason": "string",
   "email_send_error": {},
   "email_unsubscribed_at": "1970-01-01T00:00:00.000Z",
+  "email_open_count": 0,
+  "email_first_opened_at": "1970-01-01T00:00:00.000Z",
+  "email_last_opened_at": "1970-01-01T00:00:00.000Z",
+  "email_click_count": 0,
+  "email_first_clicked_at": "1970-01-01T00:00:00.000Z",
+  "email_clicked_links": [
+    {
+      "url": "string",
+      "clicked_at": "1970-01-01T00:00:00.000Z"
+    }
+  ],
   "updated_at": "1970-01-01T00:00:00.000Z"
 }
 ```
@@ -885,6 +940,17 @@ const { data } = await client.getRecipients({
       "email_bounce_reason": "string",
       "email_send_error": {},
       "email_unsubscribed_at": "1970-01-01T00:00:00.000Z",
+      "email_open_count": 0,
+      "email_first_opened_at": "1970-01-01T00:00:00.000Z",
+      "email_last_opened_at": "1970-01-01T00:00:00.000Z",
+      "email_click_count": 0,
+      "email_first_clicked_at": "1970-01-01T00:00:00.000Z",
+      "email_clicked_links": [
+        {
+          "url": "string",
+          "clicked_at": "1970-01-01T00:00:00.000Z"
+        }
+      ],
       "updated_at": "1970-01-01T00:00:00.000Z"
     }
   ],
@@ -924,7 +990,11 @@ const { data } = await client.getEmailStats({
   "bounced_soft": 0,
   "complained": 0,
   "failed": 0,
-  "unsubscribed": 0
+  "unsubscribed": 0,
+  "opened": 0,
+  "clicked": 0,
+  "total_opens": 0,
+  "total_clicks": 0
 }
 ```
 
@@ -1326,6 +1396,15 @@ type Recipient = {
   email_bounce_reason?: string
   email_send_error?: Record<string, unknown>
   email_unsubscribed_at?: string // date-time
+  email_open_count?: number
+  email_first_opened_at?: string // date-time
+  email_last_opened_at?: string // date-time
+  email_click_count?: number
+  email_first_clicked_at?: string // date-time
+  email_clicked_links?: Array<{
+    url: string
+    clicked_at: string // date-time
+  }>
   updated_at?: string // date-time
 }
 ```

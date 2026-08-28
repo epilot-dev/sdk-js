@@ -98,7 +98,7 @@ export declare namespace Components {
             total_emailed: number;
             sent: number;
             /**
-             * Currently always 0 (Delivery events are not published yet).
+             * Recipients whose SES Delivery event was recorded (needs Delivery publishing enabled).
              */
             delivered: number;
             bounced: number;
@@ -116,6 +116,22 @@ export declare namespace Components {
              * Recipients who opted out of email marketing.
              */
             unsubscribed: number;
+            /**
+             * Unique recipients with at least one open (only where open tracking is on).
+             */
+            opened: number;
+            /**
+             * Unique recipients with at least one link click (only where click tracking is on).
+             */
+            clicked: number;
+            /**
+             * Total opens across all recipients.
+             */
+            total_opens: number;
+            /**
+             * Total link clicks across all recipients.
+             */
+            total_clicks: number;
         }
         export interface GetTargetQueriesResponse {
             /**
@@ -1675,6 +1691,33 @@ export declare namespace Components {
              * When the contact unsubscribed from email marketing (opted out). Server-managed.
              */
             email_unsubscribed_at?: string; // date-time
+            /**
+             * Number of SES opens recorded for this recipient (only where open tracking is on).
+             */
+            email_open_count?: number;
+            /**
+             * When the recipient first opened the email.
+             */
+            email_first_opened_at?: string; // date-time
+            /**
+             * When the recipient most recently opened the email.
+             */
+            email_last_opened_at?: string; // date-time
+            /**
+             * Number of SES link clicks recorded for this recipient (only where click tracking is on).
+             */
+            email_click_count?: number;
+            /**
+             * When the recipient first clicked a link.
+             */
+            email_first_clicked_at?: string; // date-time
+            /**
+             * Raw click events (URL + timestamp); aggregate per-URL on the client.
+             */
+            email_clicked_links?: {
+                url: string;
+                clicked_at: string; // date-time
+            }[];
             updated_at?: string; // date-time
         }
         export interface RetriggerAutomationsRequest {
