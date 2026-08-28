@@ -2098,7 +2098,7 @@ declare namespace Components {
              * Intervals supported by the API. If omitted, it is assumed that all intervals are supported.
              *
              */
-            intervals?: ("PT15M" | "PT1H" | "P1D" | "P1M")[];
+            intervals?: ("PT15M" | "PT1H" | "P1D" | "P1M" | "P1Y")[];
             auth?: PortalExtensionAuthBlock;
             call: {
                 /**
@@ -2269,7 +2269,7 @@ declare namespace Components {
              * Intervals supported by the API. If omitted, it is assumed that all intervals are supported.
              *
              */
-            intervals?: ("PT15M" | "PT1H" | "P1D" | "P1M")[];
+            intervals?: ("PT15M" | "PT1H" | "P1D" | "P1M" | "P1Y")[];
             auth?: PortalExtensionAuthBlock;
             call: {
                 /**
@@ -2600,7 +2600,7 @@ declare namespace Components {
              * Intervals supported by the API. If omitted, it is assumed that all intervals are supported.
              *
              */
-            intervals?: ("PT15M" | "PT1H" | "P1D" | "P1M")[];
+            intervals?: ("PT15M" | "PT1H" | "P1D" | "P1M" | "P1Y")[];
             auth?: PortalExtensionAuthBlock;
             call: {
                 /**
