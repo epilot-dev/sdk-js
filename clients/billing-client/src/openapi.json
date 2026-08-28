@@ -2192,6 +2192,14 @@
                     "dynamic_tariff_configuration"
                   ]
                 }
+              },
+              "installment_amount": {
+                "description": "Installment amount effective when the pricing change was recorded.",
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/InstallmentAmountValue"
+                  }
+                ]
               }
             }
           }
