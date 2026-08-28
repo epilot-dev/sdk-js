@@ -16,7 +16,8 @@
           },
           {
             "in": "query",
-            "name": "latest"
+            "name": "latest",
+            "deprecated": true
           },
           {
             "in": "query",
@@ -49,7 +50,8 @@
           },
           {
             "in": "query",
-            "name": "latest"
+            "name": "latest",
+            "deprecated": true
           },
           {
             "in": "query",
@@ -80,7 +82,8 @@
           },
           {
             "in": "query",
-            "name": "latest"
+            "name": "latest",
+            "deprecated": true
           }
         ],
         "responses": {}
@@ -177,6 +180,7 @@
     "/v1/entity/schemas/{slug}/freeze": {
       "post": {
         "operationId": "freezeSchema",
+        "deprecated": true,
         "parameters": [
           {
             "$ref": "#/components/parameters/EntitySlugPathParam"
@@ -193,6 +197,7 @@
     "/v1/entity/schemas/{slug}/unfreeze": {
       "post": {
         "operationId": "unfreezeSchema",
+        "deprecated": true,
         "parameters": [
           {
             "$ref": "#/components/parameters/EntitySlugPathParam"

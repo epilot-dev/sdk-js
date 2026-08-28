@@ -33,8 +33,6 @@ const { data } = await entityClient.listSchemas(...)
 - [`getJsonSchema`](#getjsonschema)
 - [`getSchemaExample`](#getschemaexample)
 - [`getSchemaVersions`](#getschemaversions)
-- [`freezeSchema`](#freezeschema)
-- [`unfreezeSchema`](#unfreezeschema)
 - [`listAvailableCapabilities`](#listavailablecapabilities)
 - [`listSchemaBlueprints`](#listschemablueprints)
 - [`listTaxonomyClassificationsForSchema`](#listtaxonomyclassificationsforschema)
@@ -409,9 +407,8 @@ const { data } = await client.listSchemasV2({
 
 ### `getSchema`
 
-By default gets the current version of the Schema (frozen version if frozen, otherwise latest).
-Pass ?latest=true to get the latest version when the schema is frozen.
-Pass ?id= to get a specific versi
+Gets the latest version of the Schema.
+Pass ?id= to get a specific version by ID.
 
 `GET /v1/entity/schemas/{slug}`
 
@@ -504,7 +501,7 @@ const { data } = await client.getSchema({
       "name": "customer_messaging",
       "title": "Messaging",
       "attributes": [],
-      "variant_overridable": false,
+      "overridable_attribute": false,
       "_purpose": ["taxonomy-slug:classification-slug"],
       "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
       "app_id": "123e4567-e89b-12d3-a456-426614174000",
@@ -590,7 +587,6 @@ const { data } = await client.getSchema({
 ### `putSchema`
 
 Create or update a schema with a new version.
-When the schema is frozen, writes update the latest version without affecting the frozen version.
 
 `PUT /v1/entity/schemas/{slug}`
 
@@ -666,7 +662,7 @@ const { data } = await client.putSchema(
         name: 'customer_messaging',
         title: 'Messaging',
         attributes: [ /* ... */ ],
-        variant_overridable: false,
+        overridable_attribute: false,
         _purpose: ['taxonomy-slug:classification-slug'],
         _manifest: ['123e4567-e89b-12d3-a456-426614174000'],
         app_id: '123e4567-e89b-12d3-a456-426614174000',
@@ -828,7 +824,7 @@ const { data } = await client.putSchema(
       "name": "customer_messaging",
       "title": "Messaging",
       "attributes": [],
-      "variant_overridable": false,
+      "overridable_attribute": false,
       "_purpose": ["taxonomy-slug:classification-slug"],
       "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
       "app_id": "123e4567-e89b-12d3-a456-426614174000",
@@ -1182,365 +1178,6 @@ const { data } = await client.getSchemaVersions({
 
 ---
 
-### `freezeSchema`
-
-Freeze a schema at its current version, or at a specific version.
-When frozen, getSchema returns the frozen version by default.
-New edits via putSchema update the latest version without affecting the 
-
-`POST /v1/entity/schemas/{slug}/freeze`
-
-```ts
-const { data } = await client.freezeSchema(
-  {
-    slug: 'example',
-  },
-  {
-    version_id: '3fa85f64-5717-4562-b3fc-2c963f66afa6'
-  },
-)
-```
-
-<details>
-<summary>Response</summary>
-
-```json
-{
-  "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-  "created_at": "string",
-  "updated_at": "string",
-  "comment": "string",
-  "source": {
-    "id": "string",
-    "type": "string"
-  },
-  "frozen": true,
-  "latest": true,
-  "_summary": true,
-  "slug": "contact",
-  "version": 1,
-  "blueprint": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-  "feature_flag": "FF_MY_FEATURE_FLAG",
-  "enable_setting": ["360_features"],
-  "name": "Contact",
-  "plural": "Contacts",
-  "description": "Example description",
-  "docs_url": "https://docs.epilot.io/docs/pricing/entities",
-  "category": "customer_relations",
-  "published": false,
-  "draft": false,
-  "icon": "person",
-  "title_template": "{{first_name}} {{last_name}}",
-  "ui_config": {
-    "table_view": {
-      "view_type": "default",
-      "row_actions": ["string"],
-      "bulk_actions": ["string"],
-      "navbar_actions": [],
-      "enable_thumbnails": false
-    },
-    "create_view": {
-      "view_type": "default",
-      "search_params": {}
-    },
-    "edit_view": {
-      "view_type": "default",
-      "search_params": {},
-      "summary_attributes": ["email"]
-    },
-    "single_view": {
-      "view_type": "default",
-      "search_params": {},
-      "summary_attributes": ["email"]
-    },
-    "list_item": {
-      "summary_attributes": [],
-      "quick_actions": [],
-      "ui_config": {}
-    },
-    "sharing": {
-      "show_sharing_button": true
-    },
-    "grid_layout": {
-      "id": "string",
-      "columns": 0,
-      "cells": [0]
-    },
-    "widget_order": ["string"],
-    "widget_visibility": {
-      "next_best_action": true,
-      "address_map": false
-    },
-    "widget_widths": {
-      "address_map": "full_width",
-      "recent_communications": "one_third_width"
-    }
-  },
-  "capabilities": [
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "customer_messaging",
-      "title": "Messaging",
-      "attributes": [],
-      "variant_overridable": false,
-      "_purpose": ["taxonomy-slug:classification-slug"],
-      "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
-      "app_id": "123e4567-e89b-12d3-a456-426614174000",
-      "adjust_installment": {},
-      "ui_config": {},
-      "ui_hooks": [],
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "schemas": []
-    }
-  ],
-  "group_settings": [
-    {
-      "id": "e18a532b-ae79-4d86-a6a5-e5dbfb579d14",
-      "label": "Contact Details",
-      "expanded": true,
-      "order": 1
-    },
-    {
-      "id": "e9a1ae28-27ba-4fa0-a79c-e279cc5c4a6e",
-      "label": "Address Details",
-      "expanded": false,
-      "order": 2,
-      "info_tooltip_title": {}
-    }
-  ],
-  "layout_settings": {
-    "grid_gap": "string",
-    "grid_template_columns": "string"
-  },
-  "dialog_config": {},
-  "attributes": [
-    {
-      "name": "email",
-      "type": "email",
-      "label": "Email",
-      "required": true
-    },
-    {
-      "name": "first_name",
-      "type": "string",
-      "label": "First Name"
-    }
-  ],
-  "_purpose": ["string"],
-  "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
-  "explicit_search_mappings": {
-    "image": {
-      "type": "keyword",
-      "index": false
-    }
-  },
-  "group_headlines": [
-    {
-      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-      "name": "string",
-      "label": "string",
-      "layout": "string",
-      "group": "string",
-      "order": 0,
-      "type": "headline",
-      "enable_divider": false,
-      "divider": "top_divider",
-      "_purpose": ["taxonomy-slug:classification-slug"],
-      "_manifest": ["123e4567-e89b-12d3-a456-426614174000"]
-    }
-  ],
-  "conditions": [
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "delivery_area",
-      "label": "Delivery Area",
-      "type": "string"
-    }
-  ]
-}
-```
-
-</details>
-
----
-
-### `unfreezeSchema`
-
-Unfreeze a schema. Promotes the latest version to the current version for all users.
-
-`POST /v1/entity/schemas/{slug}/unfreeze`
-
-```ts
-const { data } = await client.unfreezeSchema({
-  slug: 'example',
-})
-```
-
-<details>
-<summary>Response</summary>
-
-```json
-{
-  "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-  "created_at": "string",
-  "updated_at": "string",
-  "comment": "string",
-  "source": {
-    "id": "string",
-    "type": "string"
-  },
-  "frozen": true,
-  "latest": true,
-  "_summary": true,
-  "slug": "contact",
-  "version": 1,
-  "blueprint": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-  "feature_flag": "FF_MY_FEATURE_FLAG",
-  "enable_setting": ["360_features"],
-  "name": "Contact",
-  "plural": "Contacts",
-  "description": "Example description",
-  "docs_url": "https://docs.epilot.io/docs/pricing/entities",
-  "category": "customer_relations",
-  "published": false,
-  "draft": false,
-  "icon": "person",
-  "title_template": "{{first_name}} {{last_name}}",
-  "ui_config": {
-    "table_view": {
-      "view_type": "default",
-      "row_actions": ["string"],
-      "bulk_actions": ["string"],
-      "navbar_actions": [],
-      "enable_thumbnails": false
-    },
-    "create_view": {
-      "view_type": "default",
-      "search_params": {}
-    },
-    "edit_view": {
-      "view_type": "default",
-      "search_params": {},
-      "summary_attributes": ["email"]
-    },
-    "single_view": {
-      "view_type": "default",
-      "search_params": {},
-      "summary_attributes": ["email"]
-    },
-    "list_item": {
-      "summary_attributes": [],
-      "quick_actions": [],
-      "ui_config": {}
-    },
-    "sharing": {
-      "show_sharing_button": true
-    },
-    "grid_layout": {
-      "id": "string",
-      "columns": 0,
-      "cells": [0]
-    },
-    "widget_order": ["string"],
-    "widget_visibility": {
-      "next_best_action": true,
-      "address_map": false
-    },
-    "widget_widths": {
-      "address_map": "full_width",
-      "recent_communications": "one_third_width"
-    }
-  },
-  "capabilities": [
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "customer_messaging",
-      "title": "Messaging",
-      "attributes": [],
-      "variant_overridable": false,
-      "_purpose": ["taxonomy-slug:classification-slug"],
-      "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
-      "app_id": "123e4567-e89b-12d3-a456-426614174000",
-      "adjust_installment": {},
-      "ui_config": {},
-      "ui_hooks": [],
-      "feature_flag": "FF_MY_FEATURE_FLAG",
-      "settings_flag": [],
-      "schemas": []
-    }
-  ],
-  "group_settings": [
-    {
-      "id": "e18a532b-ae79-4d86-a6a5-e5dbfb579d14",
-      "label": "Contact Details",
-      "expanded": true,
-      "order": 1
-    },
-    {
-      "id": "e9a1ae28-27ba-4fa0-a79c-e279cc5c4a6e",
-      "label": "Address Details",
-      "expanded": false,
-      "order": 2,
-      "info_tooltip_title": {}
-    }
-  ],
-  "layout_settings": {
-    "grid_gap": "string",
-    "grid_template_columns": "string"
-  },
-  "dialog_config": {},
-  "attributes": [
-    {
-      "name": "email",
-      "type": "email",
-      "label": "Email",
-      "required": true
-    },
-    {
-      "name": "first_name",
-      "type": "string",
-      "label": "First Name"
-    }
-  ],
-  "_purpose": ["string"],
-  "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
-  "explicit_search_mappings": {
-    "image": {
-      "type": "keyword",
-      "index": false
-    }
-  },
-  "group_headlines": [
-    {
-      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-      "name": "string",
-      "label": "string",
-      "layout": "string",
-      "group": "string",
-      "order": 0,
-      "type": "headline",
-      "enable_divider": false,
-      "divider": "top_divider",
-      "_purpose": ["taxonomy-slug:classification-slug"],
-      "_manifest": ["123e4567-e89b-12d3-a456-426614174000"]
-    }
-  ],
-  "conditions": [
-    {
-      "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
-      "name": "delivery_area",
-      "label": "Delivery Area",
-      "type": "string"
-    }
-  ]
-}
-```
-
-</details>
-
----
-
 ### `listAvailableCapabilities`
 
 List available capabilities for schema
@@ -1564,7 +1201,7 @@ const { data } = await client.listAvailableCapabilities({
       "name": "customer_messaging",
       "title": "Messaging",
       "attributes": [],
-      "variant_overridable": false,
+      "overridable_attribute": false,
       "_purpose": ["taxonomy-slug:classification-slug"],
       "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
       "app_id": "123e4567-e89b-12d3-a456-426614174000",
@@ -4638,7 +4275,7 @@ const { data } = await client.createSchemaAttribute(
     required: false,
     readonly: false,
     deprecated: false,
-    variant_overridable: false,
+    overridable_attribute: false,
     default_value: {},
     group: 'string',
     order: 0,
@@ -4713,7 +4350,7 @@ const { data } = await client.createSchemaAttribute(
   "required": false,
   "readonly": false,
   "deprecated": false,
-  "variant_overridable": false,
+  "overridable_attribute": false,
   "default_value": {},
   "group": "string",
   "order": 0,
@@ -4803,7 +4440,7 @@ const { data } = await client.getSchemaAttribute({
   "required": false,
   "readonly": false,
   "deprecated": false,
-  "variant_overridable": false,
+  "overridable_attribute": false,
   "default_value": {},
   "group": "string",
   "order": 0,
@@ -4888,7 +4525,7 @@ const { data } = await client.putSchemaAttribute(
     required: false,
     readonly: false,
     deprecated: false,
-    variant_overridable: false,
+    overridable_attribute: false,
     default_value: {},
     group: 'string',
     order: 0,
@@ -4963,7 +4600,7 @@ const { data } = await client.putSchemaAttribute(
   "required": false,
   "readonly": false,
   "deprecated": false,
-  "variant_overridable": false,
+  "overridable_attribute": false,
   "default_value": {},
   "group": "string",
   "order": 0,
@@ -5053,7 +4690,7 @@ const { data } = await client.deleteSchemaAttribute({
   "required": false,
   "readonly": false,
   "deprecated": false,
-  "variant_overridable": false,
+  "overridable_attribute": false,
   "default_value": {},
   "group": "string",
   "order": 0,
@@ -5141,7 +4778,7 @@ const { data } = await client.createSchemaCapability(
         required: false,
         readonly: false,
         deprecated: false,
-        variant_overridable: false,
+        overridable_attribute: false,
         default_value: {},
         group: 'string',
         order: 0,
@@ -5182,7 +4819,7 @@ const { data } = await client.createSchemaCapability(
         required: false,
         readonly: false,
         deprecated: false,
-        variant_overridable: false,
+        overridable_attribute: false,
         default_value: {},
         group: 'string',
         order: 0,
@@ -5211,7 +4848,7 @@ const { data } = await client.createSchemaCapability(
       },
       /* ... 33 more */
     ],
-    variant_overridable: false,
+    overridable_attribute: false,
     _purpose: ['taxonomy-slug:classification-slug'],
     _manifest: ['123e4567-e89b-12d3-a456-426614174000'],
     app_id: '123e4567-e89b-12d3-a456-426614174000',
@@ -5278,7 +4915,7 @@ const { data } = await client.createSchemaCapability(
       "required": false,
       "readonly": false,
       "deprecated": false,
-      "variant_overridable": false,
+      "overridable_attribute": false,
       "default_value": {},
       "group": "string",
       "order": 0,
@@ -5319,7 +4956,7 @@ const { data } = await client.createSchemaCapability(
       "required": false,
       "readonly": false,
       "deprecated": false,
-      "variant_overridable": false,
+      "overridable_attribute": false,
       "default_value": {},
       "group": "string",
       "order": 0,
@@ -5347,7 +4984,7 @@ const { data } = await client.createSchemaCapability(
       "type": "link"
     }
   ],
-  "variant_overridable": false,
+  "overridable_attribute": false,
   "_purpose": ["taxonomy-slug:classification-slug"],
   "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
   "app_id": "123e4567-e89b-12d3-a456-426614174000",
@@ -5429,7 +5066,7 @@ const { data } = await client.getSchemaCapability({
       "required": false,
       "readonly": false,
       "deprecated": false,
-      "variant_overridable": false,
+      "overridable_attribute": false,
       "default_value": {},
       "group": "string",
       "order": 0,
@@ -5470,7 +5107,7 @@ const { data } = await client.getSchemaCapability({
       "required": false,
       "readonly": false,
       "deprecated": false,
-      "variant_overridable": false,
+      "overridable_attribute": false,
       "default_value": {},
       "group": "string",
       "order": 0,
@@ -5498,7 +5135,7 @@ const { data } = await client.getSchemaCapability({
       "type": "link"
     }
   ],
-  "variant_overridable": false,
+  "overridable_attribute": false,
   "_purpose": ["taxonomy-slug:classification-slug"],
   "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
   "app_id": "123e4567-e89b-12d3-a456-426614174000",
@@ -5575,7 +5212,7 @@ const { data } = await client.putSchemaCapability(
         required: false,
         readonly: false,
         deprecated: false,
-        variant_overridable: false,
+        overridable_attribute: false,
         default_value: {},
         group: 'string',
         order: 0,
@@ -5616,7 +5253,7 @@ const { data } = await client.putSchemaCapability(
         required: false,
         readonly: false,
         deprecated: false,
-        variant_overridable: false,
+        overridable_attribute: false,
         default_value: {},
         group: 'string',
         order: 0,
@@ -5645,7 +5282,7 @@ const { data } = await client.putSchemaCapability(
       },
       /* ... 33 more */
     ],
-    variant_overridable: false,
+    overridable_attribute: false,
     _purpose: ['taxonomy-slug:classification-slug'],
     _manifest: ['123e4567-e89b-12d3-a456-426614174000'],
     app_id: '123e4567-e89b-12d3-a456-426614174000',
@@ -5712,7 +5349,7 @@ const { data } = await client.putSchemaCapability(
       "required": false,
       "readonly": false,
       "deprecated": false,
-      "variant_overridable": false,
+      "overridable_attribute": false,
       "default_value": {},
       "group": "string",
       "order": 0,
@@ -5753,7 +5390,7 @@ const { data } = await client.putSchemaCapability(
       "required": false,
       "readonly": false,
       "deprecated": false,
-      "variant_overridable": false,
+      "overridable_attribute": false,
       "default_value": {},
       "group": "string",
       "order": 0,
@@ -5781,7 +5418,7 @@ const { data } = await client.putSchemaCapability(
       "type": "link"
     }
   ],
-  "variant_overridable": false,
+  "overridable_attribute": false,
   "_purpose": ["taxonomy-slug:classification-slug"],
   "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
   "app_id": "123e4567-e89b-12d3-a456-426614174000",
@@ -5863,7 +5500,7 @@ const { data } = await client.deleteSchemaCapability({
       "required": false,
       "readonly": false,
       "deprecated": false,
-      "variant_overridable": false,
+      "overridable_attribute": false,
       "default_value": {},
       "group": "string",
       "order": 0,
@@ -5904,7 +5541,7 @@ const { data } = await client.deleteSchemaCapability({
       "required": false,
       "readonly": false,
       "deprecated": false,
-      "variant_overridable": false,
+      "overridable_attribute": false,
       "default_value": {},
       "group": "string",
       "order": 0,
@@ -5932,7 +5569,7 @@ const { data } = await client.deleteSchemaCapability({
       "type": "link"
     }
   ],
-  "variant_overridable": false,
+  "overridable_attribute": false,
   "_purpose": ["taxonomy-slug:classification-slug"],
   "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
   "app_id": "123e4567-e89b-12d3-a456-426614174000",
@@ -6512,7 +6149,7 @@ type EntitySchema = {
       required?: { ... }
       readonly?: { ... }
       deprecated?: { ... }
-      variant_overridable?: { ... }
+      overridable_attribute?: { ... }
       default_value?: { ... }
       group?: { ... }
       order?: { ... }
@@ -6772,7 +6409,7 @@ type Attribute = {
   required?: boolean
   readonly?: boolean
   deprecated?: boolean
-  variant_overridable?: boolean
+  overridable_attribute?: boolean
   default_value?: unknown
   group?: string
   order?: number
@@ -6835,7 +6472,7 @@ type Attribute = {
   required?: boolean
   readonly?: boolean
   deprecated?: boolean
-  variant_overridable?: boolean
+  overridable_attribute?: boolean
   default_value?: unknown
   group?: string
   order?: number
@@ -6888,7 +6525,7 @@ type BaseAttribute = {
   required?: boolean
   readonly?: boolean
   deprecated?: boolean
-  variant_overridable?: boolean
+  overridable_attribute?: boolean
   default_value?: unknown
   group?: string
   order?: number
@@ -6953,7 +6590,7 @@ type TextAttribute = {
   required?: boolean
   readonly?: boolean
   deprecated?: boolean
-  variant_overridable?: boolean
+  overridable_attribute?: boolean
   default_value?: unknown
   group?: string
   order?: number
@@ -7022,7 +6659,7 @@ type LinkAttribute = {
   required?: boolean
   readonly?: boolean
   deprecated?: boolean
-  variant_overridable?: boolean
+  overridable_attribute?: boolean
   default_value?: unknown
   group?: string
   order?: number
@@ -7088,7 +6725,7 @@ type InternalAttribute = {
   required?: boolean
   readonly?: boolean
   deprecated?: boolean
-  variant_overridable?: boolean
+  overridable_attribute?: boolean
   default_value?: unknown
   group?: string
   order?: number
@@ -7154,7 +6791,7 @@ type BooleanAttribute = {
   required?: boolean
   readonly?: boolean
   deprecated?: boolean
-  variant_overridable?: boolean
+  overridable_attribute?: boolean
   default_value?: unknown
   group?: string
   order?: number
@@ -7221,7 +6858,7 @@ type DateAttribute = {
   required?: boolean
   readonly?: boolean
   deprecated?: boolean
-  variant_overridable?: boolean
+  overridable_attribute?: boolean
   default_value?: unknown
   group?: string
   order?: number
@@ -7287,7 +6924,7 @@ type CountryAttribute = {
   required?: boolean
   readonly?: boolean
   deprecated?: boolean
-  variant_overridable?: boolean
+  overridable_attribute?: boolean
   default_value?: unknown
   group?: string
   order?: number
@@ -7353,7 +6990,7 @@ type SelectAttribute = {
   required?: boolean
   readonly?: boolean
   deprecated?: boolean
-  variant_overridable?: boolean
+  overridable_attribute?: boolean
   default_value?: unknown
   group?: string
   order?: number
@@ -7424,7 +7061,7 @@ type MultiSelectAttribute = {
   required?: boolean
   readonly?: boolean
   deprecated?: boolean
-  variant_overridable?: boolean
+  overridable_attribute?: boolean
   default_value?: unknown
   group?: string
   order?: number
@@ -7497,7 +7134,7 @@ type StatusAttribute = {
   required?: boolean
   readonly?: boolean
   deprecated?: boolean
-  variant_overridable?: boolean
+  overridable_attribute?: boolean
   default_value?: unknown
   group?: string
   order?: number
@@ -7567,7 +7204,7 @@ type SequenceAttribute = {
   required?: boolean
   readonly?: boolean
   deprecated?: boolean
-  variant_overridable?: boolean
+  overridable_attribute?: boolean
   default_value?: unknown
   group?: string
   order?: number
@@ -7635,7 +7272,7 @@ type FileAttribute = {
   required?: boolean
   readonly?: boolean
   deprecated?: boolean
-  variant_overridable?: boolean
+  overridable_attribute?: boolean
   default_value?: unknown
   group?: string
   order?: number
@@ -7707,7 +7344,7 @@ type CurrencyAttribute = {
   required?: boolean
   readonly?: boolean
   deprecated?: boolean
-  variant_overridable?: boolean
+  overridable_attribute?: boolean
   default_value?: unknown
   group?: string
   order?: number
@@ -7804,7 +7441,7 @@ type RelationAttribute = {
   required?: boolean
   readonly?: boolean
   deprecated?: boolean
-  variant_overridable?: boolean
+  overridable_attribute?: boolean
   default_value?: unknown
   group?: string
   order?: number
@@ -7898,7 +7535,7 @@ type UserRelationAttribute = {
   required?: boolean
   readonly?: boolean
   deprecated?: boolean
-  variant_overridable?: boolean
+  overridable_attribute?: boolean
   default_value?: unknown
   group?: string
   order?: number
@@ -7965,7 +7602,7 @@ type PartnerOrganisationAttribute = {
   required?: boolean
   readonly?: boolean
   deprecated?: boolean
-  variant_overridable?: boolean
+  overridable_attribute?: boolean
   default_value?: unknown
   group?: string
   order?: number
@@ -8031,7 +7668,7 @@ type PortalAccessAttribute = {
   required?: boolean
   readonly?: boolean
   deprecated?: boolean
-  variant_overridable?: boolean
+  overridable_attribute?: boolean
   default_value?: unknown
   group?: string
   order?: number
@@ -8122,7 +7759,7 @@ type AddressAttribute = {
   required?: boolean
   readonly?: boolean
   deprecated?: boolean
-  variant_overridable?: boolean
+  overridable_attribute?: boolean
   default_value?: unknown
   group?: string
   order?: number
@@ -8189,7 +7826,7 @@ type AddressRelationAttribute = {
   required?: boolean
   readonly?: boolean
   deprecated?: boolean
-  variant_overridable?: boolean
+  overridable_attribute?: boolean
   default_value?: unknown
   group?: string
   order?: number
@@ -8256,7 +7893,7 @@ type PaymentMethodRelationAttribute = {
   required?: boolean
   readonly?: boolean
   deprecated?: boolean
-  variant_overridable?: boolean
+  overridable_attribute?: boolean
   default_value?: unknown
   group?: string
   order?: number
@@ -8322,7 +7959,7 @@ type InvitationEmailAttribute = {
   required?: boolean
   readonly?: boolean
   deprecated?: boolean
-  variant_overridable?: boolean
+  overridable_attribute?: boolean
   default_value?: unknown
   group?: string
   order?: number
@@ -8388,7 +8025,7 @@ type AutomationAttribute = {
   required?: boolean
   readonly?: boolean
   deprecated?: boolean
-  variant_overridable?: boolean
+  overridable_attribute?: boolean
   default_value?: unknown
   group?: string
   order?: number
@@ -8454,7 +8091,7 @@ type InternalUserAttribute = {
   required?: boolean
   readonly?: boolean
   deprecated?: boolean
-  variant_overridable?: boolean
+  overridable_attribute?: boolean
   default_value?: unknown
   group?: string
   order?: number
@@ -8520,7 +8157,7 @@ type PurposeAttribute = {
   required?: boolean
   readonly?: boolean
   deprecated?: boolean
-  variant_overridable?: boolean
+  overridable_attribute?: boolean
   default_value?: unknown
   group?: string
   order?: number
@@ -8586,7 +8223,7 @@ type RepeatableAttribute = {
   required?: boolean
   readonly?: boolean
   deprecated?: boolean
-  variant_overridable?: boolean
+  overridable_attribute?: boolean
   default_value?: unknown
   group?: string
   order?: number
@@ -8651,7 +8288,7 @@ type TagsAttribute = {
   required?: boolean
   readonly?: boolean
   deprecated?: boolean
-  variant_overridable?: boolean
+  overridable_attribute?: boolean
   default_value?: unknown
   group?: string
   order?: number
@@ -8719,7 +8356,7 @@ type MessageEmailAddressAttribute = {
   required?: boolean
   readonly?: boolean
   deprecated?: boolean
-  variant_overridable?: boolean
+  overridable_attribute?: boolean
   default_value?: unknown
   group?: string
   order?: number
@@ -8788,7 +8425,7 @@ type NumberAttribute = {
   required?: boolean
   readonly?: boolean
   deprecated?: boolean
-  variant_overridable?: boolean
+  overridable_attribute?: boolean
   default_value?: unknown
   group?: string
   order?: number
@@ -8857,7 +8494,7 @@ type TableAttribute = {
   required?: boolean
   readonly?: boolean
   deprecated?: boolean
-  variant_overridable?: boolean
+  overridable_attribute?: boolean
   default_value?: unknown
   group?: string
   order?: number
@@ -8938,7 +8575,7 @@ type ConsentAttribute = {
   required?: boolean
   readonly?: boolean
   deprecated?: boolean
-  variant_overridable?: boolean
+  overridable_attribute?: boolean
   default_value?: unknown
   group?: string
   order?: number
@@ -9006,7 +8643,7 @@ type OrderedListAttribute = {
   required?: boolean
   readonly?: boolean
   deprecated?: boolean
-  variant_overridable?: boolean
+  overridable_attribute?: boolean
   default_value?: unknown
   group?: string
   order?: number
@@ -9072,7 +8709,7 @@ type EmailAttribute = {
   required?: boolean
   readonly?: boolean
   deprecated?: boolean
-  variant_overridable?: boolean
+  overridable_attribute?: boolean
   default_value?: unknown
   group?: string
   order?: number
@@ -9138,7 +8775,7 @@ type PhoneAttribute = {
   required?: boolean
   readonly?: boolean
   deprecated?: boolean
-  variant_overridable?: boolean
+  overridable_attribute?: boolean
   default_value?: unknown
   group?: string
   order?: number
@@ -9204,7 +8841,7 @@ type PaymentAttribute = {
   required?: boolean
   readonly?: boolean
   deprecated?: boolean
-  variant_overridable?: boolean
+  overridable_attribute?: boolean
   default_value?: unknown
   group?: string
   order?: number
@@ -9270,7 +8907,7 @@ type PriceComponentAttribute = {
   required?: boolean
   readonly?: boolean
   deprecated?: boolean
-  variant_overridable?: boolean
+  overridable_attribute?: boolean
   default_value?: unknown
   group?: string
   order?: number
@@ -9336,7 +8973,7 @@ type ComputedAttribute = {
   required?: boolean
   readonly?: boolean
   deprecated?: boolean
-  variant_overridable?: boolean
+  overridable_attribute?: boolean
   default_value?: unknown
   group?: string
   order?: number
@@ -9405,7 +9042,7 @@ type PartnerStatusAttribute = {
   required?: boolean
   readonly?: boolean
   deprecated?: boolean
-  variant_overridable?: boolean
+  overridable_attribute?: boolean
   default_value?: unknown
   group?: string
   order?: number
@@ -9637,7 +9274,7 @@ type EntityCapability = {
     required?: boolean
     readonly?: boolean
     deprecated?: boolean
-    variant_overridable?: boolean
+    overridable_attribute?: boolean
     default_value?: unknown
     group?: string
     order?: number
@@ -9688,7 +9325,7 @@ type EntityCapability = {
     required?: boolean
     readonly?: boolean
     deprecated?: boolean
-    variant_overridable?: boolean
+    overridable_attribute?: boolean
     default_value?: unknown
     group?: string
     order?: number
@@ -9744,7 +9381,7 @@ type EntityCapabilityWithCompositeID = {
     required?: boolean
     readonly?: boolean
     deprecated?: boolean
-    variant_overridable?: boolean
+    overridable_attribute?: boolean
     default_value?: unknown
     group?: string
     order?: number
@@ -9795,7 +9432,7 @@ type EntityCapabilityWithCompositeID = {
     required?: boolean
     readonly?: boolean
     deprecated?: boolean
-    variant_overridable?: boolean
+    overridable_attribute?: boolean
     default_value?: unknown
     group?: string
     order?: number

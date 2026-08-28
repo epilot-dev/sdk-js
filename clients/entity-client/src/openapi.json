@@ -75,7 +75,8 @@
           {
             "in": "query",
             "name": "latest",
-            "description": "When true, return the latest version instead of the frozen version for frozen schemas.",
+            "deprecated": true,
+            "description": "No longer has any effect: schema freezing is retired and the latest version is always returned.\n",
             "schema": {
               "type": "boolean",
               "default": false
@@ -161,7 +162,8 @@
           {
             "in": "query",
             "name": "latest",
-            "description": "When true, return the latest version instead of the frozen version for frozen schemas.",
+            "deprecated": true,
+            "description": "No longer has any effect: schema freezing is retired and the latest version is always returned.\n",
             "schema": {
               "type": "boolean",
               "default": false
@@ -223,7 +225,7 @@
       "get": {
         "operationId": "getSchema",
         "summary": "getSchema",
-        "description": "By default gets the current version of the Schema (frozen version if frozen, otherwise latest).\nPass ?latest=true to get the latest version when the schema is frozen.\nPass ?id= to get a specific version by ID.\n",
+        "description": "Gets the latest version of the Schema.\nPass ?id= to get a specific version by ID.\n",
         "tags": [
           "Schemas"
         ],
@@ -241,7 +243,8 @@
           {
             "in": "query",
             "name": "latest",
-            "description": "When true, return the latest version instead of the frozen version for frozen schemas.",
+            "deprecated": true,
+            "description": "No longer has any effect: schema freezing is retired and the latest version is always returned.\n",
             "schema": {
               "type": "boolean",
               "default": false
@@ -267,7 +270,7 @@
       "put": {
         "operationId": "putSchema",
         "summary": "putSchema",
-        "description": "Create or update a schema with a new version.\nWhen the schema is frozen, writes update the latest version without affecting the frozen version.\n",
+        "description": "Create or update a schema with a new version.\n",
         "tags": [
           "Schemas"
         ],
@@ -792,7 +795,8 @@
                       "type": "boolean"
                     },
                     "frozen_version": {
-                      "description": "The version ID that is currently frozen, if any",
+                      "deprecated": true,
+                      "description": "No longer returned: schema freezing is retired.\n",
                       "allOf": [
                         {
                           "$ref": "#/components/schemas/SchemaId"
@@ -815,7 +819,8 @@
       "post": {
         "operationId": "freezeSchema",
         "summary": "freezeSchema",
-        "description": "Freeze a schema at its current version, or at a specific version.\nWhen frozen, getSchema returns the frozen version by default.\nNew edits via putSchema update the latest version without affecting the frozen version.\n",
+        "deprecated": true,
+        "description": "Deprecated no-op: schema freezing is retired and every read returns the latest version.\nReturns the latest version of the schema unchanged. This endpoint will be removed.\n",
         "tags": [
           "Schemas"
         ],
@@ -864,7 +869,8 @@
       "post": {
         "operationId": "unfreezeSchema",
         "summary": "unfreezeSchema",
-        "description": "Unfreeze a schema. Promotes the latest version to the current version for all users.\n",
+        "deprecated": true,
+        "description": "Deprecated: schema freezing is retired. Cleans up a leftover frozen pointer by promoting the\nlatest version to the current version, and succeeds when there is nothing to clean up.\nThis endpoint will be removed.\n",
         "tags": [
           "Schemas"
         ],
@@ -3947,7 +3953,7 @@
               "description": "ISO 8601 timestamp to filter jobs created after this time (e.g., 2023-01-01T00:00:00Z).",
               "type": "string",
               "format": "date-time",
-              "example": "2023-01-01T00:00:00.000Z"
+              "example": "2023-01-01T00:00:00Z"
             }
           },
           {
@@ -5257,7 +5263,7 @@
           "conditions": {
             "type": "array",
             "nullable": true,
-            "description": "Dimensions that conditional variants of this entity type are keyed by.\n\nAbsent or `null` means entities of this type are not conditional. Attributes whose\nvalues a variant may override are marked with `variant_overridable`.\n",
+            "description": "Dimensions that conditional variants of this entity type are keyed by.\n\nAbsent or `null` means entities of this type are not conditional. Attributes whose\nvalues a variant may override are marked with `overridable_attribute`.\n",
             "items": {
               "$ref": "#/components/schemas/ConditionDefinition"
             }
@@ -5300,11 +5306,13 @@
                 }
               },
               "frozen": {
-                "description": "Indicates this schema is currently frozen. Present when the returned version is the frozen version.",
+                "deprecated": true,
+                "description": "No longer returned: schema freezing is retired.\n",
                 "type": "boolean"
               },
               "latest": {
-                "description": "Indicates this is the latest version of the schema. Both frozen and latest can be true if no changes were made since freezing.",
+                "deprecated": true,
+                "description": "No longer returned: every read returns the latest version.\n",
                 "type": "boolean"
               },
               "_summary": {
@@ -5690,7 +5698,7 @@
             "type": "boolean",
             "default": false
           },
-          "variant_overridable": {
+          "overridable_attribute": {
             "type": "boolean",
             "default": false,
             "description": "Allow conditional variants of the entity to override this attribute's value.\nOnly meaningful on schemas that declare `conditions`. Unflagged attributes stay\nfixed on the base entity.\n"
@@ -7477,10 +7485,10 @@
               "$ref": "#/components/schemas/Attribute"
             }
           },
-          "variant_overridable": {
+          "overridable_attribute": {
             "type": "boolean",
             "default": false,
-            "description": "Allow conditional variants of the entity to override the values managed by this\ncapability. Only meaningful on schemas that declare `conditions` and on capabilities\nthat render an attribute group (`EntityAttributes:Group` ui hook), e.g. pricing tiers.\nAttributes carried by the capability opt in individually via their own\n`variant_overridable` flag.\n"
+            "description": "Allow conditional variants of the entity to override the values managed by this\ncapability. Only meaningful on schemas that declare `conditions` and on capabilities\nthat render an attribute group (`EntityAttributes:Group` ui hook), e.g. pricing tiers.\nAttributes carried by the capability opt in individually via their own\n`overridable_attribute` flag.\n"
           },
           "_purpose": {
             "type": "array",
