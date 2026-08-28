@@ -398,7 +398,7 @@ declare namespace Components {
              * fixed on the base entity.
              *
              */
-            variant_overridable?: boolean;
+            overridable_attribute?: boolean;
             default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
@@ -633,7 +633,7 @@ declare namespace Components {
              * fixed on the base entity.
              *
              */
-            variant_overridable?: boolean;
+            overridable_attribute?: boolean;
             default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
@@ -898,7 +898,7 @@ declare namespace Components {
              * fixed on the base entity.
              *
              */
-            variant_overridable?: boolean;
+            overridable_attribute?: boolean;
             default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
@@ -1165,7 +1165,7 @@ declare namespace Components {
              * fixed on the base entity.
              *
              */
-            variant_overridable?: boolean;
+            overridable_attribute?: boolean;
             default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
@@ -1497,7 +1497,7 @@ declare namespace Components {
              * fixed on the base entity.
              *
              */
-            variant_overridable?: boolean;
+            overridable_attribute?: boolean;
             default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
@@ -1809,7 +1809,7 @@ declare namespace Components {
              * fixed on the base entity.
              *
              */
-            variant_overridable?: boolean;
+            overridable_attribute?: boolean;
             default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
@@ -2050,7 +2050,7 @@ declare namespace Components {
              * fixed on the base entity.
              *
              */
-            variant_overridable?: boolean;
+            overridable_attribute?: boolean;
             default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
@@ -2261,7 +2261,7 @@ declare namespace Components {
              * fixed on the base entity.
              *
              */
-            variant_overridable?: boolean;
+            overridable_attribute?: boolean;
             default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
@@ -2470,7 +2470,7 @@ declare namespace Components {
              * fixed on the base entity.
              *
              */
-            variant_overridable?: boolean;
+            overridable_attribute?: boolean;
             default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
@@ -2689,7 +2689,7 @@ declare namespace Components {
              * fixed on the base entity.
              *
              */
-            variant_overridable?: boolean;
+            overridable_attribute?: boolean;
             default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
@@ -2979,7 +2979,7 @@ declare namespace Components {
              * fixed on the base entity.
              *
              */
-            variant_overridable?: boolean;
+            overridable_attribute?: boolean;
             default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
@@ -3315,10 +3315,10 @@ declare namespace Components {
              * capability. Only meaningful on schemas that declare `conditions` and on capabilities
              * that render an attribute group (`EntityAttributes:Group` ui hook), e.g. pricing tiers.
              * Attributes carried by the capability opt in individually via their own
-             * `variant_overridable` flag.
+             * `overridable_attribute` flag.
              *
              */
-            variant_overridable?: boolean;
+            overridable_attribute?: boolean;
             _purpose?: /**
              * example:
              * taxonomy-slug:classification-slug
@@ -3495,10 +3495,10 @@ declare namespace Components {
              * capability. Only meaningful on schemas that declare `conditions` and on capabilities
              * that render an attribute group (`EntityAttributes:Group` ui hook), e.g. pricing tiers.
              * Attributes carried by the capability opt in individually via their own
-             * `variant_overridable` flag.
+             * `overridable_attribute` flag.
              *
              */
-            variant_overridable?: boolean;
+            overridable_attribute?: boolean;
             _purpose?: /**
              * example:
              * taxonomy-slug:classification-slug
@@ -4775,7 +4775,7 @@ declare namespace Components {
              * Dimensions that conditional variants of this entity type are keyed by.
              *
              * Absent or `null` means entities of this type are not conditional. Attributes whose
-             * values a variant may override are marked with `variant_overridable`.
+             * values a variant may override are marked with `overridable_attribute`.
              *
              */
             conditions?: /**
@@ -4929,11 +4929,13 @@ declare namespace Components {
                 type?: string;
             };
             /**
-             * Indicates this schema is currently frozen. Present when the returned version is the frozen version.
+             * No longer returned: schema freezing is retired.
+             *
              */
             frozen?: boolean;
             /**
-             * Indicates this is the latest version of the schema. Both frozen and latest can be true if no changes were made since freezing.
+             * No longer returned: every read returns the latest version.
+             *
              */
             latest?: boolean;
             /**
@@ -5228,7 +5230,7 @@ declare namespace Components {
              * Dimensions that conditional variants of this entity type are keyed by.
              *
              * Absent or `null` means entities of this type are not conditional. Attributes whose
-             * values a variant may override are marked with `variant_overridable`.
+             * values a variant may override are marked with `overridable_attribute`.
              *
              */
             conditions?: /**
@@ -5788,7 +5790,7 @@ declare namespace Components {
              * fixed on the base entity.
              *
              */
-            variant_overridable?: boolean;
+            overridable_attribute?: boolean;
             default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
@@ -6710,7 +6712,7 @@ declare namespace Components {
              * fixed on the base entity.
              *
              */
-            variant_overridable?: boolean;
+            overridable_attribute?: boolean;
             default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
@@ -6919,7 +6921,7 @@ declare namespace Components {
              * fixed on the base entity.
              *
              */
-            variant_overridable?: boolean;
+            overridable_attribute?: boolean;
             default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
@@ -7128,7 +7130,7 @@ declare namespace Components {
              * fixed on the base entity.
              *
              */
-            variant_overridable?: boolean;
+            overridable_attribute?: boolean;
             default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
@@ -7345,7 +7347,7 @@ declare namespace Components {
              * fixed on the base entity.
              *
              */
-            variant_overridable?: boolean;
+            overridable_attribute?: boolean;
             default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
@@ -7609,7 +7611,7 @@ declare namespace Components {
              * fixed on the base entity.
              *
              */
-            variant_overridable?: boolean;
+            overridable_attribute?: boolean;
             default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
@@ -7905,7 +7907,7 @@ declare namespace Components {
              * fixed on the base entity.
              *
              */
-            variant_overridable?: boolean;
+            overridable_attribute?: boolean;
             default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
@@ -8225,7 +8227,7 @@ declare namespace Components {
              * fixed on the base entity.
              *
              */
-            variant_overridable?: boolean;
+            overridable_attribute?: boolean;
             default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
@@ -8443,7 +8445,7 @@ declare namespace Components {
              * fixed on the base entity.
              *
              */
-            variant_overridable?: boolean;
+            overridable_attribute?: boolean;
             default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
@@ -8652,7 +8654,7 @@ declare namespace Components {
              * fixed on the base entity.
              *
              */
-            variant_overridable?: boolean;
+            overridable_attribute?: boolean;
             default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
@@ -8861,7 +8863,7 @@ declare namespace Components {
              * fixed on the base entity.
              *
              */
-            variant_overridable?: boolean;
+            overridable_attribute?: boolean;
             default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
@@ -9070,7 +9072,7 @@ declare namespace Components {
              * fixed on the base entity.
              *
              */
-            variant_overridable?: boolean;
+            overridable_attribute?: boolean;
             default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
@@ -9279,7 +9281,7 @@ declare namespace Components {
              * fixed on the base entity.
              *
              */
-            variant_overridable?: boolean;
+            overridable_attribute?: boolean;
             default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
@@ -9488,7 +9490,7 @@ declare namespace Components {
              * fixed on the base entity.
              *
              */
-            variant_overridable?: boolean;
+            overridable_attribute?: boolean;
             default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
@@ -9697,7 +9699,7 @@ declare namespace Components {
              * fixed on the base entity.
              *
              */
-            variant_overridable?: boolean;
+            overridable_attribute?: boolean;
             default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
@@ -9906,7 +9908,7 @@ declare namespace Components {
              * fixed on the base entity.
              *
              */
-            variant_overridable?: boolean;
+            overridable_attribute?: boolean;
             default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
@@ -10115,7 +10117,7 @@ declare namespace Components {
              * fixed on the base entity.
              *
              */
-            variant_overridable?: boolean;
+            overridable_attribute?: boolean;
             default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
@@ -10339,7 +10341,7 @@ declare namespace Components {
              * fixed on the base entity.
              *
              */
-            variant_overridable?: boolean;
+            overridable_attribute?: boolean;
             default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
@@ -10774,7 +10776,7 @@ declare namespace Components {
              * fixed on the base entity.
              *
              */
-            variant_overridable?: boolean;
+            overridable_attribute?: boolean;
             default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
@@ -11437,7 +11439,7 @@ declare namespace Components {
              * fixed on the base entity.
              *
              */
-            variant_overridable?: boolean;
+            overridable_attribute?: boolean;
             default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
@@ -11695,7 +11697,7 @@ declare namespace Components {
              * fixed on the base entity.
              *
              */
-            variant_overridable?: boolean;
+            overridable_attribute?: boolean;
             default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
@@ -11921,7 +11923,7 @@ declare namespace Components {
              * fixed on the base entity.
              *
              */
-            variant_overridable?: boolean;
+            overridable_attribute?: boolean;
             default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
@@ -12226,7 +12228,7 @@ declare namespace Components {
              * fixed on the base entity.
              *
              */
-            variant_overridable?: boolean;
+            overridable_attribute?: boolean;
             default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
@@ -12491,7 +12493,7 @@ declare namespace Components {
              * fixed on the base entity.
              *
              */
-            variant_overridable?: boolean;
+            overridable_attribute?: boolean;
             default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
@@ -12902,7 +12904,7 @@ declare namespace Components {
              * fixed on the base entity.
              *
              */
-            variant_overridable?: boolean;
+            overridable_attribute?: boolean;
             default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
@@ -13124,7 +13126,7 @@ declare namespace Components {
              * fixed on the base entity.
              *
              */
-            variant_overridable?: boolean;
+            overridable_attribute?: boolean;
             default_value?: any;
             /**
              * Which group the attribute should appear in. Accepts group ID or group name
@@ -15521,7 +15523,8 @@ declare namespace Paths {
                  */
                 drafts_more?: boolean;
                 /**
-                 * The version ID that is currently frozen, if any
+                 * No longer returned: schema freezing is retired.
+                 *
                  */
                 frozen_version?: string; // uuid
             }
@@ -15575,7 +15578,7 @@ declare namespace Paths {
             /**
              * ISO 8601 timestamp to filter jobs created after this time (e.g., 2023-01-01T00:00:00Z).
              * example:
-             * 2023-01-01T00:00:00.000Z
+             * 2023-01-01T00:00:00Z
              */
             export type CreatedAfter = string; // date-time
             /**
@@ -15601,7 +15604,7 @@ declare namespace Paths {
             created_after?: /**
              * ISO 8601 timestamp to filter jobs created after this time (e.g., 2023-01-01T00:00:00Z).
              * example:
-             * 2023-01-01T00:00:00.000Z
+             * 2023-01-01T00:00:00Z
              */
             Parameters.CreatedAfter /* date-time */;
             sort_pending_first?: /* When true, sorts PENDING status jobs to the top of the results. */ Parameters.SortPendingFirst;
@@ -17088,8 +17091,7 @@ export interface OperationMethods {
   /**
    * getSchema - getSchema
    * 
-   * By default gets the current version of the Schema (frozen version if frozen, otherwise latest).
-   * Pass ?latest=true to get the latest version when the schema is frozen.
+   * Gets the latest version of the Schema.
    * Pass ?id= to get a specific version by ID.
    * 
    */
@@ -17102,7 +17104,6 @@ export interface OperationMethods {
    * putSchema - putSchema
    * 
    * Create or update a schema with a new version.
-   * When the schema is frozen, writes update the latest version without affecting the frozen version.
    * 
    */
   'putSchema'(
@@ -17153,9 +17154,8 @@ export interface OperationMethods {
   /**
    * freezeSchema - freezeSchema
    * 
-   * Freeze a schema at its current version, or at a specific version.
-   * When frozen, getSchema returns the frozen version by default.
-   * New edits via putSchema update the latest version without affecting the frozen version.
+   * Deprecated no-op: schema freezing is retired and every read returns the latest version.
+   * Returns the latest version of the schema unchanged. This endpoint will be removed.
    * 
    */
   'freezeSchema'(
@@ -17166,7 +17166,9 @@ export interface OperationMethods {
   /**
    * unfreezeSchema - unfreezeSchema
    * 
-   * Unfreeze a schema. Promotes the latest version to the current version for all users.
+   * Deprecated: schema freezing is retired. Cleans up a leftover frozen pointer by promoting the
+   * latest version to the current version, and succeeds when there is nothing to clean up.
+   * This endpoint will be removed.
    * 
    */
   'unfreezeSchema'(
@@ -18289,8 +18291,7 @@ export interface PathsDictionary {
     /**
      * getSchema - getSchema
      * 
-     * By default gets the current version of the Schema (frozen version if frozen, otherwise latest).
-     * Pass ?latest=true to get the latest version when the schema is frozen.
+     * Gets the latest version of the Schema.
      * Pass ?id= to get a specific version by ID.
      * 
      */
@@ -18303,7 +18304,6 @@ export interface PathsDictionary {
      * putSchema - putSchema
      * 
      * Create or update a schema with a new version.
-     * When the schema is frozen, writes update the latest version without affecting the frozen version.
      * 
      */
     'put'(
@@ -18362,9 +18362,8 @@ export interface PathsDictionary {
     /**
      * freezeSchema - freezeSchema
      * 
-     * Freeze a schema at its current version, or at a specific version.
-     * When frozen, getSchema returns the frozen version by default.
-     * New edits via putSchema update the latest version without affecting the frozen version.
+     * Deprecated no-op: schema freezing is retired and every read returns the latest version.
+     * Returns the latest version of the schema unchanged. This endpoint will be removed.
      * 
      */
     'post'(
@@ -18377,7 +18376,9 @@ export interface PathsDictionary {
     /**
      * unfreezeSchema - unfreezeSchema
      * 
-     * Unfreeze a schema. Promotes the latest version to the current version for all users.
+     * Deprecated: schema freezing is retired. Cleans up a leftover frozen pointer by promoting the
+     * latest version to the current version, and succeeds when there is nothing to clean up.
+     * This endpoint will be removed.
      * 
      */
     'post'(
