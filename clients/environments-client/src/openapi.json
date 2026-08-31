@@ -348,17 +348,17 @@
     "schemas": {
       "EnvironmentValueType": {
         "type": "string",
-        "description": "The structure a variable's value holds. `SecretString` is encrypted at rest and\nits value is never returned. `Text`, `Number`, `Boolean` and `Options` may be\nserved to browser-facing consumers; `String` and `SecretString` may not.\n",
+        "description": "The structure a variable's value holds. `SecretString` is encrypted at rest and\nits value is never returned. `Text`, `Number`, `Boolean` and `Map` may be\nserved to browser-facing consumers; `String` and `SecretString` may not.\n",
         "enum": [
           "String",
           "SecretString",
           "Text",
           "Number",
           "Boolean",
-          "Options"
+          "Map"
         ]
       },
-      "EnvironmentOption": {
+      "MapEntry": {
         "oneOf": [
           {
             "type": "object",
@@ -405,7 +405,7 @@
           }
         ]
       },
-      "OptionsValue": {
+      "MapValue": {
         "type": "object",
         "required": [
           "options"
@@ -421,13 +421,13 @@
             "type": "array",
             "minItems": 1,
             "items": {
-              "$ref": "#/components/schemas/EnvironmentOption"
+              "$ref": "#/components/schemas/MapEntry"
             }
           }
         }
       },
       "EnvironmentValue": {
-        "description": "A variable's value. The JSON type corresponds to the variable's `type`:\n`String`, `SecretString` and `Text` are strings, `Number` is a number,\n`Boolean` is a boolean, and `Options` is an object. Numbers are IEEE 754\ndoubles; integers above 2^53 may lose precision on round-trip.\n",
+        "description": "A variable's value. The JSON type corresponds to the variable's `type`:\n`String`, `SecretString` and `Text` are strings, `Number` is a number,\n`Boolean` is a boolean, and `Map` is an object. Numbers are IEEE 754\ndoubles; integers above 2^53 may lose precision on round-trip.\n",
         "oneOf": [
           {
             "type": "string"
@@ -439,7 +439,7 @@
             "type": "boolean"
           },
           {
-            "$ref": "#/components/schemas/OptionsValue"
+            "$ref": "#/components/schemas/MapValue"
           }
         ]
       },

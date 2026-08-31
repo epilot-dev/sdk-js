@@ -36,8 +36,8 @@ const { data } = await environmentsClient.listEnvironmentVariables(...)
 
 **Schemas**
 - [`EnvironmentValueType`](#environmentvaluetype)
-- [`EnvironmentOption`](#environmentoption)
-- [`OptionsValue`](#optionsvalue)
+- [`MapEntry`](#mapentry)
+- [`MapValue`](#mapvalue)
 - [`EnvironmentValue`](#environmentvalue)
 - [`EnvironmentVariable`](#environmentvariable)
 - [`EnvironmentVariableListItem`](#environmentvariablelistitem)
@@ -291,18 +291,18 @@ const { data } = await client.deleteEnvironmentVariable({
 ### `EnvironmentValueType`
 
 The structure a variable's value holds. `SecretString` is encrypted at rest and
-its value is never returned. `Text`, `Number`, `Boolean` and `Options` may be
+its value is never returned. `Text`, `Number`, `Boolean` and `Map` may be
 served to browser-facing consumers; `String` and `SecretString` may not.
 
 
 ```ts
-type EnvironmentValueType = "String" | "SecretString" | "Text" | "Number" | "Boolean" | "Options"
+type EnvironmentValueType = "String" | "SecretString" | "Text" | "Number" | "Boolean" | "Map"
 ```
 
-### `EnvironmentOption`
+### `MapEntry`
 
 ```ts
-type EnvironmentOption = {
+type MapEntry = {
   value: string
   label: string
 } | {
@@ -311,10 +311,10 @@ type EnvironmentOption = {
 }
 ```
 
-### `OptionsValue`
+### `MapValue`
 
 ```ts
-type OptionsValue = {
+type MapValue = {
   fallbackLanguage?: string
   options: Array<{
     value: string
@@ -330,7 +330,7 @@ type OptionsValue = {
 
 A variable's value. The JSON type corresponds to the variable's `type`:
 `String`, `SecretString` and `Text` are strings, `Number` is a number,
-`Boolean` is a boolean, and `Options` is an object. Numbers are IEEE 754
+`Boolean` is a boolean, and `Map` is an object. Numbers are IEEE 754
 doubles; integers above 2^53 may lose precision on round-trip.
 
 
@@ -352,7 +352,7 @@ type EnvironmentValue = string | number | boolean | {
 ```ts
 type EnvironmentVariable = {
   key: string
-  type: "String" | "SecretString" | "Text" | "Number" | "Boolean" | "Options"
+  type: "String" | "SecretString" | "Text" | "Number" | "Boolean" | "Map"
   description?: string
   group?: string
   value?: string | number | boolean | {
@@ -376,7 +376,7 @@ type EnvironmentVariable = {
 ```ts
 type EnvironmentVariableListItem = {
   key: string
-  type: "String" | "SecretString" | "Text" | "Number" | "Boolean" | "Options"
+  type: "String" | "SecretString" | "Text" | "Number" | "Boolean" | "Map"
   description?: string
   group?: string
   value?: string | number | boolean | {
@@ -401,7 +401,7 @@ type EnvironmentVariableListItem = {
 type EnvironmentVariableList = {
   items: Array<{
     key: string
-    type: "String" | "SecretString" | "Text" | "Number" | "Boolean" | "Options"
+    type: "String" | "SecretString" | "Text" | "Number" | "Boolean" | "Map"
     description?: string
     group?: string
     value?: string | number | boolean | {
@@ -420,7 +420,7 @@ type EnvironmentVariableList = {
 ```ts
 type EnvironmentVariableCreateRequest = {
   key: string
-  type: "String" | "SecretString" | "Text" | "Number" | "Boolean" | "Options"
+  type: "String" | "SecretString" | "Text" | "Number" | "Boolean" | "Map"
   description?: string
   group?: string
   value?: string | number | boolean | {
@@ -441,7 +441,7 @@ type EnvironmentVariableCreateRequest = {
 
 ```ts
 type EnvironmentVariableUpdateRequest = {
-  type?: "String" | "SecretString" | "Text" | "Number" | "Boolean" | "Options"
+  type?: "String" | "SecretString" | "Text" | "Number" | "Boolean" | "Map"
   value?: string | number | boolean | {
     fallbackLanguage?: string
     options: Array<{
