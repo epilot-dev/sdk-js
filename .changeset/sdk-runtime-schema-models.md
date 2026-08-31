@@ -5,10 +5,8 @@
 
 Publish runtime values through the SDK via a client's `schema-model.ts`
 
-The SDK could only ever re-export *types* from a client's hand-written modules: `additional-types.ts` is copied to a `.d.ts` and re-exported with `export type *`, so a `const` or `enum` placed there type-checks and is then `undefined` at runtime. A client's `schema-model.ts` is now copied as a real `.ts` to `src/models/<api>-model.ts` and re-exported with `export *`, so the values survive.
+Only types could reach SDK consumers before — `additional-types.ts` lands in a `.d.ts`, so a `const` or `enum` there is `undefined` at runtime. A client's `schema-model.ts` is now copied as a real `.ts` and re-exported with `export *`.
 
-This fixes an existing gap: `RelationAffinityMode` has always been exported from `@epilot/entity-client` but was unreachable through `@epilot/sdk/entity` — the generator never looked at `schema-model.ts`. It is now available from both.
+This makes `RelationAffinityMode` reachable through `@epilot/sdk/entity` for the first time; it was already exported from `@epilot/entity-client`.
 
-`@epilot/pricing-client` gains a `schema-model.ts` with runtime companions for four spec enums — `PricingModelValues`, `MarkupPricingModelValues`, `TypeGetAgValues` and `DynamicTariffModeValues` — for consumers that need the values themselves (an `Object.values()` allowlist, a lookup, a `switch` default) rather than just the union type. Each is tied to its generated union with `satisfies`, so dropping a member from the spec is a compile error and the two cannot drift.
-
-A name exported from `schema-model.ts` must not also be a `components.schemas` entry, since both are re-exported from the same API entry file; hence the `<SpecType>Values` naming. See CONTRIBUTING.md.
+`@epilot/pricing-client` gains `PricingModelValues`, `MarkupPricingModelValues`, `TypeGetAgValues` and `DynamicTariffModeValues` — the enum values themselves, for lookups and `Object.values()` allowlists, rather than just the union types. Each is tied to its spec union with `satisfies`, so the two cannot drift.
