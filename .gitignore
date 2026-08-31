@@ -1,5 +1,10 @@
 node_modules
 npm_debug.log*
+
+# This is a pnpm workspace (see "packageManager" in package.json).
+# npm/yarn lockfiles are not used and must not be committed.
+package-lock.json
+yarn.lock
 .eslintcache
 dist
 *.log
