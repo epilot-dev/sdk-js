@@ -5,6 +5,7 @@
  * - Copies openapi-runtime.json definitions
  * - Copies openapi.d.ts type files
  * - Copies hand-written additional-types.ts type files
+ * - Copies hand-written schema-model.ts runtime modules
  * - Generates per-API lazy loader files (apis/*.ts)
  * - Generates the API registry (apis/_registry.ts)
  * - Updates package.json subpath exports
@@ -22,6 +23,7 @@ const DEFS_DIR = resolve(V2_DIR, 'src/definitions');
 const RUNTIME_DEFS_DIR = resolve(V2_DIR, 'definitions');
 const TYPES_DIR = resolve(V2_DIR, 'src/types');
 const APIS_DIR = resolve(V2_DIR, 'src/apis');
+const MODELS_DIR = resolve(V2_DIR, 'src/models');
 
 // Map client directory name -> SDK api name (camelCase)
 const toCamelCase = (name: string): string => {
@@ -35,6 +37,7 @@ type ClientInfo = {
   hasDefinition: boolean;
   hasTypes: boolean;
   hasAdditionalTypes: boolean;
+  hasModel: boolean;
 };
 
 const discoverClients = (): ClientInfo[] => {
@@ -54,6 +57,7 @@ const discoverClients = (): ClientInfo[] => {
       hasDefinition: existsSync(resolve(clientDir, 'openapi-runtime.json')),
       hasTypes: existsSync(resolve(clientDir, 'openapi.d.ts')),
       hasAdditionalTypes: existsSync(resolve(clientDir, 'additional-types.ts')),
+      hasModel: existsSync(resolve(clientDir, 'schema-model.ts')),
     };
   });
 };
@@ -184,28 +188,57 @@ const copyTypes = (clients: ClientInfo[]) => {
 };
 
 /**
- * Copies the hand-written `additional-types.ts` of a client (types that are not
- * part of the OpenAPI specification but are still part of the client's public
- * API surface) into the SDK types directory, so the SDK exposes the exact same
- * types as the standalone client package.
+ * Copies a hand-written client module into the SDK, repointing its `./openapi`
+ * import at the SDK's copy of the generated types.
+ *
+ * `additional-types.ts` holds types only, so it lands as a `.d.ts` re-exported
+ * with `export type *`. `schema-model.ts` holds runtime values, so it lands as a
+ * real `.ts` re-exported with `export *` — the `.d.ts` treatment would leave
+ * every value `undefined` for SDK consumers. See CONTRIBUTING.md.
  */
-const copyAdditionalTypes = (clients: ClientInfo[]) => {
-  mkdirSync(TYPES_DIR, { recursive: true });
+const copyHandWritten = (
+  clients: ClientInfo[],
+  opts: {
+    has: (client: ClientInfo) => boolean;
+    srcFile: string;
+    destDir: string;
+    destFile: (kebabName: string) => string;
+    typesImport: (kebabName: string) => string;
+  },
+) => {
+  mkdirSync(opts.destDir, { recursive: true });
 
   for (const client of clients) {
-    if (!client.hasAdditionalTypes) continue;
-    const src = resolve(CLIENTS_DIR, client.dirName, 'src/additional-types.ts');
+    if (!opts.has(client)) continue;
+    const src = resolve(CLIENTS_DIR, client.dirName, 'src', opts.srcFile);
     let content = readFileSync(src, 'utf-8');
 
     // The client resolves generated types via './openapi', in the SDK they live
-    // in a sibling file named after the API.
-    content = content.replace(/(\bfrom\s+')\.\/openapi(')/g, `$1./${client.kebabName}$2`);
-    content = `/* Auto-copied from ${client.dirName}/src/additional-types.ts */\n${content}`;
+    // in a file named after the API.
+    content = content.replace(/(\bfrom\s+')\.\/openapi(')/g, `$1${opts.typesImport(client.kebabName)}$2`);
+    content = `/* Auto-copied from ${client.dirName}/src/${opts.srcFile} */\n${content}`;
 
-    const dest = resolve(TYPES_DIR, `${client.kebabName}-additional.d.ts`);
-    writeFileSync(dest, content);
+    writeFileSync(resolve(opts.destDir, opts.destFile(client.kebabName)), content);
   }
 };
+
+const copyAdditionalTypes = (clients: ClientInfo[]) =>
+  copyHandWritten(clients, {
+    has: (client) => client.hasAdditionalTypes,
+    srcFile: 'additional-types.ts',
+    destDir: TYPES_DIR,
+    destFile: (kebabName) => `${kebabName}-additional.d.ts`,
+    typesImport: (kebabName) => `./${kebabName}`,
+  });
+
+const copyModels = (clients: ClientInfo[]) =>
+  copyHandWritten(clients, {
+    has: (client) => client.hasModel,
+    srcFile: 'schema-model.ts',
+    destDir: MODELS_DIR,
+    destFile: (kebabName) => `${kebabName}-model.ts`,
+    typesImport: (kebabName) => `../types/${kebabName}`,
+  });
 
 type SchemaDoc = {
   name: string;
@@ -366,6 +399,11 @@ const generateApiFile = (client: ClientInfo): string => {
     lines.push(`export type { OpenAPIClient } from 'openapi-client-axios'`);
   } else {
     lines.push(`import type { AxiosInstance } from 'axios'`);
+  }
+
+  if (client.hasModel) {
+    // Values, not just types — see copyModels.
+    lines.push(`export * from '../models/${client.kebabName}-model'`);
   }
 
   lines.push(
@@ -1070,6 +1108,7 @@ const main = () => {
   console.log('Copying types...');
   copyTypes(clients);
   copyAdditionalTypes(clients);
+  copyModels(clients);
 
   console.log('Generating per-API files...');
   mkdirSync(APIS_DIR, { recursive: true });
@@ -1108,6 +1147,7 @@ const main = () => {
   console.log(`  - ${validClients.length} definition files`);
   console.log(`  - ${clients.filter((c) => c.hasTypes).length} type files`);
   console.log(`  - ${clients.filter((c) => c.hasAdditionalTypes).length} additional type files`);
+  console.log(`  - ${clients.filter((c) => c.hasModel).length} model files`);
   console.log(`  - ${validClients.length} API entry files`);
   console.log(`  - 1 registry file`);
   console.log(`  - ${docCount} API docs + index`);

@@ -10,6 +10,7 @@ export type { TokenArg } from '../authorize';
 import type { Client } from '../types/entity';
 export type * from '../types/entity';
 export type { OpenAPIClient } from 'openapi-client-axios';
+export * from '../models/entity-model';
 
 /* eslint-disable @typescript-eslint/no-require-imports */
 const loadDefinition = (): Document => {

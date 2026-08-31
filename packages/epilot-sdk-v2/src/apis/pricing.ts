@@ -11,6 +11,7 @@ import type { Client } from '../types/pricing';
 export type * from '../types/pricing';
 export type * from '../types/pricing-additional';
 export type { OpenAPIClient } from 'openapi-client-axios';
+export * from '../models/pricing-model';
 
 /* eslint-disable @typescript-eslint/no-require-imports */
 const loadDefinition = (): Document => {
