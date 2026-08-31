@@ -362,7 +362,8 @@ declare namespace Components {
              * Per-resource live status. Populated only for V3 installs.
              */
             resource_progress?: V3ResourceProgressEntry[];
-            status?: "IN_PROGRESS" | "WAITING_USER_ACTION" | "CANCELED" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED";
+            options?: BlueprintInstallationJobOptions;
+            status?: "IN_PROGRESS" | "WAITING_USER_ACTION" | "REAUTH_REQUIRED" | "CANCELED" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED";
         }
         export interface BlueprintInstallationJobOptions {
             /**
@@ -935,7 +936,8 @@ declare namespace Components {
                  * Per-resource live status. Populated only for V3 installs.
                  */
                 resource_progress?: V3ResourceProgressEntry[];
-                status?: "IN_PROGRESS" | "WAITING_USER_ACTION" | "CANCELED" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED";
+                options?: BlueprintInstallationJobOptions;
+                status?: "IN_PROGRESS" | "WAITING_USER_ACTION" | "REAUTH_REQUIRED" | "CANCELED" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED";
             } | null;
         }
         export interface BulkInstallTargetInput {
@@ -1429,6 +1431,28 @@ declare namespace Components {
              * Whether the resource is virtual
              */
             is_virtual?: boolean;
+        }
+        export interface ContinueInstallationJobRequest {
+            /**
+             * List of resource addresses to ignore changes for. When a resource is marked as create, it will be ignored and not created.
+             */
+            resources_to_ignore?: string[];
+            /**
+             * When `true`, the source blueprint's `notes` overwrite the destination
+             * blueprint's `notes`. Defaults to `false`, which leaves the
+             * destination's notes untouched.
+             *
+             */
+            sync_notes?: boolean;
+            /**
+             * A freshly issued bearer for the SOURCE organization, used only when resuming a
+             * job paused at `REAUTH_REQUIRED` whose source credential also expired. Applies to
+             * cross-org installs: apply-time reads such as the authenticated File API fallback
+             * for private source files run against the source org, so the destination bearer
+             * cannot stand in for them. Omit it to keep the source token the job already has.
+             *
+             */
+            source_auth_token?: string; // password
         }
         export interface CustomBlueprint {
             id?: /**
@@ -2571,7 +2595,7 @@ declare namespace Components {
          * 4854bb2a-94f9-424d-a968-3fb17fb0bf89
          */
         export type JobID = string;
-        export type JobStatus = "PENDING" | "STARTED" | "WAITING_USER_ACTION" | "CANCELED" | "IN_PROGRESS" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED";
+        export type JobStatus = "PENDING" | "STARTED" | "WAITING_USER_ACTION" | "REAUTH_REQUIRED" | "CANCELED" | "IN_PROGRESS" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED";
         export interface LatestBlueprintVerification {
             job_id?: /**
              * ID of a job
@@ -3946,7 +3970,7 @@ declare namespace Paths {
         export interface PathParameters {
             job_id: Parameters.JobId;
         }
-        export type RequestBody = Components.Schemas.BlueprintInstallationJobOptions;
+        export type RequestBody = Components.Schemas.ContinueInstallationJobRequest;
         namespace Responses {
             export type $200 = Components.Schemas.BlueprintInstallationJob;
         }
@@ -4795,6 +4819,39 @@ declare namespace Paths {
              *
              */
             auto_apply?: boolean;
+            /**
+             * Lets the install refresh the caller's session on its own, so a run that
+             * outlives the ~60 minute token lifetime continues without the user present.
+             * Held server-side for the job's lifetime, referenced from the state machine
+             * rather than embedded in it, and deleted when the job finishes.
+             *
+             * Optional. Without it an install that outruns its token pauses at
+             * `status: "REAUTH_REQUIRED"` and waits to be resumed through
+             * `POST /v2/blueprint-manifest/jobs/{job_id}:continue`.
+             *
+             * Bounded by the refresh token itself (18 hours), not unlimited.
+             *
+             */
+            session_credentials?: {
+                /**
+                 * Cognito refresh token for the caller, scoped to the source org.
+                 */
+                refresh_token: string; // password
+                /**
+                 * The Cognito app client the refresh token was issued for. Required because
+                 * epilot provisions one user pool and app client per organization at
+                 * runtime, so the service cannot derive it.
+                 *
+                 */
+                client_id: string;
+                /**
+                 * Cross-org installs only. The destination credential is not a Cognito
+                 * session — it is minted from the refreshed source session through
+                 * sandbox-api, so it is re-derived per continuation instead of stored.
+                 *
+                 */
+                pipeline_id?: string;
+            };
         } | {
             source_org_id?: string;
             source_blueprint_id?: /**
@@ -4831,6 +4888,39 @@ declare namespace Paths {
              *
              */
             auto_apply?: boolean;
+            /**
+             * Lets the install refresh the caller's session on its own, so a run that
+             * outlives the ~60 minute token lifetime continues without the user present.
+             * Held server-side for the job's lifetime, referenced from the state machine
+             * rather than embedded in it, and deleted when the job finishes.
+             *
+             * Optional. Without it an install that outruns its token pauses at
+             * `status: "REAUTH_REQUIRED"` and waits to be resumed through
+             * `POST /v2/blueprint-manifest/jobs/{job_id}:continue`.
+             *
+             * Bounded by the refresh token itself (18 hours), not unlimited.
+             *
+             */
+            session_credentials?: {
+                /**
+                 * Cognito refresh token for the caller, scoped to the source org.
+                 */
+                refresh_token: string; // password
+                /**
+                 * The Cognito app client the refresh token was issued for. Required because
+                 * epilot provisions one user pool and app client per organization at
+                 * runtime, so the service cannot derive it.
+                 *
+                 */
+                client_id: string;
+                /**
+                 * Cross-org installs only. The destination credential is not a Cognito
+                 * session — it is minted from the refreshed source session through
+                 * sandbox-api, so it is re-derived per continuation instead of stored.
+                 *
+                 */
+                pipeline_id?: string;
+            };
         };
         namespace Responses {
             export interface $202 {
@@ -5232,6 +5322,39 @@ declare namespace Paths {
             export interface $404 {
             }
             export interface $409 {
+            }
+        }
+    }
+    namespace RetryInstallationJob {
+        namespace Parameters {
+            export type JobId = /**
+             * ID of a job
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            Components.Schemas.BlueprintJobID;
+        }
+        export interface PathParameters {
+            job_id: Parameters.JobId;
+        }
+        namespace Responses {
+            export interface $202 {
+                job_id?: /**
+                 * ID of a job
+                 * example:
+                 * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+                 */
+                Components.Schemas.BlueprintJobID;
+                destination_blueprint_id?: /**
+                 * ID of a blueprint
+                 * example:
+                 * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+                 */
+                Components.Schemas.BlueprintID;
+            }
+            export interface $400 {
+            }
+            export interface $404 {
             }
         }
     }
@@ -6065,12 +6188,42 @@ export interface OperationMethods {
    * with `auto_apply: true` (including all bulk-install child jobs), which apply
    * without pausing.
    * 
+   * Also resumes a V3 install paused at `status: "REAUTH_REQUIRED"`, where the
+   * caller's credentials could not safely cover another run. The job keeps its
+   * `job_id`, so resuming continues from the operation-log checkpoint rather than
+   * re-applying completed work. The request's bearer token becomes the destination
+   * credential; for a cross-org install whose SOURCE credential also expired, send a
+   * freshly scoped source token as `source_auth_token` — the destination bearer is not
+   * a valid substitute for it.
+   * 
    */
   'continueInstallationJob'(
     parameters?: Parameters<Paths.ContinueInstallationJob.PathParameters> | null,
     data?: Paths.ContinueInstallationJob.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ContinueInstallationJob.Responses.$200>
+  /**
+   * retryInstallationJob - retryInstallationJob
+   * 
+   * Retry a finished V3 installation job whose status is `FAILED` or
+   * `PARTIAL_SUCCESS`. Starts a fresh install job (new `job_id`) with the same
+   * source/destination and `auto_apply: true` — no `:continue` call is needed.
+   * The plan phase re-resolves every resource: already-synced resources no-op,
+   * so effectively only the failed resources are re-applied.
+   * 
+   * Must be called by a user of the destination org (where the job lives); the
+   * caller's bearer token is used as the destination token. The plan reuses the
+   * manifest persisted by the original install, so no source-org access is
+   * required. The original job's `options` (ignored resources, sync_notes) are
+   * reused when present; older jobs without persisted options fall back to the
+   * destination blueprint's `ignored_resource_addresses`.
+   * 
+   */
+  'retryInstallationJob'(
+    parameters?: Parameters<Paths.RetryInstallationJob.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.RetryInstallationJob.Responses.$202>
   /**
    * cancelBlueprintJob - cancelBlueprintJob
    * 
@@ -7010,12 +7163,44 @@ export interface PathsDictionary {
      * with `auto_apply: true` (including all bulk-install child jobs), which apply
      * without pausing.
      * 
+     * Also resumes a V3 install paused at `status: "REAUTH_REQUIRED"`, where the
+     * caller's credentials could not safely cover another run. The job keeps its
+     * `job_id`, so resuming continues from the operation-log checkpoint rather than
+     * re-applying completed work. The request's bearer token becomes the destination
+     * credential; for a cross-org install whose SOURCE credential also expired, send a
+     * freshly scoped source token as `source_auth_token` — the destination bearer is not
+     * a valid substitute for it.
+     * 
      */
     'post'(
       parameters?: Parameters<Paths.ContinueInstallationJob.PathParameters> | null,
       data?: Paths.ContinueInstallationJob.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ContinueInstallationJob.Responses.$200>
+  }
+  ['/v2/blueprint-manifest/jobs/{job_id}:retry']: {
+    /**
+     * retryInstallationJob - retryInstallationJob
+     * 
+     * Retry a finished V3 installation job whose status is `FAILED` or
+     * `PARTIAL_SUCCESS`. Starts a fresh install job (new `job_id`) with the same
+     * source/destination and `auto_apply: true` — no `:continue` call is needed.
+     * The plan phase re-resolves every resource: already-synced resources no-op,
+     * so effectively only the failed resources are re-applied.
+     * 
+     * Must be called by a user of the destination org (where the job lives); the
+     * caller's bearer token is used as the destination token. The plan reuses the
+     * manifest persisted by the original install, so no source-org access is
+     * required. The original job's `options` (ignored resources, sync_notes) are
+     * reused when present; older jobs without persisted options fall back to the
+     * destination blueprint's `ignored_resource_addresses`.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.RetryInstallationJob.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.RetryInstallationJob.Responses.$202>
   }
   ['/v2/blueprint-manifest/jobs/{job_id}:cancel']: {
     /**
@@ -7469,6 +7654,7 @@ export type CommonImportFields = Components.Schemas.CommonImportFields;
 export type CommonManifestFields = Components.Schemas.CommonManifestFields;
 export type CommonMarkdownFields = Components.Schemas.CommonMarkdownFields;
 export type CommonResourceNode = Components.Schemas.CommonResourceNode;
+export type ContinueInstallationJobRequest = Components.Schemas.ContinueInstallationJobRequest;
 export type CustomBlueprint = Components.Schemas.CustomBlueprint;
 export type DeployedBlueprint = Components.Schemas.DeployedBlueprint;
 export type DeploymentHealthReport = Components.Schemas.DeploymentHealthReport;
