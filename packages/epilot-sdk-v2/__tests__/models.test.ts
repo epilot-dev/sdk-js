@@ -52,7 +52,10 @@ describe('runtime models are exposed by the SDK', () => {
 
   // The `<SpecType>Values` naming convention is what ties a hand-written map back to
   // the schema it mirrors, in both directions: a spec member gained or lost fails here.
-  it.each(clientsWithModels)('$dirName `<SpecType>Values` maps match their spec enum', async ({ dirName, kebabName }) => {
+  it.each(clientsWithModels)('$dirName `<SpecType>Values` maps match their spec enum', async ({
+    dirName,
+    kebabName,
+  }) => {
     const schemas = readSpec(dirName)?.components?.schemas ?? {};
     const api = await import(`../src/apis/${kebabName}`);
 
