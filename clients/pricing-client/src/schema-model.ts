@@ -2,11 +2,12 @@ import type { DynamicTariffMode, MarkupPricingModel, PricingModel, TypeGetAg } f
 
 /**
  * Runtime companions for spec enums, for consumers that need the values and not
- * just the union type — `@epilot/pricing` re-declares these in
- * `src/prices/constants.ts` today.
+ * just the union type.
  *
- * Suffixed `Values` because the spec type owns the bare name. `satisfies` stops
- * them drifting: drop a member from the spec and this no longer compiles.
+ * Suffixed `Values` because the spec type owns the bare name. That suffix is also
+ * the contract: `packages/epilot-sdk-v2/__tests__/models.test.ts` checks every
+ * `<SpecType>Values` map against `components.schemas.<SpecType>.enum`, so a member
+ * added to or removed from the spec fails the build rather than drifting silently.
  */
 
 export const PricingModelValues = {

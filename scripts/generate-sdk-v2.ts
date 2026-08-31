@@ -188,55 +188,57 @@ const copyTypes = (clients: ClientInfo[]) => {
 };
 
 /**
- * Copies the hand-written `additional-types.ts` of a client (types that are not
- * part of the OpenAPI specification but are still part of the client's public
- * API surface) into the SDK types directory, so the SDK exposes the exact same
- * types as the standalone client package.
- */
-const copyAdditionalTypes = (clients: ClientInfo[]) => {
-  mkdirSync(TYPES_DIR, { recursive: true });
-
-  for (const client of clients) {
-    if (!client.hasAdditionalTypes) continue;
-    const src = resolve(CLIENTS_DIR, client.dirName, 'src/additional-types.ts');
-    let content = readFileSync(src, 'utf-8');
-
-    // The client resolves generated types via './openapi', in the SDK they live
-    // in a sibling file named after the API.
-    content = content.replace(/(\bfrom\s+')\.\/openapi(')/g, `$1./${client.kebabName}$2`);
-    content = `/* Auto-copied from ${client.dirName}/src/additional-types.ts */\n${content}`;
-
-    const dest = resolve(TYPES_DIR, `${client.kebabName}-additional.d.ts`);
-    writeFileSync(dest, content);
-  }
-};
-
-/**
- * Copies a client's hand-written `schema-model.ts` into the SDK.
+ * Copies a hand-written client module into the SDK, repointing its `./openapi`
+ * import at the SDK's copy of the generated types.
  *
- * It carries runtime values, so it is copied as a real `.ts` and re-exported with
- * `export *`; the `.d.ts` + `export type *` treatment `additional-types.ts` gets
- * would leave every value `undefined` at runtime. Names must not clash with
- * `components.schemas` entries — the two exports in the API entry file would
- * collide — hence the `<SpecType>Values` convention.
+ * `additional-types.ts` holds types only, so it lands as a `.d.ts` re-exported
+ * with `export type *`. `schema-model.ts` holds runtime values, so it lands as a
+ * real `.ts` re-exported with `export *` — the `.d.ts` treatment would leave
+ * every value `undefined` for SDK consumers. See CONTRIBUTING.md.
  */
-const copyModels = (clients: ClientInfo[]) => {
-  mkdirSync(MODELS_DIR, { recursive: true });
+const copyHandWritten = (
+  clients: ClientInfo[],
+  opts: {
+    has: (client: ClientInfo) => boolean;
+    srcFile: string;
+    destDir: string;
+    destFile: (kebabName: string) => string;
+    typesImport: (kebabName: string) => string;
+  },
+) => {
+  mkdirSync(opts.destDir, { recursive: true });
 
   for (const client of clients) {
-    if (!client.hasModel) continue;
-    const src = resolve(CLIENTS_DIR, client.dirName, 'src/schema-model.ts');
+    if (!opts.has(client)) continue;
+    const src = resolve(CLIENTS_DIR, client.dirName, 'src', opts.srcFile);
     let content = readFileSync(src, 'utf-8');
 
     // The client resolves generated types via './openapi', in the SDK they live
-    // under ../types, named after the API.
-    content = content.replace(/(\bfrom\s+')\.\/openapi(')/g, `$1../types/${client.kebabName}$2`);
-    content = `/* Auto-copied from ${client.dirName}/src/schema-model.ts */\n${content}`;
+    // in a file named after the API.
+    content = content.replace(/(\bfrom\s+')\.\/openapi(')/g, `$1${opts.typesImport(client.kebabName)}$2`);
+    content = `/* Auto-copied from ${client.dirName}/src/${opts.srcFile} */\n${content}`;
 
-    const dest = resolve(MODELS_DIR, `${client.kebabName}-model.ts`);
-    writeFileSync(dest, content);
+    writeFileSync(resolve(opts.destDir, opts.destFile(client.kebabName)), content);
   }
 };
+
+const copyAdditionalTypes = (clients: ClientInfo[]) =>
+  copyHandWritten(clients, {
+    has: (client) => client.hasAdditionalTypes,
+    srcFile: 'additional-types.ts',
+    destDir: TYPES_DIR,
+    destFile: (kebabName) => `${kebabName}-additional.d.ts`,
+    typesImport: (kebabName) => `./${kebabName}`,
+  });
+
+const copyModels = (clients: ClientInfo[]) =>
+  copyHandWritten(clients, {
+    has: (client) => client.hasModel,
+    srcFile: 'schema-model.ts',
+    destDir: MODELS_DIR,
+    destFile: (kebabName) => `${kebabName}-model.ts`,
+    typesImport: (kebabName) => `../types/${kebabName}`,
+  });
 
 type SchemaDoc = {
   name: string;

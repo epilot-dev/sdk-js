@@ -9,4 +9,4 @@ Only types could reach SDK consumers before — `additional-types.ts` lands in a
 
 This makes `RelationAffinityMode` reachable through `@epilot/sdk/entity` for the first time; it was already exported from `@epilot/entity-client`.
 
-`@epilot/pricing-client` gains `PricingModelValues`, `MarkupPricingModelValues`, `TypeGetAgValues` and `DynamicTariffModeValues` — the enum values themselves, for lookups and `Object.values()` allowlists, rather than just the union types. Each is tied to its spec union with `satisfies`, so the two cannot drift.
+`@epilot/pricing-client` gains `PricingModelValues`, `MarkupPricingModelValues`, `TypeGetAgValues` and `DynamicTariffModeValues` — the enum values themselves, for lookups and `Object.values()` allowlists, rather than just the union types. Each is tied to its spec union with `satisfies`, and checked against `components.schemas.<SpecType>.enum`, so a member added to or removed from the spec fails the build rather than drifting silently.

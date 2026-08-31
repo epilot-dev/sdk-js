@@ -44,7 +44,9 @@ under two rules:
 - **Don't reuse a `components.schemas` name.** Both files are re-exported from the
   same API entry file, so a clash breaks the build. Name a spec type's runtime
   companion `<SpecType>Values`.
-- **Tie the values to the spec with `satisfies`**, so they can't drift:
+- **Tie the values to the spec with `satisfies`.** The `Values` suffix is what lets
+  the SDK test match a map against `components.schemas.<SpecType>.enum`, so a member
+  added to or removed from the spec fails the build rather than drifting silently:
 
   ```ts
   export const PricingModelValues = {
