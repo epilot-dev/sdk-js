@@ -46,6 +46,7 @@ epilot automation searchFlows
 **executions**
 - [`getExecutions`](#getexecutions) — List automation executions
 - [`startExecution`](#startexecution) — Start new automation execution
+- [`searchExecutions`](#searchexecutions) — Search automation executions of an entity with cursor-based pagination.
 - [`getExecution`](#getexecution) — Get automation execution
 - [`cancelExecution`](#cancelexecution) — Cancel automation execution
 - [`retriggerAction`](#retriggeraction) — Retry a specific automation execution action which failed / is stuck.
@@ -306,8 +307,10 @@ epilot automation getExecutions --jsonata 'results[0]'
       "version": 2,
       "trigger_event": {},
       "workflow_context": {},
+      "workflow_wait_context": {},
       "loops": [],
-      "loop_state": {}
+      "loop_state": {},
+      "chain": ["string"]
     }
   ]
 }
@@ -347,6 +350,7 @@ epilot automation startExecution \
       "parent_task_id": "string",
       "depth": 0
     },
+    "_automation_chain": ["string"],
     "entity_contexts": [
       {
         "entity_id": "string",
@@ -400,8 +404,10 @@ epilot automation startExecution --jsonata 'id'
     {
       "id": "string",
       "schedule_id": "string",
+      "evaluation_order": "AFTER_SCHEDULE",
       "evaluationResult": true,
       "error_output": {},
+      "allow_failure": true,
       "statements": []
     }
   ],
@@ -481,9 +487,15 @@ epilot automation startExecution --jsonata 'id'
       "parent_task_id": "string",
       "depth": 0
     },
+    "_automation_chain": ["string"],
     "entity_contexts": [
       {}
     ]
+  },
+  "workflow_wait_context": {
+    "workflow_execution_id": "string",
+    "workflow_task_id": "string",
+    "source": "journey_submission"
   },
   "loops": [
     {
@@ -493,7 +505,76 @@ epilot automation startExecution --jsonata 'id'
       "length": 0
     }
   ],
-  "loop_state": {}
+  "loop_state": {},
+  "chain": ["string"]
+}
+```
+
+</details>
+
+---
+
+### `searchExecutions`
+
+Search automation executions of an entity with cursor-based pagination.
+
+`POST /v1/automation/executions:search`
+
+**Request Body** (required)
+
+**Sample Call**
+
+```bash
+epilot automation searchExecutions \
+  -d '{"entity_id":"e3d3ebac-baab-4395-abf4-50b5bf1f8b74","include_flows":false,"size":25,"cursor":"string"}'
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot automation searchExecutions
+```
+
+With JSONata filter:
+
+```bash
+epilot automation searchExecutions --jsonata 'results[0]'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "total": 0,
+  "results": [
+    {
+      "id": "9baf184f-bc81-4128-bca3-d974c90a12c4",
+      "execution_status": "pending",
+      "entity_id": "e3d3ebac-baab-4395-abf4-50b5bf1f8b74",
+      "activity_id": "e3d3ebac-baab-4395-abf4-50b5bf1f8b74",
+      "entity_snapshot": {},
+      "org_id": "e3d3ebac-baab-4395-abf4-50b5bf1f8b74",
+      "flow_id": "7791b04a-16d2-44a2-9af9-2d59c25c512f",
+      "flow_name": "Handle contact form",
+      "created_at": "1970-01-01T00:00:00.000Z",
+      "updated_at": "1970-01-01T00:00:00.000Z",
+      "current_action_id": "9ec3711b-db63-449c-b894-54d5bb622a8f",
+      "conditions": [],
+      "schedules": [],
+      "actions": [],
+      "resume_token": "eyJraWQiOiJrZXkifQ==",
+      "trigger_context": {},
+      "version": 2,
+      "trigger_event": {},
+      "workflow_context": {},
+      "workflow_wait_context": {},
+      "loops": [],
+      "loop_state": {},
+      "chain": ["string"]
+    }
+  ],
+  "next_cursor": "string"
 }
 ```
 
@@ -781,8 +862,10 @@ epilot automation getExecution -p execution_id=9baf184f-bc81-4128-bca3-d974c90a1
     {
       "id": "string",
       "schedule_id": "string",
+      "evaluation_order": "AFTER_SCHEDULE",
       "evaluationResult": true,
       "error_output": {},
+      "allow_failure": true,
       "statements": []
     }
   ],
@@ -862,9 +945,15 @@ epilot automation getExecution -p execution_id=9baf184f-bc81-4128-bca3-d974c90a1
       "parent_task_id": "string",
       "depth": 0
     },
+    "_automation_chain": ["string"],
     "entity_contexts": [
       {}
     ]
+  },
+  "workflow_wait_context": {
+    "workflow_execution_id": "string",
+    "workflow_task_id": "string",
+    "source": "journey_submission"
   },
   "loops": [
     {
@@ -874,7 +963,8 @@ epilot automation getExecution -p execution_id=9baf184f-bc81-4128-bca3-d974c90a1
       "length": 0
     }
   ],
-  "loop_state": {}
+  "loop_state": {},
+  "chain": ["string"]
 }
 ```
 
@@ -941,8 +1031,10 @@ epilot automation cancelExecution -p execution_id=9baf184f-bc81-4128-bca3-d974c9
     {
       "id": "string",
       "schedule_id": "string",
+      "evaluation_order": "AFTER_SCHEDULE",
       "evaluationResult": true,
       "error_output": {},
+      "allow_failure": true,
       "statements": []
     }
   ],
@@ -1022,9 +1114,15 @@ epilot automation cancelExecution -p execution_id=9baf184f-bc81-4128-bca3-d974c9
       "parent_task_id": "string",
       "depth": 0
     },
+    "_automation_chain": ["string"],
     "entity_contexts": [
       {}
     ]
+  },
+  "workflow_wait_context": {
+    "workflow_execution_id": "string",
+    "workflow_task_id": "string",
+    "source": "journey_submission"
   },
   "loops": [
     {
@@ -1034,7 +1132,8 @@ epilot automation cancelExecution -p execution_id=9baf184f-bc81-4128-bca3-d974c9
       "length": 0
     }
   ],
-  "loop_state": {}
+  "loop_state": {},
+  "chain": ["string"]
 }
 ```
 
@@ -1164,12 +1263,19 @@ epilot automation resumeExecutionWithToken --jsonata 'execution'
       "workflow_exec_task_id": "string",
       "workflow_role": "trigger_workflow",
       "_execution_chain": {},
+      "_automation_chain": ["string"],
       "entity_contexts": []
+    },
+    "workflow_wait_context": {
+      "workflow_execution_id": "string",
+      "workflow_task_id": "string",
+      "source": "journey_submission"
     },
     "loops": [
       {}
     ],
-    "loop_state": {}
+    "loop_state": {},
+    "chain": ["string"]
   },
   "resumedAction": {
     "id": "9ec3711b-db63-449c-b894-54d5bb622a8f",
@@ -1179,6 +1285,7 @@ epilot automation resumeExecutionWithToken --jsonata 'execution'
     "config": {
       "mapping_config": {},
       "target_schema": "string",
+      "use_uniqueness_criteria": true,
       "target_unique": ["string"],
       "mapping_attributes": [],
       "relation_attributes": [],

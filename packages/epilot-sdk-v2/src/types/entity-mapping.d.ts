@@ -1,6 +1,4 @@
 /* Auto-copied from entity-mapping-client */
-/* eslint-disable */
-
 import type {
   OpenAPIClient,
   Parameters,

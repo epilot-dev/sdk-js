@@ -42,15 +42,15 @@ epilot blueprint-manifest getJob -p job_id=4854bb2a-94f9-424d-a968-3fb17fb0bf89
 - [`listBlueprints`](#listblueprints) — List Custom and Installed Blueprints
 - [`createBlueprint`](#createblueprint) — Create a Blueprint
 - [`listInstalledMarketplaceBlueprints`](#listinstalledmarketplaceblueprints) — List installed Marketplace Blueprints for the organization.
-- [`preInstallBlueprint`](#preinstallblueprint) — Pre-install a Blueprint based on a blueprint file
+- [`preInstallBlueprint`](#preinstallblueprint) — Pre-install a Blueprint based on a blueprint file. Format-agnostic: the engine is detected from the uploaded archive, so
 - [`getBlueprintPreview`](#getblueprintpreview) — Get Blueprint Preview by ID
-- [`installBlueprint`](#installblueprint) — Kick off a new blueprint installation job. Returns 202 Accepted with Location header pointing to the job resource
 - [`getBlueprint`](#getblueprint) — Get Blueprint by ID
 - [`updateBlueprint`](#updateblueprint) — Update a Blueprint
 - [`deleteBlueprint`](#deleteblueprint) — Delete a Blueprint
-- [`validateBlueprint`](#validateblueprint) — Start a blueprint validation job. Validates Terraform for the blueprint (all types).
+- [`addBlueprintNote`](#addblueprintnote) — Append an internal note to a blueprint. `id`, `created_at` and `created_by`
+- [`updateBlueprintNote`](#updateblueprintnote) — Rewrite the text of an existing internal note. The note keeps its position in
+- [`deleteBlueprintNote`](#deleteblueprintnote) — Remove a single internal note from a blueprint.
 - [`verifyBlueprint`](#verifyblueprint) — Start a blueprint verification job. Compares resource configurations between a source org
-- [`exportBlueprint`](#exportblueprint) — Kick off a new blueprint export job. Returns 202 Accepted with Location header pointing to the job resource.
 - [`listMarketplaceSlugs`](#listmarketplaceslugs) — List all available marketplace blueprint slugs from Webflow CMS.
 - [`publishBlueprint`](#publishblueprint) — Publish a blueprint to the marketplace. Exports the blueprint, uploads it to file-api with public access, and updates th
 - [`formatBlueprintDescription`](#formatblueprintdescription) — Format a blueprint description as markdown using AI.
@@ -62,23 +62,24 @@ epilot blueprint-manifest getJob -p job_id=4854bb2a-94f9-424d-a968-3fb17fb0bf89
 - [`bulkDeleteBlueprintResources`](#bulkdeleteblueprintresources) — Bulk delete resources in a Blueprint
 - [`updateBlueprintResource`](#updateblueprintresource) — Update a resource in a Blueprint
 - [`deleteBlueprintResource`](#deleteblueprintresource) — Delete a resource from a Blueprint
-- [`installBlueprintV3`](#installblueprintv3) — Install a blueprint using the V3 engine (direct API calls, no Terraform).
+- [`publishBlueprintV3`](#publishblueprintv3) — Starts an asynchronous V3 publication. The result is a signed, portable package; poll the existing blueprint job endpoin
+- [`preInstallBlueprintV3`](#preinstallblueprintv3) — Validates a signed V3 package and returns the destination-specific resource plan used by the install UI.
+- [`installBlueprintV3`](#installblueprintv3) — Install a blueprint into a single destination org using the V3 engine (direct API
 - [`restoreBlueprintDeploymentV3`](#restoreblueprintdeploymentv3) — Roll a deployment back to its pre-install state. Two phases:
 - [`getRestorePreview`](#getrestorepreview) — Computes what would happen if the user triggered a restore on this
+- [`triggerDeploymentHealthCheckV3`](#triggerdeploymenthealthcheckv3) — Starts a read-only health scan of the resources this deployment's
+- [`getDeploymentHealthReportV3`](#getdeploymenthealthreportv3) — Returns the most recent health report produced for this deployment
 - [`getBlueprintLineageV3`](#getblueprintlineagev3) — Returns the lineage registry entries for a blueprint's resources in the current org.
-
-**Patches**
-- [`detectPatchChanges`](#detectpatchchanges) — Detect changes between the current state of a blueprint's resources and its tfstate baseline.
-- [`listPatches`](#listpatches) — List all patches for a blueprint.
-- [`createPatch`](#createpatch) — Create a new patch for a blueprint.
-- [`getPatch`](#getpatch) — Get a patch by ID, including per-org execution results.
-- [`applyPatch`](#applypatch) — Apply a patch to a single destination org.
-- [`retryPatchOrg`](#retrypatchorg) — Retry a failed patch execution for a specific org.
+- [`createBulkInstallV3`](#createbulkinstallv3) — Install one source blueprint into many destination organizations in a single
+- [`getBulkInstallV3`](#getbulkinstallv3) — Returns the bulk install parent with aggregate status and counts. Scoped by the
+- [`listBulkInstallTargetsV3`](#listbulkinstalltargetsv3) — Pages through the bulk install's target rows. Each row hydrates its latest child
+- [`retryBulkInstallTargetV3`](#retrybulkinstalltargetv3) — Retries a single failed target. Allowed only for `FAILED` and `PARTIAL_SUCCESS`
 
 **Jobs**
 - [`listBlueprintJobs`](#listblueprintjobs) — List all blueprint jobs
-- [`getBlueprintJob`](#getblueprintjob) — Poll current state of a job.
-- [`continueInstallationJob`](#continueinstallationjob) — Continue an installation job if it is waiting for user action.
+- [`getBlueprintJob`](#getblueprintjob) — Poll the current state of a job. Serves both Terraform (v2) and V3-engine jobs —
+- [`continueInstallationJob`](#continueinstallationjob) — Resume an installation job that is paused at `status: "WAITING_USER_ACTION"` after
+- [`retryInstallationJob`](#retryinstallationjob) — Retry a finished V3 installation job whose status is `FAILED` or
 - [`cancelBlueprintJob`](#cancelblueprintjob) — Cancel a blueprint job if it is still running.
 
 **Marketplace Listings**
@@ -181,12 +182,15 @@ epilot blueprint-manifest listBlueprints --jsonata 'results[0]'
       "title": "string",
       "slug": "string",
       "description": {},
+      "notes": [],
       "version": "string",
       "deployments": [],
       "is_verified": true,
       "latest_verification": {},
       "ignored_resource_addresses": ["string"],
       "installation_status": "IN_PROGRESS",
+      "active_restore_job_id": "string",
+      "active_restore_started_at": "1970-01-01T00:00:00.000Z",
       "created_at": "1970-01-01T00:00:00.000Z",
       "updated_at": "1970-01-01T00:00:00.000Z",
       "created_by": {},
@@ -235,6 +239,15 @@ epilot blueprint-manifest createBlueprint \
     "preinstall": "This is the content of the preinstall.md file which contains the blueprint description.\n",
     "postinstall": "This is the content of the postinstall.md file\n"
   },
+  "notes": [
+    {
+      "id": "3f1c9b0e-2f3a-4a1f-9a3e-6f2b8c7d1e40",
+      "text": "Adjusted the meter-reading journey for the §14a rollout.",
+      "created_at": "1970-01-01T00:00:00.000Z",
+      "updated_at": "1970-01-01T00:00:00.000Z",
+      "created_by": {}
+    }
+  ],
   "version": "string",
   "deployments": [
     {
@@ -244,6 +257,7 @@ epilot blueprint-manifest createBlueprint \
       "destination_blueprint_id": "string",
       "job_id": "string",
       "triggered_at": "1970-01-01T00:00:00.000Z",
+      "performed_by": {},
       "note": "string",
       "status": "IN_PROGRESS",
       "restore_details": {},
@@ -261,6 +275,8 @@ epilot blueprint-manifest createBlueprint \
     "source_blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
     "destination_org_id": "string",
     "destination_blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+    "installation_job_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+    "sync_engine": "terraform",
     "summary": {
       "total_resources": 0,
       "matched": 0,
@@ -271,6 +287,8 @@ epilot blueprint-manifest createBlueprint \
   },
   "ignored_resource_addresses": ["string"],
   "installation_status": "IN_PROGRESS",
+  "active_restore_job_id": "string",
+  "active_restore_started_at": "1970-01-01T00:00:00.000Z",
   "created_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z",
   "created_by": {
@@ -340,6 +358,15 @@ epilot blueprint-manifest createBlueprint --jsonata '$'
     "preinstall": "This is the content of the preinstall.md file which contains the blueprint description.\n",
     "postinstall": "This is the content of the postinstall.md file\n"
   },
+  "notes": [
+    {
+      "id": "3f1c9b0e-2f3a-4a1f-9a3e-6f2b8c7d1e40",
+      "text": "Adjusted the meter-reading journey for the §14a rollout.",
+      "created_at": "1970-01-01T00:00:00.000Z",
+      "updated_at": "1970-01-01T00:00:00.000Z",
+      "created_by": {}
+    }
+  ],
   "version": "string",
   "deployments": [
     {
@@ -349,6 +376,7 @@ epilot blueprint-manifest createBlueprint --jsonata '$'
       "destination_blueprint_id": "string",
       "job_id": "string",
       "triggered_at": "1970-01-01T00:00:00.000Z",
+      "performed_by": {},
       "note": "string",
       "status": "IN_PROGRESS",
       "restore_details": {},
@@ -366,6 +394,8 @@ epilot blueprint-manifest createBlueprint --jsonata '$'
     "source_blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
     "destination_org_id": "string",
     "destination_blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+    "installation_job_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+    "sync_engine": "terraform",
     "summary": {
       "total_resources": 0,
       "matched": 0,
@@ -376,6 +406,8 @@ epilot blueprint-manifest createBlueprint --jsonata '$'
   },
   "ignored_resource_addresses": ["string"],
   "installation_status": "IN_PROGRESS",
+  "active_restore_job_id": "string",
+  "active_restore_started_at": "1970-01-01T00:00:00.000Z",
   "created_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z",
   "created_by": {
@@ -482,7 +514,7 @@ epilot blueprint-manifest listInstalledMarketplaceBlueprints --jsonata 'results[
 
 ### `preInstallBlueprint`
 
-Pre-install a Blueprint based on a blueprint file
+Pre-install a Blueprint based on a blueprint file. Format-agnostic: the engine is detected from the uploaded archive, so
 
 `POST /v2/blueprint-manifest/blueprints:pre-install`
 
@@ -521,6 +553,7 @@ epilot blueprint-manifest preInstallBlueprint --jsonata 'id'
   "version": "string",
   "slug": "string",
   "source_type": "marketplace",
+  "sync_engine": "terraform",
   "blueprint_file_s3_key": "string",
   "is_verified": true,
   "docs_url": "string",
@@ -606,6 +639,7 @@ epilot blueprint-manifest getBlueprintPreview -p preview_id=123e4567-e89b-12d3-a
   "version": "string",
   "slug": "string",
   "source_type": "marketplace",
+  "sync_engine": "terraform",
   "blueprint_file_s3_key": "string",
   "is_verified": true,
   "docs_url": "string",
@@ -643,56 +677,6 @@ epilot blueprint-manifest getBlueprintPreview -p preview_id=123e4567-e89b-12d3-a
 ```
 
 </details>
-
----
-
-### `installBlueprint`
-
-Kick off a new blueprint installation job. Returns 202 Accepted with Location header pointing to the job resource
-
-`POST /v2/blueprint-manifest/blueprint:install`
-
-**Request Body** (required)
-
-**Sample Call**
-
-```bash
-epilot blueprint-manifest installBlueprint
-```
-
-With request body:
-
-```bash
-epilot blueprint-manifest installBlueprint \
-  -d '{
-  "source_org_id": "string",
-  "source_blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
-  "source_blueprint_file": "string",
-  "destination_org_id": "string",
-  "destination_blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
-  "source_auth_token": "string",
-  "destination_auth_token": "string",
-  "options": {
-    "resources_to_ignore": ["string"]
-  },
-  "mode": "simple",
-  "source_blueprint_type": "marketplace",
-  "slug": "string",
-  "auto_enable_features": true
-}'
-```
-
-Using stdin pipe:
-
-```bash
-cat body.json | epilot blueprint-manifest installBlueprint
-```
-
-With JSONata filter:
-
-```bash
-epilot blueprint-manifest installBlueprint --jsonata '$'
-```
 
 ---
 
@@ -739,6 +723,15 @@ epilot blueprint-manifest getBlueprint -p blueprint_id=c2d6cac8-bdd5-4ea2-8a6c-1
     "preinstall": "This is the content of the preinstall.md file which contains the blueprint description.\n",
     "postinstall": "This is the content of the postinstall.md file\n"
   },
+  "notes": [
+    {
+      "id": "3f1c9b0e-2f3a-4a1f-9a3e-6f2b8c7d1e40",
+      "text": "Adjusted the meter-reading journey for the §14a rollout.",
+      "created_at": "1970-01-01T00:00:00.000Z",
+      "updated_at": "1970-01-01T00:00:00.000Z",
+      "created_by": {}
+    }
+  ],
   "version": "string",
   "deployments": [
     {
@@ -748,6 +741,7 @@ epilot blueprint-manifest getBlueprint -p blueprint_id=c2d6cac8-bdd5-4ea2-8a6c-1
       "destination_blueprint_id": "string",
       "job_id": "string",
       "triggered_at": "1970-01-01T00:00:00.000Z",
+      "performed_by": {},
       "note": "string",
       "status": "IN_PROGRESS",
       "restore_details": {},
@@ -765,6 +759,8 @@ epilot blueprint-manifest getBlueprint -p blueprint_id=c2d6cac8-bdd5-4ea2-8a6c-1
     "source_blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
     "destination_org_id": "string",
     "destination_blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+    "installation_job_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+    "sync_engine": "terraform",
     "summary": {
       "total_resources": 0,
       "matched": 0,
@@ -775,6 +771,8 @@ epilot blueprint-manifest getBlueprint -p blueprint_id=c2d6cac8-bdd5-4ea2-8a6c-1
   },
   "ignored_resource_addresses": ["string"],
   "installation_status": "IN_PROGRESS",
+  "active_restore_job_id": "string",
+  "active_restore_started_at": "1970-01-01T00:00:00.000Z",
   "created_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z",
   "created_by": {
@@ -858,6 +856,15 @@ epilot blueprint-manifest updateBlueprint \
     "preinstall": "This is the content of the preinstall.md file which contains the blueprint description.\n",
     "postinstall": "This is the content of the postinstall.md file\n"
   },
+  "notes": [
+    {
+      "id": "3f1c9b0e-2f3a-4a1f-9a3e-6f2b8c7d1e40",
+      "text": "Adjusted the meter-reading journey for the §14a rollout.",
+      "created_at": "1970-01-01T00:00:00.000Z",
+      "updated_at": "1970-01-01T00:00:00.000Z",
+      "created_by": {}
+    }
+  ],
   "version": "string",
   "deployments": [
     {
@@ -867,6 +874,7 @@ epilot blueprint-manifest updateBlueprint \
       "destination_blueprint_id": "string",
       "job_id": "string",
       "triggered_at": "1970-01-01T00:00:00.000Z",
+      "performed_by": {},
       "note": "string",
       "status": "IN_PROGRESS",
       "restore_details": {},
@@ -884,6 +892,8 @@ epilot blueprint-manifest updateBlueprint \
     "source_blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
     "destination_org_id": "string",
     "destination_blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+    "installation_job_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+    "sync_engine": "terraform",
     "summary": {
       "total_resources": 0,
       "matched": 0,
@@ -894,6 +904,8 @@ epilot blueprint-manifest updateBlueprint \
   },
   "ignored_resource_addresses": ["string"],
   "installation_status": "IN_PROGRESS",
+  "active_restore_job_id": "string",
+  "active_restore_started_at": "1970-01-01T00:00:00.000Z",
   "created_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z",
   "created_by": {
@@ -969,6 +981,15 @@ epilot blueprint-manifest updateBlueprint -p blueprint_id=c2d6cac8-bdd5-4ea2-8a6
     "preinstall": "This is the content of the preinstall.md file which contains the blueprint description.\n",
     "postinstall": "This is the content of the postinstall.md file\n"
   },
+  "notes": [
+    {
+      "id": "3f1c9b0e-2f3a-4a1f-9a3e-6f2b8c7d1e40",
+      "text": "Adjusted the meter-reading journey for the §14a rollout.",
+      "created_at": "1970-01-01T00:00:00.000Z",
+      "updated_at": "1970-01-01T00:00:00.000Z",
+      "created_by": {}
+    }
+  ],
   "version": "string",
   "deployments": [
     {
@@ -978,6 +999,7 @@ epilot blueprint-manifest updateBlueprint -p blueprint_id=c2d6cac8-bdd5-4ea2-8a6
       "destination_blueprint_id": "string",
       "job_id": "string",
       "triggered_at": "1970-01-01T00:00:00.000Z",
+      "performed_by": {},
       "note": "string",
       "status": "IN_PROGRESS",
       "restore_details": {},
@@ -995,6 +1017,8 @@ epilot blueprint-manifest updateBlueprint -p blueprint_id=c2d6cac8-bdd5-4ea2-8a6
     "source_blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
     "destination_org_id": "string",
     "destination_blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+    "installation_job_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+    "sync_engine": "terraform",
     "summary": {
       "total_resources": 0,
       "matched": 0,
@@ -1005,6 +1029,8 @@ epilot blueprint-manifest updateBlueprint -p blueprint_id=c2d6cac8-bdd5-4ea2-8a6
   },
   "ignored_resource_addresses": ["string"],
   "installation_status": "IN_PROGRESS",
+  "active_restore_job_id": "string",
+  "active_restore_started_at": "1970-01-01T00:00:00.000Z",
   "created_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z",
   "created_by": {
@@ -1097,6 +1123,15 @@ epilot blueprint-manifest deleteBlueprint -p blueprint_id=c2d6cac8-bdd5-4ea2-8a6
     "preinstall": "This is the content of the preinstall.md file which contains the blueprint description.\n",
     "postinstall": "This is the content of the postinstall.md file\n"
   },
+  "notes": [
+    {
+      "id": "3f1c9b0e-2f3a-4a1f-9a3e-6f2b8c7d1e40",
+      "text": "Adjusted the meter-reading journey for the §14a rollout.",
+      "created_at": "1970-01-01T00:00:00.000Z",
+      "updated_at": "1970-01-01T00:00:00.000Z",
+      "created_by": {}
+    }
+  ],
   "version": "string",
   "deployments": [
     {
@@ -1106,6 +1141,7 @@ epilot blueprint-manifest deleteBlueprint -p blueprint_id=c2d6cac8-bdd5-4ea2-8a6
       "destination_blueprint_id": "string",
       "job_id": "string",
       "triggered_at": "1970-01-01T00:00:00.000Z",
+      "performed_by": {},
       "note": "string",
       "status": "IN_PROGRESS",
       "restore_details": {},
@@ -1123,6 +1159,8 @@ epilot blueprint-manifest deleteBlueprint -p blueprint_id=c2d6cac8-bdd5-4ea2-8a6
     "source_blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
     "destination_org_id": "string",
     "destination_blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+    "installation_job_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+    "sync_engine": "terraform",
     "summary": {
       "total_resources": 0,
       "matched": 0,
@@ -1133,6 +1171,8 @@ epilot blueprint-manifest deleteBlueprint -p blueprint_id=c2d6cac8-bdd5-4ea2-8a6
   },
   "ignored_resource_addresses": ["string"],
   "installation_status": "IN_PROGRESS",
+  "active_restore_job_id": "string",
+  "active_restore_started_at": "1970-01-01T00:00:00.000Z",
   "created_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z",
   "created_by": {
@@ -1182,11 +1222,11 @@ epilot blueprint-manifest deleteBlueprint -p blueprint_id=c2d6cac8-bdd5-4ea2-8a6
 
 ---
 
-### `validateBlueprint`
+### `addBlueprintNote`
 
-Start a blueprint validation job. Validates Terraform for the blueprint (all types).
+Append an internal note to a blueprint. `id`, `created_at` and `created_by`
 
-`POST /v2/blueprint-manifest/blueprints/{blueprint_id}/validate`
+`POST /v2/blueprint-manifest/blueprints/{blueprint_id}/notes`
 
 **Parameters**
 
@@ -1194,24 +1234,176 @@ Start a blueprint validation job. Validates Terraform for the blueprint (all typ
 | ---- | -- | ---- | -------- | ----------- |
 | `blueprint_id` | path | string | Yes |  |
 
+**Request Body** (required)
+
 **Sample Call**
 
 ```bash
-epilot blueprint-manifest validateBlueprint \
-  -p blueprint_id=c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+epilot blueprint-manifest addBlueprintNote \
+  -p blueprint_id=c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341 \
+  -d '{"text":"string"}'
 ```
 
 Using positional args for path parameters:
 
 ```bash
-epilot blueprint-manifest validateBlueprint c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+epilot blueprint-manifest addBlueprintNote c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot blueprint-manifest addBlueprintNote -p blueprint_id=c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
 ```
 
 With JSONata filter:
 
 ```bash
-epilot blueprint-manifest validateBlueprint -p blueprint_id=c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341 --jsonata '$'
+epilot blueprint-manifest addBlueprintNote -p blueprint_id=c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341 --jsonata 'id'
 ```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "id": "3f1c9b0e-2f3a-4a1f-9a3e-6f2b8c7d1e40",
+  "text": "Adjusted the meter-reading journey for the §14a rollout.",
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "updated_at": "1970-01-01T00:00:00.000Z",
+  "created_by": {
+    "name": "manifest@epilot.cloud",
+    "org_id": "911690",
+    "user_id": "11001045",
+    "token_id": "api_5ZugdRXasLfWBypHi93Fk"
+  }
+}
+```
+
+</details>
+
+---
+
+### `updateBlueprintNote`
+
+Rewrite the text of an existing internal note. The note keeps its position in
+
+`PATCH /v2/blueprint-manifest/blueprints/{blueprint_id}/notes/{note_id}`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `blueprint_id` | path | string | Yes |  |
+| `note_id` | path | string | Yes |  |
+
+**Request Body** (required)
+
+**Sample Call**
+
+```bash
+epilot blueprint-manifest updateBlueprintNote \
+  -p blueprint_id=c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341 \
+  -p note_id=123e4567-e89b-12d3-a456-426614174000 \
+  -d '{"text":"string"}'
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot blueprint-manifest updateBlueprintNote c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341 123e4567-e89b-12d3-a456-426614174000
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot blueprint-manifest updateBlueprintNote -p blueprint_id=c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341 -p note_id=123e4567-e89b-12d3-a456-426614174000
+```
+
+With JSONata filter:
+
+```bash
+epilot blueprint-manifest updateBlueprintNote -p blueprint_id=c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341 -p note_id=123e4567-e89b-12d3-a456-426614174000 --jsonata 'id'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "id": "3f1c9b0e-2f3a-4a1f-9a3e-6f2b8c7d1e40",
+  "text": "Adjusted the meter-reading journey for the §14a rollout.",
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "updated_at": "1970-01-01T00:00:00.000Z",
+  "created_by": {
+    "name": "manifest@epilot.cloud",
+    "org_id": "911690",
+    "user_id": "11001045",
+    "token_id": "api_5ZugdRXasLfWBypHi93Fk"
+  }
+}
+```
+
+</details>
+
+---
+
+### `deleteBlueprintNote`
+
+Remove a single internal note from a blueprint.
+
+`DELETE /v2/blueprint-manifest/blueprints/{blueprint_id}/notes/{note_id}`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `blueprint_id` | path | string | Yes |  |
+| `note_id` | path | string | Yes |  |
+
+**Sample Call**
+
+```bash
+epilot blueprint-manifest deleteBlueprintNote \
+  -p blueprint_id=c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341 \
+  -p note_id=123e4567-e89b-12d3-a456-426614174000
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot blueprint-manifest deleteBlueprintNote c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341 123e4567-e89b-12d3-a456-426614174000
+```
+
+With JSONata filter:
+
+```bash
+epilot blueprint-manifest deleteBlueprintNote -p blueprint_id=c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341 -p note_id=123e4567-e89b-12d3-a456-426614174000 --jsonata 'notes'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "notes": [
+    {
+      "id": "3f1c9b0e-2f3a-4a1f-9a3e-6f2b8c7d1e40",
+      "text": "Adjusted the meter-reading journey for the §14a rollout.",
+      "created_at": "1970-01-01T00:00:00.000Z",
+      "updated_at": "1970-01-01T00:00:00.000Z",
+      "created_by": {
+        "name": "manifest@epilot.cloud",
+        "org_id": "911690",
+        "user_id": "11001045",
+        "token_id": "api_5ZugdRXasLfWBypHi93Fk"
+      }
+    }
+  ]
+}
+```
+
+</details>
 
 ---
 
@@ -1247,7 +1439,9 @@ epilot blueprint-manifest verifyBlueprint \
   "destination_org_id": "string",
   "destination_blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
   "source_auth_token": "string",
-  "destination_auth_token": "string"
+  "destination_auth_token": "string",
+  "installation_job_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+  "sync_engine": "terraform"
 }'
 ```
 
@@ -1267,554 +1461,6 @@ With JSONata filter:
 
 ```bash
 epilot blueprint-manifest verifyBlueprint -p blueprint_id=c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341 --jsonata '$'
-```
-
----
-
-### `detectPatchChanges`
-
-Detect changes between the current state of a blueprint's resources and its tfstate baseline.
-
-`POST /v2/blueprint-manifest/blueprints/{blueprint_id}/patches:detect`
-
-**Parameters**
-
-| Name | In | Type | Required | Description |
-| ---- | -- | ---- | -------- | ----------- |
-| `blueprint_id` | path | string | Yes |  |
-
-**Request Body**
-
-**Sample Call**
-
-```bash
-epilot blueprint-manifest detectPatchChanges \
-  -p blueprint_id=c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341 \
-  -d '{"source_org_id":"string","dest_org_id":"string","dest_blueprint_id":"string","rollout_id":"string"}'
-```
-
-Using positional args for path parameters:
-
-```bash
-epilot blueprint-manifest detectPatchChanges c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
-```
-
-Using stdin pipe:
-
-```bash
-cat body.json | epilot blueprint-manifest detectPatchChanges -p blueprint_id=c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
-```
-
-With JSONata filter:
-
-```bash
-epilot blueprint-manifest detectPatchChanges -p blueprint_id=c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341 --jsonata 'resources'
-```
-
-<details>
-<summary>Sample Response</summary>
-
-```json
-{
-  "resources": [
-    {
-      "type": "string",
-      "source_id": "string",
-      "address": "string",
-      "name": "string",
-      "changes": [
-        {
-          "path": "string",
-          "op": "changed",
-          "baseline_value": {},
-          "current_value": {}
-        }
-      ]
-    }
-  ]
-}
-```
-
-</details>
-
----
-
-### `listPatches`
-
-List all patches for a blueprint.
-
-`GET /v2/blueprint-manifest/blueprints/{blueprint_id}/patches`
-
-**Parameters**
-
-| Name | In | Type | Required | Description |
-| ---- | -- | ---- | -------- | ----------- |
-| `blueprint_id` | path | string | Yes |  |
-
-**Sample Call**
-
-```bash
-epilot blueprint-manifest listPatches \
-  -p blueprint_id=c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
-```
-
-Using positional args for path parameters:
-
-```bash
-epilot blueprint-manifest listPatches c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
-```
-
-With JSONata filter:
-
-```bash
-epilot blueprint-manifest listPatches -p blueprint_id=c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341 --jsonata 'results[0]'
-```
-
-<details>
-<summary>Sample Response</summary>
-
-```json
-{
-  "total": 0,
-  "results": [
-    {
-      "patch_id": "string",
-      "version": 0,
-      "blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
-      "rollout_id": "string",
-      "source_org_id": "string",
-      "name": "string",
-      "description": "string",
-      "status": "draft",
-      "resources": [
-        {
-          "type": "string",
-          "source_id": "string",
-          "address": "string",
-          "name": "string",
-          "changes": [
-            {
-              "path": "string",
-              "op": "changed",
-              "baseline_value": {},
-              "current_value": {}
-            }
-          ]
-        }
-      ],
-      "changelog": "string",
-      "created_by": "string",
-      "created_at": "1970-01-01T00:00:00.000Z",
-      "applied_at": "1970-01-01T00:00:00.000Z"
-    }
-  ]
-}
-```
-
-</details>
-
----
-
-### `createPatch`
-
-Create a new patch for a blueprint.
-
-`POST /v2/blueprint-manifest/blueprints/{blueprint_id}/patches`
-
-**Parameters**
-
-| Name | In | Type | Required | Description |
-| ---- | -- | ---- | -------- | ----------- |
-| `blueprint_id` | path | string | Yes |  |
-
-**Request Body** (required)
-
-**Sample Call**
-
-```bash
-epilot blueprint-manifest createPatch \
-  -p blueprint_id=c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
-```
-
-With request body:
-
-```bash
-epilot blueprint-manifest createPatch \
-  -p blueprint_id=c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341 \
-  -d '{
-  "blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
-  "rollout_id": "string",
-  "source_org_id": "string",
-  "name": "string",
-  "description": "string",
-  "resources": [
-    {
-      "type": "string",
-      "source_id": "string",
-      "address": "string",
-      "name": "string",
-      "changes": [
-        {
-          "path": "string",
-          "op": "changed",
-          "baseline_value": {},
-          "current_value": {}
-        }
-      ]
-    }
-  ],
-  "changelog": "string"
-}'
-```
-
-Using positional args for path parameters:
-
-```bash
-epilot blueprint-manifest createPatch c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
-```
-
-Using stdin pipe:
-
-```bash
-cat body.json | epilot blueprint-manifest createPatch -p blueprint_id=c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
-```
-
-With JSONata filter:
-
-```bash
-epilot blueprint-manifest createPatch -p blueprint_id=c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341 --jsonata 'patch_id'
-```
-
-<details>
-<summary>Sample Response</summary>
-
-```json
-{
-  "patch_id": "string",
-  "version": 0,
-  "blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
-  "rollout_id": "string",
-  "source_org_id": "string",
-  "name": "string",
-  "description": "string",
-  "status": "draft",
-  "resources": [
-    {
-      "type": "string",
-      "source_id": "string",
-      "address": "string",
-      "name": "string",
-      "changes": [
-        {
-          "path": "string",
-          "op": "changed",
-          "baseline_value": {},
-          "current_value": {}
-        }
-      ]
-    }
-  ],
-  "changelog": "string",
-  "created_by": "string",
-  "created_at": "1970-01-01T00:00:00.000Z",
-  "applied_at": "1970-01-01T00:00:00.000Z"
-}
-```
-
-</details>
-
----
-
-### `getPatch`
-
-Get a patch by ID, including per-org execution results.
-
-`GET /v2/blueprint-manifest/blueprints/{blueprint_id}/patches/{patch_id}`
-
-**Parameters**
-
-| Name | In | Type | Required | Description |
-| ---- | -- | ---- | -------- | ----------- |
-| `blueprint_id` | path | string | Yes |  |
-| `patch_id` | path | string | Yes |  |
-
-**Sample Call**
-
-```bash
-epilot blueprint-manifest getPatch \
-  -p blueprint_id=c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341 \
-  -p patch_id=123e4567-e89b-12d3-a456-426614174000
-```
-
-Using positional args for path parameters:
-
-```bash
-epilot blueprint-manifest getPatch c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341 123e4567-e89b-12d3-a456-426614174000
-```
-
-With JSONata filter:
-
-```bash
-epilot blueprint-manifest getPatch -p blueprint_id=c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341 -p patch_id=123e4567-e89b-12d3-a456-426614174000 --jsonata '$'
-```
-
-<details>
-<summary>Sample Response</summary>
-
-```json
-{
-  "patch_id": "string",
-  "version": 0,
-  "blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
-  "rollout_id": "string",
-  "source_org_id": "string",
-  "name": "string",
-  "description": "string",
-  "status": "draft",
-  "resources": [
-    {
-      "type": "string",
-      "source_id": "string",
-      "address": "string",
-      "name": "string",
-      "changes": [
-        {
-          "path": "string",
-          "op": "changed",
-          "baseline_value": {},
-          "current_value": {}
-        }
-      ]
-    }
-  ],
-  "changelog": "string",
-  "created_by": "string",
-  "created_at": "1970-01-01T00:00:00.000Z",
-  "applied_at": "1970-01-01T00:00:00.000Z",
-  "org_results": [
-    {
-      "patch_id": "string",
-      "version": 0,
-      "org_id": "string",
-      "org_name": "string",
-      "dest_blueprint_id": "string",
-      "status": "pending",
-      "error": "string",
-      "applied_at": "1970-01-01T00:00:00.000Z",
-      "retries": 0,
-      "changes_applied": [
-        {
-          "path": "string",
-          "op": "changed",
-          "baseline_value": {},
-          "current_value": {}
-        }
-      ]
-    }
-  ]
-}
-```
-
-</details>
-
----
-
-### `applyPatch`
-
-Apply a patch to a single destination org.
-
-`POST /v2/blueprint-manifest/blueprints/{blueprint_id}/patches/{patch_id}:apply`
-
-**Parameters**
-
-| Name | In | Type | Required | Description |
-| ---- | -- | ---- | -------- | ----------- |
-| `blueprint_id` | path | string | Yes |  |
-| `patch_id` | path | string | Yes |  |
-
-**Request Body** (required)
-
-**Sample Call**
-
-```bash
-epilot blueprint-manifest applyPatch \
-  -p blueprint_id=c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341 \
-  -p patch_id=123e4567-e89b-12d3-a456-426614174000
-```
-
-With request body:
-
-```bash
-epilot blueprint-manifest applyPatch \
-  -p blueprint_id=c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341 \
-  -p patch_id=123e4567-e89b-12d3-a456-426614174000 \
-  -d '{
-  "org_id": "string",
-  "org_name": "string",
-  "dest_blueprint_id": "string",
-  "dest_org_id": "string",
-  "destination_auth_token": "string"
-}'
-```
-
-Using positional args for path parameters:
-
-```bash
-epilot blueprint-manifest applyPatch c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341 123e4567-e89b-12d3-a456-426614174000
-```
-
-Using stdin pipe:
-
-```bash
-cat body.json | epilot blueprint-manifest applyPatch -p blueprint_id=c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341 -p patch_id=123e4567-e89b-12d3-a456-426614174000
-```
-
-With JSONata filter:
-
-```bash
-epilot blueprint-manifest applyPatch -p blueprint_id=c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341 -p patch_id=123e4567-e89b-12d3-a456-426614174000 --jsonata 'patch_id'
-```
-
-<details>
-<summary>Sample Response</summary>
-
-```json
-{
-  "patch_id": "string",
-  "version": 0,
-  "org_id": "string",
-  "org_name": "string",
-  "dest_blueprint_id": "string",
-  "status": "pending",
-  "error": "string",
-  "applied_at": "1970-01-01T00:00:00.000Z",
-  "retries": 0,
-  "changes_applied": [
-    {
-      "path": "string",
-      "op": "changed",
-      "baseline_value": {},
-      "current_value": {}
-    }
-  ]
-}
-```
-
-</details>
-
----
-
-### `retryPatchOrg`
-
-Retry a failed patch execution for a specific org.
-
-`POST /v2/blueprint-manifest/blueprints/{blueprint_id}/patches/{patch_id}/orgs/{org_id}:retry`
-
-**Parameters**
-
-| Name | In | Type | Required | Description |
-| ---- | -- | ---- | -------- | ----------- |
-| `blueprint_id` | path | string | Yes |  |
-| `patch_id` | path | string | Yes |  |
-| `org_id` | path | string | Yes |  |
-
-**Request Body**
-
-**Sample Call**
-
-```bash
-epilot blueprint-manifest retryPatchOrg \
-  -p blueprint_id=c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341 \
-  -p patch_id=123e4567-e89b-12d3-a456-426614174000 \
-  -p org_id=123e4567-e89b-12d3-a456-426614174000 \
-  -d '{"org_name":"string","dest_blueprint_id":"string","destination_auth_token":"string"}'
-```
-
-Using positional args for path parameters:
-
-```bash
-epilot blueprint-manifest retryPatchOrg c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341 123e4567-e89b-12d3-a456-426614174000 123e4567-e89b-12d3-a456-426614174000
-```
-
-Using stdin pipe:
-
-```bash
-cat body.json | epilot blueprint-manifest retryPatchOrg -p blueprint_id=c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341 -p patch_id=123e4567-e89b-12d3-a456-426614174000 -p org_id=123e4567-e89b-12d3-a456-426614174000
-```
-
-With JSONata filter:
-
-```bash
-epilot blueprint-manifest retryPatchOrg -p blueprint_id=c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341 -p patch_id=123e4567-e89b-12d3-a456-426614174000 -p org_id=123e4567-e89b-12d3-a456-426614174000 --jsonata 'patch_id'
-```
-
-<details>
-<summary>Sample Response</summary>
-
-```json
-{
-  "patch_id": "string",
-  "version": 0,
-  "org_id": "string",
-  "org_name": "string",
-  "dest_blueprint_id": "string",
-  "status": "pending",
-  "error": "string",
-  "applied_at": "1970-01-01T00:00:00.000Z",
-  "retries": 0,
-  "changes_applied": [
-    {
-      "path": "string",
-      "op": "changed",
-      "baseline_value": {},
-      "current_value": {}
-    }
-  ]
-}
-```
-
-</details>
-
----
-
-### `exportBlueprint`
-
-Kick off a new blueprint export job. Returns 202 Accepted with Location header pointing to the job resource.
-
-`POST /v2/blueprint-manifest/blueprints/{blueprint_id}:export`
-
-**Parameters**
-
-| Name | In | Type | Required | Description |
-| ---- | -- | ---- | -------- | ----------- |
-| `blueprint_id` | path | string | Yes |  |
-
-**Request Body**
-
-**Sample Call**
-
-```bash
-epilot blueprint-manifest exportBlueprint \
-  -p blueprint_id=c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341 \
-  -d '{"destination_org_id":"string","destination_blueprint_id":"string","validate":true}'
-```
-
-Using positional args for path parameters:
-
-```bash
-epilot blueprint-manifest exportBlueprint c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
-```
-
-Using stdin pipe:
-
-```bash
-cat body.json | epilot blueprint-manifest exportBlueprint -p blueprint_id=c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
-```
-
-With JSONata filter:
-
-```bash
-epilot blueprint-manifest exportBlueprint -p blueprint_id=c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341 --jsonata '$'
 ```
 
 ---
@@ -2082,7 +1728,34 @@ epilot blueprint-manifest addBlueprintResource -p blueprint_id=c2d6cac8-bdd5-4ea
       "impact_on_install": ["create"],
       "impact_on_install_reason": ["string"]
     }
-  ]
+  ],
+  "skipped": [
+    {
+      "id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+      "type": "designbuilder",
+      "reason": "not_found"
+    }
+  ],
+  "errors": [
+    {
+      "error": "string",
+      "code": "dependency_extraction",
+      "data": {
+        "formattedResource": {
+          "id": "string",
+          "name": "string",
+          "type": "string"
+        },
+        "resource": "string",
+        "resourceDependency": "string",
+        "resources": ["string"],
+        "addresses": ["string"],
+        "originalError": "string"
+      }
+    }
+  ],
+  "total_errors": 0,
+  "errors_truncated": true
 }
 ```
 
@@ -2101,6 +1774,10 @@ Sync dependencies of all root resources in a Blueprint
 | Name | In | Type | Required | Description |
 | ---- | -- | ---- | -------- | ----------- |
 | `blueprint_id` | path | string | Yes |  |
+| `trigger` | query | "manual" \| "pre_sync" \| "post_revert" | No | What initiated the sync. Automated triggers (`pre_sync`,
+`post_revert`) are side effects of an operation the activity
+feed already shows on its own row, so they are excluded from
+the audit log — same  |
 
 **Sample Call**
 
@@ -2208,7 +1885,34 @@ epilot blueprint-manifest bulkAddBlueprintResources -p blueprint_id=c2d6cac8-bdd
       "impact_on_install": ["create"],
       "impact_on_install_reason": ["string"]
     }
-  ]
+  ],
+  "skipped": [
+    {
+      "id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+      "type": "designbuilder",
+      "reason": "not_found"
+    }
+  ],
+  "errors": [
+    {
+      "error": "string",
+      "code": "dependency_extraction",
+      "data": {
+        "formattedResource": {
+          "id": "string",
+          "name": "string",
+          "type": "string"
+        },
+        "resource": "string",
+        "resourceDependency": "string",
+        "resources": ["string"],
+        "addresses": ["string"],
+        "originalError": "string"
+      }
+    }
+  ],
+  "total_errors": 0,
+  "errors_truncated": true
 }
 ```
 
@@ -2614,7 +2318,7 @@ epilot blueprint-manifest listBlueprintJobs --jsonata 'results[0]'
 
 ### `getBlueprintJob`
 
-Poll current state of a job.
+Poll the current state of a job. Serves both Terraform (v2) and V3-engine jobs —
 
 `GET /v2/blueprint-manifest/jobs/{job_id}`
 
@@ -2702,7 +2406,7 @@ epilot blueprint-manifest getBlueprintJob -p job_id=c2d6cac8-bdd5-4ea2-8a6c-1cbd
 
 ### `continueInstallationJob`
 
-Continue an installation job if it is waiting for user action.
+Resume an installation job that is paused at `status: "WAITING_USER_ACTION"` after
 
 `POST /v2/blueprint-manifest/jobs/{job_id}:continue`
 
@@ -2719,7 +2423,7 @@ Continue an installation job if it is waiting for user action.
 ```bash
 epilot blueprint-manifest continueInstallationJob \
   -p job_id=c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341 \
-  -d '{"resources_to_ignore":["string"]}'
+  -d '{"resources_to_ignore":["string"],"sync_notes":false,"source_auth_token":"string"}'
 ```
 
 Using positional args for path parameters:
@@ -2800,14 +2504,53 @@ epilot blueprint-manifest continueInstallationJob -p job_id=c2d6cac8-bdd5-4ea2-8
       "name": "string",
       "status": "pending",
       "target_id": "string",
-      "error_message": "string"
+      "error_message": "string",
+      "error_code": "string",
+      "error_data": {}
     }
   ],
+  "options": {
+    "resources_to_ignore": ["string"],
+    "sync_notes": false
+  },
   "status": "IN_PROGRESS"
 }
 ```
 
 </details>
+
+---
+
+### `retryInstallationJob`
+
+Retry a finished V3 installation job whose status is `FAILED` or
+
+`POST /v2/blueprint-manifest/jobs/{job_id}:retry`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `job_id` | path | string | Yes |  |
+
+**Sample Call**
+
+```bash
+epilot blueprint-manifest retryInstallationJob \
+  -p job_id=c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot blueprint-manifest retryInstallationJob c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+```
+
+With JSONata filter:
+
+```bash
+epilot blueprint-manifest retryInstallationJob -p job_id=c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341 --jsonata '$'
+```
 
 ---
 
@@ -3679,9 +3422,133 @@ epilot blueprint-manifest publishMarketplaceListingVersion -p listing_id=123e456
 
 ---
 
+### `publishBlueprintV3`
+
+Starts an asynchronous V3 publication. The result is a signed, portable package; poll the existing blueprint job endpoin
+
+`POST /v3/blueprint-manifest/blueprints/{blueprint_id}:publish`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `blueprint_id` | path | string | Yes |  |
+
+**Request Body**
+
+**Sample Call**
+
+```bash
+epilot blueprint-manifest publishBlueprintV3 \
+  -p blueprint_id=c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341 \
+  -d '{"publish_to_marketplace":false}'
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot blueprint-manifest publishBlueprintV3 c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot blueprint-manifest publishBlueprintV3 -p blueprint_id=c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+```
+
+With JSONata filter:
+
+```bash
+epilot blueprint-manifest publishBlueprintV3 -p blueprint_id=c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341 --jsonata '$'
+```
+
+---
+
+### `preInstallBlueprintV3`
+
+Validates a signed V3 package and returns the destination-specific resource plan used by the install UI.
+
+`POST /v3/blueprint-manifest/blueprints:pre-install`
+
+**Request Body** (required)
+
+**Sample Call**
+
+```bash
+epilot blueprint-manifest preInstallBlueprintV3 \
+  -d '{"blueprint_file":"string","source_blueprint_type":"marketplace","slug":"string"}'
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot blueprint-manifest preInstallBlueprintV3
+```
+
+With JSONata filter:
+
+```bash
+epilot blueprint-manifest preInstallBlueprintV3 --jsonata 'id'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "id": "string",
+  "org_id": "string",
+  "title": "string",
+  "description": {
+    "preinstall": "string"
+  },
+  "version": "string",
+  "slug": "string",
+  "source_type": "marketplace",
+  "sync_engine": "terraform",
+  "blueprint_file_s3_key": "string",
+  "is_verified": true,
+  "docs_url": "string",
+  "recommended_apps": ["string"],
+  "required_features": {
+    "enabled": ["string"],
+    "disabled": ["string"]
+  },
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "created_by": {
+    "name": "manifest@epilot.cloud",
+    "org_id": "911690",
+    "user_id": "11001045",
+    "token_id": "api_5ZugdRXasLfWBypHi93Fk"
+  },
+  "is_updating": true,
+  "resources": [
+    {
+      "id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+      "name": "string",
+      "type": "designbuilder",
+      "address": "string",
+      "is_root": true,
+      "is_ready": true,
+      "is_hidden": true,
+      "is_disabled": false,
+      "hard_dependencies": ["designbuilder"],
+      "parent_resource_ids": ["c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341"],
+      "depends_on_addresses": ["string"],
+      "impact_on_install": ["create"],
+      "impact_on_install_reason": ["string"]
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
 ### `installBlueprintV3`
 
-Install a blueprint using the V3 engine (direct API calls, no Terraform).
+Install a blueprint into a single destination org using the V3 engine (direct API
 
 `POST /v3/blueprint-manifest/blueprint:install`
 
@@ -3792,9 +3659,176 @@ epilot blueprint-manifest getRestorePreview -p blueprint_id=c2d6cac8-bdd5-4ea2-8
       "reason": "modified",
       "last_synced_at": "1970-01-01T00:00:00.000Z",
       "current_updated_at": "1970-01-01T00:00:00.000Z",
-      "error_message": "string"
+      "error_message": "string",
+      "is_hidden": true,
+      "co_owned_by": [
+        {
+          "blueprint_id": "string",
+          "title": "string"
+        }
+      ],
+      "protected_by": [
+        {
+          "lineage_id": "string",
+          "type": "string",
+          "target_id": "string"
+        }
+      ]
     }
-  ]
+  ],
+  "has_effective_changes": true
+}
+```
+
+</details>
+
+---
+
+### `triggerDeploymentHealthCheckV3`
+
+Starts a read-only health scan of the resources this deployment's
+
+`POST /v3/blueprint-manifest/blueprints/{blueprint_id}/deployments/{job_id}:health-check`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `blueprint_id` | path | string | Yes |  |
+| `job_id` | path | string | Yes | The install job whose deployment is being checked. |
+
+**Request Body**
+
+**Sample Call**
+
+```bash
+epilot blueprint-manifest triggerDeploymentHealthCheckV3 \
+  -p blueprint_id=c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341 \
+  -p job_id=c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341 \
+  -d '{"source_org_id":"string","source_auth_token":"string"}'
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot blueprint-manifest triggerDeploymentHealthCheckV3 c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341 c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot blueprint-manifest triggerDeploymentHealthCheckV3 -p blueprint_id=c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341 -p job_id=c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+```
+
+With JSONata filter:
+
+```bash
+epilot blueprint-manifest triggerDeploymentHealthCheckV3 -p blueprint_id=c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341 -p job_id=c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341 --jsonata '$'
+```
+
+---
+
+### `getDeploymentHealthReportV3`
+
+Returns the most recent health report produced for this deployment
+
+`GET /v3/blueprint-manifest/blueprints/{blueprint_id}/deployments/{job_id}/health-report`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `blueprint_id` | path | string | Yes |  |
+| `job_id` | path | string | Yes |  |
+
+**Sample Call**
+
+```bash
+epilot blueprint-manifest getDeploymentHealthReportV3 \
+  -p blueprint_id=c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341 \
+  -p job_id=c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot blueprint-manifest getDeploymentHealthReportV3 c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341 c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+```
+
+With JSONata filter:
+
+```bash
+epilot blueprint-manifest getDeploymentHealthReportV3 -p blueprint_id=c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341 -p job_id=c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341 --jsonata 'status'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "status": "running",
+  "job_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+  "blueprint_instance_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+  "destination_org_id": "string",
+  "generated_at": "1970-01-01T00:00:00.000Z",
+  "html_url": "string",
+  "summary": {
+    "resources_scanned": 0,
+    "unchecked": 0,
+    "errors": 0,
+    "warnings": 0,
+    "infos": 0
+  },
+  "findings": [
+    {
+      "check_id": "live_readability",
+      "code": "missing_in_destination",
+      "severity": "error",
+      "resource_type": "string",
+      "lineage_id": "string",
+      "target_id": "string",
+      "resource_name": "string",
+      "message": "string",
+      "verdict": "string",
+      "evidence": {
+        "path": "string",
+        "referenced_id": "string",
+        "referenced_type": "string",
+        "referenced_name": "string",
+        "referenced_lineage_id": "string",
+        "expected_target_id": "string",
+        "reference_kind": "string",
+        "operation": "string",
+        "rejection_reason": "string",
+        "error_message": "string",
+        "response_status": 0
+      }
+    }
+  ],
+  "coverage": {
+    "checks": [
+      {
+        "check_id": "live_readability",
+        "status": "completed",
+        "scope": "tracked_resources",
+        "resources_considered": 0,
+        "details": ["string"]
+      }
+    ],
+    "resource_types": [
+      {
+        "resource_type": "string",
+        "tracked": 0,
+        "readable_by_lineage": 0,
+        "missing_by_lineage": 0,
+        "read_errors": 0,
+        "unchecked": 0,
+        "specialized_checks": ["live_readability"],
+        "known_blind_spots": ["string"]
+      }
+    ]
+  },
+  "error": "string"
 }
 ```
 
@@ -3856,6 +3890,306 @@ epilot blueprint-manifest getBlueprintLineageV3 -p blueprint_id=c2d6cac8-bdd5-4e
 
 ---
 
+### `createBulkInstallV3`
+
+Install one source blueprint into many destination organizations in a single
+
+`POST /v3/blueprint-manifest/bulk-installs`
+
+**Request Body** (required)
+
+**Sample Call**
+
+```bash
+epilot blueprint-manifest createBulkInstallV3
+```
+
+With request body:
+
+```bash
+epilot blueprint-manifest createBulkInstallV3 \
+  -d '{
+  "source_org_id": "string",
+  "source_blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+  "max_concurrency": 2,
+  "slug": "string",
+  "options": {
+    "resources_to_ignore": ["string"],
+    "sync_notes": false
+  },
+  "targets": [
+    {
+      "destination_org_id": "string",
+      "destination_blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+      "destination_auth_token": "string"
+    }
+  ]
+}'
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot blueprint-manifest createBulkInstallV3
+```
+
+With JSONata filter:
+
+```bash
+epilot blueprint-manifest createBulkInstallV3 --jsonata '$'
+```
+
+---
+
+### `getBulkInstallV3`
+
+Returns the bulk install parent with aggregate status and counts. Scoped by the
+
+`GET /v3/blueprint-manifest/bulk-installs/{bulk_job_id}`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `bulk_job_id` | path | string | Yes |  |
+
+**Sample Call**
+
+```bash
+epilot blueprint-manifest getBulkInstallV3 \
+  -p bulk_job_id=123e4567-e89b-12d3-a456-426614174000
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot blueprint-manifest getBulkInstallV3 123e4567-e89b-12d3-a456-426614174000
+```
+
+With JSONata filter:
+
+```bash
+epilot blueprint-manifest getBulkInstallV3 -p bulk_job_id=123e4567-e89b-12d3-a456-426614174000 --jsonata 'bulk_job_id'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "bulk_job_id": "string",
+  "source_org_id": "string",
+  "source_blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+  "status": "QUEUED",
+  "target_count": 0,
+  "max_concurrency": 0,
+  "counts": {
+    "queued": 0,
+    "in_progress": 0,
+    "success": 0,
+    "partial_success": 0,
+    "failed": 0
+  },
+  "slug": "string",
+  "options": {
+    "resources_to_ignore": ["string"],
+    "sync_notes": false
+  },
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "updated_at": "1970-01-01T00:00:00.000Z"
+}
+```
+
+</details>
+
+---
+
+### `listBulkInstallTargetsV3`
+
+Pages through the bulk install's target rows. Each row hydrates its latest child
+
+`GET /v3/blueprint-manifest/bulk-installs/{bulk_job_id}/targets`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `bulk_job_id` | path | string | Yes |  |
+| `limit` | query | number | No |  |
+| `cursor` | query | string | No |  |
+
+**Sample Call**
+
+```bash
+epilot blueprint-manifest listBulkInstallTargetsV3 \
+  -p bulk_job_id=123e4567-e89b-12d3-a456-426614174000
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot blueprint-manifest listBulkInstallTargetsV3 123e4567-e89b-12d3-a456-426614174000
+```
+
+With JSONata filter:
+
+```bash
+epilot blueprint-manifest listBulkInstallTargetsV3 -p bulk_job_id=123e4567-e89b-12d3-a456-426614174000 --jsonata 'results[0]'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "results": [
+    {
+      "bulk_job_id": "string",
+      "destination_org_id": "string",
+      "destination_blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+      "status": "QUEUED",
+      "job_ids": ["c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341"],
+      "created_at": "1970-01-01T00:00:00.000Z",
+      "updated_at": "1970-01-01T00:00:00.000Z",
+      "job": {}
+    }
+  ],
+  "next_cursor": "string"
+}
+```
+
+</details>
+
+---
+
+### `retryBulkInstallTargetV3`
+
+Retries a single failed target. Allowed only for `FAILED` and `PARTIAL_SUCCESS`
+
+`POST /v3/blueprint-manifest/bulk-installs/{bulk_job_id}/targets/{destination_org_id}:retry`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `bulk_job_id` | path | string | Yes |  |
+| `destination_org_id` | path | string | Yes |  |
+
+**Request Body** (required)
+
+**Sample Call**
+
+```bash
+epilot blueprint-manifest retryBulkInstallTargetV3 \
+  -p bulk_job_id=123e4567-e89b-12d3-a456-426614174000 \
+  -p destination_org_id=123e4567-e89b-12d3-a456-426614174000 \
+  -d '{"destination_auth_token":"string"}'
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot blueprint-manifest retryBulkInstallTargetV3 123e4567-e89b-12d3-a456-426614174000 123e4567-e89b-12d3-a456-426614174000
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot blueprint-manifest retryBulkInstallTargetV3 -p bulk_job_id=123e4567-e89b-12d3-a456-426614174000 -p destination_org_id=123e4567-e89b-12d3-a456-426614174000
+```
+
+With JSONata filter:
+
+```bash
+epilot blueprint-manifest retryBulkInstallTargetV3 -p bulk_job_id=123e4567-e89b-12d3-a456-426614174000 -p destination_org_id=123e4567-e89b-12d3-a456-426614174000 --jsonata 'bulk_job_id'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "bulk_job_id": "string",
+  "destination_org_id": "string",
+  "destination_blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+  "status": "QUEUED",
+  "job_ids": ["c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341"],
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "updated_at": "1970-01-01T00:00:00.000Z",
+  "job": {
+    "id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+    "events": [
+      {
+        "timestamp": "1970-01-01T00:00:00.000Z",
+        "message": "string",
+        "errors": [
+          {
+            "error": "string",
+            "code": "dependency_extraction",
+            "data": {
+              "formattedResource": {
+                "id": "string",
+                "name": "string",
+                "type": "string"
+              },
+              "resource": "string",
+              "resourceDependency": "string",
+              "resources": ["string"],
+              "addresses": ["string"],
+              "originalError": "string"
+            }
+          }
+        ],
+        "level": "info",
+        "data": {
+          "installed_blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+          "export_job_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+          "resources": 0
+        }
+      }
+    ],
+    "triggered_at": "1970-01-01T00:00:00.000Z",
+    "created_by": {
+      "name": "manifest@epilot.cloud",
+      "org_id": "911690",
+      "user_id": "11001045",
+      "token_id": "api_5ZugdRXasLfWBypHi93Fk"
+    },
+    "job_type": "install",
+    "source_blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+    "source_blueprint_type": "custom",
+    "source_org_id": "string",
+    "source_blueprint_file": "string",
+    "destination_blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
+    "destination_org_id": "string",
+    "slug": "string",
+    "sync_engine": "terraform",
+    "resource_progress": [
+      {
+        "lineage_id": "string",
+        "type": "string",
+        "address": "string",
+        "name": "string",
+        "status": "pending",
+        "target_id": "string",
+        "error_message": "string",
+        "error_code": "string",
+        "error_data": {}
+      }
+    ],
+    "options": {
+      "resources_to_ignore": ["string"],
+      "sync_notes": false
+    },
+    "status": "IN_PROGRESS"
+  }
+}
+```
+
+</details>
+
+---
+
 ### `listUniquenessCriteria`
 
 List all custom uniqueness criteria configured for the caller's organization.
@@ -3884,10 +4218,13 @@ epilot blueprint-manifest listUniquenessCriteria --jsonata 'results[0]'
       "org_id": "string",
       "resource_type": "emailtemplate",
       "fields": ["string"],
+      "propagated_to": ["string"],
       "updated_at": "1970-01-01T00:00:00.000Z",
       "updated_by": "string"
     }
-  ]
+  ],
+  "defaults": {},
+  "readonly_types": ["string"]
 }
 ```
 
@@ -3905,7 +4242,7 @@ Get the configured uniqueness criteria for a specific resource type, if any.
 
 | Name | In | Type | Required | Description |
 | ---- | -- | ---- | -------- | ----------- |
-| `resource_type` | path | "emailtemplate" \| "product" \| "price" \| "tax" \| "coupon" \| "product_recommendation" \| "file" \| "document_template" \| "schema" \| "taxonomy" \| "notification_template" \| "family" \| "permission" \| "journey" | Yes |  |
+| `resource_type` | path | "emailtemplate" \| "product" \| "price" \| "tax" \| "coupon" \| "product_recommendation" \| "file" \| "document_template" \| "notification_template" \| "journey" | Yes |  |
 
 **Sample Call**
 
@@ -3934,6 +4271,7 @@ epilot blueprint-manifest getUniquenessCriteria -p resource_type=example --jsona
   "org_id": "string",
   "resource_type": "emailtemplate",
   "fields": ["string"],
+  "propagated_to": ["string"],
   "updated_at": "1970-01-01T00:00:00.000Z",
   "updated_by": "string"
 }
@@ -3953,7 +4291,7 @@ Set or replace the uniqueness criteria for a resource type. The provided fields
 
 | Name | In | Type | Required | Description |
 | ---- | -- | ---- | -------- | ----------- |
-| `resource_type` | path | "emailtemplate" \| "product" \| "price" \| "tax" \| "coupon" \| "product_recommendation" \| "file" \| "document_template" \| "schema" \| "taxonomy" \| "notification_template" \| "family" \| "permission" \| "journey" | Yes |  |
+| `resource_type` | path | "emailtemplate" \| "product" \| "price" \| "tax" \| "coupon" \| "product_recommendation" \| "file" \| "document_template" \| "notification_template" \| "journey" | Yes |  |
 
 **Request Body** (required)
 
@@ -3962,7 +4300,7 @@ Set or replace the uniqueness criteria for a resource type. The provided fields
 ```bash
 epilot blueprint-manifest putUniquenessCriteria \
   -p resource_type=example \
-  -d '{"fields":["string"]}'
+  -d '{"fields":["string"],"propagated_to":["string"]}'
 ```
 
 Using positional args for path parameters:
@@ -3991,6 +4329,7 @@ epilot blueprint-manifest putUniquenessCriteria -p resource_type=example --jsona
   "org_id": "string",
   "resource_type": "emailtemplate",
   "fields": ["string"],
+  "propagated_to": ["string"],
   "updated_at": "1970-01-01T00:00:00.000Z",
   "updated_by": "string"
 }
@@ -4010,7 +4349,7 @@ Remove the custom criteria for a resource type, reverting to the default fields.
 
 | Name | In | Type | Required | Description |
 | ---- | -- | ---- | -------- | ----------- |
-| `resource_type` | path | "emailtemplate" \| "product" \| "price" \| "tax" \| "coupon" \| "product_recommendation" \| "file" \| "document_template" \| "schema" \| "taxonomy" \| "notification_template" \| "family" \| "permission" \| "journey" | Yes |  |
+| `resource_type` | path | "emailtemplate" \| "product" \| "price" \| "tax" \| "coupon" \| "product_recommendation" \| "file" \| "document_template" \| "notification_template" \| "journey" | Yes |  |
 
 **Sample Call**
 

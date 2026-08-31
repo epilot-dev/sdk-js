@@ -1013,6 +1013,20 @@
                 "in_app": false
               }
             }
+          },
+          "allowed_channels": {
+            "description": "Optional delivery-channel ceiling. When present, delivery is restricted to the intersection of this set and each recipient's own notification preferences — it can only NARROW delivery, never force a channel on. Absent means no restriction (recipient preferences and per-type defaults apply as before). An empty array suppresses all channels.",
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "email",
+                "in_app"
+              ]
+            },
+            "example": [
+              "in_app"
+            ]
           }
         },
         "required": [

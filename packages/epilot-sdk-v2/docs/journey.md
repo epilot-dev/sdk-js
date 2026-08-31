@@ -54,6 +54,7 @@ const { data } = await journeyClient.getJourneysByOrgId(...)
 - [`SearchJourneysQueryRequest`](#searchjourneysqueryrequest)
 - [`SearchJourneysResponse`](#searchjourneysresponse)
 - [`Journey`](#journey)
+- [`JourneyActivationGuarantee`](#journeyactivationguarantee)
 - [`JourneyFeatureFlags`](#journeyfeatureflags)
 - [`JourneyAuditInfo`](#journeyauditinfo)
 - [`JourneyValidationResponse`](#journeyvalidationresponse)
@@ -123,6 +124,7 @@ const { data } = await client.getJourney({
       "showStepSubtitle": true,
       "showStepper": true,
       "showStepperLabels": true,
+      "stepperType": "numbers",
       "hideNextButton": true,
       "name": "string",
       "stepId": "string",
@@ -158,7 +160,8 @@ const { data } = await client.getJourney({
       "type": "string",
       "paramKey": "string",
       "isRequired": true,
-      "shouldLoadEntity": true
+      "shouldLoadEntity": true,
+      "description": "string"
     }
   ],
   "journey_type": "Sales template (Premium)",
@@ -196,20 +199,24 @@ const { data } = await client.getJourney({
     "useAustrianLabels": true,
     "enableDarkMode": true,
     "accessMode": "PUBLIC",
+    "authGate": {
+      "stepId": "string"
+    },
     "isPublished": true,
     "status": "string",
     "isActive": true,
     "savingProgress": {
-      "savingMode": "auto",
-      "supportedVersion": 0
+      "mode": "auto",
+      "supportedRevision": 0
     },
     "thirdPartyCookies": true
   },
   "validationRules": {
     "block1": "rule123",
-    "block2": {
-      "field1": "rule456",
-      "field2": "rule789"
+    "block2": ["rule456", "rule789"],
+    "block3": {
+      "field1": "rule101",
+      "field2": ["rule102", "rule103"]
     }
   },
   "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
@@ -317,6 +324,7 @@ const { data } = await client.createJourney(
         showStepSubtitle: true,
         showStepper: true,
         showStepperLabels: true,
+        stepperType: 'numbers',
         hideNextButton: true,
         name: 'string',
         stepId: 'string',
@@ -352,7 +360,8 @@ const { data } = await client.createJourney(
         type: 'string',
         paramKey: 'string',
         isRequired: true,
-        shouldLoadEntity: true
+        shouldLoadEntity: true,
+        description: 'string'
       }
     ],
     journey_type: 'Sales template (Premium)',
@@ -390,20 +399,24 @@ const { data } = await client.createJourney(
       useAustrianLabels: true,
       enableDarkMode: true,
       accessMode: 'PUBLIC',
+      authGate: {
+        stepId: 'string'
+      },
       isPublished: true,
       status: 'string',
       isActive: true,
       savingProgress: {
-        savingMode: 'auto',
-        supportedVersion: 0
+        mode: 'auto',
+        supportedRevision: 0
       },
       thirdPartyCookies: true
     },
     validationRules: {
       block1: 'rule123',
-      block2: {
-        field1: 'rule456',
-        field2: 'rule789'
+      block2: ['rule456', 'rule789'],
+      block3: {
+        field1: 'rule101',
+        field2: ['rule102', 'rule103']
       }
     },
     _manifest: ['123e4567-e89b-12d3-a456-426614174000'],
@@ -431,6 +444,7 @@ const { data } = await client.createJourney(
       "showStepSubtitle": true,
       "showStepper": true,
       "showStepperLabels": true,
+      "stepperType": "numbers",
       "hideNextButton": true,
       "name": "string",
       "stepId": "string",
@@ -466,7 +480,8 @@ const { data } = await client.createJourney(
       "type": "string",
       "paramKey": "string",
       "isRequired": true,
-      "shouldLoadEntity": true
+      "shouldLoadEntity": true,
+      "description": "string"
     }
   ],
   "journey_type": "Sales template (Premium)",
@@ -504,20 +519,24 @@ const { data } = await client.createJourney(
     "useAustrianLabels": true,
     "enableDarkMode": true,
     "accessMode": "PUBLIC",
+    "authGate": {
+      "stepId": "string"
+    },
     "isPublished": true,
     "status": "string",
     "isActive": true,
     "savingProgress": {
-      "savingMode": "auto",
-      "supportedVersion": 0
+      "mode": "auto",
+      "supportedRevision": 0
     },
     "thirdPartyCookies": true
   },
   "validationRules": {
     "block1": "rule123",
-    "block2": {
-      "field1": "rule456",
-      "field2": "rule789"
+    "block2": ["rule456", "rule789"],
+    "block3": {
+      "field1": "rule101",
+      "field2": ["rule102", "rule103"]
     }
   },
   "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
@@ -559,6 +578,7 @@ const { data } = await client.updateJourney(
         showStepSubtitle: true,
         showStepper: true,
         showStepperLabels: true,
+        stepperType: 'numbers',
         hideNextButton: true,
         name: 'string',
         stepId: 'string',
@@ -594,7 +614,8 @@ const { data } = await client.updateJourney(
         type: 'string',
         paramKey: 'string',
         isRequired: true,
-        shouldLoadEntity: true
+        shouldLoadEntity: true,
+        description: 'string'
       }
     ],
     journey_type: 'Sales template (Premium)',
@@ -632,20 +653,24 @@ const { data } = await client.updateJourney(
       useAustrianLabels: true,
       enableDarkMode: true,
       accessMode: 'PUBLIC',
+      authGate: {
+        stepId: 'string'
+      },
       isPublished: true,
       status: 'string',
       isActive: true,
       savingProgress: {
-        savingMode: 'auto',
-        supportedVersion: 0
+        mode: 'auto',
+        supportedRevision: 0
       },
       thirdPartyCookies: true
     },
     validationRules: {
       block1: 'rule123',
-      block2: {
-        field1: 'rule456',
-        field2: 'rule789'
+      block2: ['rule456', 'rule789'],
+      block3: {
+        field1: 'rule101',
+        field2: ['rule102', 'rule103']
       }
     },
     _manifest: ['123e4567-e89b-12d3-a456-426614174000'],
@@ -730,6 +755,7 @@ const { data } = await client.patchUpdateJourney(
       "useAustrianLabels": true,
       "enableDarkMode": true,
       "accessMode": "PUBLIC",
+      "authGate": {},
       "isPublished": true,
       "status": "string",
       "isActive": true,
@@ -738,7 +764,8 @@ const { data } = await client.patchUpdateJourney(
     },
     "validationRules": {
       "block1": "rule123",
-      "block2": {}
+      "block2": ["rule456", "rule789"],
+      "block3": {}
     },
     "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
     "createdBy": "string",
@@ -825,6 +852,7 @@ const { data } = await client.generateDocument(
     context_data: {
       additionalProperties: 'string'
     },
+    context_entity_id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
     language: 'de'
   },
 )
@@ -905,6 +933,7 @@ const { data } = await client.createJourneyV2(
         showStepSubtitle: true,
         showStepper: true,
         showStepperLabels: true,
+        stepperType: 'numbers',
         hideNextButton: true,
         name: 'string',
         stepId: 'string',
@@ -940,7 +969,8 @@ const { data } = await client.createJourneyV2(
         type: 'string',
         paramKey: 'string',
         isRequired: true,
-        shouldLoadEntity: true
+        shouldLoadEntity: true,
+        description: 'string'
       }
     ],
     journey_type: 'Sales template (Premium)',
@@ -953,10 +983,7 @@ const { data } = await client.createJourneyV2(
         width: 'string',
         topBar: true,
         scrollToTop: true,
-        button: {
-          text: 'string',
-          align: 'left'
-        }
+        button: { /* ... */ }
       },
       safeModeAutomation: true,
       designId: 'string',
@@ -978,14 +1005,23 @@ const { data } = await client.createJourneyV2(
       useNewDesign: true,
       thirdPartyCookies: true,
       accessMode: 'PUBLIC',
+      authGate: {
+        stepId: 'string'
+      },
       enableDarkMode: true,
-      isActive: true
+      useAustrianLabels: true,
+      isActive: true,
+      savingProgress: {
+        mode: 'auto',
+        supportedRevision: 0
+      }
     },
     validationRules: {
       block1: 'rule123',
-      block2: {
-        field1: 'rule456',
-        field2: 'rule789'
+      block2: ['rule456', 'rule789'],
+      block3: {
+        field1: 'rule101',
+        field2: ['rule102', 'rule103']
       }
     },
     _manifest: ['123e4567-e89b-12d3-a456-426614174000']
@@ -1009,6 +1045,7 @@ const { data } = await client.createJourneyV2(
       "showStepSubtitle": true,
       "showStepper": true,
       "showStepperLabels": true,
+      "stepperType": "numbers",
       "hideNextButton": true,
       "name": "string",
       "stepId": "string",
@@ -1044,7 +1081,8 @@ const { data } = await client.createJourneyV2(
       "type": "string",
       "paramKey": "string",
       "isRequired": true,
-      "shouldLoadEntity": true
+      "shouldLoadEntity": true,
+      "description": "string"
     }
   ],
   "journey_type": "Sales template (Premium)",
@@ -1057,10 +1095,7 @@ const { data } = await client.createJourneyV2(
       "width": "string",
       "topBar": true,
       "scrollToTop": true,
-      "button": {
-        "text": "string",
-        "align": "left"
-      }
+      "button": {}
     },
     "safeModeAutomation": true,
     "designId": "string",
@@ -1082,14 +1117,23 @@ const { data } = await client.createJourneyV2(
     "useNewDesign": true,
     "thirdPartyCookies": true,
     "accessMode": "PUBLIC",
+    "authGate": {
+      "stepId": "string"
+    },
     "enableDarkMode": true,
-    "isActive": true
+    "useAustrianLabels": true,
+    "isActive": true,
+    "savingProgress": {
+      "mode": "auto",
+      "supportedRevision": 0
+    }
   },
   "validationRules": {
     "block1": "rule123",
-    "block2": {
-      "field1": "rule456",
-      "field2": "rule789"
+    "block2": ["rule456", "rule789"],
+    "block3": {
+      "field1": "rule101",
+      "field2": ["rule102", "rule103"]
     }
   },
   "_manifest": ["123e4567-e89b-12d3-a456-426614174000"]
@@ -1121,6 +1165,7 @@ const { data } = await client.updateJourneyV2(
         showStepSubtitle: true,
         showStepper: true,
         showStepperLabels: true,
+        stepperType: 'numbers',
         hideNextButton: true,
         name: 'string',
         stepId: 'string',
@@ -1156,7 +1201,8 @@ const { data } = await client.updateJourneyV2(
         type: 'string',
         paramKey: 'string',
         isRequired: true,
-        shouldLoadEntity: true
+        shouldLoadEntity: true,
+        description: 'string'
       }
     ],
     journey_type: 'Sales template (Premium)',
@@ -1169,10 +1215,7 @@ const { data } = await client.updateJourneyV2(
         width: 'string',
         topBar: true,
         scrollToTop: true,
-        button: {
-          text: 'string',
-          align: 'left'
-        }
+        button: { /* ... */ }
       },
       safeModeAutomation: true,
       designId: 'string',
@@ -1194,14 +1237,23 @@ const { data } = await client.updateJourneyV2(
       useNewDesign: true,
       thirdPartyCookies: true,
       accessMode: 'PUBLIC',
+      authGate: {
+        stepId: 'string'
+      },
       enableDarkMode: true,
-      isActive: true
+      useAustrianLabels: true,
+      isActive: true,
+      savingProgress: {
+        mode: 'auto',
+        supportedRevision: 0
+      }
     },
     validationRules: {
       block1: 'rule123',
-      block2: {
-        field1: 'rule456',
-        field2: 'rule789'
+      block2: ['rule456', 'rule789'],
+      block3: {
+        field1: 'rule101',
+        field2: ['rule102', 'rule103']
       }
     },
     _manifest: ['123e4567-e89b-12d3-a456-426614174000']
@@ -1225,6 +1277,7 @@ const { data } = await client.updateJourneyV2(
       "showStepSubtitle": true,
       "showStepper": true,
       "showStepperLabels": true,
+      "stepperType": "numbers",
       "hideNextButton": true,
       "name": "string",
       "stepId": "string",
@@ -1260,7 +1313,8 @@ const { data } = await client.updateJourneyV2(
       "type": "string",
       "paramKey": "string",
       "isRequired": true,
-      "shouldLoadEntity": true
+      "shouldLoadEntity": true,
+      "description": "string"
     }
   ],
   "journey_type": "Sales template (Premium)",
@@ -1273,10 +1327,7 @@ const { data } = await client.updateJourneyV2(
       "width": "string",
       "topBar": true,
       "scrollToTop": true,
-      "button": {
-        "text": "string",
-        "align": "left"
-      }
+      "button": {}
     },
     "safeModeAutomation": true,
     "designId": "string",
@@ -1298,14 +1349,23 @@ const { data } = await client.updateJourneyV2(
     "useNewDesign": true,
     "thirdPartyCookies": true,
     "accessMode": "PUBLIC",
+    "authGate": {
+      "stepId": "string"
+    },
     "enableDarkMode": true,
-    "isActive": true
+    "useAustrianLabels": true,
+    "isActive": true,
+    "savingProgress": {
+      "mode": "auto",
+      "supportedRevision": 0
+    }
   },
   "validationRules": {
     "block1": "rule123",
-    "block2": {
-      "field1": "rule456",
-      "field2": "rule789"
+    "block2": ["rule456", "rule789"],
+    "block3": {
+      "field1": "rule101",
+      "field2": ["rule102", "rule103"]
     }
   },
   "_manifest": ["123e4567-e89b-12d3-a456-426614174000"]
@@ -1348,6 +1408,7 @@ const { data } = await client.patchUpdateJourneyV2(
       "showStepSubtitle": true,
       "showStepper": true,
       "showStepperLabels": true,
+      "stepperType": "numbers",
       "hideNextButton": true,
       "name": "string",
       "stepId": "string",
@@ -1383,7 +1444,8 @@ const { data } = await client.patchUpdateJourneyV2(
       "type": "string",
       "paramKey": "string",
       "isRequired": true,
-      "shouldLoadEntity": true
+      "shouldLoadEntity": true,
+      "description": "string"
     }
   ],
   "journey_type": "Sales template (Premium)",
@@ -1396,10 +1458,7 @@ const { data } = await client.patchUpdateJourneyV2(
       "width": "string",
       "topBar": true,
       "scrollToTop": true,
-      "button": {
-        "text": "string",
-        "align": "left"
-      }
+      "button": {}
     },
     "safeModeAutomation": true,
     "designId": "string",
@@ -1421,14 +1480,23 @@ const { data } = await client.patchUpdateJourneyV2(
     "useNewDesign": true,
     "thirdPartyCookies": true,
     "accessMode": "PUBLIC",
+    "authGate": {
+      "stepId": "string"
+    },
     "enableDarkMode": true,
-    "isActive": true
+    "useAustrianLabels": true,
+    "isActive": true,
+    "savingProgress": {
+      "mode": "auto",
+      "supportedRevision": 0
+    }
   },
   "validationRules": {
     "block1": "rule123",
-    "block2": {
-      "field1": "rule456",
-      "field2": "rule789"
+    "block2": ["rule456", "rule789"],
+    "block3": {
+      "field1": "rule101",
+      "field2": ["rule102", "rule103"]
     }
   },
   "_manifest": ["123e4567-e89b-12d3-a456-426614174000"]
@@ -1468,6 +1536,7 @@ const { data } = await client.getJourneyV2({
       "showStepSubtitle": true,
       "showStepper": true,
       "showStepperLabels": true,
+      "stepperType": "numbers",
       "hideNextButton": true,
       "name": "string",
       "stepId": "string",
@@ -1503,7 +1572,8 @@ const { data } = await client.getJourneyV2({
       "type": "string",
       "paramKey": "string",
       "isRequired": true,
-      "shouldLoadEntity": true
+      "shouldLoadEntity": true,
+      "description": "string"
     }
   ],
   "journey_type": "Sales template (Premium)",
@@ -1516,10 +1586,7 @@ const { data } = await client.getJourneyV2({
       "width": "string",
       "topBar": true,
       "scrollToTop": true,
-      "button": {
-        "text": "string",
-        "align": "left"
-      }
+      "button": {}
     },
     "safeModeAutomation": true,
     "designId": "string",
@@ -1541,14 +1608,23 @@ const { data } = await client.getJourneyV2({
     "useNewDesign": true,
     "thirdPartyCookies": true,
     "accessMode": "PUBLIC",
+    "authGate": {
+      "stepId": "string"
+    },
     "enableDarkMode": true,
-    "isActive": true
+    "useAustrianLabels": true,
+    "isActive": true,
+    "savingProgress": {
+      "mode": "auto",
+      "supportedRevision": 0
+    }
   },
   "validationRules": {
     "block1": "rule123",
-    "block2": {
-      "field1": "rule456",
-      "field2": "rule789"
+    "block2": ["rule456", "rule789"],
+    "block3": {
+      "field1": "rule101",
+      "field2": ["rule102", "rule103"]
     }
   },
   "_manifest": ["123e4567-e89b-12d3-a456-426614174000"]
@@ -1652,6 +1728,7 @@ type JourneyResponse = {
       showStepSubtitle?: { ... }
       showStepper?: { ... }
       showStepperLabels?: { ... }
+      stepperType?: { ... }
       hideNextButton?: { ... }
       name: { ... }
       stepId?: { ... }
@@ -1689,6 +1766,7 @@ type JourneyResponse = {
       paramKey: { ... }
       isRequired?: { ... }
       shouldLoadEntity?: { ... }
+      description?: { ... }
     }>
     journey_type?: string
     protected?: boolean
@@ -1718,13 +1796,14 @@ type JourneyResponse = {
       useAustrianLabels?: { ... }
       enableDarkMode?: { ... }
       accessMode?: { ... }
+      authGate?: { ... }
       isPublished?: { ... }
       status?: { ... }
       isActive?: { ... }
       savingProgress?: { ... }
       thirdPartyCookies?: { ... }
     }
-    validationRules?: Record<string, string | Record<string, string>>
+    validationRules?: Record<string, string | string[] | Record<string, string | string[]>>
     _manifest?: string // uuid[]
     createdBy?: string
     updatedBy?: string
@@ -1736,6 +1815,7 @@ type JourneyResponse = {
     revisions: number
     featureFlags?: Record<string, unknown>
   }
+  // ...
 }
 ```
 
@@ -1786,6 +1866,7 @@ type JourneyCreationRequest = {
     showStepSubtitle?: boolean
     showStepper?: boolean
     showStepperLabels?: boolean
+    stepperType?: "numbers" | "progress bar"
     hideNextButton?: boolean
     name: string
     stepId?: string
@@ -1829,6 +1910,7 @@ type JourneyCreationRequest = {
     paramKey: string
     isRequired?: boolean
     shouldLoadEntity?: boolean
+    description?: string
   }>
   journey_type?: string
   protected?: boolean
@@ -1865,15 +1947,13 @@ type JourneyCreationRequest = {
     useAustrianLabels?: boolean
     enableDarkMode?: boolean
     accessMode?: "PUBLIC" | "PRIVATE"
+    authGate?: {
+      stepId: { ... }
+    }
     isPublished?: boolean
     status?: string
     isActive?: boolean
     savingProgress?: {
-      savingMode?: { ... }
-      supportedVersion?: { ... }
-    }
-    thirdPartyCookies?: boolean
-  }
   // ...
 }
 ```
@@ -1892,6 +1972,7 @@ type JourneyCreationRequestV2 = {
     showStepSubtitle?: boolean
     showStepper?: boolean
     showStepperLabels?: boolean
+    stepperType?: "numbers" | "progress bar"
     hideNextButton?: boolean
     name: string
     stepId?: string
@@ -1935,6 +2016,7 @@ type JourneyCreationRequestV2 = {
     paramKey: string
     isRequired?: boolean
     shouldLoadEntity?: boolean
+    description?: string
   }>
   journey_type?: string
   protected?: boolean
@@ -1968,11 +2050,18 @@ type JourneyCreationRequestV2 = {
     useNewDesign?: boolean
     thirdPartyCookies?: boolean
     accessMode?: "PUBLIC" | "PRIVATE"
+    authGate?: {
+      stepId: { ... }
+    }
     enableDarkMode?: boolean
+    useAustrianLabels?: boolean
     isActive?: boolean
+    savingProgress?: {
+      mode?: { ... }
+      supportedRevision?: { ... }
+    }
   }
-  validationRules?: Record<string, string | Record<string, string>>
-  _manifest?: string // uuid[]
+  // ...
 }
 ```
 
@@ -2028,6 +2117,7 @@ type Journey = {
     showStepSubtitle?: boolean
     showStepper?: boolean
     showStepperLabels?: boolean
+    stepperType?: "numbers" | "progress bar"
     hideNextButton?: boolean
     name: string
     stepId?: string
@@ -2071,6 +2161,7 @@ type Journey = {
     paramKey: string
     isRequired?: boolean
     shouldLoadEntity?: boolean
+    description?: string
   }>
   journey_type?: string
   protected?: boolean
@@ -2107,16 +2198,27 @@ type Journey = {
     useAustrianLabels?: boolean
     enableDarkMode?: boolean
     accessMode?: "PUBLIC" | "PRIVATE"
+    authGate?: {
+      stepId: { ... }
+    }
     isPublished?: boolean
     status?: string
     isActive?: boolean
     savingProgress?: {
-      savingMode?: { ... }
-      supportedVersion?: { ... }
-    }
-    thirdPartyCookies?: boolean
-  }
   // ...
+}
+```
+
+### `JourneyActivationGuarantee`
+
+Journeys read from the API always carry an explicit `settings.isActive`. The flag remains optional in request bodies.
+
+
+```ts
+type JourneyActivationGuarantee = {
+  settings: {
+    isActive: boolean
+  }
 }
 ```
 
@@ -2263,6 +2365,7 @@ type GenerateDocumentRequest = {
   context_data: {
     additionalProperties?: string
   }
+  context_entity_id?: string // uuid
   language?: string
 }
 ```
@@ -2291,19 +2394,20 @@ type ButtonOption = {
 ### `ValidationRuleRef`
 
 References to validation rules organized by blocks and fields.
-Maps block IDs to either rule IDs (for block-level rules) or rule references (for field-level rules).
+Maps block IDs to either one or more ordered rule IDs (for block-level rules)
+or rule references (for field-level rules).
 
 
 ```ts
-type ValidationRuleRef = Record<string, string | Record<string, string>>
+type ValidationRuleRef = Record<string, string | string[] | Record<string, string | string[]>>
 ```
 
 ### `RuleRef`
 
 Field-level rule references within a block.
-Maps field names to rule IDs.
+Maps field names to one or more ordered rule IDs.
 
 
 ```ts
-type RuleRef = Record<string, string>
+type RuleRef = Record<string, string | string[]>
 ```

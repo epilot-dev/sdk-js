@@ -103,7 +103,17 @@ epilot event-catalog listEvents --jsonata 'results[0]'
       },
       "enabled": true,
       "auto_trigger": true,
-      "automation_trigger": true
+      "automation_trigger": true,
+      "success_criteria": [
+        {
+          "entity_schema": "contract",
+          "attribute": "installment_amount"
+        },
+        {
+          "entity_schema": "billing_account",
+          "attribute": "due_date"
+        }
+      ]
     }
   ]
 }
@@ -180,7 +190,17 @@ epilot event-catalog getEvent -p event_name=example --jsonata '$'
   },
   "enabled": true,
   "auto_trigger": true,
-  "automation_trigger": true
+  "automation_trigger": true,
+  "success_criteria": [
+    {
+      "entity_schema": "contract",
+      "attribute": "installment_amount"
+    },
+    {
+      "entity_schema": "billing_account",
+      "attribute": "due_date"
+    }
+  ]
 }
 ```
 
@@ -246,7 +266,17 @@ epilot event-catalog patchEvent \
   },
   "enabled": true,
   "auto_trigger": true,
-  "automation_trigger": true
+  "automation_trigger": true,
+  "success_criteria": [
+    {
+      "entity_schema": "contract",
+      "attribute": "installment_amount"
+    },
+    {
+      "entity_schema": "billing_account",
+      "attribute": "due_date"
+    }
+  ]
 }'
 ```
 
@@ -304,7 +334,17 @@ epilot event-catalog patchEvent -p event_name=example --jsonata '$'
   },
   "enabled": true,
   "auto_trigger": true,
-  "automation_trigger": true
+  "automation_trigger": true,
+  "success_criteria": [
+    {
+      "entity_schema": "contract",
+      "attribute": "installment_amount"
+    },
+    {
+      "entity_schema": "billing_account",
+      "attribute": "due_date"
+    }
+  ]
 }
 ```
 

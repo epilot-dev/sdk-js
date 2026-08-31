@@ -1,6 +1,4 @@
 /* Auto-copied from address-client */
-/* eslint-disable */
-
 import type {
   OpenAPIClient,
   Parameters,

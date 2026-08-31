@@ -40,6 +40,10 @@ export declare namespace Components {
                 additionalProperties?: string;
             };
             /**
+             * Entity id used to resolve entity and relational template variables
+             */
+            context_entity_id?: string; // uuid
+            /**
              * Language code for the document
              * example:
              * de
@@ -151,6 +155,7 @@ export declare namespace Components {
                 showStepSubtitle?: boolean | null;
                 showStepper?: boolean | null;
                 showStepperLabels?: boolean | null;
+                stepperType?: "numbers" | "progress bar";
                 hideNextButton?: boolean | null;
                 name: string;
                 stepId?: string;
@@ -263,6 +268,10 @@ export declare namespace Components {
                  * If type is not text, we can instruct the journey to fetch the entity id we receive as value
                  */
                 shouldLoadEntity?: boolean;
+                /**
+                 * Human-readable note describing the parameter's purpose. Free text; may contain newlines.
+                 */
+                description?: string | null;
             }[];
             /**
              * Journey Template
@@ -296,7 +305,7 @@ export declare namespace Components {
                  */
                 canary?: boolean;
                 designId: string;
-                templateId?: string;
+                templateId?: string | null;
                 entityId?: string | null;
                 mappingsAutomationId?: string;
                 targetedCustomer?: string;
@@ -342,12 +351,21 @@ export declare namespace Components {
                  */
                 enableDarkMode?: boolean;
                 accessMode?: "PUBLIC" | "PRIVATE";
+                /**
+                 * Steps after this step require an authenticated session (auth gate)
+                 */
+                authGate?: {
+                    /**
+                     * The step containing the Login & Registration block
+                     */
+                    stepId: string;
+                };
                 isPublished?: boolean;
                 status?: string;
                 isActive?: boolean;
                 savingProgress?: {
-                    savingMode?: "auto" | "local" | "remote" | "none";
-                    supportedVersion?: number;
+                    mode?: "auto" | "local" | "remote" | "none";
+                    supportedRevision?: number;
                 };
                 /**
                  * If false, third-party cookies are disabled to comply with GDPR regulations without asking for consent.
@@ -356,14 +374,22 @@ export declare namespace Components {
             };
             validationRules?: /**
              * References to validation rules organized by blocks and fields.
-             * Maps block IDs to either rule IDs (for block-level rules) or rule references (for field-level rules).
+             * Maps block IDs to either one or more ordered rule IDs (for block-level rules)
+             * or rule references (for field-level rules).
              *
              * example:
              * {
              *   "block1": "rule123",
-             *   "block2": {
-             *     "field1": "rule456",
-             *     "field2": "rule789"
+             *   "block2": [
+             *     "rule456",
+             *     "rule789"
+             *   ],
+             *   "block3": {
+             *     "field1": "rule101",
+             *     "field2": [
+             *       "rule102",
+             *       "rule103"
+             *     ]
              *   }
              * }
              */
@@ -387,6 +413,18 @@ export declare namespace Components {
                 [name: string]: any;
             };
         }
+        /**
+         * Journeys read from the API always carry an explicit `settings.isActive`. The flag remains optional in request bodies.
+         *
+         */
+        export interface JourneyActivationGuarantee {
+            settings: {
+                /**
+                 * Whether the journey is active (accessible to end customers)
+                 */
+                isActive: boolean;
+            };
+        }
         export interface JourneyAuditInfo {
             createdAt: string;
             lastModifiedAt: string;
@@ -407,6 +445,7 @@ export declare namespace Components {
                 showStepSubtitle?: boolean | null;
                 showStepper?: boolean | null;
                 showStepperLabels?: boolean | null;
+                stepperType?: "numbers" | "progress bar";
                 hideNextButton?: boolean | null;
                 name: string;
                 stepId?: string;
@@ -519,6 +558,10 @@ export declare namespace Components {
                  * If type is not text, we can instruct the journey to fetch the entity id we receive as value
                  */
                 shouldLoadEntity?: boolean;
+                /**
+                 * Human-readable note describing the parameter's purpose. Free text; may contain newlines.
+                 */
+                description?: string | null;
             }[];
             /**
              * Journey Template
@@ -552,7 +595,7 @@ export declare namespace Components {
                  */
                 canary?: boolean;
                 designId: string;
-                templateId?: string;
+                templateId?: string | null;
                 entityId?: string | null;
                 mappingsAutomationId?: string;
                 targetedCustomer?: string;
@@ -598,12 +641,21 @@ export declare namespace Components {
                  */
                 enableDarkMode?: boolean;
                 accessMode?: "PUBLIC" | "PRIVATE";
+                /**
+                 * Steps after this step require an authenticated session (auth gate)
+                 */
+                authGate?: {
+                    /**
+                     * The step containing the Login & Registration block
+                     */
+                    stepId: string;
+                };
                 isPublished?: boolean;
                 status?: string;
                 isActive?: boolean;
                 savingProgress?: {
-                    savingMode?: "auto" | "local" | "remote" | "none";
-                    supportedVersion?: number;
+                    mode?: "auto" | "local" | "remote" | "none";
+                    supportedRevision?: number;
                 };
                 /**
                  * If false, third-party cookies are disabled to comply with GDPR regulations without asking for consent.
@@ -612,14 +664,22 @@ export declare namespace Components {
             };
             validationRules?: /**
              * References to validation rules organized by blocks and fields.
-             * Maps block IDs to either rule IDs (for block-level rules) or rule references (for field-level rules).
+             * Maps block IDs to either one or more ordered rule IDs (for block-level rules)
+             * or rule references (for field-level rules).
              *
              * example:
              * {
              *   "block1": "rule123",
-             *   "block2": {
-             *     "field1": "rule456",
-             *     "field2": "rule789"
+             *   "block2": [
+             *     "rule456",
+             *     "rule789"
+             *   ],
+             *   "block3": {
+             *     "field1": "rule101",
+             *     "field2": [
+             *       "rule102",
+             *       "rule103"
+             *     ]
              *   }
              * }
              */
@@ -646,6 +706,7 @@ export declare namespace Components {
                 showStepSubtitle?: boolean | null;
                 showStepper?: boolean | null;
                 showStepperLabels?: boolean | null;
+                stepperType?: "numbers" | "progress bar";
                 hideNextButton?: boolean | null;
                 name: string;
                 stepId?: string;
@@ -758,6 +819,10 @@ export declare namespace Components {
                  * If type is not text, we can instruct the journey to fetch the entity id we receive as value
                  */
                 shouldLoadEntity?: boolean;
+                /**
+                 * Human-readable note describing the parameter's purpose. Free text; may contain newlines.
+                 */
+                description?: string | null;
             }[];
             /**
              * Journey Template
@@ -789,7 +854,7 @@ export declare namespace Components {
                 designId?: string;
                 entityId?: string | null;
                 mappingsAutomationId?: string;
-                templateId?: string;
+                templateId?: string | null;
                 targetedCustomer?: string;
                 description?: string | null;
                 publicToken?: string | null;
@@ -827,21 +892,46 @@ export declare namespace Components {
                 thirdPartyCookies?: boolean;
                 accessMode?: "PUBLIC" | "PRIVATE";
                 /**
+                 * Steps after this step require an authenticated session (auth gate)
+                 */
+                authGate?: {
+                    /**
+                     * The step containing the Login & Registration block
+                     */
+                    stepId: string;
+                };
+                /**
                  * If true, the journey shows an icon to toggle dark mode
                  */
                 enableDarkMode?: boolean;
+                /**
+                 * If true, some journey input labels are in Austrian format
+                 */
+                useAustrianLabels?: boolean;
                 isActive?: boolean;
+                savingProgress?: {
+                    mode?: "auto" | "local" | "remote" | "none";
+                    supportedRevision?: number;
+                };
             };
             validationRules?: /**
              * References to validation rules organized by blocks and fields.
-             * Maps block IDs to either rule IDs (for block-level rules) or rule references (for field-level rules).
+             * Maps block IDs to either one or more ordered rule IDs (for block-level rules)
+             * or rule references (for field-level rules).
              *
              * example:
              * {
              *   "block1": "rule123",
-             *   "block2": {
-             *     "field1": "rule456",
-             *     "field2": "rule789"
+             *   "block2": [
+             *     "rule456",
+             *     "rule789"
+             *   ],
+             *   "block3": {
+             *     "field1": "rule101",
+             *     "field2": [
+             *       "rule102",
+             *       "rule103"
+             *     ]
              *   }
              * }
              */
@@ -958,17 +1048,22 @@ export declare namespace Components {
         }
         /**
          * Field-level rule references within a block.
-         * Maps field names to rule IDs.
+         * Maps field names to one or more ordered rule IDs.
          *
          * example:
          * {
          *   "firstName": "rule123",
-         *   "lastName": "rule456",
-         *   "email": "rule789"
+         *   "lastName": [
+         *     "rule456",
+         *     "rule789"
+         *   ]
          * }
          */
         export interface RuleRef {
-            [name: string]: string;
+            [name: string]: string | [
+                string,
+                ...string[]
+            ];
         }
         export interface S3Reference {
             /**
@@ -1182,27 +1277,40 @@ export declare namespace Components {
         }
         /**
          * References to validation rules organized by blocks and fields.
-         * Maps block IDs to either rule IDs (for block-level rules) or rule references (for field-level rules).
+         * Maps block IDs to either one or more ordered rule IDs (for block-level rules)
+         * or rule references (for field-level rules).
          *
          * example:
          * {
          *   "block1": "rule123",
-         *   "block2": {
-         *     "field1": "rule456",
-         *     "field2": "rule789"
+         *   "block2": [
+         *     "rule456",
+         *     "rule789"
+         *   ],
+         *   "block3": {
+         *     "field1": "rule101",
+         *     "field2": [
+         *       "rule102",
+         *       "rule103"
+         *     ]
          *   }
          * }
          */
         export interface ValidationRuleRef {
-            [name: string]: string | /**
+            [name: string]: string | [
+                string,
+                ...string[]
+            ] | /**
              * Field-level rule references within a block.
-             * Maps field names to rule IDs.
+             * Maps field names to one or more ordered rule IDs.
              *
              * example:
              * {
              *   "firstName": "rule123",
-             *   "lastName": "rule456",
-             *   "email": "rule789"
+             *   "lastName": [
+             *     "rule456",
+             *     "rule789"
+             *   ]
              * }
              */
             RuleRef;
@@ -1327,7 +1435,284 @@ export declare namespace Paths {
             orgId?: Parameters.OrgId;
         }
         namespace Responses {
-            export type $200 = Components.Schemas.Journey;
+            /**
+             * Journeys read from the API always carry an explicit `settings.isActive`. The flag remains optional in request bodies.
+             *
+             */
+            export interface $200 {
+                [name: string]: any;
+                journeyId?: string;
+                organizationId: string;
+                brandId?: string;
+                name: string;
+                steps: {
+                    showStepName?: boolean | null;
+                    title?: string | null;
+                    subTitle?: string | null;
+                    showStepSubtitle?: boolean | null;
+                    showStepper?: boolean | null;
+                    showStepperLabels?: boolean | null;
+                    stepperType?: "numbers" | "progress bar";
+                    hideNextButton?: boolean | null;
+                    name: string;
+                    stepId?: string;
+                    schema: any;
+                    uischema: any;
+                    maxWidth?: "small" | "medium" | "large" | "extra large";
+                }[];
+                design?: {
+                    logoUrl?: string | null;
+                    theme?: {
+                        [name: string]: any;
+                    };
+                    designTokens?: {
+                        [key: string]: any;
+                    };
+                };
+                rules?: {
+                    type: "inject" | "injectWithKey";
+                    sourceType: "journey" | "step" | "block";
+                    source: string;
+                    target: string;
+                }[];
+                logics?: {
+                    autoGeneratedId?: string;
+                    conditions: string[];
+                    actions: string[];
+                }[];
+                logicsV4?: {
+                    [name: string]: {
+                        /**
+                         * Unique identifier for logic. Use uuidv7
+                         */
+                        id?: string; // uuid
+                        /**
+                         * If true, logic can't be manipulated by the configuring user
+                         */
+                        protected?: boolean;
+                        /**
+                         * Indicates which action to take in case logic evaluates to true
+                         */
+                        action?: string;
+                        /**
+                         * Indicates when the logic should be evaluated
+                         */
+                        triggeredOn?: string;
+                        conditions?: {
+                            /**
+                             * Operator to be applied between the fact value and the value
+                             */
+                            operator?: string;
+                            /**
+                             * If operator is a custom function, this needs to be provided
+                             */
+                            functionName?: string;
+                            fact?: {
+                                /**
+                                 * Unique identifier for a fact
+                                 */
+                                id?: string; // uuid
+                                /**
+                                 * Indicates reference type (block or context parameter)
+                                 */
+                                referenceType?: string;
+                                /**
+                                 * Id of the reference
+                                 */
+                                referenceId?: string;
+                                /**
+                                 * Path to a property. Used if only part of the value is needed
+                                 */
+                                path?: string;
+                                /**
+                                 * If path is a reference, indicates the intention of it
+                                 */
+                                meaning?: string;
+                            };
+                            value?: string | number | boolean | {
+                                [key: string]: any;
+                            } | any[];
+                            args?: {
+                                [key: string]: any;
+                            };
+                        }[][];
+                        /**
+                         * Logic specific settings. Will vary by type of logic
+                         */
+                        settings?: {
+                            [key: string]: any;
+                        };
+                    };
+                };
+                contextSchema?: {
+                    /**
+                     * Unique identifier for the context schema item
+                     */
+                    id?: string; // uuid
+                    /**
+                     * Type of the parameter. It could be either an entity slug, or a text
+                     */
+                    type: string;
+                    /**
+                     * Expected key to be received in the context
+                     */
+                    paramKey: string;
+                    /**
+                     * Indicates if a value is expected to be provided
+                     */
+                    isRequired?: boolean;
+                    /**
+                     * If type is not text, we can instruct the journey to fetch the entity id we receive as value
+                     */
+                    shouldLoadEntity?: boolean;
+                    /**
+                     * Human-readable note describing the parameter's purpose. Free text; may contain newlines.
+                     */
+                    description?: string | null;
+                }[];
+                /**
+                 * Journey Template
+                 * example:
+                 * Sales template (Premium)
+                 */
+                journey_type?: string;
+                /**
+                 * If true, journey is displayed in read-only mode
+                 */
+                protected?: boolean;
+                /**
+                 * Whitelist of paths that remain editable when the journey is protected. Supports wildcard patterns (e.g. steps/*​/blocks/**).
+                 */
+                protectedEditable?: string[];
+                settings: {
+                    embedOptions?: {
+                        mode?: "full-screen" | "inline";
+                        lang?: "de" | "en" | "fr";
+                        width?: string;
+                        topBar?: boolean;
+                        scrollToTop?: boolean;
+                        button?: {
+                            text?: string | null;
+                            align?: "left" | "center" | "right";
+                        };
+                    };
+                    safeModeAutomation?: boolean;
+                    /**
+                     * DEPRECATED - This API will return hardcoded value of false. Please note that this field is internal to epilot and should not be used by external clients. If you wish to get the canary flag, please use the /v1/journey/{id}/settings API.
+                     */
+                    canary?: boolean;
+                    designId: string;
+                    templateId?: string | null;
+                    entityId?: string | null;
+                    mappingsAutomationId?: string;
+                    targetedCustomer?: string;
+                    description?: string | null;
+                    organizationSettings?: {
+                        [name: string]: boolean;
+                    } | null;
+                    publicToken?: string | null;
+                    runtimeEntities?: ("ORDER" | "OPPORTUNITY")[];
+                    filePurposes?: string[];
+                    entityTags?: string[];
+                    /**
+                     * @deprecated Use addressSuggestionsFileId instead
+                     */
+                    addressSuggestionsFileUrl?: string | null;
+                    addressSuggestionsFileId?: string | null;
+                    /**
+                     * Country code for address format (e.g. DE, AT, CH, LU)
+                     */
+                    addressSuggestionsCountryCode?: string | null;
+                    /**
+                     * Whether address auto-complete is enabled
+                     */
+                    addressSuggestionsEnableAutoComplete?: boolean;
+                    /**
+                     * Sources for address auto-complete (e.g. deutschePostService, customAddressesFile)
+                     */
+                    addressSuggestionsSource?: string[];
+                    /**
+                     * Whether free text input is allowed when auto-complete is on
+                     */
+                    addressSuggestionsEnableFreeText?: boolean;
+                    /**
+                     * This property is deprecated and will be removed in a future version
+                     */
+                    useNewDesign?: boolean;
+                    /**
+                     * If true, some journey input labels are in Austrian format
+                     */
+                    useAustrianLabels?: boolean;
+                    /**
+                     * If true, the journey shows an icon to toggle dark mode
+                     */
+                    enableDarkMode?: boolean;
+                    accessMode?: "PUBLIC" | "PRIVATE";
+                    /**
+                     * Steps after this step require an authenticated session (auth gate)
+                     */
+                    authGate?: {
+                        /**
+                         * The step containing the Login & Registration block
+                         */
+                        stepId: string;
+                    };
+                    isPublished?: boolean;
+                    status?: string;
+                    /**
+                     * Whether the journey is active (accessible to end customers)
+                     */
+                    isActive: boolean;
+                    savingProgress?: {
+                        mode?: "auto" | "local" | "remote" | "none";
+                        supportedRevision?: number;
+                    };
+                    /**
+                     * If false, third-party cookies are disabled to comply with GDPR regulations without asking for consent.
+                     */
+                    thirdPartyCookies?: boolean;
+                };
+                validationRules?: /**
+                 * References to validation rules organized by blocks and fields.
+                 * Maps block IDs to either one or more ordered rule IDs (for block-level rules)
+                 * or rule references (for field-level rules).
+                 *
+                 * example:
+                 * {
+                 *   "block1": "rule123",
+                 *   "block2": [
+                 *     "rule456",
+                 *     "rule789"
+                 *   ],
+                 *   "block3": {
+                 *     "field1": "rule101",
+                 *     "field2": [
+                 *       "rule102",
+                 *       "rule103"
+                 *     ]
+                 *   }
+                 * }
+                 */
+                Components.Schemas.ValidationRuleRef;
+                /**
+                 * Manifest/Blueprint ID used to create/update the entity
+                 */
+                _manifest?: string /* uuid */[];
+                createdBy?: string;
+                updatedBy?: string | null;
+                /**
+                 * If passed with value of null, the API won't modify the lastModifiedAt field on updating the journey
+                 */
+                __lastModifiedAt?: string | null;
+                createdAt: string;
+                lastModifiedAt: string;
+                deletedAt?: string;
+                version: number;
+                revisions: number;
+                featureFlags?: {
+                    [name: string]: any;
+                };
+            }
         }
     }
     namespace GetJourneyProducts {
@@ -1381,7 +1766,259 @@ export declare namespace Paths {
             version?: Parameters.Version;
         }
         namespace Responses {
-            export type $200 = Components.Schemas.JourneyCreationRequestV2;
+            /**
+             * Journeys read from the API always carry an explicit `settings.isActive`. The flag remains optional in request bodies.
+             *
+             */
+            export interface $200 {
+                journeyId?: string;
+                brandId?: string;
+                name: string;
+                steps: {
+                    showStepName?: boolean | null;
+                    title?: string | null;
+                    subTitle?: string | null;
+                    showStepSubtitle?: boolean | null;
+                    showStepper?: boolean | null;
+                    showStepperLabels?: boolean | null;
+                    stepperType?: "numbers" | "progress bar";
+                    hideNextButton?: boolean | null;
+                    name: string;
+                    stepId?: string;
+                    schema: any;
+                    uischema: any;
+                    maxWidth?: "small" | "medium" | "large" | "extra large";
+                }[];
+                design?: {
+                    logoUrl?: string | null;
+                    theme?: {
+                        [name: string]: any;
+                    };
+                    designTokens?: {
+                        [key: string]: any;
+                    };
+                };
+                rules?: {
+                    type: "inject" | "injectWithKey";
+                    sourceType: "journey" | "step" | "block";
+                    source: string;
+                    target: string;
+                }[];
+                logics?: {
+                    autoGeneratedId?: string;
+                    conditions: string[];
+                    actions: string[];
+                }[];
+                logicsV4?: {
+                    [name: string]: {
+                        /**
+                         * Unique identifier for logic. Use uuidv7
+                         */
+                        id?: string; // uuid
+                        /**
+                         * If true, logic can't be manipulated by the configuring user
+                         */
+                        protected?: boolean;
+                        /**
+                         * Indicates which action to take in case logic evaluates to true
+                         */
+                        action?: string;
+                        /**
+                         * Indicates when the logic should be evaluated
+                         */
+                        triggeredOn?: string;
+                        conditions?: {
+                            /**
+                             * Operator to be applied between the fact value and the value
+                             */
+                            operator?: string;
+                            /**
+                             * If operator is a custom function, this needs to be provided
+                             */
+                            functionName?: string;
+                            fact?: {
+                                /**
+                                 * Unique identifier for a fact
+                                 */
+                                id?: string; // uuid
+                                /**
+                                 * Indicates reference type (block or context parameter)
+                                 */
+                                referenceType?: string;
+                                /**
+                                 * Id of the reference
+                                 */
+                                referenceId?: string;
+                                /**
+                                 * Path to a property. Used if only part of the value is needed
+                                 */
+                                path?: string;
+                                /**
+                                 * If path is a reference, indicates the intention of it
+                                 */
+                                meaning?: string;
+                            };
+                            value?: string | number | boolean | {
+                                [key: string]: any;
+                            } | any[];
+                            args?: {
+                                [key: string]: any;
+                            };
+                        }[][];
+                        /**
+                         * Logic specific settings. Will vary by type of logic
+                         */
+                        settings?: {
+                            [key: string]: any;
+                        };
+                    };
+                };
+                contextSchema?: {
+                    /**
+                     * Unique identifier for the context schema item
+                     */
+                    id?: string; // uuid
+                    /**
+                     * Type of the parameter. It could be either an entity slug, or a text
+                     */
+                    type: string;
+                    /**
+                     * Expected key to be received in the context
+                     */
+                    paramKey: string;
+                    /**
+                     * Indicates if a value is expected to be provided
+                     */
+                    isRequired?: boolean;
+                    /**
+                     * If type is not text, we can instruct the journey to fetch the entity id we receive as value
+                     */
+                    shouldLoadEntity?: boolean;
+                    /**
+                     * Human-readable note describing the parameter's purpose. Free text; may contain newlines.
+                     */
+                    description?: string | null;
+                }[];
+                /**
+                 * Journey Template
+                 * example:
+                 * Sales template (Premium)
+                 */
+                journey_type?: string;
+                /**
+                 * If true, journey is displayed in read-only mode
+                 */
+                protected?: boolean;
+                /**
+                 * Whitelist of paths that remain editable when the journey is protected. Supports wildcard patterns (e.g. steps/*​/blocks/**).
+                 */
+                protectedEditable?: string[];
+                settings: {
+                    embedOptions?: {
+                        mode?: "full-screen" | "inline";
+                        lang?: "de" | "en" | "fr";
+                        width?: string;
+                        topBar?: boolean;
+                        scrollToTop?: boolean;
+                        button?: {
+                            text?: string | null;
+                            align?: "left" | "center" | "right";
+                        };
+                    };
+                    safeModeAutomation?: boolean;
+                    designId?: string;
+                    entityId?: string | null;
+                    mappingsAutomationId?: string;
+                    templateId?: string | null;
+                    targetedCustomer?: string;
+                    description?: string | null;
+                    publicToken?: string | null;
+                    runtimeEntities?: ("ORDER" | "OPPORTUNITY")[];
+                    filePurposes?: string[];
+                    entityTags?: string[];
+                    /**
+                     * @deprecated Use addressSuggestionsFileId instead
+                     */
+                    addressSuggestionsFileUrl?: string | null;
+                    addressSuggestionsFileId?: string | null;
+                    /**
+                     * Country code for address format (e.g. DE, AT, CH, LU)
+                     */
+                    addressSuggestionsCountryCode?: string | null;
+                    /**
+                     * Whether address auto-complete is enabled
+                     */
+                    addressSuggestionsEnableAutoComplete?: boolean;
+                    /**
+                     * Sources for address auto-complete (e.g. deutschePostService, customAddressesFile)
+                     */
+                    addressSuggestionsSource?: string[];
+                    /**
+                     * Whether free text input is allowed when auto-complete is on
+                     */
+                    addressSuggestionsEnableFreeText?: boolean;
+                    /**
+                     * This property is deprecated and will be removed in a future version
+                     */
+                    useNewDesign?: boolean;
+                    /**
+                     * If false, third-party cookies are disabled to comply with GDPR regulations without asking for consent.
+                     */
+                    thirdPartyCookies?: boolean;
+                    accessMode?: "PUBLIC" | "PRIVATE";
+                    /**
+                     * Steps after this step require an authenticated session (auth gate)
+                     */
+                    authGate?: {
+                        /**
+                         * The step containing the Login & Registration block
+                         */
+                        stepId: string;
+                    };
+                    /**
+                     * If true, the journey shows an icon to toggle dark mode
+                     */
+                    enableDarkMode?: boolean;
+                    /**
+                     * If true, some journey input labels are in Austrian format
+                     */
+                    useAustrianLabels?: boolean;
+                    /**
+                     * Whether the journey is active (accessible to end customers)
+                     */
+                    isActive: boolean;
+                    savingProgress?: {
+                        mode?: "auto" | "local" | "remote" | "none";
+                        supportedRevision?: number;
+                    };
+                };
+                validationRules?: /**
+                 * References to validation rules organized by blocks and fields.
+                 * Maps block IDs to either one or more ordered rule IDs (for block-level rules)
+                 * or rule references (for field-level rules).
+                 *
+                 * example:
+                 * {
+                 *   "block1": "rule123",
+                 *   "block2": [
+                 *     "rule456",
+                 *     "rule789"
+                 *   ],
+                 *   "block3": {
+                 *     "field1": "rule101",
+                 *     "field2": [
+                 *       "rule102",
+                 *       "rule103"
+                 *     ]
+                 *   }
+                 * }
+                 */
+                Components.Schemas.ValidationRuleRef;
+                /**
+                 * Manifest/Blueprint ID used to create/update the entity
+                 */
+                _manifest?: string /* uuid */[];
+            }
         }
     }
     namespace GetJourneysByOrgId {
@@ -1935,6 +2572,7 @@ export type GenerateDocumentResponse = Components.Schemas.GenerateDocumentRespon
 export type GetJourneysResponse = Components.Schemas.GetJourneysResponse;
 export type GetSettingsForJourney = Components.Schemas.GetSettingsForJourney;
 export type Journey = Components.Schemas.Journey;
+export type JourneyActivationGuarantee = Components.Schemas.JourneyActivationGuarantee;
 export type JourneyAuditInfo = Components.Schemas.JourneyAuditInfo;
 export type JourneyCreationRequest = Components.Schemas.JourneyCreationRequest;
 export type JourneyCreationRequestV2 = Components.Schemas.JourneyCreationRequestV2;
