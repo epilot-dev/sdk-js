@@ -1,5 +1,3 @@
-/* eslint-disable */
-
 import type {
   OpenAPIClient,
   Parameters,
@@ -96,6 +94,14 @@ declare namespace Components {
              */
             source_ref: EntityRef;
             /**
+             * Reference to the current iteration's entity when running inside a flow loop.
+             * When set, its fields and relations are merged into the source context;
+             * on schema conflicts the loop entity wins, so paths like `<schema>._id` resolve
+             * to the iteration entity rather than to a same-schema relation of the source.
+             *
+             */
+            loop_ref?: EntityRef;
+            /**
              * Mapping Configuration to apply.
              */
             targets: TargetConfig[];
@@ -141,6 +147,127 @@ declare namespace Components {
         }
         export interface ExecuteRelationsResp {
             relations?: NewRelationItem[];
+        }
+        /**
+         * One multi-hop graph lookup against entity-api's `POST /v1/entity:graph`, resolved during
+         * graph_context enrichment (before mapping_attributes are evaluated). Every node in `graph.nodes`
+         * is merged into sourceContext under its own `id`, so listing several nodes here costs one
+         * entity-api call, not one per node.
+         *
+         * If a node's `cardinality` is "one" (or it is the seed node), exactly one entity must be found
+         * for it: zero or multiple matches fail the mapping execution instead of silently mapping
+         * missing/wrong data. If "many" (the default), it resolves to an array - possibly empty - with no
+         * such failure. Each node's cardinality is validated independently.
+         *
+         * `seed.entity_id` and any `graph.nodes[].filter[].value` may contain `{{handlebars}}` placeholders
+         * (e.g. `{{contract._id}}`, `{{contract.origin_order}}`), resolved against the in-progress
+         * sourceContext (the source entity, its 1-hop relations, and any custom variables already
+         * resolved) before the graph query is sent.
+         *
+         */
+        export interface GraphContextEntry {
+            seed: /* Mirrors entity-api's GraphSeed (see entity-api openapi.yml) - the entity the graph traversal starts from. */ GraphSeed;
+            graph: /* Mirrors entity-api's GraphDefinition (see entity-api openapi.yml) - the shape of the graph to traverse. */ GraphDefinition;
+        }
+        /**
+         * Mirrors entity-api's GraphDefinition (see entity-api openapi.yml) - the shape of the graph to traverse.
+         */
+        export interface GraphDefinition {
+            nodes: /* Mirrors entity-api's GraphNode (see entity-api openapi.yml). */ GraphNode[];
+            edges: /* Mirrors entity-api's GraphEdge (see entity-api openapi.yml). */ GraphEdge[];
+        }
+        /**
+         * Mirrors entity-api's GraphEdge (see entity-api openapi.yml).
+         */
+        export interface GraphEdge {
+            /**
+             * Source node ID.
+             * example:
+             * contact
+             */
+            from: string;
+            /**
+             * Target node ID.
+             * example:
+             * order
+             */
+            to: string;
+        }
+        /**
+         * Mirrors entity-api's GraphNode (see entity-api openapi.yml).
+         */
+        export interface GraphNode {
+            /**
+             * Unique identifier for this node in the graph definition.
+             * example:
+             * contact
+             */
+            id: string;
+            /**
+             * Entity schema slug for this node.
+             * example:
+             * contact
+             */
+            schema: string;
+            /**
+             * "one": this node resolves to a single entity. "many" (default if unset): this node
+             * resolves to an array of entities.
+             *
+             */
+            cardinality?: "one" | "many";
+            /**
+             * Optional entity fields to include in the hydrated response for this node.
+             */
+            fields?: string[];
+            /**
+             * Narrows this node's traversal results to entities matching every filter (AND semantics).
+             * Useful for disambiguating among multiple entities reachable via the same graph edge.
+             *
+             */
+            filter?: /* Mirrors entity-api's GraphNodeFilter (see entity-api openapi.yml). */ GraphNodeFilter[];
+        }
+        /**
+         * Mirrors entity-api's GraphNodeFilter (see entity-api openapi.yml).
+         */
+        export interface GraphNodeFilter {
+            /**
+             * Entity attribute name to match against.
+             * example:
+             * order_number
+             */
+            attribute: string;
+            /**
+             * Literal value the attribute must exactly equal. Supports `{{handlebars}}` placeholders
+             * resolved against sourceContext when given as a string.
+             *
+             * example:
+             * {{contract.origin_order}}
+             */
+            value: /**
+             * Literal value the attribute must exactly equal. Supports `{{handlebars}}` placeholders
+             * resolved against sourceContext when given as a string.
+             *
+             * example:
+             * {{contract.origin_order}}
+             */
+            (string | null) | number | boolean;
+        }
+        /**
+         * Mirrors entity-api's GraphSeed (see entity-api openapi.yml) - the entity the graph traversal starts from.
+         */
+        export interface GraphSeed {
+            /**
+             * The id of the seed entity. Supports `{{handlebars}}` placeholders resolved against sourceContext.
+             * example:
+             * {{contract._id}}
+             */
+            entity_id: string;
+            /**
+             * The node ID in `graph.nodes` that corresponds to the seed entity.
+             * example:
+             * contact
+             */
+            node_id: string;
         }
         export interface JourneyRef {
             journey_id?: string;
@@ -399,6 +526,31 @@ declare namespace Components {
              * Generate random ids / numbers
              */
             _random?: RandomOperation;
+            /**
+             * Iterate over a source array. Use with _as and _map.
+             * The value is a path to resolve from the source entity context.
+             * Example: "submission.meterReadings"
+             *
+             * example:
+             * submission.meterReadings
+             */
+            _each?: string;
+            /**
+             * Name for the current iteration item in _each.
+             * Accessed as $<name> in _copy paths within _map.
+             * Example: "reading" (accessed as $reading)
+             *
+             * example:
+             * reading
+             */
+            _as?: string;
+            /**
+             * Operation to evaluate per _each iteration item.
+             * Can be any OperationNode, typically an object with _copy
+             * references to the $<_as name> alias.
+             *
+             */
+            _map?: /* Mapping operation nodes are either primitive values or operation node objects */ OperationNode;
         }
         export interface Owner {
             type: "user" | "internal_service";
@@ -431,6 +583,10 @@ declare namespace Components {
              * Include all relation tags (labels) present on the main entity relation
              */
             target_tags_include_source?: boolean;
+            /**
+             * Tags to add to the matched target entity's _tags array during mapping. Useful for assigning file collections to file entities.
+             */
+            target_entity_tags?: string[];
             /**
              * Whether to override the relation source_filter with the specified one
              */
@@ -519,6 +675,11 @@ declare namespace Components {
              */
             target_unique?: string[];
             /**
+             * Execution wire flag set per automation by automation-workers: resolve the target entity via the organization's global uniqueness criteria (deduplication-api) instead of target_unique. Never persisted in stored mapping configs.
+             *
+             */
+            use_uniqueness_criteria?: boolean;
+            /**
              * contains config in case of running in loop mode
              */
             loop_config?: {
@@ -569,6 +730,32 @@ declare namespace Components {
              * Relation tags (labels) to include in main entity linkback relation attribute
              */
             linkback_relation_tags?: string[];
+            /**
+             * Multi-hop entity graph lookups resolved before any mapping_attribute is evaluated. Each
+             * entry queries entity-api's `POST /v1/entity:graph` and merges every node's result into
+             * sourceContext under its own `graph.nodes[].id`, so mapping_attributes can `_copy`/`_template`
+             * from `<node id>.<field>`. A graph node's value overwrites any existing sourceContext key of
+             * the same name (a source entity field, a 1-hop relation, or another graph node).
+             *
+             */
+            graph_context?: /**
+             * One multi-hop graph lookup against entity-api's `POST /v1/entity:graph`, resolved during
+             * graph_context enrichment (before mapping_attributes are evaluated). Every node in `graph.nodes`
+             * is merged into sourceContext under its own `id`, so listing several nodes here costs one
+             * entity-api call, not one per node.
+             *
+             * If a node's `cardinality` is "one" (or it is the seed node), exactly one entity must be found
+             * for it: zero or multiple matches fail the mapping execution instead of silently mapping
+             * missing/wrong data. If "many" (the default), it resolves to an array - possibly empty - with no
+             * such failure. Each node's cardinality is validated independently.
+             *
+             * `seed.entity_id` and any `graph.nodes[].filter[].value` may contain `{{handlebars}}` placeholders
+             * (e.g. `{{contract._id}}`, `{{contract.origin_order}}`), resolved against the in-progress
+             * sourceContext (the source entity, its 1-hop relations, and any custom variables already
+             * resolved) before the graph query is sent.
+             *
+             */
+            GraphContextEntry[];
         }
     }
 }
@@ -1061,6 +1248,12 @@ export type ExecuteMappingReq = Components.Schemas.ExecuteMappingReq;
 export type ExecuteMappingResp = Components.Schemas.ExecuteMappingResp;
 export type ExecuteRelationsReq = Components.Schemas.ExecuteRelationsReq;
 export type ExecuteRelationsResp = Components.Schemas.ExecuteRelationsResp;
+export type GraphContextEntry = Components.Schemas.GraphContextEntry;
+export type GraphDefinition = Components.Schemas.GraphDefinition;
+export type GraphEdge = Components.Schemas.GraphEdge;
+export type GraphNode = Components.Schemas.GraphNode;
+export type GraphNodeFilter = Components.Schemas.GraphNodeFilter;
+export type GraphSeed = Components.Schemas.GraphSeed;
 export type JourneyRef = Components.Schemas.JourneyRef;
 export type Loop_Index_String = Components.Schemas.LoopIndexString;
 export type MapCondition = Components.Schemas.MapCondition;
