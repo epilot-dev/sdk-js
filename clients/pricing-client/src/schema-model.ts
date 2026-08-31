@@ -1,18 +1,12 @@
 import type { DynamicTariffMode, MarkupPricingModel, PricingModel, TypeGetAg } from './openapi';
 
 /**
- * Runtime companions for spec enums.
+ * Runtime companions for spec enums, for consumers that need the values and not
+ * just the union type — `@epilot/pricing` re-declares these in
+ * `src/prices/constants.ts` today.
  *
- * `components.schemas` enums generate a TypeScript union — a type, erased at
- * runtime. Consumers that need the values themselves (a lookup, a `switch`
- * default, an `Object.values()` allowlist) otherwise re-declare them by hand;
- * `@epilot/pricing` carries exactly such a copy in `src/prices/constants.ts`.
- *
- * Named `<SpecType>Values` because the spec type already owns the bare name —
- * exporting both from `@epilot/sdk/pricing` would collide.
- *
- * `satisfies` is what makes these safe to depend on: drop a member from the spec
- * and this file stops compiling, so the two cannot drift apart silently.
+ * Suffixed `Values` because the spec type owns the bare name. `satisfies` stops
+ * them drifting: drop a member from the spec and this no longer compiles.
  */
 
 export const PricingModelValues = {

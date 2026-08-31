@@ -212,17 +212,13 @@ const copyAdditionalTypes = (clients: ClientInfo[]) => {
 };
 
 /**
- * Copies the hand-written `schema-model.ts` of a client into the SDK.
+ * Copies a client's hand-written `schema-model.ts` into the SDK.
  *
- * Unlike `additional-types.ts`, this module carries **runtime values** (enums,
- * frozen constants) that mirror the spec — a shared allowlist a consumer needs to
- * evaluate, not just to type against. It is therefore copied as a real `.ts` and
- * re-exported with `export *` rather than `export type *`; a `.d.ts` would
- * type-check and then be `undefined` at runtime for every SDK consumer.
- *
- * A name exported here must not also be a `components.schemas` entry, or the two
- * `export`s in the API entry file collide and the build fails. Name the runtime
- * companion of a spec type `<SpecType>Values`.
+ * It carries runtime values, so it is copied as a real `.ts` and re-exported with
+ * `export *`; the `.d.ts` + `export type *` treatment `additional-types.ts` gets
+ * would leave every value `undefined` at runtime. Names must not clash with
+ * `components.schemas` entries — the two exports in the API entry file would
+ * collide — hence the `<SpecType>Values` convention.
  */
 const copyModels = (clients: ClientInfo[]) => {
   mkdirSync(MODELS_DIR, { recursive: true });

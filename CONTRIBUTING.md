@@ -27,44 +27,33 @@ npm version patch --no-git-tag-version
 git commit -am 'chore(entity-client): update client with new spec'
 ```
 
-## Hand-written modules in a client (`additional-types.ts` / `schema-model.ts`)
+## Hand-written modules in a client
 
-Almost everything a client exposes is generated from `openapi.json`. Two files are
-hand-written, and the SDK generator treats them differently — pick by whether the
-thing you are adding has to exist at **runtime**.
+Two files in a client are not generated from `openapi.json`. Pick by whether what
+you are adding has to exist at **runtime**:
 
 | File | Holds | Copied to | Re-exported as |
 | --- | --- | --- | --- |
 | `src/additional-types.ts` | types only | `src/types/<api>-additional.d.ts` | `export type *` |
-| `src/schema-model.ts` | runtime values (enums, frozen constants) | `src/models/<api>-model.ts` | `export *` |
+| `src/schema-model.ts` | runtime values | `src/models/<api>-model.ts` | `export *` |
 
-A `const` or `enum` put in `additional-types.ts` will type-check and then be
-`undefined` for every `@epilot/sdk/<api>` consumer, because it is copied into a
-`.d.ts` and re-exported with `export type *`. Runtime values belong in
-`schema-model.ts`.
+A `const` or `enum` in `additional-types.ts` type-checks and is then `undefined`
+for SDK consumers, because it lands in a `.d.ts`. Values belong in `schema-model.ts`,
+under two rules:
 
-Two rules for `schema-model.ts`:
-
-- **Do not reuse a `components.schemas` name.** Both modules are re-exported from
-  the same API entry file, so a clash is a build error. Name the runtime companion
-  of a spec type `<SpecType>Values` — e.g. the spec's `PricingModel` union is
-  accompanied by `PricingModelValues`.
-- **Tie the values back to the spec with `satisfies`**, so the copy cannot drift:
+- **Don't reuse a `components.schemas` name.** Both files are re-exported from the
+  same API entry file, so a clash breaks the build. Name a spec type's runtime
+  companion `<SpecType>Values`.
+- **Tie the values to the spec with `satisfies`**, so they can't drift:
 
   ```ts
-  import type { PricingModel } from './openapi'
-
   export const PricingModelValues = {
     perUnit: 'per_unit',
-    // ...
   } as const satisfies Record<string, PricingModel>
   ```
 
-  Remove a member from the spec and this stops compiling, which is the point —
-  it is the only thing keeping a hand-maintained list honest.
-
-After adding or editing either file, run `pnpm generate` in `packages/epilot-sdk-v2`
-and commit the regenerated output.
+After editing either, run `pnpm generate` in `packages/epilot-sdk-v2` and commit
+the regenerated output.
 
 ## Auto-release (`@epilot/sdk`)
 
