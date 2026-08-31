@@ -53,11 +53,11 @@ jobs:
           fi
 
       - run: pnpm build
-      - run: pnpm test
 
       # A build must not mutate tracked source: no code generation, no network
       # fetches of live specs. Updating a spec is the deliberate
-      # 'npm run openapi' step documented in CONTRIBUTING.md.
+      # 'npm run openapi' step documented in CONTRIBUTING.md. Checked directly
+      # after the build so a dirty tree can only be the build's doing.
       - name: Check build left the tree clean
         run: |
           if ! git diff --quiet; then
@@ -65,6 +65,8 @@ jobs:
             git diff --stat
             exit 1
           fi
+
+      - run: pnpm test
 
   auto-release:
     name: Auto-release @epilot/sdk and @epilot/cli
