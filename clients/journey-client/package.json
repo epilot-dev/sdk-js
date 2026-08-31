@@ -10,9 +10,9 @@
     "bundle-definition": "webpack",
     "openapi": "node ../../scripts/update-openapi.js https://docs.api.epilot.io/journey-config.yaml",
     "typegen": "openapi typegen src/openapi.json --client > src/openapi.d.ts",
-    "build": "npm run openapi && npm run typegen && npm run typescript && npm run bundle-definition",
+    "build": "npm run typescript && npm run bundle-definition",
     "eslint": "../node_modules/.bin/eslint -c ../.eslintrc.yml",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run typegen && npm run build"
   },
   "files": [
     "*.js",
