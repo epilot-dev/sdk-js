@@ -68,6 +68,7 @@ const { data } = await blueprintManifestClient.getJob(...)
 - [`listBlueprintJobs`](#listblueprintjobs)
 - [`getBlueprintJob`](#getblueprintjob)
 - [`continueInstallationJob`](#continueinstallationjob)
+- [`retryInstallationJob`](#retryinstallationjob)
 - [`cancelBlueprintJob`](#cancelblueprintjob)
 
 **Marketplace Listings**
@@ -146,6 +147,7 @@ const { data } = await blueprintManifestClient.getJob(...)
 - [`FieldDiff`](#fielddiff)
 - [`BlueprintJobEvent`](#blueprintjobevent)
 - [`BlueprintInstallationJobOptions`](#blueprintinstallationjoboptions)
+- [`ContinueInstallationJobRequest`](#continueinstallationjobrequest)
 - [`ManifestID`](#manifestid)
 - [`JobID`](#jobid)
 - [`ManifestSource`](#manifestsource)
@@ -1984,7 +1986,8 @@ const { data } = await client.continueInstallationJob(
   },
   {
     resources_to_ignore: ['string'],
-    sync_notes: false
+    sync_notes: false,
+    source_auth_token: 'string'
   },
 )
 ```
@@ -2054,11 +2057,31 @@ const { data } = await client.continueInstallationJob(
       "error_data": {}
     }
   ],
+  "options": {
+    "resources_to_ignore": ["string"],
+    "sync_notes": false
+  },
   "status": "IN_PROGRESS"
 }
 ```
 
 </details>
+
+---
+
+### `retryInstallationJob`
+
+Retry a finished V3 installation job whose status is `FAILED` or
+`PARTIAL_SUCCESS`. Starts a fresh install job (new `job_id`) with the same
+source/destination and `auto_apply: true` — no `:continue` c
+
+`POST /v2/blueprint-manifest/jobs/{job_id}:retry`
+
+```ts
+const { data } = await client.retryInstallationJob({
+  job_id: 'example',
+})
+```
 
 ---
 
@@ -3206,6 +3229,10 @@ const { data } = await client.listBulkInstallTargetsV3({
             "error_data": {}
           }
         ],
+        "options": {
+          "resources_to_ignore": ["string"],
+          "sync_notes": false
+        },
         "status": "IN_PROGRESS"
       }
     }
@@ -3311,6 +3338,10 @@ const { data } = await client.retryBulkInstallTargetV3(
         "error_data": {}
       }
     ],
+    "options": {
+      "resources_to_ignore": ["string"],
+      "sync_notes": false
+    },
     "status": "IN_PROGRESS"
   }
 }
@@ -4669,7 +4700,11 @@ type BlueprintInstallationJob = {
     error_code?: string
     error_data?: Record<string, unknown>
   }>
-  status?: "IN_PROGRESS" | "WAITING_USER_ACTION" | "CANCELED" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED"
+  options?: {
+    resources_to_ignore?: string[]
+    sync_notes?: boolean
+  }
+  status?: "IN_PROGRESS" | "WAITING_USER_ACTION" | "REAUTH_REQUIRED" | "CANCELED" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED"
 }
 ```
 
@@ -4780,7 +4815,11 @@ type BulkInstallTarget = {
       error_code?: { ... }
       error_data?: { ... }
     }>
-    status?: "IN_PROGRESS" | "WAITING_USER_ACTION" | "CANCELED" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED"
+    options?: {
+      resources_to_ignore?: { ... }
+      sync_notes?: { ... }
+    }
+    status?: "IN_PROGRESS" | "WAITING_USER_ACTION" | "REAUTH_REQUIRED" | "CANCELED" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED"
   }
 }
 ```
@@ -4812,6 +4851,7 @@ type BulkInstallTargetList = {
       slug?: { ... }
       sync_engine?: { ... }
       resource_progress?: { ... }
+      options?: { ... }
       status?: { ... }
     }
   }>
@@ -5198,7 +5238,11 @@ type BlueprintJob = {
     error_code?: string
     error_data?: Record<string, unknown>
   }>
-  status?: "IN_PROGRESS" | "WAITING_USER_ACTION" | "CANCELED" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED"
+  options?: {
+    resources_to_ignore?: string[]
+    sync_notes?: boolean
+  }
+  status?: "IN_PROGRESS" | "WAITING_USER_ACTION" | "REAUTH_REQUIRED" | "CANCELED" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED"
 } | {
   id?: string
   events?: Array<{
@@ -5219,10 +5263,6 @@ type BlueprintJob = {
   triggered_at?: string // date-time
   created_by?: {
     name?: unknown
-    org_id: string
-    user_id?: string
-    token_id?: string
-  }
   // ...
 }
 ```
@@ -5479,6 +5519,16 @@ type BlueprintInstallationJobOptions = {
 }
 ```
 
+### `ContinueInstallationJobRequest`
+
+```ts
+type ContinueInstallationJobRequest = {
+  resources_to_ignore?: string[]
+  sync_notes?: boolean
+  source_auth_token?: string // password
+}
+```
+
 ### `ManifestID`
 
 ID of an imported / installed manifest
@@ -5509,7 +5559,7 @@ type Manifest = {
   previous_jobs_ids?: string[]
   previous_jobs?: Array<{
     job_id?: string
-    job_status?: "PENDING" | "STARTED" | "WAITING_USER_ACTION" | "CANCELED" | "IN_PROGRESS" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED"
+    job_status?: "PENDING" | "STARTED" | "WAITING_USER_ACTION" | "REAUTH_REQUIRED" | "CANCELED" | "IN_PROGRESS" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED"
     manifest_file_path?: string
     message?: string
     timestamp?: string // date-time
@@ -5662,7 +5712,7 @@ type ManifestItem = {
 ### `JobStatus`
 
 ```ts
-type JobStatus = "PENDING" | "STARTED" | "WAITING_USER_ACTION" | "CANCELED" | "IN_PROGRESS" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED"
+type JobStatus = "PENDING" | "STARTED" | "WAITING_USER_ACTION" | "REAUTH_REQUIRED" | "CANCELED" | "IN_PROGRESS" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED"
 ```
 
 ### `ResourceNodeType`
@@ -5813,7 +5863,7 @@ type ResourceNode = {
 ```ts
 type Job = {
   job_id?: string
-  job_status?: "PENDING" | "STARTED" | "WAITING_USER_ACTION" | "CANCELED" | "IN_PROGRESS" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED"
+  job_status?: "PENDING" | "STARTED" | "WAITING_USER_ACTION" | "REAUTH_REQUIRED" | "CANCELED" | "IN_PROGRESS" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED"
   manifest_file_path?: string
   message?: string
   timestamp?: string // date-time
