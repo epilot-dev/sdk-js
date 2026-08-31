@@ -5,6 +5,7 @@
  * - Copies openapi-runtime.json definitions
  * - Copies openapi.d.ts type files
  * - Copies hand-written additional-types.ts type files
+ * - Copies hand-written schema-model.ts runtime modules
  * - Generates per-API lazy loader files (apis/*.ts)
  * - Generates the API registry (apis/_registry.ts)
  * - Updates package.json subpath exports
@@ -22,6 +23,7 @@ const DEFS_DIR = resolve(V2_DIR, 'src/definitions');
 const RUNTIME_DEFS_DIR = resolve(V2_DIR, 'definitions');
 const TYPES_DIR = resolve(V2_DIR, 'src/types');
 const APIS_DIR = resolve(V2_DIR, 'src/apis');
+const MODELS_DIR = resolve(V2_DIR, 'src/models');
 
 // Map client directory name -> SDK api name (camelCase)
 const toCamelCase = (name: string): string => {
@@ -35,6 +37,7 @@ type ClientInfo = {
   hasDefinition: boolean;
   hasTypes: boolean;
   hasAdditionalTypes: boolean;
+  hasModel: boolean;
 };
 
 const discoverClients = (): ClientInfo[] => {
@@ -54,6 +57,7 @@ const discoverClients = (): ClientInfo[] => {
       hasDefinition: existsSync(resolve(clientDir, 'openapi-runtime.json')),
       hasTypes: existsSync(resolve(clientDir, 'openapi.d.ts')),
       hasAdditionalTypes: existsSync(resolve(clientDir, 'additional-types.ts')),
+      hasModel: existsSync(resolve(clientDir, 'schema-model.ts')),
     };
   });
 };
@@ -203,6 +207,37 @@ const copyAdditionalTypes = (clients: ClientInfo[]) => {
     content = `/* Auto-copied from ${client.dirName}/src/additional-types.ts */\n${content}`;
 
     const dest = resolve(TYPES_DIR, `${client.kebabName}-additional.d.ts`);
+    writeFileSync(dest, content);
+  }
+};
+
+/**
+ * Copies the hand-written `schema-model.ts` of a client into the SDK.
+ *
+ * Unlike `additional-types.ts`, this module carries **runtime values** (enums,
+ * frozen constants) that mirror the spec — a shared allowlist a consumer needs to
+ * evaluate, not just to type against. It is therefore copied as a real `.ts` and
+ * re-exported with `export *` rather than `export type *`; a `.d.ts` would
+ * type-check and then be `undefined` at runtime for every SDK consumer.
+ *
+ * A name exported here must not also be a `components.schemas` entry, or the two
+ * `export`s in the API entry file collide and the build fails. Name the runtime
+ * companion of a spec type `<SpecType>Values`.
+ */
+const copyModels = (clients: ClientInfo[]) => {
+  mkdirSync(MODELS_DIR, { recursive: true });
+
+  for (const client of clients) {
+    if (!client.hasModel) continue;
+    const src = resolve(CLIENTS_DIR, client.dirName, 'src/schema-model.ts');
+    let content = readFileSync(src, 'utf-8');
+
+    // The client resolves generated types via './openapi', in the SDK they live
+    // under ../types, named after the API.
+    content = content.replace(/(\bfrom\s+')\.\/openapi(')/g, `$1../types/${client.kebabName}$2`);
+    content = `/* Auto-copied from ${client.dirName}/src/schema-model.ts */\n${content}`;
+
+    const dest = resolve(MODELS_DIR, `${client.kebabName}-model.ts`);
     writeFileSync(dest, content);
   }
 };
@@ -366,6 +401,11 @@ const generateApiFile = (client: ClientInfo): string => {
     lines.push(`export type { OpenAPIClient } from 'openapi-client-axios'`);
   } else {
     lines.push(`import type { AxiosInstance } from 'axios'`);
+  }
+
+  if (client.hasModel) {
+    // Values, not just types — see copyModels.
+    lines.push(`export * from '../models/${client.kebabName}-model'`);
   }
 
   lines.push(
@@ -1070,6 +1110,7 @@ const main = () => {
   console.log('Copying types...');
   copyTypes(clients);
   copyAdditionalTypes(clients);
+  copyModels(clients);
 
   console.log('Generating per-API files...');
   mkdirSync(APIS_DIR, { recursive: true });
@@ -1108,6 +1149,7 @@ const main = () => {
   console.log(`  - ${validClients.length} definition files`);
   console.log(`  - ${clients.filter((c) => c.hasTypes).length} type files`);
   console.log(`  - ${clients.filter((c) => c.hasAdditionalTypes).length} additional type files`);
+  console.log(`  - ${clients.filter((c) => c.hasModel).length} model files`);
   console.log(`  - ${validClients.length} API entry files`);
   console.log(`  - 1 registry file`);
   console.log(`  - ${docCount} API docs + index`);
