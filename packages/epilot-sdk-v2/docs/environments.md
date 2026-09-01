@@ -36,8 +36,9 @@ const { data } = await environmentsClient.listEnvironmentVariables(...)
 
 **Schemas**
 - [`EnvironmentValueType`](#environmentvaluetype)
-- [`EnvironmentOption`](#environmentoption)
-- [`OptionsValue`](#optionsvalue)
+- [`StringTranslations`](#stringtranslations)
+- [`MapEntry`](#mapentry)
+- [`MapValue`](#mapvalue)
 - [`EnvironmentValue`](#environmentvalue)
 - [`EnvironmentVariable`](#environmentvariable)
 - [`EnvironmentVariableListItem`](#environmentvariablelistitem)
@@ -291,37 +292,48 @@ const { data } = await client.deleteEnvironmentVariable({
 ### `EnvironmentValueType`
 
 The structure a variable's value holds. `SecretString` is encrypted at rest and
-its value is never returned. `Text`, `Number`, `Boolean` and `Options` may be
+its value is never returned. `Text`, `Number`, `Boolean` and `Map` may be
 served to browser-facing consumers; `String` and `SecretString` may not.
 
 
 ```ts
-type EnvironmentValueType = "String" | "SecretString" | "Text" | "Number" | "Boolean" | "Options"
+type EnvironmentValueType = "String" | "SecretString" | "Text" | "Number" | "Boolean" | "Map"
 ```
 
-### `EnvironmentOption`
+### `StringTranslations`
+
+A string translated per language. Keys are language codes (e.g. `de`,
+`en-US`), matching the hyphen-only BCP-47 form epilot's i18n stack uses
+everywhere else. Must match LANGUAGE_KEY_PATTERN in
+src/core/value-types.ts — the two are not otherwise linked.
+
 
 ```ts
-type EnvironmentOption = {
-  value: string
-  label: string
-} | {
-  value: string
-  labels: Record<string, string>
+type StringTranslations = Record<string, string>
+```
+
+### `MapEntry`
+
+One entry of a Map. `key` is the token a journey submits; `value` is
+what the customer reads — either one string, or one string per
+language. Every entry of a Map must agree on which of the two it uses.
+
+
+```ts
+type MapEntry = {
+  key: string
+  value: string | Record<string, string>
 }
 ```
 
-### `OptionsValue`
+### `MapValue`
 
 ```ts
-type OptionsValue = {
+type MapValue = {
   fallbackLanguage?: string
   options: Array<{
-    value: string
-    label: string
-  } | {
-    value: string
-    labels: Record<string, string>
+    key: string
+    value: string | Record<string, string>
   }>
 }
 ```
@@ -330,7 +342,7 @@ type OptionsValue = {
 
 A variable's value. The JSON type corresponds to the variable's `type`:
 `String`, `SecretString` and `Text` are strings, `Number` is a number,
-`Boolean` is a boolean, and `Options` is an object. Numbers are IEEE 754
+`Boolean` is a boolean, and `Map` is an object. Numbers are IEEE 754
 doubles; integers above 2^53 may lose precision on round-trip.
 
 
@@ -338,11 +350,8 @@ doubles; integers above 2^53 may lose precision on round-trip.
 type EnvironmentValue = string | number | boolean | {
   fallbackLanguage?: string
   options: Array<{
-    value: string
-    label: string
-  } | {
-    value: string
-    labels: Record<string, string>
+    key: string
+    value: string | Record<string, string>
   }>
 }
 ```
@@ -352,17 +361,14 @@ type EnvironmentValue = string | number | boolean | {
 ```ts
 type EnvironmentVariable = {
   key: string
-  type: "String" | "SecretString" | "Text" | "Number" | "Boolean" | "Options"
+  type: "String" | "SecretString" | "Text" | "Number" | "Boolean" | "Map"
   description?: string
   group?: string
   value?: string | number | boolean | {
     fallbackLanguage?: string
     options: Array<{
+      key: { ... }
       value: { ... }
-      label: { ... }
-    } | {
-      value: { ... }
-      labels: { ... }
     }>
   }
   protected?: boolean
@@ -376,17 +382,14 @@ type EnvironmentVariable = {
 ```ts
 type EnvironmentVariableListItem = {
   key: string
-  type: "String" | "SecretString" | "Text" | "Number" | "Boolean" | "Options"
+  type: "String" | "SecretString" | "Text" | "Number" | "Boolean" | "Map"
   description?: string
   group?: string
   value?: string | number | boolean | {
     fallbackLanguage?: string
     options: Array<{
+      key: { ... }
       value: { ... }
-      label: { ... }
-    } | {
-      value: { ... }
-      labels: { ... }
     }>
   }
   protected?: boolean
@@ -401,7 +404,7 @@ type EnvironmentVariableListItem = {
 type EnvironmentVariableList = {
   items: Array<{
     key: string
-    type: "String" | "SecretString" | "Text" | "Number" | "Boolean" | "Options"
+    type: "String" | "SecretString" | "Text" | "Number" | "Boolean" | "Map"
     description?: string
     group?: string
     value?: string | number | boolean | {
@@ -420,17 +423,14 @@ type EnvironmentVariableList = {
 ```ts
 type EnvironmentVariableCreateRequest = {
   key: string
-  type: "String" | "SecretString" | "Text" | "Number" | "Boolean" | "Options"
+  type: "String" | "SecretString" | "Text" | "Number" | "Boolean" | "Map"
   description?: string
   group?: string
   value?: string | number | boolean | {
     fallbackLanguage?: string
     options: Array<{
+      key: { ... }
       value: { ... }
-      label: { ... }
-    } | {
-      value: { ... }
-      labels: { ... }
     }>
   }
   protected?: boolean
@@ -441,15 +441,12 @@ type EnvironmentVariableCreateRequest = {
 
 ```ts
 type EnvironmentVariableUpdateRequest = {
-  type?: "String" | "SecretString" | "Text" | "Number" | "Boolean" | "Options"
+  type?: "String" | "SecretString" | "Text" | "Number" | "Boolean" | "Map"
   value?: string | number | boolean | {
     fallbackLanguage?: string
     options: Array<{
+      key: { ... }
       value: { ... }
-      label: { ... }
-    } | {
-      value: { ... }
-      labels: { ... }
     }>
   }
   description?: string
