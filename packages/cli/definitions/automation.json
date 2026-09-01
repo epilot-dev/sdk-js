@@ -621,6 +621,42 @@
         }
       }
     },
+    "/v1/automation/executions:search": {
+      "post": {
+        "operationId": "searchExecutions",
+        "summary": "searchExecutions",
+        "description": "Search automation executions of an entity with cursor-based pagination.\nReturns pages of up to 100 executions, newest first.\nPrefer this over GET /v1/automation/executions, which returns the full\nexecution history in a single response.\n",
+        "tags": [
+          "executions"
+        ],
+        "requestBody": {
+          "description": "Search parameters",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchExecutionsReq"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "A page of automation executions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchExecutionsResp"
+                }
+              }
+            }
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          }
+        }
+      }
+    },
     "/v1/automation/executions/bulk-jobs": {
       "post": {
         "operationId": "bulkTriggerExecutions",
@@ -1259,6 +1295,9 @@
           },
           {
             "$ref": "#/components/schemas/ReplyEmailAction"
+          },
+          {
+            "$ref": "#/components/schemas/AssignEntityAction"
           }
         ]
       },
@@ -1305,6 +1344,9 @@
           },
           {
             "$ref": "#/components/schemas/ReplyEmailActionConfig"
+          },
+          {
+            "$ref": "#/components/schemas/AssignEntityActionConfig"
           }
         ]
       },
@@ -1815,6 +1857,10 @@
             "type": "string",
             "description": "Schema of target entity"
           },
+          "use_uniqueness_criteria": {
+            "type": "boolean",
+            "description": "Resolve this action's target (contact/account) via the organization's global uniqueness criteria instead of per-action identifiers (target_unique / Unique switches). Forwarded to entity mapping by automation-workers.\n"
+          },
           "target_unique": {
             "type": "array",
             "description": "Unique key for target entity (see upsertEntity of Entity API)",
@@ -2187,12 +2233,224 @@
           },
           "add": {
             "type": "array",
-            "description": "Assignees to add to the thread",
+            "description": "Assignees to add to the thread. For even_distribution this may contain group IDs (prefixed \"group_\") whose members are candidates.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "assignment_type": {
+            "type": "string",
+            "description": "How assignees in `add` are resolved.\n- direct: assign exactly the users in `add` (default).\n- even_distribution: treat `add` as a candidate pool (users and/or groups)\n  and assign the least-loaded available agent.\n- sequential: reserved for future use.\n",
+            "enum": [
+              "direct",
+              "even_distribution",
+              "sequential"
+            ],
+            "default": "direct"
+          },
+          "only_available_users": {
+            "type": "boolean",
+            "description": "Candidate condition for even_distribution: when true, skip users who\nare currently absent (out-of-office). Opt-in; defaults to false.\n",
+            "default": false
+          },
+          "hold_until_available": {
+            "type": "boolean",
+            "description": "Sub-option of only_available_users: when a day off (weekend / whole\nday off with a known return) is what empties the candidate pool, hold\nthe thread and retry when the soonest candidate is back — bounded to\n7 retries over 7 days — before applying the fallback. Defaults to\ntrue; set false to skip the hold and fall straight through to the\nfallback. Out-of-office / vacation and non-availability reasons never\nhold regardless.\n",
+            "default": true
+          },
+          "match_user_skills": {
+            "type": "boolean",
+            "description": "Candidate condition for even_distribution: when true, only assign to\nusers whose skills (tags) match a label on the message. Opt-in;\ndefaults to false.\n",
+            "default": false
+          },
+          "required_skill_categories": {
+            "type": "array",
+            "description": "Candidate condition (with match_user_skills): label families\n(taxonomy slugs) that must match. A user qualifies only if it shares\na label with the message within each of these categories. Leave empty\nto match on any label (flat OR across all categories).\n",
+            "items": {
+              "type": "string"
+            }
+          },
+          "skill_match_mode": {
+            "type": "string",
+            "description": "How strictly required skill categories are matched (applies with\nmatch_user_skills and required skill categories set).\n- require_all: hard match (default) — a user must match every required\n  category the message has a label in.\n- prefer: soft match — prefer the best-matching users, relaxing to\n  fewer categories only when no better match exists; a user matching\n  no category is never eligible (the fallback then applies).\n",
+            "enum": [
+              "require_all",
+              "prefer"
+            ],
+            "default": "require_all"
+          },
+          "fallback": {
+            "type": "string",
+            "description": "What to do when smart assignment resolves no assignable candidate.\nApplies to even_distribution.\n- leave_unassigned: leave the thread unassigned (default).\n- assign_to_fallback: route to the users/groups in `fallback_assignees`.\n",
+            "enum": [
+              "leave_unassigned",
+              "assign_to_fallback"
+            ],
+            "default": "leave_unassigned"
+          },
+          "fallback_assignees": {
+            "type": "array",
+            "description": "Target user/group IDs (group IDs prefixed \"group_\") to assign when\n`fallback` is \"assign_to_fallback\".\n",
             "items": {
               "type": "string"
             }
           }
         }
+      },
+      "EntityAssignee": {
+        "type": "object",
+        "description": "A single assignee as stored in a user-relation attribute. Written through\nverbatim by the assign-entity worker. Note this object encoding differs\ndeliberately from AssignThreadConfig, which stores bare id strings —\neach matches what its own target accepts.\n",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "Which kind of principal this assignee is. Required: it selects which\nof the identifier properties below applies, and forms part of the\nappend-mode de-duplication key.\n",
+            "enum": [
+              "user",
+              "partner_user",
+              "partner_organization",
+              "group"
+            ]
+          },
+          "user_id": {
+            "type": "string",
+            "description": "Set for user and partner_user assignees."
+          },
+          "group_id": {
+            "type": "string",
+            "description": "Set for group assignees."
+          },
+          "org_id": {
+            "type": "string",
+            "description": "Organization the assignee belongs to."
+          },
+          "partner_id": {
+            "type": "string",
+            "description": "Set for partner_user and partner_organization assignees."
+          },
+          "display_name": {
+            "type": "string",
+            "description": "Label snapshotted at configuration time; may go stale after a rename."
+          },
+          "email": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "AssignEntityConfig": {
+        "type": "object",
+        "properties": {
+          "attribute": {
+            "type": "string",
+            "description": "Slug of the user-relation attribute on the triggering entity to write to."
+          },
+          "assignees": {
+            "type": "array",
+            "description": "Assignees to write into `attribute`, in the order given.",
+            "items": {
+              "$ref": "#/components/schemas/EntityAssignee"
+            }
+          },
+          "write_mode": {
+            "type": "string",
+            "description": "How `assignees` combine with the attribute's current value.\n- replace: overwrite the attribute with `assignees` (default).\n- append: union with the existing assignees, de-duplicated, existing\n  entries first. Two assignees are duplicates when their `type` and\n  `org_id` both match and the identifier for that type matches:\n  `user_id` for user and partner_user, `group_id` for group,\n  `partner_id` for partner_organization. Scoping by `org_id` keeps\n  assignees from different organizations distinct even when their\n  identifiers coincide.\n",
+            "enum": [
+              "replace",
+              "append"
+            ],
+            "default": "replace"
+          },
+          "assignment_type": {
+            "type": "string",
+            "description": "How assignees are resolved.\n- direct: assign exactly the assignees listed (default, and the only\n  accepted value).\nReserved for a future routing strategy; widening this enum later is\nbackwards compatible and needs no migration of existing flows.\n",
+            "enum": [
+              "direct"
+            ],
+            "default": "direct"
+          },
+          "source": {
+            "type": "object",
+            "description": "Which entity to assign to. Omit for the triggering entity (the\ndefault, and the behaviour of every flow saved before this field\nexisted).\n- trigger: the entity that started the flow.\n- action: the entity produced by an earlier action, identified by\n  that action's `flow_action_id`.\n",
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "The producing action's `flow_action_id` when origin is `action`, or the trigger id when origin is `trigger`. Note this is `flow_action_id` (stable across executions), not `id`.\n"
+              },
+              "origin": {
+                "type": "string",
+                "enum": [
+                  "trigger",
+                  "action"
+                ]
+              },
+              "schema": {
+                "type": "string",
+                "description": "Entity schema recorded when the source was chosen, for display. The worker uses the schema on the resolved entity itself, since this value goes stale if the producing action's target changes.\n"
+              }
+            }
+          }
+        }
+      },
+      "AssignEntityActionConfig": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AutomationActionConfig"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "enum": [
+                  "assign-entity"
+                ]
+              },
+              "config": {
+                "$ref": "#/components/schemas/AssignEntityConfig"
+              }
+            }
+          }
+        ],
+        "example": {
+          "id": "25jga0-gkasl26-0asg-908sgaj2",
+          "name": "Assign Entity",
+          "type": "assign-entity",
+          "config": {
+            "attribute": "assigned_to",
+            "write_mode": "replace",
+            "assignment_type": "direct",
+            "assignees": [
+              {
+                "type": "user",
+                "user_id": "90503",
+                "org_id": "66",
+                "display_name": "Jane Doe",
+                "email": "jane.doe@example.com"
+              }
+            ]
+          }
+        }
+      },
+      "AssignEntityAction": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AutomationAction"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "enum": [
+                  "assign-entity"
+                ]
+              },
+              "config": {
+                "$ref": "#/components/schemas/AssignEntityConfig"
+              }
+            }
+          }
+        ]
       },
       "SendEmailActionConfig": {
         "allOf": [
@@ -2458,6 +2716,15 @@
             "type": "boolean",
             "description": "Pause automation execution after sending email to wait for a confirmation link to be clicked.\n\nThe email template should contain a confirmation link using the variable `{{confirmation_url}}`\n",
             "default": false
+          },
+          "wait_for_journey_submission": {
+            "type": "boolean",
+            "description": "Only relevant when this action runs from a workflow automation task. After the email is sent,\nthe workflow task waits for the journey referenced in the email template to be submitted and\nits submission automation to complete (AL-2521).\n\nThe email template should contain a journey link created with the generateJourneyLink variable.\n",
+            "default": false
+          },
+          "journey_id": {
+            "type": "string",
+            "description": "Snapshot of the journey referenced by the selected email template's journey link; set by the\nbuilder UI. Display/validation only — correlation does not depend on it.\n"
           },
           "reply_to_sender": {
             "type": "boolean",
@@ -3345,12 +3612,24 @@
             "type": "string",
             "description": "Schedule Id which indicates the schedule of the actions inside the condition"
           },
+          "evaluation_order": {
+            "type": "string",
+            "enum": [
+              "AFTER_SCHEDULE",
+              "BEFORE_SCHEDULE"
+            ],
+            "description": "Determines how the condition and its schedule combine in time, when the condition block also has a schedule.\n\n- `AFTER_SCHEDULE` (default): the schedule is created first and the condition is evaluated when the schedule fires, against the data at that moment (\"wait, then check\").\n- `BEFORE_SCHEDULE`: the condition is evaluated at trigger time against the current data; only when it passes is the schedule created, and it is not re-evaluated when it fires (\"check now, then wait\"). A failing condition skips the block immediately.\n\nAn absent value is treated as `AFTER_SCHEDULE` for backwards compatibility."
+          },
           "evaluationResult": {
             "type": "boolean",
             "description": "Result of the condition evaluation"
           },
           "error_output": {
             "$ref": "#/components/schemas/ErrorOutput"
+          },
+          "allow_failure": {
+            "description": "Whether the execution should continue when processing the condition\nblock itself fails (e.g. its schedule cannot be computed). When true,\nthe block's actions are cancelled and the execution moves on to the\nnext action instead of stopping in a failed state.\n",
+            "type": "boolean"
           },
           "statements": {
             "type": "array",
@@ -3523,6 +3802,9 @@
           "workflow_context": {
             "$ref": "#/components/schemas/WorkflowExecutionContext"
           },
+          "workflow_wait_context": {
+            "$ref": "#/components/schemas/WorkflowWaitContext"
+          },
           "loops": {
             "type": "array",
             "description": "Loop scope definitions propagated from the flow onto the execution record. Each loop has an id and a source_path resolved against the trigger entity at execution time. Actions referencing a loop's id via their loop_id property run once per item in the resolved array.\n",
@@ -3535,6 +3817,13 @@
             "description": "Runtime iteration state, keyed by loop_id. Tracks the current_index and total for each active loop scope. Entries are removed once a loop exits.\n",
             "additionalProperties": {
               "$ref": "#/components/schemas/AutomationLoopState"
+            }
+          },
+          "chain": {
+            "type": "array",
+            "description": "Ordered automation flow ids in this execution's trigger chain (multi-automation loop prevention).",
+            "items": {
+              "type": "string"
             }
           }
         },
@@ -3566,6 +3855,7 @@
       },
       "WorkflowExecutionContext": {
         "type": "object",
+        "description": "Automation Executions triggered by workflow task automations will always carry information about the triggering workflow. This information is helpful in correlating workflow executions with all the triggered automation executions\n",
         "required": [
           "workflow_exec_id",
           "workflow_role"
@@ -3582,6 +3872,13 @@
           },
           "_execution_chain": {
             "$ref": "#/components/schemas/ExecutionChain"
+          },
+          "_automation_chain": {
+            "type": "array",
+            "description": "[Internal] Ordered automation flow ids that led to the parent flow being started. The started execution appends its own flow id, so entity writes it performs carry the full chain and a loop running through a workflow can be detected. This is an internal property and should not be used by external consumers.\n",
+            "items": {
+              "type": "string"
+            }
           },
           "entity_contexts": {
             "type": "array",
@@ -3600,6 +3897,26 @@
                 }
               }
             }
+          }
+        }
+      },
+      "WorkflowWaitContext": {
+        "type": "object",
+        "description": "Workflow automation tasks can be paused & waiting for journey automation executions to succeed. If such is the case, this context tracks the task_id of the workflow waiting for journey submission success This context is consumed by svc-workflows to resume a task waiting on this journey submission.\n",
+        "required": [
+          "workflow_execution_id",
+          "workflow_task_id"
+        ],
+        "properties": {
+          "workflow_execution_id": {
+            "type": "string"
+          },
+          "workflow_task_id": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string",
+            "example": "journey_submission"
           }
         }
       },
@@ -3859,6 +4176,56 @@
             "items": {
               "$ref": "#/components/schemas/AutomationExecution"
             }
+          }
+        },
+        "required": [
+          "total",
+          "results"
+        ]
+      },
+      "SearchExecutionsReq": {
+        "type": "object",
+        "properties": {
+          "entity_id": {
+            "$ref": "#/components/schemas/EntityId"
+          },
+          "include_flows": {
+            "description": "Include flow automations in the response",
+            "type": "boolean",
+            "default": false
+          },
+          "size": {
+            "description": "Max number of executions to return per page",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100,
+            "default": 25
+          },
+          "cursor": {
+            "description": "Opaque cursor returned as next_cursor by a previous page.\nPass it to fetch the next page of results.\n",
+            "type": "string"
+          }
+        },
+        "required": [
+          "entity_id"
+        ]
+      },
+      "SearchExecutionsResp": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "description": "Number of executions in this page",
+            "type": "number"
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AutomationExecution"
+            }
+          },
+          "next_cursor": {
+            "description": "Opaque cursor to fetch the next page of results.\nOnly present when more results are available.\n",
+            "type": "string"
           }
         },
         "required": [

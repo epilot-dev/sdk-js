@@ -5374,23 +5374,23 @@ export interface OperationMethods {
   ): OperationResponse<Paths.GetFileSummary.Responses.$200>
   /**
    * getFileSummaryFeedback - Get file summary feedback
-   *
+   * 
    * Get the authenticated user's feedback for the current generated file summary.
    */
   'getFileSummaryFeedback'(
     parameters?: Parameters<Paths.GetFileSummaryFeedback.PathParameters> | null,
     data?: any,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetFileSummaryFeedback.Responses.$200>
   /**
    * putFileSummaryFeedback - Submit file summary feedback
-   *
+   * 
    * Upsert thumbs up/down feedback for the current generated file summary.
    */
   'putFileSummaryFeedback'(
     parameters?: Parameters<Paths.PutFileSummaryFeedback.PathParameters> | null,
     data?: Paths.PutFileSummaryFeedback.RequestBody,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.PutFileSummaryFeedback.Responses.$200>
   /**
    * createFileSummaryJob - createFileSummaryJob
@@ -5917,23 +5917,23 @@ export interface PathsDictionary {
   ['/v1/files/{id}/summary/feedback']: {
     /**
      * getFileSummaryFeedback - Get file summary feedback
-     *
+     * 
      * Get the authenticated user's feedback for the current generated file summary.
      */
     'get'(
       parameters?: Parameters<Paths.GetFileSummaryFeedback.PathParameters> | null,
       data?: any,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetFileSummaryFeedback.Responses.$200>
     /**
      * putFileSummaryFeedback - Submit file summary feedback
-     *
+     * 
      * Upsert thumbs up/down feedback for the current generated file summary.
      */
     'put'(
       parameters?: Parameters<Paths.PutFileSummaryFeedback.PathParameters> | null,
       data?: Paths.PutFileSummaryFeedback.RequestBody,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.PutFileSummaryFeedback.Responses.$200>
   }
   ['/v1/files/{id}/summary-jobs']: {

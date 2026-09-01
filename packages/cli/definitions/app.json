@@ -1438,6 +1438,70 @@
         }
       }
     },
+    "/v1/app/{appId}/options/resolve": {
+      "post": {
+        "summary": "resolveOptions",
+        "description": "Resolve the effective app-level options of an installation, including decrypted sensitive values (secrets). This endpoint accepts epilot internal-auth tokens exclusively (internal service calls, e.g. automation-workers or the customer portal API) — no user token, API key, or app token can call it, regardless of roles. Every call is audit-logged with the caller identity.",
+        "operationId": "resolveOptions",
+        "tags": [
+          "App Installation"
+        ],
+        "parameters": [
+          {
+            "name": "appId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "keys": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Narrow the response to these option keys"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Effective options with resolved values",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "options": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Options"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Caller is not authenticated with an internal-auth token"
+          },
+          "404": {
+            "description": "App installation not found"
+          }
+        }
+      }
+    },
     "/v1/app-events": {
       "post": {
         "summary": "ingestEvent",
@@ -1501,6 +1565,18 @@
             "type": "string"
           },
           "description": "Path to forward to the proxy target"
+        },
+        {
+          "name": "query",
+          "in": "query",
+          "required": false,
+          "style": "form",
+          "explode": true,
+          "schema": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "description": "Free-form query parameters, forwarded unchanged to the proxy target"
         }
       ],
       "get": {
@@ -1551,6 +1627,105 @@
             }
           }
         },
+        "responses": {
+          "200": {
+            "description": "Proxied response from the target API"
+          },
+          "403": {
+            "description": "Forbidden - app not installed or no public component uses this proxy"
+          },
+          "404": {
+            "description": "Proxy target not found"
+          },
+          "502": {
+            "description": "Bad gateway - proxy target unreachable or error"
+          }
+        }
+      },
+      "put": {
+        "summary": "publicProxyPut",
+        "operationId": "publicProxyPut",
+        "description": "Forward a PUT request to a registered proxy target from a public-facing component",
+        "tags": [
+          "App Proxy"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Proxied response from the target API"
+          },
+          "403": {
+            "description": "Forbidden - app not installed or no public component uses this proxy"
+          },
+          "404": {
+            "description": "Proxy target not found"
+          },
+          "502": {
+            "description": "Bad gateway - proxy target unreachable or error"
+          }
+        }
+      },
+      "patch": {
+        "summary": "publicProxyPatch",
+        "operationId": "publicProxyPatch",
+        "description": "Forward a PATCH request to a registered proxy target from a public-facing component",
+        "tags": [
+          "App Proxy"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Proxied response from the target API"
+          },
+          "403": {
+            "description": "Forbidden - app not installed or no public component uses this proxy"
+          },
+          "404": {
+            "description": "Proxy target not found"
+          },
+          "502": {
+            "description": "Bad gateway - proxy target unreachable or error"
+          }
+        }
+      },
+      "delete": {
+        "summary": "publicProxyDelete",
+        "operationId": "publicProxyDelete",
+        "description": "Forward a DELETE request to a registered proxy target from a public-facing component",
+        "tags": [
+          "App Proxy"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
         "responses": {
           "200": {
             "description": "Proxied response from the target API"
@@ -1713,6 +1888,20 @@
                 },
                 "grants": {
                   "$ref": "#/components/schemas/Grants"
+                },
+                "functions": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FunctionDefinition"
+                  },
+                  "description": "Replaces the full set of server-side functions for this version"
+                },
+                "options": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Options"
+                  },
+                  "description": "Replaces the full set of app-level option declarations for this version.\nOption keys must be unique app-wide; `secret`-touching options are always\nsensitive and must not declare `sensitive: false`.\n"
                 }
               }
             }
@@ -1866,6 +2055,25 @@
               "object"
             ],
             "description": "The type of this option. `object` declares a structured value whose fields are listed\nunder `fields`. Combine with `repeatable: true` to express a list of these objects.\n"
+          },
+          "sensitive": {
+            "type": "boolean",
+            "description": "Write-only, server-side only value — like a sensitive environment variable\n(app-level options only). Sensitive values are never serialized in any response;\nthey are resolvable only via server-side channels (API proxy injection, function\n`secrets` allowlist, the internal options/resolve endpoint). Non-sensitive values\nare readable wherever the app runs, including the end-customer browser (journey and\nportal runtime). Forced to true for `secret`-touching options. Default: false.\n"
+          },
+          "configured": {
+            "type": "boolean",
+            "readOnly": true,
+            "description": "Serialized instead of `value` for sensitive options (secrets): true when a\nvalue is stored.\n"
+          },
+          "lifted": {
+            "type": "boolean",
+            "readOnly": true,
+            "description": "Compatibility marker: this option is declared at app level and folded back\ninto the component's options so existing consumers (journey runtime, portal\nblocks, older services) keep working unchanged. New consumers should read\napp-level options from the installation's `options` array instead.\n"
+          },
+          "value_updated_at": {
+            "type": "string",
+            "readOnly": true,
+            "description": "Timestamp of the last value change. Only returned for sensitive options\n(alongside `configured`) so installers can see when a secret was last rotated.\n"
           }
         }
       },
@@ -1930,7 +2138,7 @@
         "properties": {
           "component_id": {
             "type": "string",
-            "description": "ID of the component these values are for"
+            "description": "ID of the component these values are for. Use the sentinel `$app` for\napp-level option values (options declared at the manifest top level).\n"
           },
           "options": {
             "type": "array",
@@ -1970,9 +2178,86 @@
           "CUSTOM_CAPABILITY",
           "EXTERNAL_PRODUCT_CATALOG",
           "CUSTOM_PAGE",
-          "API_PROXY"
+          "API_PROXY",
+          "APP_FUNCTION"
         ],
         "description": "Type of app component"
+      },
+      "FunctionDefinition": {
+        "type": "object",
+        "description": "A named server-side function belonging to the app. Runs in the epilot code-execution sandbox with an installation-scoped app token. Functions with a schedule are executed automatically once per installation.\n",
+        "required": [
+          "name",
+          "type",
+          "code"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Unique function name within the app",
+            "pattern": "^[a-z0-9][a-z0-9-]{0,63}$"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "workflow",
+              "scheduled"
+            ],
+            "description": "Where the function can be used. `workflow` functions are referenced by CUSTOM_FLOW_ACTION components (type `function`) and run with entity context. `scheduled` functions run automatically per installation on their cron schedule.\n"
+          },
+          "label": {
+            "allOf": [
+              {
+                "description": "Human-readable display name of the function, shown to installing organizations (e.g. in the scheduled-functions summary)\n"
+              },
+              {
+                "$ref": "#/components/schemas/TranslatedString"
+              }
+            ]
+          },
+          "description": {
+            "allOf": [
+              {
+                "description": "Description of the function"
+              },
+              {
+                "$ref": "#/components/schemas/TranslatedString"
+              }
+            ]
+          },
+          "code": {
+            "type": "string",
+            "maxLength": 307200,
+            "description": "JavaScript code to execute. Must declare a top-level `async function handler(input, context)`. Maximum size: 300KB (hard limit). Security restrictions: eval() and Function() constructor are not allowed.\n"
+          },
+          "schedule": {
+            "type": "string",
+            "maxLength": 100,
+            "description": "Cron trigger for the function, executed once per installation. Standard 5-field cron expression (e.g. \"0 3 * * *\") or rate expression (e.g. \"rate(30 minutes)\"). Minimum interval: 15 minutes. Scheduled runs are limited to 60 seconds.\n",
+            "example": "rate(30 minutes)"
+          },
+          "schedule_timezone": {
+            "type": "string",
+            "description": "IANA timezone the cron expression is evaluated in",
+            "default": "Europe/Berlin"
+          },
+          "schedule_overlap": {
+            "type": "string",
+            "enum": [
+              "skip"
+            ],
+            "default": "skip",
+            "description": "Behavior when the previous scheduled run is still active"
+          },
+          "secrets": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "deprecated": true,
+            "description": "DEPRECATED and ignored — functions receive the app's full effective option keyspace (sensitive values included) via input.app_options. Kept for manifest compatibility.\n"
+          }
+        }
       },
       "Author": {
         "type": "object",
@@ -2059,6 +2344,13 @@
               "$ref": "#/components/schemas/Options"
             },
             "description": "List of options for the app component"
+          },
+          "uses_options": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Keys of app-level options this component uses. Narrows which options are\nfolded back into `options` for legacy consumers (e.g. which values a journey\nblock receives in its public args) — a scoping hint, never a security\nboundary. Stamped automatically by the component-options migration; may also\nbe declared by the app developer.\n"
           },
           "surfaces": {
             "type": "object"
@@ -2157,7 +2449,8 @@
                 "type": "string",
                 "enum": [
                   "tab",
-                  "group"
+                  "group",
+                  "widget"
                 ]
               },
               "allowed_schemas": {
@@ -2386,7 +2679,7 @@
           }
         ]
       },
-      "SandboxCustomActionConfig": {
+      "FunctionRefCustomActionConfig": {
         "allOf": [
           {
             "$ref": "#/components/schemas/BaseCustomActionConfig"
@@ -2397,41 +2690,37 @@
               "type": {
                 "type": "string",
                 "enum": [
-                  "sandbox"
+                  "function"
                 ]
               },
-              "sandbox_settings": {
-                "type": "object",
-                "properties": {
-                  "code": {
-                    "type": "string",
-                    "description": "JavaScript code to execute for the sandbox action. Maximum size: 300KB (hard limit). Code is stored as raw JavaScript and will be syntax-validated on save. Security restrictions: eval() and Function() constructor are not allowed.\n",
-                    "maxLength": 307200
-                  }
-                }
+              "function_name": {
+                "type": "string",
+                "description": "Name of a `workflow`-type function of the same app version. The component provides the org-facing contract (name, options, config surface); the referenced function provides the code.\n"
               }
             },
             "required": [
-              "type"
+              "type",
+              "function_name"
             ]
           }
         ]
       },
       "CustomFlowConfig": {
         "type": "object",
+        "description": "Configuration of a flow action component. `external_integration` calls an external HTTP endpoint; `function` runs a workflow-type app function in the epilot sandbox.\n",
         "oneOf": [
           {
             "$ref": "#/components/schemas/ExternalIntegrationCustomActionConfig"
           },
           {
-            "$ref": "#/components/schemas/SandboxCustomActionConfig"
+            "$ref": "#/components/schemas/FunctionRefCustomActionConfig"
           }
         ],
         "discriminator": {
           "propertyName": "type",
           "mapping": {
             "external_integration": "#/components/schemas/ExternalIntegrationCustomActionConfig",
-            "sandbox": "#/components/schemas/SandboxCustomActionConfig"
+            "function": "#/components/schemas/FunctionRefCustomActionConfig"
           }
         }
       },
@@ -2651,7 +2940,10 @@
                   "dataExport": "#/components/schemas/PortalExtensionHookDataExport",
                   "costDataRetrieval": "#/components/schemas/PortalExtensionHookCostDataRetrieval",
                   "meterReadingPlausibilityCheck": "#/components/schemas/PortalExtensionHookMeterReadingPlausibilityCheck",
-                  "visualizationMetadata": "#/components/schemas/PortalExtensionHookVisualizationMetadata"
+                  "visualizationMetadata": "#/components/schemas/PortalExtensionHookVisualizationMetadata",
+                  "changeEmail": "#/components/schemas/PortalExtensionHookChangeEmail",
+                  "changePassword": "#/components/schemas/PortalExtensionHookChangePassword",
+                  "deleteAccount": "#/components/schemas/PortalExtensionHookDeleteAccount"
                 }
               },
               "oneOf": [
@@ -2678,6 +2970,15 @@
                 },
                 {
                   "$ref": "#/components/schemas/PortalExtensionHookVisualizationMetadata"
+                },
+                {
+                  "$ref": "#/components/schemas/PortalExtensionHookChangeEmail"
+                },
+                {
+                  "$ref": "#/components/schemas/PortalExtensionHookChangePassword"
+                },
+                {
+                  "$ref": "#/components/schemas/PortalExtensionHookDeleteAccount"
                 }
               ]
             }
@@ -3074,7 +3375,8 @@
                 "PT15M",
                 "PT1H",
                 "P1D",
-                "P1M"
+                "P1M",
+                "P1Y"
               ]
             }
           },
@@ -3185,7 +3487,8 @@
                 "PT15M",
                 "PT1H",
                 "P1D",
-                "P1M"
+                "P1M",
+                "P1Y"
               ]
             }
           },
@@ -3488,7 +3791,8 @@
                 "PT15M",
                 "PT1H",
                 "P1D",
-                "P1M"
+                "P1M",
+                "P1Y"
               ]
             }
           },
@@ -3559,6 +3863,344 @@
             "deprecated": true,
             "description": "Deprecated. Prefer `secure_proxy` instead.\nIf true, requests are made from a set of static IP addresses and only allow connections to a set of allowed IP addresses. Get in touch with us to add your IP addresses.\n",
             "default": false
+          },
+          "secure_proxy": {
+            "$ref": "#/components/schemas/PortalExtensionSecureProxy"
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "call"
+        ],
+        "additionalProperties": false
+      },
+      "PortalExtensionHookChangeEmail": {
+        "description": "Hook that replaces the built-in change email functionality for portal users. When configured, the portal does not run its own change email flow. Instead, this hook makes an HTTP call to the third-party system, which is expected to handle the email change.\nThe `change_mode` controls what the portal does after the call:\n  - `asynchronous`: The third-party system takes the email change over entirely (most likely by sending the user instructions to confirm the new email address). The portal does not change the login email itself.\n  - `synchronous`: The third-party system applies the email change immediately. The portal waits for a successful (2xx) response and then also changes the portal user's login email right away, without sending a confirmation email. The user has to sign in again with the new email address afterwards.\n\nThe expected response http status code to the call is:\n  - 2xx if the request was accepted\n  - non-2xx if the request failed (optionally with a human-readable message resolved via `resolved.error_message_path`)\n",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9_-]+$",
+            "description": "Identifier of the hook. Should not change between updates."
+          },
+          "name": {
+            "$ref": "#/components/schemas/TranslatedString"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "changeEmail"
+            ]
+          },
+          "change_mode": {
+            "type": "string",
+            "enum": [
+              "synchronous",
+              "asynchronous"
+            ],
+            "description": "Controls how the email change is handled once the third-party system accepted it. `asynchronous` hands the email change over entirely to the third-party system and the portal does not change the login email itself. `synchronous` waits for the third-party system to respond and then changes the portal user's login email immediately, without a confirmation email.\n",
+            "default": "asynchronous"
+          },
+          "require_password_confirmation": {
+            "type": "boolean",
+            "description": "Whether the portal user must confirm their current password before the change email request is handed over to the third-party system. When true, the portal collects and verifies the current password before calling the hook. Skipped for portal users whose identity is managed by an identity provider: an SSO login has no password to confirm. When no password is confirmed and `change_mode` is `synchronous`, the re-created login gets a random password and the portal user signs in through their identity provider, or sets a new password via the email code flow.\n",
+            "default": true
+          },
+          "explanation": {
+            "type": "object",
+            "properties": {
+              "en": {
+                "type": "string",
+                "description": "Explanation of the functionality shown to the end user.",
+                "example": "You will receive an email with instructions to confirm your new email address."
+              }
+            },
+            "additionalProperties": {
+              "type": "string",
+              "description": "Explanation of the functionality in language denoted by ISO 3166-1 alpha-2 code."
+            },
+            "required": [
+              "en"
+            ],
+            "description": "Optional explanation shown to the user in the change email confirmation dialog."
+          },
+          "auth": {
+            "$ref": "#/components/schemas/PortalExtensionAuthBlock"
+          },
+          "call": {
+            "type": "object",
+            "properties": {
+              "method": {
+                "type": "string",
+                "description": "HTTP method to use for the call",
+                "default": "POST"
+              },
+              "url": {
+                "type": "string",
+                "description": "URL to call. Supports variable interpolation."
+              },
+              "params": {
+                "type": "object",
+                "description": "Parameters to append to the URL. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              },
+              "headers": {
+                "type": "object",
+                "description": "Headers to use. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              },
+              "body": {
+                "type": "object",
+                "description": "Optional JSON body to use for the call. Defaults to an object with the requested new email and portal user context, e.g. `{\"new_email\": \"...\", \"old_email\": \"...\", \"portal_user_id\": \"...\"}`. The requested new email is available as `{{Input.new_email}}` and the current account email as `{{Input.old_email}}`. Supports variable interpolation."
+              }
+            },
+            "required": [
+              "url",
+              "headers"
+            ],
+            "additionalProperties": false
+          },
+          "resolved": {
+            "type": "object",
+            "properties": {
+              "error_message_path": {
+                "type": "string",
+                "description": "Optional path to a human-readable error message in the third-party response body, used when the call fails (non-2xx status).\nIf specified and the path resolves to a string, that message is forwarded to the end user instead of a generic error.\n",
+                "example": "error.message"
+              }
+            },
+            "additionalProperties": false
+          },
+          "secure_proxy": {
+            "$ref": "#/components/schemas/PortalExtensionSecureProxy"
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "call"
+        ],
+        "additionalProperties": false
+      },
+      "PortalExtensionHookChangePassword": {
+        "description": "Hook that replaces the built-in change password functionality for portal users. When configured, the portal does not change the user's password itself. Instead, this hook makes an HTTP call to the third-party system, which is expected to handle the password change (most likely by sending the user instructions to complete the process).\nThe expected response http status code to the call is:\n  - 2xx if the request was accepted\n  - non-2xx if the request failed (optionally with a human-readable message resolved via `resolved.error_message_path`)\n",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9_-]+$",
+            "description": "Identifier of the hook. Should not change between updates."
+          },
+          "name": {
+            "$ref": "#/components/schemas/TranslatedString"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "changePassword"
+            ]
+          },
+          "require_new_password": {
+            "type": "boolean",
+            "description": "Whether the portal user must provide a new password. When false, the portal only asks the user to confirm (showing the configured explanation) and no new password is collected; the third-party system is expected to handle the password change. When true, the portal collects a new password and passes it to the third-party system as `{{Input.new_password}}`.\n",
+            "default": false
+          },
+          "explanation": {
+            "type": "object",
+            "properties": {
+              "en": {
+                "type": "string",
+                "description": "Explanation of the functionality shown to the end user.",
+                "example": "You will receive an email with instructions to reset your password."
+              }
+            },
+            "additionalProperties": {
+              "type": "string",
+              "description": "Explanation of the functionality in language denoted by ISO 3166-1 alpha-2 code."
+            },
+            "required": [
+              "en"
+            ],
+            "description": "Optional explanation shown to the user in the change password confirmation dialog."
+          },
+          "auth": {
+            "$ref": "#/components/schemas/PortalExtensionAuthBlock"
+          },
+          "call": {
+            "type": "object",
+            "properties": {
+              "method": {
+                "type": "string",
+                "description": "HTTP method to use for the call",
+                "default": "POST"
+              },
+              "url": {
+                "type": "string",
+                "description": "URL to call. Supports variable interpolation."
+              },
+              "params": {
+                "type": "object",
+                "description": "Parameters to append to the URL. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              },
+              "headers": {
+                "type": "object",
+                "description": "Headers to use. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              },
+              "body": {
+                "type": "object",
+                "description": "Optional JSON body to use for the call. Defaults to an object with portal user context (and the new password as `{{Input.new_password}}` when `require_new_password` is true). Supports variable interpolation."
+              }
+            },
+            "required": [
+              "url",
+              "headers"
+            ],
+            "additionalProperties": false
+          },
+          "resolved": {
+            "type": "object",
+            "properties": {
+              "error_message_path": {
+                "type": "string",
+                "description": "Optional path to a human-readable error message in the third-party response body, used when the call fails (non-2xx status).\nIf specified and the path resolves to a string, that message is forwarded to the end user instead of a generic error.\n",
+                "example": "error.message"
+              }
+            },
+            "additionalProperties": false
+          },
+          "secure_proxy": {
+            "$ref": "#/components/schemas/PortalExtensionSecureProxy"
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "call"
+        ],
+        "additionalProperties": false
+      },
+      "PortalExtensionHookDeleteAccount": {
+        "description": "Hook that replaces the built-in delete account functionality for portal users. When configured, the portal does not delete the user itself. Instead, this hook makes an HTTP call to the third-party system, which is expected to handle the deletion.\nThe `deletion_mode` controls what the portal does after the call:\n  - `synchronous`: The third-party system deletes the user immediately. The portal waits for a successful (2xx) response and then also deletes the corresponding epilot Cognito user.\n  - `asynchronous`: The third-party system handles deletion out-of-band. The portal does not delete anything immediately; cleanup is expected to happen later (e.g. via the user deletion API or webhooks).\n\nThe optional `delete_contact` additionally deletes the contact related to the portal user, once the portal user itself was deleted (`synchronous` mode only).\n\nThe expected response http status code to the call is:\n  - 2xx if the request was accepted\n  - non-2xx if the request failed (optionally with a human-readable message resolved via `resolved.error_message_path`)\n",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9_-]+$",
+            "description": "Identifier of the hook. Should not change between updates."
+          },
+          "name": {
+            "$ref": "#/components/schemas/TranslatedString"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "deleteAccount"
+            ]
+          },
+          "deletion_mode": {
+            "type": "string",
+            "enum": [
+              "synchronous",
+              "asynchronous"
+            ],
+            "description": "Controls how the account deletion is handled. `synchronous` waits for the third-party system to respond and then also deletes the epilot user. `asynchronous` hands the deletion over entirely to the third-party system and the portal does not delete anything immediately.\n",
+            "default": "synchronous"
+          },
+          "delete_contact": {
+            "type": "string",
+            "enum": [
+              "none",
+              "soft",
+              "hard"
+            ],
+            "description": "Opt-in deletion of the contact related to the portal user, applied after the portal user itself was deleted. `none` (default) leaves the contact untouched. `soft` deletes the contact, so it can still be restored from the trash. `hard` permanently purges the contact. Only applied in `synchronous` deletion mode, as `asynchronous` mode hands the cleanup over to the third-party system.\n",
+            "default": "none"
+          },
+          "explanation": {
+            "type": "object",
+            "properties": {
+              "en": {
+                "type": "string",
+                "description": "Explanation of the functionality shown to the end user.",
+                "example": "Your account deletion will be processed by our system. This may take a few days."
+              }
+            },
+            "additionalProperties": {
+              "type": "string",
+              "description": "Explanation of the functionality in language denoted by ISO 3166-1 alpha-2 code."
+            },
+            "required": [
+              "en"
+            ],
+            "description": "Optional explanation shown to the user in the delete account confirmation dialog."
+          },
+          "auth": {
+            "$ref": "#/components/schemas/PortalExtensionAuthBlock"
+          },
+          "call": {
+            "type": "object",
+            "properties": {
+              "method": {
+                "type": "string",
+                "description": "HTTP method to use for the call",
+                "default": "POST"
+              },
+              "url": {
+                "type": "string",
+                "description": "URL to call. Supports variable interpolation."
+              },
+              "params": {
+                "type": "object",
+                "description": "Parameters to append to the URL. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              },
+              "headers": {
+                "type": "object",
+                "description": "Headers to use. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              },
+              "body": {
+                "type": "object",
+                "description": "Optional JSON body to use for the call. Defaults to an object with portal user context, e.g. `{\"portal_user_id\": \"...\", \"email\": \"...\"}`. Supports variable interpolation."
+              }
+            },
+            "required": [
+              "url",
+              "headers"
+            ],
+            "additionalProperties": false
+          },
+          "resolved": {
+            "type": "object",
+            "properties": {
+              "error_message_path": {
+                "type": "string",
+                "description": "Optional path to a human-readable error message in the third-party response body, used when the call fails (non-2xx status).\nIf specified and the path resolves to a string, that message is forwarded to the end user instead of a generic error.\n",
+                "example": "error.message"
+              }
+            },
+            "additionalProperties": false
           },
           "secure_proxy": {
             "$ref": "#/components/schemas/PortalExtensionSecureProxy"
@@ -4113,6 +4755,39 @@
           }
         }
       },
+      "InternalReview": {
+        "description": "Review entry including app ownership info, used by internal admin endpoints",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Review"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "app_id": {
+                "type": "string",
+                "description": "ID of the app configuration",
+                "readOnly": true
+              },
+              "org_id": {
+                "type": "string",
+                "description": "Organization ID of the app owner",
+                "readOnly": true
+              },
+              "reviewed_by": {
+                "type": "string",
+                "description": "Identity of the internal reviewer who approved the review",
+                "readOnly": true
+              },
+              "reviewed_at": {
+                "type": "string",
+                "description": "Timestamp of the approval",
+                "readOnly": true
+              }
+            }
+          }
+        ]
+      },
       "ConfigurationMetadata": {
         "description": "Basic metadata about your app configuration which does not get versioned",
         "type": "object",
@@ -4258,6 +4933,22 @@
             },
             "minItems": 0
           },
+          "functions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FunctionDefinition"
+            },
+            "minItems": 0,
+            "description": "Server-side functions of the app, including scheduled functions"
+          },
+          "options": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Options"
+            },
+            "minItems": 0,
+            "description": "App-level option declarations (with sensitivity) of this version"
+          },
           "visibility": {
             "type": "string",
             "enum": [
@@ -4358,8 +5049,7 @@
           },
           "target": {
             "type": "string",
-            "format": "uri",
-            "description": "Base URL of the target API. Must be HTTPS.",
+            "description": "Base URL of the target API. Must be HTTPS. May reference component options via {{option_key}} interpolation (resolved from decrypted values), e.g. \"https://{{cluster}}.example.com/api\" for a per-installation host. The fully-resolved URL is validated at request time (SSRF protection).",
             "pattern": "^https://"
           },
           "auth_type": {
@@ -4367,10 +5057,11 @@
             "enum": [
               "header",
               "bearer",
+              "basic",
               "oauth2",
               "none"
             ],
-            "description": "Authentication strategy"
+            "description": "Authentication strategy. 'basic' sends an HTTP Basic Authorization header built server-side from the 'username' and 'password' component options."
           },
           "auth_header": {
             "type": "string",
@@ -4381,6 +5072,13 @@
             "format": "uri",
             "description": "OAuth2 token endpoint URL",
             "pattern": "^https://"
+          },
+          "headers": {
+            "type": "object",
+            "description": "Additional request headers injected server-side on every proxied request. Values may reference component options via {{option_key}} interpolation (resolved from decrypted secrets), so credentials are never exposed to the client. Applied in addition to auth_type.",
+            "additionalProperties": {
+              "type": "string"
+            }
           }
         }
       },
@@ -4459,6 +5157,11 @@
             "description": "Name of the app",
             "readOnly": true
           },
+          "icon_url": {
+            "type": "string",
+            "description": "Public URL of the app logo, if one has been uploaded",
+            "readOnly": true
+          },
           "option_values": {
             "type": "array",
             "items": {
@@ -4473,6 +5176,22 @@
               "$ref": "#/components/schemas/BaseComponent"
             },
             "minLength": 0,
+            "readOnly": true
+          },
+          "functions": {
+            "description": "Server-side functions of the installed version, including scheduled functions",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FunctionDefinition"
+            },
+            "readOnly": true
+          },
+          "options": {
+            "description": "Effective app-level options of the installation: declared top-level options plus\ncomponent-level options lifted to the app keyspace, each with its configured\n`value`. Values of sensitive options (secrets) are never included — they carry\n`configured` and `value_updated_at` instead.\n",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Options"
+            },
             "readOnly": true
           },
           "installed_version": {
@@ -4581,6 +5300,22 @@
               "$ref": "#/components/schemas/BaseComponent"
             },
             "minItems": 0
+          },
+          "functions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FunctionDefinition"
+            },
+            "minItems": 0,
+            "description": "Server-side functions of the app, including scheduled functions"
+          },
+          "options": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Options"
+            },
+            "minItems": 0,
+            "description": "App-level option declarations (with sensitivity) of this version"
           },
           "is_beta": {
             "type": "boolean",
@@ -4832,6 +5567,11 @@
               "correlation_id": {
                 "type": "string",
                 "description": "Filter by correlation ID for tracing"
+              },
+              "search": {
+                "type": "string",
+                "maxLength": 200,
+                "description": "Case-insensitive substring match over event details and component id"
               }
             }
           },
@@ -4882,6 +5622,11 @@
                 "minimum": 1,
                 "maximum": 1000,
                 "default": 100
+              },
+              "before": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Cursor: only return events strictly older than this timestamp. Use the timestamp of the last received event to fetch the next page; more efficient than increasing page/page_size.\n"
               }
             }
           },

@@ -88,13 +88,15 @@ epilot entity-mapping storeConfig \
       "allow_failure": true,
       "target_schema": "string",
       "target_unique": ["string"],
+      "use_uniqueness_criteria": false,
       "loop_config": {},
       "conditionMode": "oneOf",
       "conditions": [],
       "mapping_attributes": [],
       "relation_attributes": [],
       "linkback_relation_attribute": "mapped_entities",
-      "linkback_relation_tags": ["string"]
+      "linkback_relation_tags": ["string"],
+      "graph_context": []
     }
   ],
   "created_at": "1970-01-01T00:00:00.000Z",
@@ -145,13 +147,15 @@ epilot entity-mapping storeConfig --jsonata '$'
       "allow_failure": true,
       "target_schema": "string",
       "target_unique": ["string"],
+      "use_uniqueness_criteria": false,
       "loop_config": {},
       "conditionMode": "oneOf",
       "conditions": [],
       "mapping_attributes": [],
       "relation_attributes": [],
       "linkback_relation_attribute": "mapped_entities",
-      "linkback_relation_tags": ["string"]
+      "linkback_relation_tags": ["string"],
+      "graph_context": []
     }
   ],
   "created_at": "1970-01-01T00:00:00.000Z",
@@ -225,13 +229,15 @@ epilot entity-mapping getConfig -p id=70542580-2b38-4bfc-af8d-bb90102f9f47 --jso
       "allow_failure": true,
       "target_schema": "string",
       "target_unique": ["string"],
+      "use_uniqueness_criteria": false,
       "loop_config": {},
       "conditionMode": "oneOf",
       "conditions": [],
       "mapping_attributes": [],
       "relation_attributes": [],
       "linkback_relation_attribute": "mapped_entities",
-      "linkback_relation_tags": ["string"]
+      "linkback_relation_tags": ["string"],
+      "graph_context": []
     }
   ],
   "created_at": "1970-01-01T00:00:00.000Z",
@@ -305,13 +311,15 @@ epilot entity-mapping deleteConfig -p id=70542580-2b38-4bfc-af8d-bb90102f9f47 --
       "allow_failure": true,
       "target_schema": "string",
       "target_unique": ["string"],
+      "use_uniqueness_criteria": false,
       "loop_config": {},
       "conditionMode": "oneOf",
       "conditions": [],
       "mapping_attributes": [],
       "relation_attributes": [],
       "linkback_relation_attribute": "mapped_entities",
-      "linkback_relation_tags": ["string"]
+      "linkback_relation_tags": ["string"],
+      "graph_context": []
     }
   ],
   "created_at": "1970-01-01T00:00:00.000Z",
@@ -432,13 +440,15 @@ epilot entity-mapping storeNewVersion \
       "allow_failure": true,
       "target_schema": "string",
       "target_unique": ["string"],
+      "use_uniqueness_criteria": false,
       "loop_config": {},
       "conditionMode": "oneOf",
       "conditions": [],
       "mapping_attributes": [],
       "relation_attributes": [],
       "linkback_relation_attribute": "mapped_entities",
-      "linkback_relation_tags": ["string"]
+      "linkback_relation_tags": ["string"],
+      "graph_context": []
     }
   ],
   "created_at": "1970-01-01T00:00:00.000Z",
@@ -495,13 +505,15 @@ epilot entity-mapping storeNewVersion -p id=70542580-2b38-4bfc-af8d-bb90102f9f47
       "allow_failure": true,
       "target_schema": "string",
       "target_unique": ["string"],
+      "use_uniqueness_criteria": false,
       "loop_config": {},
       "conditionMode": "oneOf",
       "conditions": [],
       "mapping_attributes": [],
       "relation_attributes": [],
       "linkback_relation_attribute": "mapped_entities",
-      "linkback_relation_tags": ["string"]
+      "linkback_relation_tags": ["string"],
+      "graph_context": []
     }
   ],
   "created_at": "1970-01-01T00:00:00.000Z",
@@ -577,13 +589,15 @@ epilot entity-mapping getConfigVersion -p id=70542580-2b38-4bfc-af8d-bb90102f9f4
       "allow_failure": true,
       "target_schema": "string",
       "target_unique": ["string"],
+      "use_uniqueness_criteria": false,
       "loop_config": {},
       "conditionMode": "oneOf",
       "conditions": [],
       "mapping_attributes": [],
       "relation_attributes": [],
       "linkback_relation_attribute": "mapped_entities",
-      "linkback_relation_tags": ["string"]
+      "linkback_relation_tags": ["string"],
+      "graph_context": []
     }
   ],
   "created_at": "1970-01-01T00:00:00.000Z",
@@ -636,6 +650,10 @@ epilot entity-mapping executeMapping \
     "entity_id": "string",
     "entity_schema": "submission"
   },
+  "loop_ref": {
+    "entity_id": "string",
+    "entity_schema": "submission"
+  },
   "targets": [
     {
       "id": "string",
@@ -643,66 +661,15 @@ epilot entity-mapping executeMapping \
       "allow_failure": true,
       "target_schema": "string",
       "target_unique": ["string"],
-      "loop_config": {
-        "source_path": "string",
-        "length": "the length of the array"
-      },
+      "use_uniqueness_criteria": false,
+      "loop_config": {},
       "conditionMode": "oneOf",
-      "conditions": [
-        {
-          "_exists": {
-            "source": "string",
-            "value": "string"
-          },
-          "_equals": {
-            "source": "string",
-            "value": "string"
-          },
-          "_not_exists": {
-            "source": "string",
-            "value": "string"
-          },
-          "_any_of": {
-            "source": "string",
-            "value": "string"
-          }
-        }
-      ],
-      "mapping_attributes": [
-        {
-          "target": "_tags",
-          "operation": {
-            "_append": ["new", "tags"],
-            "_uniq": true
-          }
-        },
-        {
-          "mode": "copy_if_exists",
-          "target": "string",
-          "value": {}
-        }
-      ],
-      "relation_attributes": [
-        {
-          "target": "string",
-          "target_tags": ["string"],
-          "target_tags_include_source": false,
-          "override_with_source_filter": false,
-          "source_filter": {
-            "limit": 0,
-            "schema": "string",
-            "attribute": "string",
-            "relation_tag": "string",
-            "tag": "string",
-            "self": false
-          },
-          "related_to": {},
-          "mode": "append",
-          "origin": "system_recommendation"
-        }
-      ],
+      "conditions": [],
+      "mapping_attributes": [],
+      "relation_attributes": [],
       "linkback_relation_attribute": "mapped_entities",
-      "linkback_relation_tags": ["string"]
+      "linkback_relation_tags": ["string"],
+      "graph_context": []
     }
   ]
 }'
@@ -803,13 +770,15 @@ epilot entity-mapping searchConfigs --jsonata '$'
       "allow_failure": true,
       "target_schema": "string",
       "target_unique": ["string"],
+      "use_uniqueness_criteria": false,
       "loop_config": {},
       "conditionMode": "oneOf",
       "conditions": [],
       "mapping_attributes": [],
       "relation_attributes": [],
       "linkback_relation_attribute": "mapped_entities",
-      "linkback_relation_tags": ["string"]
+      "linkback_relation_tags": ["string"],
+      "graph_context": []
     }
   ],
   "created_at": "1970-01-01T00:00:00.000Z",
@@ -904,6 +873,7 @@ epilot entity-mapping executeRelations \
         "target": "string",
         "target_tags": ["string"],
         "target_tags_include_source": false,
+        "target_entity_tags": ["string"],
         "override_with_source_filter": false,
         "source_filter": {
           "limit": 0,
@@ -1014,13 +984,15 @@ epilot entity-mapping getMappingConfig -p id=70542580-2b38-4bfc-af8d-bb90102f9f4
       "allow_failure": true,
       "target_schema": "string",
       "target_unique": ["string"],
+      "use_uniqueness_criteria": false,
       "loop_config": {},
       "conditionMode": "oneOf",
       "conditions": [],
       "mapping_attributes": [],
       "relation_attributes": [],
       "linkback_relation_attribute": "mapped_entities",
-      "linkback_relation_tags": ["string"]
+      "linkback_relation_tags": ["string"],
+      "graph_context": []
     }
   ],
   "created_at": "1970-01-01T00:00:00.000Z",
@@ -1085,13 +1057,15 @@ epilot entity-mapping putMappingConfig \
       "allow_failure": true,
       "target_schema": "string",
       "target_unique": ["string"],
+      "use_uniqueness_criteria": false,
       "loop_config": {},
       "conditionMode": "oneOf",
       "conditions": [],
       "mapping_attributes": [],
       "relation_attributes": [],
       "linkback_relation_attribute": "mapped_entities",
-      "linkback_relation_tags": ["string"]
+      "linkback_relation_tags": ["string"],
+      "graph_context": []
     }
   ],
   "created_at": "1970-01-01T00:00:00.000Z",
@@ -1148,13 +1122,15 @@ epilot entity-mapping putMappingConfig -p id=70542580-2b38-4bfc-af8d-bb90102f9f4
       "allow_failure": true,
       "target_schema": "string",
       "target_unique": ["string"],
+      "use_uniqueness_criteria": false,
       "loop_config": {},
       "conditionMode": "oneOf",
       "conditions": [],
       "mapping_attributes": [],
       "relation_attributes": [],
       "linkback_relation_attribute": "mapped_entities",
-      "linkback_relation_tags": ["string"]
+      "linkback_relation_tags": ["string"],
+      "graph_context": []
     }
   ],
   "created_at": "1970-01-01T00:00:00.000Z",

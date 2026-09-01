@@ -38,7 +38,34 @@ jobs:
           cache: "pnpm"
       - run: pnpm install --frozen-lockfile
       - run: pnpm generate-sdk
+      - run: pnpm --filter @epilot/cli generate
+
+      # The repo commits the generated artifacts of both @epilot/sdk and
+      # @epilot/cli. Regenerating above and finding no diff is what keeps them
+      # honest — without this the generators run, the output is thrown away,
+      # and the committed copies drift unnoticed.
+      - name: Check generated artifacts are up to date
+        run: |
+          if ! git diff --quiet; then
+            echo "::error::Generated artifacts are out of date. Run 'pnpm generate-sdk && pnpm --filter @epilot/cli generate' and commit the result."
+            git diff --stat
+            exit 1
+          fi
+
       - run: pnpm build
+
+      # A build must not mutate tracked source: no code generation, no network
+      # fetches of live specs. Updating a spec is the deliberate
+      # 'npm run openapi' step documented in CONTRIBUTING.md. Checked directly
+      # after the build so a dirty tree can only be the build's doing.
+      - name: Check build left the tree clean
+        run: |
+          if ! git diff --quiet; then
+            echo "::error::'pnpm build' modified tracked files. A build must not regenerate or re-fetch committed source."
+            git diff --stat
+            exit 1
+          fi
+
       - run: pnpm test
 
   auto-release:
@@ -145,7 +172,15 @@ jobs:
               pkg.version = '${CLI_VERSION}';
               fs.writeFileSync(path, JSON.stringify(pkg, null, 2) + '\n');
             "
-            FILES_TO_ADD="$FILES_TO_ADD packages/cli/package.json packages/cli-wrapper/package.json"
+            # src/index.ts embeds CLI_VERSION and definitions/ are copied from
+            # clients/, so the generated artifacts have to be rebuilt after the
+            # bump and staged with it. The "Build and test CLI" step above ran
+            # before the bump, and "Rebuild CLI with bumped version" runs after
+            # the push, so neither produces output this commit can carry.
+            cd "$GITHUB_WORKSPACE"
+            pnpm --filter @epilot/cli generate
+
+            FILES_TO_ADD="$FILES_TO_ADD packages/cli/ packages/cli-wrapper/package.json"
             TAGS="$TAGS @epilot/cli@${CLI_VERSION}"
           fi
 
