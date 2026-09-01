@@ -36,6 +36,7 @@ const { data } = await environmentsClient.listEnvironmentVariables(...)
 
 **Schemas**
 - [`EnvironmentValueType`](#environmentvaluetype)
+- [`StringTranslations`](#stringtranslations)
 - [`MapEntry`](#mapentry)
 - [`MapValue`](#mapvalue)
 - [`EnvironmentValue`](#environmentvalue)
@@ -299,15 +300,29 @@ served to browser-facing consumers; `String` and `SecretString` may not.
 type EnvironmentValueType = "String" | "SecretString" | "Text" | "Number" | "Boolean" | "Map"
 ```
 
+### `StringTranslations`
+
+A string translated per language. Keys are language codes (e.g. `de`,
+`en-US`), matching the hyphen-only BCP-47 form epilot's i18n stack uses
+everywhere else. Must match LANGUAGE_KEY_PATTERN in
+src/core/value-types.ts — the two are not otherwise linked.
+
+
+```ts
+type StringTranslations = Record<string, string>
+```
+
 ### `MapEntry`
+
+One entry of a Map. `key` is the token a journey submits; `value` is
+what the customer reads — either one string, or one string per
+language. Every entry of a Map must agree on which of the two it uses.
+
 
 ```ts
 type MapEntry = {
-  value: string
-  label: string
-} | {
-  value: string
-  labels: Record<string, string>
+  key: string
+  value: string | Record<string, string>
 }
 ```
 
@@ -317,11 +332,8 @@ type MapEntry = {
 type MapValue = {
   fallbackLanguage?: string
   options: Array<{
-    value: string
-    label: string
-  } | {
-    value: string
-    labels: Record<string, string>
+    key: string
+    value: string | Record<string, string>
   }>
 }
 ```
@@ -338,11 +350,8 @@ doubles; integers above 2^53 may lose precision on round-trip.
 type EnvironmentValue = string | number | boolean | {
   fallbackLanguage?: string
   options: Array<{
-    value: string
-    label: string
-  } | {
-    value: string
-    labels: Record<string, string>
+    key: string
+    value: string | Record<string, string>
   }>
 }
 ```
@@ -358,11 +367,8 @@ type EnvironmentVariable = {
   value?: string | number | boolean | {
     fallbackLanguage?: string
     options: Array<{
+      key: { ... }
       value: { ... }
-      label: { ... }
-    } | {
-      value: { ... }
-      labels: { ... }
     }>
   }
   protected?: boolean
@@ -382,11 +388,8 @@ type EnvironmentVariableListItem = {
   value?: string | number | boolean | {
     fallbackLanguage?: string
     options: Array<{
+      key: { ... }
       value: { ... }
-      label: { ... }
-    } | {
-      value: { ... }
-      labels: { ... }
     }>
   }
   protected?: boolean
@@ -426,11 +429,8 @@ type EnvironmentVariableCreateRequest = {
   value?: string | number | boolean | {
     fallbackLanguage?: string
     options: Array<{
+      key: { ... }
       value: { ... }
-      label: { ... }
-    } | {
-      value: { ... }
-      labels: { ... }
     }>
   }
   protected?: boolean
@@ -445,11 +445,8 @@ type EnvironmentVariableUpdateRequest = {
   value?: string | number | boolean | {
     fallbackLanguage?: string
     options: Array<{
+      key: { ... }
       value: { ... }
-      label: { ... }
-    } | {
-      value: { ... }
-      labels: { ... }
     }>
   }
   description?: string

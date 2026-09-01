@@ -158,21 +158,51 @@ export declare namespace Components {
              */
             protected?: boolean;
         }
-        export type MapEntry = {
-            value: string;
-            label: string;
-        } | {
-            value: string;
-            labels: {
-                [name: string]: string;
-            };
-        };
+        /**
+         * One entry of a Map. `key` is the token a journey submits; `value` is
+         * what the customer reads — either one string, or one string per
+         * language. Every entry of a Map must agree on which of the two it uses.
+         *
+         */
+        export interface MapEntry {
+            key: string;
+            value: string | /**
+             * A string translated per language. Keys are language codes (e.g. `de`,
+             * `en-US`), matching the hyphen-only BCP-47 form epilot's i18n stack uses
+             * everywhere else. Must match LANGUAGE_KEY_PATTERN in
+             * src/core/value-types.ts — the two are not otherwise linked.
+             *
+             */
+            StringTranslations;
+        }
         export interface MapValue {
             fallbackLanguage?: string;
             options: [
+                /**
+                 * One entry of a Map. `key` is the token a journey submits; `value` is
+                 * what the customer reads — either one string, or one string per
+                 * language. Every entry of a Map must agree on which of the two it uses.
+                 *
+                 */
                 MapEntry,
-                ...MapEntry[]
+                .../**
+                 * One entry of a Map. `key` is the token a journey submits; `value` is
+                 * what the customer reads — either one string, or one string per
+                 * language. Every entry of a Map must agree on which of the two it uses.
+                 *
+                 */
+                MapEntry[]
             ];
+        }
+        /**
+         * A string translated per language. Keys are language codes (e.g. `de`,
+         * `en-US`), matching the hyphen-only BCP-47 form epilot's i18n stack uses
+         * everywhere else. Must match LANGUAGE_KEY_PATTERN in
+         * src/core/value-types.ts — the two are not otherwise linked.
+         *
+         */
+        export interface StringTranslations {
+            [name: string]: string;
         }
     }
 }
@@ -494,3 +524,4 @@ export type EnvironmentVariableListItem = Components.Schemas.EnvironmentVariable
 export type EnvironmentVariableUpdateRequest = Components.Schemas.EnvironmentVariableUpdateRequest;
 export type MapEntry = Components.Schemas.MapEntry;
 export type MapValue = Components.Schemas.MapValue;
+export type StringTranslations = Components.Schemas.StringTranslations;

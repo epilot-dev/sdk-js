@@ -358,52 +358,43 @@
           "Map"
         ]
       },
+      "StringTranslations": {
+        "description": "A string translated per language. Keys are language codes (e.g. `de`,\n`en-US`), matching the hyphen-only BCP-47 form epilot's i18n stack uses\neverywhere else. Must match LANGUAGE_KEY_PATTERN in\nsrc/core/value-types.ts — the two are not otherwise linked.\n",
+        "type": "object",
+        "minProperties": 1,
+        "propertyNames": {
+          "pattern": "^[a-z]{2,3}(-[A-Za-z0-9]+)*$"
+        },
+        "additionalProperties": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
       "MapEntry": {
-        "oneOf": [
-          {
-            "type": "object",
-            "required": [
-              "value",
-              "label"
-            ],
-            "additionalProperties": false,
-            "properties": {
-              "value": {
-                "type": "string",
-                "minLength": 1
-              },
-              "label": {
-                "type": "string",
-                "minLength": 1
-              }
-            }
+        "description": "One entry of a Map. `key` is the token a journey submits; `value` is\nwhat the customer reads — either one string, or one string per\nlanguage. Every entry of a Map must agree on which of the two it uses.\n",
+        "type": "object",
+        "required": [
+          "key",
+          "value"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "key": {
+            "type": "string",
+            "minLength": 1
           },
-          {
-            "type": "object",
-            "required": [
-              "value",
-              "labels"
-            ],
-            "additionalProperties": false,
-            "properties": {
-              "value": {
+          "value": {
+            "oneOf": [
+              {
                 "type": "string",
                 "minLength": 1
               },
-              "labels": {
-                "type": "object",
-                "minProperties": 1,
-                "propertyNames": {
-                  "pattern": "^[a-z]{2,3}(-[A-Za-z0-9]+)*$"
-                },
-                "additionalProperties": {
-                  "type": "string",
-                  "minLength": 1
-                }
+              {
+                "$ref": "#/components/schemas/StringTranslations"
               }
-            }
+            ]
           }
-        ]
+        }
       },
       "MapValue": {
         "type": "object",
