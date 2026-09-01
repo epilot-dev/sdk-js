@@ -929,14 +929,20 @@
                 "$ref": "#/components/schemas/EqualsCondition"
               },
               {
+                "$ref": "#/components/schemas/NotEqualsCondition"
+              },
+              {
                 "$ref": "#/components/schemas/EqualsCurrentUserCondition"
+              },
+              {
+                "$ref": "#/components/schemas/NotEqualsCurrentUserCondition"
               }
             ]
           }
         ]
       },
       "EqualsCurrentUserCondition": {
-        "description": "Check if any relation_user attribute on the entity contains the current user. When attribute is provided, only that specific attribute path is checked.",
+        "description": "Check if any relation_user attribute on the entity contains the current user. When attribute is provided, only that specific attribute path is checked. When attributes is provided, it takes precedence over attribute and the condition passes when the current user appears in ANY of the listed attribute paths.",
         "type": "object",
         "properties": {
           "attribute": {
@@ -944,10 +950,54 @@
             "description": "Optional JSON path to a specific user attribute. When omitted, all relation_user attributes on the entity are scanned.",
             "example": "assignee.*.user_id"
           },
+          "attributes": {
+            "type": "array",
+            "description": "Optional list of JSON paths to user attributes. Takes precedence over attribute.",
+            "minItems": 1,
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "assignee.*.user_id",
+              "owner.*.user_id"
+            ]
+          },
           "operation": {
             "type": "string",
             "enum": [
               "equals_current_user"
+            ]
+          }
+        },
+        "required": [
+          "operation"
+        ]
+      },
+      "NotEqualsCurrentUserCondition": {
+        "description": "Check if the current user is absent from the relation_user attributes on the entity. When attribute is provided, only that specific attribute path is checked. When attributes is provided, it takes precedence over attribute and the condition passes only when the current user appears in NONE of the listed attribute paths.",
+        "type": "object",
+        "properties": {
+          "attribute": {
+            "type": "string",
+            "description": "Optional JSON path to a specific user attribute. When omitted, all relation_user attributes on the entity are scanned.",
+            "example": "assignee.*.user_id"
+          },
+          "attributes": {
+            "type": "array",
+            "description": "Optional list of JSON paths to user attributes. Takes precedence over attribute.",
+            "minItems": 1,
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "assignee.*.user_id",
+              "owner.*.user_id"
+            ]
+          },
+          "operation": {
+            "type": "string",
+            "enum": [
+              "not_equals_current_user"
             ]
           }
         },
@@ -971,6 +1021,35 @@
           },
           "values": {
             "type": "array",
+            "minItems": 1,
+            "items": {
+              "example": "Qualification"
+            }
+          }
+        },
+        "required": [
+          "attribute",
+          "operation",
+          "values"
+        ]
+      },
+      "NotEqualsCondition": {
+        "description": "Passes when the attribute does not equal any of the values. Records where the attribute is missing or empty pass the condition.",
+        "type": "object",
+        "properties": {
+          "attribute": {
+            "type": "string",
+            "example": "workflows.primary.task_name"
+          },
+          "operation": {
+            "type": "string",
+            "enum": [
+              "not_equals"
+            ]
+          },
+          "values": {
+            "type": "array",
+            "minItems": 1,
             "items": {
               "example": "Qualification"
             }
@@ -1511,5 +1590,9 @@
       }
     }
   },
-  "servers": []
+  "servers": [
+    {
+      "url": "https://permissions.sls.epilot.io"
+    }
+  ]
 }

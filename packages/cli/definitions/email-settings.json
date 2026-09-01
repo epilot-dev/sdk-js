@@ -27,6 +27,10 @@
       "description": "Microsoft Office 365 Outlook integration endpoints. These endpoints enable organizations to:\n- Initiate OAuth connections with Microsoft 365\n- Connect Outlook shared mailboxes\n- Manage connection status and tokens\n- Disconnect integrations when needed\n\nThe integration supports multiple Azure AD tenants and handles token refresh automatically.\n"
     },
     {
+      "name": "Custom SMTP",
+      "description": "Custom SMTP connection management. Lets organizations configure their own outbound\nSMTP server (e.g. Mailgun, SendGrid, a self-hosted Postfix) for sending emails\nfrom epilot via their existing provider. Credentials are encrypted at rest using\na customer-managed KMS key. Only outbound sending is supported — replies do not\ncome back into epilot.\n"
+    },
+    {
       "name": "Channels",
       "description": "Channel integration endpoints. Channels represent external communication providers\n(e.g., Microsoft Teams, WhatsApp) that can be connected to an epilot organization.\n\nAll channel endpoints live under `/v2/channels/{channel}`.\n"
     },
@@ -610,6 +614,81 @@
         }
       }
     },
+    "/v2/outlook/calendar/admin-consent-status": {
+      "get": {
+        "operationId": "getCalendarAdminConsentStatus",
+        "summary": "getCalendarAdminConsentStatus",
+        "description": "Reports whether the caller's organization can connect personal Outlook\ncalendars.\n\nConnecting a personal calendar requires the tenant admin to have\nconsented to epilot's Microsoft 365 app. That consent is tenant-wide,\none-time, and granted for the full scope set (mail + calendar), so the\norg-level Outlook connection set up during onboarding is the gate.\n\nWhen consent is missing the response includes `admin_consent_url` for\nthe admin to open, and the UI should ask the user to involve their IT\ninstead of starting an OAuth flow that would fail.\n",
+        "tags": [
+          "O365 Outlook Connection"
+        ],
+        "responses": {
+          "200": {
+            "description": "Admin consent status for the organization",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalendarAdminConsentStatus"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/v2/outlook/calendar/me": {
+      "get": {
+        "operationId": "getMyCalendarConnection",
+        "summary": "getMyCalendarConnection",
+        "description": "Returns the calling user's personal Outlook calendar connection,\nor null when the user hasn't connected yet.\n\nPer-user calendar connections are distinct from the org-level\nshared-mailbox connection (`/v2/outlook/connection/status`): each\nuser connects their own delegated token because reading user A's\ncalendar requires user A's consent.\n",
+        "tags": [
+          "O365 Outlook Connection"
+        ],
+        "responses": {
+          "200": {
+            "description": "Calendar connection (or null if absent)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MyCalendarConnectionResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "disconnectMyCalendar",
+        "summary": "disconnectMyCalendar",
+        "description": "Removes the calling user's personal calendar connection.",
+        "tags": [
+          "O365 Outlook Connection"
+        ],
+        "responses": {
+          "204": {
+            "description": "Disconnected"
+          },
+          "404": {
+            "description": "No connection to disconnect"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
     "/v2/outlook/connection/disconnect": {
       "post": {
         "operationId": "disconnectOutlook",
@@ -817,6 +896,28 @@
                     "description": "Shared inbox ID to associate with the mailbox. Defaults to the default shared inbox.",
                     "default": "default"
                   },
+                  "name": {
+                    "type": "string",
+                    "description": "Sender name to use for the Outlook mailbox email address."
+                  },
+                  "user_ids": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "User IDs for which this email address should be available by default."
+                  },
+                  "group_ids": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Group IDs for which this email address should be available by default."
+                  },
+                  "default_signature_id": {
+                    "type": "string",
+                    "description": "Default signature ID to use for this Outlook mailbox email address."
+                  },
                   "mailboxSyncTimeframe": {
                     "type": "string",
                     "enum": [
@@ -973,7 +1074,11 @@
                 ],
                 "properties": {
                   "timeframe": {
-                    "$ref": "#/components/schemas/MailboxSyncTimeframePeriods",
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/MailboxSyncTimeframePeriods"
+                      }
+                    ],
                     "description": "Sync period:\n- 5m: last 5 minutes (quick sync)\n- 1w: 1 week\n- 2w: 2 weeks\n- 1m: 1 month\n"
                   }
                 }
@@ -1198,6 +1303,418 @@
         }
       }
     },
+    "/v2/smtp/connections": {
+      "get": {
+        "operationId": "listSmtpConnections",
+        "summary": "listSmtpConnections",
+        "description": "Returns all custom SMTP connections configured for the organization.\nPasswords are never returned.\n",
+        "tags": [
+          "Custom SMTP"
+        ],
+        "responses": {
+          "200": {
+            "description": "SMTP connections listed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "connections",
+                    "has_connections"
+                  ],
+                  "properties": {
+                    "connections": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/SmtpConnection"
+                      }
+                    },
+                    "has_connections": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "post": {
+        "operationId": "createSmtpConnection",
+        "summary": "createSmtpConnection",
+        "description": "Creates a new custom SMTP connection. Runs a live verify against the SMTP server\nbefore persisting; on failure the request is rejected and nothing is saved. Pass\n`skip_test=true` to store the configuration untested instead.\n",
+        "tags": [
+          "Custom SMTP"
+        ],
+        "parameters": [
+          {
+            "name": "skip_test",
+            "in": "query",
+            "required": false,
+            "description": "Save without running the live verify. Use when the server is not reachable from\nepilot yet, or when a referenced `{{ env.* }}` secret has not been set. The\nconnection is stored untested — `last_test_status` is left unset rather than\nclaimed as `ok` — and env references are not resolved either, since an\nunresolvable one is expected in this case.\n",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSmtpConnectionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "SMTP connection created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SmtpConnection"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error, SMTP test failed, or refused for security reasons\n(private IP, plaintext on non-localhost host, invalid TLS).\n"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/smtp/connections/{connectionId}": {
+      "parameters": [
+        {
+          "name": "connectionId",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "get": {
+        "operationId": "getSmtpConnection",
+        "summary": "getSmtpConnection",
+        "description": "Returns a single custom SMTP connection by id. The password is never returned.",
+        "tags": [
+          "Custom SMTP"
+        ],
+        "responses": {
+          "200": {
+            "description": "SMTP connection retrieved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SmtpConnection"
+                }
+              }
+            }
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      },
+      "put": {
+        "operationId": "updateSmtpConnection",
+        "summary": "updateSmtpConnection",
+        "description": "Partial update; omitted fields keep their existing values. The merged\nconfiguration is verified against the SMTP server before persisting. Pass\n`skip_test=true` to store it untested instead, which also clears any previous\ntest result — it described a configuration that no longer applies.\n",
+        "tags": [
+          "Custom SMTP"
+        ],
+        "parameters": [
+          {
+            "name": "skip_test",
+            "in": "query",
+            "required": false,
+            "description": "Save without running the live verify. Use when the server is not reachable from\nepilot yet, or when a referenced `{{ env.* }}` secret has not been set. The\nconnection is stored untested — `last_test_status` is left unset rather than\nclaimed as `ok` — and env references are not resolved either, since an\nunresolvable one is expected in this case.\n",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateSmtpConnectionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "SMTP connection updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SmtpConnection"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error or SMTP test failed"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteSmtpConnection",
+        "summary": "deleteSmtpConnection",
+        "description": "Deletes a custom SMTP connection. Messages already sent are unaffected.",
+        "tags": [
+          "Custom SMTP"
+        ],
+        "responses": {
+          "200": {
+            "description": "SMTP connection deleted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "connection_id": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/v2/smtp/connections/{connectionId}/test": {
+      "parameters": [
+        {
+          "name": "connectionId",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "post": {
+        "operationId": "testSmtpConnection",
+        "summary": "testSmtpConnection",
+        "description": "Re-runs a live SMTP verify against the saved configuration (EHLO + AUTH + NOOP + QUIT)\nand updates `last_test_status` / `last_tested_at` on the connection.\n",
+        "tags": [
+          "Custom SMTP"
+        ],
+        "responses": {
+          "200": {
+            "description": "SMTP test executed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SmtpTestResult"
+                }
+              }
+            }
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/v2/smtp/senders": {
+      "get": {
+        "operationId": "listSmtpSenders",
+        "summary": "listSmtpSenders",
+        "description": "Returns every address registered to send through a custom SMTP connection.",
+        "tags": [
+          "Custom SMTP"
+        ],
+        "responses": {
+          "200": {
+            "description": "SMTP senders listed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "senders"
+                  ],
+                  "properties": {
+                    "senders": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/SmtpSender"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "post": {
+        "operationId": "connectSmtpSender",
+        "summary": "connectSmtpSender",
+        "description": "Registers an address as a sender on a custom SMTP connection:\n  1. Creates the email address so it can be picked in the composer\n  2. Binds it to the connection, so outgoing mail from it is routed there\nThe SMTP server still has the final say on which From addresses it accepts.\n",
+        "tags": [
+          "Custom SMTP"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConnectSmtpSenderRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Sender connected",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "email_address",
+                    "sender"
+                  ],
+                  "properties": {
+                    "email_address": {
+                      "$ref": "#/components/schemas/EmailAddressResponse"
+                    },
+                    "sender": {
+                      "$ref": "#/components/schemas/SmtpSender"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "description": "The referenced SMTP connection does not exist"
+          },
+          "409": {
+            "description": "The address is already registered, here or in another organization"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/smtp/senders/{email}": {
+      "parameters": [
+        {
+          "name": "email",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "email"
+          }
+        }
+      ],
+      "delete": {
+        "operationId": "disconnectSmtpSender",
+        "summary": "disconnectSmtpSender",
+        "description": "Removes a sender address: deletes the email address and its binding to the SMTP\nconnection. The connection itself and messages already sent are unaffected.\n",
+        "tags": [
+          "Custom SMTP"
+        ],
+        "responses": {
+          "200": {
+            "description": "Sender disconnected",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "success",
+                    "email"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "email": {
+                      "type": "string",
+                      "format": "email"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/v2/outlook/oauth/callback": {
       "get": {
         "operationId": "outlookOAuthCallback",
@@ -1282,6 +1799,14 @@
           },
           {
             "name": "tenant",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "clientdata",
             "in": "query",
             "required": false,
             "schema": {
@@ -2078,6 +2603,12 @@
           "calendar": {
             "type": "boolean",
             "description": "Request 'calendar' specific scopes."
+          },
+          "return_to": {
+            "type": "string",
+            "maxLength": 512,
+            "pattern": "^/[^/\\\\].*$",
+            "description": "Optional same-origin frontend path to redirect to after the OAuth\nround-trip. Must start with a single \"/\" — protocol-relative\nand absolute URLs are rejected.\n"
           }
         }
       },
@@ -2644,6 +3175,89 @@
           }
         }
       },
+      "CalendarAdminConsentStatus": {
+        "type": "object",
+        "required": [
+          "admin_consented"
+        ],
+        "properties": {
+          "admin_consented": {
+            "type": "boolean",
+            "description": "True when the tenant admin has consented to epilot's Microsoft 365\napp, so users in this organization can connect personal calendars.\n"
+          },
+          "admin_consent_url": {
+            "type": "string",
+            "format": "uri",
+            "description": "Microsoft admin-consent URL for an administrator to open. Present\nonly when `admin_consented` is false.\n"
+          }
+        }
+      },
+      "MyCalendarConnectionResponse": {
+        "type": "object",
+        "description": "Per-user calendar connection metadata, or null when the caller has\nnot connected their personal calendar yet.\n",
+        "properties": {
+          "connection": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CalendarConnectionInfo"
+              }
+            ],
+            "nullable": true
+          }
+        }
+      },
+      "CalendarConnectionInfo": {
+        "type": "object",
+        "required": [
+          "user_id",
+          "tenant_id",
+          "status"
+        ],
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "description": "Azure AD Object ID of the connected user"
+          },
+          "tenant_id": {
+            "type": "string",
+            "description": "Microsoft Azure AD tenant ID"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "connected",
+              "expired"
+            ],
+            "description": "Token health for this calendar connection"
+          },
+          "scopes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Granted permission scopes on the user's token"
+          },
+          "connected_by_display_name": {
+            "type": "string"
+          },
+          "connected_by_email": {
+            "type": "string",
+            "format": "email"
+          },
+          "connected_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
       "OutlookConnectionStatus": {
         "type": "object",
         "required": [
@@ -2723,6 +3337,269 @@
           "is_token_valid": {
             "type": "boolean",
             "description": "Whether the current token is still valid"
+          }
+        }
+      },
+      "SmtpConnection": {
+        "type": "object",
+        "required": [
+          "connection_id",
+          "smtp_host",
+          "smtp_port",
+          "smtp_secure",
+          "smtp_username"
+        ],
+        "properties": {
+          "connection_id": {
+            "type": "string",
+            "description": "Stable identifier for this SMTP connection"
+          },
+          "smtp_host": {
+            "type": "string",
+            "description": "Hostname of the SMTP server (e.g. smtp.mailgun.org)"
+          },
+          "smtp_port": {
+            "type": "string",
+            "description": "SMTP port (typically 587 for STARTTLS or 465 for TLS). A string, because it\nmay hold a `{{ env.your_key }}` reference rather than a literal port.\n"
+          },
+          "smtp_secure": {
+            "type": "string",
+            "enum": [
+              "tls",
+              "starttls"
+            ],
+            "description": "Connection security mode. Plaintext SMTP is not offered: it would put the\nSMTP password on the wire in the clear.\n- tls: Implicit TLS (port 465)\n- starttls: STARTTLS upgrade (port 587)\n"
+          },
+          "smtp_username": {
+            "type": "string",
+            "description": "SMTP auth username"
+          },
+          "smtp_password": {
+            "type": "string",
+            "description": "Only returned when the stored value is exactly one `{{ env.your_key }}`\nreference, which names a secret rather than being one — that lets the\nsettings UI edit the reference without dropping it. A literal password, or a\npartly templated one, is omitted entirely: submit an update without this\nfield to keep the stored value.\n"
+          },
+          "connected_by_display_name": {
+            "type": "string"
+          },
+          "connected_by_email": {
+            "type": "string",
+            "format": "email"
+          },
+          "connected_by_user_id": {
+            "type": "string"
+          },
+          "connected_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "last_tested_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "last_test_status": {
+            "type": "string",
+            "enum": [
+              "ok",
+              "auth_failed",
+              "tls_failed",
+              "host_unreachable",
+              "timeout",
+              "secret_missing",
+              "unknown"
+            ]
+          },
+          "last_test_error": {
+            "type": "string",
+            "description": "Latest test error message, if any"
+          }
+        }
+      },
+      "CreateSmtpConnectionRequest": {
+        "type": "object",
+        "required": [
+          "smtp_host",
+          "smtp_port",
+          "smtp_secure",
+          "smtp_username",
+          "smtp_password"
+        ],
+        "properties": {
+          "smtp_host": {
+            "type": "string"
+          },
+          "smtp_port": {
+            "description": "A port between 1 and 65535, or a `{{ env.your_key }}` template resolving to\none. An integer is still accepted, so callers predating the template support\nkeep working.\n",
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 65535
+              }
+            ]
+          },
+          "smtp_secure": {
+            "type": "string",
+            "enum": [
+              "tls",
+              "starttls"
+            ]
+          },
+          "smtp_username": {
+            "type": "string"
+          },
+          "smtp_password": {
+            "type": "string",
+            "description": "May contain `{{ env.your_key }}` templates referencing the organization's\nenvironment variables (including secrets), resolved at send time. Stored as\nentered, so the settings UI edits the template rather than a resolved value.\n",
+            "example": "{{ env.smtp_password }}"
+          }
+        }
+      },
+      "UpdateSmtpConnectionRequest": {
+        "type": "object",
+        "description": "Partial update; omitted fields keep their existing values.",
+        "properties": {
+          "smtp_host": {
+            "type": "string"
+          },
+          "smtp_port": {
+            "description": "A port between 1 and 65535, or a `{{ env.your_key }}` template resolving to\none. An integer is still accepted, so callers predating the template support\nkeep working.\n",
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 65535
+              }
+            ]
+          },
+          "smtp_secure": {
+            "type": "string",
+            "enum": [
+              "tls",
+              "starttls"
+            ]
+          },
+          "smtp_username": {
+            "type": "string"
+          },
+          "smtp_password": {
+            "type": "string"
+          }
+        }
+      },
+      "SmtpSender": {
+        "type": "object",
+        "description": "An address allowed to send through a custom SMTP connection. Mirrors an Outlook\nmailbox: the address, its display name and its assignees live on the shared\nemail-address record, while this row binds it to a set of SMTP credentials.\n",
+        "required": [
+          "email",
+          "connection_id"
+        ],
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "The sender address. Stored lower-cased."
+          },
+          "connection_id": {
+            "type": "string",
+            "description": "SMTP connection this address sends through"
+          },
+          "reply_to_email": {
+            "type": "string",
+            "description": "Default Reply-To for messages from this address. Custom SMTP is send-only, so\npoint this at a mailbox someone actually monitors. May contain a\n`{{ env.your_key }}` template, so this is not constrained to `format: email`.\nA per-message Reply-To still wins.\n"
+          },
+          "connected_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "connected_by_user_id": {
+            "type": "string"
+          }
+        }
+      },
+      "ConnectSmtpSenderRequest": {
+        "type": "object",
+        "required": [
+          "email",
+          "connection_id"
+        ],
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "Address to send from. Must be one the SMTP server accepts as a From."
+          },
+          "connection_id": {
+            "type": "string",
+            "description": "SMTP connection to send through"
+          },
+          "name": {
+            "type": "string",
+            "description": "Sender name shown on outgoing messages."
+          },
+          "reply_to_email": {
+            "type": "string",
+            "description": "Email address, or a `{{ env.your_key }}` template resolving to one."
+          },
+          "shared_inbox_id": {
+            "type": "string",
+            "description": "Shared inbox to associate with the address. Defaults to the default shared inbox.",
+            "default": "default"
+          },
+          "user_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "User IDs for which this address should be available by default."
+          },
+          "group_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Group IDs for which this address should be available by default."
+          },
+          "default_signature_id": {
+            "type": "string",
+            "description": "Default signature ID to use for this address."
+          }
+        }
+      },
+      "SmtpTestResult": {
+        "type": "object",
+        "required": [
+          "status",
+          "tested_at"
+        ],
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "ok",
+              "auth_failed",
+              "tls_failed",
+              "host_unreachable",
+              "timeout",
+              "secret_missing",
+              "unknown"
+            ]
+          },
+          "error": {
+            "type": "string"
+          },
+          "tested_at": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       },

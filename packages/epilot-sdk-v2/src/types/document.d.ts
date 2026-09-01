@@ -1,6 +1,4 @@
 /* Auto-copied from document-client */
-/* eslint-disable */
-
 import type {
   OpenAPIClient,
   Parameters,

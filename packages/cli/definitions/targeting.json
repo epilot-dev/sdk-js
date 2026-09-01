@@ -37,7 +37,7 @@
     "/v1/campaign/{campaign_id}/status": {
       "post": {
         "operationId": "changeCampaignStatus",
-        "summary": "Change the status of a campaign",
+        "summary": "changeCampaignStatus",
         "description": "Change the status of a campaign to a desired status.\n\nThe status can be one of the following: active, inactive.\n\nStatus transition is accompanied by side effects, e.g., automation execution.\n",
         "tags": [
           "Campaign"
@@ -69,7 +69,7 @@
       "get": {
         "operationId": "getCampaignJobStatus",
         "description": "Get the status of a campaign's automation job",
-        "summary": "Get the status of a campaign's automation job",
+        "summary": "getCampaignJobStatus",
         "tags": [
           "Campaign"
         ],
@@ -99,7 +99,7 @@
     "/v1/campaign/{campaign_id}/portals": {
       "get": {
         "operationId": "getCampaignPortals",
-        "summary": "Get portals usage info for a campaign",
+        "summary": "getCampaignPortals",
         "description": "Get the list of portals and its widgets where the campaign is used.\n",
         "tags": [
           "Campaign"
@@ -130,7 +130,7 @@
     "/v1/campaign/{campaign_id}/automations:retrigger": {
       "post": {
         "operationId": "retriggerCampaignAutomations",
-        "summary": "Retrigger automations for campaign recipients",
+        "summary": "retriggerCampaignAutomations",
         "description": "Retrigger automation executions for specific campaign recipients that have failed.\n\nThis endpoint starts new automation executions for the specified recipients\nusing the campaign's associated automation flow. Only recipients with\nautomation_status 'failed' will be processed. Recipients with other statuses\n(success, pending, in_progress, cancelled) will be skipped to prevent\naccidentally retriggering successful or ongoing automations.\n",
         "tags": [
           "Campaign Delivery"
@@ -174,7 +174,7 @@
     "/v1/campaign:setup": {
       "post": {
         "operationId": "setupCampaign",
-        "summary": "Set up a campaign with related entities and configurations",
+        "summary": "setupCampaign",
         "description": "Creates a `campaign` entity together with its related entities and configurations in a single call.\nUsed by the campaign wizard UI, but not restricted to it.\n",
         "tags": [
           "Campaign"
@@ -210,7 +210,7 @@
     "/v1/campaign:match": {
       "post": {
         "operationId": "matchCampaigns",
-        "summary": "Match campaigns",
+        "summary": "matchCampaigns",
         "description": "Match campaigns based on target entities.\n\nThis endpoint returns the list of campaigns where the provided entities are part of the target.\n",
         "tags": [
           "Campaign"
@@ -243,10 +243,46 @@
         }
       }
     },
+    "/v1/campaign:discover": {
+      "post": {
+        "operationId": "discoverCampaigns",
+        "summary": "discoverCampaigns",
+        "description": "Given an entity, returns the Next Best Actions it should see on the Entity-UI channel.\n\nEnumerates the organization's **active** campaigns that carry a valid Entity-UI Next Best\nAction, live-matches each against the entity using the existing match engine, and returns\nthe matching NBAs priority-sorted (one per campaign).\n\nThis is a pure read: it writes nothing. An entity that matches no campaigns returns an\nempty list, not an error.\n",
+        "tags": [
+          "Campaign"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DiscoverCampaignsParams"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/DiscoverCampaignsResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/ClientErrorResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerErrorResponse"
+          }
+        }
+      }
+    },
     "/v1/target:match": {
       "post": {
         "operationId": "matchTargets",
-        "summary": "Match targets",
+        "summary": "matchTargets",
         "description": "Find targets from the provided list that include the provide entities.\n",
         "tags": [
           "Target"
@@ -282,7 +318,7 @@
     "/v1/target/queries": {
       "post": {
         "operationId": "getTargetQueries",
-        "summary": "Get target queries",
+        "summary": "getTargetQueries",
         "description": "Transform target filters into Lucene queries for the provided target IDs.\nReturns the transformed query string for each target along with any errors encountered.\n",
         "tags": [
           "Target"
@@ -318,7 +354,7 @@
     "/v1/campaign/{campaign_id}/recipient": {
       "post": {
         "operationId": "createRecipient",
-        "summary": "Create a recipient associated with a campaign",
+        "summary": "createRecipient",
         "description": "Creates a new recipient associated with a campaign.",
         "tags": [
           "Campaign Recipient"
@@ -359,7 +395,7 @@
     "/v1/campaign/{campaign_id}/recipient/{recipient_id}": {
       "patch": {
         "operationId": "updateRecipient",
-        "summary": "Update a recipient",
+        "summary": "updateRecipient",
         "description": "Updates a recipient's attributes.",
         "tags": [
           "Campaign Recipient"
@@ -403,7 +439,7 @@
     "/v1/campaign/{campaign_id}/recipient/{recipient_id}/portal:status": {
       "patch": {
         "operationId": "updateRecipientPortalStatus",
-        "summary": "Update portal status for a campaign recipient",
+        "summary": "updateRecipientPortalStatus",
         "description": "Updates the portal status for a specific campaign recipient.\nThe portal_status_updated_at timestamp is automatically set when the status changes.\n\nStatus transition rules:\n- From 'sent': can change to 'seen', 'dismissed', or 'clicked'\n- From 'seen': can change to 'dismissed' or 'clicked'\n- From 'dismissed' or 'clicked': cannot be changed (final states)\n",
         "tags": [
           "Campaign Recipient"
@@ -450,10 +486,97 @@
         }
       }
     },
+    "/v1/campaign/{campaign_id}/recipient/{recipient_id}/entity_ui:status": {
+      "patch": {
+        "operationId": "updateRecipientEntityUiStatus",
+        "summary": "updateRecipientEntityUiStatus",
+        "description": "Records a Next Best Action interaction for a recipient on the Entity-UI channel.\n\nUnlike the portal channel, an NBA recipient is created lazily: the first `seen` creates\nthe recipient record (and requires `entity_schema`). `seen` is idempotent — re-viewing an\nNBA that is already seen/clicked/dismissed is a no-op success and never regresses the status.\n\nStatus transition rules:\n- `seen`: lazily creates the recipient; a no-op success if a status already exists\n- From `seen`: can change to `clicked` or `dismissed`\n- From `clicked`: can change to `dismissed`\n- From `dismissed`: cannot be changed via this operation — use `entity_ui:restore`\n\n`dismissed` and `clicked` require an existing recipient (404 otherwise, since an NBA is\nborn at `seen`) and reject invalid transitions (409).\n\nThe entity_ui_status_updated_at timestamp is automatically set when the status changes.\n",
+        "tags": [
+          "Campaign Recipient"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CampaignIdPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/RecipientIdPathParam"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateEntityUiStatusRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/RecipientResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/ClientErrorResponse"
+          },
+          "404": {
+            "$ref": "#/components/responses/ClientErrorResponse"
+          },
+          "409": {
+            "$ref": "#/components/responses/ClientErrorResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerErrorResponse"
+          }
+        }
+      }
+    },
+    "/v1/campaign/{campaign_id}/recipient/{recipient_id}/entity_ui:restore": {
+      "post": {
+        "operationId": "restoreRecipientEntityUiStatus",
+        "summary": "Undo a dismissal on the Entity-UI (Next Best Action) channel",
+        "description": "Reverses a dismissal so the Next Best Action becomes visible to the entity again. This is\nthe only way out of `dismissed` — `entity_ui:status` cannot leave that state.\n\nThe recipient's status is restored to whatever it was immediately before the dismissal\n(recorded in `entity_ui_status_before_dismiss`), so a `clicked` NBA that was dismissed\nreturns to `clicked` and does not lose its recorded click. Falls back to `seen` when no\nprevious status was recorded.\n\nScoped to the Entity-UI channel only: the recipient's portal and automation state is never\ntouched. Takes no request body — the recipient's current state fully determines the result.\n\nReturns 404 when the recipient has no Entity-UI status at all, and 409 when it has one but\nis not currently `dismissed` (there is nothing to undo).\n",
+        "tags": [
+          "Campaign Recipient"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CampaignIdPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/RecipientIdPathParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/RecipientResponse"
+          },
+          "404": {
+            "$ref": "#/components/responses/ClientErrorResponse"
+          },
+          "409": {
+            "$ref": "#/components/responses/ClientErrorResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerErrorResponse"
+          }
+        }
+      }
+    },
     "/v1/campaign/{campaign_id}/recipients": {
       "get": {
         "operationId": "getRecipients",
-        "summary": "Get campaign recipients",
+        "summary": "getRecipients",
         "description": "Get a paginated list of recipients for a campaign.",
         "tags": [
           "Campaign Recipient"
@@ -495,9 +618,14 @@
           {
             "name": "automation_status",
             "in": "query",
-            "description": "Filter by automation status",
+            "description": "Filter by automation status. Repeat the parameter to match multiple\nstatuses in one request\n(e.g. automation_status=failed&automation_status=cancelled).\n",
+            "style": "form",
+            "explode": true,
             "schema": {
-              "$ref": "#/components/schemas/AutomationStatus"
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/AutomationStatus"
+              }
             }
           },
           {
@@ -507,11 +635,50 @@
             "schema": {
               "$ref": "#/components/schemas/PortalStatus"
             }
+          },
+          {
+            "name": "email_status",
+            "in": "query",
+            "description": "Filter by email delivery status (e.g. bounced, delivered). The response total reflects the count for the filtered status.",
+            "schema": {
+              "$ref": "#/components/schemas/EmailStatus"
+            }
           }
         ],
         "responses": {
           "200": {
             "$ref": "#/components/responses/RecipientsResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/ClientErrorResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerErrorResponse"
+          }
+        }
+      }
+    },
+    "/v1/campaign/{campaign_id}/email-stats": {
+      "get": {
+        "operationId": "getEmailStats",
+        "summary": "getEmailStats",
+        "description": "Aggregate email delivery counts for a campaign, for the KPI summary on the campaign UI.\nCounts cover the email (automation) channel only; `total_emailed` is the number of\nrecipients with a recorded email status. `delivered` is derivable as\n`total_emailed - bounced - complained - failed`.\n",
+        "tags": [
+          "Campaign Recipient"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CampaignIdPathParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/EmailStatsResponse"
           },
           "400": {
             "$ref": "#/components/responses/ClientErrorResponse"
@@ -575,6 +742,7 @@
                   "CAMPAIGN_NOT_FOUND",
                   "CAMPAIGN_HAS_NO_TARGET",
                   "CAMPAIGN_HAS_NO_DELIVERY_METHOD",
+                  "INVALID_NEXT_BEST_ACTION",
                   "CAMPAIGN_HAS_JOB_IN_PROGRESS",
                   "CAMPAIGN_HAS_UNEXPECTED_STATUS",
                   "JOB_TOKEN_MISSING",
@@ -913,6 +1081,150 @@
         ],
         "additionalProperties": false
       },
+      "NextBestAction": {
+        "type": "object",
+        "description": "A Next Best Action configured on a campaign's Entity-UI channel.\nThis is the canonical NBA contract shared by discovery (this API), authoring, and rendering.\nNBA content is single-language in v1; text fields may contain `{{placeholders}}` resolved at render time.\n",
+        "properties": {
+          "category": {
+            "type": "string",
+            "maxLength": 30,
+            "description": "Light category label shown above the title. Free-form text."
+          },
+          "icon": {
+            "type": "object",
+            "description": "Curated icon for the NBA.",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Icon name from \"@epilot360/icons\"."
+              },
+              "color": {
+                "type": "string",
+                "description": "Optional icon color."
+              }
+            },
+            "required": [
+              "name"
+            ]
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 60,
+            "description": "Bold action title. Required. Supports `{{placeholders}}`."
+          },
+          "body": {
+            "type": "string",
+            "maxLength": 140,
+            "description": "Optional description. Supports `{{placeholders}}` (incl. relative dates)."
+          },
+          "priority": {
+            "type": "string",
+            "enum": [
+              "low",
+              "medium",
+              "high"
+            ],
+            "default": "medium",
+            "description": "Display priority. NBAs are shown highest-priority first."
+          },
+          "is_dismissable": {
+            "type": "boolean",
+            "default": true,
+            "description": "Whether the agent can dismiss the NBA."
+          },
+          "cta": {
+            "type": "object",
+            "description": "The NBA's single call-to-action.",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "journey",
+                  "workflow",
+                  "flow"
+                ]
+              },
+              "target": {
+                "type": "string",
+                "description": "Journey id, workflow definition id, or flow template id, depending on `type`."
+              },
+              "context_params": {
+                "type": "array",
+                "description": "Journey context parameters (journey CTA only). Maps the journey's declared\ncontext parameters so the journey knows which entity it is about. Discovery\nreturns them verbatim; they are passed to the journey when it launches.\n",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "key": {
+                      "type": "string"
+                    },
+                    "value": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "key",
+                    "value"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "type",
+              "target"
+            ]
+          }
+        },
+        "required": [
+          "title",
+          "cta"
+        ]
+      },
+      "DiscoverCampaignsParams": {
+        "type": "object",
+        "properties": {
+          "entity_id": {
+            "$ref": "#/components/schemas/BaseUUID"
+          },
+          "entity_schema": {
+            "type": "string",
+            "description": "The schema slug of the entity (e.g. \"contact\" or \"account\")."
+          }
+        },
+        "required": [
+          "entity_id",
+          "entity_schema"
+        ],
+        "additionalProperties": false
+      },
+      "DiscoverResult": {
+        "type": "object",
+        "description": "One discovered Next Best Action, plus this entity's interaction state for it.",
+        "properties": {
+          "campaign_id": {
+            "$ref": "#/components/schemas/BaseUUID"
+          },
+          "nba": {
+            "$ref": "#/components/schemas/NextBestAction"
+          },
+          "status": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EntityUiStatus"
+              }
+            ],
+            "description": "The recipient's current Entity-UI status for this campaign, present only when a\nrecipient record already exists (i.e. the entity has previously seen, clicked or\ndismissed this NBA). Absent when the entity has not yet interacted with it.\n\nIn `results` this is only ever `seen` or `clicked`; in `dismissed` it is always\n`dismissed`. Lets the client skip a redundant `seen` call for NBAs already seen.\n"
+          },
+          "status_updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When `status` was last written. Present whenever `status` is. Lets the client show how\nlong ago an NBA was dismissed.\n"
+          }
+        },
+        "required": [
+          "campaign_id",
+          "nba"
+        ]
+      },
       "MatchTargetParams": {
         "type": "object",
         "properties": {
@@ -1017,6 +1329,34 @@
           "clicked"
         ]
       },
+      "EntityUiStatus": {
+        "type": "string",
+        "description": "Lifecycle status of a Next Best Action on the Entity-UI channel. Unlike the portal\nchannel there is no `sent` state: an NBA recipient is born at `seen`, the moment the\naction is first rendered to an agent.\n",
+        "enum": [
+          "seen",
+          "dismissed",
+          "clicked"
+        ]
+      },
+      "EmailStatus": {
+        "type": "string",
+        "description": "Delivery status of the email a campaign's automation sends to a recipient. Set to `sent`\nonce the automation hands the email off, then updated asynchronously as SES notifications\narrive (`bounced` / `complained`; an SES Reject maps to `bounced`). `failed` is a send-time\nfailure (the automation execution could not send at all), distinct from an asynchronous\nbounce. `delivered` is reserved for when Delivery events are published.\n",
+        "enum": [
+          "sent",
+          "delivered",
+          "bounced",
+          "complained",
+          "failed"
+        ]
+      },
+      "EmailBounceType": {
+        "type": "string",
+        "description": "SES bounce classification: `permanent` (hard) or `transient` (soft).",
+        "enum": [
+          "permanent",
+          "transient"
+        ]
+      },
       "Recipient": {
         "type": "object",
         "properties": {
@@ -1045,6 +1385,100 @@
           "portal_state": {
             "type": "object",
             "additionalProperties": true
+          },
+          "entity_ui_status": {
+            "$ref": "#/components/schemas/EntityUiStatus"
+          },
+          "entity_ui_status_updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "entity_ui_status_before_dismiss": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EntityUiStatus"
+              }
+            ],
+            "description": "The Entity-UI status the recipient held immediately before it was dismissed, so\n`entity_ui:restore` can put it back without losing a recorded click.\n\nServer-managed — never send this from a client; it is ignored on write. Meaningful\n**only while** `entity_ui_status` is `dismissed`: a restore intentionally leaves the\nvalue behind rather than clearing it, so a stale value after a restore is expected and\nmust not be read.\n"
+          },
+          "message_entity_id": {
+            "type": "string",
+            "description": "The message entity id of the email sent to this recipient by the campaign's automation\n(not the SES/provider message id), used to correlate SES delivery notifications back to\nthe recipient. Server-managed.\n"
+          },
+          "email_status": {
+            "$ref": "#/components/schemas/EmailStatus"
+          },
+          "email_status_updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "email_bounce_type": {
+            "$ref": "#/components/schemas/EmailBounceType"
+          },
+          "email_bounce_subtype": {
+            "type": "string",
+            "description": "SES bounce sub-type (e.g. `General`, `NoEmail`, `MailboxFull`)."
+          },
+          "email_complaint_type": {
+            "type": "string",
+            "description": "SES complaint feedback type (e.g. `abuse`, `fraud`), set for complaints."
+          },
+          "email_bounce_reason": {
+            "type": "string",
+            "description": "Human-readable failure reason — the SES bounce `diagnosticCode`, the complaint\nfeedback type, or a send-time error message.\n"
+          },
+          "email_send_error": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "The raw SES notification (or send error) kept verbatim for a detail view."
+          },
+          "email_unsubscribed_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the contact unsubscribed from email marketing (opted out). Server-managed."
+          },
+          "email_open_count": {
+            "type": "integer",
+            "description": "Number of SES opens recorded for this recipient (only where open tracking is on)."
+          },
+          "email_first_opened_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the recipient first opened the email."
+          },
+          "email_last_opened_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the recipient most recently opened the email."
+          },
+          "email_click_count": {
+            "type": "integer",
+            "description": "Number of SES link clicks recorded for this recipient (only where click tracking is on)."
+          },
+          "email_first_clicked_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the recipient first clicked a link."
+          },
+          "email_clicked_links": {
+            "type": "array",
+            "description": "Raw click events (URL + timestamp); aggregate per-URL on the client.",
+            "items": {
+              "type": "object",
+              "required": [
+                "url",
+                "clicked_at"
+              ],
+              "properties": {
+                "url": {
+                  "type": "string"
+                },
+                "clicked_at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              }
+            }
           },
           "updated_at": {
             "type": "string",
@@ -1210,6 +1644,22 @@
         "required": [
           "status"
         ]
+      },
+      "UpdateEntityUiStatusRequest": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/EntityUiStatus"
+          },
+          "entity_schema": {
+            "type": "string",
+            "description": "Schema slug of the recipient entity (e.g. \"contact\"). Required when recording the\nfirst `seen`, which lazily creates the recipient record; ignored on later transitions.\n"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "additionalProperties": false
       },
       "SetupCampaignRequest": {
         "description": "Discriminated by `type`. Each campaign variant has its own request shape;\nnew variants are added by introducing a new schema and extending the `oneOf` list.\n",
@@ -1525,6 +1975,81 @@
           }
         }
       },
+      "EmailStatsResponse": {
+        "description": "Aggregate email delivery counts for a campaign.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "total_emailed",
+                "sent",
+                "delivered",
+                "bounced",
+                "bounced_hard",
+                "bounced_soft",
+                "complained",
+                "failed",
+                "unsubscribed",
+                "opened",
+                "clicked",
+                "total_opens",
+                "total_clicks"
+              ],
+              "properties": {
+                "total_emailed": {
+                  "type": "integer",
+                  "description": "Recipients with a recorded email status (the KPI denominator)."
+                },
+                "sent": {
+                  "type": "integer"
+                },
+                "delivered": {
+                  "type": "integer",
+                  "description": "Recipients whose SES Delivery event was recorded (needs Delivery publishing enabled)."
+                },
+                "bounced": {
+                  "type": "integer"
+                },
+                "bounced_hard": {
+                  "type": "integer",
+                  "description": "Bounces classified permanent (bounced_hard + bounced_soft = bounced)."
+                },
+                "bounced_soft": {
+                  "type": "integer",
+                  "description": "Bounces classified transient."
+                },
+                "complained": {
+                  "type": "integer"
+                },
+                "failed": {
+                  "type": "integer"
+                },
+                "unsubscribed": {
+                  "type": "integer",
+                  "description": "Recipients who opted out of email marketing."
+                },
+                "opened": {
+                  "type": "integer",
+                  "description": "Unique recipients with at least one open (only where open tracking is on)."
+                },
+                "clicked": {
+                  "type": "integer",
+                  "description": "Unique recipients with at least one link click (only where click tracking is on)."
+                },
+                "total_opens": {
+                  "type": "integer",
+                  "description": "Total opens across all recipients."
+                },
+                "total_clicks": {
+                  "type": "integer",
+                  "description": "Total link clicks across all recipients."
+                }
+              }
+            }
+          }
+        }
+      },
       "MatchCampaignsResponse": {
         "description": "List of campaigns where the target entities match the given entities.",
         "content": {
@@ -1552,6 +2077,41 @@
                   }
                 }
               }
+            }
+          }
+        }
+      },
+      "DiscoverCampaignsResponse": {
+        "description": "The Next Best Actions the entity should see on the Entity-UI channel, priority-sorted.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "hits": {
+                  "type": "number",
+                  "description": "Number of matching NBAs. Counts `results` only — dismissed ones are excluded."
+                },
+                "results": {
+                  "type": "array",
+                  "description": "Matching NBAs, sorted by priority (desc); one entry per campaign.",
+                  "items": {
+                    "$ref": "#/components/schemas/DiscoverResult"
+                  }
+                },
+                "dismissed": {
+                  "type": "array",
+                  "description": "NBAs this entity has dismissed that would otherwise be in `results` — same shape,\nalso priority-sorted. Returned so the client can show the agent what it hid and\noffer to restore it, without a second round-trip.\n\nOnly currently-relevant dismissals appear: each one is matched against its\ncampaign's target exactly like a visible NBA, so a dismissal is dropped once the\ncampaign ends or the entity stops matching. Capped, so this is not a complete\ndismissal history.\n",
+                  "items": {
+                    "$ref": "#/components/schemas/DiscoverResult"
+                  }
+                }
+              },
+              "required": [
+                "hits",
+                "results",
+                "dismissed"
+              ]
             }
           }
         }

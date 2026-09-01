@@ -2,8 +2,8 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Pricing API",
-    "description": "The `pricing-api` hub sets the foundations for the following Pricing APIs:\n\n### Order API\nThis api enables the management of orders in epilot 360, providing features such as:\n - Automatic calculation of totals and price breakdowns for taxes on the Order entity\n - Product and pricing data validation\n\n### Shopping Cart API\nUsed to interact with a cart during a customer's checkout session, providing:\n - An unified data model to model a Shopping Cart\n - Product and pricing data validation\n - Checkout a cart into an order or quote\n\n### Catalog API\nProvides a way to query the entire catalog of products and prices.\n\n### Availability API\nProvides endpoints for querying products availability by a set of predefined dimensions.\n\n### Spot Market API\nProvides endpoints to fetch (historic) spot market price data.\n\n### External Integrations API\nProvides endpoints for external integrations. E.g. GetAG.\n\n### External Catalog API\nProvides endpoints for external catalog.\n\n### Product Recommendations API\nProvides endpoints for product recommendations.\n",
-    "version": "1.1.0",
+    "description": "The `pricing-api` hub sets the foundations for the following Pricing APIs:\n\n### Order API\nThis api enables the management of orders in epilot 360, providing features such as:\n - Automatic calculation of totals and price breakdowns for taxes on the Order entity\n - Product and pricing data validation\n\n### Shopping Cart API\nUsed to interact with a cart during a customer's checkout session, providing:\n - An unified data model to model a Shopping Cart\n - Product and pricing data validation\n - Checkout a cart into an order or quote\n\n### Catalog API\nProvides a way to query the entire catalog of products and prices.\n\n### Availability API\nProvides endpoints for querying products availability by a set of predefined dimensions.\n\n### Spot Market API\nProvides endpoints to fetch (historic) spot market price data.\n\n### External Integrations API\nProvides endpoints for external integrations. E.g. GetAG.\n\n### External Catalog API\nProvides endpoints for external catalog.\n\n### Product Recommendations API\nProvides endpoints for product recommendations.\n\n### Conditional Pricing API\nProvides endpoints for resolving conditional Products, Prices and Coupons, and for authoring the conditions they vary by.\n",
+    "version": "1.2.1",
     "termsOfService": "https://epilot.cloud/agb",
     "contact": {
       "name": "Support",
@@ -47,6 +47,10 @@
     {
       "name": "Product Recommendations API",
       "description": "Provides endpoints for product recommendations.\n"
+    },
+    {
+      "name": "Conditional Pricing API",
+      "description": "Provides endpoints for resolving conditional Products, Prices and Coupons — the variant of an\nentity that applies to a given context — and for authoring the conditions they vary by.\n"
     },
     {
       "name": "order_schema",
@@ -96,7 +100,8 @@
         "External Integrations API",
         "External Catalog API",
         "Product Recommendations API",
-        "Promo Codes API"
+        "Promo Codes API",
+        "Conditional Pricing API"
       ]
     },
     {
@@ -136,7 +141,7 @@
     "/v1/pricing:compute": {
       "post": {
         "description": "Computes a set of pricing details that can be persisted on an entity with the pricing capability enabled, e.g: Orders or Contracts.",
-        "summary": "calculatePricingDetails",
+        "summary": "$calculatePricingDetails",
         "operationId": "$calculatePricingDetails",
         "tags": [
           "Order API"
@@ -876,7 +881,7 @@
             "name": "id",
             "description": "Order entity ID",
             "schema": {
-              "type": "string"
+              "$ref": "#/components/schemas/EntityId"
             },
             "required": true,
             "example": "9d4602d3-03be-4d85-86b2-f3c6555fc606"
@@ -995,7 +1000,7 @@
       "post": {
         "description": "Checkouts a cart and executes the specified checkout `mode` process.\n\nA Checkout implicitly finalizes the provided cart (if not transient from a fast-checkout) and behaves in one of the following modes:\n- `create_order` (**default**): the payment happens at a later date or managed by 3rd-party CRM (SAP)\n- `create_invoice`: the payment happens on the online checkout (paypal, stripe, adyen)\n- `create_quote`: the checkout represents a price quote request\n\nFast checkout is also supported, by passing the Cart contents directly.\nWhen a fast checkout is performed the cart is considered transient and there is no cart persistance.\n\nIf the checkout `mode` is omitted, the `mode` will default to `create_order`.\n",
         "operationId": "$checkoutCart",
-        "summary": "checkoutCart",
+        "summary": "$checkoutCart",
         "security": [
           {},
           {
@@ -1064,7 +1069,7 @@
       "post": {
         "description": "Provides a querying functionalities over products and prices of the Catalog for a given organization.",
         "operationId": "$searchCatalog",
-        "summary": "searchCatalog",
+        "summary": "$searchCatalog",
         "security": [
           {},
           {
@@ -1131,7 +1136,7 @@
       "post": {
         "description": "Provides a querying functionalities over products and prices of the Catalog for a given organization.",
         "operationId": "$privateSearchCatalog",
-        "summary": "privateSearchCatalog",
+        "summary": "$privateSearchCatalog",
         "tags": [
           "Catalog API"
         ],
@@ -1172,7 +1177,7 @@
     "/v1/public/validate-promo-codes": {
       "post": {
         "description": "Validate a list of promo codes against a list of coupons",
-        "summary": "validatePromoCodes",
+        "summary": "$validatePromoCodes",
         "operationId": "$validatePromoCodes",
         "tags": [
           "Promo Codes API"
@@ -1288,7 +1293,7 @@
       "post": {
         "description": "The availability check endpoint",
         "operationId": "$availabilityCheck",
-        "summary": "availabilityCheck",
+        "summary": "$availabilityCheck",
         "security": [
           {
             "EpilotPublicAuth": []
@@ -1402,7 +1407,7 @@
       "get": {
         "description": "Validates an availability file, it returns an array of errors if the file is invalid",
         "operationId": "$validateAvailabilityFile",
-        "summary": "validateAvailabilityFile",
+        "summary": "$validateAvailabilityFile",
         "tags": [
           "Availability API"
         ],
@@ -1483,7 +1488,7 @@
       "get": {
         "description": "Get a series of historic energy prices for a given time period, market and bidding zone.",
         "operationId": "$historicMarketPrices",
-        "summary": "historicMarketPrices",
+        "summary": "$historicMarketPrices",
         "tags": [
           "Spot Market API"
         ],
@@ -1593,7 +1598,7 @@
       "get": {
         "description": "Get the average energy prices for a given time period, market and bidding zone.",
         "operationId": "$averageMarketPrice",
-        "summary": "averageMarketPrice",
+        "summary": "$averageMarketPrice",
         "tags": [
           "Spot Market API"
         ],
@@ -1712,7 +1717,7 @@
             "example": "external-catalog"
           }
         ],
-        "summary": "searchExternalProducts",
+        "summary": "$searchExternalProducts",
         "tags": [
           "External Integrations API"
         ],
@@ -1874,7 +1879,7 @@
             "example": "external-catalog"
           }
         ],
-        "summary": "searchExternalProductRecommendations",
+        "summary": "$searchExternalProductRecommendations",
         "tags": [
           "External Integrations API"
         ],
@@ -2261,7 +2266,7 @@
             "example": "getag"
           }
         ],
-        "summary": "searchProviders",
+        "summary": "$searchProviders",
         "tags": [
           "External Integrations API"
         ],
@@ -2413,7 +2418,7 @@
             "example": "getag"
           }
         ],
-        "summary": "searchStreets",
+        "summary": "$searchStreets",
         "tags": [
           "External Integrations API"
         ],
@@ -2513,7 +2518,7 @@
             "example": "getag"
           }
         ],
-        "summary": "calculatePricingDetails",
+        "summary": "$computePrice",
         "tags": [
           "External Integrations API"
         ],
@@ -2603,7 +2608,7 @@
       "get": {
         "description": "Gets the credentials for a given integration / organization",
         "operationId": "$getCredentials",
-        "summary": "getCredentials",
+        "summary": "$getCredentials",
         "tags": [
           "External Integrations API"
         ],
@@ -2665,7 +2670,7 @@
       "put": {
         "description": "Saves the credentials for a given integration / organization",
         "operationId": "$saveCredentials",
-        "summary": "saveCredentials",
+        "summary": "$saveCredentials",
         "tags": [
           "External Integrations API"
         ],
@@ -2719,7 +2724,7 @@
       "delete": {
         "description": "Delete the credentials for a given integration / organization",
         "operationId": "$deleteCredentials",
-        "summary": "deleteCredentials",
+        "summary": "$deleteCredentials",
         "tags": [
           "External Integrations API"
         ],
@@ -2762,7 +2767,7 @@
             "EpilotPublicAuth": []
           }
         ],
-        "summary": "getExternalCatalogProducts",
+        "summary": "$getExternalCatalogProducts",
         "tags": [
           "External Catalog API"
         ],
@@ -2923,7 +2928,7 @@
             "EpilotPublicAuth": []
           }
         ],
-        "summary": "getExternalCatalogProductRecommendations",
+        "summary": "$getExternalCatalogProductRecommendations",
         "tags": [
           "External Catalog API"
         ],
@@ -3266,7 +3271,7 @@
       "post": {
         "description": "Get a list of product recommendations based on the search parameters.",
         "operationId": "$productRecommendations",
-        "summary": "productRecommendations",
+        "summary": "$productRecommendations",
         "security": [
           {
             "EpilotPublicAuth": []
@@ -3406,6 +3411,1021 @@
           }
         }
       }
+    },
+    "/v1/conditional-pricing/{slug}/condition-sets": {
+      "get": {
+        "description": "Returns the condition sets built in for one conditional entity type: the situations a\nconditional Product, Price or Coupon is commonly varied by, ready to be copied into that\nschema's `conditions` array and extended or modified from there.\n\nWhich sets exist depends on the schema — an offer window is a Product's dimension, a delivery\narea is a Price's and a Coupon's — so only the sets built in for `slug` are returned.\n\nStatic, read-only reference data. The catalog is the same for every organization and is not\napplied to any schema by this endpoint — adding conditions to a schema stays an Entity API\nwrite.\n",
+        "operationId": "$getConditionSets",
+        "summary": "$getConditionSets",
+        "tags": [
+          "Conditional Pricing API"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "description": "The conditional entity type whose built-in condition sets to return",
+            "schema": {
+              "$ref": "#/components/schemas/ConditionalEntitySlug"
+            },
+            "required": true,
+            "example": "price"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The condition sets built in for this entity type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConditionSetCatalog"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request, e.g. the slug names no conditional entity type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/conditional-pricing:resolve": {
+      "post": {
+        "description": "Resolves which of a conditional entity's variants apply to a situation, and returns each one\ncomposed: the base entity overlaid with the values of the version in effect at `as_of`.\n\nResolution is two selections in a fixed order — the variant, by matching `context` against\nthe conditions each variant pins; then the version, by `as_of`. It is always scoped to one\nlogical entity, so it stays a cheap, predictable lookup rather than an open search.\n\nMatching follows two rules worth knowing before assembling a context. A condition a variant\ndoes **not** pin matches any value, which is what lets a condition be added to a schema\nwithout breaking the variants that already exist. A condition **missing from `context`**,\nhowever, does not satisfy one a variant pinned: an incomplete integration resolves to\nnothing rather than silently matching another segment's variants.\n\nWhen nothing matches, the entity's `default` variant is returned if it has one. There is no\nimplicit fallback to the unmodified base entity — its values are the ones no variant\noverrode, which is not an answer to \"what applies here\".\n\nAvailability is a separate mechanism and is never consulted here.\n",
+        "operationId": "$resolveConditionalEntity",
+        "summary": "$resolveConditionalEntity",
+        "tags": [
+          "Conditional Pricing API"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResolveConditionalEntityRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The variants that apply, each composed with the version in effect. Empty when nothing\napplies and the entity has no `default` variant. With `resolve_one`, exactly one result.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResolvedVariants"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The context is not usable against this schema: it names an undefined condition\n(`CONDITION_UNDEFINED`), applies an operator the condition's type does not support\n(`OPERATOR_UNSUPPORTED`), carries a value malformed for its type (`CONTEXT_FORMAT_INVALID`),\nor selects more variants than one response may carry (`TOO_MANY_MATCHES`).\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConditionalPricingError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such schema or entity, or — with `resolve_one` — nothing applied and the entity has no\n`default` variant (`NOT_FOUND`).\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConditionalPricingError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Several variants apply while a single result was requested (`AMBIGUOUS_RESOLUTION`); the\ncandidates are in `details`.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConditionalPricingError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/conditional-pricing/{slug}/entities/{entity_id}/variants": {
+      "post": {
+        "description": "Creates one variant of a conditional entity, together with the first version carrying its\nvalues. Never two calls: a variant that existed without a version would be an entity holding\na condition tuple it cannot answer with.\n\nThe body pins the situation the variant applies to. Pins are exact values only — predicates\nare a read-side concept and are rejected here — and are stored canonicalized for their\ncondition's type, so two spellings of one instant, or one town written two ways, are one\nvariant rather than two that no context can tell apart.\n\nThree write rules are worth knowing before the first call:\n\n- A variant must pin at least one condition or be marked `default`. A variant pinning nothing\n  would be a universal wildcard matching every resolve, which is a far more dangerous thing\n  than a fallback and far easier to create by accident.\n- `default` is a property of the variant, set by the `default` flag, and is never a value in\n  `conditions` — not even `false`. A `default` variant cannot pin anything else, and an entity\n  can have only one, enforced by the ordinary condition-tuple guard rather than by a rule of\n  its own. Any entity may have one; nothing is declared in the schema to allow it.\n- Condition values are immutable afterwards. A variant's identity is the situation it applies\n  to, and orders and contracts pin it. **A condition added to a schema that already has\n  variants is effectively one-way**: every existing variant is a wildcard on the new\n  dimension, but the first variant that pins it is ambiguous against all of them, and\n  retro-pinning the others is blocked by this same rule.\n\nAttribute values are applied only for attributes currently carrying `overridable_attribute`.\nMetadata and non-overridable fields present in the body are ignored rather than rejected, so a\nclient working from a slightly stale schema snapshot still succeeds.\n\n`variant_id` is always server-generated and returned, and is not accepted in the body — the\nrequest schema admits no such property. It is the durable key orders and contracts pin, so it\ncannot be something two independent importers could collide on.\n",
+        "operationId": "$createConditionalVariant",
+        "summary": "$createConditionalVariant",
+        "tags": [
+          "Conditional Pricing API"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "description": "The conditional entity type this variant belongs to",
+            "schema": {
+              "$ref": "#/components/schemas/ConditionalEntitySlug"
+            },
+            "required": true,
+            "example": "price"
+          },
+          {
+            "in": "path",
+            "name": "entity_id",
+            "description": "The conditional entity to add a variant to",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "example": "price-sp26d1yo"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateVariantRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The variant, as created, together with its first version",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreatedVariant"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The variant cannot be created as described: it pins nothing and is not the default, pins\na condition the schema does not declare (`CONDITION_UNDEFINED`), pins a `select` value\noutside the vocabulary the condition declares (`CONDITION_VALUE_INVALID`), pins the\nfallback marker directly under either of its names (`default` or `_default`), carries a\nvalue malformed for its condition's type, or the entity already holds every variant it\nmay hold.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConditionalPricingError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such schema, or no such entity (`NOT_FOUND`).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConditionalPricingError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Another variant of this entity already pins this exact combination of condition values\n(`TUPLE_CONFLICT`, naming it in `details.conflicting_variant_id`) — which is also how a\nsecond `default` variant is refused — or the entity's items are being written\nconcurrently (`WRITE_CONFLICT`, retryable).\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConditionalPricingError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/conditional-pricing/{slug}/entities/{entity_id}/variants/{variant_id}": {
+      "get": {
+        "description": "Returns the version of this variant that is currently in effect — the one with the latest\n`valid_from` at or before now.\n\nThe \"open this variant\" read: no date arithmetic is asked of the caller, and what comes back\ncarries the `_revision` a write to that version has to be sent with, so an editing screen can\nload and save without working out which version it is looking at.\n\nWhat is returned is the version's own attribute overrides, not the base entity overlaid with\nthem. Composing the two is what `:resolve` answers.\n\nA variant staged ahead of its launch has versions but none of them in effect, and is reported\nas having none rather than as not existing — the two are fixed differently.\n",
+        "operationId": "$getActiveConditionalVariantVersion",
+        "summary": "$getActiveConditionalVariantVersion",
+        "tags": [
+          "Conditional Pricing API"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "description": "The conditional entity type this variant belongs to",
+            "schema": {
+              "$ref": "#/components/schemas/ConditionalEntitySlug"
+            },
+            "required": true,
+            "example": "price"
+          },
+          {
+            "in": "path",
+            "name": "entity_id",
+            "description": "The conditional entity the variant belongs to",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "example": "price-sp26d1yo"
+          },
+          {
+            "in": "path",
+            "name": "variant_id",
+            "description": "The variant whose timeline this call addresses",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "example": "var-46045"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The version, as stored",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VariantVersion"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request, e.g. the slug names no conditional entity type.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConditionalPricingError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such variant under this schema, or it has no version at the instant addressed\n(`NOT_FOUND`). A variant whose versions are all still scheduled has none in effect, which is\nreported as such rather than as a missing variant.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConditionalPricingError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "description": "Replaces the values of the version currently in effect, wholesale.\n\nThe body is the complete set of attribute overrides: an attribute the variant may override and\nthat is absent from it stops being overridden. Attributes the variant may **not** override are\nignored where the body carries them, and their stored value is kept rather than dropped — a\nroutine full-snapshot write must not erase an override the moment its attribute's flag happens\nto be off.\n\nEditing the version in effect is the ordinary way a live price is corrected, and warns about\nnothing: what changes is what that version *says*, not which version is in effect.\n\nNeither `valid_from` nor `conditions` can be changed here. Both are accepted when they match\nwhat is stored, so a client building its body from the version it loaded need not strip them\nout first, and both are refused when they name something else.\n",
+        "operationId": "$replaceActiveConditionalVariantVersion",
+        "summary": "$replaceActiveConditionalVariantVersion",
+        "tags": [
+          "Conditional Pricing API"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "description": "The conditional entity type this variant belongs to",
+            "schema": {
+              "$ref": "#/components/schemas/ConditionalEntitySlug"
+            },
+            "required": true,
+            "example": "price"
+          },
+          {
+            "in": "path",
+            "name": "entity_id",
+            "description": "The conditional entity the variant belongs to",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "example": "price-sp26d1yo"
+          },
+          {
+            "in": "path",
+            "name": "variant_id",
+            "description": "The variant whose timeline this call addresses",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "example": "var-46045"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReplaceVersionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The version, as the write left it, together with anything the write moved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WrittenVariantVersion"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The write cannot be applied as described: it would move the version it addresses to another\n`valid_from`, or change the conditions its variant is pinned to — both identity rather than\ncontent, and both fixed at creation. Also when `_revision` is missing or is not a revision\nmarker.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConditionalPricingError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such variant under this schema, or it has no version at the instant addressed\n(`NOT_FOUND`). A variant whose versions are all still scheduled has none in effect, which is\nreported as such rather than as a missing variant.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConditionalPricingError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The version has been written since `_revision` was read (`WRITE_CONFLICT`, retryable after\nre-reading the version).\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConditionalPricingError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "description": "Changes only the fields it names on the version currently in effect.\n\nEverything the body does not mention is left as stored — the \"just nudge this number\" write. A\n`null` is a value like any other rather than a deletion; a client that wants an attribute to\nstop being overridden sends the complete snapshot without it through `PUT`.\n\nAttempting to change a pinned condition value is refused here in particular: a partial update\nis the path a caller reaches for by accident, and a variant's conditions are the situation it\napplies to, which the orders and contracts pinning it depend on not shifting.\n",
+        "operationId": "$patchActiveConditionalVariantVersion",
+        "summary": "$patchActiveConditionalVariantVersion",
+        "tags": [
+          "Conditional Pricing API"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "description": "The conditional entity type this variant belongs to",
+            "schema": {
+              "$ref": "#/components/schemas/ConditionalEntitySlug"
+            },
+            "required": true,
+            "example": "price"
+          },
+          {
+            "in": "path",
+            "name": "entity_id",
+            "description": "The conditional entity the variant belongs to",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "example": "price-sp26d1yo"
+          },
+          {
+            "in": "path",
+            "name": "variant_id",
+            "description": "The variant whose timeline this call addresses",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "example": "var-46045"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchVersionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The version, as the write left it, together with anything the write moved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WrittenVariantVersion"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The write cannot be applied as described: it would move the version it addresses to another\n`valid_from`, or change the conditions its variant is pinned to — both identity rather than\ncontent, and both fixed at creation. Also when `_revision` is missing or is not a revision\nmarker.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConditionalPricingError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such variant under this schema, or it has no version at the instant addressed\n(`NOT_FOUND`). A variant whose versions are all still scheduled has none in effect, which is\nreported as such rather than as a missing variant.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConditionalPricingError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The version has been written since `_revision` was read (`WRITE_CONFLICT`, retryable after\nre-reading the version).\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConditionalPricingError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "description": "Removes one variant of a conditional entity: the condition tuple it holds, its registration\nin the search index, and every version it accumulated.\n\nTwo phases. The first frees the tuple and deregisters the variant, and is what makes the\ncombination of condition values immediately reusable — the second removes the version rows in\nbatches afterwards. A response arrives only once both have finished for this request, but the\ntuple is reusable from the moment the first completes, whether or not the second did: a\nvariant with more versions than one transaction can carry is the ordinary case, not an edge\none. An interrupted delete is safe to send again; it picks up where it stopped.\n\nNothing is archived. A variant an order or contract pins stops resolving, and hydration drops\nthe reference leniently rather than failing the read.\n\nThis removes the **variant**, not one of its versions. To remove a single version, name it on\n`…/variants/{variant_id}/versions/{valid_from}` — including the one currently in effect, which\ndeliberately has no \"delete whichever is live\" shorthand: that is exactly the write nobody\nshould be able to ask for without saying which version they meant.\n",
+        "operationId": "$deleteConditionalVariant",
+        "summary": "$deleteConditionalVariant",
+        "tags": [
+          "Conditional Pricing API"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "description": "The conditional entity type this variant belongs to",
+            "schema": {
+              "$ref": "#/components/schemas/ConditionalEntitySlug"
+            },
+            "required": true,
+            "example": "price"
+          },
+          {
+            "in": "path",
+            "name": "entity_id",
+            "description": "The conditional entity the variant belongs to",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "example": "price-sp26d1yo"
+          },
+          {
+            "in": "path",
+            "name": "variant_id",
+            "description": "The variant to remove",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "example": "var-46045"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "What the delete removed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeletedVariant"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request, e.g. the slug names no conditional entity type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConditionalPricingError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "This entity has no such variant (`NOT_FOUND`).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConditionalPricingError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The variant's items are being written concurrently (`WRITE_CONFLICT`, retryable).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConditionalPricingError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/conditional-pricing/{slug}/entities/{entity_id}/variants/{variant_id}/versions": {
+      "post": {
+        "description": "Appends a version to a variant: a new set of values taking effect at its own instant.\n\nThis is how a price changes. No version carries an end date and nothing is superseded\nexplicitly — the version in effect at an instant is simply the one with the latest `valid_from`\nat or before it, so appending a later version is the whole of \"this is the new price from then\non\". A version dated in the future is staged and excluded from resolution until its date.\n\n**A version is never refused for being late.** A `valid_from` in the past is written like any\nother and answered with warnings in `warnings` naming what it moved — what resolves now, what a\npast-dated read returns, or both. Correcting a price that took effect last week is ordinary\nwork; the alternative, deleting and recreating the variant, breaks every order and contract\npinning its id.\n\nWhat is refused is appending at a `valid_from` the variant already has: that write means either\n\"replace it\" or \"and also this\", and only the caller knows which. The two operations both\nexist, on the dated version path.\n\nThe variant's `conditions` are its identity and are fixed at creation; they may be sent back\nunchanged but never changed.\n",
+        "operationId": "$appendConditionalVariantVersion",
+        "summary": "$appendConditionalVariantVersion",
+        "tags": [
+          "Conditional Pricing API"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "description": "The conditional entity type this variant belongs to",
+            "schema": {
+              "$ref": "#/components/schemas/ConditionalEntitySlug"
+            },
+            "required": true,
+            "example": "price"
+          },
+          {
+            "in": "path",
+            "name": "entity_id",
+            "description": "The conditional entity the variant belongs to",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "example": "price-sp26d1yo"
+          },
+          {
+            "in": "path",
+            "name": "variant_id",
+            "description": "The variant whose timeline this call addresses",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "example": "var-46045"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AppendVersionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The version, as appended, together with anything the write moved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WrittenVariantVersion"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The version cannot be appended as described: the body would change the variant's conditions,\nor `valid_from` is not a timestamp this store can sort by.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConditionalPricingError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such schema, or no such variant under it (`NOT_FOUND`).\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConditionalPricingError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The variant already has a version at that `valid_from` (`VERSION_CONFLICT`) — append means\nappend, never an implicit overwrite. Replace or patch that version instead.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConditionalPricingError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/conditional-pricing/{slug}/entities/{entity_id}/variants/{variant_id}/versions/{valid_from}": {
+      "get": {
+        "description": "Returns one specific version of a variant, by the instant it takes effect — what a form editing\nthat version loads.\n\nExact, never nearest: an instant the variant has no version at is a not-found rather than the\nversion that would be in effect at it. That question is the shorthand read's, or `:resolve`'s.\n",
+        "operationId": "$getConditionalVariantVersion",
+        "summary": "$getConditionalVariantVersion",
+        "tags": [
+          "Conditional Pricing API"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "description": "The conditional entity type this variant belongs to",
+            "schema": {
+              "$ref": "#/components/schemas/ConditionalEntitySlug"
+            },
+            "required": true,
+            "example": "price"
+          },
+          {
+            "in": "path",
+            "name": "entity_id",
+            "description": "The conditional entity the variant belongs to",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "example": "price-sp26d1yo"
+          },
+          {
+            "in": "path",
+            "name": "variant_id",
+            "description": "The variant whose timeline this call addresses",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "example": "var-46045"
+          },
+          {
+            "in": "path",
+            "name": "valid_from",
+            "description": "The version to address, by the instant it takes effect.\n\nAn RFC 3339 date (`2026-01-01`, read as midnight UTC) or date-time\n(`2026-01-01T00:00:00Z`), to at most millisecond precision. Written any accepted way: it is\ncanonicalized before it is matched, so the spelling a read returned and the spelling a\nhuman typed address the same version.\n",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "example": "2027-01-01T00:00:00.000Z"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The version, as stored",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VariantVersion"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request, e.g. a `valid_from` that is not a timestamp this store can sort by.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConditionalPricingError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "This variant has no version at that instant (`NOT_FOUND`).\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConditionalPricingError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "description": "Replaces one version's values wholesale, addressed by its `valid_from`.\n\nEditable whatever its date, at both ends of the timeline: a scheduled version must stay\neditable so a staged price can be corrected before it goes live rather than accumulating dead\nversions beside it, and a past one must stay editable because correcting history is ordinary\nwork. Writing a superseded version is answered with a warning naming what a past-dated read now\nreturns; it is not refused.\n\nAttributes the variant may not override are ignored where the body carries them, and their\nstored value is preserved rather than dropped.\n",
+        "operationId": "$replaceConditionalVariantVersion",
+        "summary": "$replaceConditionalVariantVersion",
+        "tags": [
+          "Conditional Pricing API"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "description": "The conditional entity type this variant belongs to",
+            "schema": {
+              "$ref": "#/components/schemas/ConditionalEntitySlug"
+            },
+            "required": true,
+            "example": "price"
+          },
+          {
+            "in": "path",
+            "name": "entity_id",
+            "description": "The conditional entity the variant belongs to",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "example": "price-sp26d1yo"
+          },
+          {
+            "in": "path",
+            "name": "variant_id",
+            "description": "The variant whose timeline this call addresses",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "example": "var-46045"
+          },
+          {
+            "in": "path",
+            "name": "valid_from",
+            "description": "The version to address, by the instant it takes effect.\n\nAn RFC 3339 date (`2026-01-01`, read as midnight UTC) or date-time\n(`2026-01-01T00:00:00Z`), to at most millisecond precision. Written any accepted way: it is\ncanonicalized before it is matched, so the spelling a read returned and the spelling a\nhuman typed address the same version.\n",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "example": "2027-01-01T00:00:00.000Z"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReplaceVersionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The version, as the write left it, together with anything the write moved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WrittenVariantVersion"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The write cannot be applied as described: it would move the version it addresses to another\n`valid_from`, or change the conditions its variant is pinned to — both identity rather than\ncontent, and both fixed at creation. Also when `_revision` is missing or is not a revision\nmarker.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConditionalPricingError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "This variant has no version at that instant (`NOT_FOUND`).\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConditionalPricingError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The version has been written since `_revision` was read (`WRITE_CONFLICT`, retryable after\nre-reading the version).\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConditionalPricingError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "description": "Changes only the fields it names on one version, addressed by its `valid_from`.\n\nEverything the body does not mention is left as stored. A partial update that tries to change a\npinned condition value is refused: condition values are immutable after a variant is created,\nand this is the path that rule is most likely to be broken on by accident.\n",
+        "operationId": "$patchConditionalVariantVersion",
+        "summary": "$patchConditionalVariantVersion",
+        "tags": [
+          "Conditional Pricing API"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "description": "The conditional entity type this variant belongs to",
+            "schema": {
+              "$ref": "#/components/schemas/ConditionalEntitySlug"
+            },
+            "required": true,
+            "example": "price"
+          },
+          {
+            "in": "path",
+            "name": "entity_id",
+            "description": "The conditional entity the variant belongs to",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "example": "price-sp26d1yo"
+          },
+          {
+            "in": "path",
+            "name": "variant_id",
+            "description": "The variant whose timeline this call addresses",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "example": "var-46045"
+          },
+          {
+            "in": "path",
+            "name": "valid_from",
+            "description": "The version to address, by the instant it takes effect.\n\nAn RFC 3339 date (`2026-01-01`, read as midnight UTC) or date-time\n(`2026-01-01T00:00:00Z`), to at most millisecond precision. Written any accepted way: it is\ncanonicalized before it is matched, so the spelling a read returned and the spelling a\nhuman typed address the same version.\n",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "example": "2027-01-01T00:00:00.000Z"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchVersionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The version, as the write left it, together with anything the write moved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WrittenVariantVersion"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The write cannot be applied as described: it would move the version it addresses to another\n`valid_from`, or change the conditions its variant is pinned to — both identity rather than\ncontent, and both fixed at creation. Also when `_revision` is missing or is not a revision\nmarker.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConditionalPricingError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "This variant has no version at that instant (`NOT_FOUND`).\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConditionalPricingError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The version has been written since `_revision` was read (`WRITE_CONFLICT`, retryable after\nre-reading the version).\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConditionalPricingError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "description": "Removes one version of a variant.\n\nWithdrawing a scheduled adjustment is what this is for, and deleting a future version warns\nabout nothing — nothing that has resolved, or could have resolved, changes. Deleting a version\nthat has taken effect is allowed too and answered with a warning: it changes what a past-dated\nread returns, and if it was the version in effect it changes what resolves now.\n\n**A variant's last remaining version cannot be deleted.** Such a variant would still hold its\ncondition tuple and still be selectable, and then resolve to nothing — which is a variant delete\nwearing a version delete's clothes. Delete the variant instead; that frees the tuple too.\n\nThe variant itself is untouched: it keeps its conditions, its tuple and its place in the index.\n",
+        "operationId": "$deleteConditionalVariantVersion",
+        "summary": "$deleteConditionalVariantVersion",
+        "tags": [
+          "Conditional Pricing API"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "description": "The conditional entity type this variant belongs to",
+            "schema": {
+              "$ref": "#/components/schemas/ConditionalEntitySlug"
+            },
+            "required": true,
+            "example": "price"
+          },
+          {
+            "in": "path",
+            "name": "entity_id",
+            "description": "The conditional entity the variant belongs to",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "example": "price-sp26d1yo"
+          },
+          {
+            "in": "path",
+            "name": "variant_id",
+            "description": "The variant whose timeline this call addresses",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "example": "var-46045"
+          },
+          {
+            "in": "path",
+            "name": "valid_from",
+            "description": "The version to address, by the instant it takes effect.\n\nAn RFC 3339 date (`2026-01-01`, read as midnight UTC) or date-time\n(`2026-01-01T00:00:00Z`), to at most millisecond precision. Written any accepted way: it is\ncanonicalized before it is matched, so the spelling a read returned and the spelling a\nhuman typed address the same version.\n",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "example": "2027-01-01T00:00:00.000Z"
+          },
+          {
+            "in": "query",
+            "name": "_revision",
+            "description": "The revision marker read from the version being deleted. The delete is refused if the\nversion has been written since.\n\nA query parameter rather than a body field, since a DELETE carrying a body travels badly\nthrough clients and proxies; it is the same marker the write bodies carry as `_revision`.\n",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "required": true,
+            "example": 3
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The version removed, together with anything the delete moved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeletedVariantVersion"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The version cannot be removed: it is the variant's only one, `_revision` is missing, or\n`valid_from` is not a timestamp this store can sort by.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConditionalPricingError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "This variant has no version at that instant (`NOT_FOUND`).\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConditionalPricingError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The version has been written since `_revision` was read (`WRITE_CONFLICT`, retryable after\nre-reading the version).\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConditionalPricingError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -3430,6 +4450,694 @@
           "external-catalog"
         ]
       },
+      "ConditionalEntitySlug": {
+        "type": "string",
+        "description": "Schema slug of an entity type that can be conditional — the `{slug}` of every\nconditional-pricing route.\n",
+        "enum": [
+          "product",
+          "price",
+          "coupon"
+        ]
+      },
+      "ConditionType": {
+        "type": "string",
+        "description": "The kind of value a condition holds, which decides how a variant's pinned value is matched\nagainst a resolve context.\n\n- `string`: an arbitrary string, matched exactly and case-sensitively\n- `number`: a numeric value\n- `date`: a single date\n- `daterange`: a window with a from and an until timestamp; both ends may be left open\n- `boolean`: a true/false value\n- `select`: one of the values declared in `options`, unless `allow_any` is set\n- `location`: a geographic value, shaped by `format`\n\nThere is no condition type for the fallback variant. Being the entity's fallback is a\nproperty of the variant, set by the `default` flag on a variant write, and needs nothing\ndeclared in the schema.\n",
+        "enum": [
+          "string",
+          "number",
+          "date",
+          "daterange",
+          "boolean",
+          "select",
+          "location"
+        ]
+      },
+      "ConditionDefinition": {
+        "type": "object",
+        "description": "One condition dimension, in the shape a schema's `conditions` array holds it — copy it in\nverbatim.\n",
+        "required": [
+          "name",
+          "label",
+          "type"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "How variants and resolve contexts refer to this condition. Independent of attribute\nnames: a value needed as an attribute too is duplicated onto the variant.\n\n`default`, and any name beginning with `_`, are reserved for the server: a condition\ndeclared under one is ignored, since nothing could pin it and no context could address it.\n",
+            "example": "postal_code"
+          },
+          "label": {
+            "type": "string",
+            "description": "Human-readable name of the condition.",
+            "example": "Postal Code"
+          },
+          "type": {
+            "$ref": "#/components/schemas/ConditionType"
+          },
+          "options": {
+            "type": "array",
+            "description": "The declared vocabulary of a `select` condition. Absent for every other type.\n\nThe same shape a `select` attribute's `options` has on the Entity API, item for item: an\nentry is either the value itself or an object carrying that value and an optional display\n`title`. A `title` is never pinned by a variant and never matched — two entries differing\nonly in their title are one vocabulary entry.\n\nEnforced on variant writes, unless `allow_any` is true: a pinned value outside the\nvocabulary is rejected with `CONDITION_VALUE_INVALID`. It is *not* enforced on resolve —\na vocabulary says what may be stored, not what may be asked for, so a context value\noutside it is a query that simply matches nothing.\n",
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "nullable": true
+                },
+                {
+                  "type": "object",
+                  "required": [
+                    "value"
+                  ],
+                  "properties": {
+                    "value": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    }
+                  }
+                }
+              ]
+            },
+            "example": [
+              "private",
+              "commercial"
+            ]
+          },
+          "allow_any": {
+            "type": "boolean",
+            "description": "Allow arbitrary stored values in addition to the declared `options`. Absent means strict:\na variant may only pin a declared option.\n",
+            "example": false
+          },
+          "format": {
+            "type": "string",
+            "description": "The value shape of a `location` condition. Absent for every other type.",
+            "enum": [
+              "zipcode",
+              "zipcode + town"
+            ]
+          }
+        }
+      },
+      "ConditionSet": {
+        "type": "object",
+        "description": "A named bundle of condition definitions, built in for one entity type.",
+        "required": [
+          "id",
+          "label",
+          "description",
+          "conditions"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Identifies the set within this entity type's catalog.",
+            "example": "delivery_area"
+          },
+          "label": {
+            "type": "string",
+            "description": "Human-readable name of the set.",
+            "example": "Delivery Area"
+          },
+          "description": {
+            "type": "string",
+            "description": "What the set is for, and when to reach for it."
+          },
+          "conditions": {
+            "type": "array",
+            "description": "The condition definitions to copy into the schema's own `conditions` array.",
+            "items": {
+              "$ref": "#/components/schemas/ConditionDefinition"
+            }
+          }
+        }
+      },
+      "ConditionSetCatalog": {
+        "type": "object",
+        "required": [
+          "results"
+        ],
+        "properties": {
+          "results": {
+            "type": "array",
+            "description": "The condition sets built in for the requested entity type, in the order they are offered.\n",
+            "items": {
+              "$ref": "#/components/schemas/ConditionSet"
+            }
+          }
+        }
+      },
+      "ConditionalPricingErrorCode": {
+        "type": "string",
+        "description": "Machine-readable failure mode of a conditional-pricing operation, allowing clients\nto branch on the kind of failure instead of parsing the error message.\n\n- `NOT_FOUND` (404): the addressed entity, variant or version does not exist\n- `AMBIGUOUS_RESOLUTION` (409): several variants match the given context while a single result was requested\n- `TUPLE_CONFLICT` (409): the condition tuple is already claimed by another variant\n- `VERSION_CONFLICT` (409): a version already exists at the given `valid_from` on that variant\n- `CONDITION_UNDEFINED` (400): the context names a condition the entity's schema does not define\n- `OPERATOR_UNSUPPORTED` (400): the requested operator is not applicable to the condition's type\n- `CONTEXT_FORMAT_INVALID` (400): a context value is malformed for its condition type\n- `CONDITION_VALUE_INVALID` (400): a variant write pins a `select` value the condition's declared `options` do not contain\n- `TOO_MANY_MATCHES` (400): a multi-match resolve exceeded its result cap\n- `WRITE_CONFLICT` (409): transient write contention, retryable unlike `TUPLE_CONFLICT`\n\nEach code is emitted with the HTTP status shown above, and only with that status.\n",
+        "enum": [
+          "NOT_FOUND",
+          "AMBIGUOUS_RESOLUTION",
+          "TUPLE_CONFLICT",
+          "VERSION_CONFLICT",
+          "CONDITION_UNDEFINED",
+          "OPERATOR_UNSUPPORTED",
+          "CONTEXT_FORMAT_INVALID",
+          "CONDITION_VALUE_INVALID",
+          "TOO_MANY_MATCHES",
+          "WRITE_CONFLICT"
+        ]
+      },
+      "ResolveConditionalEntityRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "schema",
+          "entity_id"
+        ],
+        "properties": {
+          "schema": {
+            "$ref": "#/components/schemas/ConditionalEntitySlug"
+          },
+          "entity_id": {
+            "type": "string",
+            "description": "The conditional entity to resolve. Resolution is always scoped to exactly one.",
+            "example": "price-sp26d1yo"
+          },
+          "context": {
+            "$ref": "#/components/schemas/ResolveContext"
+          },
+          "as_of": {
+            "type": "string",
+            "description": "The instant the version is selected at — the version with the latest `valid_from` at or\nbefore it. Defaults to now. A variant whose first version is later than this is\nscheduled rather than applicable, and is excluded from resolution entirely.\n\nAn RFC 3339 date (`2026-01-01`, read as midnight UTC) or date-time\n(`2026-01-01T00:00:00Z`), to at most millisecond precision. Deliberately not declared as\n`format: date-time`, which would reject the plain-date form that this accepts.\n",
+            "example": "2027-03-15T00:00:00Z"
+          },
+          "options": {
+            "$ref": "#/components/schemas/ResolveOptions"
+          }
+        }
+      },
+      "ResolveContext": {
+        "type": "object",
+        "additionalProperties": true,
+        "description": "The situation to resolve for: a flat map keyed by condition name, as the entity's schema\ndeclares them. A condition left out of the map is not a wildcard — it matches only variants\nthat leave that condition unpinned.\n\nEach value is either an exact value, typed by its condition, or a single-operator predicate\nobject:\n\n- `{ \"lt\": v }`, `{ \"lte\": v }`, `{ \"gt\": v }`, `{ \"gte\": v }` — order against a `number` or\n  `date` condition.\n- `{ \"in\": [...] }` — membership, against a `string`, `select` or `number` condition.\n- `{ \"between\": \"2026-03-01\" }` — the explicit spelling of `daterange` containment; a plain\n  date supplied for a `daterange` condition means the same thing.\n- `{ \"exists\": true }` — pinned to any value. `{ \"exists\": false }` says what leaving the key\n  out says.\n\nExact values are typed by their condition: a `string` or `select` matches exactly and\ncase-sensitively, with no trimming; a `location` of format `zipcode` is the postal code\nitself, and one of format `zipcode + town` an object carrying both, whose town is compared\ncase- and whitespace-insensitively while its postal code is not.\n\n`default`, and any name beginning with `_`, are reserved for the server and cannot be\nsupplied here.\n",
+        "example": {
+          "postal_code": "46045",
+          "consumption": {
+            "lt": 5000
+          }
+        }
+      },
+      "ResolveOptions": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "resolve_one": {
+            "type": "boolean",
+            "default": false,
+            "description": "Ask for an unambiguous answer. Several applicable variants become `AMBIGUOUS_RESOLUTION`\nrather than a set, and nothing applicable becomes `NOT_FOUND` rather than an empty one.\nThe response shape does not change: `results` simply carries exactly one entry.\n"
+          }
+        }
+      },
+      "ResolvedVariants": {
+        "type": "object",
+        "required": [
+          "results"
+        ],
+        "properties": {
+          "results": {
+            "type": "array",
+            "description": "One composed payload per applicable variant, capped at 100 — a context selecting more\nthan that is answered with `TOO_MANY_MATCHES` instead, since each result costs its own\nversion lookup. No dominance or specificity ordering is applied between them.\n",
+            "items": {
+              "$ref": "#/components/schemas/ResolvedVariant"
+            }
+          }
+        }
+      },
+      "ResolvedVariant": {
+        "type": "object",
+        "additionalProperties": true,
+        "description": "The entity as this variant leaves it — every attribute of a plain entity read, with the\napplicable version's overrides applied — plus the discriminators saying where the numbers\ncame from.\n",
+        "required": [
+          "_id",
+          "_variant_id",
+          "_version_valid_from",
+          "_conditions"
+        ],
+        "properties": {
+          "_id": {
+            "type": "string",
+            "description": "The logical entity's id — the same one a plain entity read returns. Resolution never\nmints a new identity; a variant is a set of values for *this* entity, not another one.\n",
+            "example": "price-sp26d1yo"
+          },
+          "_variant_id": {
+            "type": "string",
+            "description": "The variant these values came from. Durable: this is what an order or a contract pins to\nread the same numbers back later.\n",
+            "example": "var-46045"
+          },
+          "_version_valid_from": {
+            "type": "string",
+            "description": "The `valid_from` of the version applied for the requested `as_of`.",
+            "example": "2027-01-01T00:00:00.000Z"
+          },
+          "_conditions": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/VariantConditions"
+              }
+            ],
+            "description": "The conditions this variant pins, plus the boolean `default` discriminator.\n\nUnderscore-prefixed, like every other discriminator here, so that it cannot collide with\nan attribute an organization happens to have called `conditions`.\n"
+          }
+        }
+      },
+      "CreateVariantRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "values"
+        ],
+        "properties": {
+          "conditions": {
+            "$ref": "#/components/schemas/PinnedConditions"
+          },
+          "default": {
+            "type": "boolean",
+            "default": false,
+            "description": "Mark this variant as the entity's fallback: the one served when no other variant applies.\n\nA property of the variant, never an entry in `conditions` — a variant claiming a value for\nthe marker would hold a real condition tuple while being permanently unmatchable, since no\nresolve context ever supplies it. A default variant cannot pin anything else, and an\nentity can have at most one.\n\nAvailable to every conditional entity: nothing has to be declared in the schema first.\nThe variant is stored pinning one reserved condition, which is what makes the ordinary\ncondition-tuple guard enforce at-most-one-per-entity with no rule of its own.\n"
+          },
+          "valid_from": {
+            "type": "string",
+            "description": "When the first version takes effect. Defaults to now.\n\nAn RFC 3339 date (`2026-01-01`, read as midnight UTC) or date-time\n(`2026-01-01T00:00:00Z`), to at most millisecond precision. Deliberately not declared as\n`format: date-time`, which would reject the plain-date form that this accepts.\n",
+            "example": "2027-01-01T00:00:00Z"
+          },
+          "values": {
+            "$ref": "#/components/schemas/VariantValues"
+          }
+        }
+      },
+      "VariantConditions": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": [
+          "default"
+        ],
+        "description": "A variant's pinned conditions as a reader sees them: the pins the schema declares, plus a\nboolean `default` saying whether this is the entity's fallback.\n\n`default` is always present and always a boolean, so a client can branch on \"did I get the\nfallback?\" without knowing how one is stored. The reserved condition a fallback is actually\npinned under never appears here.\n",
+        "properties": {
+          "default": {
+            "type": "boolean"
+          }
+        },
+        "example": {
+          "postal_code": "46045",
+          "default": false
+        }
+      },
+      "PinnedConditions": {
+        "type": "object",
+        "additionalProperties": true,
+        "description": "The situation this variant applies to: a flat map keyed by condition name, as the entity's\nschema declares them. A condition left out is a wildcard — the variant applies whatever the\ncontext says for it, which is what makes adding a condition to a schema non-breaking for the\nvariants that already exist.\n\nExact values only. Predicates are accepted in a resolve context and nowhere else, so that\nmatching is decided in exactly one place.\n\nValues are typed by their condition and stored canonicalized for that type: a `date` becomes\nmillisecond-precision UTC, a `daterange` an object carrying `from` and `until` where an empty\nstring is an open end, a `location` of format `zipcode` the postal code itself and one of\nformat `zipcode + town` an object carrying both. A `select` value must be a string, and must\nbe one the condition's `options` declare unless it sets `allow_any`.\n\n`default`, and any name beginning with `_`, are reserved for the server and cannot be pinned\nhere. Whether a variant is the entity's fallback is set through the request's `default` flag.\n",
+        "example": {
+          "postal_code": "46045"
+        }
+      },
+      "VariantValues": {
+        "type": "object",
+        "additionalProperties": true,
+        "description": "The attribute values this version overrides on the base entity, keyed by attribute name.\n\nOnly attributes currently declaring `overridable_attribute` are applied. Metadata fields\n(anything underscore-prefixed), readonly attributes, hidden attributes and non-overridable\nattributes present here are ignored rather than rejected, so a client working from a slightly\nstale schema snapshot still succeeds instead of failing on fields it could not have known to\ndrop. An attribute's `render_condition` says when to show it and has no bearing on whether a\nvariant may override it.\n\nIgnored means *not updated*, never *removed*: a value already stored for an attribute that is\nnot currently overridable is preserved, so removing and restoring the flag deactivates and\nthen reactivates the same override.\n\nA composite price's `price_components` is an ordinary overridable relation attribute: a\ncomposite variant pins its component variants here the same way any other relation value is\nset, with no special handling.\n",
+        "example": {
+          "unit_amount": 2499,
+          "unit_amount_decimal": "24.99"
+        }
+      },
+      "CreatedVariant": {
+        "type": "object",
+        "required": [
+          "variant_id",
+          "entity_id",
+          "schema",
+          "conditions",
+          "valid_from",
+          "values",
+          "_created_at",
+          "_updated_at",
+          "_revision",
+          "warnings"
+        ],
+        "properties": {
+          "variant_id": {
+            "type": "string",
+            "description": "Server-generated, always. This is the durable key orders and contracts pin, so it is never\naccepted from a client — a client-suppliable id would risk collisions between independent\nimporters.\n",
+            "example": "var-46045"
+          },
+          "entity_id": {
+            "type": "string",
+            "example": "price-sp26d1yo"
+          },
+          "schema": {
+            "$ref": "#/components/schemas/ConditionalEntitySlug"
+          },
+          "conditions": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/VariantConditions"
+              }
+            ],
+            "description": "The situation this variant applies to, plus the boolean `default` discriminator — the\nsame shape `_conditions` has on a resolved payload.\n"
+          },
+          "valid_from": {
+            "type": "string",
+            "description": "When the first version takes effect, canonicalized to millisecond-precision UTC.",
+            "example": "2027-01-01T00:00:00.000Z"
+          },
+          "values": {
+            "$ref": "#/components/schemas/VariantValues"
+          },
+          "_created_at": {
+            "type": "string",
+            "description": "When the first version was created.",
+            "readOnly": true
+          },
+          "_updated_at": {
+            "type": "string",
+            "description": "When the first version was last written.",
+            "readOnly": true
+          },
+          "_revision": {
+            "type": "number",
+            "description": "The revision a later write to this version must carry to be accepted. Genuinely current,\nunlike one read back later from an eventually-consistent read.\n",
+            "readOnly": true
+          },
+          "warnings": {
+            "type": "array",
+            "description": "Things worth knowing that did not stop the write. Empty in the ordinary case — a client\nreads its length rather than branching on its absence.\n",
+            "items": {
+              "$ref": "#/components/schemas/VariantWriteWarning"
+            }
+          }
+        }
+      },
+      "VariantWriteWarning": {
+        "type": "object",
+        "required": [
+          "code",
+          "message",
+          "variant_count",
+          "cap"
+        ],
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "- `VARIANT_COUNT_APPROACHING_CAP`: this entity is nearing the number of variants it may\n  hold. Surfaced rather than rejected, so an importer finds out with a whole run's notice\n  instead of discovering the limit halfway through a refresh.\n",
+            "enum": [
+              "VARIANT_COUNT_APPROACHING_CAP"
+            ]
+          },
+          "message": {
+            "type": "string"
+          },
+          "variant_count": {
+            "type": "number",
+            "description": "Variants this entity holds, including the one just created."
+          },
+          "cap": {
+            "type": "number",
+            "description": "Variants this entity may hold. Configurable per organization."
+          }
+        }
+      },
+      "DeletedVariant": {
+        "type": "object",
+        "required": [
+          "variant_id",
+          "entity_id",
+          "schema",
+          "tuple_released",
+          "versions_deleted"
+        ],
+        "properties": {
+          "variant_id": {
+            "type": "string",
+            "example": "var-46045"
+          },
+          "entity_id": {
+            "type": "string",
+            "example": "price-sp26d1yo"
+          },
+          "schema": {
+            "$ref": "#/components/schemas/ConditionalEntitySlug"
+          },
+          "tuple_released": {
+            "type": "boolean",
+            "description": "Whether this call is the one that freed the variant's combination of condition values.\n`false` where an earlier, interrupted attempt had already freed it — the delete still\nsucceeded, and the combination was already reusable.\n"
+          },
+          "versions_deleted": {
+            "type": "number",
+            "description": "Version rows this call removed."
+          }
+        }
+      },
+      "VariantVersion": {
+        "type": "object",
+        "description": "One version of one variant: the attribute overrides it carries, the instant it takes effect,\nand the variant it belongs to.\n\nThese are the version's **own** overrides, not the base entity overlaid with them — this is\nwhat an editing screen loads and saves, and what it edits is the overrides. Composing them onto\nthe entity is what `:resolve` answers.\n",
+        "required": [
+          "variant_id",
+          "entity_id",
+          "schema",
+          "conditions",
+          "valid_from",
+          "values",
+          "_created_at",
+          "_updated_at",
+          "_revision"
+        ],
+        "properties": {
+          "variant_id": {
+            "type": "string",
+            "example": "var-46045"
+          },
+          "entity_id": {
+            "type": "string",
+            "example": "price-sp26d1yo"
+          },
+          "schema": {
+            "$ref": "#/components/schemas/ConditionalEntitySlug"
+          },
+          "conditions": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/VariantConditions"
+              }
+            ],
+            "description": "The situation the variant applies to, plus the boolean `default` discriminator. A property\nof the variant rather than of this version: every version of a variant carries the same\none, and no version write can change it.\n"
+          },
+          "valid_from": {
+            "type": "string",
+            "description": "When this version takes effect, canonicalized to millisecond-precision UTC. A version's\nidentity within its variant — it never moves.\n",
+            "example": "2027-01-01T00:00:00.000Z"
+          },
+          "values": {
+            "$ref": "#/components/schemas/VariantValues"
+          },
+          "_created_at": {
+            "type": "string",
+            "description": "When this version was created.",
+            "readOnly": true
+          },
+          "_updated_at": {
+            "type": "string",
+            "description": "When this version was last written.",
+            "readOnly": true
+          },
+          "_revision": {
+            "type": "integer",
+            "description": "The revision a write to this version must carry to be accepted. Always current: every read\nthat returns one is strongly consistent, so it is never a marker a write would be refused\nfor having read too early.\n",
+            "readOnly": true,
+            "example": 3
+          }
+        }
+      },
+      "WrittenVariantVersion": {
+        "description": "A version as a write left it, together with anything the write moved.\n",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/VariantVersion"
+          },
+          {
+            "type": "object",
+            "required": [
+              "warnings"
+            ],
+            "properties": {
+              "warnings": {
+                "type": "array",
+                "description": "What this write moved, if anything. Empty in the ordinary case — a client reads its\nlength rather than branching on its absence.\n",
+                "items": {
+                  "$ref": "#/components/schemas/VersionWriteWarning"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "DeletedVariantVersion": {
+        "type": "object",
+        "required": [
+          "variant_id",
+          "entity_id",
+          "schema",
+          "valid_from",
+          "warnings"
+        ],
+        "properties": {
+          "variant_id": {
+            "type": "string",
+            "example": "var-46045"
+          },
+          "entity_id": {
+            "type": "string",
+            "example": "price-sp26d1yo"
+          },
+          "schema": {
+            "$ref": "#/components/schemas/ConditionalEntitySlug"
+          },
+          "valid_from": {
+            "type": "string",
+            "description": "The version removed, canonicalized to millisecond-precision UTC.",
+            "example": "2027-01-01T00:00:00.000Z"
+          },
+          "warnings": {
+            "type": "array",
+            "description": "What the delete moved, if anything. Empty when a scheduled version was withdrawn.",
+            "items": {
+              "$ref": "#/components/schemas/VersionWriteWarning"
+            }
+          }
+        }
+      },
+      "VersionWriteWarning": {
+        "type": "object",
+        "description": "Something a version write moved. A version write is never refused for being late — backdating a\nversion, and editing or deleting one that has already been superseded, are both accepted — so\nwhat a caller gets instead is a warning naming exactly what changed. One write can carry both\ncodes.\n",
+        "required": [
+          "code",
+          "message",
+          "valid_from"
+        ],
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "- `ACTIVE_VERSION_REPLACED`: what resolves **now** changed, other than by a newer version\n  taking effect. The version in effect was written behind, or removed.\n- `SUPERSEDED_VERSION_WRITTEN`: what a past-dated (`as_of`) read returns changed. The write\n  landed on, or created, a version that is not the one currently in effect.\n",
+            "enum": [
+              "ACTIVE_VERSION_REPLACED",
+              "SUPERSEDED_VERSION_WRITTEN"
+            ]
+          },
+          "message": {
+            "type": "string"
+          },
+          "valid_from": {
+            "type": "string",
+            "description": "The version this write created, changed or removed.",
+            "example": "2026-08-01T00:00:00.000Z"
+          },
+          "active_valid_from": {
+            "type": "string",
+            "description": "The version in effect when the write landed, before it did. Absent when the variant had\nnone — every version of it still scheduled.\n",
+            "example": "2026-01-01T00:00:00.000Z"
+          }
+        }
+      },
+      "AppendVersionRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "values"
+        ],
+        "properties": {
+          "valid_from": {
+            "type": "string",
+            "description": "When this version takes effect. Defaults to now.\n\nAn RFC 3339 date (`2026-01-01`, read as midnight UTC) or date-time\n(`2026-01-01T00:00:00Z`), to at most millisecond precision. Deliberately not declared as\n`format: date-time`, which would reject the plain-date form that this accepts.\n\nA date in the past is accepted and answered with warnings, never refused. A date the\nvariant already has a version at is refused as `VERSION_CONFLICT`.\n\n**Omit this to mean \"now\"** — that is the only spelling of now that is reliably silent. A\ntimestamp taken from the caller's own clock is already some milliseconds old when the\nserver judges it, which makes it a backdate, however small, and it is answered with the\nwarnings a backdate earns.\n",
+            "example": "2027-01-01T00:00:00Z"
+          },
+          "values": {
+            "$ref": "#/components/schemas/VariantValues"
+          },
+          "conditions": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PinnedConditions"
+              }
+            ],
+            "description": "Optional, and never applied: a variant's conditions are fixed when it is created. Accepted\nonly so that a client building its body from the version it loaded is not forced to strip\nthem out, and refused when they describe a different situation from the stored one.\n"
+          }
+        }
+      },
+      "ReplaceVersionRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "values",
+          "_revision"
+        ],
+        "properties": {
+          "values": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/VariantValues"
+              }
+            ],
+            "description": "The complete set of attribute overrides this version carries. An overridable attribute\nabsent from here stops being overridden.\n\nAttributes the variant may not override are ignored where this carries them, and their\n**stored value is kept rather than dropped** — otherwise a routine full-snapshot write\nwould erase an override the moment its attribute's `overridable_attribute`, `readonly` or\n`hidden` flag happened to be off.\n"
+          },
+          "_revision": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "The revision marker read from the version being written. The write is refused with\n`WRITE_CONFLICT` if the version has been written since.\n\nRequired rather than optional: an optional one is a guarantee every client can opt out of\nby forgetting a field, and the write it protects is the one that overwrites somebody\nelse's edit.\n",
+            "example": 3
+          },
+          "valid_from": {
+            "type": "string",
+            "description": "Optional, and never applied. Accepted when it names the version being addressed — so a\nclient building its body from what it loaded need not strip it out — and refused when it\nnames another: a version's `valid_from` is its identity, and moving it is an append and a\ndelete rather than an edit.\n"
+          },
+          "conditions": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PinnedConditions"
+              }
+            ],
+            "description": "Optional, and never applied: a variant's conditions are fixed when it is created. Refused\nwhen they describe a different situation from the stored one.\n"
+          }
+        }
+      },
+      "PatchVersionRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "values",
+          "_revision"
+        ],
+        "properties": {
+          "values": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/VariantValues"
+              }
+            ],
+            "description": "Only the attribute overrides to change. Everything not mentioned is left as stored.\n\n`null` is a value like any other here rather than a deletion; to stop overriding an\nattribute, send the complete snapshot without it through the replace operation.\n"
+          },
+          "_revision": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "The revision marker read from the version being written. The write is refused with\n`WRITE_CONFLICT` if the version has been written since.\n",
+            "example": 3
+          },
+          "valid_from": {
+            "type": "string",
+            "description": "Optional, never applied, and refused when it names a version other than the one addressed."
+          },
+          "conditions": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PinnedConditions"
+              }
+            ],
+            "description": "Optional, and never applied. A partial update that tries to change a pinned condition value\nis refused — this is the path that rule is most likely to be broken on by accident.\n"
+          }
+        }
+      },
       "Error": {
         "required": [
           "message"
@@ -3448,6 +5156,31 @@
             "description": "The cause of the error (visible for bad requests - http 400)"
           }
         }
+      },
+      "ConditionalPricingError": {
+        "description": "An error from a conditional-pricing operation, carrying a machine-readable `code`\nfrom the conditional-pricing vocabulary plus any structured data about the failure,\nso a client can branch on the kind of failure rather than parse the message.\nReferenced only by the operations that emit these codes; every other operation\nkeeps the plain `Error` shape.\n",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Error"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string",
+                "description": "The error message. Carries the same string as `message`, which the shared `Error`\nschema requires — `error` is the field responses have always used, and every caller\nto date reads. Declared here rather than on the shared `Error` because a request\nvalidation failure puts a list of validation errors in this field instead of a\nstring, and those responses reference `Error` directly.\n"
+              },
+              "code": {
+                "$ref": "#/components/schemas/ConditionalPricingErrorCode"
+              },
+              "details": {
+                "type": "object",
+                "additionalProperties": true,
+                "description": "Structured data about the failure, shaped by the accompanying `code`\n(e.g. the candidate variants of an `ambiguous-resolution`). Only present\nwhen the failure has structured data to report, and never without a `code`.\n"
+              }
+            }
+          }
+        ]
       },
       "Product": {
         "type": "object",
@@ -5569,6 +7302,9 @@
             "description": "When true, enables entity hydration to resolve nested $relation references in-place.",
             "default": false
           },
+          "fields": {
+            "$ref": "#/components/schemas/CatalogFieldsParam"
+          },
           "availability": {
             "$ref": "#/components/schemas/AvailabilityFilters"
           }
@@ -5581,6 +7317,17 @@
         },
         "required": [
           "q"
+        ]
+      },
+      "CatalogFieldsParam": {
+        "type": "array",
+        "description": "List of entity fields to include or exclude from the results.\n",
+        "items": {
+          "type": "string"
+        },
+        "example": [
+          "!_files",
+          "!**.versions"
         ]
       },
       "CatalogSearchResult": {
@@ -6953,7 +8700,14 @@
             "description": "The deprecated tax rate applied.\nThis field has been deprecated in favor of the new Tax Management. You should use the new tax fields pointing to a proper tax entity.\n"
           },
           "tax": {
-            "$ref": "#/components/schemas/Tax"
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Tax"
+              },
+              {
+                "$ref": "#/components/schemas/TaxItem"
+              }
+            ]
           }
         }
       },
@@ -7687,6 +9441,9 @@
             "oneOf": [
               {
                 "$ref": "#/components/schemas/Tax"
+              },
+              {
+                "$ref": "#/components/schemas/TaxItem"
               }
             ]
           }
@@ -8427,6 +10184,37 @@
           ],
           "_created_at": "2021-02-09T12:41:43.662Z",
           "_updated_at": "2021-02-09T12:41:43.662Z"
+        }
+      },
+      "TaxItem": {
+        "type": "object",
+        "description": "A minimal, ad-hoc tax rate for line items with no backing tax entity\nin the catalog (e.g. a fully custom/composite price component built\nby a client with no product/price reference to resolve tax from).\nMirrors how PriceItem relates to Price: unlike Tax, this has no\nentity identity — it isn't persisted and can't be looked up by _id,\nso it can't be shared/reused across price items the way a catalog\nTax can.\n",
+        "additionalProperties": false,
+        "required": [
+          "type",
+          "rate"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "VAT",
+              "GST",
+              "Custom"
+            ]
+          },
+          "rate": {
+            "type": "number",
+            "nullable": true
+          },
+          "description": {
+            "type": "string"
+          }
+        },
+        "example": {
+          "rate": 19,
+          "type": "VAT",
+          "description": "Custom 19% VAT"
         }
       },
       "TaxBreakdownInfo": {

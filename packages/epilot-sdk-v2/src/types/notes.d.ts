@@ -837,6 +837,7 @@ export declare namespace Paths {
     }
 }
 
+
 export interface OperationMethods {
   /**
    * createNote - createNote
@@ -1148,6 +1149,7 @@ export interface PathsDictionary {
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
+
 
 export type ContextType = Components.Schemas.ContextType;
 export type CreatedByType = Components.Schemas.CreatedByType;

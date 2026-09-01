@@ -43,6 +43,7 @@ epilot app getPublicFacingComponent -p appId=123e4567-e89b-12d3-a456-42661417400
 - [`patchInstallation`](#patchinstallation) — Patch an installed app by its ID.
 - [`uninstall`](#uninstall) — Uninstall an app by its ID.
 - [`promoteVersion`](#promoteversion) — Update an installed app to a new version
+- [`resolveOptions`](#resolveoptions) — Resolve the effective app-level options of an installation, including decrypted sensitive values (secrets). This endpoin
 
 **App Configuration**
 - [`listConfigurations`](#listconfigurations) — List all app configuration metadata owned by an organization. To get full app configuration details, use the /v1/app-con
@@ -74,6 +75,9 @@ epilot app getPublicFacingComponent -p appId=123e4567-e89b-12d3-a456-42661417400
 **App Proxy**
 - [`publicProxyGet`](#publicproxyget) — Forward a GET request to a registered proxy target from a public-facing component (e.g. journey blocks)
 - [`publicProxyPost`](#publicproxypost) — Forward a POST request to a registered proxy target from a public-facing component (e.g. journey blocks)
+- [`publicProxyPut`](#publicproxyput) — Forward a PUT request to a registered proxy target from a public-facing component
+- [`publicProxyPatch`](#publicproxypatch) — Forward a PATCH request to a registered proxy target from a public-facing component
+- [`publicProxyDelete`](#publicproxydelete) — Forward a DELETE request to a registered proxy target from a public-facing component
 
 ### `getPublicFacingComponent`
 
@@ -403,6 +407,35 @@ epilot app getPublicConfiguration -p appId=123e4567-e89b-12d3-a456-426614174000 
       "configuration": {}
     }
   ],
+  "functions": [
+    {
+      "name": "string",
+      "type": "workflow",
+      "label": {},
+      "description": {},
+      "code": "string",
+      "schedule": "rate(30 minutes)",
+      "schedule_timezone": "Europe/Berlin",
+      "schedule_overlap": "skip",
+      "secrets": ["string"]
+    }
+  ],
+  "options": [
+    {
+      "key": "string",
+      "label": "string",
+      "required": true,
+      "description": "string",
+      "repeatable": true,
+      "fields": [],
+      "value": {},
+      "type": "text",
+      "sensitive": true,
+      "configured": true,
+      "lifted": true,
+      "value_updated_at": "string"
+    }
+  ],
   "is_beta": true,
   "deprecated_at": "string",
   "version": "string",
@@ -424,6 +457,8 @@ epilot app getPublicConfiguration -p appId=123e4567-e89b-12d3-a456-426614174000 
       "app_id": "string",
       "owner_org_id": "string",
       "components": [],
+      "functions": [],
+      "options": [],
       "visibility": "private",
       "public": false,
       "pending": false,
@@ -520,6 +555,35 @@ epilot app getConfiguration -p appId=123e4567-e89b-12d3-a456-426614174000 --json
     {
       "component_type": "CUSTOM_JOURNEY_BLOCK",
       "configuration": {}
+    }
+  ],
+  "functions": [
+    {
+      "name": "string",
+      "type": "workflow",
+      "label": {},
+      "description": {},
+      "code": "string",
+      "schedule": "rate(30 minutes)",
+      "schedule_timezone": "Europe/Berlin",
+      "schedule_overlap": "skip",
+      "secrets": ["string"]
+    }
+  ],
+  "options": [
+    {
+      "key": "string",
+      "label": "string",
+      "required": true,
+      "description": "string",
+      "repeatable": true,
+      "fields": [],
+      "value": {},
+      "type": "text",
+      "sensitive": true,
+      "configured": true,
+      "lifted": true,
+      "value_updated_at": "string"
     }
   ],
   "visibility": "private",
@@ -693,7 +757,8 @@ epilot app queryEvents \
     "source": ["CUSTOM_JOURNEY_BLOCK"],
     "component_id": ["string"],
     "event_type": ["ERROR"],
-    "correlation_id": "string"
+    "correlation_id": "string",
+    "search": "string"
   },
   "aggregation": {
     "group_by": ["source"],
@@ -701,7 +766,8 @@ epilot app queryEvents \
   },
   "pagination": {
     "page": 1,
-    "page_size": 100
+    "page_size": 100,
+    "before": "1970-01-01T00:00:00.000Z"
   },
   "sort": {
     "field": "timestamp",
@@ -743,7 +809,8 @@ epilot app queryEvents -p appId=123e4567-e89b-12d3-a456-426614174000 --jsonata '
       "source": ["CUSTOM_JOURNEY_BLOCK"],
       "component_id": ["string"],
       "event_type": ["ERROR"],
-      "correlation_id": "string"
+      "correlation_id": "string",
+      "search": "string"
     },
     "aggregation": {
       "group_by": ["source"],
@@ -751,7 +818,8 @@ epilot app queryEvents -p appId=123e4567-e89b-12d3-a456-426614174000 --jsonata '
     },
     "pagination": {
       "page": 1,
-      "page_size": 100
+      "page_size": 100,
+      "before": "1970-01-01T00:00:00.000Z"
     },
     "sort": {
       "field": "timestamp",
@@ -1045,25 +1113,9 @@ epilot app listVersions -p appId=123e4567-e89b-12d3-a456-426614174000 --jsonata 
     {
       "app_id": "string",
       "owner_org_id": "string",
-      "components": [
-        {
-          "component_type": "CUSTOM_JOURNEY_BLOCK",
-          "configuration": {
-            "override_dev_mode": {
-              "override_url": "http://localhost:3000"
-            },
-            "component_url": "https://cdn.apps.com/123/v1.0.0/bundle.js",
-            "component_tag": "string",
-            "component_args": [
-              {
-                "type": "text"
-              }
-            ],
-            "component_size": 0,
-            "component_mapping": {}
-          }
-        }
-      ],
+      "components": [],
+      "functions": [],
+      "options": [],
       "visibility": "private",
       "public": false,
       "pending": false,
@@ -1072,28 +1124,9 @@ epilot app listVersions -p appId=123e4567-e89b-12d3-a456-426614174000 --jsonata 
       "deprecated_at": "string",
       "changelog": "string",
       "review_status": "approved",
-      "role": {
-        "id": "string",
-        "grants": [
-          {
-            "action": "string",
-            "resource": "string"
-          }
-        ]
-      },
-      "blueprint_ref": {
-        "manifest_id": "string",
-        "job_id": "string",
-        "source_blueprint_file": "string"
-      },
-      "version_audit": {
-        "created_at": "string",
-        "created_by": "string",
-        "updated_at": "string",
-        "updated_by": "string",
-        "versioned_at": "string",
-        "versioned_by": "string"
-      }
+      "role": {},
+      "blueprint_ref": {},
+      "version_audit": {}
     }
   ],
   "pagination": {
@@ -1187,6 +1220,35 @@ epilot app getVersion -p appId=123e4567-e89b-12d3-a456-426614174000 -p version=e
       "configuration": {}
     }
   ],
+  "functions": [
+    {
+      "name": "string",
+      "type": "workflow",
+      "label": {},
+      "description": {},
+      "code": "string",
+      "schedule": "rate(30 minutes)",
+      "schedule_timezone": "Europe/Berlin",
+      "schedule_overlap": "skip",
+      "secrets": ["string"]
+    }
+  ],
+  "options": [
+    {
+      "key": "string",
+      "label": "string",
+      "required": true,
+      "description": "string",
+      "repeatable": true,
+      "fields": [],
+      "value": {},
+      "type": "text",
+      "sensitive": true,
+      "configured": true,
+      "lifted": true,
+      "value_updated_at": "string"
+    }
+  ],
   "visibility": "private",
   "public": false,
   "pending": false,
@@ -1241,8 +1303,68 @@ Patch an existing app version
 ```bash
 epilot app patchVersion \
   -p appId=123e4567-e89b-12d3-a456-426614174000 \
+  -p version=example
+```
+
+With request body:
+
+```bash
+epilot app patchVersion \
+  -p appId=123e4567-e89b-12d3-a456-426614174000 \
   -p version=example \
-  -d '{"manifest_id":"string","role_id":"string","grants":[{"action":"string","resource":"string"}]}'
+  -d '{
+  "manifest_id": "string",
+  "role_id": "string",
+  "grants": [
+    {
+      "action": "string",
+      "resource": "string"
+    }
+  ],
+  "functions": [
+    {
+      "name": "string",
+      "type": "workflow",
+      "label": {
+        "en": "string",
+        "de": "string"
+      },
+      "description": {
+        "en": "string",
+        "de": "string"
+      },
+      "code": "string",
+      "schedule": "rate(30 minutes)",
+      "schedule_timezone": "Europe/Berlin",
+      "schedule_overlap": "skip",
+      "secrets": ["string"]
+    }
+  ],
+  "options": [
+    {
+      "key": "string",
+      "label": "string",
+      "required": true,
+      "description": "string",
+      "repeatable": true,
+      "fields": [
+        {
+          "key": "string",
+          "label": "string",
+          "description": "string",
+          "required": true,
+          "type": "text"
+        }
+      ],
+      "value": {},
+      "type": "text",
+      "sensitive": true,
+      "configured": true,
+      "lifted": true,
+      "value_updated_at": "string"
+    }
+  ]
+}'
 ```
 
 Using positional args for path parameters:
@@ -1680,7 +1802,7 @@ Retrieve a list of installed apps for the organization.
 
 | Name | In | Type | Required | Description |
 | ---- | -- | ---- | -------- | ----------- |
-| `componentType` | query | "CUSTOM_JOURNEY_BLOCK" \| "CUSTOM_PORTAL_BLOCK" \| "PORTAL_EXTENSION" \| "CUSTOM_FLOW_ACTION" \| "ERP_INFORM_TOOLKIT" \| "CUSTOM_CAPABILITY" \| "EXTERNAL_PRODUCT_CATALOG" \| "CUSTOM_PAGE" \| "API_PROXY" | No | Filter apps by specific component type |
+| `componentType` | query | "CUSTOM_JOURNEY_BLOCK" \| "CUSTOM_PORTAL_BLOCK" \| "PORTAL_EXTENSION" \| "CUSTOM_FLOW_ACTION" \| "ERP_INFORM_TOOLKIT" \| "CUSTOM_CAPABILITY" \| "EXTERNAL_PRODUCT_CATALOG" \| "CUSTOM_PAGE" \| "API_PROXY" \| "APP_FUNCTION" | No | Filter apps by specific component type |
 | `enabled` | query | boolean | No | Filter apps by enabled status |
 | `page` | query | number | No | Page number for pagination |
 | `pageSize` | query | number | No | Number of items per page |
@@ -1709,49 +1831,15 @@ epilot app listInstallations --jsonata 'apps'
       "owner_org_id": "string",
       "enabled": true,
       "name": "string",
-      "option_values": [
-        {
-          "component_id": "string",
-          "options": [
-            {
-              "key": "string",
-              "value": {}
-            }
-          ]
-        }
-      ],
-      "components": [
-        {
-          "component_type": "CUSTOM_JOURNEY_BLOCK",
-          "configuration": {
-            "override_dev_mode": {
-              "override_url": "http://localhost:3000"
-            },
-            "component_url": "https://cdn.apps.com/123/v1.0.0/bundle.js",
-            "component_tag": "string",
-            "component_args": [
-              {
-                "type": "text"
-              }
-            ],
-            "component_size": 0,
-            "component_mapping": {}
-          }
-        }
-      ],
+      "icon_url": "string",
+      "option_values": [],
+      "components": [],
+      "functions": [],
+      "options": [],
       "installed_version": "string",
       "role": "string",
-      "blueprint_ref": {
-        "manifest_id": "string",
-        "job_id": "string",
-        "source_blueprint_file": "string"
-      },
-      "installation_audit": {
-        "created_at": "string",
-        "created_by": "string",
-        "updated_at": "string",
-        "updated_by": "string"
-      },
+      "blueprint_ref": {},
+      "installation_audit": {},
       "_manifest": ["123e4567-e89b-12d3-a456-426614174000"]
     }
   ],
@@ -1808,34 +1896,46 @@ epilot app getInstallation -p appId=123e4567-e89b-12d3-a456-426614174000 --jsona
   "owner_org_id": "string",
   "enabled": true,
   "name": "string",
+  "icon_url": "string",
   "option_values": [
     {
       "component_id": "string",
-      "options": [
-        {
-          "key": "string",
-          "value": {}
-        }
-      ]
+      "options": []
     }
   ],
   "components": [
     {
       "component_type": "CUSTOM_JOURNEY_BLOCK",
-      "configuration": {
-        "override_dev_mode": {
-          "override_url": "http://localhost:3000"
-        },
-        "component_url": "https://cdn.apps.com/123/v1.0.0/bundle.js",
-        "component_tag": "string",
-        "component_args": [
-          {
-            "type": "text"
-          }
-        ],
-        "component_size": 0,
-        "component_mapping": {}
-      }
+      "configuration": {}
+    }
+  ],
+  "functions": [
+    {
+      "name": "string",
+      "type": "workflow",
+      "label": {},
+      "description": {},
+      "code": "string",
+      "schedule": "rate(30 minutes)",
+      "schedule_timezone": "Europe/Berlin",
+      "schedule_overlap": "skip",
+      "secrets": ["string"]
+    }
+  ],
+  "options": [
+    {
+      "key": "string",
+      "label": "string",
+      "required": true,
+      "description": "string",
+      "repeatable": true,
+      "fields": [],
+      "value": {},
+      "type": "text",
+      "sensitive": true,
+      "configured": true,
+      "lifted": true,
+      "value_updated_at": "string"
     }
   ],
   "installed_version": "string",
@@ -1930,34 +2030,46 @@ epilot app install -p appId=123e4567-e89b-12d3-a456-426614174000 --jsonata 'app_
   "owner_org_id": "string",
   "enabled": true,
   "name": "string",
+  "icon_url": "string",
   "option_values": [
     {
       "component_id": "string",
-      "options": [
-        {
-          "key": "string",
-          "value": {}
-        }
-      ]
+      "options": []
     }
   ],
   "components": [
     {
       "component_type": "CUSTOM_JOURNEY_BLOCK",
-      "configuration": {
-        "override_dev_mode": {
-          "override_url": "http://localhost:3000"
-        },
-        "component_url": "https://cdn.apps.com/123/v1.0.0/bundle.js",
-        "component_tag": "string",
-        "component_args": [
-          {
-            "type": "text"
-          }
-        ],
-        "component_size": 0,
-        "component_mapping": {}
-      }
+      "configuration": {}
+    }
+  ],
+  "functions": [
+    {
+      "name": "string",
+      "type": "workflow",
+      "label": {},
+      "description": {},
+      "code": "string",
+      "schedule": "rate(30 minutes)",
+      "schedule_timezone": "Europe/Berlin",
+      "schedule_overlap": "skip",
+      "secrets": ["string"]
+    }
+  ],
+  "options": [
+    {
+      "key": "string",
+      "label": "string",
+      "required": true,
+      "description": "string",
+      "repeatable": true,
+      "fields": [],
+      "value": {},
+      "type": "text",
+      "sensitive": true,
+      "configured": true,
+      "lifted": true,
+      "value_updated_at": "string"
     }
   ],
   "installed_version": "string",
@@ -2120,34 +2232,46 @@ epilot app promoteVersion -p appId=123e4567-e89b-12d3-a456-426614174000 -p versi
   "owner_org_id": "string",
   "enabled": true,
   "name": "string",
+  "icon_url": "string",
   "option_values": [
     {
       "component_id": "string",
-      "options": [
-        {
-          "key": "string",
-          "value": {}
-        }
-      ]
+      "options": []
     }
   ],
   "components": [
     {
       "component_type": "CUSTOM_JOURNEY_BLOCK",
-      "configuration": {
-        "override_dev_mode": {
-          "override_url": "http://localhost:3000"
-        },
-        "component_url": "https://cdn.apps.com/123/v1.0.0/bundle.js",
-        "component_tag": "string",
-        "component_args": [
-          {
-            "type": "text"
-          }
-        ],
-        "component_size": 0,
-        "component_mapping": {}
-      }
+      "configuration": {}
+    }
+  ],
+  "functions": [
+    {
+      "name": "string",
+      "type": "workflow",
+      "label": {},
+      "description": {},
+      "code": "string",
+      "schedule": "rate(30 minutes)",
+      "schedule_timezone": "Europe/Berlin",
+      "schedule_overlap": "skip",
+      "secrets": ["string"]
+    }
+  ],
+  "options": [
+    {
+      "key": "string",
+      "label": "string",
+      "required": true,
+      "description": "string",
+      "repeatable": true,
+      "fields": [],
+      "value": {},
+      "type": "text",
+      "sensitive": true,
+      "configured": true,
+      "lifted": true,
+      "value_updated_at": "string"
     }
   ],
   "installed_version": "string",
@@ -2164,6 +2288,82 @@ epilot app promoteVersion -p appId=123e4567-e89b-12d3-a456-426614174000 -p versi
     "updated_by": "string"
   },
   "_manifest": ["123e4567-e89b-12d3-a456-426614174000"]
+}
+```
+
+</details>
+
+---
+
+### `resolveOptions`
+
+Resolve the effective app-level options of an installation, including decrypted sensitive values (secrets). This endpoin
+
+`POST /v1/app/{appId}/options/resolve`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `appId` | path | string | Yes |  |
+
+**Request Body**
+
+**Sample Call**
+
+```bash
+epilot app resolveOptions \
+  -p appId=123e4567-e89b-12d3-a456-426614174000 \
+  -d '{"keys":["string"]}'
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot app resolveOptions 123e4567-e89b-12d3-a456-426614174000
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot app resolveOptions -p appId=123e4567-e89b-12d3-a456-426614174000
+```
+
+With JSONata filter:
+
+```bash
+epilot app resolveOptions -p appId=123e4567-e89b-12d3-a456-426614174000 --jsonata 'options'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "options": [
+    {
+      "key": "string",
+      "label": "string",
+      "required": true,
+      "description": "string",
+      "repeatable": true,
+      "fields": [
+        {
+          "key": "string",
+          "label": "string",
+          "description": "string",
+          "required": true,
+          "type": "text"
+        }
+      ],
+      "value": {},
+      "type": "text",
+      "sensitive": true,
+      "configured": true,
+      "lifted": true,
+      "value_updated_at": "string"
+    }
+  ]
 }
 ```
 
@@ -2234,6 +2434,7 @@ Forward a GET request to a registered proxy target from a public-facing componen
 | `appId` | path | string | Yes | ID of the installed app |
 | `proxyName` | path | string | Yes | Name of the proxy target as defined in the app manifest |
 | `path` | path | string | Yes | Path to forward to the proxy target |
+| `query` | query | object | No | Free-form query parameters, forwarded unchanged to the proxy target |
 
 **Sample Call**
 
@@ -2271,6 +2472,7 @@ Forward a POST request to a registered proxy target from a public-facing compone
 | `appId` | path | string | Yes | ID of the installed app |
 | `proxyName` | path | string | Yes | Name of the proxy target as defined in the app manifest |
 | `path` | path | string | Yes | Path to forward to the proxy target |
+| `query` | query | object | No | Free-form query parameters, forwarded unchanged to the proxy target |
 
 **Request Body**
 
@@ -2300,6 +2502,138 @@ With JSONata filter:
 
 ```bash
 epilot app publicProxyPost -p appId=123e4567-e89b-12d3-a456-426614174000 -p proxyName=example -p path=example --jsonata '$'
+```
+
+---
+
+### `publicProxyPut`
+
+Forward a PUT request to a registered proxy target from a public-facing component
+
+`PUT /v1/public/app/{appId}/proxy/{proxyName}/{path}`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `appId` | path | string | Yes | ID of the installed app |
+| `proxyName` | path | string | Yes | Name of the proxy target as defined in the app manifest |
+| `path` | path | string | Yes | Path to forward to the proxy target |
+| `query` | query | object | No | Free-form query parameters, forwarded unchanged to the proxy target |
+
+**Request Body**
+
+**Sample Call**
+
+```bash
+epilot app publicProxyPut \
+  -p appId=123e4567-e89b-12d3-a456-426614174000 \
+  -p proxyName=example \
+  -p path=example \
+  -d '{}'
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot app publicProxyPut 123e4567-e89b-12d3-a456-426614174000 example example
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot app publicProxyPut -p appId=123e4567-e89b-12d3-a456-426614174000 -p proxyName=example -p path=example
+```
+
+With JSONata filter:
+
+```bash
+epilot app publicProxyPut -p appId=123e4567-e89b-12d3-a456-426614174000 -p proxyName=example -p path=example --jsonata '$'
+```
+
+---
+
+### `publicProxyPatch`
+
+Forward a PATCH request to a registered proxy target from a public-facing component
+
+`PATCH /v1/public/app/{appId}/proxy/{proxyName}/{path}`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `appId` | path | string | Yes | ID of the installed app |
+| `proxyName` | path | string | Yes | Name of the proxy target as defined in the app manifest |
+| `path` | path | string | Yes | Path to forward to the proxy target |
+| `query` | query | object | No | Free-form query parameters, forwarded unchanged to the proxy target |
+
+**Request Body**
+
+**Sample Call**
+
+```bash
+epilot app publicProxyPatch \
+  -p appId=123e4567-e89b-12d3-a456-426614174000 \
+  -p proxyName=example \
+  -p path=example \
+  -d '{}'
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot app publicProxyPatch 123e4567-e89b-12d3-a456-426614174000 example example
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot app publicProxyPatch -p appId=123e4567-e89b-12d3-a456-426614174000 -p proxyName=example -p path=example
+```
+
+With JSONata filter:
+
+```bash
+epilot app publicProxyPatch -p appId=123e4567-e89b-12d3-a456-426614174000 -p proxyName=example -p path=example --jsonata '$'
+```
+
+---
+
+### `publicProxyDelete`
+
+Forward a DELETE request to a registered proxy target from a public-facing component
+
+`DELETE /v1/public/app/{appId}/proxy/{proxyName}/{path}`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `appId` | path | string | Yes | ID of the installed app |
+| `proxyName` | path | string | Yes | Name of the proxy target as defined in the app manifest |
+| `path` | path | string | Yes | Path to forward to the proxy target |
+| `query` | query | object | No | Free-form query parameters, forwarded unchanged to the proxy target |
+
+**Sample Call**
+
+```bash
+epilot app publicProxyDelete \
+  -p appId=123e4567-e89b-12d3-a456-426614174000 \
+  -p proxyName=example \
+  -p path=example
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot app publicProxyDelete 123e4567-e89b-12d3-a456-426614174000 example example
+```
+
+With JSONata filter:
+
+```bash
+epilot app publicProxyDelete -p appId=123e4567-e89b-12d3-a456-426614174000 -p proxyName=example -p path=example --jsonata '$'
 ```
 
 ---

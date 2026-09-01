@@ -2,13 +2,17 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Integration Toolkit API",
-    "version": "1.2.0",
+    "version": "1.22.0",
     "description": "API for integrating with external systems in a standardised way."
   },
   "tags": [
     {
       "name": "erp",
       "description": "ERP integration endpoints"
+    },
+    {
+      "name": "erp-imports",
+      "description": "ERP pricing file import endpoints"
     },
     {
       "name": "trigger",
@@ -279,6 +283,9 @@
           "401": {
             "$ref": "#/components/responses/Unauthorized"
           },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
           }
@@ -331,6 +338,9 @@
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
           },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
@@ -595,6 +605,167 @@
           },
           "422": {
             "description": "Unprocessable entity - mapping configuration or payload validation failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseBase"
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/erp/updates/direct_simulation": {
+      "post": {
+        "operationId": "simulateDirect",
+        "summary": "simulateDirect",
+        "description": "Dry run for direct-mode payloads: validates a `DirectPayload` against a `direct: true`\nuse case configuration and previews the internal entity and meter reading updates the\npipeline would apply — without persisting anything.\n\nUnlike the ingest endpoint, validation does not stop at the first problem: ALL issues\nacross all operations are collected into `errors`, each carrying the index of the\noperation it refers to. When the payload is valid, the response additionally contains\nthe translated update previews plus non-blocking `warnings` (for example unique-id\nfields that are not defined in the target entity schema, or a failed server-side\nunique-id type derivation).\n\nUse this endpoint while designing a direct integration, before sending events to\n`POST /v3/erp/updates/events`. See documentation at /docs/DIRECT_MODE.md.\n",
+        "tags": [
+          "erp"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DirectSimulationRequest"
+              },
+              "examples": {
+                "entity_upsert": {
+                  "summary": "Entity upsert (open mode)",
+                  "value": {
+                    "event_configuration": {
+                      "direct": true
+                    },
+                    "payload": {
+                      "version": "1",
+                      "operations": [
+                        {
+                          "entity_slug": "contact",
+                          "unique_ids": {
+                            "customer_number": "CUST-12345"
+                          },
+                          "attributes": {
+                            "first_name": "Anna",
+                            "last_name": "Schmidt",
+                            "email": "anna.schmidt@example.com"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "allowlist_with_relation": {
+                  "summary": "Allowlisted entities with a relation",
+                  "value": {
+                    "event_configuration": {
+                      "direct": true,
+                      "entities": [
+                        {
+                          "entity_schema": "contract",
+                          "unique_ids": [
+                            "contract_number"
+                          ]
+                        },
+                        {
+                          "entity_schema": "contact",
+                          "unique_ids": [
+                            "customer_number"
+                          ]
+                        }
+                      ]
+                    },
+                    "payload": {
+                      "version": "1",
+                      "operations": [
+                        {
+                          "entity_slug": "contract",
+                          "unique_ids": {
+                            "contract_number": "CTR-001"
+                          },
+                          "attributes": {
+                            "display_name": "Premium Contract",
+                            "customer": {
+                              "$relation": {
+                                "_set": [
+                                  {
+                                    "schema": "contact",
+                                    "unique_ids": {
+                                      "customer_number": "CUST-12345"
+                                    },
+                                    "tags": [
+                                      "primary"
+                                    ]
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "meter_reading": {
+                  "summary": "Meter reading",
+                  "value": {
+                    "event_configuration": {
+                      "direct": true
+                    },
+                    "payload": {
+                      "version": "1",
+                      "operations": [
+                        {
+                          "type": "meter_reading",
+                          "meter": {
+                            "unique_ids": {
+                              "meter_number": "M-001"
+                            }
+                          },
+                          "counter": {
+                            "unique_ids": {
+                              "obis_number": "1-0:1.8.0"
+                            }
+                          },
+                          "reading_matching": "strict-date",
+                          "attributes": {
+                            "external_id": "R-001",
+                            "timestamp": "2026-08-24T06:00:00Z",
+                            "source": "ERP",
+                            "value": 12345.6
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Simulation executed - `valid` reports the verdict, `errors` lists every violation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DirectSimulationResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "422": {
+            "description": "Unprocessable entity - simulation could not be executed",
             "content": {
               "application/json": {
                 "schema": {
@@ -1618,6 +1789,239 @@
         }
       }
     },
+    "/v1/integrations/{integrationId}/documentation": {
+      "get": {
+        "operationId": "listDocumentationPages",
+        "summary": "listDocumentationPages",
+        "description": "Retrieve all documentation pages of an integration, without their markdown content.\nAn integration has at most one general page plus at most one page per use case.\nThe page id is 'general' for the integration-wide page, otherwise the use case ID.\n",
+        "tags": [
+          "integrations"
+        ],
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true,
+            "description": "The integration ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved documentation pages",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "pages"
+                  ],
+                  "properties": {
+                    "pages": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/DocumentationPageSummary"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "description": "Integration not found"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/integrations/{integrationId}/documentation/{docId}": {
+      "get": {
+        "operationId": "getDocumentationPage",
+        "summary": "getDocumentationPage",
+        "description": "Retrieve a single documentation page including its markdown content",
+        "tags": [
+          "integrations"
+        ],
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true,
+            "description": "The integration ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "docId",
+            "in": "path",
+            "required": true,
+            "description": "'general' for the integration-wide page, otherwise a use case ID",
+            "schema": {
+              "type": "string",
+              "pattern": "^(general|[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved documentation page",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentationPage"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "description": "Documentation page not found"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "put": {
+        "operationId": "upsertDocumentationPage",
+        "summary": "upsertDocumentationPage",
+        "description": "Create or update the documentation page identified by docId.\nUpsert semantics enforce the invariant of one general page per\nintegration and one page per use case. For use case pages the\nuse case must exist.\n",
+        "tags": [
+          "integrations"
+        ],
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true,
+            "description": "The integration ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "docId",
+            "in": "path",
+            "required": true,
+            "description": "'general' for the integration-wide page, otherwise a use case ID",
+            "schema": {
+              "type": "string",
+              "pattern": "^(general|[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpsertDocumentationPageRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Documentation page created or updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentationPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "description": "Integration or use case not found"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteDocumentationPage",
+        "summary": "deleteDocumentationPage",
+        "description": "Delete a documentation page",
+        "tags": [
+          "integrations"
+        ],
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true,
+            "description": "The integration ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "docId",
+            "in": "path",
+            "required": true,
+            "description": "'general' for the integration-wide page, otherwise a use case ID",
+            "schema": {
+              "type": "string",
+              "pattern": "^(general|[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Documentation page deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "description": "Documentation page not found"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/v2/integrations": {
       "get": {
         "operationId": "listIntegrationsV2",
@@ -1839,10 +2243,233 @@
         }
       }
     },
+    "/v2/integrations/{integrationId}/notifications/history": {
+      "get": {
+        "operationId": "listNotificationHistory",
+        "summary": "listNotificationHistory",
+        "description": "Returns the cursor-paginated, newest-first notification history for an\nintegration (every real notification decision — both fired and suppressed).\nRequires the `integration:view` permission on the integration's organization.\n",
+        "tags": [
+          "integrations"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true,
+            "description": "The integration ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "description": "Opaque base64 pagination cursor returned as `next_cursor` by a prior page.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Requested number of items to return. Values above 100 are accepted and clamped server-side to 100 (the enforcement point is the handler, not this schema), so a large value never 400s at the contract layer.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 50
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "required": false,
+            "description": "Optional notification type filter (e.g. `critical_error`, `error_threshold`).",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Cursor-paginated notification history (newest first)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationHistoryResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/integrations/{integrationId}/notifications/test": {
+      "post": {
+        "operationId": "testSendNotification",
+        "summary": "testSendNotification",
+        "description": "Renders and sends ONE representative notification of the requested kind/type to\nthe CALLING USER ONLY (never any other recipient), so an operator can preview how\na notification looks. A test send does NOT write to the notification history.\nRequires the `integration:manage` permission on the integration's organization.\n",
+        "tags": [
+          "integrations"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true,
+            "description": "The integration ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TestNotificationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Test notification accepted for delivery to the calling user (sent is true)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TestNotificationResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          },
+          "502": {
+            "description": "The downstream notification service rejected or failed the test send.\nThe body uses TestNotificationResponse with sent set to false so the\noperator sees the real (failed) delivery outcome.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TestNotificationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/integrations/{integrationId}/notifications/status": {
+      "get": {
+        "operationId": "getNotificationStatus",
+        "summary": "getNotificationStatus",
+        "description": "Returns the live per-rule alert state and (for 'auto' rules) the current\nhour-of-week baseline band for an integration's notification monitoring.\nReflects the latest 5-minute sweep — near-real-time, not live.\nRequires the `integration:view` permission on the integration's organization.\n",
+        "tags": [
+          "integrations"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true,
+            "description": "The integration ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "include",
+            "in": "query",
+            "required": false,
+            "description": "Add `baseline_series` to also return all 168 hour-of-week buckets per\n'auto' rule (heavier; omit for just the current-bucket markers).\n",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "baseline_series"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Live notification status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationStatusResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/v2/integrations/{integrationId}/use-cases/{useCaseId}/secure-proxy-whitelist": {
       "get": {
         "operationId": "getSecureProxyWhitelist",
-        "summary": "Get secure_proxy whitelist (admin portal only)",
+        "summary": "getSecureProxyWhitelist",
         "description": "Returns the current allowed_domains, allowed_ips, and vpc_mode for a secure_proxy use case.\nStaff-only — gated by internal-auth issuer AND admin-portal Cognito user pool membership.\nRejects Login-As tokens.\n",
         "tags": [
           "integrations",
@@ -1902,7 +2529,7 @@
       },
       "put": {
         "operationId": "updateSecureProxyWhitelist",
-        "summary": "Update secure_proxy whitelist (admin portal only)",
+        "summary": "updateSecureProxyWhitelist",
         "description": "Replaces allowed_domains and/or allowed_ips on a secure_proxy use case.\nAt least one of the two fields is required. Validation mirrors the CLI's\n`validateDomainPatterns` / `validateCidrs`. Writes a USECASE_HISTORY row\nwith the admin user's email as `changed_by`.\n\nUpdate semantics per field:\n  - **omitted** — field is not modified; the stored value is preserved.\n  - **non-empty array** — the stored value is replaced with the supplied list.\n  - **empty array (`[]`)** — the list is cleared (stored as `[]`). This is\n    the canonical way to remove all entries. `null` is not accepted.\n\nStaff-only — same auth gates as GET.\n",
         "tags": [
           "integrations",
@@ -1974,7 +2601,7 @@
     "/v2/integrations/{integrationId}/use-cases/{useCaseId}/secure-proxy-whitelist/history": {
       "get": {
         "operationId": "listSecureProxyWhitelistHistory",
-        "summary": "List secure_proxy whitelist change history (admin portal only)",
+        "summary": "listSecureProxyWhitelistHistory",
         "description": "Returns the most recent USECASE_HISTORY entries for a secure_proxy use case,\nin reverse chronological order (newest first). Each entry includes the\nactor email (`changed_by`), the ISO-8601 timestamp (`history_created_at`),\nthe `change_description` (free-text action), and the full `configuration`\nsnapshot — from which UI-08 computes a before/after diff between consecutive\nentries.\n\nStaff-only — gated by internal-auth issuer AND admin-portal Cognito user pool\nmembership. Rejects Login-As tokens (same auth gate as the GET / PUT\nsecure-proxy-whitelist operations).\n\nThin wrapper over the service-layer `listUseCaseHistory` that powers\n`GET /v1/integrations/{integrationId}/use-cases/{useCaseId}/history` — the\nseparate path exists because the /v1 variant is tenant-gated and admin-portal\ninternal-auth tokens do not carry tenant permissions.\n",
         "tags": [
           "integrations",
@@ -2371,6 +2998,59 @@
           },
           "404": {
             "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/entities/{entityId}/sync-status": {
+      "get": {
+        "operationId": "getEntitySyncStatus",
+        "summary": "getEntitySyncStatus",
+        "description": "Get the inbound ERP sync status of an entity: when each integration last\nsynchronized (checked) the entity against the ERP, and when it last\nactually changed it. `last_synced_at` also advances on no-op checks —\nevents that were received and evaluated but changed nothing — which by\ndesign leave no trace on the entity itself (no activity feed entry, no\n`_updated_at` bump). Use it to tell whether an entity is up to date with\nthe ERP. Returns an empty list for entities no inbound use case has\nprocessed. Org-scoped via the caller's token.\n",
+        "tags": [
+          "integrations"
+        ],
+        "parameters": [
+          {
+            "name": "entityId",
+            "in": "path",
+            "required": true,
+            "description": "The entity ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "integration_id",
+            "in": "query",
+            "required": false,
+            "description": "Narrow the result to a single integration",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved entity sync status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntitySyncStatusResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
           },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
@@ -3005,10 +3685,126 @@
         }
       }
     },
+    "/v2/integrations/{integrationId}/monitoring/external-events": {
+      "post": {
+        "operationId": "ingestExternalMonitoringEvents",
+        "summary": "ingestExternalMonitoringEvents",
+        "description": "Ingest monitoring spans produced by an EXTERNAL system (e.g. an integration\nmiddleware), so the Integration Hub is the central monitoring point and the\ncross-system event trace spans both the external system and epilot's own\nprocessing.\n\nEach span is validated, assigned a server-controlled `EXTERNAL_*` taxonomy code\nderived from its `level` (the client never supplies a code — this marks\nprovenance and prevents spoofing an epilot code), has its `use_case_slug`\nresolved against the integration's configured use cases, and is republished onto\nthe same monitoring event bus as epilot's own spans — so external spans are\nfirst-class to the trace view, stats, alerting and digests.\n\nSpans link to the epilot trace via `correlation_id` (the trace id): the middleware\nmust stamp the same `correlation_id` here and on the event it forwards to the\ninbound endpoint. Invalid spans in a batch are reported per-item and do not fail\nthe whole batch.\n",
+        "tags": [
+          "monitoring",
+          "integrations"
+        ],
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true,
+            "description": "The integration ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IngestExternalMonitoringEventsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Batch accepted (some spans may have been rejected — see counts).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IngestExternalMonitoringEventsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/integrations/{integrationId}/monitoring/traces/{correlationId}": {
+      "get": {
+        "operationId": "getMonitoringTraceByCorrelation",
+        "summary": "getMonitoringTraceByCorrelation",
+        "description": "Returns the cross-system event trace for a `correlation_id`: every monitoring\nspan sharing it — external spans (middleware) plus epilot's own processing spans\n— ordered chronologically, with a rolled-up status and the epilot inbound event\n\"head\" attached. This is the correlation-grouped counterpart to\n`…/events/{eventId}/associated` (which groups a single epilot event's fan-out by\nevent_id). Origin is distinguished by the `EXTERNAL_*` code prefix on external\nspans. Freshness is near-real-time (spans land as they are produced/ingested).\n",
+        "tags": [
+          "monitoring",
+          "integrations"
+        ],
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true,
+            "description": "The integration ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "correlationId",
+            "in": "path",
+            "required": true,
+            "description": "The trace id (correlation_id) shared across systems",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The assembled cross-system trace.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MonitoringTraceResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/v1/integrations/secure-proxies": {
       "get": {
         "operationId": "listSecureProxies",
-        "summary": "List all secure proxy use cases",
+        "summary": "listSecureProxies",
         "description": "Lists all secure_proxy use cases across all integrations for the authenticated organization.\nReturns minimal data suitable for dropdowns and selection UIs.\n",
         "tags": [
           "integrations"
@@ -3052,7 +3848,7 @@
     "/v1/secure-proxy": {
       "post": {
         "operationId": "secureProxy",
-        "summary": "Proxy HTTP request through secure VPC",
+        "summary": "secureProxy",
         "description": "Routes an HTTP request through a VPC with either static IP egress or VPN secure link access.\nThe VPC mode is determined by the referenced secure_proxy use case configuration.\nFor secure_link mode, the target URL must match the use case's allowed_domains whitelist.\n",
         "tags": [
           "proxy"
@@ -3100,11 +3896,11 @@
             }
           },
           "502": {
-            "description": "Upstream error from the proxied target",
+            "description": "Upstream failure: epilot could not obtain an HTTP response from the proxied target\n(e.g. TLS handshake failure, connection refused/reset, DNS failure or timeout).\nThe body's `code`/`reason` identify the underlying cause, distinguishing a\nremote-side problem from an epilot-side one. When the target *does* answer with\nits own status, that status and body are passed through unchanged via\n`SecureProxyResponse` instead.\n",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponseBase"
+                  "$ref": "#/components/schemas/SecureProxyUpstreamError"
                 }
               }
             }
@@ -3135,7 +3931,7 @@
     "/v1/managed-call/{slug}/execute": {
       "post": {
         "operationId": "managedCallExecute",
-        "summary": "Execute a managed call operation",
+        "summary": "managedCallExecute",
         "description": "Execute a managed call operation synchronously. The slug in the path acts as the RPC method name.\nCalls an external partner API with JSONata mapping on both request and response.\n",
         "tags": [
           "managed-call"
@@ -3224,7 +4020,7 @@
     "/v1/integrations/{integrationId}/generate-types-preview": {
       "post": {
         "operationId": "generateTypesPreview",
-        "summary": "Preview scaffolded types for a connector integration",
+        "summary": "generateTypesPreview",
         "description": "Analyses the JSONata mappings of all managed-call use cases in the integration and returns scaffolded type descriptors. The frontend uses these to show the type editor modal where developers fill in leaf types.\n",
         "tags": [
           "integrations"
@@ -3274,7 +4070,7 @@
     "/v1/integrations/{integrationId}/generate-types": {
       "post": {
         "operationId": "generateTypes",
-        "summary": "Generate a TypeScript npm package for a connector integration",
+        "summary": "generateTypes",
         "description": "Generates a complete TypeScript npm package with typed interfaces for all managed-call use cases. This is a stateless operation that does not persist any changes. Use the commit-types endpoint to lock configurations after review.\n",
         "tags": [
           "integrations"
@@ -3334,7 +4130,7 @@
     "/v1/integrations/{integrationId}/commit-types": {
       "post": {
         "operationId": "commitTypes",
-        "summary": "Commit generated types and lock use case configurations",
+        "summary": "commitTypes",
         "description": "Commits the generated types by locking use case configurations and updating version tracking. Should be called after the user reviews and downloads the generated package.\n",
         "tags": [
           "integrations"
@@ -3390,6 +4186,411 @@
           }
         }
       }
+    },
+    "/v2/erp/imports": {
+      "post": {
+        "operationId": "createErpImport",
+        "summary": "createErpImport",
+        "description": "Register an already-uploaded file (S3 ref) as a pricing-file import job. Returns the job and a file preview. Nothing runs yet: no use case is chosen and no validation starts here. Optionally rank candidates with POST /v2/erp/imports/{importId}:suggest-use-cases, then start validation with POST /v2/erp/imports/{importId}:validate.\nPass `import_id` to repoint an existing PENDING import at a different file instead, keeping its id and its place in the history.",
+        "tags": [
+          "erp-imports"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateErpImportRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The named import now points at this file. Returned only when `import_id` was supplied — no `Location`, because nothing was created.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateErpImportResponse"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Import job created. Returned only when `import_id` was omitted.",
+            "headers": {
+              "Location": {
+                "description": "URL of the created job (`/v2/erp/imports/{importId}`).",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateErpImportResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "get": {
+        "operationId": "listErpImports",
+        "summary": "listErpImports",
+        "description": "List recent pricing-file import jobs for the org, newest first.\n\nPass `next_cursor` back as `cursor` for the next page. A page can be\nshorter than `limit` and still have more behind it, so stop on\n`next_cursor: null`.\n",
+        "tags": [
+          "erp-imports"
+        ],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Page size. Values above 100 are clamped to 100.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 50
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "description": "Opaque cursor from a prior page's `next_cursor`.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Import jobs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErpImportList"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/erp/imports/{importId}": {
+      "get": {
+        "operationId": "getErpImport",
+        "summary": "getErpImport",
+        "description": "Get a pricing-file import job (status, counts, result links).",
+        "tags": [
+          "erp-imports"
+        ],
+        "parameters": [
+          {
+            "name": "importId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The import job",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErpImportJob"
+                }
+              }
+            }
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteErpImport",
+        "summary": "deleteErpImport",
+        "description": "Remove an import and the file it owns. Allowed from any status: an import whose run is still in flight is stopped by the deletion, and rows it already wrote stay written.",
+        "tags": [
+          "erp-imports"
+        ],
+        "parameters": [
+          {
+            "name": "importId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "The import and its file were removed"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/erp/imports/{importId}:validate": {
+      "post": {
+        "operationId": "validateErpImport",
+        "summary": "validateErpImport",
+        "description": "Choose the use case to read this file with, and start the validate phase.\nCallable from PENDING, READY and FAILED — so a wrong choice is corrected by calling this again with a different use case, rather than re-uploading. Each call replaces any previous verdict. Any other status returns 409.",
+        "tags": [
+          "erp-imports"
+        ],
+        "parameters": [
+          {
+            "name": "importId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ValidateErpImportRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Validation started",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErpImportJob"
+                }
+              }
+            }
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "422": {
+            "description": "The use case cannot drive an import",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseBase"
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/erp/imports/{importId}:suggest-use-cases": {
+      "post": {
+        "operationId": "suggestErpImportUseCases",
+        "summary": "suggestErpImportUseCases",
+        "description": "Rank the org's inbound use cases against this file's columns — the input to the ranked picker (\"matches 6 of your 7 columns\"). Optional: skip this and call `:validate` directly when the use case is already known. Reads only the file's first row, not its data.\nEvery eligible use case is returned, including ones matching nothing: the \"nothing fits, pick anyway\" view needs the full list. Highest match first.\nCSV only — an xlsx import fails with 400 rather than silently returning zero matches, which would look identical to \"we checked and nothing matches\".",
+        "tags": [
+          "erp-imports"
+        ],
+        "parameters": [
+          {
+            "name": "importId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Ranked use-case suggestions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuggestErpImportUseCasesResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/erp/imports/{importId}:execute": {
+      "post": {
+        "operationId": "executeErpImport",
+        "summary": "executeErpImport",
+        "description": "Confirm and run the write phase of a validated import. Only a READY job may be executed; any other status returns 409.",
+        "tags": [
+          "erp-imports"
+        ],
+        "parameters": [
+          {
+            "name": "importId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExecuteErpImportRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Execution started",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErpImportJob"
+                }
+              }
+            }
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "422": {
+            "description": "The verdict carries warnings and `ack_warnings` was not true",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseBase"
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/erp/imports/{importId}:abort": {
+      "post": {
+        "operationId": "abortErpImport",
+        "summary": "abortErpImport",
+        "description": "Ask a running import to stop. Valid while the job is VALIDATING or PROCESSING; any other status returns 409.\nThe stop is cooperative: the job passes through CANCELLING and typically reaches CANCELLED within seconds.\nRows already published to the platform are **kept**: this is a stop, not a rollback. Aborting during VALIDATING has published nothing, so it is always clean; aborting during PROCESSING leaves a partial import, and the rows that landed are visible in monitoring under the job's correlation_id.",
+        "tags": [
+          "erp-imports"
+        ],
+        "parameters": [
+          {
+            "name": "importId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "The stop was recorded. The job is still finishing up — poll GET /v2/erp/imports/{importId} to observe CANCELLED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErpImportJob"
+                }
+              }
+            }
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -3402,6 +4603,712 @@
       }
     },
     "schemas": {
+      "S3Reference": {
+        "type": "object",
+        "required": [
+          "bucket",
+          "key"
+        ],
+        "properties": {
+          "bucket": {
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          }
+        }
+      },
+      "CreateErpImportRequest": {
+        "type": "object",
+        "description": "Register an already-uploaded file as an import. The use case is chosen later, via `:validate` — upload and interpretation are separate decisions.",
+        "required": [
+          "s3_reference"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "s3_reference": {
+            "$ref": "#/components/schemas/S3Reference"
+          },
+          "include_preview": {
+            "type": "boolean",
+            "default": false,
+            "description": "Return a sample of the file's first rows in `preview`. Only controls whether the sample comes BACK — the head is read either way, because that read is how an unreadable file gets refused."
+          },
+          "import_id": {
+            "type": "string",
+            "description": "Repoint an EXISTING import at this file instead of registering a new one — same row, same id, so iterating on which file to import leaves one entry in the history rather than one per attempt.\nOnly a PENDING import may be repointed; any other status returns 409 with code `IMPORT_NOT_REPLACEABLE`. Past the first check the previous verdict is what tells the user what to fix, and a job that reached the execute phase may already have published rows under `correlation_id`.\nAn id that names nothing returns 404. It never falls back to registering a new import: a stale id must fail loudly rather than quietly produce a second one."
+          }
+        }
+      },
+      "ValidateErpImportRequest": {
+        "type": "object",
+        "required": [
+          "integration_id",
+          "use_case_slug"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "integration_id": {
+            "type": "string"
+          },
+          "use_case_slug": {
+            "type": "string",
+            "description": "An inbound use case's slug, unique within its integration."
+          }
+        }
+      },
+      "ErpImportUseCaseSuggestion": {
+        "type": "object",
+        "required": [
+          "integration_id",
+          "integration_name",
+          "use_case_slug",
+          "use_case_name",
+          "matched_columns",
+          "entity_types"
+        ],
+        "properties": {
+          "integration_id": {
+            "type": "string"
+          },
+          "integration_name": {
+            "type": "string"
+          },
+          "use_case_slug": {
+            "type": "string"
+          },
+          "use_case_name": {
+            "type": "string"
+          },
+          "entity_types": {
+            "type": "integer",
+            "description": "How many distinct entity schemas this mapping uses."
+          },
+          "matched_columns": {
+            "type": "integer",
+            "description": "How many of the FILE's columns this use case reads, by exact trimmed name."
+          }
+        }
+      },
+      "SuggestErpImportUseCasesResponse": {
+        "type": "object",
+        "required": [
+          "file_columns",
+          "suggestions"
+        ],
+        "properties": {
+          "file_columns": {
+            "type": "integer",
+            "description": "Columns in the file. Present even when `suggestions` is empty."
+          },
+          "suggestions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ErpImportUseCaseSuggestion"
+            }
+          }
+        }
+      },
+      "ExecuteErpImportRequest": {
+        "type": "object",
+        "description": "Confirmation options. Required only when the verdict carries warnings — a clean import needs no body at all.",
+        "additionalProperties": false,
+        "properties": {
+          "ack_warnings": {
+            "type": "boolean",
+            "description": "The caller has seen `validation.issues` and accepts them. Required when `validation.warnings` is greater than 0; ignored otherwise."
+          }
+        }
+      },
+      "ErpImportIssue": {
+        "type": "object",
+        "description": "A problem found during validation, scoped to the file as a whole rather than to individual rows.\n`code` is the translation key and the other fields are its parameters — there is deliberately no message to display. Each code appears at most once, with everything it has to say aggregated into that one entry.",
+        "required": [
+          "code",
+          "severity"
+        ],
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Enum of possible issue codes.\n",
+            "enum": [
+              "UNIQUE_ID_COLUMN_MISSING",
+              "MAPPED_COLUMN_MISSING",
+              "MALFORMED_ROW",
+              "INVALID_ENCODING",
+              "EMPTY_FILE",
+              "TOO_MANY_ROWS",
+              "BLANK_ROWS_SKIPPED"
+            ]
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "warning",
+              "blocking"
+            ]
+          },
+          "columns": {
+            "type": "array",
+            "description": "The columns this issue is about, at most one entry per column per entity.\nOn UNIQUE_ID_COLUMN_MISSING the file has NONE of these. Do NOT tell the user that adding one of them is enough: a unique id may read several columns through a JSONata expression, and whether it combines them (`A & B`, both needed) or falls back between them (`A ? A : B`, either will do) is not knowable here.",
+            "items": {
+              "type": "object",
+              "required": [
+                "name"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "The column name, spelled as the mapping reads it."
+                },
+                "entity": {
+                  "type": "string",
+                  "description": "Slug of the entity this column helps identify. UNIQUE_ID_COLUMN_MISSING only."
+                }
+              }
+            }
+          },
+          "row": {
+            "type": "integer",
+            "description": "The offending data row, 1-based as the user counts rows. MALFORMED_ROW only."
+          }
+        }
+      },
+      "ErpImportValidation": {
+        "type": "object",
+        "description": "Validate-phase summary: what the file will create, and whether it may be confirmed. Absent until the validate phase completes. No per-row detail is kept — a rejected file is corrected and imported again.",
+        "required": [
+          "total_rows",
+          "blocking",
+          "warnings",
+          "entities"
+        ],
+        "properties": {
+          "total_rows": {
+            "type": "integer",
+            "description": "Data rows the import will act on. Rows with no value in any column are dropped before they are counted, and reported as BLANK_ROWS_SKIPPED — so this can be lower than the line count of the file."
+          },
+          "blocking": {
+            "type": "integer",
+            "description": "Blocking problems found, counting per-row ones that are not listed in `issues`."
+          },
+          "warnings": {
+            "type": "integer"
+          },
+          "entities": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "description": "Distinct entities the file expresses, keyed by entity slug."
+          },
+          "issues": {
+            "type": "array",
+            "description": "Whole-file issues, at most one per `code`. Do not expect the length to match blocking + warnings: those also count per-row problems, which are recorded for support but never listed here. Warnings here are what `ack_warnings` on `:execute` acknowledges.",
+            "items": {
+              "$ref": "#/components/schemas/ErpImportIssue"
+            }
+          }
+        }
+      },
+      "ErpImportProgress": {
+        "type": "object",
+        "description": "How far the currently running phase has got. Written at every batch boundary, so it advances during long runs rather than only at the end.\n`total_rows` is ABSENT during the validate phase until the file has been read to the end — there is deliberately no counting pass, since that would be a second unbounded read of the whole file. Render an indeterminate indicator while it is missing: dividing by a missing total yields a determinate bar pinned at 0%, which reads as a hung import.",
+        "required": [
+          "processed_rows"
+        ],
+        "properties": {
+          "processed_rows": {
+            "type": "integer",
+            "description": "Rows fully processed. An exact \"the first N rows are done\" watermark, not an estimate — it only advances once a batch has been completely handled."
+          },
+          "total_rows": {
+            "type": "integer",
+            "description": "Rows in the file. Known only once a phase has read to EOF; the execute phase has it from the start, because validate recorded it first."
+          }
+        }
+      },
+      "ErpImportError": {
+        "type": "object",
+        "description": "Why the import failed — present if and only if status = FAILED. `code` is the translation key; for VALIDATION_BLOCKED the specifics are in `validation`.",
+        "required": [
+          "code",
+          "message"
+        ],
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Enum of possible error codes.\n",
+            "enum": [
+              "VALIDATION_BLOCKED",
+              "FILE_FORMAT_UNSUPPORTED",
+              "FILE_UNAVAILABLE",
+              "VALIDATE_TIMEOUT",
+              "IMPORT_TIMEOUT",
+              "USE_CASE_NOT_USABLE",
+              "IMPORT_NO_PROGRESS",
+              "INTERNAL_ERROR"
+            ]
+          },
+          "message": {
+            "type": "string",
+            "description": "One English sentence, derived from `code` so the two always agree. A fallback for a client that has no translation for this code — prefer translating `code`, and never parse this. It deliberately does NOT restate `validation.issues`."
+          }
+        }
+      },
+      "ErpImportFilePreview": {
+        "type": "object",
+        "description": "Sample of the file's first rows, using the same parser as `:validate`. Registration refuses a file it cannot read, so a created job always includes this.",
+        "required": [
+          "columns",
+          "rows"
+        ],
+        "properties": {
+          "columns": {
+            "type": "array",
+            "description": "Effective column names (trimmed, duplicates collapsed).",
+            "items": {
+              "type": "string"
+            }
+          },
+          "rows": {
+            "type": "array",
+            "description": "Up to the first 3 data rows, aligned to `columns`.",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "CreateErpImportResponse": {
+        "type": "object",
+        "required": [
+          "job"
+        ],
+        "properties": {
+          "job": {
+            "$ref": "#/components/schemas/ErpImportJob"
+          },
+          "preview": {
+            "$ref": "#/components/schemas/ErpImportFilePreview"
+          }
+        }
+      },
+      "ErpImportJob": {
+        "type": "object",
+        "required": [
+          "import_id",
+          "org_id",
+          "format",
+          "status",
+          "s3_input_ref",
+          "created_at",
+          "updated_at"
+        ],
+        "properties": {
+          "import_id": {
+            "type": "string",
+            "description": "`imp_{ULID}` — time-ordered, also used as the job's correlation_id."
+          },
+          "org_id": {
+            "type": "string"
+          },
+          "created_by": {
+            "type": "string"
+          },
+          "integration_id": {
+            "type": "string",
+            "description": "The integration owning the chosen use case. Absent until the first `:validate`."
+          },
+          "use_case_slug": {
+            "type": "string",
+            "description": "The inbound use case whose mapping drives both phases. Absent until the first `:validate`, and MUTABLE — re-validating with a different use case replaces it."
+          },
+          "format": {
+            "type": "string",
+            "enum": [
+              "csv",
+              "xlsx"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "description": "PENDING → VALIDATING → READY → PROCESSING → IMPORTED, with FAILED reachable from any working status, and CANCELLING → CANCELLED reachable from VALIDATING or PROCESSING via :abort. Only IMPORTED and CANCELLED are terminal. READY and FAILED both accept a further `:validate`, which is how a wrong use case is corrected without re-uploading the file.\nIMPORTED means every row was handed to the platform, not that the platform finished — per-row outcomes live in monitoring, filtered by correlation_id. A file that fails validation is FAILED with error.code = VALIDATION_BLOCKED.\nREADY is legitimately idle for as long as the user takes to confirm, so it carries no running work and never goes stale.\nCANCELLING is transient and cooperative: the abort has been recorded but the worker only notices at its next batch boundary. Rows already published stay published — a stop is not a rollback.",
+            "enum": [
+              "PENDING",
+              "VALIDATING",
+              "READY",
+              "PROCESSING",
+              "IMPORTED",
+              "FAILED",
+              "CANCELLING",
+              "CANCELLED"
+            ]
+          },
+          "s3_input_ref": {
+            "$ref": "#/components/schemas/S3Reference"
+          },
+          "size_bytes": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Size of the uploaded file, recorded at registration. Present on every job registered from version 1.17.0 onwards; absent on older rows, which were written before it was captured."
+          },
+          "column_count": {
+            "type": "integer",
+            "description": "How many effective columns the file's header yielded — the length of the `preview.columns` returned at registration, kept so a job loaded later can still describe its file. The preview ROWS are deliberately not stored: they are a sample for the person about to choose a mapping, not job state. Present on every job registered from version 1.17.0 onwards."
+          },
+          "validation": {
+            "$ref": "#/components/schemas/ErpImportValidation"
+          },
+          "progress": {
+            "$ref": "#/components/schemas/ErpImportProgress"
+          },
+          "error": {
+            "$ref": "#/components/schemas/ErpImportError"
+          },
+          "correlation_id": {
+            "type": "string",
+            "description": "Scopes this run in monitoring. Always equal to `import_id`."
+          },
+          "activity_id": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ErpImportList": {
+        "type": "object",
+        "required": [
+          "results"
+        ],
+        "properties": {
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ErpImportJob"
+            }
+          },
+          "next_cursor": {
+            "type": "string",
+            "nullable": true,
+            "description": "Cursor for the next page, or null when there are no more rows."
+          }
+        }
+      },
+      "NotificationHistoryItem": {
+        "type": "object",
+        "description": "A single notification-history row (one real notification decision).",
+        "required": [
+          "id",
+          "type",
+          "severity",
+          "title",
+          "occurred_at",
+          "notified",
+          "recipients",
+          "context",
+          "created_at"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Stable history row id (ULID)."
+          },
+          "type": {
+            "type": "string",
+            "description": "The notification/rule type (e.g. critical_error, error_threshold, integration_digest)."
+          },
+          "state_transition": {
+            "type": "string",
+            "nullable": true,
+            "description": "The state transition that produced this decision (e.g. OK->ALERTING), when applicable."
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "error",
+              "warning",
+              "info"
+            ],
+            "description": "Severity of the decision."
+          },
+          "title": {
+            "type": "string",
+            "description": "Human-readable title at decision time."
+          },
+          "occurred_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the decision occurred (newest-first ordering key)."
+          },
+          "notified": {
+            "type": "boolean",
+            "description": "Whether the notification was actually sent (true) or suppressed (false)."
+          },
+          "suppressed_reason": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "muted",
+              "debounced",
+              "recipient_opt_out"
+            ],
+            "description": "Why the notification was suppressed (only set when notified is false)."
+          },
+          "recipients": {
+            "type": "array",
+            "description": "epilot user ids the notification was (or would have been) delivered to.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "context": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Type-specific context captured at decision time."
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the history row was written."
+          }
+        }
+      },
+      "NotificationHistoryResponse": {
+        "type": "object",
+        "required": [
+          "history"
+        ],
+        "properties": {
+          "history": {
+            "type": "array",
+            "description": "Notification-history rows, newest first.",
+            "items": {
+              "$ref": "#/components/schemas/NotificationHistoryItem"
+            }
+          },
+          "next_cursor": {
+            "type": "string",
+            "nullable": true,
+            "description": "Opaque base64 cursor for the next page, or null when there are no more rows."
+          }
+        }
+      },
+      "TestNotificationRequest": {
+        "type": "object",
+        "required": [
+          "kind"
+        ],
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "alert",
+              "digest"
+            ],
+            "description": "The kind of notification to render and send."
+          },
+          "type": {
+            "type": "string",
+            "description": "The alert type to render when kind=alert (e.g. critical_error, error_threshold)."
+          },
+          "channels": {
+            "type": "array",
+            "description": "Delivery channels to use; defaults to the integration's configured channels.",
+            "items": {
+              "type": "string",
+              "enum": [
+                "email",
+                "in_app"
+              ]
+            }
+          }
+        }
+      },
+      "TestNotificationResponse": {
+        "type": "object",
+        "required": [
+          "sent",
+          "recipient",
+          "channels"
+        ],
+        "properties": {
+          "sent": {
+            "type": "boolean",
+            "description": "Whether the test notification was accepted for delivery."
+          },
+          "recipient": {
+            "type": "string",
+            "description": "The calling user id the test was sent to (the only recipient)."
+          },
+          "channels": {
+            "type": "array",
+            "description": "The channels the test was delivered on.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "notification_id": {
+            "type": "string",
+            "nullable": true,
+            "description": "The svc-notification-api message id, or null when not returned."
+          }
+        }
+      },
+      "NotificationStatusResponse": {
+        "type": "object",
+        "required": [
+          "health",
+          "rules"
+        ],
+        "properties": {
+          "health": {
+            "type": "string",
+            "enum": [
+              "healthy",
+              "alerting",
+              "muted"
+            ],
+            "description": "Rolled-up live status: `muted` when muteUntil is in the future; else `alerting` if any rule is currently ALERTING; else `healthy`.\n"
+          },
+          "evaluated_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "Most recent per-rule evaluation instant (max lastEvaluatedAt), or null when no rule has been evaluated. Updates on the 5-minute sweep tick.\n"
+          },
+          "rules": {
+            "type": "array",
+            "description": "Per-rule status, one entry per configured rule.",
+            "items": {
+              "$ref": "#/components/schemas/NotificationRuleStatus"
+            }
+          }
+        }
+      },
+      "NotificationRuleStatus": {
+        "type": "object",
+        "required": [
+          "rule_id",
+          "state"
+        ],
+        "properties": {
+          "rule_id": {
+            "type": "string",
+            "description": "The rule's stable id (matches the configured rule id)."
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "ok",
+              "alerting",
+              "recovered"
+            ],
+            "description": "The rule's live AlertState (defaults to `ok` when never evaluated)."
+          },
+          "last_fired_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "ISO instant the rule last entered ALERTING."
+          },
+          "last_cleared_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "ISO instant the rule last cleared back to OK."
+          },
+          "baseline": {
+            "nullable": true,
+            "description": "Present only for enabled 'auto'-threshold rules; null otherwise.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RuleBaselineStatus"
+              }
+            ]
+          }
+        }
+      },
+      "RuleBaselineStatus": {
+        "type": "object",
+        "required": [
+          "is_mature"
+        ],
+        "properties": {
+          "is_mature": {
+            "type": "boolean",
+            "description": "False during cold start; the sweeper uses the static fallbackThreshold until the baseline's history span is mature.\n"
+          },
+          "computed_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "ISO instant the baseline was last computed."
+          },
+          "median": {
+            "type": "number",
+            "nullable": true,
+            "description": "Typical in-scope event volume for the current hour-of-week bucket."
+          },
+          "mad": {
+            "type": "number",
+            "nullable": true,
+            "description": "Median absolute deviation for the current hour-of-week bucket."
+          },
+          "upper": {
+            "type": "number",
+            "nullable": true,
+            "description": "Dynamic alert threshold (median + k·MAD, k by sensitivity) for the current hour-of-week, or null when the bucket is uncovered.\n"
+          },
+          "buckets": {
+            "type": "array",
+            "nullable": true,
+            "description": "Full 168-bucket series; only present when ?include=baseline_series.",
+            "items": {
+              "$ref": "#/components/schemas/RuleBaselineBucket"
+            }
+          }
+        }
+      },
+      "RuleBaselineBucket": {
+        "type": "object",
+        "required": [
+          "dow",
+          "hour",
+          "median",
+          "mad"
+        ],
+        "properties": {
+          "dow": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 7,
+            "description": "Day of week, 1=Monday … 7=Sunday."
+          },
+          "hour": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 23,
+            "description": "Hour of day, 0 … 23 (UTC)."
+          },
+          "median": {
+            "type": "number"
+          },
+          "mad": {
+            "type": "number"
+          }
+        }
+      },
       "ErrorResponseBase": {
         "type": "object",
         "properties": {
@@ -3475,6 +5382,11 @@
             "maxLength": 255,
             "description": "Optional unique identifier for idempotency - prevents duplicate processing of the same event within 24 hours in context of the same integration. Must contain only alphanumeric characters, hyphens, and underscores.\n",
             "example": "evt-2025-05-01-12345-create-bp"
+          },
+          "correlation_id": {
+            "type": "string",
+            "description": "Optional per-event trace id for cross-system tracing (unique per business operation). Overrides the request-level meta.correlation_id for THIS event. When absent, the event inherits the request-level correlation_id; when both are absent, epilot mints its own event_id and the trace is epilot-only. Orthogonal to deduplication_id (idempotency).\n",
+            "example": "bp-8f3a2c-7d4e-4b1a-9c2f-1e6d5a4b3c21"
           },
           "use_case_id": {
             "type": "string",
@@ -3564,7 +5476,7 @@
                 "additionalProperties": true
               }
             ],
-            "description": "The object data payload - can be either a serialized string or a direct JSON object",
+            "description": "The object data payload - can be either a serialized string or a direct JSON object.\n\nFor events routed to a mapped (default) use case this is the raw ERP object; the use\ncase's mapping configuration transforms it into entity updates.\n\nFor events routed to a use case whose configuration has `direct: true`, the payload\nMUST be a `DirectPayload` (as an object, or a JSON string): a versioned envelope of\npre-mapped entity and meter reading operations that skip the mapping engine entirely.\nDirect use cases accept JSON only - `format: \"xml\"` events are rejected.\n",
             "example": "{\"id\":\"BP10001\",\"name\":\"Acme Corporation\",\"type\":\"organization\",\"tax_id\":\"DE123456789\",\"status\":\"active\"}"
           },
           "use_case_slug": {
@@ -3582,6 +5494,19 @@
             "maxLength": 255,
             "description": "Optional unique identifier for idempotency - prevents duplicate processing of the same event within 24 hours in context of the same integration. Must contain only alphanumeric characters, hyphens, and underscores.\n",
             "example": "evt-2025-05-01-12345-bp"
+          },
+          "group_id": {
+            "type": "string",
+            "description": "Optional per-event ordering group. Overrides the request-level `group_id` for THIS event; when absent, the event inherits the request-level `group_id` (or the default strict per-integration ordering). Use it when a single batch carries events for unrelated business objects that may be processed in parallel. See the request-level `group_id` for semantics.\n",
+            "maxLength": 128,
+            "example": "customer-42"
+          },
+          "correlation_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255,
+            "description": "Optional per-event trace id. Overrides the request-level `correlation_id` for THIS event, so a batch carrying several distinct business operations keeps its traces segregated in monitoring instead of merged under one request-level id. When absent, the event inherits the request-level `correlation_id`.\n",
+            "example": "customer-42-sync-2026-08-26"
           }
         }
       },
@@ -3603,7 +5528,7 @@
           },
           "group_id": {
             "type": "string",
-            "description": "Controls ordering and parallelism for this request's events.\n\nBy default, all events for a given `integration_id` are processed\n**strictly in order, one at a time**. For high-volume integrations this\ncan become a throughput bottleneck.\n\nSet `group_id` to opt into **parallel processing**:\n- Events sharing the same `group_id` are processed in the order received.\n- Events with different `group_id` values are processed in parallel.\n\nTypical usage is to derive `group_id` from a logical partition key in\nyour payload — for example the customer ID, contract ID, or meter ID —\nso updates to the same business object remain ordered while unrelated\nobjects are processed concurrently.\n\nNotes:\n- Up to 20 groups per integration are processed concurrently. Using\n  more distinct values than that yields no additional parallelism.\n- Omit this field if strict per-integration ordering is required.\n",
+            "description": "Controls ordering and parallelism for this request's events.\n\nBy default, all events for a given `integration_id` are processed\n**strictly in order, one at a time**. For high-volume integrations this\ncan become a throughput bottleneck.\n\nSet `group_id` to opt into **parallel processing**:\n- Events sharing the same `group_id` are processed in the order received.\n- Events with different `group_id` values are processed in parallel.\n\nTypical usage is to derive `group_id` from a logical partition key in\nyour payload — for example the customer ID, contract ID, or meter ID —\nso updates to the same business object remain ordered while unrelated\nobjects are processed concurrently.\n\nNotes:\n- Individual events may set their own `group_id`, which overrides this\n  request-level value for that event only.\n- Up to 20 groups per integration are processed concurrently. Using\n  more distinct values than that yields no additional parallelism.\n- Omit this field if strict per-integration ordering is required.\n",
             "maxLength": 128,
             "example": "customer-42"
           },
@@ -4007,6 +5932,9 @@
         "properties": {
           "autoRefresh": {
             "$ref": "#/components/schemas/AutoRefreshSettings"
+          },
+          "notifications": {
+            "$ref": "#/components/schemas/IntegrationNotificationConfig"
           }
         }
       },
@@ -4023,6 +5951,231 @@
             "type": "integer",
             "minimum": 1,
             "description": "Maximum age (in minutes) of data before it is considered stale and eligible for refresh"
+          }
+        }
+      },
+      "IntegrationNotificationConfig": {
+        "type": "object",
+        "description": "Integration monitoring notification configuration. Rides Integration.settings.notifications (camelCase) and surfaces on both v1 and v2 GET/PUT. Unknown keys are stripped server-side to stay forward-compatible with deferred (V2) rule types.",
+        "required": [
+          "enabled",
+          "recipients",
+          "defaultChannels",
+          "rules",
+          "digest"
+        ],
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "description": "Master switch for this integration's notifications."
+          },
+          "recipients": {
+            "type": "array",
+            "description": "epilot user ids notified for this integration. Same-org membership and per-user notification preferences are enforced at send time (Phases 3–5), not at config-write time.",
+            "items": {
+              "$ref": "#/components/schemas/NotificationRecipient"
+            }
+          },
+          "defaultChannels": {
+            "$ref": "#/components/schemas/NotificationChannelSet"
+          },
+          "monitoredUseCases": {
+            "type": "array",
+            "description": "Integration-level use-case include-filter; absent/empty means all use cases.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "monitoredCodes": {
+            "type": "array",
+            "description": "Integration-level code scope; absent/empty resolves to ['_error_']. Accepts concrete monitoring error codes or group sentinels (_error_, _warning_, _success_, _info_, _any_, _parent_).",
+            "items": {
+              "type": "string"
+            }
+          },
+          "rules": {
+            "type": "array",
+            "description": "Enabled triggers and their params. A type MAY repeat; capped at 20 rules (enforced at the write boundary).",
+            "items": {
+              "$ref": "#/components/schemas/NotificationRule"
+            }
+          },
+          "digest": {
+            "$ref": "#/components/schemas/NotificationDigestConfig"
+          },
+          "muteUntil": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "ISO instant; snooze all non-digest alerts until this time. `null` means not muted."
+          }
+        }
+      },
+      "NotificationRecipient": {
+        "type": "object",
+        "description": "A configured recipient. Only the epilot user_id is stored.",
+        "required": [
+          "user_id"
+        ],
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "description": "epilot user id. Same-org membership is enforced at send time (Phases 3–5), which re-validates each recipient against the integration's org before fanning out — it is not enforced at config-write time."
+          }
+        }
+      },
+      "NotificationChannelSet": {
+        "type": "object",
+        "description": "Delivery channel toggles. New channels added in svc-notification-api inherit here.",
+        "required": [
+          "email",
+          "in_app"
+        ],
+        "properties": {
+          "email": {
+            "type": "boolean"
+          },
+          "in_app": {
+            "type": "boolean"
+          }
+        }
+      },
+      "NotificationRule": {
+        "type": "object",
+        "description": "A single notification rule. Only the params relevant to a given type are set. The id is optional on write: the server mints a ULID when omitted and preserves a supplied id verbatim (a stable id keeps a rule's AlertState across config saves).",
+        "required": [
+          "type",
+          "enabled"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Stable AlertState + baseline key. Optional on write — the server mints a ULID when omitted; a supplied id is preserved verbatim."
+          },
+          "name": {
+            "type": "string",
+            "description": "Optional human label disambiguating two rules of the same type."
+          },
+          "type": {
+            "type": "string",
+            "description": "Rule trigger type. These are the only supported types; each is produced by a real alerter.",
+            "enum": [
+              "critical_error",
+              "error_threshold",
+              "warning_threshold",
+              "success_rate_drop",
+              "recovery",
+              "silence"
+            ]
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "channels": {
+            "$ref": "#/components/schemas/NotificationChannelSet"
+          },
+          "codes": {
+            "type": "array",
+            "description": "Per-rule code scope. Event-matching rules default to ['_parent_']; silence defaults to ['_any_']. success_rate_drop and recovery take no codes.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "threshold": {
+            "description": "Count or percentage; 'auto' selects anomaly-baseline mode.",
+            "oneOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string",
+                "enum": [
+                  "auto"
+                ]
+              }
+            ]
+          },
+          "sensitivity": {
+            "type": "string",
+            "description": "Band width for 'auto' mode.",
+            "enum": [
+              "low",
+              "medium",
+              "high"
+            ]
+          },
+          "fallbackThreshold": {
+            "type": "number",
+            "description": "Static value used while the 'auto' baseline is immature (cold start)."
+          },
+          "window": {
+            "type": "string",
+            "description": "Evaluation window, e.g. '15m', '1h', '24h'."
+          },
+          "minSampleSize": {
+            "type": "integer",
+            "description": "success_rate_drop minimum sample size guard."
+          },
+          "quietPeriod": {
+            "type": "string",
+            "description": "silence quiet period, e.g. '12h'."
+          }
+        }
+      },
+      "NotificationDigestConfig": {
+        "type": "object",
+        "description": "Digest schedule and content configuration.",
+        "required": [
+          "enabled",
+          "frequency",
+          "timeOfDay",
+          "timezone",
+          "channels",
+          "includeHealthy",
+          "skipIfEmpty"
+        ],
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "frequency": {
+            "type": "string",
+            "enum": [
+              "daily",
+              "weekly"
+            ]
+          },
+          "dayOfWeek": {
+            "type": "integer",
+            "description": "Weekly only. 0 = Sunday … 6 = Saturday.",
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "timeOfDay": {
+            "type": "string",
+            "description": "HH:mm"
+          },
+          "timezone": {
+            "type": "string",
+            "description": "IANA timezone, e.g. 'Europe/Berlin'."
+          },
+          "channels": {
+            "$ref": "#/components/schemas/NotificationChannelSet"
+          },
+          "includeHealthy": {
+            "type": "boolean",
+            "description": "List all integrations vs. only ones with issues."
+          },
+          "skipIfEmpty": {
+            "type": "boolean",
+            "description": "Suppress the digest when nothing happened."
           }
         }
       },
@@ -4132,6 +6285,10 @@
         "type": "object",
         "description": "Configuration for inbound use cases (ERP to epilot)",
         "properties": {
+          "direct": {
+            "type": "boolean",
+            "description": "Enables direct mode for this use case. When `true`, every event routed to this use\ncase must carry a `DirectPayload` - pre-mapped entity and meter reading operations -\ninstead of raw ERP data, and the mapping engine is skipped entirely. Everything else\nin the inbound pipeline (deduplication, ordering, create-vs-update resolution,\nrelation resolution, monitoring) behaves exactly as in mapped mode.\n\nIn direct mode, `entities` doubles as an optional allowlist: when non-empty, each\noperation's `entity_slug` must match an entry's `entity_schema`, and when that entry\ndeclares `unique_ids`, the operation's unique-id keys must be exactly that set (or\njust `_id`). Entries need only `entity_schema` and `unique_ids` - `fields` is not\nrequired and is ignored. `meter_readings` is ignored in direct mode.\n\nFlag changes take up to 5 minutes to propagate (configuration cache).\n"
+          },
           "entities": {
             "type": "array",
             "description": "Array of entity configurations for this event",
@@ -4161,6 +6318,11 @@
             "description": "The Event Catalog event name that triggers this outbound flow",
             "example": "contract.created"
           },
+          "event_filter": {
+            "type": "string",
+            "description": "JSONata boolean predicate over the hydrated event payload. The use case handles the\nevent only when this evaluates truthy; when absent it handles every event of its name,\nwhich is the behaviour of every pre-existing configuration.\n\nThis is where event scoping belongs — narrowing to certain ticket purposes, contract\ntypes or channels. Evaluation input is the full hydrated event, so relation nodes such\nas `ticket` and `contact` are populated. An expression that throws is treated as no\nmatch and logged, so one malformed filter cannot block the other use cases subscribed\nto the same event.\n",
+            "example": "$count(ticket._purpose[$ in ['bae4b4d1-d728-49ef-92ff-54486dd301b4']]) > 0"
+          },
           "mappings": {
             "type": "array",
             "minItems": 1,
@@ -4168,6 +6330,15 @@
               "$ref": "#/components/schemas/OutboundMapping"
             },
             "description": "List of mappings that transform and deliver the event"
+          },
+          "ack_tracking": {
+            "type": "string",
+            "enum": [
+              "on",
+              "off"
+            ],
+            "default": "on",
+            "description": "Whether this use case participates in the acknowledgement protocol.\n\n`on` (the default, and the behaviour of every pre-existing use case) records an\nACK_PENDING on each event and expects the consumer to confirm receipt via\n`POST /v1/erp/tracking/acknowledgement`; unconfirmed events raise ACK_TIMEOUT after\nthe timeout window.\n\n`off` opts the use case out entirely: no tracking row, no ACK_PENDING, no\nACK_TIMEOUT. Set it for consumers that never acknowledge — otherwise every event\nproduces a guaranteed timeout warning — and for deliveries that already keep their\nown durable per-item record, such as `file_proxy`.\n\nThe tracking row is per-event, not per-use-case, so it is suppressed only when EVERY\nenabled use case matching the event has opted out.\n"
           }
         }
       },
@@ -4175,8 +6346,7 @@
         "type": "object",
         "required": [
           "entity_schema",
-          "unique_ids",
-          "fields"
+          "unique_ids"
         ],
         "properties": {
           "entity_schema": {
@@ -4222,7 +6392,7 @@
           },
           "fields": {
             "type": "array",
-            "description": "Field mapping definitions",
+            "description": "Field mapping definitions. Required for mapped-mode entity configurations; may be\nomitted for allowlist entries of a `direct: true` use case, where no mapping runs.\n",
             "items": {
               "$ref": "#/components/schemas/IntegrationEntityField"
             }
@@ -4888,7 +7058,11 @@
           "change_description": {
             "type": "string",
             "maxLength": 2000,
-            "description": "Description of the last change made to this use case"
+            "description": "Reason given for the update that produced the current version. Absent when the update supplied none — it is not inherited from the previous version.\n"
+          },
+          "changed_by": {
+            "type": "string",
+            "description": "User ID recorded for the update that produced the current version. Absent when the update had no user context, e.g. an automated sync.\n"
           },
           "created_at": {
             "type": "string",
@@ -5856,7 +8030,32 @@
             "description": "Response headers from upstream"
           },
           "body": {
-            "description": "Response body from upstream"
+            "description": "Response body from upstream. When `status_code` is 502 and the target never produced an HTTP response (TLS/connection/DNS failure or timeout), this is a `SecureProxyUpstreamError` describing the underlying cause."
+          }
+        }
+      },
+      "SecureProxyUpstreamError": {
+        "type": "object",
+        "description": "Error payload returned when epilot could not obtain an HTTP response from the proxied target. The failure is epilot-generated (HTTP 502) but the cause is usually remote-side; `code`/`reason` make that attributable.",
+        "required": [
+          "message"
+        ],
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Short error category.",
+            "enum": [
+              "Upstream network error",
+              "Upstream error"
+            ]
+          },
+          "code": {
+            "type": "string",
+            "description": "Underlying Node.js/axios error code when available (e.g. `UNABLE_TO_VERIFY_LEAF_SIGNATURE`, `ECONNREFUSED`, `ETIMEDOUT`, `ENOTFOUND`)."
+          },
+          "reason": {
+            "type": "string",
+            "description": "Human-readable explanation, present only for well-known codes (TLS/certificate, DNS and connection failures)."
           }
         }
       },
@@ -6248,11 +8447,25 @@
       "FileProxyUseCaseConfiguration": {
         "type": "object",
         "required": [
-          "steps",
-          "response"
+          "steps"
         ],
-        "description": "Configuration for file_proxy use cases. Defines how to authenticate and fetch files from external document systems.\n\nThe file proxy download URL always requires `orgId`, `integrationId`, and either `useCaseSlug` (recommended) or `useCaseId` (legacy UUID) as query parameters.\nThe `orgId` is included in the signed URL to establish organization context without requiring authentication.\nAdditional use-case-specific parameters are declared in the `params` array.\n",
+        "description": "Configuration for file_proxy use cases. Defines how to authenticate and move files\nbetween epilot and an external document system, in either direction (see `direction`).\n\n**Download** (`direction: download`, the default) fetches a file from the external system\nand serves it to a browser. The download URL always requires `orgId`, `integrationId`, and\neither `useCaseSlug` (recommended) or `useCaseId` (legacy UUID) as query parameters.\nThe `orgId` is included in the signed URL to establish organization context without\nrequiring authentication. Additional use-case-specific parameters are declared in the\n`params` array. `response` is REQUIRED for download use cases.\n\n**Upload** (`direction: upload`) pushes epilot files to the external system. It is not\nreachable over the download endpoint; an outbound use case points at it via a `file_proxy`\ndelivery, and this configuration owns everything about what gets sent: `fan_out` decides\nhow many deliveries one event produces, and every step builds its own request body with\n`body_jsonata` — or leaves it empty to send the delivery's files unchanged.\n`upload` is REQUIRED and `response` MUST be omitted.\n\nTwo expression languages, split by what they produce. **Handlebars composes strings**:\n`url` and `headers` on upload, plus a form-encoded, XML or plain-text `body` on\ndownload. **JSONata produces data**: `body_jsonata` and the per-step `enabled`.\nJSONata omits keys whose value is undefined, so an optional field needs no conditional\nguard — it is simply absent from the serialized body.\n\nHandlebars templates are rendered EXACTLY ONCE, against a single context holding `env`,\n`file_data`, `steps` and `auth_token`. Writing\n`{{ env.some_var }}` resolves it. The legacy `\\{{ env.some_var }}` escape belongs to the\ntwo-pass renderer and is NOT rewritten here — it renders as the literal text\n`{{ env.some_var }}`, which is rejected (see below) rather than shipped.\n\nTwo guards run on every rendered upload template, because single-pass rendering fails\nquietly by default. Both are terminal, and each names what to fix:\n\n- **residual `{{` after rendering** — a configuration still carrying the `\\{{` escape.\n  Rewrite it without the backslash.\n- **a referenced `env` key absent from the environment** — checked BEFORE the URL is\n  parsed, because an empty value in host position turns\n  `https://{{env.host}}/document/import` into `https:///document/import`, whose host\n  then parses as `document`. Provision the environment variable. A key that exists and\n  is legitimately empty is fine; only absence fails.\n\nOpenAPI 3.0 cannot express this conditional requiredness, so it is enforced by the\nserver-side validator, which returns an explicit message naming the offending field.\n",
         "properties": {
+          "direction": {
+            "type": "string",
+            "enum": [
+              "download",
+              "upload"
+            ],
+            "default": "download",
+            "description": "Direction of file travel. `download` (default) pulls a file from the external system\ninto epilot; `upload` pushes an epilot file out to the external system. Omitted means\n`download`, so every pre-existing configuration keeps its exact meaning.\n\nNote this is the direction of the FILE, not the epilot use-case type — an `upload`\nfile_proxy use case is still a `file_proxy` use case, never an `outbound` one.\n"
+          },
+          "upload": {
+            "$ref": "#/components/schemas/FileProxyUploadConfig"
+          },
+          "fan_out": {
+            "$ref": "#/components/schemas/FileProxyFanOutConfig"
+          },
           "secure_proxy": {
             "description": "Optional secure proxy attachment for routing all outbound file proxy requests.\nOnly `use_case_slug` is supported and the referenced secure_proxy use case\nmust belong to the same integration.\n",
             "allOf": [
@@ -6269,7 +8482,7 @@
             "items": {
               "$ref": "#/components/schemas/FileProxyParam"
             },
-            "description": "Additional use-case-specific parameters expected in the download URL query string (beyond the required orgId, integrationId, and useCaseSlug or useCaseId)"
+            "description": "Download-only. Additional use-case-specific parameters expected in the download URL\nquery string (beyond the required orgId, integrationId, and useCaseSlug or useCaseId).\nRejected when `direction` is `upload`.\n"
           },
           "allowed_origins": {
             "type": "array",
@@ -6278,7 +8491,7 @@
               "format": "uri",
               "pattern": "^https?://"
             },
-            "description": "Additional origins permitted to call /download for this use case (CORS, exact match). Portal origins are always allowed."
+            "description": "Download-only. Additional origins permitted to call /download for this use case\n(CORS, exact match). Portal origins are always allowed. Rejected when `direction`\nis `upload`.\n"
           },
           "steps": {
             "type": "array",
@@ -6286,10 +8499,15 @@
             "items": {
               "$ref": "#/components/schemas/FileProxyStep"
             },
-            "description": "Ordered list of HTTP steps to execute to retrieve the file"
+            "description": "Ordered list of HTTP steps to execute. For `download` these retrieve the file; for\n`upload` they deliver it, each assembling its own request body — `body_jsonata` for\nJSON, `body` for anything else.\n"
           },
           "response": {
             "$ref": "#/components/schemas/FileProxyResponseConfig"
+          },
+          "prevent_indirect_serving": {
+            "type": "boolean",
+            "default": false,
+            "description": "Download-only; rejected when `direction` is `upload`.\nWhen `true`, this use case is served via the streaming endpoint: mapped file URLs\nare built as `/stream/download`, files of any size are streamed inline over HTTP\nresponse streaming, and buffered `/download` requests for oversize files are\n307-redirected to `/stream`. Files never transit epilot's temporary S3 storage on\nthe streaming path. Defaults to `false` (small files are served directly and large\nfiles are transparently served via a temporary S3 redirect).\n"
           }
         }
       },
@@ -6415,7 +8633,9 @@
             "type": "string",
             "enum": [
               "GET",
-              "POST"
+              "POST",
+              "PUT",
+              "PATCH"
             ],
             "description": "HTTP method"
           },
@@ -6426,9 +8646,19 @@
             },
             "description": "Handlebars templates for request headers"
           },
+          "body_jsonata": {
+            "type": "string",
+            "description": "Upload-only. JSONata producing the request body as DATA; the result is serialized to\nJSON and sent. Use this for every JSON body — it cannot emit malformed JSON, and it\nomits a key whose value is undefined instead of sending it empty, which is what makes\noptional fields work without a conditional guard.\n\nThe evaluation root is the hydrated event, so `contact.customer_pin` and\n`ticket._purpose` are reachable directly, unprefixed. **Everything else is a\n`$`-prefixed binding**: `$file_data` (the files this delivery carries — see\n`FileProxyFanOutConfig` for what it holds in each mode), `$ack_id`, `$env`,\n`$steps` (results of the steps already executed, each\n`{statusCode, headers, body}`), `$germanDate(iso)` and `$now()`.\nWriting `file_data[0].filename` instead of `$file_data[0].filename` yields\nnothing — it reads a field named `file_data` on the event, which does not exist.\n\nLeave this empty to send the delivery's files exactly as they are: the single\nattachment object when fanning out, the whole array when not. No mapping is\nneeded for the common case.\n\nMust evaluate to an object or an array. Anything else fails the delivery terminally\nwith `MAPPING_EXPRESSION_FAILED`, naming the step.\n\n**Only `undefined` omits a key.** `null`, `\"\"`, `false` and `0` are values and are\nall sent. Two traps follow from that, and one idiom avoids both:\n\n- `x ? $string(x)` omits the key when `x` is `0` or `\"\"`, because JSONata reads both\n  as false. A meter number of `\"0\"` would silently vanish.\n- `: undefined` is not a literal — JSONata has no `undefined` keyword, so it is a\n  path lookup that happens to find nothing. Against an event that really does carry\n  a field named `undefined`, it returns that field's value.\n\nWrite the **two-arm ternary with no else branch**, which omits the key when the test\nis false: `{ \"pin\": $exists(contact.pin) ? $string(contact.pin) }`.\n\nEvery `$` binding is checked at save time against the known set, so a mistyped\nbinding (`$lookup.documentType` for `$file_data[0].filename`) is rejected rather\nthan silently producing a missing key.\n\nNot accepted together with `body`, which the upload direction rejects outright.\n",
+            "example": "{ \"documentType\": \"Zählerstand\", \"fileName\": $file_data[0].filename, \"fileData\": $file_data[0].base64, \"pin\": $exists(contact.customer_pin) ? $string(contact.customer_pin) }"
+          },
+          "enabled": {
+            "type": "string",
+            "description": "Upload-only, OPTIONAL. JSONata returning a boolean, deciding whether this step\nruns at all. Absent means it runs.\n\nA false result is a BREAK: this step is skipped and so is every step after it,\nand the delivery is recorded as `skipped` rather than delivered or failed. It is\nacknowledged and never retried, and a `STEP_DISABLED` monitoring event is emitted\nat level `info` — a disabled step is the configuration working, not a fault.\n\nReads the same bindings a body does, `$steps` included, so it can branch on what\nan earlier step returned. This is how a delivery is filtered out: with one\ndelivery per attachment, a false result on the first step drops that file.\n\nAn expression that throws, or returns a non-boolean, is a terminal\n`MAPPING_EXPRESSION_FAILED` instead — a broken predicate must not read as a\ndeliberate skip.\n",
+            "example": "$file_data[0].mime_type = \"application/pdf\""
+          },
           "body": {
             "type": "string",
-            "description": "Handlebars template for the request body (POST only)"
+            "description": "Handlebars template for the request body (write methods only), for bodies that are\nNOT JSON — form-encoded, XML, plain text. For a JSON body use `body_jsonata`\ninstead; it cannot produce malformed JSON.\n\n**Download-only.** The upload direction rejects it: use `body_jsonata`, or leave\nthat empty to send the files unchanged.\n\nRendered once, against the context described on `FileProxyUseCaseConfiguration`:\n`{{ params.* }}`, `{{ env.* }}`, `{{ steps.N.body }}`, `{{ auth_token }}`.\n\nIf a JSON body is written here anyway, **route every user-controlled value through\nthe `json` helper**: the template engine does not escape, so\n`\"name\":\"{{ params.documentName }}\"` produces invalid JSON the moment a value\ncontains a quote. Write `\"name\": {{json params.documentName}}` instead — the helper\nemits the surrounding quotes itself and renders absent values as `null`.\n\nMutually exclusive with `body_jsonata`, which is upload-only.\n"
           },
           "response_type": {
             "type": "string",
@@ -6440,8 +8670,46 @@
           }
         }
       },
+      "FileProxyFanOutConfig": {
+        "type": "object",
+        "required": [
+          "enabled"
+        ],
+        "description": "Whether one event produces one delivery per file, or a single delivery carrying all of\nthem. The split is always over the event's `event_attachments` — there is no expression\nto write, because an upload only ever runs on events that declare that field.\n\nEach resulting delivery is fully independent: its own idempotency record, its own retry\nschedule, its own monitoring events. A four-file event can therefore end up three-of-four\ndelivered, which is the honest state to report.\n\nThe split is evaluated ONCE, when the event is enqueued, so item indices — and therefore\nidempotency keys — stay stable across retries.\n\nEither way, expressions read the same `$file_data` binding, so no expression needs to\nknow which mode it runs in. An event carrying no attachments is recorded as `skipped`.\n",
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "description": "When true, one delivery per attachment, and `$file_data` holds exactly that one\nfile. When false (or absent), the event produces exactly one delivery and\n`$file_data` holds every attachment on the event.\n\nAn empty `event_attachments` produces no deliveries and one info-level\n`FAN_OUT_EMPTY`, which is the normal outcome for a catch-all subscription seeing an\nevent with nothing to send.\n"
+          }
+        }
+      },
+      "FileProxyUploadConfig": {
+        "type": "object",
+        "description": "Upload-side settings for a file_proxy use case with `direction: upload`.\nThe surrounding file_proxy configuration owns WHAT and HOW to send: `fan_out`,\nauth, and the steps with their `body_jsonata`. This nested object governs\nupload-specific limits and how the final external response is judged. The\noutbound mapping remains a pure pointer to the recipe (see `FileProxyDeliveryConfig`).\n",
+        "properties": {
+          "max_total_bytes": {
+            "type": "integer",
+            "description": "Ceiling for ALL of a delivery's files together, in bytes. Capped by the platform\nlimit, which it may lower but never raise.\n\nOnly reachable with `fan_out.enabled: false`, where one delivery carries every\nattachment and the worker holds them all resident at once. base64 inflates each\nby about a third, so the combined figure is what matters rather than any single\nfile's size.\n",
+            "example": 26214400
+          },
+          "max_file_bytes": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 104857600,
+            "description": "Per-file ceiling for this use case, in bytes. Files above it fail terminally with\n`FILE_TOO_LARGE` before any bytes are fetched. Defaults to — and is clamped by — the\nplatform ceiling of 100 MiB (104857600).\n"
+          },
+          "max_delivery_attempts": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100,
+            "default": 8,
+            "description": "Maximum delivery attempts per item before the delivery is marked failed. Attempts\nare spaced by an exponential, jittered backoff. The default 8 attempts schedule at\nmost 7 delays, totaling about 7 hours 40 minutes before jitter, so a normal ERP\nmaintenance window does not immediately exhaust them.\n\nLives here rather than on the outbound delivery because how hard to retry is a\nproperty of the transport — the same judgement as `max_file_bytes` — and the outbound\ndelivery is a pure pointer.\n"
+          }
+        }
+      },
       "FileProxyResponseConfig": {
         "type": "object",
+        "description": "How to extract the file from the step results. REQUIRED when `direction` is `download`;\nrejected when `direction` is `upload` (an upload has no file to extract).\n",
         "required": [
           "body",
           "encoding"
@@ -6572,6 +8840,20 @@
               "$ref": "#/components/schemas/MeterReadingUpdate"
             }
           },
+          "prune_scope_updates": {
+            "type": "array",
+            "description": "Resolved prune scopes produced by entity mappings using `upsert-prune-scope-purge` / `upsert-prune-scope-delete`. Each entry describes the entities that would be deleted at runtime because they exist in scope but were not part of this payload.",
+            "items": {
+              "$ref": "#/components/schemas/EntityPruneScopeUpdate"
+            }
+          },
+          "meter_readings_prune_scope_updates": {
+            "type": "array",
+            "description": "Resolved prune scopes produced by meter reading mappings using `upsert-prune-scope`. Each entry describes the readings that would be deleted at runtime for a meter (+ counter) because they were not part of this payload.",
+            "items": {
+              "$ref": "#/components/schemas/MeterReadingPruneScopeUpdate"
+            }
+          },
           "warnings": {
             "type": "array",
             "description": "Validation warnings about the configuration (e.g., unique_ids referencing non-indexed fields)",
@@ -6603,12 +8885,612 @@
           }
         }
       },
+      "DirectPayload": {
+        "type": "object",
+        "description": "The payload of an ERP event routed to a `direct: true` use case: a versioned envelope of\npre-mapped operations that skip the mapping engine. Sent as the `payload` of an\n`ErpEventV3` - either as a JSON object or as a JSON string (`format` must be `json`;\nXML is rejected for direct use cases).\n\nThe schema is strict: unknown keys on the envelope or on any operation are rejected with\nan error naming the offending path. Attribute values, by contrast, pass through to the\nentity verbatim (except `$relation` / `$relation_ref` envelopes, which are validated and\nresolved).\n\nOne event lands as one queue message, so the whole event (including this payload) must\nstay within the 256 KiB message budget. Identical consecutive payloads within 5 minutes\ncan be deduplicated by the queue - use the event's `deduplication_id` deliberately when\nre-sending identical data.\n",
+        "required": [
+          "version",
+          "operations"
+        ],
+        "properties": {
+          "version": {
+            "type": "string",
+            "description": "Version of the direct payload contract. Currently only `\"1\"` is supported; an\nunsupported version is rejected with `DIRECT_VERSION_UNSUPPORTED`. Deliberately not\nan enum: the constraint is enforced by the handler so the dry-run endpoint returns\na structured `valid: false` verdict instead of a schema-level 400.\n"
+          },
+          "operations": {
+            "type": "array",
+            "description": "The operations to apply, in order. At most 100 operations per event (enforced by\nthe handler, with a structured error naming the limit). Each item is either an\nentity operation (`type` omitted or `\"entity\"`) or a meter reading operation\n(`type: \"meter_reading\"`).\n",
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/DirectEntityOperation"
+                },
+                {
+                  "$ref": "#/components/schemas/DirectMeterReadingOperation"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "DirectEntityOperation": {
+        "type": "object",
+        "description": "A single pre-mapped entity operation: upserts, soft-deletes, or purges one entity,\nidentified by its unique ids. Produces the same internal update as a mapped-mode entity\nconfiguration, so create-vs-update resolution, relation resolution, ordering, and\nmonitoring behave identically.\n",
+        "required": [
+          "entity_slug",
+          "unique_ids"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "entity"
+            ],
+            "description": "Operation discriminator. Optional - an operation without `type` is an entity operation."
+          },
+          "entity_slug": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Target entity schema slug (e.g. `contact`, `contract`).",
+            "example": "contract"
+          },
+          "unique_ids": {
+            "type": "object",
+            "minProperties": 1,
+            "additionalProperties": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "number"
+                }
+              ]
+            },
+            "description": "Attribute values that uniquely identify this entity, as `{ attribute: value }`.\nValues may be strings or numbers (numbers are coerced to strings); values that are\nempty after trimming are rejected. Use `_id` as the sole key to reference an entity\ndirectly by its epilot id.\n\nUnlike mapped mode, the unique-id ATTRIBUTE NAMES are given directly - there is no\nfield-to-attribute mapping step.\n",
+            "example": {
+              "contract_number": "CTR-001"
+            }
+          },
+          "unique_id_types": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "enum": [
+                "email",
+                "phone"
+              ]
+            },
+            "description": "Optional per-field type hints for repeatable unique-id fields (`email` / `phone`),\nneeded so lookups search the repeatable storage format correctly. When omitted, the\nserver derives the types from the entity schema; explicit values always win over\nderivation.\n"
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "upsert",
+              "delete",
+              "purge"
+            ],
+            "default": "upsert",
+            "description": "Operation mode: `upsert` creates or updates the entity (default), `delete` soft\ndeletes it, `purge` removes it permanently. For `delete` / `purge`, `attributes`\nmay be omitted - only `unique_ids` are used to locate the entity.\n"
+          },
+          "attributes": {
+            "type": "object",
+            "description": "Attribute values to write, keyed by attribute name. Required when `mode` is `upsert`\n(an empty object is allowed); optional for `delete` / `purge`.\n\nValues are written verbatim - the server does not validate them against the entity\nschema (attributes not defined in the schema are stored but not indexed; the\nsimulation endpoint surfaces warnings for unique-id fields missing from the schema).\nTwo envelope forms receive special treatment: `$relation` values\n(`DirectRelationValue`) and `$relation_ref` values (`DirectRelationRefValue`) are\nvalidated and resolved to entity relations.\n",
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/DirectRelationValue"
+                },
+                {
+                  "$ref": "#/components/schemas/DirectRelationRefValue"
+                },
+                {
+                  "description": "Any other JSON value - written to the entity attribute verbatim."
+                }
+              ]
+            }
+          }
+        }
+      },
+      "DirectMeterReadingOperation": {
+        "type": "object",
+        "description": "A single pre-mapped meter reading operation: upserts or deletes one reading on a meter\n(and optionally a specific counter), identified by their unique ids. Produces the same\ninternal update as a mapped-mode meter reading configuration.\n",
+        "required": [
+          "type",
+          "meter",
+          "attributes"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "meter_reading"
+            ],
+            "description": "Operation discriminator. Required for meter reading operations."
+          },
+          "meter": {
+            "type": "object",
+            "required": [
+              "unique_ids"
+            ],
+            "additionalProperties": false,
+            "description": "Reference to the meter this reading belongs to.",
+            "properties": {
+              "unique_ids": {
+                "type": "object",
+                "minProperties": 1,
+                "additionalProperties": {
+                  "oneOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "number"
+                    }
+                  ]
+                },
+                "description": "Attribute values that uniquely identify the meter, as `{ attribute: value }`.",
+                "example": {
+                  "meter_number": "M-001"
+                }
+              }
+            }
+          },
+          "counter": {
+            "type": "object",
+            "required": [
+              "unique_ids"
+            ],
+            "additionalProperties": false,
+            "description": "Optional reference to the meter counter (register) the reading belongs to. Required\nwhen `reading_matching` is `strict-date`.\n",
+            "properties": {
+              "unique_ids": {
+                "type": "object",
+                "minProperties": 1,
+                "additionalProperties": {
+                  "oneOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "number"
+                    }
+                  ]
+                },
+                "description": "Attribute values that uniquely identify the counter, as `{ attribute: value }`.",
+                "example": {
+                  "obis_number": "1-0:1.8.0"
+                }
+              }
+            }
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "upsert",
+              "delete"
+            ],
+            "default": "upsert",
+            "description": "Operation mode: `upsert` creates or updates the reading (default), `delete` removes it."
+          },
+          "reading_matching": {
+            "type": "string",
+            "enum": [
+              "external_id",
+              "strict-date"
+            ],
+            "description": "Strategy for matching this reading against existing readings. `external_id` (the\ndefault) matches by the reading's `external_id`; `strict-date` matches by meter +\ncounter + direction + date and REQUIRES `counter`. Useful when readings originate in\nthe portal and are echoed back by the ERP with truncated timestamps.\n"
+          },
+          "attributes": {
+            "type": "object",
+            "required": [
+              "external_id",
+              "timestamp",
+              "source",
+              "value"
+            ],
+            "description": "The reading data. Additional keys (e.g. `direction`, `reason`, `read_by`, `status`,\n`metadata`) pass through to the metering service verbatim.\n",
+            "properties": {
+              "external_id": {
+                "oneOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "number"
+                  }
+                ],
+                "description": "External identifier of the reading (numbers are coerced to strings)."
+              },
+              "timestamp": {
+                "type": "string",
+                "description": "When the reading was taken. ISO 8601 - either `YYYY-MM-DD` or\n`YYYY-MM-DDTHH:mm:ss` (optional fractional seconds and `Z` / `±HH:mm` offset).\nOther formats (e.g. `DD.MM.YYYY`, epoch numbers) are rejected.\n",
+                "example": "2026-08-24T06:00:00Z"
+              },
+              "source": {
+                "type": "string",
+                "enum": [
+                  "ECP",
+                  "ERP",
+                  "360",
+                  "journey-submission"
+                ],
+                "description": "Origin system of the reading."
+              },
+              "value": {
+                "oneOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "string"
+                  }
+                ],
+                "description": "The reading value - a number, or a numeric string (coerced to a number)."
+              }
+            }
+          }
+        }
+      },
+      "DirectRelationValue": {
+        "type": "object",
+        "description": "An entity attribute value that establishes relations to other entities. Written on any\nattribute inside a direct entity operation's `attributes`.\n\nTwo forms are accepted: a bare array of items (shorthand for `_set`, i.e. replace), or\nan object with EXACTLY ONE of the operations `_set` (replace), `_append` (merge,\ndeduplicated by entity id), `_append_all` (merge without deduplication). No other\noperation keys are accepted.\n",
+        "required": [
+          "$relation"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "$relation": {
+            "oneOf": [
+              {
+                "type": "array",
+                "description": "Shorthand for `_set` - replaces the attribute's relations with these items.",
+                "items": {
+                  "$ref": "#/components/schemas/DirectRelationItem"
+                }
+              },
+              {
+                "type": "object",
+                "description": "Exactly one of `_set`, `_append`, `_append_all` must be given.",
+                "additionalProperties": false,
+                "properties": {
+                  "_set": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/DirectRelationItem"
+                    }
+                  },
+                  "_append": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/DirectRelationItem"
+                    }
+                  },
+                  "_append_all": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/DirectRelationItem"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        }
+      },
+      "DirectRelationItem": {
+        "type": "object",
+        "description": "One relation target: either an already-resolved reference (`entity_id`), or a lookup by\nunique ids (`schema` + `unique_ids`, resolved by the pipeline like any other unique-id\nlookup, including stub creation and retry when the target does not exist yet). The two\nforms are mutually exclusive. Use `_id` as the sole `unique_ids` key for a direct-id\nlookup.\n",
+        "additionalProperties": false,
+        "properties": {
+          "entity_id": {
+            "type": "string",
+            "description": "Epilot entity id of the relation target. Must not be combined with `schema` / `unique_ids`."
+          },
+          "schema": {
+            "type": "string",
+            "description": "Entity schema slug of the relation target. Required when `entity_id` is not given.",
+            "example": "contact"
+          },
+          "unique_ids": {
+            "type": "object",
+            "minProperties": 1,
+            "additionalProperties": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "number"
+                }
+              ]
+            },
+            "description": "Attribute values that uniquely identify the target. Required when `entity_id` is not given.",
+            "example": {
+              "customer_number": "CUST-12345"
+            }
+          },
+          "unique_id_types": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "enum": [
+                "email",
+                "phone"
+              ]
+            },
+            "description": "Optional per-field type hints for repeatable unique-id fields, as on the entity operation."
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Optional relation tags (e.g. `primary`, `billing`)."
+          }
+        }
+      },
+      "DirectRelationRefValue": {
+        "type": "object",
+        "description": "An entity attribute value that references an ITEM INSIDE a repeatable attribute of\nanother entity - for example one address out of a contact's `address` list. The target\nentity is looked up by unique ids, then the item at `path` matching `value` is\nreferenced (creating it when missing).\n\nThe same operation envelope as `$relation` applies: a bare array is shorthand for\n`_set`, otherwise exactly one of `_set`, `_append`, `_append_all`.\n",
+        "required": [
+          "$relation_ref"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "$relation_ref": {
+            "oneOf": [
+              {
+                "type": "array",
+                "description": "Shorthand for `_set`.",
+                "items": {
+                  "$ref": "#/components/schemas/DirectRelationRefItem"
+                }
+              },
+              {
+                "type": "object",
+                "description": "Exactly one of `_set`, `_append`, `_append_all` must be given.",
+                "additionalProperties": false,
+                "properties": {
+                  "_set": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/DirectRelationRefItem"
+                    }
+                  },
+                  "_append": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/DirectRelationRefItem"
+                    }
+                  },
+                  "_append_all": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/DirectRelationRefItem"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        }
+      },
+      "DirectRelationRefItem": {
+        "type": "object",
+        "description": "One relation-ref target - the entity to look up, and the repeatable item to reference on it.",
+        "required": [
+          "schema",
+          "unique_ids",
+          "path",
+          "value"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "schema": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Entity schema slug of the target entity.",
+            "example": "contact"
+          },
+          "unique_ids": {
+            "type": "object",
+            "minProperties": 1,
+            "additionalProperties": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "number"
+                }
+              ]
+            },
+            "description": "Attribute values that uniquely identify the target entity."
+          },
+          "unique_id_types": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "enum": [
+                "email",
+                "phone"
+              ]
+            },
+            "description": "Optional per-field type hints for repeatable unique-id fields."
+          },
+          "path": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The attribute on the TARGET entity that holds the repeatable array (e.g. `address`)."
+          },
+          "value": {
+            "description": "The item to match (or create) at `path` - e.g. an address object.",
+            "example": {
+              "street": "Main Street",
+              "city": "Berlin"
+            }
+          }
+        }
+      },
+      "DirectSimulationRequest": {
+        "type": "object",
+        "description": "Request for a direct-mode dry run: the `direct: true` use case configuration to test\nagainst, and the payload to validate and translate.\n",
+        "required": [
+          "event_configuration",
+          "payload"
+        ],
+        "properties": {
+          "event_configuration": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/InboundIntegrationEventConfiguration"
+              }
+            ],
+            "description": "The direct use case configuration to simulate against. `direct` must be `true`;\n`entities` acts as the optional allowlist exactly as at runtime. This is the same\nconfiguration format stored on the inbound use case resource, so a configuration can\nbe tested before saving it.\n"
+          },
+          "payload": {
+            "oneOf": [
+              {
+                "type": "string",
+                "description": "The direct payload as a JSON string (as it would be sent in the event's `payload`)."
+              },
+              {
+                "$ref": "#/components/schemas/DirectPayload"
+              }
+            ],
+            "description": "The direct payload to validate - a `DirectPayload` object, or its JSON string form."
+          }
+        }
+      },
+      "DirectSimulationResponse": {
+        "type": "object",
+        "description": "Result of a direct-mode dry run. `valid: false` responses list EVERY violation found\nacross all operations in `errors`. `valid: true` responses preview the internal updates\nthe pipeline would apply, plus non-blocking `warnings`.\n",
+        "required": [
+          "valid",
+          "errors"
+        ],
+        "properties": {
+          "valid": {
+            "type": "boolean",
+            "description": "Whether the payload would be accepted by the ingest endpoint."
+          },
+          "errors": {
+            "type": "array",
+            "description": "All validation errors found. Empty when `valid` is `true`.",
+            "items": {
+              "$ref": "#/components/schemas/DirectSimulationError"
+            }
+          },
+          "warnings": {
+            "type": "array",
+            "description": "Non-blocking findings - e.g. unique-id fields not defined in the target entity\nschema (lookups would never match), or a failed server-side unique-id type\nderivation.\n",
+            "items": {
+              "$ref": "#/components/schemas/MappingSimulationWarning"
+            }
+          },
+          "entity_updates": {
+            "type": "array",
+            "description": "The translated internal entity updates, exactly as the pipeline would process them.\nOnly present when `valid` is `true`.\n",
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/EntityUpdate"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "unique_identifiers_metadata": {
+                      "type": "object",
+                      "description": "Per-field metadata for repeatable unique-id fields - explicit\n`unique_id_types` merged with server-side schema derivation. Absent when\nno field resolved to a repeatable type.\n",
+                      "additionalProperties": {
+                        "type": "object",
+                        "properties": {
+                          "fieldType": {
+                            "type": "string",
+                            "enum": [
+                              "email",
+                              "phone"
+                            ]
+                          },
+                          "index": {
+                            "type": "integer"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "meter_reading_updates": {
+            "type": "array",
+            "description": "The translated internal meter reading updates. Only present when `valid` is `true`.\n",
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/MeterReadingUpdate"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "_config": {
+                      "type": "object",
+                      "description": "Per-reading pipeline configuration carried by the operation.",
+                      "properties": {
+                        "reading_matching": {
+                          "type": "string",
+                          "enum": [
+                            "external_id",
+                            "strict-date"
+                          ]
+                        }
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      "DirectSimulationError": {
+        "type": "object",
+        "description": "One validation error found during a direct-mode dry run.",
+        "required": [
+          "code",
+          "message"
+        ],
+        "properties": {
+          "code": {
+            "type": "string",
+            "enum": [
+              "DIRECT_PAYLOAD_INVALID",
+              "DIRECT_VERSION_UNSUPPORTED",
+              "DIRECT_ENTITY_NOT_ALLOWED"
+            ],
+            "description": "Error class, matching the monitoring codes the ingest pipeline emits:\n`DIRECT_PAYLOAD_INVALID` (schema violation, JSON parse failure, or XML format),\n`DIRECT_VERSION_UNSUPPORTED` (unknown payload `version`),\n`DIRECT_ENTITY_NOT_ALLOWED` (entity or unique-id keys not permitted by the use\ncase's allowlist).\n"
+          },
+          "message": {
+            "type": "string",
+            "description": "Human-readable description, including the path of the offending element."
+          },
+          "operation_index": {
+            "type": "integer",
+            "description": "Zero-based index of the operation the error refers to, when attributable to one."
+          }
+        }
+      },
       "EntityUpdate": {
         "type": "object",
         "required": [
           "entity_slug",
           "unique_identifiers",
-          "attributes"
+          "attributes",
+          "mode"
         ],
         "properties": {
           "entity_slug": {
@@ -6624,6 +9506,38 @@
             "type": "object",
             "description": "Mapped attribute values",
             "additionalProperties": true
+          },
+          "pricing": {
+            "type": "object",
+            "description": "Present when the entity mapping has a `pricing` block. Echoes the pricing configuration and the data extracted for it, so mapping authors can see what would be sent to the pricing service.",
+            "required": [
+              "config",
+              "data"
+            ],
+            "properties": {
+              "config": {
+                "type": "object",
+                "additionalProperties": true,
+                "description": "The pricing configuration from the entity mapping"
+              },
+              "data": {
+                "type": "array",
+                "description": "The pricing input data extracted from the payload",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "upsert",
+              "delete",
+              "purge"
+            ],
+            "description": "Effective operation mode applied to this entity at runtime. `upsert-prune-scope-purge` / `upsert-prune-scope-delete` configurations report `upsert` here, because the individual entities in the payload are upserted — the destructive part of those modes is reported separately in `prune_scope_updates`. For `delete` / `purge`, `attributes` are still mapped and returned but ignored at runtime: only `unique_identifiers` are used to locate the entity to remove."
           }
         }
       },
@@ -6631,7 +9545,8 @@
         "type": "object",
         "required": [
           "meter",
-          "attributes"
+          "attributes",
+          "mode"
         ],
         "properties": {
           "meter": {
@@ -6661,6 +9576,121 @@
             "type": "object",
             "additionalProperties": true,
             "description": "Meter reading attributes. Required: external_id, timestamp, source, value. `timestamp` must be ISO 8601 — either `YYYY-MM-DD` or `YYYY-MM-DDTHH:mm:ss` (with optional fractional seconds and optional `Z` / `±HH:mm` timezone offset); non-ISO formats (e.g. `DD.MM.YYYY` or epoch numbers) are rejected and must be converted upstream via a `jsonataExpression` (e.g. `$fromMillis(...)`). Date-only values are normalized to midnight UTC and offset-less date-times are anchored to UTC before being forwarded to the metering API. `source` must be one of: ECP, ERP, 360, journey-submission. `reason` (optional) must be one of: regular, irregular, last, first, meter_change, contract_change, meter_adjustment (or empty/null)."
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "upsert",
+              "delete"
+            ],
+            "description": "Effective operation mode applied to this reading at runtime. `upsert-prune-scope` configurations report `upsert` here — their destructive part is reported separately in `meter_readings_prune_scope_updates`."
+          }
+        }
+      },
+      "EntityPruneScopeUpdate": {
+        "type": "object",
+        "description": "A resolved entity prune scope. At runtime, entities of `entity_slug` found within `scope` whose unique identifiers are not listed in `keep_unique_ids` are removed using `deletion_mode`.",
+        "required": [
+          "entity_slug",
+          "scope",
+          "keep_unique_ids",
+          "deletion_mode"
+        ],
+        "properties": {
+          "entity_slug": {
+            "type": "string",
+            "description": "The entity type that would be pruned"
+          },
+          "scope": {
+            "type": "object",
+            "description": "The scope configuration resolved against the payload",
+            "required": [
+              "scope_mode"
+            ],
+            "properties": {
+              "scope_mode": {
+                "type": "string",
+                "enum": [
+                  "relations",
+                  "query"
+                ],
+                "description": "How the entities in scope are found"
+              },
+              "schema": {
+                "type": "string",
+                "description": "Schema of the related entity defining the scope (`relations` scope_mode only)"
+              },
+              "unique_ids": {
+                "type": "object",
+                "additionalProperties": true,
+                "description": "Resolved unique identifiers of the related scope entity (`relations` scope_mode only)"
+              },
+              "query": {
+                "type": "object",
+                "additionalProperties": true,
+                "description": "Resolved query parameters used to find entities in scope (`query` scope_mode only)"
+              }
+            }
+          },
+          "keep_unique_ids": {
+            "type": "array",
+            "description": "Unique identifiers of the entities upserted by this payload. Everything else found in scope would be deleted.",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "deletion_mode": {
+            "type": "string",
+            "enum": [
+              "delete",
+              "purge"
+            ],
+            "description": "`delete` soft deletes the pruned entities, `purge` removes them permanently"
+          }
+        }
+      },
+      "MeterReadingPruneScopeUpdate": {
+        "type": "object",
+        "description": "A resolved meter reading prune scope. At runtime, readings of the given meter (+ counter) whose external ids are not listed in `keep_external_ids` are deleted.",
+        "required": [
+          "meter",
+          "keep_external_ids"
+        ],
+        "properties": {
+          "meter": {
+            "type": "object",
+            "required": [
+              "$entity_unique_ids"
+            ],
+            "properties": {
+              "$entity_unique_ids": {
+                "type": "object",
+                "additionalProperties": true,
+                "description": "Unique identifiers for the meter"
+              }
+            }
+          },
+          "meter_counter": {
+            "type": "object",
+            "properties": {
+              "$entity_unique_ids": {
+                "type": "object",
+                "additionalProperties": true,
+                "description": "Unique identifiers for the meter counter"
+              }
+            }
+          },
+          "keep_external_ids": {
+            "type": "array",
+            "description": "External ids of the readings present in this payload. All other readings in scope would be deleted. An empty array means every reading in scope would be deleted.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "source": {
+            "type": "string",
+            "description": "When set, only readings with this source are eligible for pruning (e.g. `ERP`)"
           }
         }
       },
@@ -6796,12 +9826,12 @@
           "enabled",
           "delivery"
         ],
-        "description": "A mapping that delivers an event to an external system — either pushed to a webhook (with a JSONata payload transformation) or made available on the pull-based poll queue (raw event payload, no transformation)",
+        "description": "A mapping that delivers an event to an external system by one of three mechanisms — pushed to a webhook (with a JSONata payload transformation), made available on the pull-based poll queue (raw event payload, no transformation), or handed to a file_proxy use case that uploads files to an external document system (a pointer only; the referenced use case owns the payload and the fan-out)",
         "properties": {
           "id": {
             "type": "string",
             "format": "uuid",
-            "description": "Unique identifier for this mapping"
+            "description": "Unique identifier for this mapping; generated by the API when omitted"
           },
           "name": {
             "type": "string",
@@ -6810,7 +9840,7 @@
           },
           "jsonata_expression": {
             "type": "string",
-            "description": "JSONata expression to transform the event payload. Required for webhook delivery; ignored for poll delivery.",
+            "description": "JSONata expression to transform the event payload. Required for webhook delivery, ignored for poll delivery, and rejected for file_proxy delivery — a file_proxy payload is built by the referenced use case's steps, so accepting an expression here would silently do nothing.",
             "example": "{ \"id\": entity._id, \"customer\": entity.customer_name }"
           },
           "enabled": {
@@ -6834,20 +9864,24 @@
         }
       },
       "DeliveryConfig": {
-        "description": "Configuration for how the event should be delivered. webhook = push delivery via svc-webhooks (JSONata-transformed payload); poll = pull-based queue delivery where the consumer fetches items via the poll API (raw event payload)",
+        "description": "Configuration for how the event should be delivered. webhook = push delivery via svc-webhooks (JSONata-transformed payload); poll = pull-based queue delivery where the consumer fetches items via the poll API (raw event payload); file_proxy = one push per event attachment to an external document system, through a file_proxy use case (JSONata-transformed payload carrying the file bytes)",
         "oneOf": [
           {
             "$ref": "#/components/schemas/WebhookDeliveryConfig"
           },
           {
             "$ref": "#/components/schemas/PollDeliveryConfig"
+          },
+          {
+            "$ref": "#/components/schemas/FileProxyDeliveryConfig"
           }
         ],
         "discriminator": {
           "propertyName": "type",
           "mapping": {
             "webhook": "#/components/schemas/WebhookDeliveryConfig",
-            "poll": "#/components/schemas/PollDeliveryConfig"
+            "poll": "#/components/schemas/PollDeliveryConfig",
+            "file_proxy": "#/components/schemas/FileProxyDeliveryConfig"
           }
         }
       },
@@ -6908,7 +9942,7 @@
               "block"
             ],
             "default": "dead_letter",
-            "description": "What happens when an item exhausts max_delivery_attempts: dead_letter routes the exhausted item to the dead-letter queue; block halts the queue until operator/consumer action. Enforcement lands with the queue consumer (Phase 10) — this field defines the contract."
+            "description": "What happens when an item exhausts max_delivery_attempts: dead_letter routes the exhausted item to the dead-letter queue and advances past it so the stream keeps flowing; block halts the queue at that item until operator/consumer action removes it."
           },
           "max_delivery_attempts": {
             "type": "integer",
@@ -6916,6 +9950,120 @@
             "maximum": 100,
             "default": 5,
             "description": "Maximum delivery attempts before the poison_policy is applied"
+          }
+        }
+      },
+      "FileProxyDeliveryConfig": {
+        "type": "object",
+        "required": [
+          "type",
+          "use_case_slug"
+        ],
+        "description": "Push delivery to an external document system through a `file_proxy` use case.\n\nA pure pointer, deliberately. The outbound use case decides WHEN to deliver — its event\nname plus `event_filter` — and the referenced `file_proxy` use case decides WHAT and HOW:\nwhich items to fan out over (`fan_out`), what values to build (each\nstep's `body_jsonata`), and the steps that send them. Keeping every file concern on the\nfile_proxy side is what lets one upload recipe be shared by several event subscriptions\nwithout duplicating any of it.\n\n`jsonata_expression` on the mapping is NOT used for this delivery type and is rejected.\n\nThe slug is resolved at delivery time, not at save time, so use cases can be saved in any\norder; a dangling reference surfaces as a `USE_CASE_NOT_FOUND` monitoring event naming\nthe referencing mapping.\n",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "file_proxy"
+            ],
+            "description": "Delivery mechanism type"
+          },
+          "use_case_slug": {
+            "type": "string",
+            "description": "Slug of a `file_proxy` use case with `direction: upload` in the SAME integration.\n",
+            "example": "wemag_d3_document_upload"
+          }
+        }
+      },
+      "EntitySyncStatusResponse": {
+        "type": "object",
+        "required": [
+          "entity_id",
+          "sync_states"
+        ],
+        "properties": {
+          "entity_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The entity the sync states belong to"
+          },
+          "sync_states": {
+            "type": "array",
+            "description": "One entry per integration that has processed an inbound event for the entity",
+            "items": {
+              "$ref": "#/components/schemas/EntitySyncState"
+            }
+          }
+        }
+      },
+      "EntitySyncState": {
+        "type": "object",
+        "description": "Inbound sync state of one entity for one integration. Carries two\nindependent groups: the entity-level fields (`last_synced_at`, …) and,\non meter/meter_counter entities, the readings-level fields\n(`readings_last_synced_at`, …). Either group can be present alone — a\nmeter whose readings sync via the ERP but whose entity was never\nitself inbound-mapped carries only the readings group.\n",
+        "required": [
+          "entity_id",
+          "integration_id",
+          "entity_slug"
+        ],
+        "properties": {
+          "entity_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The entity ID"
+          },
+          "integration_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The integration that synchronized the entity"
+          },
+          "entity_slug": {
+            "type": "string",
+            "description": "The entity schema slug",
+            "example": "contract"
+          },
+          "use_case_id": {
+            "type": "string",
+            "description": "The inbound use case that last processed the entity"
+          },
+          "last_synced_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Last time an inbound ERP event for this entity was processed —\nincluding no-op checks that changed nothing on the entity.\n"
+          },
+          "last_changed_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Last time an inbound ERP event actually changed the entity (create/patch/delete)"
+          },
+          "last_operation": {
+            "type": "string",
+            "enum": [
+              "create",
+              "patch",
+              "delete",
+              "no-op"
+            ],
+            "description": "Outcome of the most recent inbound sync check"
+          },
+          "last_event_id": {
+            "type": "string",
+            "description": "The event ID of the most recent inbound sync check"
+          },
+          "readings_last_synced_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Last time meter readings for this meter/meter_counter entity were\nreceived and processed from the ERP. Only present on meter and\nmeter_counter entities. The metering path cannot detect no-ops,\nso there is no separate readings changed-at.\n"
+          },
+          "readings_last_operation": {
+            "type": "string",
+            "enum": [
+              "upsert",
+              "delete"
+            ],
+            "description": "Outcome of the most recent inbound readings sync"
+          },
+          "readings_last_event_id": {
+            "type": "string",
+            "description": "The event ID of the most recent inbound readings sync"
           }
         }
       },
@@ -6989,6 +10137,60 @@
           },
           "poll": {
             "$ref": "#/components/schemas/OutboundPollStatus"
+          },
+          "file_proxy": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OutboundFileProxyTargetStatus"
+            },
+            "description": "One entry per file_proxy mapping on this use case. Present only on use cases with a\nfile_proxy delivery mapping.\n"
+          }
+        }
+      },
+      "OutboundFileProxyTargetStatus": {
+        "type": "object",
+        "description": "Resolution state of one file_proxy mapping's referenced upload use case.\n\nBecause the transport lives on a separate use case, edits to the endpoint or credentials\ndo not appear in THIS use case's history. `target_updated_at` is the hook that lets an\noperator notice a target changed underneath a delivery that started failing.\n",
+        "required": [
+          "mapping_id",
+          "use_case_slug",
+          "resolved"
+        ],
+        "properties": {
+          "mapping_id": {
+            "type": "string",
+            "description": "The mapping holding this file_proxy delivery"
+          },
+          "use_case_slug": {
+            "type": "string",
+            "description": "Slug of the referenced file_proxy use case"
+          },
+          "resolved": {
+            "type": "boolean",
+            "description": "Whether the slug currently resolves to an enabled `file_proxy` use case with\n`direction: upload` in this integration. References are resolved at delivery time,\nso `false` is a live warning rather than a save-time error.\n"
+          },
+          "target_use_case_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Id of the referenced use case — absent when unresolved"
+          },
+          "target_enabled": {
+            "type": "boolean",
+            "description": "Whether the referenced use case is enabled — absent when unresolved"
+          },
+          "target_updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the referenced use case was last modified — absent when unresolved. Surfaced\nbecause a change here is invisible in this use case's own history diff.\n"
+          },
+          "unresolved_reason": {
+            "type": "string",
+            "enum": [
+              "not_found",
+              "wrong_type",
+              "wrong_direction",
+              "disabled"
+            ],
+            "description": "Why the reference did not resolve — absent when `resolved` is true"
           }
         }
       },
@@ -8470,6 +11672,160 @@
           }
         }
       },
+      "ExternalMonitoringSpan": {
+        "type": "object",
+        "properties": {
+          "correlation_id": {
+            "type": "string",
+            "description": "Trace id — links this span to the epilot trace. Unique per business operation. Required."
+          },
+          "level": {
+            "type": "string",
+            "description": "Span outcome level — one of success | error | warning | info. Drives the server-assigned EXTERNAL_* code, coloring, and alerting. Required.\n"
+          },
+          "use_case_slug": {
+            "type": "string",
+            "description": "Business use case slug (e.g. \"business_partner\"). Resolved server-side against the integration's configured use cases to a use_case_id/use_case_type; stored as the grouping dimension. Portable — no epilot-internal UUIDs required.\n"
+          },
+          "occurred_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "External clock time the span occurred; stored as created_at."
+          },
+          "message": {
+            "type": "string",
+            "description": "Human-readable line shown in the trace and event tables."
+          },
+          "detail": {
+            "type": "object",
+            "additionalProperties": true,
+            "nullable": true,
+            "description": "Free-form context (step, http_status, reason, …). The place for external-system specificity — the taxonomy code stays clean (EXTERNAL_*).\n"
+          }
+        },
+        "description": "A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).\n"
+      },
+      "IngestExternalMonitoringEventsRequest": {
+        "type": "object",
+        "required": [
+          "events"
+        ],
+        "properties": {
+          "events": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 100,
+            "items": {
+              "$ref": "#/components/schemas/ExternalMonitoringSpan"
+            },
+            "description": "Batch of external monitoring spans (max 100 per request)."
+          }
+        }
+      },
+      "IngestExternalMonitoringEventsResponse": {
+        "type": "object",
+        "required": [
+          "accepted",
+          "rejected"
+        ],
+        "properties": {
+          "accepted": {
+            "type": "integer",
+            "description": "Number of spans accepted and republished onto the monitoring bus."
+          },
+          "rejected": {
+            "type": "integer",
+            "description": "Number of spans rejected in validation. See `results` for reasons."
+          },
+          "results": {
+            "type": "array",
+            "description": "Per-span results; present for rejections in a mixed batch.",
+            "items": {
+              "type": "object",
+              "required": [
+                "index",
+                "status"
+              ],
+              "properties": {
+                "index": {
+                  "type": "integer",
+                  "description": "Zero-based index of the span in the request `events` array."
+                },
+                "status": {
+                  "type": "string",
+                  "enum": [
+                    "accepted",
+                    "rejected"
+                  ]
+                },
+                "reason": {
+                  "type": "string",
+                  "description": "Rejection reason (present when status is rejected)."
+                }
+              }
+            }
+          }
+        }
+      },
+      "MonitoringTraceResponse": {
+        "type": "object",
+        "required": [
+          "correlation_id",
+          "status",
+          "span_count",
+          "truncated",
+          "spans"
+        ],
+        "properties": {
+          "correlation_id": {
+            "type": "string",
+            "description": "The trace id these spans share."
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "success",
+              "error",
+              "warning",
+              "info"
+            ],
+            "description": "Rolled-up status across all spans (error > warning > success > info)."
+          },
+          "started_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "created_at of the earliest span (null when the trace is empty)."
+          },
+          "ended_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "created_at of the latest returned span (null when the trace is empty)."
+          },
+          "span_count": {
+            "type": "integer",
+            "description": "Number of spans RETURNED (== spans.length; capped)."
+          },
+          "truncated": {
+            "type": "boolean",
+            "description": "True when the trace has more spans than the cap; the returned window is the earliest spans, so ended_at/status reflect only that window.\n"
+          },
+          "spans": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MonitoringEventV2"
+            },
+            "description": "All spans sharing the correlation_id, chronological. External-origin spans carry an EXTERNAL_* code; epilot spans carry an epilot code or empty (success).\n"
+          },
+          "inbound_event": {
+            "type": "object",
+            "nullable": true,
+            "additionalProperties": true,
+            "description": "The epilot inbound event \"head\" (raw payload), when present."
+          }
+        }
+      },
       "MonitoringEventV2": {
         "type": "object",
         "required": [
@@ -8574,7 +11930,21 @@
               "managed_call",
               "secure_proxy"
             ],
-            "description": "Filter stats by use case type"
+            "description": "Filter stats by a single use case type"
+          },
+          "use_case_types": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "inbound",
+                "outbound",
+                "file_proxy",
+                "managed_call",
+                "secure_proxy"
+              ]
+            },
+            "description": "Filter stats to this set of use case types (matches any). Takes precedence over `use_case_type` when both are present. Used by the notification producers to scope alerts/digests to the integration's `monitoredUseCases`."
           },
           "group_by": {
             "type": "string",
@@ -8792,6 +12162,110 @@
             }
           }
         }
+      },
+      "DocumentationPageSummary": {
+        "type": "object",
+        "description": "Documentation page metadata without the markdown content",
+        "required": [
+          "id",
+          "integration_id",
+          "scope",
+          "title",
+          "created_at",
+          "updated_at"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "'general' for the integration-wide page, otherwise the use case ID",
+            "example": "general"
+          },
+          "integration_id": {
+            "type": "string",
+            "format": "uuid",
+            "readOnly": true
+          },
+          "scope": {
+            "type": "string",
+            "enum": [
+              "integration",
+              "use_case"
+            ],
+            "description": "Whether the page documents the whole integration or a single use case"
+          },
+          "use_case_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The linked use case. Only set when scope is use_case."
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 150
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "created_by": {
+            "type": "string",
+            "nullable": true,
+            "description": "User ID that created the page",
+            "readOnly": true
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "updated_by": {
+            "type": "string",
+            "nullable": true,
+            "description": "User ID of the last edit",
+            "readOnly": true
+          }
+        }
+      },
+      "DocumentationPage": {
+        "description": "A markdown documentation page of an integration",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/DocumentationPageSummary"
+          },
+          {
+            "type": "object",
+            "required": [
+              "content"
+            ],
+            "properties": {
+              "content": {
+                "type": "string",
+                "maxLength": 100000,
+                "description": "Markdown source of the page"
+              }
+            }
+          }
+        ]
+      },
+      "UpsertDocumentationPageRequest": {
+        "type": "object",
+        "required": [
+          "title",
+          "content"
+        ],
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 150
+          },
+          "content": {
+            "type": "string",
+            "maxLength": 100000,
+            "description": "Markdown source of the page"
+          }
+        }
       }
     },
     "responses": {
@@ -8827,6 +12301,16 @@
       },
       "Forbidden": {
         "description": "Forbidden - insufficient permissions",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponseBase"
+            }
+          }
+        }
+      },
+      "Conflict": {
+        "description": "Conflict - the resource is not in a state that allows this operation",
         "content": {
           "application/json": {
             "schema": {
@@ -9014,7 +12498,7 @@
         }
       },
       "ReplayEventsResponse": {
-        "description": "Events replay initiated",
+        "description": "Events replay initiated. Always 200 — per-event outcomes are reported in `results`, so inspect it (or compare `replayed` against the number of requested ids) rather than treating the status code as success.\n",
         "content": {
           "application/json": {
             "schema": {
@@ -9024,6 +12508,48 @@
                 "results"
               ],
               "properties": {
+                "replayed": {
+                  "type": "integer",
+                  "description": "Number of events actually queued for re-processing.",
+                  "example": 2
+                },
+                "results": {
+                  "type": "array",
+                  "description": "One entry per requested event id, in request order.",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "event_id",
+                      "status"
+                    ],
+                    "properties": {
+                      "event_id": {
+                        "type": "string",
+                        "description": "The requested (source) event ID."
+                      },
+                      "status": {
+                        "type": "string",
+                        "enum": [
+                          "success",
+                          "queued",
+                          "skipped",
+                          "ignored",
+                          "not_found",
+                          "error"
+                        ],
+                        "description": "Outcome for this event. `success`/`queued` means it was enqueued for re-processing. `not_found` means no inbound event with that ID exists for the organization. `skipped` means it was deduplicated, `ignored` means no enabled use case matched it, and `error` means it could not be queued (see `message`).\n"
+                      },
+                      "replay_event_id": {
+                        "type": "string",
+                        "description": "The new event ID assigned to the replayed event. Use it to follow the replay in monitoring.\n"
+                      },
+                      "message": {
+                        "type": "string",
+                        "description": "Human-readable detail for this outcome."
+                      }
+                    }
+                  }
+                },
                 "event_ids": {
                   "type": "array",
                   "items": {
