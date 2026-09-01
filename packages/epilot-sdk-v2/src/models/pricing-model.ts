@@ -35,3 +35,36 @@ export const DynamicTariffModeValues = {
   dayAheadMarket: 'day_ahead_market',
   manual: 'manual',
 } as const satisfies Record<string, DynamicTariffMode>;
+
+/**
+ * Entity attribute types whose value a conditional pricing variant may override, via the
+ * entity schema's `overridable_attribute` flag. Lives here rather than in entity-client
+ * because conditional pricing is its only consumer.
+ *
+ * An allowlist by design: a denylist rots as new attribute types land — a new type would
+ * silently become overridable — and it cannot be derived from an attribute's kind alone,
+ * since `file` and `image` are scalars unless `repeatable` is set.
+ *
+ * These are entity types, so there is no pricing schema to `satisfies` them against and no
+ * compile-time anchor; `models.test.ts` checks every member against the entity spec instead.
+ */
+export const OVERRIDABLE_ATTRIBUTE_TYPE_LIST = [
+  'string',
+  'number',
+  'currency',
+  'boolean',
+  'date',
+  'datetime',
+  'select',
+  'radio',
+  'multiselect',
+  'checkbox',
+  'country',
+  'tags',
+] as const;
+
+/**
+ * Lookup companion of the list above. Typed `string` so a caller can test an unvalidated
+ * `attribute.type` without narrowing it first.
+ */
+export const OVERRIDABLE_ATTRIBUTE_TYPES: ReadonlySet<string> = new Set(OVERRIDABLE_ATTRIBUTE_TYPE_LIST);

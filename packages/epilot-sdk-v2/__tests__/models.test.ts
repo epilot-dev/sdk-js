@@ -4,13 +4,8 @@ import { describe, expect, it } from 'vitest';
 
 import { CLIENTS_DIR, SRC_DIR, clientsWith } from './helpers/clients';
 import { DynamicTariffModeValues, PricingModelValues } from '../src/apis/pricing';
-import {
-  OVERRIDABLE_ATTRIBUTE_TYPES,
-  OVERRIDABLE_ATTRIBUTE_TYPE_LIST,
-  RELATION_ATTRIBUTE_TYPES,
-  RELATION_ATTRIBUTE_TYPE_LIST,
-  RelationAffinityMode,
-} from '../src/apis/entity';
+import { RELATION_ATTRIBUTE_TYPES, RELATION_ATTRIBUTE_TYPE_LIST, RelationAffinityMode } from '../src/apis/entity';
+import { OVERRIDABLE_ATTRIBUTE_TYPES, OVERRIDABLE_ATTRIBUTE_TYPE_LIST } from '../src/apis/pricing';
 
 const MODELS_DIR = resolve(SRC_DIR, 'models');
 
@@ -76,9 +71,13 @@ describe('runtime models are exposed by the SDK', () => {
     }
   });
 
-  // The `satisfies` in schema-model.ts guards these at compile time; this guards the
-  // values that actually ship, and catches a spec that drops an attribute type entirely.
-  it('entity attribute allowlists only contain types the spec declares', async () => {
+  /**
+   * Both allowlists hold *entity* attribute types. `RELATION_ATTRIBUTE_TYPE_LIST` is
+   * `satisfies`-anchored to the entity spec at compile time; `OVERRIDABLE_ATTRIBUTE_TYPE_LIST`
+   * ships from pricing-client, which has no entity types to anchor against and must not
+   * import them (the SDK depends on no client package), so this is its only drift guard.
+   */
+  it('attribute-type allowlists only contain types the entity spec declares', () => {
     type Schema = { allOf?: Schema[]; properties?: { type?: { enum?: string[] } } };
 
     const schemas: Record<string, Schema> = readSpec('entity-client').components.schemas;
@@ -99,7 +98,7 @@ describe('runtime models are exposed by the SDK', () => {
     }
   });
 
-  it('entity allowlist sets are usable for lookup with an unnarrowed string', () => {
+  it('allowlist sets are usable for lookup with an unnarrowed string', () => {
     expect(RELATION_ATTRIBUTE_TYPES.has('relation_payment_method')).toBe(true);
     expect(RELATION_ATTRIBUTE_TYPES.has('string')).toBe(false);
     expect(OVERRIDABLE_ATTRIBUTE_TYPES.has('currency')).toBe(true);

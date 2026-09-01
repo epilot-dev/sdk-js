@@ -23,30 +23,7 @@ export const RELATION_ATTRIBUTE_TYPE_LIST = [
 ] as const satisfies readonly AttributeType[];
 
 /**
- * Attribute types whose value a conditional variant may override via `overridable_attribute`.
- *
- * An allowlist by design: a denylist rots as new attribute types land — a new type would
- * silently become overridable — and it cannot be derived from kind alone, since `file` and
- * `image` are scalars unless `repeatable` is set. A type absent here is not overridable.
- */
-export const OVERRIDABLE_ATTRIBUTE_TYPE_LIST = [
-  'string',
-  'number',
-  'currency',
-  'boolean',
-  'date',
-  'datetime',
-  'select',
-  'radio',
-  'multiselect',
-  'checkbox',
-  'country',
-  'tags',
-] as const satisfies readonly AttributeType[];
-
-/**
- * Lookup companions of the lists above. Typed `string` rather than `AttributeType` so a
+ * Lookup companion of the list above. Typed `string` rather than `AttributeType` so a
  * caller can test an unvalidated `attribute.type` without narrowing it first.
  */
 export const RELATION_ATTRIBUTE_TYPES: ReadonlySet<string> = new Set(RELATION_ATTRIBUTE_TYPE_LIST);
-export const OVERRIDABLE_ATTRIBUTE_TYPES: ReadonlySet<string> = new Set(OVERRIDABLE_ATTRIBUTE_TYPE_LIST);
