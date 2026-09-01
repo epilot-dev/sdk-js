@@ -58,7 +58,15 @@ jobs:
         id: check
         run: |
           CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD)
-          if echo "$CHANGED_FILES" | grep -q '^clients/.*/openapi\.json$'; then
+
+          # Anything that changes what @epilot/sdk ships: a spec, a hand-written client
+          # module, the generator, or the SDK's own runtime.
+          SDK_PATHS='^(clients/.*/openapi\.json$|clients/[^/]+/src/(schema-model|additional-types|index)\.ts$|scripts/generate-sdk-v2\.ts$|packages/epilot-sdk-v2/src/)'
+          # ...but not the generated output, which the auto-release commit itself rewrites.
+          # Matching it would make that commit re-trigger this job in a loop.
+          SDK_GENERATED='^packages/epilot-sdk-v2/src/(apis|types|models|definitions|docs)/|^packages/epilot-sdk-v2/src/client-map\.ts$'
+
+          if echo "$CHANGED_FILES" | grep -E "$SDK_PATHS" | grep -qvE "$SDK_GENERATED"; then
             echo "sdk=true" >> "$GITHUB_OUTPUT"
           else
             echo "sdk=false" >> "$GITHUB_OUTPUT"
@@ -159,7 +167,8 @@ jobs:
             [ -n "$COMMIT_MSG" ] && COMMIT_MSG="$COMMIT_MSG, "
             COMMIT_MSG="${COMMIT_MSG}@epilot/cli@${CLI_VERSION}"
           fi
-          git commit -m "$COMMIT_MSG"
+          # `[skip release]` stops this commit from re-triggering the job (see the job `if`).
+          git commit -m "$COMMIT_MSG [skip release]"
 
           for TAG in $TAGS; do
             git tag "$TAG"
