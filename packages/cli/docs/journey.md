@@ -39,6 +39,7 @@ epilot journey getJourneysByOrgId -p id=123
 - [`getJourneysByOrgId`](#getjourneysbyorgid) — Get all journeys by organization id
 - [`getJourney`](#getjourney) — Get journey by id. Private journeys requires valid private token to be passed
 - [`removeJourney`](#removejourney) — Remove journey by id
+- [`getJourneyEnvironment`](#getjourneyenvironment) — Resolve the environment variables referenced by this journey. Only browser-safe value types are returned.
 - [`getJourneyProducts`](#getjourneyproducts) — Get products available in the journey by id. requires public journey token to be passed.
 - [`createJourney`](#createjourney) — Create a Journey
 - [`updateJourney`](#updatejourney) — Update a Journey
@@ -208,6 +209,7 @@ epilot journey getJourney -p id=509cdffe-424f-457a-95c2-9708c304ce77 --jsonata '
     "templateId": "string",
     "entityId": "string",
     "mappingsAutomationId": "string",
+    "newMappings": true,
     "targetedCustomer": "string",
     "description": "string",
     "organizationSettings": {},
@@ -292,6 +294,62 @@ With JSONata filter:
 ```bash
 epilot journey removeJourney -p id=509cdffe-424f-457a-95c2-9708c304ce77 --jsonata '$'
 ```
+
+---
+
+### `getJourneyEnvironment`
+
+Resolve the environment variables referenced by this journey. Only browser-safe value types are returned.
+
+`GET /v1/journey/configuration/{id}/environment`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `id` | path | string (uuid) | Yes | Journey ID bound to the supplied journey access token |
+
+**Sample Call**
+
+```bash
+epilot journey getJourneyEnvironment \
+  -p id=123e4567-e89b-12d3-a456-426614174000
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot journey getJourneyEnvironment 123e4567-e89b-12d3-a456-426614174000
+```
+
+With JSONata filter:
+
+```bash
+epilot journey getJourneyEnvironment -p id=123e4567-e89b-12d3-a456-426614174000 --jsonata 'items[0]'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "items": [
+    {
+      "datasourceId": "string",
+      "type": "Text",
+      "value": "string"
+    }
+  ],
+  "errors": [
+    {
+      "datasourceId": "string",
+      "code": "not_found"
+    }
+  ]
+}
+```
+
+</details>
 
 ---
 
@@ -459,6 +517,7 @@ epilot journey createJourney \
     "templateId": "string",
     "entityId": "string",
     "mappingsAutomationId": "string",
+    "newMappings": true,
     "targetedCustomer": "string",
     "description": "string",
     "organizationSettings": {},
@@ -590,6 +649,7 @@ epilot journey createJourney --jsonata '$'
     "templateId": "string",
     "entityId": "string",
     "mappingsAutomationId": "string",
+    "newMappings": true,
     "targetedCustomer": "string",
     "description": "string",
     "organizationSettings": {},
@@ -733,6 +793,7 @@ epilot journey updateJourney \
     "templateId": "string",
     "entityId": "string",
     "mappingsAutomationId": "string",
+    "newMappings": true,
     "targetedCustomer": "string",
     "description": "string",
     "organizationSettings": {},
@@ -857,6 +918,7 @@ epilot journey patchUpdateJourney --jsonata 'createdJourney'
       "templateId": "string",
       "entityId": "string",
       "mappingsAutomationId": "string",
+      "newMappings": true,
       "targetedCustomer": "string",
       "description": "string",
       "organizationSettings": {},
@@ -1150,6 +1212,7 @@ epilot journey createJourneyV2 \
     "designId": "string",
     "entityId": "string",
     "mappingsAutomationId": "string",
+    "newMappings": true,
     "templateId": "string",
     "targetedCustomer": "string",
     "description": "string",
@@ -1273,6 +1336,7 @@ epilot journey createJourneyV2 --jsonata 'journeyId'
     "designId": "string",
     "entityId": "string",
     "mappingsAutomationId": "string",
+    "newMappings": true,
     "templateId": "string",
     "targetedCustomer": "string",
     "description": "string",
@@ -1402,6 +1466,7 @@ epilot journey updateJourneyV2 \
     "designId": "string",
     "entityId": "string",
     "mappingsAutomationId": "string",
+    "newMappings": true,
     "templateId": "string",
     "targetedCustomer": "string",
     "description": "string",
@@ -1525,6 +1590,7 @@ epilot journey updateJourneyV2 --jsonata 'journeyId'
     "designId": "string",
     "entityId": "string",
     "mappingsAutomationId": "string",
+    "newMappings": true,
     "templateId": "string",
     "targetedCustomer": "string",
     "description": "string",
@@ -1667,6 +1733,7 @@ epilot journey patchUpdateJourneyV2 --jsonata 'journeyId'
     "designId": "string",
     "entityId": "string",
     "mappingsAutomationId": "string",
+    "newMappings": true,
     "templateId": "string",
     "targetedCustomer": "string",
     "description": "string",
@@ -1815,6 +1882,7 @@ epilot journey getJourneyV2 -p id=509cdffe-424f-457a-95c2-9708c304ce77 --jsonata
     "designId": "string",
     "entityId": "string",
     "mappingsAutomationId": "string",
+    "newMappings": true,
     "templateId": "string",
     "targetedCustomer": "string",
     "description": "string",

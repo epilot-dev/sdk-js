@@ -207,6 +207,62 @@
         }
       }
     },
+    "/v1/journey/configuration/{id}/environment": {
+      "get": {
+        "operationId": "getJourneyEnvironment",
+        "summary": "getJourneyEnvironment",
+        "description": "Resolve the environment variables referenced by this journey. Only browser-safe value types are returned.",
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "tags": [
+          "Journeys"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Journey ID bound to the supplied journey access token",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Resolved environment-backed datasources",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Always private, no-store"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JourneyEnvironmentResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Journey access token missing"
+          },
+          "403": {
+            "description": "Journey access token does not match the journey"
+          },
+          "502": {
+            "description": "Environment resolver unavailable"
+          }
+        }
+      }
+    },
     "/v1/journey/products/{id}": {
       "get": {
         "operationId": "getJourneyProducts",
@@ -952,6 +1008,124 @@
   },
   "components": {
     "schemas": {
+      "EnvironmentMapEntry": {
+        "type": "object",
+        "required": [
+          "key",
+          "value"
+        ],
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "value": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              }
+            ]
+          }
+        }
+      },
+      "EnvironmentMap": {
+        "type": "object",
+        "required": [
+          "options"
+        ],
+        "properties": {
+          "fallbackLanguage": {
+            "type": "string",
+            "default": "de"
+          },
+          "options": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EnvironmentMapEntry"
+            }
+          }
+        }
+      },
+      "JourneyEnvironmentResponse": {
+        "type": "object",
+        "required": [
+          "items",
+          "errors"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "datasourceId",
+                "type",
+                "value"
+              ],
+              "properties": {
+                "datasourceId": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "Text",
+                    "Number",
+                    "Boolean",
+                    "Map"
+                  ]
+                },
+                "value": {
+                  "oneOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "boolean"
+                    },
+                    {
+                      "$ref": "#/components/schemas/EnvironmentMap"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "datasourceId",
+                "code"
+              ],
+              "properties": {
+                "datasourceId": {
+                  "type": "string"
+                },
+                "code": {
+                  "type": "string",
+                  "enum": [
+                    "not_found",
+                    "unsupported_type",
+                    "not_set",
+                    "invalid_value",
+                    "incompatible_consumer"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
       "GetJourneysResponse": {
         "type": "object"
       },
@@ -1363,11 +1537,7 @@
                   },
                   "lang": {
                     "type": "string",
-                    "enum": [
-                      "de",
-                      "en",
-                      "fr"
-                    ]
+                    "example": "de"
                   },
                   "width": {
                     "type": "string"
@@ -1418,6 +1588,10 @@
               },
               "mappingsAutomationId": {
                 "type": "string"
+              },
+              "newMappings": {
+                "description": "When true, the journey is created without a mapping config or automation; mappings are managed as advanced mappings on a lazily created automation.",
+                "type": "boolean"
               },
               "targetedCustomer": {
                 "type": "string"
@@ -1917,11 +2091,7 @@
                   },
                   "lang": {
                     "type": "string",
-                    "enum": [
-                      "de",
-                      "en",
-                      "fr"
-                    ]
+                    "example": "de"
                   },
                   "width": {
                     "type": "string"
@@ -1963,6 +2133,10 @@
               },
               "mappingsAutomationId": {
                 "type": "string"
+              },
+              "newMappings": {
+                "description": "When true, the journey is created without a mapping config or automation; mappings are managed as advanced mappings on a lazily created automation.",
+                "type": "boolean"
               },
               "templateId": {
                 "type": "string",

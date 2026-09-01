@@ -26,6 +26,16 @@ export declare namespace Components {
              */
             label?: string;
         }
+        export interface EnvironmentMap {
+            fallbackLanguage?: string;
+            options: EnvironmentMapEntry[];
+        }
+        export interface EnvironmentMapEntry {
+            key: string;
+            value: string | {
+                [name: string]: string;
+            };
+        }
         export interface GenerateDocumentRequest {
             /**
              * Entity id for the template being used
@@ -290,7 +300,11 @@ export declare namespace Components {
             settings?: {
                 embedOptions?: {
                     mode?: "full-screen" | "inline";
-                    lang?: "de" | "en" | "fr";
+                    /**
+                     * example:
+                     * de
+                     */
+                    lang?: string;
                     width?: string;
                     topBar?: boolean;
                     scrollToTop?: boolean;
@@ -308,6 +322,10 @@ export declare namespace Components {
                 templateId?: string | null;
                 entityId?: string | null;
                 mappingsAutomationId?: string;
+                /**
+                 * When true, the journey is created without a mapping config or automation; mappings are managed as advanced mappings on a lazily created automation.
+                 */
+                newMappings?: boolean;
                 targetedCustomer?: string;
                 description?: string | null;
                 organizationSettings?: {
@@ -580,7 +598,11 @@ export declare namespace Components {
             settings?: {
                 embedOptions?: {
                     mode?: "full-screen" | "inline";
-                    lang?: "de" | "en" | "fr";
+                    /**
+                     * example:
+                     * de
+                     */
+                    lang?: string;
                     width?: string;
                     topBar?: boolean;
                     scrollToTop?: boolean;
@@ -598,6 +620,10 @@ export declare namespace Components {
                 templateId?: string | null;
                 entityId?: string | null;
                 mappingsAutomationId?: string;
+                /**
+                 * When true, the journey is created without a mapping config or automation; mappings are managed as advanced mappings on a lazily created automation.
+                 */
+                newMappings?: boolean;
                 targetedCustomer?: string;
                 description?: string | null;
                 organizationSettings?: {
@@ -841,7 +867,11 @@ export declare namespace Components {
             settings?: {
                 embedOptions?: {
                     mode?: "full-screen" | "inline";
-                    lang?: "de" | "en" | "fr";
+                    /**
+                     * example:
+                     * de
+                     */
+                    lang?: string;
                     width?: string;
                     topBar?: boolean;
                     scrollToTop?: boolean;
@@ -854,6 +884,10 @@ export declare namespace Components {
                 designId?: string;
                 entityId?: string | null;
                 mappingsAutomationId?: string;
+                /**
+                 * When true, the journey is created without a mapping config or automation; mappings are managed as advanced mappings on a lazily created automation.
+                 */
+                newMappings?: boolean;
                 templateId?: string | null;
                 targetedCustomer?: string;
                 description?: string | null;
@@ -940,6 +974,17 @@ export declare namespace Components {
              * Manifest/Blueprint ID used to create/update the entity
              */
             _manifest?: string /* uuid */[];
+        }
+        export interface JourneyEnvironmentResponse {
+            items: {
+                datasourceId: string;
+                type: "Text" | "Number" | "Boolean" | "Map";
+                value: string | number | boolean | EnvironmentMap;
+            }[];
+            errors: {
+                datasourceId: string;
+                code: "not_found" | "unsupported_type" | "not_set" | "invalid_value" | "incompatible_consumer";
+            }[];
         }
         export interface JourneyFeatureFlags {
             featureFlags?: {
@@ -1587,7 +1632,11 @@ export declare namespace Paths {
                 settings: {
                     embedOptions?: {
                         mode?: "full-screen" | "inline";
-                        lang?: "de" | "en" | "fr";
+                        /**
+                         * example:
+                         * de
+                         */
+                        lang?: string;
                         width?: string;
                         topBar?: boolean;
                         scrollToTop?: boolean;
@@ -1605,6 +1654,10 @@ export declare namespace Paths {
                     templateId?: string | null;
                     entityId?: string | null;
                     mappingsAutomationId?: string;
+                    /**
+                     * When true, the journey is created without a mapping config or automation; mappings are managed as advanced mappings on a lazily created automation.
+                     */
+                    newMappings?: boolean;
                     targetedCustomer?: string;
                     description?: string | null;
                     organizationSettings?: {
@@ -1712,6 +1765,23 @@ export declare namespace Paths {
                 featureFlags?: {
                     [name: string]: any;
                 };
+            }
+        }
+    }
+    namespace GetJourneyEnvironment {
+        namespace Parameters {
+            export type Id = string; // uuid
+        }
+        export interface PathParameters {
+            id: Parameters.Id /* uuid */;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.JourneyEnvironmentResponse;
+            export interface $401 {
+            }
+            export interface $403 {
+            }
+            export interface $502 {
             }
         }
     }
@@ -1916,7 +1986,11 @@ export declare namespace Paths {
                 settings: {
                     embedOptions?: {
                         mode?: "full-screen" | "inline";
-                        lang?: "de" | "en" | "fr";
+                        /**
+                         * example:
+                         * de
+                         */
+                        lang?: string;
                         width?: string;
                         topBar?: boolean;
                         scrollToTop?: boolean;
@@ -1929,6 +2003,10 @@ export declare namespace Paths {
                     designId?: string;
                     entityId?: string | null;
                     mappingsAutomationId?: string;
+                    /**
+                     * When true, the journey is created without a mapping config or automation; mappings are managed as advanced mappings on a lazily created automation.
+                     */
+                    newMappings?: boolean;
                     templateId?: string | null;
                     targetedCustomer?: string;
                     description?: string | null;
@@ -2227,6 +2305,16 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<any>
   /**
+   * getJourneyEnvironment - getJourneyEnvironment
+   * 
+   * Resolve the environment variables referenced by this journey. Only browser-safe value types are returned.
+   */
+  'getJourneyEnvironment'(
+    parameters?: Parameters<Paths.GetJourneyEnvironment.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetJourneyEnvironment.Responses.$200>
+  /**
    * getJourneyProducts - getJourneyProducts
    * 
    * Get products available in the journey by id. requires public journey token to be passed.
@@ -2404,6 +2492,18 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<any>
   }
+  ['/v1/journey/configuration/{id}/environment']: {
+    /**
+     * getJourneyEnvironment - getJourneyEnvironment
+     * 
+     * Resolve the environment variables referenced by this journey. Only browser-safe value types are returned.
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetJourneyEnvironment.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetJourneyEnvironment.Responses.$200>
+  }
   ['/v1/journey/products/{id}']: {
     /**
      * getJourneyProducts - getJourneyProducts
@@ -2567,6 +2667,8 @@ export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
 
 export type ButtonOption = Components.Schemas.ButtonOption;
+export type EnvironmentMap = Components.Schemas.EnvironmentMap;
+export type EnvironmentMapEntry = Components.Schemas.EnvironmentMapEntry;
 export type GenerateDocumentRequest = Components.Schemas.GenerateDocumentRequest;
 export type GenerateDocumentResponse = Components.Schemas.GenerateDocumentResponse;
 export type GetJourneysResponse = Components.Schemas.GetJourneysResponse;
@@ -2576,6 +2678,7 @@ export type JourneyActivationGuarantee = Components.Schemas.JourneyActivationGua
 export type JourneyAuditInfo = Components.Schemas.JourneyAuditInfo;
 export type JourneyCreationRequest = Components.Schemas.JourneyCreationRequest;
 export type JourneyCreationRequestV2 = Components.Schemas.JourneyCreationRequestV2;
+export type JourneyEnvironmentResponse = Components.Schemas.JourneyEnvironmentResponse;
 export type JourneyFeatureFlags = Components.Schemas.JourneyFeatureFlags;
 export type JourneyProductsResponse = Components.Schemas.JourneyProductsResponse;
 export type JourneyResponse = Components.Schemas.JourneyResponse;

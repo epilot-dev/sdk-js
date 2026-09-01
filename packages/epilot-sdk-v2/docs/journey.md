@@ -28,6 +28,7 @@ const { data } = await journeyClient.getJourneysByOrgId(...)
 - [`getJourneysByOrgId`](#getjourneysbyorgid)
 - [`getJourney`](#getjourney)
 - [`removeJourney`](#removejourney)
+- [`getJourneyEnvironment`](#getjourneyenvironment)
 - [`getJourneyProducts`](#getjourneyproducts)
 - [`createJourney`](#createjourney)
 - [`updateJourney`](#updatejourney)
@@ -45,6 +46,9 @@ const { data } = await journeyClient.getJourneysByOrgId(...)
 - [`removeJourneyV2`](#removejourneyv2)
 
 **Schemas**
+- [`EnvironmentMapEntry`](#environmentmapentry)
+- [`EnvironmentMap`](#environmentmap)
+- [`JourneyEnvironmentResponse`](#journeyenvironmentresponse)
 - [`GetJourneysResponse`](#getjourneysresponse)
 - [`JourneyResponse`](#journeyresponse)
 - [`JourneyProductsResponse`](#journeyproductsresponse)
@@ -182,6 +186,7 @@ const { data } = await client.getJourney({
     "templateId": "string",
     "entityId": "string",
     "mappingsAutomationId": "string",
+    "newMappings": true,
     "targetedCustomer": "string",
     "description": "string",
     "organizationSettings": {},
@@ -247,6 +252,43 @@ const { data } = await client.removeJourney({
   id: '123e4567-e89b-12d3-a456-426614174000',
 })
 ```
+
+---
+
+### `getJourneyEnvironment`
+
+Resolve the environment variables referenced by this journey. Only browser-safe value types are returned.
+
+`GET /v1/journey/configuration/{id}/environment`
+
+```ts
+const { data } = await client.getJourneyEnvironment({
+  id: '123e4567-e89b-12d3-a456-426614174000',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "items": [
+    {
+      "datasourceId": "string",
+      "type": "Text",
+      "value": "string"
+    }
+  ],
+  "errors": [
+    {
+      "datasourceId": "string",
+      "code": "not_found"
+    }
+  ]
+}
+```
+
+</details>
 
 ---
 
@@ -382,6 +424,7 @@ const { data } = await client.createJourney(
       templateId: 'string',
       entityId: 'string',
       mappingsAutomationId: 'string',
+      newMappings: true,
       targetedCustomer: 'string',
       description: 'string',
       organizationSettings: {},
@@ -502,6 +545,7 @@ const { data } = await client.createJourney(
     "templateId": "string",
     "entityId": "string",
     "mappingsAutomationId": "string",
+    "newMappings": true,
     "targetedCustomer": "string",
     "description": "string",
     "organizationSettings": {},
@@ -636,6 +680,7 @@ const { data } = await client.updateJourney(
       templateId: 'string',
       entityId: 'string',
       mappingsAutomationId: 'string',
+      newMappings: true,
       targetedCustomer: 'string',
       description: 'string',
       organizationSettings: {},
@@ -738,6 +783,7 @@ const { data } = await client.patchUpdateJourney(
       "templateId": "string",
       "entityId": "string",
       "mappingsAutomationId": "string",
+      "newMappings": true,
       "targetedCustomer": "string",
       "description": "string",
       "organizationSettings": {},
@@ -989,6 +1035,7 @@ const { data } = await client.createJourneyV2(
       designId: 'string',
       entityId: 'string',
       mappingsAutomationId: 'string',
+      newMappings: true,
       templateId: 'string',
       targetedCustomer: 'string',
       description: 'string',
@@ -1101,6 +1148,7 @@ const { data } = await client.createJourneyV2(
     "designId": "string",
     "entityId": "string",
     "mappingsAutomationId": "string",
+    "newMappings": true,
     "templateId": "string",
     "targetedCustomer": "string",
     "description": "string",
@@ -1221,6 +1269,7 @@ const { data } = await client.updateJourneyV2(
       designId: 'string',
       entityId: 'string',
       mappingsAutomationId: 'string',
+      newMappings: true,
       templateId: 'string',
       targetedCustomer: 'string',
       description: 'string',
@@ -1333,6 +1382,7 @@ const { data } = await client.updateJourneyV2(
     "designId": "string",
     "entityId": "string",
     "mappingsAutomationId": "string",
+    "newMappings": true,
     "templateId": "string",
     "targetedCustomer": "string",
     "description": "string",
@@ -1464,6 +1514,7 @@ const { data } = await client.patchUpdateJourneyV2(
     "designId": "string",
     "entityId": "string",
     "mappingsAutomationId": "string",
+    "newMappings": true,
     "templateId": "string",
     "targetedCustomer": "string",
     "description": "string",
@@ -1592,6 +1643,7 @@ const { data } = await client.getJourneyV2({
     "designId": "string",
     "entityId": "string",
     "mappingsAutomationId": "string",
+    "newMappings": true,
     "templateId": "string",
     "targetedCustomer": "string",
     "description": "string",
@@ -1706,6 +1758,46 @@ const { data } = await client.getButtonOptions({
 
 ## Schemas
 
+### `EnvironmentMapEntry`
+
+```ts
+type EnvironmentMapEntry = {
+  key: string
+  value: string | Record<string, string>
+}
+```
+
+### `EnvironmentMap`
+
+```ts
+type EnvironmentMap = {
+  fallbackLanguage?: string
+  options: Array<{
+    key: string
+    value: string | Record<string, string>
+  }>
+}
+```
+
+### `JourneyEnvironmentResponse`
+
+```ts
+type JourneyEnvironmentResponse = {
+  items: Array<{
+    datasourceId: string
+    type: "Text" | "Number" | "Boolean" | "Map"
+    value: string | number | boolean | {
+      fallbackLanguage?: { ... }
+      options: { ... }
+    }
+  }>
+  errors: Array<{
+    datasourceId: string
+    code: "not_found" | "unsupported_type" | "not_set" | "invalid_value" | "incompatible_consumer"
+  }>
+}
+```
+
 ### `GetJourneysResponse`
 
 ```ts
@@ -1779,6 +1871,7 @@ type JourneyResponse = {
       templateId?: { ... }
       entityId?: { ... }
       mappingsAutomationId?: { ... }
+      newMappings?: { ... }
       targetedCustomer?: { ... }
       description?: { ... }
       organizationSettings?: { ... }
@@ -1814,7 +1907,6 @@ type JourneyResponse = {
     version: number
     revisions: number
     featureFlags?: Record<string, unknown>
-  }
   // ...
 }
 ```
@@ -1930,6 +2022,7 @@ type JourneyCreationRequest = {
     templateId?: string
     entityId?: string
     mappingsAutomationId?: string
+    newMappings?: boolean
     targetedCustomer?: string
     description?: string
     organizationSettings?: Record<string, boolean>
@@ -1953,7 +2046,6 @@ type JourneyCreationRequest = {
     isPublished?: boolean
     status?: string
     isActive?: boolean
-    savingProgress?: {
   // ...
 }
 ```
@@ -2034,6 +2126,7 @@ type JourneyCreationRequestV2 = {
     designId?: string
     entityId?: string
     mappingsAutomationId?: string
+    newMappings?: boolean
     templateId?: string
     targetedCustomer?: string
     description?: string
@@ -2060,7 +2153,6 @@ type JourneyCreationRequestV2 = {
       mode?: { ... }
       supportedRevision?: { ... }
     }
-  }
   // ...
 }
 ```
@@ -2181,6 +2273,7 @@ type Journey = {
     templateId?: string
     entityId?: string
     mappingsAutomationId?: string
+    newMappings?: boolean
     targetedCustomer?: string
     description?: string
     organizationSettings?: Record<string, boolean>
@@ -2204,7 +2297,6 @@ type Journey = {
     isPublished?: boolean
     status?: string
     isActive?: boolean
-    savingProgress?: {
   // ...
 }
 ```
