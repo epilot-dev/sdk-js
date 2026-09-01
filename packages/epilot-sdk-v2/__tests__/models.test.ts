@@ -4,7 +4,8 @@ import { describe, expect, it } from 'vitest';
 
 import { CLIENTS_DIR, SRC_DIR, clientsWith } from './helpers/clients';
 import { DynamicTariffModeValues, PricingModelValues } from '../src/apis/pricing';
-import { RelationAffinityMode } from '../src/apis/entity';
+import { RELATION_ATTRIBUTE_TYPES, RELATION_ATTRIBUTE_TYPE_LIST, RelationAffinityMode } from '../src/apis/entity';
+import { OVERRIDABLE_ATTRIBUTE_TYPES, OVERRIDABLE_ATTRIBUTE_TYPE_LIST } from '../src/apis/pricing';
 
 const MODELS_DIR = resolve(SRC_DIR, 'models');
 
@@ -68,6 +69,37 @@ describe('runtime models are exposed by the SDK', () => {
       expect(specEnum, `${name} matches no components.schemas.${specName}.enum — check the name`).toBeDefined();
       expect(Object.values(api[name]).sort(), `${name} has drifted from the spec`).toEqual([...specEnum].sort());
     }
+  });
+
+  // Both lists hold entity attribute types. The pricing one has no compile-time
+  // anchor, so this is its only drift guard.
+  it('attribute-type allowlists only contain types the entity spec declares', () => {
+    type Schema = { allOf?: Schema[]; properties?: { type?: { enum?: string[] } } };
+
+    const schemas: Record<string, Schema> = readSpec('entity-client').components.schemas;
+    const variants = (schemas.Attribute as unknown as { anyOf: { $ref: string }[] }).anyOf;
+    const declared = new Set(
+      variants
+        .map(({ $ref }) => schemas[$ref.split('/').pop() as string])
+        // A variant may declare `type` directly or behind an allOf composition.
+        .flatMap((variant) => (variant.allOf ?? [variant]).flatMap((part) => part.properties?.type?.enum ?? [])),
+    );
+    expect(declared.size).toBeGreaterThan(0);
+
+    for (const list of [RELATION_ATTRIBUTE_TYPE_LIST, OVERRIDABLE_ATTRIBUTE_TYPE_LIST]) {
+      expect(list.length).toBeGreaterThan(0);
+      for (const type of list) {
+        expect(declared.has(type), `"${type}" is not a type any Attribute variant declares`).toBe(true);
+      }
+    }
+  });
+
+  it('allowlist sets are usable for lookup with an unnarrowed string', () => {
+    expect(RELATION_ATTRIBUTE_TYPES.has('relation_payment_method')).toBe(true);
+    expect(RELATION_ATTRIBUTE_TYPES.has('string')).toBe(false);
+    expect(OVERRIDABLE_ATTRIBUTE_TYPES.has('currency')).toBe(true);
+    // `ordered_list` ships in the stock product schema and must stay non-overridable.
+    expect(OVERRIDABLE_ATTRIBUTE_TYPES.has('ordered_list')).toBe(false);
   });
 
   it('exposes the entity relation affinity enum through @epilot/sdk/entity', () => {
