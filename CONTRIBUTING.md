@@ -27,6 +27,36 @@ npm version patch --no-git-tag-version
 git commit -am 'chore(entity-client): update client with new spec'
 ```
 
+## Hand-written modules in a client
+
+Two files in a client are not generated from `openapi.json`. Pick by whether what
+you are adding has to exist at **runtime**:
+
+| File | Holds | Copied to | Re-exported as |
+| --- | --- | --- | --- |
+| `src/additional-types.ts` | types only | `src/types/<api>-additional.d.ts` | `export type *` |
+| `src/schema-model.ts` | runtime values | `src/models/<api>-model.ts` | `export *` |
+
+A `const` or `enum` in `additional-types.ts` type-checks and is then `undefined`
+for SDK consumers, because it lands in a `.d.ts`. Values belong in `schema-model.ts`,
+under two rules:
+
+- **Don't reuse a `components.schemas` name.** Both files are re-exported from the
+  same API entry file, so a clash breaks the build. Name a spec type's runtime
+  companion `<SpecType>Values`.
+- **Tie the values to the spec with `satisfies`.** The `Values` suffix is what lets
+  the SDK test match a map against `components.schemas.<SpecType>.enum`, so a member
+  added to or removed from the spec fails the build rather than drifting silently:
+
+  ```ts
+  export const PricingModelValues = {
+    perUnit: 'per_unit',
+  } as const satisfies Record<string, PricingModel>
+  ```
+
+After editing either, run `pnpm generate` in `packages/epilot-sdk-v2` and commit
+the regenerated output.
+
 ## Auto-release (`@epilot/sdk`)
 
 When changes to any `clients/*/openapi.json` file land on `main`, the CI automatically:

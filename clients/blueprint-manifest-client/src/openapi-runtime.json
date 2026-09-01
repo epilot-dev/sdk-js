@@ -702,6 +702,19 @@
         "responses": {}
       }
     },
+    "/v2/blueprint-manifest/jobs/{job_id}:retry": {
+      "post": {
+        "operationId": "retryInstallationJob",
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "job_id"
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v2/blueprint-manifest/jobs/{job_id}:cancel": {
       "post": {
         "operationId": "cancelBlueprintJob",

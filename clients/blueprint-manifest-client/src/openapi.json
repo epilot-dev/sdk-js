@@ -2617,7 +2617,7 @@
       "post": {
         "operationId": "continueInstallationJob",
         "summary": "continueInstallationJob",
-        "description": "Resume an installation job that is paused at `status: \"WAITING_USER_ACTION\"` after\nplanning. Works for both Terraform and V3 jobs. Not needed for V3 installs created\nwith `auto_apply: true` (including all bulk-install child jobs), which apply\nwithout pausing.\n",
+        "description": "Resume an installation job that is paused at `status: \"WAITING_USER_ACTION\"` after\nplanning. Works for both Terraform and V3 jobs. Not needed for V3 installs created\nwith `auto_apply: true` (including all bulk-install child jobs), which apply\nwithout pausing.\n\nAlso resumes a V3 install paused at `status: \"REAUTH_REQUIRED\"`, where the\ncaller's credentials could not safely cover another run. The job keeps its\n`job_id`, so resuming continues from the operation-log checkpoint rather than\nre-applying completed work. The request's bearer token becomes the destination\ncredential; for a cross-org install whose SOURCE credential also expired, send a\nfreshly scoped source token as `source_auth_token` — the destination bearer is not\na valid substitute for it.\n",
         "tags": [
           "Jobs"
         ],
@@ -2636,7 +2636,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/BlueprintInstallationJobOptions"
+                "$ref": "#/components/schemas/ContinueInstallationJobRequest"
               }
             }
           }
@@ -2651,6 +2651,60 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/v2/blueprint-manifest/jobs/{job_id}:retry": {
+      "post": {
+        "operationId": "retryInstallationJob",
+        "summary": "retryInstallationJob",
+        "description": "Retry a finished V3 installation job whose status is `FAILED` or\n`PARTIAL_SUCCESS`. Starts a fresh install job (new `job_id`) with the same\nsource/destination and `auto_apply: true` — no `:continue` call is needed.\nThe plan phase re-resolves every resource: already-synced resources no-op,\nso effectively only the failed resources are re-applied.\n\nMust be called by a user of the destination org (where the job lives); the\ncaller's bearer token is used as the destination token. The plan reuses the\nmanifest persisted by the original install, so no source-org access is\nrequired. The original job's `options` (ignored resources, sync_notes) are\nreused when present; older jobs without persisted options fall back to the\ndestination blueprint's `ignored_resource_addresses`.\n",
+        "tags": [
+          "Jobs"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "job_id",
+            "schema": {
+              "$ref": "#/components/schemas/BlueprintJobID"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Retry install job started",
+            "headers": {
+              "Location": {
+                "description": "Path to poll the resulting job: GET /v2/blueprint-manifest/jobs/{job_id}",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "job_id": {
+                      "$ref": "#/components/schemas/BlueprintJobID"
+                    },
+                    "destination_blueprint_id": {
+                      "$ref": "#/components/schemas/BlueprintID"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Job is not a retryable V3 installation job"
+          },
+          "404": {
+            "description": "Job not found"
           }
         }
       }
@@ -3354,6 +3408,29 @@
                     "type": "boolean",
                     "description": "When `true`, the install skips the manual plan-approval step and applies\nstraight after plan + snapshot succeed (no `:continue` call needed).\nDefaults to `false`. Used internally by the bulk-install worker.\n",
                     "default": false
+                  },
+                  "session_credentials": {
+                    "type": "object",
+                    "description": "Lets the install refresh the caller's session on its own, so a run that\noutlives the ~60 minute token lifetime continues without the user present.\nHeld server-side for the job's lifetime, referenced from the state machine\nrather than embedded in it, and deleted when the job finishes.\n\nOptional. Without it an install that outruns its token pauses at\n`status: \"REAUTH_REQUIRED\"` and waits to be resumed through\n`POST /v2/blueprint-manifest/jobs/{job_id}:continue`.\n\nBounded by the refresh token itself (18 hours), not unlimited.\n",
+                    "required": [
+                      "refresh_token",
+                      "client_id"
+                    ],
+                    "properties": {
+                      "refresh_token": {
+                        "type": "string",
+                        "format": "password",
+                        "description": "Cognito refresh token for the caller, scoped to the source org."
+                      },
+                      "client_id": {
+                        "type": "string",
+                        "description": "The Cognito app client the refresh token was issued for. Required because\nepilot provisions one user pool and app client per organization at\nruntime, so the service cannot derive it.\n"
+                      },
+                      "pipeline_id": {
+                        "type": "string",
+                        "description": "Cross-org installs only. The destination credential is not a Cognito\nsession — it is minted from the refreshed source session through\nsandbox-api, so it is re-derived per continuation instead of stored.\n"
+                      }
+                    }
                   }
                 }
               },
@@ -5284,11 +5361,15 @@
                   "$ref": "#/components/schemas/V3ResourceProgressEntry"
                 }
               },
+              "options": {
+                "$ref": "#/components/schemas/BlueprintInstallationJobOptions"
+              },
               "status": {
                 "type": "string",
                 "enum": [
                   "IN_PROGRESS",
                   "WAITING_USER_ACTION",
+                  "REAUTH_REQUIRED",
                   "CANCELED",
                   "SUCCESS",
                   "PARTIAL_SUCCESS",
@@ -6440,6 +6521,23 @@
           }
         }
       },
+      "ContinueInstallationJobRequest": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BlueprintInstallationJobOptions"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "source_auth_token": {
+                "description": "A freshly issued bearer for the SOURCE organization, used only when resuming a\njob paused at `REAUTH_REQUIRED` whose source credential also expired. Applies to\ncross-org installs: apply-time reads such as the authenticated File API fallback\nfor private source files run against the source org, so the destination bearer\ncannot stand in for them. Omit it to keep the source token the job already has.\n",
+                "type": "string",
+                "format": "password"
+              }
+            }
+          }
+        ]
+      },
       "ManifestID": {
         "type": "string",
         "description": "ID of an imported / installed manifest",
@@ -6512,6 +6610,7 @@
           "PENDING",
           "STARTED",
           "WAITING_USER_ACTION",
+          "REAUTH_REQUIRED",
           "CANCELED",
           "IN_PROGRESS",
           "SUCCESS",

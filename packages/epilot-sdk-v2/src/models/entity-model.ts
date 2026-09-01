@@ -1,4 +1,5 @@
-import type { Attribute } from './openapi';
+/* Auto-copied from entity-client/src/schema-model.ts */
+import type { Attribute } from '../types/entity';
 
 /** Every `type` an entity schema attribute can have. */
 export type AttributeType = NonNullable<Attribute['type']>;

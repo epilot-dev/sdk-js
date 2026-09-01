@@ -1,12 +1,12 @@
-import { existsSync, readdirSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
+import { SRC_DIR, clientsWith } from './helpers/clients';
 import type { AvailabilityDate, Cart, PriceTierEnhanced } from '../src/apis/pricing';
 
-const CLIENTS_DIR = resolve(__dirname, '../../../clients');
-const TYPES_DIR = resolve(__dirname, '../src/types');
-const APIS_DIR = resolve(__dirname, '../src/apis');
+const TYPES_DIR = resolve(SRC_DIR, 'types');
+const APIS_DIR = resolve(SRC_DIR, 'apis');
 
 /**
  * Types that are hand-written in a client's `additional-types.ts` (i.e. not part
@@ -15,10 +15,7 @@ const APIS_DIR = resolve(__dirname, '../src/apis');
  * re-declare them. See clients/pricing-client/src/additional-types.ts.
  */
 describe('additional types are exposed by the SDK', () => {
-  const clientsWithAdditionalTypes = readdirSync(CLIENTS_DIR, { withFileTypes: true })
-    .filter((d) => d.isDirectory() && d.name.endsWith('-client'))
-    .filter((d) => existsSync(resolve(CLIENTS_DIR, d.name, 'src/additional-types.ts')))
-    .map((d) => ({ dirName: d.name, kebabName: d.name.replace(/-client$/, '') }));
+  const clientsWithAdditionalTypes = clientsWith('additional-types.ts');
 
   it('finds at least one client with additional types', () => {
     expect(clientsWithAdditionalTypes.length).toBeGreaterThan(0);

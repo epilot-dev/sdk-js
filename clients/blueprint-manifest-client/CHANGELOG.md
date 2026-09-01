@@ -1,5 +1,13 @@
 # @epilot/blueprint-manifest-client
 
+## 5.6.0
+
+### Minor Changes
+
+- Add the session-continuity surface for long V3 installs: `session_credentials` on
+  `installBlueprintV3`, `source_auth_token` on `continueInstallationJob`, and the
+  `REAUTH_REQUIRED` job status. All additive — existing callers are unaffected.
+
 ## 3.3.1
 
 ### Patch Changes
