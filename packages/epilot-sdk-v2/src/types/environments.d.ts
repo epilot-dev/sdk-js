@@ -21,42 +21,33 @@ export declare namespace Components {
         export interface EnvironmentGroupUpsertRequest {
             description?: string;
         }
-        export type EnvironmentOption = {
-            value: string;
-            label: string;
-        } | {
-            value: string;
-            labels: {
-                [name: string]: string;
-            };
-        };
         /**
          * A variable's value. The JSON type corresponds to the variable's `type`:
          * `String`, `SecretString` and `Text` are strings, `Number` is a number,
-         * `Boolean` is a boolean, and `Options` is an object. Numbers are IEEE 754
+         * `Boolean` is a boolean, and `Map` is an object. Numbers are IEEE 754
          * doubles; integers above 2^53 may lose precision on round-trip.
          *
          */
         export type EnvironmentValue = /**
          * A variable's value. The JSON type corresponds to the variable's `type`:
          * `String`, `SecretString` and `Text` are strings, `Number` is a number,
-         * `Boolean` is a boolean, and `Options` is an object. Numbers are IEEE 754
+         * `Boolean` is a boolean, and `Map` is an object. Numbers are IEEE 754
          * doubles; integers above 2^53 may lose precision on round-trip.
          *
          */
-        string | number | boolean | OptionsValue;
+        string | number | boolean | MapValue;
         /**
          * The structure a variable's value holds. `SecretString` is encrypted at rest and
-         * its value is never returned. `Text`, `Number`, `Boolean` and `Options` may be
+         * its value is never returned. `Text`, `Number`, `Boolean` and `Map` may be
          * served to browser-facing consumers; `String` and `SecretString` may not.
          *
          */
-        export type EnvironmentValueType = "String" | "SecretString" | "Text" | "Number" | "Boolean" | "Options";
+        export type EnvironmentValueType = "String" | "SecretString" | "Text" | "Number" | "Boolean" | "Map";
         export interface EnvironmentVariable {
             key: string; // ^[a-z0-9][a-z0-9_.\-]{0,127}$
             type: /**
              * The structure a variable's value holds. `SecretString` is encrypted at rest and
-             * its value is never returned. `Text`, `Number`, `Boolean` and `Options` may be
+             * its value is never returned. `Text`, `Number`, `Boolean` and `Map` may be
              * served to browser-facing consumers; `String` and `SecretString` may not.
              *
              */
@@ -78,7 +69,7 @@ export declare namespace Components {
              * install, which syncs a variable's key and type but never its value.
              *
              */
-            string | number | boolean | OptionsValue;
+            string | number | boolean | MapValue;
             /**
              * Whether the variable is protected from editing
              */
@@ -90,7 +81,7 @@ export declare namespace Components {
             key: string; // ^[a-z0-9][a-z0-9_.\-]{0,127}$
             type: /**
              * The structure a variable's value holds. `SecretString` is encrypted at rest and
-             * its value is never returned. `Text`, `Number`, `Boolean` and `Options` may be
+             * its value is never returned. `Text`, `Number`, `Boolean` and `Map` may be
              * served to browser-facing consumers; `String` and `SecretString` may not.
              *
              */
@@ -100,7 +91,7 @@ export declare namespace Components {
             value?: /**
              * A variable's value. The JSON type corresponds to the variable's `type`:
              * `String`, `SecretString` and `Text` are strings, `Number` is a number,
-             * `Boolean` is a boolean, and `Options` is an object. Numbers are IEEE 754
+             * `Boolean` is a boolean, and `Map` is an object. Numbers are IEEE 754
              * doubles; integers above 2^53 may lose precision on round-trip.
              *
              */
@@ -117,7 +108,7 @@ export declare namespace Components {
             key: string;
             type: /**
              * The structure a variable's value holds. `SecretString` is encrypted at rest and
-             * its value is never returned. `Text`, `Number`, `Boolean` and `Options` may be
+             * its value is never returned. `Text`, `Number`, `Boolean` and `Map` may be
              * served to browser-facing consumers; `String` and `SecretString` may not.
              *
              */
@@ -139,7 +130,7 @@ export declare namespace Components {
              * install, which syncs a variable's key and type but never its value.
              *
              */
-            string | number | boolean | OptionsValue;
+            string | number | boolean | MapValue;
             /**
              * Whether the variable is protected from editing
              */
@@ -151,11 +142,11 @@ export declare namespace Components {
             /**
              * Type of variable. Used when creating a new variable. Defaults to String.
              */
-            type?: "String" | "SecretString" | "Text" | "Number" | "Boolean" | "Options";
+            type?: "String" | "SecretString" | "Text" | "Number" | "Boolean" | "Map";
             value?: /**
              * A variable's value. The JSON type corresponds to the variable's `type`:
              * `String`, `SecretString` and `Text` are strings, `Number` is a number,
-             * `Boolean` is a boolean, and `Options` is an object. Numbers are IEEE 754
+             * `Boolean` is a boolean, and `Map` is an object. Numbers are IEEE 754
              * doubles; integers above 2^53 may lose precision on round-trip.
              *
              */
@@ -167,12 +158,51 @@ export declare namespace Components {
              */
             protected?: boolean;
         }
-        export interface OptionsValue {
+        /**
+         * One entry of a Map. `key` is the token a journey submits; `value` is
+         * what the customer reads — either one string, or one string per
+         * language. Every entry of a Map must agree on which of the two it uses.
+         *
+         */
+        export interface MapEntry {
+            key: string;
+            value: string | /**
+             * A string translated per language. Keys are language codes (e.g. `de`,
+             * `en-US`), matching the hyphen-only BCP-47 form epilot's i18n stack uses
+             * everywhere else. Must match LANGUAGE_KEY_PATTERN in
+             * src/core/value-types.ts — the two are not otherwise linked.
+             *
+             */
+            StringTranslations;
+        }
+        export interface MapValue {
             fallbackLanguage?: string;
             options: [
-                EnvironmentOption,
-                ...EnvironmentOption[]
+                /**
+                 * One entry of a Map. `key` is the token a journey submits; `value` is
+                 * what the customer reads — either one string, or one string per
+                 * language. Every entry of a Map must agree on which of the two it uses.
+                 *
+                 */
+                MapEntry,
+                .../**
+                 * One entry of a Map. `key` is the token a journey submits; `value` is
+                 * what the customer reads — either one string, or one string per
+                 * language. Every entry of a Map must agree on which of the two it uses.
+                 *
+                 */
+                MapEntry[]
             ];
+        }
+        /**
+         * A string translated per language. Keys are language codes (e.g. `de`,
+         * `en-US`), matching the hyphen-only BCP-47 form epilot's i18n stack uses
+         * everywhere else. Must match LANGUAGE_KEY_PATTERN in
+         * src/core/value-types.ts — the two are not otherwise linked.
+         *
+         */
+        export interface StringTranslations {
+            [name: string]: string;
         }
     }
 }
@@ -485,7 +515,6 @@ export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 export type EnvironmentGroup = Components.Schemas.EnvironmentGroup;
 export type EnvironmentGroupList = Components.Schemas.EnvironmentGroupList;
 export type EnvironmentGroupUpsertRequest = Components.Schemas.EnvironmentGroupUpsertRequest;
-export type EnvironmentOption = Components.Schemas.EnvironmentOption;
 export type EnvironmentValue = Components.Schemas.EnvironmentValue;
 export type EnvironmentValueType = Components.Schemas.EnvironmentValueType;
 export type EnvironmentVariable = Components.Schemas.EnvironmentVariable;
@@ -493,4 +522,6 @@ export type EnvironmentVariableCreateRequest = Components.Schemas.EnvironmentVar
 export type EnvironmentVariableList = Components.Schemas.EnvironmentVariableList;
 export type EnvironmentVariableListItem = Components.Schemas.EnvironmentVariableListItem;
 export type EnvironmentVariableUpdateRequest = Components.Schemas.EnvironmentVariableUpdateRequest;
-export type OptionsValue = Components.Schemas.OptionsValue;
+export type MapEntry = Components.Schemas.MapEntry;
+export type MapValue = Components.Schemas.MapValue;
+export type StringTranslations = Components.Schemas.StringTranslations;
