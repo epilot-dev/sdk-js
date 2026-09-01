@@ -1279,13 +1279,9 @@ declare namespace Components {
              */
             version?: number;
             trigger_event?: TriggerEventManual | TriggerEventEntityActivity | TriggerEventEntityOperation | TriggerEventFlowAutomationTask | TriggerEventMessaging;
-            workflow_context?: /**
-             * Automation Executions triggered by workflow task automations will always carry information about the triggering workflow. This information is helpful in correlating workflow executions with all the triggered automation executions
-             *
-             */
-            WorkflowExecutionContext;
+            workflow_context?: WorkflowExecutionContext;
             workflow_wait_context?: /**
-             * Workflow automation tasks can be paused & waiting for journey automation executions to succeed. If such is the case, this context tracks the task_id of the workflow waiting for journey submission success This context is consumed by svc-workflows to resume a task waiting on this journey submission.
+             * Correlation stamped when the triggering submission entity carried workflow wait claims from a journey link (AL-2521). Consumed by svc-workflows to resume a task waiting on this journey submission.
              *
              */
             WorkflowWaitContext;
@@ -2229,7 +2225,7 @@ declare namespace Components {
                 schema?: string;
             };
         }
-        export type EntityOperation = "createEntity" | "updateEntity" | "deleteEntity" | "softDeleteEntity" | "restoreEntity";
+        export type EntityOperation = "createEntity" | "updateEntity" | "deleteEntity" | "softDeleteEntity" | "restoreEntity" | "relationsAdded" | "relationsRemoved" | "relationsSoftDeleted" | "relationsRestored" | "relationsDeleted";
         /**
          * - If provides filter_config, executes an automation based on the filtered configuration when an entity event occurs.
          * - The conditions on a filter follows the event bridge patterns - `https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-event-patterns.html`
@@ -3054,6 +3050,107 @@ declare namespace Components {
             total: number;
             results: AutomationExecution[];
         }
+        /**
+         * One multi-hop graph query to run against entity-api's `POST /v1/entity:graph`. Every node
+         * in `graph.nodes` is merged into the mapping's source context under its own `id`, so
+         * listing multiple nodes here costs one entity-api call, not one per node. A node's value
+         * overwrites any existing source-context key of the same name (the source entity, a 1-hop
+         * relation, or another graph node).
+         *
+         */
+        export interface GraphContextEntry {
+            seed: GraphSeed;
+            graph: GraphDefinition;
+        }
+        export interface GraphDefinition {
+            /**
+             * List of node definitions in the graph
+             */
+            nodes: GraphNode[];
+            /**
+             * List of edge definitions connecting nodes
+             */
+            edges: GraphEdge[];
+        }
+        export interface GraphEdge {
+            /**
+             * Source node ID
+             * example:
+             * contact
+             */
+            from: string;
+            /**
+             * Target node ID
+             * example:
+             * billing_account
+             */
+            to: string;
+        }
+        export interface GraphNode {
+            /**
+             * Unique identifier for this node in the graph definition
+             * example:
+             * contact
+             */
+            id: string;
+            /**
+             * Entity schema slug for this node
+             * example:
+             * contact
+             */
+            schema: string;
+            /**
+             * "one": this node resolves to a single entity. "many" (default if unset): this node
+             * resolves to an array of entities. The seed node always returns a single entity
+             * regardless of this setting.
+             *
+             * example:
+             * one
+             */
+            cardinality?: "one" | "many";
+            /**
+             * Optional entity fields to include in the hydrated response for this node.
+             */
+            fields?: string[];
+            /**
+             * Narrows this node's traversal results to entities matching every filter (AND
+             * semantics). Useful for disambiguating among multiple entities reachable via the same
+             * graph edge.
+             *
+             */
+            filter?: /* Entities are included in this node's result only if `attribute` exactly equals the literal `value`. */ GraphNodeFilter[];
+        }
+        /**
+         * Entities are included in this node's result only if `attribute` exactly equals the literal `value`.
+         */
+        export interface GraphNodeFilter {
+            /**
+             * Entity attribute name to match against.
+             * example:
+             * order_number
+             */
+            attribute: string;
+            /**
+             * Literal value the attribute must exactly equal for the entity to be included in this node's result. Supports `{{handlebars}}` placeholders resolved against sourceContext when given as a string.
+             * example:
+             * OR-113
+             */
+            value: /**
+             * Literal value the attribute must exactly equal for the entity to be included in this node's result. Supports `{{handlebars}}` placeholders resolved against sourceContext when given as a string.
+             * example:
+             * OR-113
+             */
+            (string | null) | number | boolean;
+        }
+        export interface GraphSeed {
+            entity_id: string; // uuid
+            /**
+             * The node ID in the graph definition that corresponds to the seed entity
+             * example:
+             * contact
+             */
+            node_id: string;
+        }
         export interface InformERPAction {
             id?: /**
              * example:
@@ -3509,6 +3606,27 @@ declare namespace Components {
              * Relation tags (labels) to include in main entity linkback relation attribute
              */
             linkback_relation_tags?: string[];
+            /**
+             * Multi-hop graph queries (executed via entity-api's `POST /v1/entity:graph`), each
+             * merging every traversed node into the mapping's source context under its own node id,
+             * so `mapping_attributes` (e.g. `_copy` / `_template`) can reference it alongside the
+             * main entity, e.g. `{ "_copy": "order.line_items" }`.
+             *
+             * `seed.entity_id` and any node `filter[].value` may contain `{{handlebars}}`
+             * placeholders (e.g. `{{trigger.entity._id}}`) that are resolved at execution time
+             * against the mapping's source context. Resolution and graph execution happen in
+             * entity-mapping-api; this API only accepts, validates and passes through this field.
+             *
+             */
+            graph_context?: /**
+             * One multi-hop graph query to run against entity-api's `POST /v1/entity:graph`. Every node
+             * in `graph.nodes` is merged into the mapping's source context under its own `id`, so
+             * listing multiple nodes here costs one entity-api call, not one per node. A node's value
+             * overwrites any existing source-context key of the same name (the source entity, a 1-hop
+             * relation, or another graph node).
+             *
+             */
+            GraphContextEntry[];
         }
         export type MappingAttribute = SetValueMapper | CopyValueMapper | AppendValueMapper;
         /**
@@ -3892,8 +4010,10 @@ declare namespace Components {
             email_template_id?: string;
             /**
              * Language code for the email template
+             * example:
+             * de
              */
-            language_code?: "de" | "en";
+            language_code?: string;
             /**
              * Controls how the reply email is sent.
              * - reply_in_thread: Sends the email as a reply within the existing email thread (default).
@@ -4122,7 +4242,11 @@ declare namespace Components {
         }
         export interface SendEmailConfig {
             email_template_id?: string;
-            language_code?: "de" | "en";
+            /**
+             * example:
+             * de
+             */
+            language_code?: string;
             /**
              * Send an email exclusively to the portal user if they are registered on the portal.
              */
@@ -4256,11 +4380,7 @@ declare namespace Components {
              * 7791b04a-16d2-44a2-9af9-2d59c25c512f
              */
             AutomationFlowId;
-            workflow_context?: /**
-             * Automation Executions triggered by workflow task automations will always carry information about the triggering workflow. This information is helpful in correlating workflow executions with all the triggered automation executions
-             *
-             */
-            WorkflowExecutionContext;
+            workflow_context?: WorkflowExecutionContext;
             /**
              * Use workflow_context.workflow_exec_id instead
              */
@@ -5037,10 +5157,6 @@ declare namespace Components {
          * The role this automation plays in the workflow.
          */
         export type WorkflowContextRole = "trigger_workflow" | "run_task_automation";
-        /**
-         * Automation Executions triggered by workflow task automations will always carry information about the triggering workflow. This information is helpful in correlating workflow executions with all the triggered automation executions
-         *
-         */
         export interface WorkflowExecutionContext {
             workflow_exec_id: string;
             workflow_exec_task_id?: string;
@@ -5060,9 +5176,16 @@ declare namespace Components {
                 entity_schema?: string;
                 is_primary?: boolean;
             }[];
+            /**
+             * Id of the user on whose behalf the workflow task triggered this automation — the caller of a user-initiated run, or the user whose task completion advanced the flow to the automation task. Action workers resolve it as the acting user for template variable resolution (user.*) and email thread assignment, matching the attribution of manually triggered executions. Absent when no human action led to the trigger (scheduler fires, journey-triggered flows).
+             *
+             * example:
+             * 10006129
+             */
+            trigger_user_id?: string;
         }
         /**
-         * Workflow automation tasks can be paused & waiting for journey automation executions to succeed. If such is the case, this context tracks the task_id of the workflow waiting for journey submission success This context is consumed by svc-workflows to resume a task waiting on this journey submission.
+         * Correlation stamped when the triggering submission entity carried workflow wait claims from a journey link (AL-2521). Consumed by svc-workflows to resume a task waiting on this journey submission.
          *
          */
         export interface WorkflowWaitContext {
@@ -6007,6 +6130,12 @@ export type ForwardEmailActionConfig = Components.Schemas.ForwardEmailActionConf
 export type ForwardEmailConfig = Components.Schemas.ForwardEmailConfig;
 export type FrontendSubmitTrigger = Components.Schemas.FrontendSubmitTrigger;
 export type GetExecutionsResp = Components.Schemas.GetExecutionsResp;
+export type GraphContextEntry = Components.Schemas.GraphContextEntry;
+export type GraphDefinition = Components.Schemas.GraphDefinition;
+export type GraphEdge = Components.Schemas.GraphEdge;
+export type GraphNode = Components.Schemas.GraphNode;
+export type GraphNodeFilter = Components.Schemas.GraphNodeFilter;
+export type GraphSeed = Components.Schemas.GraphSeed;
 export type InformERPAction = Components.Schemas.InformERPAction;
 export type InformERPActionConfig = Components.Schemas.InformERPActionConfig;
 export type InformERPConfig = Components.Schemas.InformERPConfig;

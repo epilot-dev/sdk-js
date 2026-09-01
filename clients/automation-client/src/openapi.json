@@ -1900,11 +1900,167 @@
             "items": {
               "type": "string"
             }
+          },
+          "graph_context": {
+            "type": "array",
+            "description": "Multi-hop graph queries (executed via entity-api's `POST /v1/entity:graph`), each\nmerging every traversed node into the mapping's source context under its own node id,\nso `mapping_attributes` (e.g. `_copy` / `_template`) can reference it alongside the\nmain entity, e.g. `{ \"_copy\": \"order.line_items\" }`.\n\n`seed.entity_id` and any node `filter[].value` may contain `{{handlebars}}`\nplaceholders (e.g. `{{trigger.entity._id}}`) that are resolved at execution time\nagainst the mapping's source context. Resolution and graph execution happen in\nentity-mapping-api; this API only accepts, validates and passes through this field.\n",
+            "items": {
+              "$ref": "#/components/schemas/GraphContextEntry"
+            }
           }
         },
         "required": [
           "target_schema"
         ]
+      },
+      "GraphContextEntry": {
+        "type": "object",
+        "description": "One multi-hop graph query to run against entity-api's `POST /v1/entity:graph`. Every node\nin `graph.nodes` is merged into the mapping's source context under its own `id`, so\nlisting multiple nodes here costs one entity-api call, not one per node. A node's value\noverwrites any existing source-context key of the same name (the source entity, a 1-hop\nrelation, or another graph node).\n",
+        "required": [
+          "seed",
+          "graph"
+        ],
+        "properties": {
+          "seed": {
+            "$ref": "#/components/schemas/GraphSeed"
+          },
+          "graph": {
+            "$ref": "#/components/schemas/GraphDefinition"
+          }
+        }
+      },
+      "GraphSeed": {
+        "type": "object",
+        "required": [
+          "entity_id",
+          "node_id"
+        ],
+        "properties": {
+          "entity_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "node_id": {
+            "type": "string",
+            "description": "The node ID in the graph definition that corresponds to the seed entity",
+            "example": "contact"
+          }
+        }
+      },
+      "GraphDefinition": {
+        "type": "object",
+        "required": [
+          "nodes",
+          "edges"
+        ],
+        "properties": {
+          "nodes": {
+            "type": "array",
+            "description": "List of node definitions in the graph",
+            "items": {
+              "$ref": "#/components/schemas/GraphNode"
+            }
+          },
+          "edges": {
+            "type": "array",
+            "description": "List of edge definitions connecting nodes",
+            "items": {
+              "$ref": "#/components/schemas/GraphEdge"
+            }
+          }
+        }
+      },
+      "GraphNode": {
+        "type": "object",
+        "required": [
+          "id",
+          "schema"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for this node in the graph definition",
+            "example": "contact"
+          },
+          "schema": {
+            "type": "string",
+            "description": "Entity schema slug for this node",
+            "example": "contact"
+          },
+          "cardinality": {
+            "type": "string",
+            "enum": [
+              "one",
+              "many"
+            ],
+            "description": "\"one\": this node resolves to a single entity. \"many\" (default if unset): this node\nresolves to an array of entities. The seed node always returns a single entity\nregardless of this setting.\n",
+            "example": "one"
+          },
+          "fields": {
+            "type": "array",
+            "description": "Optional entity fields to include in the hydrated response for this node.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "filter": {
+            "type": "array",
+            "description": "Narrows this node's traversal results to entities matching every filter (AND\nsemantics). Useful for disambiguating among multiple entities reachable via the same\ngraph edge.\n",
+            "items": {
+              "$ref": "#/components/schemas/GraphNodeFilter"
+            }
+          }
+        }
+      },
+      "GraphNodeFilter": {
+        "type": "object",
+        "description": "Entities are included in this node's result only if `attribute` exactly equals the literal `value`.",
+        "required": [
+          "attribute",
+          "value"
+        ],
+        "properties": {
+          "attribute": {
+            "type": "string",
+            "description": "Entity attribute name to match against.",
+            "example": "order_number"
+          },
+          "value": {
+            "description": "Literal value the attribute must exactly equal for the entity to be included in this node's result. Supports `{{handlebars}}` placeholders resolved against sourceContext when given as a string.",
+            "oneOf": [
+              {
+                "type": "string",
+                "nullable": true
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "boolean"
+              }
+            ],
+            "example": "OR-113"
+          }
+        }
+      },
+      "GraphEdge": {
+        "type": "object",
+        "required": [
+          "from",
+          "to"
+        ],
+        "properties": {
+          "from": {
+            "type": "string",
+            "description": "Source node ID",
+            "example": "contact"
+          },
+          "to": {
+            "type": "string",
+            "description": "Target node ID",
+            "example": "billing_account"
+          }
+        }
       },
       "MappingConfigRef": {
         "type": "object",
@@ -2663,10 +2819,7 @@
           "language_code": {
             "type": "string",
             "description": "Language code for the email template",
-            "enum": [
-              "de",
-              "en"
-            ]
+            "example": "de"
           },
           "reply_mode": {
             "type": "string",
@@ -2697,10 +2850,7 @@
           },
           "language_code": {
             "type": "string",
-            "enum": [
-              "de",
-              "en"
-            ]
+            "example": "de"
           },
           "notify_portal_user_only": {
             "type": "boolean",
@@ -3855,7 +4005,6 @@
       },
       "WorkflowExecutionContext": {
         "type": "object",
-        "description": "Automation Executions triggered by workflow task automations will always carry information about the triggering workflow. This information is helpful in correlating workflow executions with all the triggered automation executions\n",
         "required": [
           "workflow_exec_id",
           "workflow_role"
@@ -3897,12 +4046,17 @@
                 }
               }
             }
+          },
+          "trigger_user_id": {
+            "type": "string",
+            "description": "Id of the user on whose behalf the workflow task triggered this automation — the caller of a user-initiated run, or the user whose task completion advanced the flow to the automation task. Action workers resolve it as the acting user for template variable resolution (user.*) and email thread assignment, matching the attribution of manually triggered executions. Absent when no human action led to the trigger (scheduler fires, journey-triggered flows).\n",
+            "example": "10006129"
           }
         }
       },
       "WorkflowWaitContext": {
         "type": "object",
-        "description": "Workflow automation tasks can be paused & waiting for journey automation executions to succeed. If such is the case, this context tracks the task_id of the workflow waiting for journey submission success This context is consumed by svc-workflows to resume a task waiting on this journey submission.\n",
+        "description": "Correlation stamped when the triggering submission entity carried workflow wait claims from a journey link (AL-2521). Consumed by svc-workflows to resume a task waiting on this journey submission.\n",
         "required": [
           "workflow_execution_id",
           "workflow_task_id"
@@ -4999,7 +5153,12 @@
           "updateEntity",
           "deleteEntity",
           "softDeleteEntity",
-          "restoreEntity"
+          "restoreEntity",
+          "relationsAdded",
+          "relationsRemoved",
+          "relationsSoftDeleted",
+          "relationsRestored",
+          "relationsDeleted"
         ]
       },
       "EntitySearchFilter": {
