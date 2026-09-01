@@ -71,12 +71,8 @@ describe('runtime models are exposed by the SDK', () => {
     }
   });
 
-  /**
-   * Both allowlists hold *entity* attribute types. `RELATION_ATTRIBUTE_TYPE_LIST` is
-   * `satisfies`-anchored to the entity spec at compile time; `OVERRIDABLE_ATTRIBUTE_TYPE_LIST`
-   * ships from pricing-client, which has no entity types to anchor against and must not
-   * import them (the SDK depends on no client package), so this is its only drift guard.
-   */
+  // Both lists hold entity attribute types. The pricing one has no compile-time
+  // anchor, so this is its only drift guard.
   it('attribute-type allowlists only contain types the entity spec declares', () => {
     type Schema = { allOf?: Schema[]; properties?: { type?: { enum?: string[] } } };
 

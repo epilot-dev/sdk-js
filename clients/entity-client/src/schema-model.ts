@@ -10,10 +10,7 @@ export enum RelationAffinityMode {
   STRONG = 'strong',
 }
 
-/**
- * Attribute types that point at another entity instead of holding a plain value.
- * `repeatable` does not change this — a repeatable relation is still a relation.
- */
+/** Types that point at another entity. A repeatable relation is still a relation. */
 export const RELATION_ATTRIBUTE_TYPE_LIST = [
   'relation',
   'relation_user',
@@ -21,8 +18,5 @@ export const RELATION_ATTRIBUTE_TYPE_LIST = [
   'relation_payment_method',
 ] as const satisfies readonly AttributeType[];
 
-/**
- * Lookup companion of the list above. Typed `string` rather than `AttributeType` so a
- * caller can test an unvalidated `attribute.type` without narrowing it first.
- */
+/** `string`, not `AttributeType`, so callers can test an unnarrowed `attribute.type`. */
 export const RELATION_ATTRIBUTE_TYPES: ReadonlySet<string> = new Set(RELATION_ATTRIBUTE_TYPE_LIST);
