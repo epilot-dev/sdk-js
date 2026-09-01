@@ -348,64 +348,55 @@
     "schemas": {
       "EnvironmentValueType": {
         "type": "string",
-        "description": "The structure a variable's value holds. `SecretString` is encrypted at rest and\nits value is never returned. `Text`, `Number`, `Boolean` and `Options` may be\nserved to browser-facing consumers; `String` and `SecretString` may not.\n",
+        "description": "The structure a variable's value holds. `SecretString` is encrypted at rest and\nits value is never returned. `Text`, `Number`, `Boolean` and `Map` may be\nserved to browser-facing consumers; `String` and `SecretString` may not.\n",
         "enum": [
           "String",
           "SecretString",
           "Text",
           "Number",
           "Boolean",
-          "Options"
+          "Map"
         ]
       },
-      "EnvironmentOption": {
-        "oneOf": [
-          {
-            "type": "object",
-            "required": [
-              "value",
-              "label"
-            ],
-            "additionalProperties": false,
-            "properties": {
-              "value": {
-                "type": "string",
-                "minLength": 1
-              },
-              "label": {
-                "type": "string",
-                "minLength": 1
-              }
-            }
+      "StringTranslations": {
+        "description": "A string translated per language. Keys are language codes (e.g. `de`,\n`en-US`), matching the hyphen-only BCP-47 form epilot's i18n stack uses\neverywhere else. Must match LANGUAGE_KEY_PATTERN in\nsrc/core/value-types.ts — the two are not otherwise linked.\n",
+        "type": "object",
+        "minProperties": 1,
+        "propertyNames": {
+          "pattern": "^[a-z]{2,3}(-[A-Za-z0-9]+)*$"
+        },
+        "additionalProperties": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "MapEntry": {
+        "description": "One entry of a Map. `key` is the token a journey submits; `value` is\nwhat the customer reads — either one string, or one string per\nlanguage. Every entry of a Map must agree on which of the two it uses.\n",
+        "type": "object",
+        "required": [
+          "key",
+          "value"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "key": {
+            "type": "string",
+            "minLength": 1
           },
-          {
-            "type": "object",
-            "required": [
-              "value",
-              "labels"
-            ],
-            "additionalProperties": false,
-            "properties": {
-              "value": {
+          "value": {
+            "oneOf": [
+              {
                 "type": "string",
                 "minLength": 1
               },
-              "labels": {
-                "type": "object",
-                "minProperties": 1,
-                "propertyNames": {
-                  "pattern": "^[a-z]{2,3}(-[A-Za-z0-9]+)*$"
-                },
-                "additionalProperties": {
-                  "type": "string",
-                  "minLength": 1
-                }
+              {
+                "$ref": "#/components/schemas/StringTranslations"
               }
-            }
+            ]
           }
-        ]
+        }
       },
-      "OptionsValue": {
+      "MapValue": {
         "type": "object",
         "required": [
           "options"
@@ -421,13 +412,13 @@
             "type": "array",
             "minItems": 1,
             "items": {
-              "$ref": "#/components/schemas/EnvironmentOption"
+              "$ref": "#/components/schemas/MapEntry"
             }
           }
         }
       },
       "EnvironmentValue": {
-        "description": "A variable's value. The JSON type corresponds to the variable's `type`:\n`String`, `SecretString` and `Text` are strings, `Number` is a number,\n`Boolean` is a boolean, and `Options` is an object. Numbers are IEEE 754\ndoubles; integers above 2^53 may lose precision on round-trip.\n",
+        "description": "A variable's value. The JSON type corresponds to the variable's `type`:\n`String`, `SecretString` and `Text` are strings, `Number` is a number,\n`Boolean` is a boolean, and `Map` is an object. Numbers are IEEE 754\ndoubles; integers above 2^53 may lose precision on round-trip.\n",
         "oneOf": [
           {
             "type": "string"
@@ -439,7 +430,7 @@
             "type": "boolean"
           },
           {
-            "$ref": "#/components/schemas/OptionsValue"
+            "$ref": "#/components/schemas/MapValue"
           }
         ]
       },
