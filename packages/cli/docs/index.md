@@ -39,7 +39,7 @@ npx epilot auth login
 | File API | `epilot file` | 37 | [file.md](./file.md) |
 | Iban API | `epilot iban` | 1 | [iban.md](./iban.md) |
 | Integration Toolkit API | `epilot integration-toolkit` | 70 | [integration-toolkit.md](./integration-toolkit.md) |
-| Journey API | `epilot journey` | 16 | [journey.md](./journey.md) |
+| Journey API | `epilot journey` | 17 | [journey.md](./journey.md) |
 | Kanban API | `epilot kanban` | 10 | [kanban.md](./kanban.md) |
 | Message API | `epilot message` | 54 | [message.md](./message.md) |
 | Metering API | `epilot metering` | 21 | [metering.md](./metering.md) |

@@ -969,11 +969,12 @@ export const API_LIST: ApiInfo[] = [
     kebabName: 'journey',
     title: 'Journey API',
     serverUrl: 'https://journey-config.sls.epilot.io',
-    operationCount: 16,
+    operationCount: 17,
     operationIds: [
       'getJourneysByOrgId',
       'getJourney',
       'removeJourney',
+      'getJourneyEnvironment',
       'getJourneyProducts',
       'createJourney',
       'updateJourney',
