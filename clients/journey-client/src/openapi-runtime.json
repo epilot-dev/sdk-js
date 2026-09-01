@@ -62,6 +62,19 @@
         "responses": {}
       }
     },
+    "/v1/journey/configuration/{id}/environment": {
+      "get": {
+        "operationId": "getJourneyEnvironment",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v1/journey/products/{id}": {
       "get": {
         "operationId": "getJourneyProducts",

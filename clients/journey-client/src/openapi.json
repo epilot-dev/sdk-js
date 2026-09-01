@@ -3,7 +3,7 @@
   "info": {
     "title": "Journey API",
     "description": "API to configure journeys",
-    "version": "1.4.2"
+    "version": "1.4.3"
   },
   "security": [
     {
@@ -149,7 +149,14 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Journey"
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/Journey"
+                    },
+                    {
+                      "$ref": "#/components/schemas/JourneyActivationGuarantee"
+                    }
+                  ]
                 }
               }
             }
@@ -196,6 +203,62 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/v1/journey/configuration/{id}/environment": {
+      "get": {
+        "operationId": "getJourneyEnvironment",
+        "summary": "getJourneyEnvironment",
+        "description": "Resolve the environment variables referenced by this journey. Only browser-safe value types are returned.",
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "tags": [
+          "Journeys"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Journey ID bound to the supplied journey access token",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Resolved environment-backed datasources",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Always private, no-store"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JourneyEnvironmentResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Journey access token missing"
+          },
+          "403": {
+            "description": "Journey access token does not match the journey"
+          },
+          "502": {
+            "description": "Environment resolver unavailable"
           }
         }
       }
@@ -736,7 +799,14 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/JourneyCreationRequestV2"
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/JourneyCreationRequestV2"
+                    },
+                    {
+                      "$ref": "#/components/schemas/JourneyActivationGuarantee"
+                    }
+                  ]
                 }
               }
             }
@@ -938,6 +1008,124 @@
   },
   "components": {
     "schemas": {
+      "EnvironmentMapEntry": {
+        "type": "object",
+        "required": [
+          "key",
+          "value"
+        ],
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "value": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              }
+            ]
+          }
+        }
+      },
+      "EnvironmentMap": {
+        "type": "object",
+        "required": [
+          "options"
+        ],
+        "properties": {
+          "fallbackLanguage": {
+            "type": "string",
+            "default": "de"
+          },
+          "options": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EnvironmentMapEntry"
+            }
+          }
+        }
+      },
+      "JourneyEnvironmentResponse": {
+        "type": "object",
+        "required": [
+          "items",
+          "errors"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "datasourceId",
+                "type",
+                "value"
+              ],
+              "properties": {
+                "datasourceId": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "Text",
+                    "Number",
+                    "Boolean",
+                    "Map"
+                  ]
+                },
+                "value": {
+                  "oneOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "boolean"
+                    },
+                    {
+                      "$ref": "#/components/schemas/EnvironmentMap"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "datasourceId",
+                "code"
+              ],
+              "properties": {
+                "datasourceId": {
+                  "type": "string"
+                },
+                "code": {
+                  "type": "string",
+                  "enum": [
+                    "not_found",
+                    "unsupported_type",
+                    "not_set",
+                    "invalid_value",
+                    "incompatible_consumer"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
       "GetJourneysResponse": {
         "type": "object"
       },
@@ -1064,6 +1252,13 @@
                   "type": "boolean",
                   "nullable": true
                 },
+                "stepperType": {
+                  "type": "string",
+                  "enum": [
+                    "numbers",
+                    "progress bar"
+                  ]
+                },
                 "hideNextButton": {
                   "type": "boolean",
                   "nullable": true
@@ -1296,6 +1491,12 @@
                 "shouldLoadEntity": {
                   "type": "boolean",
                   "description": "If type is not text, we can instruct the journey to fetch the entity id we receive as value"
+                },
+                "description": {
+                  "type": "string",
+                  "nullable": true,
+                  "maxLength": 500,
+                  "description": "Human-readable note describing the parameter's purpose. Free text; may contain newlines."
                 }
               },
               "required": [
@@ -1336,11 +1537,7 @@
                   },
                   "lang": {
                     "type": "string",
-                    "enum": [
-                      "de",
-                      "en",
-                      "fr"
-                    ]
+                    "example": "de"
                   },
                   "width": {
                     "type": "string"
@@ -1382,7 +1579,8 @@
                 "type": "string"
               },
               "templateId": {
-                "type": "string"
+                "type": "string",
+                "nullable": true
               },
               "entityId": {
                 "type": "string",
@@ -1390,6 +1588,10 @@
               },
               "mappingsAutomationId": {
                 "type": "string"
+              },
+              "newMappings": {
+                "description": "When true, the journey is created without a mapping config or automation; mappings are managed as advanced mappings on a lazily created automation.",
+                "type": "boolean"
               },
               "targetedCustomer": {
                 "type": "string"
@@ -1481,6 +1683,19 @@
                   "PRIVATE"
                 ]
               },
+              "authGate": {
+                "type": "object",
+                "description": "Steps after this step require an authenticated session (auth gate)",
+                "required": [
+                  "stepId"
+                ],
+                "properties": {
+                  "stepId": {
+                    "type": "string",
+                    "description": "The step containing the Login & Registration block"
+                  }
+                }
+              },
               "isPublished": {
                 "type": "boolean"
               },
@@ -1493,7 +1708,7 @@
               "savingProgress": {
                 "type": "object",
                 "properties": {
-                  "savingMode": {
+                  "mode": {
                     "type": "string",
                     "enum": [
                       "auto",
@@ -1502,7 +1717,7 @@
                       "none"
                     ]
                   },
-                  "supportedVersion": {
+                  "supportedRevision": {
                     "type": "number"
                   }
                 }
@@ -1590,6 +1805,13 @@
                 "showStepperLabels": {
                   "type": "boolean",
                   "nullable": true
+                },
+                "stepperType": {
+                  "type": "string",
+                  "enum": [
+                    "numbers",
+                    "progress bar"
+                  ]
                 },
                 "hideNextButton": {
                   "type": "boolean",
@@ -1823,6 +2045,12 @@
                 "shouldLoadEntity": {
                   "type": "boolean",
                   "description": "If type is not text, we can instruct the journey to fetch the entity id we receive as value"
+                },
+                "description": {
+                  "type": "string",
+                  "nullable": true,
+                  "maxLength": 500,
+                  "description": "Human-readable note describing the parameter's purpose. Free text; may contain newlines."
                 }
               },
               "required": [
@@ -1863,11 +2091,7 @@
                   },
                   "lang": {
                     "type": "string",
-                    "enum": [
-                      "de",
-                      "en",
-                      "fr"
-                    ]
+                    "example": "de"
                   },
                   "width": {
                     "type": "string"
@@ -1910,8 +2134,13 @@
               "mappingsAutomationId": {
                 "type": "string"
               },
+              "newMappings": {
+                "description": "When true, the journey is created without a mapping config or automation; mappings are managed as advanced mappings on a lazily created automation.",
+                "type": "boolean"
+              },
               "templateId": {
-                "type": "string"
+                "type": "string",
+                "nullable": true
               },
               "targetedCustomer": {
                 "type": "string"
@@ -1992,12 +2221,46 @@
                   "PRIVATE"
                 ]
               },
+              "authGate": {
+                "type": "object",
+                "description": "Steps after this step require an authenticated session (auth gate)",
+                "required": [
+                  "stepId"
+                ],
+                "properties": {
+                  "stepId": {
+                    "type": "string",
+                    "description": "The step containing the Login & Registration block"
+                  }
+                }
+              },
               "enableDarkMode": {
                 "type": "boolean",
                 "description": "If true, the journey shows an icon to toggle dark mode"
               },
+              "useAustrianLabels": {
+                "type": "boolean",
+                "description": "If true, some journey input labels are in Austrian format"
+              },
               "isActive": {
                 "type": "boolean"
+              },
+              "savingProgress": {
+                "type": "object",
+                "properties": {
+                  "mode": {
+                    "type": "string",
+                    "enum": [
+                      "auto",
+                      "local",
+                      "remote",
+                      "none"
+                    ]
+                  },
+                  "supportedRevision": {
+                    "type": "number"
+                  }
+                }
               }
             },
             "additionalProperties": false
@@ -2168,6 +2431,27 @@
             "$ref": "#/components/schemas/JourneyFeatureFlags"
           }
         ]
+      },
+      "JourneyActivationGuarantee": {
+        "description": "Journeys read from the API always carry an explicit `settings.isActive`. The flag remains optional in request bodies.\n",
+        "type": "object",
+        "required": [
+          "settings"
+        ],
+        "properties": {
+          "settings": {
+            "type": "object",
+            "required": [
+              "isActive"
+            ],
+            "properties": {
+              "isActive": {
+                "type": "boolean",
+                "description": "Whether the journey is active (accessible to end customers)"
+              }
+            }
+          }
+        }
       },
       "JourneyFeatureFlags": {
         "type": "object",
@@ -2534,6 +2818,11 @@
               }
             }
           },
+          "context_entity_id": {
+            "description": "Entity id used to resolve entity and relational template variables",
+            "type": "string",
+            "format": "uuid"
+          },
           "language": {
             "description": "Language code for the document",
             "type": "string",
@@ -2583,12 +2872,21 @@
       },
       "ValidationRuleRef": {
         "type": "object",
-        "description": "References to validation rules organized by blocks and fields.\nMaps block IDs to either rule IDs (for block-level rules) or rule references (for field-level rules).\n",
+        "description": "References to validation rules organized by blocks and fields.\nMaps block IDs to either one or more ordered rule IDs (for block-level rules)\nor rule references (for field-level rules).\n",
         "additionalProperties": {
           "oneOf": [
             {
               "type": "string",
               "description": "Rule ID for block-level validation"
+            },
+            {
+              "type": "array",
+              "description": "Ordered rule IDs for block-level validation",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": {
+                "type": "string"
+              }
             },
             {
               "$ref": "#/components/schemas/RuleRef"
@@ -2597,23 +2895,45 @@
         },
         "example": {
           "block1": "rule123",
-          "block2": {
-            "field1": "rule456",
-            "field2": "rule789"
+          "block2": [
+            "rule456",
+            "rule789"
+          ],
+          "block3": {
+            "field1": "rule101",
+            "field2": [
+              "rule102",
+              "rule103"
+            ]
           }
         }
       },
       "RuleRef": {
         "type": "object",
-        "description": "Field-level rule references within a block.\nMaps field names to rule IDs.\n",
+        "description": "Field-level rule references within a block.\nMaps field names to one or more ordered rule IDs.\n",
         "additionalProperties": {
-          "type": "string",
-          "description": "Rule ID for field-level validation"
+          "oneOf": [
+            {
+              "type": "string",
+              "description": "Rule ID for field-level validation"
+            },
+            {
+              "type": "array",
+              "description": "Ordered rule IDs for field-level validation",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": {
+                "type": "string"
+              }
+            }
+          ]
         },
         "example": {
           "firstName": "rule123",
-          "lastName": "rule456",
-          "email": "rule789"
+          "lastName": [
+            "rule456",
+            "rule789"
+          ]
         }
       }
     },
