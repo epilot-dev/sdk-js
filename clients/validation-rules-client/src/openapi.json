@@ -2103,6 +2103,9 @@
             "$ref": "#/components/schemas/RelativeDateValue"
           },
           {
+            "$ref": "#/components/schemas/EnvironmentValue"
+          },
+          {
             "$ref": "#/components/schemas/ExternalValue"
           },
           {
@@ -2114,7 +2117,7 @@
         ]
       },
       "ScalarValue": {
-        "description": "A single comparison value - static, resolved from context, a relative date, or an external value.",
+        "description": "A single comparison value - static, resolved from context, a relative date, an organisation environment variable, or an external value.",
         "oneOf": [
           {
             "$ref": "#/components/schemas/StaticValue"
@@ -2126,9 +2129,37 @@
             "$ref": "#/components/schemas/RelativeDateValue"
           },
           {
+            "$ref": "#/components/schemas/EnvironmentValue"
+          },
+          {
             "$ref": "#/components/schemas/ExternalValue"
           }
         ]
+      },
+      "EnvironmentValue": {
+        "type": "object",
+        "description": "A comparison value resolved at evaluation time from an organisation environment variable\n(environments-api). The rule stores the key, never the value, so one change to the variable\nreaches every rule that references it and a blueprint install never overwrites the\norganisation's own value.\n\nOnly browser-safe variable types are allowed: `Number` for numeric comparisons, `Text` for\ntext comparisons and for dates (ISO 8601 string), `Boolean` for `applies_when` values.\n`String` and `SecretString` variables are rejected at write time. Write-time validation also\nchecks that the variable exists in the organisation; a variable that exists without a value\n(for example seeded by a blueprint install) is accepted and resolves as unavailable until set.\n",
+        "required": [
+          "source",
+          "key"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "source": {
+            "type": "string",
+            "enum": [
+              "environment"
+            ]
+          },
+          "key": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_.\\-]{0,127}$",
+            "description": "Environment variable key, e.g. `abschlag.max`."
+          },
+          "adjust": {
+            "$ref": "#/components/schemas/ValueAdjustment"
+          }
+        }
       },
       "ExternalValue": {
         "type": "object",
@@ -2256,6 +2287,9 @@
               },
               {
                 "$ref": "#/components/schemas/ContextValue"
+              },
+              {
+                "$ref": "#/components/schemas/EnvironmentValue"
               }
             ]
           },
@@ -2386,7 +2420,7 @@
             "description": "Comparison applied to the resolved context value. `isEmpty` / `isNotEmpty`\ntake no `value`; all other operators require one.\n"
           },
           "value": {
-            "description": "Static comparison value for binary operators.",
+            "description": "Comparison value for binary operators: a static number, string or boolean, or an\norganisation environment variable (`Number`, `Text` or `Boolean`) so a precondition\ncan act as a per-organisation switch or threshold.\n",
             "oneOf": [
               {
                 "type": "number"
@@ -2396,6 +2430,9 @@
               },
               {
                 "type": "boolean"
+              },
+              {
+                "$ref": "#/components/schemas/EnvironmentValue"
               }
             ]
           }

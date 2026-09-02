@@ -27,9 +27,31 @@ declare namespace Components {
              */
             operator: "equal" | "notEqual" | "greaterThan" | "greaterThanInclusive" | "lessThan" | "lessThanInclusive" | "isEmpty" | "isNotEmpty";
             /**
-             * Static comparison value for binary operators.
+             * Comparison value for binary operators: a static number, string or boolean, or an
+             * organisation environment variable (`Number`, `Text` or `Boolean`) so a precondition
+             * can act as a per-organisation switch or threshold.
+             *
              */
-            value?: /* Static comparison value for binary operators. */ number | string | boolean;
+            value?: /**
+             * Comparison value for binary operators: a static number, string or boolean, or an
+             * organisation environment variable (`Number`, `Text` or `Boolean`) so a precondition
+             * can act as a per-organisation switch or threshold.
+             *
+             */
+            number | string | boolean | /**
+             * A comparison value resolved at evaluation time from an organisation environment variable
+             * (environments-api). The rule stores the key, never the value, so one change to the variable
+             * reaches every rule that references it and a blueprint install never overwrites the
+             * organisation's own value.
+             *
+             * Only browser-safe variable types are allowed: `Number` for numeric comparisons, `Text` for
+             * text comparisons and for dates (ISO 8601 string), `Boolean` for `applies_when` values.
+             * `String` and `SecretString` variables are rejected at write time. Write-time validation also
+             * checks that the variable exists in the organisation; a variable that exists without a value
+             * (for example seeded by a blueprint install) is accepted and resolves as unavailable until set.
+             *
+             */
+            EnvironmentValue;
         }
         /**
          * Declarative validation rule (schema version v2). Supports predefined comparison operators
@@ -109,6 +131,19 @@ declare namespace Components {
          *
          */
         ContextValue | /* A date relative to the evaluation moment, e.g. "today minus 30 days". Only valid for date rules. */ RelativeDateValue | /**
+         * A comparison value resolved at evaluation time from an organisation environment variable
+         * (environments-api). The rule stores the key, never the value, so one change to the variable
+         * reaches every rule that references it and a blueprint install never overwrites the
+         * organisation's own value.
+         *
+         * Only browser-safe variable types are allowed: `Number` for numeric comparisons, `Text` for
+         * text comparisons and for dates (ISO 8601 string), `Boolean` for `applies_when` values.
+         * `String` and `SecretString` variables are rejected at write time. Write-time validation also
+         * checks that the variable exists in the organisation; a variable that exists without a value
+         * (for example seeded by a blueprint install) is accepted and resolves as unavailable until set.
+         *
+         */
+        EnvironmentValue | /**
          * A comparison value produced at evaluation time by an External Values hook of an installed
          * app (component type `EXTERNAL_VALUES`). The rule stores the reference only; the value is
          * resolved server-side by the external-values-api, which executes the hook's HTTP call with
@@ -200,6 +235,32 @@ declare namespace Components {
              *
              */
             ContextRequirement[];
+        }
+        /**
+         * A comparison value resolved at evaluation time from an organisation environment variable
+         * (environments-api). The rule stores the key, never the value, so one change to the variable
+         * reaches every rule that references it and a blueprint install never overwrites the
+         * organisation's own value.
+         *
+         * Only browser-safe variable types are allowed: `Number` for numeric comparisons, `Text` for
+         * text comparisons and for dates (ISO 8601 string), `Boolean` for `applies_when` values.
+         * `String` and `SecretString` variables are rejected at write time. Write-time validation also
+         * checks that the variable exists in the organisation; a variable that exists without a value
+         * (for example seeded by a blueprint install) is accepted and resolves as unavailable until set.
+         *
+         */
+        export interface EnvironmentValue {
+            source: "environment";
+            /**
+             * Environment variable key, e.g. `abschlag.max`.
+             */
+            key: string; // ^[a-z0-9][a-z0-9_.\-]{0,127}$
+            adjust?: /**
+             * Adjusts a context-resolved numeric value before comparison, e.g. "context value plus 10 percent".
+             * Used to express tolerance bands such as "at most 10% above the current instalment amount".
+             *
+             */
+            ValueAdjustment;
         }
         /**
          * A comparison value produced at evaluation time by an External Values hook of an installed
@@ -560,8 +621,8 @@ declare namespace Components {
          */
         export interface RangeValue {
             source: "range";
-            min: /* A single comparison value - static, resolved from context, a relative date, or an external value. */ ScalarValue;
-            max: /* A single comparison value - static, resolved from context, a relative date, or an external value. */ ScalarValue;
+            min: /* A single comparison value - static, resolved from context, a relative date, an organisation environment variable, or an external value. */ ScalarValue;
+            max: /* A single comparison value - static, resolved from context, a relative date, an organisation environment variable, or an external value. */ ScalarValue;
         }
         /**
          * Condition definition for a regex-based validation rule (2 levels deep)
@@ -635,15 +696,28 @@ declare namespace Components {
             anchor?: "today";
         }
         /**
-         * A single comparison value - static, resolved from context, a relative date, or an external value.
+         * A single comparison value - static, resolved from context, a relative date, an organisation environment variable, or an external value.
          */
-        export type ScalarValue = /* A single comparison value - static, resolved from context, a relative date, or an external value. */ /* A fixed comparison value. */ StaticValue | /**
+        export type ScalarValue = /* A single comparison value - static, resolved from context, a relative date, an organisation environment variable, or an external value. */ /* A fixed comparison value. */ StaticValue | /**
          * A dynamic comparison value resolved from runtime context, e.g. `contract.installment_amount`
          * or `previous_reading.value`. The first path segment must match the `name` of a declared
          * context requirement.
          *
          */
         ContextValue | /* A date relative to the evaluation moment, e.g. "today minus 30 days". Only valid for date rules. */ RelativeDateValue | /**
+         * A comparison value resolved at evaluation time from an organisation environment variable
+         * (environments-api). The rule stores the key, never the value, so one change to the variable
+         * reaches every rule that references it and a blueprint install never overwrites the
+         * organisation's own value.
+         *
+         * Only browser-safe variable types are allowed: `Number` for numeric comparisons, `Text` for
+         * text comparisons and for dates (ISO 8601 string), `Boolean` for `applies_when` values.
+         * `String` and `SecretString` variables are rejected at write time. Write-time validation also
+         * checks that the variable exists in the organisation; a variable that exists without a value
+         * (for example seeded by a blueprint install) is accepted and resolves as unavailable until set.
+         *
+         */
+        EnvironmentValue | /**
          * A comparison value produced at evaluation time by an External Values hook of an installed
          * app (component type `EXTERNAL_VALUES`). The rule stores the reference only; the value is
          * resolved server-side by the external-values-api, which executes the hook's HTTP call with
@@ -883,7 +957,20 @@ declare namespace Components {
              * context requirement.
              *
              */
-            ContextValue;
+            ContextValue | /**
+             * A comparison value resolved at evaluation time from an organisation environment variable
+             * (environments-api). The rule stores the key, never the value, so one change to the variable
+             * reaches every rule that references it and a blueprint install never overwrites the
+             * organisation's own value.
+             *
+             * Only browser-safe variable types are allowed: `Number` for numeric comparisons, `Text` for
+             * text comparisons and for dates (ISO 8601 string), `Boolean` for `applies_when` values.
+             * `String` and `SecretString` variables are rejected at write time. Write-time validation also
+             * checks that the variable exists in the organisation; a variable that exists without a value
+             * (for example seeded by a blueprint install) is accepted and resolves as unavailable until set.
+             *
+             */
+            EnvironmentValue;
             direction: "increase" | "decrease";
             /**
              * Rounds the adjusted result to a whole number - `up` (ceiling) or `down` (floor).
@@ -1383,6 +1470,7 @@ export type ConditionValue = Components.Schemas.ConditionValue;
 export type ContextRequirement = Components.Schemas.ContextRequirement;
 export type ContextValue = Components.Schemas.ContextValue;
 export type CreateValidationRuleRequest = Components.Schemas.CreateValidationRuleRequest;
+export type EnvironmentValue = Components.Schemas.EnvironmentValue;
 export type ExternalValue = Components.Schemas.ExternalValue;
 export type GetValidationRulesResponse = Components.Schemas.GetValidationRulesResponse;
 export type NoValue = Components.Schemas.NoValue;
