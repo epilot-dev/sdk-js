@@ -1,6 +1,6 @@
-# @epilot/entity-client
+# @epilot/sdk
 
-## 7.5.0
+## 2.20.0
 
 ### Minor Changes
 
@@ -14,20 +14,10 @@
 
   These were hand-copied in `entity-api`, `epilot360-entity-builder`, `epilot360-entity-builder-v2` and `epilot360-integration-hub`; those copies can now be replaced with an import.
 
-## 6.10.1
+- b6a744e: Publish runtime values through the SDK via a client's `schema-model.ts`
 
-### Patch Changes
+  Only types could reach SDK consumers before — `additional-types.ts` lands in a `.d.ts`, so a `const` or `enum` there is `undefined` at runtime. A client's `schema-model.ts` is now copied as a real `.ts` and re-exported with `export *`.
 
-- Upgrade openapi-client-axios to ^7.8.0 across all clients
+  This makes `RelationAffinityMode` reachable through `@epilot/sdk/entity` for the first time; it was already exported from `@epilot/entity-client`.
 
-## 6.6.1
-
-### Patch Changes
-
-- Mark access as public for all packages
-
-## 6.6.0
-
-### Minor Changes
-
-- Minor version bump for all client packages
+  `@epilot/pricing-client` gains `PricingModelValues`, `MarkupPricingModelValues`, `TypeGetAgValues` and `DynamicTariffModeValues` — the enum values themselves, for lookups and `Object.values()` allowlists, rather than just the union types. Each is tied to its spec union with `satisfies`, and checked against `components.schemas.<SpecType>.enum`, so a member added to or removed from the spec fails the build rather than drifting silently.
