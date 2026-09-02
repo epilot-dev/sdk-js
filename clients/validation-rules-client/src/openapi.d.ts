@@ -33,8 +33,8 @@ declare namespace Components {
         }
         /**
          * Declarative validation rule (schema version v2). Supports predefined comparison operators
-         * over number, date and text inputs, with static, dynamic (context path) and relative-date
-         * comparison values.
+         * over number, date and text inputs, with static, dynamic (context path), relative-date and
+         * external (app-provided) comparison values.
          *
          */
         export interface ComparisonRuleType {
@@ -108,7 +108,20 @@ declare namespace Components {
          * context requirement.
          *
          */
-        ContextValue | /* A date relative to the evaluation moment, e.g. "today minus 30 days". Only valid for date rules. */ RelativeDateValue | /* A lower and upper bound for range operators (between, dateBetween, lengthBetween). Bounds are inclusive. */ RangeValue | /* No comparison value - used by unary operators such as notInFuture / notInPast. */ NoValue;
+        ContextValue | /* A date relative to the evaluation moment, e.g. "today minus 30 days". Only valid for date rules. */ RelativeDateValue | /**
+         * A comparison value produced at evaluation time by an External Values hook of an installed
+         * app (component type `EXTERNAL_VALUES`). The rule stores the reference only; the value is
+         * resolved server-side by the external-values-api, which executes the hook's HTTP call with
+         * the app's credentials and returns the typed result identified by `result_id`.
+         *
+         * Write-time validation checks that the app is installed in the organisation, that the hook
+         * and result exist, and that the result's type is compatible with the compared kind
+         * (`number` results for numeric comparisons, `text` for text, `date` for date). External values
+         * are resolved only for authenticated consumers (epilot 360 users and portal end customers);
+         * in public journeys the dependent conditions are skipped.
+         *
+         */
+        ExternalValue | /* A lower and upper bound for range operators (between, dateBetween, lengthBetween). Bounds are inclusive. */ RangeValue | /* No comparison value - used by unary operators such as notInFuture / notInPast. */ NoValue;
         /**
          * An entity context source the rule needs at evaluation time, referenced by `context`
          * value paths via the schema slug as their first segment (e.g. `contract.installment_amount`).
@@ -167,8 +180,8 @@ declare namespace Components {
             UsedBy[];
             rule: /* Validation rule that uses a regular expression to validate input. */ RegexRuleType | /* Validation rule that uses a sequence of patterns to validate input. */ PatternRuleType | /* Validation rule for numeric values, supporting range and digit count constraints. */ NumericRuleType | /**
              * Declarative validation rule (schema version v2). Supports predefined comparison operators
-             * over number, date and text inputs, with static, dynamic (context path) and relative-date
-             * comparison values.
+             * over number, date and text inputs, with static, dynamic (context path), relative-date and
+             * external (app-provided) comparison values.
              *
              */
             ComparisonRuleType;
@@ -187,6 +200,40 @@ declare namespace Components {
              *
              */
             ContextRequirement[];
+        }
+        /**
+         * A comparison value produced at evaluation time by an External Values hook of an installed
+         * app (component type `EXTERNAL_VALUES`). The rule stores the reference only; the value is
+         * resolved server-side by the external-values-api, which executes the hook's HTTP call with
+         * the app's credentials and returns the typed result identified by `result_id`.
+         *
+         * Write-time validation checks that the app is installed in the organisation, that the hook
+         * and result exist, and that the result's type is compatible with the compared kind
+         * (`number` results for numeric comparisons, `text` for text, `date` for date). External values
+         * are resolved only for authenticated consumers (epilot 360 users and portal end customers);
+         * in public journeys the dependent conditions are skipped.
+         *
+         */
+        export interface ExternalValue {
+            source: "external";
+            /**
+             * ID of the installed app that provides the External Values component.
+             */
+            app_id: string;
+            /**
+             * ID of the hook within the app's External Values component.
+             */
+            hook_id: string; // ^[a-zA-Z0-9_-]+$
+            /**
+             * ID of the result entry within the hook whose value is compared.
+             */
+            result_id: string; // ^[a-zA-Z0-9_-]+$
+            adjust?: /**
+             * Adjusts a context-resolved numeric value before comparison, e.g. "context value plus 10 percent".
+             * Used to express tolerance bands such as "at most 10% above the current instalment amount".
+             *
+             */
+            ValueAdjustment;
         }
         /**
          * Response envelope for listing all validation rules within an organization.
@@ -513,8 +560,8 @@ declare namespace Components {
          */
         export interface RangeValue {
             source: "range";
-            min: /* A single comparison value - static, resolved from context, or a relative date. */ ScalarValue;
-            max: /* A single comparison value - static, resolved from context, or a relative date. */ ScalarValue;
+            min: /* A single comparison value - static, resolved from context, a relative date, or an external value. */ ScalarValue;
+            max: /* A single comparison value - static, resolved from context, a relative date, or an external value. */ ScalarValue;
         }
         /**
          * Condition definition for a regex-based validation rule (2 levels deep)
@@ -588,15 +635,28 @@ declare namespace Components {
             anchor?: "today";
         }
         /**
-         * A single comparison value - static, resolved from context, or a relative date.
+         * A single comparison value - static, resolved from context, a relative date, or an external value.
          */
-        export type ScalarValue = /* A single comparison value - static, resolved from context, or a relative date. */ /* A fixed comparison value. */ StaticValue | /**
+        export type ScalarValue = /* A single comparison value - static, resolved from context, a relative date, or an external value. */ /* A fixed comparison value. */ StaticValue | /**
          * A dynamic comparison value resolved from runtime context, e.g. `contract.installment_amount`
          * or `previous_reading.value`. The first path segment must match the `name` of a declared
          * context requirement.
          *
          */
-        ContextValue | /* A date relative to the evaluation moment, e.g. "today minus 30 days". Only valid for date rules. */ RelativeDateValue;
+        ContextValue | /* A date relative to the evaluation moment, e.g. "today minus 30 days". Only valid for date rules. */ RelativeDateValue | /**
+         * A comparison value produced at evaluation time by an External Values hook of an installed
+         * app (component type `EXTERNAL_VALUES`). The rule stores the reference only; the value is
+         * resolved server-side by the external-values-api, which executes the hook's HTTP call with
+         * the app's credentials and returns the typed result identified by `result_id`.
+         *
+         * Write-time validation checks that the app is installed in the organisation, that the hook
+         * and result exist, and that the result's type is compatible with the compared kind
+         * (`number` results for numeric comparisons, `text` for text, `date` for date). External values
+         * are resolved only for authenticated consumers (epilot 360 users and portal end customers);
+         * in public journeys the dependent conditions are skipped.
+         *
+         */
+        ExternalValue;
         /**
          * A fixed comparison value.
          */
@@ -630,8 +690,8 @@ declare namespace Components {
             UsedBy[];
             rule?: /* Validation rule that uses a regular expression to validate input. */ RegexRuleType | /* Validation rule that uses a sequence of patterns to validate input. */ PatternRuleType | /* Validation rule for numeric values, supporting range and digit count constraints. */ NumericRuleType | /**
              * Declarative validation rule (schema version v2). Supports predefined comparison operators
-             * over number, date and text inputs, with static, dynamic (context path) and relative-date
-             * comparison values.
+             * over number, date and text inputs, with static, dynamic (context path), relative-date and
+             * external (app-provided) comparison values.
              *
              */
             ComparisonRuleType;
@@ -705,8 +765,8 @@ declare namespace Components {
             UsedBy[];
             rule?: /* Validation rule that uses a regular expression to validate input. */ RegexRuleType | /* Validation rule that uses a sequence of patterns to validate input. */ PatternRuleType | /* Validation rule for numeric values, supporting range and digit count constraints. */ NumericRuleType | /**
              * Declarative validation rule (schema version v2). Supports predefined comparison operators
-             * over number, date and text inputs, with static, dynamic (context path) and relative-date
-             * comparison values.
+             * over number, date and text inputs, with static, dynamic (context path), relative-date and
+             * external (app-provided) comparison values.
              *
              */
             ComparisonRuleType;
@@ -777,8 +837,8 @@ declare namespace Components {
             UsedBy[];
             rule?: /* Validation rule that uses a regular expression to validate input. */ RegexRuleType | /* Validation rule that uses a sequence of patterns to validate input. */ PatternRuleType | /* Validation rule for numeric values, supporting range and digit count constraints. */ NumericRuleType | /**
              * Declarative validation rule (schema version v2). Supports predefined comparison operators
-             * over number, date and text inputs, with static, dynamic (context path) and relative-date
-             * comparison values.
+             * over number, date and text inputs, with static, dynamic (context path), relative-date and
+             * external (app-provided) comparison values.
              *
              */
             ComparisonRuleType;
@@ -1321,6 +1381,7 @@ export type ConditionValue = Components.Schemas.ConditionValue;
 export type ContextRequirement = Components.Schemas.ContextRequirement;
 export type ContextValue = Components.Schemas.ContextValue;
 export type CreateValidationRuleRequest = Components.Schemas.CreateValidationRuleRequest;
+export type ExternalValue = Components.Schemas.ExternalValue;
 export type GetValidationRulesResponse = Components.Schemas.GetValidationRulesResponse;
 export type NoValue = Components.Schemas.NoValue;
 export type NumericCondition = Components.Schemas.NumericCondition;
