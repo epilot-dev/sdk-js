@@ -39,6 +39,10 @@ export const DynamicTariffModeValues = {
  * Entity attribute types a conditional pricing variant may override (`overridable_attribute`).
  * An allowlist, so a new attribute type is never overridable by default. No pricing schema to
  * `satisfies` against — `models.test.ts` checks these against the entity spec.
+ *
+ * Scalars are overridden value for value. The relation types are overridden as a whole: the
+ * variant's `$relation` list replaces the base entity's, which is how a variant swaps a product's
+ * prices or a composite price's components (the entity spec's `RELATION_ATTRIBUTE_TYPE_LIST`).
  */
 export const OVERRIDABLE_ATTRIBUTE_TYPE_LIST = [
   'string',
@@ -53,6 +57,10 @@ export const OVERRIDABLE_ATTRIBUTE_TYPE_LIST = [
   'checkbox',
   'country',
   'tags',
+  'relation',
+  'relation_user',
+  'relation_address',
+  'relation_payment_method',
 ] as const;
 
 /** `string`, not a literal union, so callers can test an unnarrowed `attribute.type`. */
