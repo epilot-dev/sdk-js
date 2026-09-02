@@ -1150,6 +1150,9 @@
             "description": "Target version to create"
           }
         ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/CloneVersionRequest"
+        },
         "responses": {
           "201": {
             "description": "New version created successfully",
@@ -1902,6 +1905,28 @@
                     "$ref": "#/components/schemas/Options"
                   },
                   "description": "Replaces the full set of app-level option declarations for this version.\nOption keys must be unique app-wide; `secret`-touching options are always\nsensitive and must not declare `sensitive: false`.\n"
+                },
+                "changelog": {
+                  "type": "string",
+                  "maxLength": 250,
+                  "description": "Short description of what changed in this version"
+                }
+              }
+            }
+          }
+        }
+      },
+      "CloneVersionRequest": {
+        "required": false,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "changelog": {
+                  "type": "string",
+                  "maxLength": 250,
+                  "description": "Short description of what the new version will change"
                 }
               }
             }
@@ -2009,7 +2034,7 @@
       },
       "Options": {
         "type": "object",
-        "description": "Options for the component configuration",
+        "description": "An option declaration — a setting the installing org fills in. Declared at app level.",
         "required": [
           "key",
           "type"
@@ -2058,7 +2083,7 @@
           },
           "sensitive": {
             "type": "boolean",
-            "description": "Write-only, server-side only value — like a sensitive environment variable\n(app-level options only). Sensitive values are never serialized in any response;\nthey are resolvable only via server-side channels (API proxy injection, function\n`secrets` allowlist, the internal options/resolve endpoint). Non-sensitive values\nare readable wherever the app runs, including the end-customer browser (journey and\nportal runtime). Forced to true for `secret`-touching options. Default: false.\n"
+            "description": "Write-only, server-side only value — like a sensitive environment variable\n(app-level options only). Sensitive values are never serialized in any response;\nthey are resolvable only via server-side channels (API proxy injection, function\nruns, the internal options/resolve endpoint). Non-sensitive values\nare readable wherever the app runs, including the end-customer browser (journey and\nportal runtime). Forced to true for `secret`-touching options. Default: false.\n"
           },
           "configured": {
             "type": "boolean",
@@ -2179,6 +2204,7 @@
           "EXTERNAL_PRODUCT_CATALOG",
           "CUSTOM_PAGE",
           "API_PROXY",
+          "EXTERNAL_VALUES",
           "APP_FUNCTION"
         ],
         "description": "Type of app component"
@@ -2375,7 +2401,8 @@
                 "CUSTOM_CAPABILITY": "#/components/schemas/CustomCapabilityComponent",
                 "EXTERNAL_PRODUCT_CATALOG": "#/components/schemas/ExternalProductCatalogComponent",
                 "CUSTOM_PAGE": "#/components/schemas/CustomPageComponent",
-                "API_PROXY": "#/components/schemas/ApiProxyComponent"
+                "API_PROXY": "#/components/schemas/ApiProxyComponent",
+                "EXTERNAL_VALUES": "#/components/schemas/ExternalValuesComponent"
               }
             },
             "oneOf": [
@@ -2405,6 +2432,9 @@
               },
               {
                 "$ref": "#/components/schemas/ApiProxyComponent"
+              },
+              {
+                "$ref": "#/components/schemas/ExternalValuesComponent"
               }
             ]
           }
@@ -2425,6 +2455,25 @@
           },
           "configuration": {
             "$ref": "#/components/schemas/ApiProxyConfig"
+          }
+        }
+      },
+      "ExternalValuesComponent": {
+        "type": "object",
+        "description": "Exposes typed values resolved from an external system at runtime (e.g. a meter reading prediction). Consumers such as validation rules reference a hook and one of its results by id. Resolution is performed by the external-values-api on behalf of authenticated epilot 360 users and portal end customers.\n",
+        "required": [
+          "component_type",
+          "configuration"
+        ],
+        "properties": {
+          "component_type": {
+            "type": "string",
+            "enum": [
+              "EXTERNAL_VALUES"
+            ]
+          },
+          "configuration": {
+            "$ref": "#/components/schemas/ExternalValuesConfig"
           }
         }
       },
@@ -3667,7 +3716,7 @@
         "additionalProperties": false
       },
       "PortalExtensionHookVisualizationMetadata": {
-        "description": "Hook that returns runtime metadata describing how a visualization (consumption / price / cost chart) should be rendered for a given portal context (meter, contract, etc). It is invoked by the portal before fetching data, with the same context the data hook would receive, so that the discovery shape can vary per meter/contract. The expected response to the call is:\n  - 200 with a JSON body of shape:\n    {\n      \"type_options\": [\n        { \"id\": \"ht\", \"label\": { \"en\": \"High tariff\" }, \"aggregation_group\": \"consumption\", \"statistical_method\": \"sum\", \"unit\": \"kWh\", \"color\": \"primary\", \"precision\": 2 },\n        ...\n      ],\n      \"intervals\": [\"PT15M\", \"PT1H\", \"P1D\", \"P1M\"],\n      \"data_range\": { \"from\": \"2024-01-01T00:00:00Z\", \"to\": \"2026-05-01T00:00:00Z\" }\n    }\n  Each type option carries its own `statistical_method`, which describes the method already applied to that type's data and dictates the chart shape: `sum` is rendered as a bar chart; `min`, `average`, and `max` are rendered as a line chart. A single visualization can therefore mix bar-shaped types with line-shaped types. Defaults to `sum` when omitted.\n  Each type option may also customize its rendering: `color` picks a Spark palette color (`primary`, `slate`, `mauve`, `orange`, `red`, `tomato`, `amber`, `green`, `blue`) used to draw the type's series; `precision` sets the number of decimal places to show for that type's values (axis labels, tooltips, summaries). Both are optional — the consumer falls back to its own defaults when they are omitted.\n  `aggregation_group` controls how types within a group are visually combined (depends on the per-type `statistical_method`):\n    - bar chart (`sum`): same-group types are stacked into a single bar (e.g. ht/nt summed into total consumption); different-group types render side-by-side.\n    - line chart (`min` / `average` / `max`): same-group types are rendered as an area chart; different-group types render as separate lines.\n  All fields are optional; the consumer falls back to its defaults for whatever the hook does not return.\nThe portal looks up this hook implicitly per extension (one `visualizationMetadata` hook per extension) — there is no need for a data-retrieval hook to reference it explicitly.\n",
+        "description": "Hook that returns runtime metadata describing how a visualization (consumption / price / cost chart) should be rendered for a given portal context (meter, contract, etc). It is invoked by the portal before fetching data, with the same context the data hook would receive, so that the discovery shape can vary per meter/contract. The expected response to the call is:\n  - 200 with a JSON body of shape:\n    {\n      \"type_options\": [\n        { \"id\": \"ht\", \"label\": { \"en\": \"High tariff\" }, \"aggregation_group\": \"consumption\", \"statistical_method\": \"sum\", \"unit\": \"kWh\", \"color\": \"primary\", \"precision\": 2 },\n        ...\n      ],\n      \"intervals\": [\"PT15M\", \"PT1H\", \"P1D\", \"P1M\", \"P1Y\"],\n      \"data_range\": { \"from\": \"2024-01-01T00:00:00Z\", \"to\": \"2026-05-01T00:00:00Z\" }\n    }\n  Each type option carries its own `statistical_method`, which describes the method already applied to that type's data and dictates the chart shape: `sum` is rendered as a bar chart; `min`, `average`, and `max` are rendered as a line chart. A single visualization can therefore mix bar-shaped types with line-shaped types. Defaults to `sum` when omitted.\n  Each type option may also customize its rendering: `color` picks a Spark palette color (`primary`, `slate`, `mauve`, `orange`, `red`, `tomato`, `amber`, `green`, `blue`) used to draw the type's series; `precision` sets the number of decimal places to show for that type's values (axis labels, tooltips, summaries). Both are optional — the consumer falls back to its own defaults when they are omitted.\n  `aggregation_group` controls how types within a group are visually combined (depends on the per-type `statistical_method`):\n    - bar chart (`sum`): same-group types are stacked into a single bar (e.g. ht/nt summed into total consumption); different-group types render side-by-side.\n    - line chart (`min` / `average` / `max`): same-group types are rendered as an area chart; different-group types render as separate lines.\n  All fields are optional; the consumer falls back to its defaults for whatever the hook does not return.\nThe portal looks up this hook implicitly per extension (one `visualizationMetadata` hook per extension) — there is no need for a data-retrieval hook to reference it explicitly.\n",
         "type": "object",
         "properties": {
           "id": {
@@ -5079,6 +5128,204 @@
             "additionalProperties": {
               "type": "string"
             }
+          }
+        }
+      },
+      "ExternalValuesConfig": {
+        "type": "object",
+        "description": "Configuration for an EXTERNAL_VALUES component",
+        "required": [
+          "hooks"
+        ],
+        "properties": {
+          "hooks": {
+            "type": "array",
+            "description": "Hooks exposed by this component. Hook ids must be unique within the component.",
+            "items": {
+              "$ref": "#/components/schemas/ExternalValuesHook"
+            }
+          }
+        }
+      },
+      "ExternalValuesHook": {
+        "type": "object",
+        "description": "One external call that returns one or more typed results. Interpolated templates (Liquid) have access to `Input`, `Context`, `Consumer`, `Options`, `Env` and — for `result` templates — `Response` and `AuthResponse`.\n",
+        "required": [
+          "id",
+          "name",
+          "call",
+          "result"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9_-]{1,100}$",
+            "description": "Stable identifier; consumers (e.g. validation rules) reference it. Renaming breaks references."
+          },
+          "name": {
+            "$ref": "#/components/schemas/TranslatedString"
+          },
+          "description": {
+            "$ref": "#/components/schemas/TranslatedString"
+          },
+          "auth_type": {
+            "type": "string",
+            "enum": [
+              "none",
+              "header",
+              "bearer",
+              "hmac"
+            ],
+            "default": "none",
+            "description": "Static request authentication applied to the call.\n- `none`: no static authentication.\n- `header`: sends `auth_secret` in header `auth_header` (default `X-API-Key`).\n- `bearer`: sends `Authorization: Bearer <auth_secret>`.\n- `hmac`: signs the request per Standard Webhooks (headers `webhook-id`,\n  `webhook-timestamp`, `webhook-signature` = `v1,<base64 HMAC-SHA256>` over\n  `<id>.<timestamp>.<body>`) using `auth_secret` as a `whsec_`-prefixed\n  base64 secret, exactly as epilot webhooks do.\n\n`auth_secret` is required when `auth_type` is `header`, `bearer` or `hmac`.\nCombine with `auth` (a pre-call that fetches a token) when the target needs both.\n"
+          },
+          "auth_header": {
+            "type": "string",
+            "description": "Header name used when `auth_type` is `header`. Defaults to `X-API-Key`."
+          },
+          "auth_secret": {
+            "type": "string",
+            "description": "Liquid template resolving to the secret, e.g. \"{{Options.api_key}}\". Must reference an option declared with `type: secret`; literals are rejected. Required when `auth_type` is `header`, `bearer` or `hmac`.",
+            "example": "{{Options.api_key}}"
+          },
+          "auth": {
+            "$ref": "#/components/schemas/PortalExtensionAuthBlock"
+          },
+          "call": {
+            "type": "object",
+            "required": [
+              "url"
+            ],
+            "properties": {
+              "method": {
+                "type": "string",
+                "enum": [
+                  "GET",
+                  "POST",
+                  "PUT",
+                  "PATCH"
+                ],
+                "default": "POST",
+                "description": "HTTP method to use for the call"
+              },
+              "url": {
+                "type": "string",
+                "description": "URL to call. Supports variable interpolation."
+              },
+              "headers": {
+                "type": "object",
+                "description": "Headers to send with the call. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              },
+              "params": {
+                "type": "object",
+                "description": "Query parameters to append to the URL. Supports variable interpolation.",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              },
+              "body": {
+                "type": "object",
+                "description": "JSON body to send. Values support variable interpolation. When omitted, `{ Input, Context, Consumer }` is sent as-is.",
+                "additionalProperties": true
+              }
+            }
+          },
+          "result": {
+            "type": "array",
+            "minItems": 1,
+            "description": "Typed results extracted from the response. Result ids must be unique within the hook.",
+            "items": {
+              "$ref": "#/components/schemas/ExternalValuesResult"
+            }
+          },
+          "timeout_ms": {
+            "type": "integer",
+            "minimum": 500,
+            "maximum": 5000,
+            "default": 3000,
+            "description": "Timeout for the external call in milliseconds."
+          },
+          "on_unavailable": {
+            "type": "string",
+            "enum": [
+              "skip",
+              "block"
+            ],
+            "default": "skip",
+            "description": "Behaviour when the external system is unavailable (timeout, network or upstream error). `skip`: consumers ignore conditions depending on this hook. `block`: consumers treat the dependent action as not allowed."
+          },
+          "cache": {
+            "type": "object",
+            "description": "Response caching. Off when omitted.",
+            "required": [
+              "ttl_seconds"
+            ],
+            "properties": {
+              "ttl_seconds": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 3600,
+                "description": "Time to live in seconds. 0 disables caching."
+              },
+              "key": {
+                "type": "string",
+                "description": "Liquid template for the cache key. Defaults to a hash of org, app, hook, `Input` and `Context`."
+              }
+            }
+          },
+          "use_static_ips": {
+            "type": "boolean",
+            "description": "If set, requests are sent from epilot's static egress IPs. Mutually exclusive with secure_proxy."
+          },
+          "secure_proxy": {
+            "$ref": "#/components/schemas/PortalExtensionSecureProxy"
+          }
+        }
+      },
+      "ExternalValuesResult": {
+        "type": "object",
+        "description": "A single typed value extracted from the hook response. Exactly one of `template`, `path` or `jsonata` must be set.\n",
+        "required": [
+          "id",
+          "type",
+          "name"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9_-]{1,100}$",
+            "description": "Stable identifier of the result within the hook. Renaming breaks references."
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "number",
+              "text",
+              "date",
+              "boolean"
+            ],
+            "description": "Type the extracted value is coerced to."
+          },
+          "name": {
+            "$ref": "#/components/schemas/TranslatedString"
+          },
+          "template": {
+            "type": "string",
+            "description": "Liquid template over `Response` etc.; output coerced to `type`.",
+            "example": "{{Response.value}}"
+          },
+          "path": {
+            "type": "string",
+            "description": "Dot path into the response body, e.g. \"data.limit\".",
+            "example": "data.limit"
+          },
+          "jsonata": {
+            "type": "string",
+            "description": "JSONata expression over `{ Response, Input, Context, Options, Env }`.",
+            "example": "$sum(Response.items.amount)"
           }
         }
       },
