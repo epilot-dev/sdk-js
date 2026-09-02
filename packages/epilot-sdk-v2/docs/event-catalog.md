@@ -26,8 +26,12 @@ const { data } = await eventCatalogClient.listEvents(...)
 
 **Event Catalog**
 - [`listEvents`](#listevents)
+- [`createCustomEvent`](#createcustomevent)
 - [`getEvent`](#getevent)
 - [`patchEvent`](#patchevent)
+- [`deprecateCustomEvent`](#deprecatecustomevent)
+- [`previewCustomEvent`](#previewcustomevent)
+- [`publishCustomEventDefinition`](#publishcustomeventdefinition)
 - [`getEventJSONSchema`](#geteventjsonschema)
 - [`getEventExample`](#geteventexample)
 - [`listEventVersions`](#listeventversions)
@@ -39,6 +43,13 @@ const { data } = await eventCatalogClient.listEvents(...)
 **Schemas**
 - [`EventConfigBase`](#eventconfigbase)
 - [`EventConfig`](#eventconfig)
+- [`CreateCustomEventPayload`](#createcustomeventpayload)
+- [`EventMapping`](#eventmapping)
+- [`CustomEventLineage`](#customeventlineage)
+- [`PurposeFilterSnapshot`](#purposefiltersnapshot)
+- [`PublishCustomEventPayload`](#publishcustomeventpayload)
+- [`ValidationIssue`](#validationissue)
+- [`PreviewEventResponse`](#previeweventresponse)
 - [`UpdateEventPayload`](#updateeventpayload)
 - [`PrimitiveField`](#primitivefield)
 - [`ContextEntity`](#contextentity)
@@ -108,11 +119,28 @@ const { data } = await client.listEvents()
         "operation": ["createEntity", "updateEntity"],
         "schema": ["contact", "contract", "order"],
         "attribute": ["email", "phone", "status"],
-        "purpose": ["Kündigung", "Umzug/Auszug"]
+        "purpose": ["Kündigung", "Umzug/Auszug"],
+        "purpose_filters": [
+          {
+            "id": "string",
+            "display_name": "string"
+          }
+        ]
       },
       "enabled": true,
       "auto_trigger": true,
       "automation_trigger": true,
+      "automation_trigger_only": true,
+      "automation_trigger_seed_node": "ticket",
+      "event_origin": "builtin",
+      "mapping": {
+        "mode": "guided",
+        "jsonata": "string"
+      },
+      "lineage": {
+        "base_event_name": "string",
+        "base_event_version": "string"
+      },
       "success_criteria": [
         {
           "entity_schema": "contract",
@@ -123,6 +151,134 @@ const { data } = await client.listEvents()
           "attribute": "due_date"
         }
       ]
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `createCustomEvent`
+
+Reserve an org-scoped custom event name and persist its immutable v1.0 draft definition.
+
+`POST /v1/events`
+
+```ts
+const { data } = await client.createCustomEvent(
+  null,
+  {
+    event_name: 'string',
+    event_title: 'string',
+    event_description: 'string',
+    event_tags: ['string'],
+    schema_fields: {},
+    entity_graph: {
+      nodes: [
+        {
+          id: 'contact',
+          schema: 'contact',
+          cardinality: 'one',
+          fields: ['_id', '_title', 'first_name', 'account', '!account.*._files', '**._product']
+        }
+      ],
+      edges: [
+        {
+          from: 'contact',
+          to: 'billing_account'
+        }
+      ]
+    },
+    entity_operation: {
+      operation: ['createEntity', 'updateEntity'],
+      schema: ['contact', 'contract', 'order'],
+      attribute: ['email', 'phone', 'status'],
+      purpose: ['Kündigung', 'Umzug/Auszug'],
+      purpose_filters: [
+        {
+          id: 'string',
+          display_name: 'string'
+        }
+      ]
+    },
+    automation_trigger: true,
+    mapping: {
+      mode: 'guided',
+      jsonata: 'string'
+    },
+    lineage: {
+      base_event_name: 'string',
+      base_event_version: 'string'
+    },
+    example: {}
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "event_name": "AddMeterReading",
+  "event_title": "Add Meter Reading",
+  "event_description": "Triggered when a new meter reading is added",
+  "event_version": "1.0",
+  "event_status": "active",
+  "event_tags": ["builtin", "metering", "erp"],
+  "schema_fields": {},
+  "entity_graph": {
+    "nodes": [
+      {
+        "id": "contact",
+        "schema": "contact",
+        "cardinality": "one",
+        "fields": ["_id", "_title", "first_name", "account", "!account.*._files", "**._product"]
+      }
+    ],
+    "edges": [
+      {
+        "from": "contact",
+        "to": "billing_account"
+      }
+    ]
+  },
+  "entity_operation": {
+    "operation": ["createEntity", "updateEntity"],
+    "schema": ["contact", "contract", "order"],
+    "attribute": ["email", "phone", "status"],
+    "purpose": ["Kündigung", "Umzug/Auszug"],
+    "purpose_filters": [
+      {
+        "id": "string",
+        "display_name": "string"
+      }
+    ]
+  },
+  "enabled": true,
+  "auto_trigger": true,
+  "automation_trigger": true,
+  "automation_trigger_only": true,
+  "automation_trigger_seed_node": "ticket",
+  "event_origin": "builtin",
+  "mapping": {
+    "mode": "guided",
+    "jsonata": "string"
+  },
+  "lineage": {
+    "base_event_name": "string",
+    "base_event_version": "string"
+  },
+  "success_criteria": [
+    {
+      "entity_schema": "contract",
+      "attribute": "installment_amount"
+    },
+    {
+      "entity_schema": "billing_account",
+      "attribute": "due_date"
     }
   ]
 }
@@ -176,11 +332,28 @@ const { data } = await client.getEvent({
     "operation": ["createEntity", "updateEntity"],
     "schema": ["contact", "contract", "order"],
     "attribute": ["email", "phone", "status"],
-    "purpose": ["Kündigung", "Umzug/Auszug"]
+    "purpose": ["Kündigung", "Umzug/Auszug"],
+    "purpose_filters": [
+      {
+        "id": "string",
+        "display_name": "string"
+      }
+    ]
   },
   "enabled": true,
   "auto_trigger": true,
   "automation_trigger": true,
+  "automation_trigger_only": true,
+  "automation_trigger_seed_node": "ticket",
+  "event_origin": "builtin",
+  "mapping": {
+    "mode": "guided",
+    "jsonata": "string"
+  },
+  "lineage": {
+    "base_event_name": "string",
+    "base_event_version": "string"
+  },
   "success_criteria": [
     {
       "entity_schema": "contract",
@@ -210,46 +383,12 @@ const { data } = await client.patchEvent(
     event_name: 'example',
   },
   {
-    event_name: 'AddMeterReading',
-    event_title: 'Add Meter Reading',
-    event_description: 'Triggered when a new meter reading is added',
-    event_version: '1.0',
-    event_status: 'active',
-    event_tags: ['builtin', 'metering', 'erp'],
-    schema_fields: {},
-    entity_graph: {
-      nodes: [
-        {
-          id: 'contact',
-          schema: 'contact',
-          cardinality: 'one',
-          fields: ['_id', '_title', 'first_name', 'account', '!account.*._files', '**._product']
-        }
-      ],
-      edges: [
-        {
-          from: 'contact',
-          to: 'billing_account'
-        }
-      ]
-    },
-    entity_operation: {
-      operation: ['createEntity', 'updateEntity'],
-      schema: ['contact', 'contract', 'order'],
-      attribute: ['email', 'phone', 'status'],
-      purpose: ['Kündigung', 'Umzug/Auszug']
-    },
     enabled: true,
     auto_trigger: true,
-    automation_trigger: true,
     success_criteria: [
       {
         entity_schema: 'contract',
         attribute: 'installment_amount'
-      },
-      {
-        entity_schema: 'billing_account',
-        attribute: 'due_date'
       }
     ]
   },
@@ -288,11 +427,173 @@ const { data } = await client.patchEvent(
     "operation": ["createEntity", "updateEntity"],
     "schema": ["contact", "contract", "order"],
     "attribute": ["email", "phone", "status"],
-    "purpose": ["Kündigung", "Umzug/Auszug"]
+    "purpose": ["Kündigung", "Umzug/Auszug"],
+    "purpose_filters": [
+      {
+        "id": "string",
+        "display_name": "string"
+      }
+    ]
   },
   "enabled": true,
   "auto_trigger": true,
   "automation_trigger": true,
+  "automation_trigger_only": true,
+  "automation_trigger_seed_node": "ticket",
+  "event_origin": "builtin",
+  "mapping": {
+    "mode": "guided",
+    "jsonata": "string"
+  },
+  "lineage": {
+    "base_event_name": "string",
+    "base_event_version": "string"
+  },
+  "success_criteria": [
+    {
+      "entity_schema": "contract",
+      "attribute": "installment_amount"
+    },
+    {
+      "entity_schema": "billing_account",
+      "attribute": "due_date"
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `deprecateCustomEvent`
+
+Soft-deprecate an org-scoped custom event. Definitions and v1.0 history remain readable.
+
+`DELETE /v1/events/{event_name}`
+
+```ts
+const { data } = await client.deprecateCustomEvent({
+  event_name: 'example',
+})
+```
+
+---
+
+### `previewCustomEvent`
+
+Assemble and fully validate a persisted custom-event draft without publishing it.
+
+`POST /v1/events/{event_name}:preview`
+
+```ts
+const { data } = await client.previewCustomEvent(
+  {
+    event_name: 'example',
+  },
+  {
+    seed: {
+      entity_id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+      node_id: 'ticket'
+    },
+    _trigger_source_type: 'automation',
+    _trigger_source: 'execution-id/action-id'
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "payload": {},
+  "errors": [
+    {
+      "path": "string",
+      "message": "string"
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `publishCustomEventDefinition`
+
+Conditionally activate an immutable custom-event v1.0 definition.
+
+`POST /v1/events/{event_name}:publish`
+
+```ts
+const { data } = await client.publishCustomEventDefinition(
+  {
+    event_name: 'example',
+  },
+  {
+    enabled: true,
+    auto_trigger: true,
+    base_auto_trigger_enabled: true
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "event_name": "AddMeterReading",
+  "event_title": "Add Meter Reading",
+  "event_description": "Triggered when a new meter reading is added",
+  "event_version": "1.0",
+  "event_status": "active",
+  "event_tags": ["builtin", "metering", "erp"],
+  "schema_fields": {},
+  "entity_graph": {
+    "nodes": [
+      {
+        "id": "contact",
+        "schema": "contact",
+        "cardinality": "one",
+        "fields": ["_id", "_title", "first_name", "account", "!account.*._files", "**._product"]
+      }
+    ],
+    "edges": [
+      {
+        "from": "contact",
+        "to": "billing_account"
+      }
+    ]
+  },
+  "entity_operation": {
+    "operation": ["createEntity", "updateEntity"],
+    "schema": ["contact", "contract", "order"],
+    "attribute": ["email", "phone", "status"],
+    "purpose": ["Kündigung", "Umzug/Auszug"],
+    "purpose_filters": [
+      {
+        "id": "string",
+        "display_name": "string"
+      }
+    ]
+  },
+  "enabled": true,
+  "auto_trigger": true,
+  "automation_trigger": true,
+  "automation_trigger_only": true,
+  "automation_trigger_seed_node": "ticket",
+  "event_origin": "builtin",
+  "mapping": {
+    "mode": "guided",
+    "jsonata": "string"
+  },
+  "lineage": {
+    "base_event_name": "string",
+    "base_event_version": "string"
+  },
   "success_criteria": [
     {
       "entity_schema": "contract",
@@ -689,12 +990,10 @@ const { data } = await client.triggerEvent(
   {
     seed: {
       entity_id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
-      node_id: 'string'
+      node_id: 'ticket'
     },
-    fields: {},
-    skip_hydration: ['string'],
-    _trigger_source_type: 'string',
-    _trigger_source: 'string'
+    _trigger_source_type: 'automation',
+    _trigger_source: 'execution-id/action-id'
   },
 )
 ```
@@ -764,10 +1063,25 @@ type EventConfigBase = {
     schema: string[]
     attribute?: string[]
     purpose?: string[]
+    purpose_filters?: Array<{
+      id: { ... }
+      display_name: { ... }
+    }>
   }
   enabled?: boolean
   auto_trigger?: boolean
   automation_trigger?: boolean
+  automation_trigger_only?: boolean
+  automation_trigger_seed_node?: string
+  event_origin?: "builtin" | "custom"
+  mapping?: {
+    mode: "guided" | "jsonata"
+    jsonata?: string
+  }
+  lineage?: {
+    base_event_name: string
+    base_event_version: string
+  }
   success_criteria?: Array<{
     entity_schema: string
     attribute: string
@@ -823,10 +1137,25 @@ type EventConfig = {
     schema: string[]
     attribute?: string[]
     purpose?: string[]
+    purpose_filters?: Array<{
+      id: { ... }
+      display_name: { ... }
+    }>
   }
   enabled?: boolean
   auto_trigger?: boolean
   automation_trigger?: boolean
+  automation_trigger_only?: boolean
+  automation_trigger_seed_node?: string
+  event_origin?: "builtin" | "custom"
+  mapping?: {
+    mode: "guided" | "jsonata"
+    jsonata?: string
+  }
+  lineage?: {
+    base_event_name: string
+    base_event_version: string
+  }
   success_criteria?: Array<{
     entity_schema: string
     attribute: string
@@ -834,22 +1163,17 @@ type EventConfig = {
 }
 ```
 
-### `UpdateEventPayload`
+### `CreateCustomEventPayload`
 
-Payload for updating an event configuration.
-Accepts the same fields as EventConfig (all optional for PATCH).
-Currently `enabled`, `auto_trigger` and `success_criteria` fields are processed.
-
+Complete immutable custom-event v1.0 definition. Publication is a separate conditional action.
 
 ```ts
-type UpdateEventPayload = {
-  event_name?: string
-  event_title?: string
+type CreateCustomEventPayload = {
+  event_name: string
+  event_title: string
   event_description?: string
-  event_version?: string
-  event_status?: "active" | "deprecated" | "draft" | "disabled"
   event_tags?: string[]
-  schema_fields?: Record<string, {
+  schema_fields: Record<string, {
     json_schema: object
     required?: boolean
     graph_source?: string
@@ -885,10 +1209,94 @@ type UpdateEventPayload = {
     schema: string[]
     attribute?: string[]
     purpose?: string[]
+    purpose_filters?: Array<{
+      id: { ... }
+      display_name: { ... }
+    }>
   }
+  automation_trigger?: boolean
+  mapping?: {
+    mode: "guided" | "jsonata"
+    jsonata?: string
+  }
+  lineage?: {
+    base_event_name: string
+    base_event_version: string
+  }
+  example?: Record<string, unknown>
+}
+```
+
+### `EventMapping`
+
+Guided mappings use schema_fields graph_source expressions; raw mode evaluates one JSONata object transform.
+
+```ts
+type EventMapping = {
+  mode: "guided" | "jsonata"
+  jsonata?: string
+}
+```
+
+### `CustomEventLineage`
+
+Optional catalog lineage to a separately named base event. It does not replace the base event.
+
+```ts
+type CustomEventLineage = {
+  base_event_name: string
+  base_event_version: string
+}
+```
+
+### `PurposeFilterSnapshot`
+
+```ts
+type PurposeFilterSnapshot = {
+  id: string
+  display_name: string
+}
+```
+
+### `PublishCustomEventPayload`
+
+```ts
+type PublishCustomEventPayload = {
   enabled?: boolean
   auto_trigger?: boolean
-  automation_trigger?: boolean
+  base_auto_trigger_enabled?: boolean
+}
+```
+
+### `ValidationIssue`
+
+```ts
+type ValidationIssue = {
+  path: string
+  message: string
+}
+```
+
+### `PreviewEventResponse`
+
+```ts
+type PreviewEventResponse = {
+  payload: Record<string, unknown>
+  errors: Array<{
+    path: string
+    message: string
+  }>
+}
+```
+
+### `UpdateEventPayload`
+
+Mutable org activation overlay. Immutable event definition fields are not accepted.
+
+```ts
+type UpdateEventPayload = {
+  enabled?: boolean
+  auto_trigger?: boolean
   success_criteria?: Array<{
     entity_schema: string
     attribute: string
@@ -1113,6 +1521,10 @@ type EntityOperationTrigger = {
   schema: string[]
   attribute?: string[]
   purpose?: string[]
+  purpose_filters?: Array<{
+    id: string
+    display_name: string
+  }>
 }
 ```
 

@@ -9,6 +9,16 @@
       "get": {
         "operationId": "listEvents",
         "responses": {}
+      },
+      "post": {
+        "operationId": "createCustomEvent",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
       }
     },
     "/v1/events/{event_name}": {
@@ -34,6 +44,54 @@
         ],
         "requestBody": {
           "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deprecateCustomEvent",
+        "parameters": [
+          {
+            "name": "event_name",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/events/{event_name}:preview": {
+      "post": {
+        "operationId": "previewCustomEvent",
+        "parameters": [
+          {
+            "name": "event_name",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/events/{event_name}:publish": {
+      "post": {
+        "operationId": "publishCustomEventDefinition",
+        "parameters": [
+          {
+            "name": "event_name",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
           "content": {
             "application/json": {}
           }
