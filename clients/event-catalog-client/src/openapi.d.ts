@@ -78,7 +78,7 @@ declare namespace Components {
             event_description?: string;
             event_tags?: string[];
             schema_fields: {
-                [name: string]: SchemaField;
+                [name: string]: /* Custom v1 fields support JSON Schema values and context entities; attachment semantics are built-in-only. */ CustomSchemaField;
             };
             entity_graph?: /* Entity graph definition for resolving related entities */ GraphDefinition;
             entity_operation?: /**
@@ -105,6 +105,10 @@ declare namespace Components {
             base_event_name: string;
             base_event_version: string;
         }
+        /**
+         * Custom v1 fields support JSON Schema values and context entities; attachment semantics are built-in-only.
+         */
+        export type CustomSchemaField = /* Custom v1 fields support JSON Schema values and context entities; attachment semantics are built-in-only. */ /* A primitive JSON Schema field definition */ PrimitiveField | ContextEntity;
         /**
          * Configuration for triggering an event based on entity operations.
          *
@@ -2283,6 +2287,7 @@ export type CommonEventMetadata = Components.Schemas.CommonEventMetadata;
 export type ContextEntity = Components.Schemas.ContextEntity;
 export type CreateCustomEventPayload = Components.Schemas.CreateCustomEventPayload;
 export type CustomEventLineage = Components.Schemas.CustomEventLineage;
+export type CustomSchemaField = Components.Schemas.CustomSchemaField;
 export type EntityOperationTrigger = Components.Schemas.EntityOperationTrigger;
 export type Event = Components.Schemas.Event;
 export type EventAttachment = Components.Schemas.EventAttachment;

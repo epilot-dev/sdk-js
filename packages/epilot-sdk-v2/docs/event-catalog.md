@@ -54,6 +54,7 @@ const { data } = await eventCatalogClient.listEvents(...)
 - [`PrimitiveField`](#primitivefield)
 - [`ContextEntity`](#contextentity)
 - [`AttachmentField`](#attachmentfield)
+- [`CustomSchemaField`](#customschemafield)
 - [`SchemaField`](#schemafield)
 - [`SuccessCriterion`](#successcriterion)
 - [`CommonEventMetadata`](#commoneventmetadata)
@@ -1180,17 +1181,6 @@ type CreateCustomEventPayload = {
   } | {
     entity_schema: string
     required?: boolean
-  } | {
-    items: {
-      entity_id: { ... }
-      filename?: { ... }
-      mime_type?: { ... }
-      size_bytes?: { ... }
-      s3ref?: { ... }
-      version_index: { ... }
-      readable_size?: { ... }
-    }
-    required?: boolean
   }>
   entity_graph?: {
     nodes: Array<{
@@ -1345,6 +1335,21 @@ type AttachmentField = {
     version_index: number
     readable_size?: string
   }
+  required?: boolean
+}
+```
+
+### `CustomSchemaField`
+
+Custom v1 fields support JSON Schema values and context entities; attachment semantics are built-in-only.
+
+```ts
+type CustomSchemaField = {
+  json_schema: object
+  required?: boolean
+  graph_source?: string
+} | {
+  entity_schema: string
   required?: boolean
 }
 ```

@@ -864,7 +864,7 @@
           "schema_fields": {
             "type": "object",
             "additionalProperties": {
-              "$ref": "#/components/schemas/SchemaField"
+              "$ref": "#/components/schemas/CustomSchemaField"
             }
           },
           "entity_graph": {
@@ -1077,6 +1077,17 @@
         },
         "required": [
           "items"
+        ]
+      },
+      "CustomSchemaField": {
+        "description": "Custom v1 fields support JSON Schema values and context entities; attachment semantics are built-in-only.",
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/PrimitiveField"
+          },
+          {
+            "$ref": "#/components/schemas/ContextEntity"
+          }
         ]
       },
       "SchemaField": {
