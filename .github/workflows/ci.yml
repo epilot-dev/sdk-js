@@ -58,7 +58,9 @@ jobs:
         id: check
         run: |
           CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD)
-          if echo "$CHANGED_FILES" | grep -q '^clients/.*/openapi\.json$'; then
+          # All client source files the SDK generator copies into @epilot/sdk:
+          # the specs plus the hand-written type/runtime modules.
+          if echo "$CHANGED_FILES" | grep -qE '^clients/[^/]+/src/(openapi\.json|openapi\.d\.ts|openapi-runtime\.json|additional-types\.ts|schema-model\.ts)$'; then
             echo "sdk=true" >> "$GITHUB_OUTPUT"
           else
             echo "sdk=false" >> "$GITHUB_OUTPUT"
