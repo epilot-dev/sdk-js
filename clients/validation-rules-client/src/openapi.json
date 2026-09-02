@@ -208,7 +208,7 @@
             }
           },
           "400": {
-            "description": "Bad Request - Invalid request body",
+            "description": "Bad Request - Invalid request body. Invalid external comparison values additionally carry a\n`code` (`external_value_not_found` when the app is not installed or the hook / result does not\nexist, `external_value_incompatible` when the result type does not match the compared kind).\n",
             "content": {
               "application/json": {
                 "schema": {
@@ -217,6 +217,13 @@
                     "message": {
                       "type": "string",
                       "example": "Invalid request body"
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "external_value_not_found",
+                        "external_value_incompatible"
+                      ]
                     }
                   }
                 }
@@ -484,7 +491,7 @@
             }
           },
           "400": {
-            "description": "Bad Request - Invalid request body",
+            "description": "Bad Request - Invalid request body. Invalid external comparison values additionally carry a\n`code` (`external_value_not_found` when the app is not installed or the hook / result does not\nexist, `external_value_incompatible` when the result type does not match the compared kind).\n",
             "content": {
               "application/json": {
                 "schema": {
@@ -493,6 +500,13 @@
                     "message": {
                       "type": "string",
                       "example": "Invalid request body"
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "external_value_not_found",
+                        "external_value_incompatible"
+                      ]
                     }
                   }
                 }

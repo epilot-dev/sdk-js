@@ -960,6 +960,7 @@ declare namespace Paths {
                  * Invalid request body
                  */
                 message?: string;
+                code?: "external_value_not_found" | "external_value_incompatible";
             }
             export interface $401 {
                 /**
@@ -1167,6 +1168,7 @@ declare namespace Paths {
                  * Invalid request body
                  */
                 message?: string;
+                code?: "external_value_not_found" | "external_value_incompatible";
             }
             export interface $401 {
                 /**
