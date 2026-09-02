@@ -7373,15 +7373,36 @@
                   "select"
                 ]
               },
-              "values": {
+              "options": {
                 "type": "array",
-                "description": "Selectable options. May be empty while the condition is being configured.",
+                "description": "The vocabulary a variant may pin this condition to. May be empty while the condition\nis being configured.\n\nThe same shape a `select` attribute's `options` has, item for item: an entry is\neither the value itself or an object carrying that value and an optional display\n`title`. The `title` is what a UI shows; the `value` is what a variant stores and\nwhat a resolve context is matched against. Two entries differing only in their\ntitle are one vocabulary entry.\n\nUnlike a `select` attribute there is no `allow_any`: a variant can only ever pin a\ndeclared option, because the vocabulary is what makes every variant addressable.\n",
                 "items": {
-                  "type": "string"
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "value": {
+                          "type": "string"
+                        },
+                        "title": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "value"
+                      ]
+                    }
+                  ]
                 },
                 "example": [
                   "12_months",
-                  "24_months"
+                  {
+                    "value": "24_months",
+                    "title": "24 months"
+                  }
                 ]
               }
             },
@@ -7423,7 +7444,7 @@
         ]
       },
       "ConditionDefinition": {
-        "description": "One dimension that conditional variants of an entity type are keyed by. `type`\ndiscriminates the variants: only a `select` condition carries `values`, and only a\n`location` condition carries `format`.\n",
+        "description": "One dimension that conditional variants of an entity type are keyed by. `type`\ndiscriminates the variants: only a `select` condition carries `options`, and only a\n`location` condition carries `format`.\n",
         "oneOf": [
           {
             "$ref": "#/components/schemas/ScalarConditionDefinition"

@@ -1844,8 +1844,13 @@ const { data } = await client.$getConditionSets({
           "name": "postal_code",
           "label": "Postal Code",
           "type": "string",
-          "options": ["private", "commercial"],
-          "allow_any": false,
+          "options": [
+            "private",
+            {
+              "value": "commercial",
+              "title": "Commercial customers"
+            }
+          ],
           "format": "zipcode"
         }
       ]
@@ -2486,7 +2491,6 @@ type ConditionDefinition = {
     value: string
     title?: string
   }>
-  allow_any?: boolean
   format?: "zipcode" | "zipcode + town"
 }
 ```
@@ -2508,7 +2512,6 @@ type ConditionSet = {
       value: { ... }
       title?: { ... }
     }>
-    allow_any?: boolean
     format?: "zipcode" | "zipcode + town"
   }>
 }
@@ -2527,7 +2530,6 @@ type ConditionSetCatalog = {
       label: { ... }
       type: { ... }
       options?: { ... }
-      allow_any?: { ... }
       format?: { ... }
     }>
   }>

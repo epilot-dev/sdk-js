@@ -2005,13 +2005,13 @@ declare namespace Components {
         }
         /**
          * One dimension that conditional variants of an entity type are keyed by. `type`
-         * discriminates the variants: only a `select` condition carries `values`, and only a
+         * discriminates the variants: only a `select` condition carries `options`, and only a
          * `location` condition carries `format`.
          *
          */
         export type ConditionDefinition = /**
          * One dimension that conditional variants of an entity type are keyed by. `type`
-         * discriminates the variants: only a `select` condition carries `values`, and only a
+         * discriminates the variants: only a `select` condition carries `options`, and only a
          * `location` condition carries `format`.
          *
          */
@@ -4780,7 +4780,7 @@ declare namespace Components {
              */
             conditions?: /**
              * One dimension that conditional variants of an entity type are keyed by. `type`
-             * discriminates the variants: only a `select` condition carries `values`, and only a
+             * discriminates the variants: only a `select` condition carries `options`, and only a
              * `location` condition carries `format`.
              *
              */
@@ -5235,7 +5235,7 @@ declare namespace Components {
              */
             conditions?: /**
              * One dimension that conditional variants of an entity type are keyed by. `type`
-             * discriminates the variants: only a `select` condition carries `values`, and only a
+             * discriminates the variants: only a `select` condition carries `options`, and only a
              * `location` condition carries `format`.
              *
              */
@@ -11654,14 +11654,31 @@ declare namespace Components {
              */
             type: "select";
             /**
-             * Selectable options. May be empty while the condition is being configured.
+             * The vocabulary a variant may pin this condition to. May be empty while the condition
+             * is being configured.
+             *
+             * The same shape a `select` attribute's `options` has, item for item: an entry is
+             * either the value itself or an object carrying that value and an optional display
+             * `title`. The `title` is what a UI shows; the `value` is what a variant stores and
+             * what a resolve context is matched against. Two entries differing only in their
+             * title are one vocabulary entry.
+             *
+             * Unlike a `select` attribute there is no `allow_any`: a variant can only ever pin a
+             * declared option, because the vocabulary is what makes every variant addressable.
+             *
              * example:
              * [
              *   "12_months",
-             *   "24_months"
+             *   {
+             *     "value": "24_months",
+             *     "title": "24 months"
+             *   }
              * ]
              */
-            values?: string[];
+            options?: (string | {
+                value: string;
+                title?: string;
+            })[];
         }
         /**
          * Sequence of unique identifiers
