@@ -80,6 +80,15 @@
             }
           },
           {
+            "name": "trigger_event_name",
+            "in": "query",
+            "description": "Filter by Event Catalog event name. Returns only automations that have an event_catalog trigger for this event.",
+            "schema": {
+              "type": "string",
+              "example": "CustomerRequestSubmitted"
+            }
+          },
+          {
             "name": "include_flows",
             "in": "query",
             "description": "Include flow automations in the response",
@@ -1249,6 +1258,9 @@
           },
           {
             "$ref": "#/components/schemas/FlowsTrigger"
+          },
+          {
+            "$ref": "#/components/schemas/EventCatalogTrigger"
           }
         ]
       },
@@ -1900,11 +1912,167 @@
             "items": {
               "type": "string"
             }
+          },
+          "graph_context": {
+            "type": "array",
+            "description": "Multi-hop graph queries (executed via entity-api's `POST /v1/entity:graph`), each\nmerging every traversed node into the mapping's source context under its own node id,\nso `mapping_attributes` (e.g. `_copy` / `_template`) can reference it alongside the\nmain entity, e.g. `{ \"_copy\": \"order.line_items\" }`.\n\n`seed.entity_id` and any node `filter[].value` may contain `{{handlebars}}`\nplaceholders (e.g. `{{trigger.entity._id}}`) that are resolved at execution time\nagainst the mapping's source context. Resolution and graph execution happen in\nentity-mapping-api; this API only accepts, validates and passes through this field.\n",
+            "items": {
+              "$ref": "#/components/schemas/GraphContextEntry"
+            }
           }
         },
         "required": [
           "target_schema"
         ]
+      },
+      "GraphContextEntry": {
+        "type": "object",
+        "description": "One multi-hop graph query to run against entity-api's `POST /v1/entity:graph`. Every node\nin `graph.nodes` is merged into the mapping's source context under its own `id`, so\nlisting multiple nodes here costs one entity-api call, not one per node. A node's value\noverwrites any existing source-context key of the same name (the source entity, a 1-hop\nrelation, or another graph node).\n",
+        "required": [
+          "seed",
+          "graph"
+        ],
+        "properties": {
+          "seed": {
+            "$ref": "#/components/schemas/GraphSeed"
+          },
+          "graph": {
+            "$ref": "#/components/schemas/GraphDefinition"
+          }
+        }
+      },
+      "GraphSeed": {
+        "type": "object",
+        "required": [
+          "entity_id",
+          "node_id"
+        ],
+        "properties": {
+          "entity_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "node_id": {
+            "type": "string",
+            "description": "The node ID in the graph definition that corresponds to the seed entity",
+            "example": "contact"
+          }
+        }
+      },
+      "GraphDefinition": {
+        "type": "object",
+        "required": [
+          "nodes",
+          "edges"
+        ],
+        "properties": {
+          "nodes": {
+            "type": "array",
+            "description": "List of node definitions in the graph",
+            "items": {
+              "$ref": "#/components/schemas/GraphNode"
+            }
+          },
+          "edges": {
+            "type": "array",
+            "description": "List of edge definitions connecting nodes",
+            "items": {
+              "$ref": "#/components/schemas/GraphEdge"
+            }
+          }
+        }
+      },
+      "GraphNode": {
+        "type": "object",
+        "required": [
+          "id",
+          "schema"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for this node in the graph definition",
+            "example": "contact"
+          },
+          "schema": {
+            "type": "string",
+            "description": "Entity schema slug for this node",
+            "example": "contact"
+          },
+          "cardinality": {
+            "type": "string",
+            "enum": [
+              "one",
+              "many"
+            ],
+            "description": "\"one\": this node resolves to a single entity. \"many\" (default if unset): this node\nresolves to an array of entities. The seed node always returns a single entity\nregardless of this setting.\n",
+            "example": "one"
+          },
+          "fields": {
+            "type": "array",
+            "description": "Optional entity fields to include in the hydrated response for this node.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "filter": {
+            "type": "array",
+            "description": "Narrows this node's traversal results to entities matching every filter (AND\nsemantics). Useful for disambiguating among multiple entities reachable via the same\ngraph edge.\n",
+            "items": {
+              "$ref": "#/components/schemas/GraphNodeFilter"
+            }
+          }
+        }
+      },
+      "GraphNodeFilter": {
+        "type": "object",
+        "description": "Entities are included in this node's result only if `attribute` exactly equals the literal `value`.",
+        "required": [
+          "attribute",
+          "value"
+        ],
+        "properties": {
+          "attribute": {
+            "type": "string",
+            "description": "Entity attribute name to match against.",
+            "example": "order_number"
+          },
+          "value": {
+            "description": "Literal value the attribute must exactly equal for the entity to be included in this node's result. Supports `{{handlebars}}` placeholders resolved against sourceContext when given as a string.",
+            "oneOf": [
+              {
+                "type": "string",
+                "nullable": true
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "boolean"
+              }
+            ],
+            "example": "OR-113"
+          }
+        }
+      },
+      "GraphEdge": {
+        "type": "object",
+        "required": [
+          "from",
+          "to"
+        ],
+        "properties": {
+          "from": {
+            "type": "string",
+            "description": "Source node ID",
+            "example": "contact"
+          },
+          "to": {
+            "type": "string",
+            "description": "Target node ID",
+            "example": "billing_account"
+          }
+        }
       },
       "MappingConfigRef": {
         "type": "object",
@@ -2663,10 +2831,7 @@
           "language_code": {
             "type": "string",
             "description": "Language code for the email template",
-            "enum": [
-              "de",
-              "en"
-            ]
+            "example": "de"
           },
           "reply_mode": {
             "type": "string",
@@ -2697,10 +2862,7 @@
           },
           "language_code": {
             "type": "string",
-            "enum": [
-              "de",
-              "en"
-            ]
+            "example": "de"
           },
           "notify_portal_user_only": {
             "type": "boolean",
@@ -3503,10 +3665,12 @@
               },
               "originType": {
                 "type": "string",
+                "description": "`event` reads the operand from the trigger's Event Catalog payload instead of an entity: `attribute` is then a dot path into the payload (e.g. `ticket.subject`). Only valid with `origin: trigger` on flows started by an EventCatalogTrigger.\n",
                 "enum": [
                   "entity",
                   "workflow",
-                  "journey_block"
+                  "journey_block",
+                  "event"
                 ]
               },
               "schema": {
@@ -3796,6 +3960,9 @@
               },
               {
                 "$ref": "#/components/schemas/TriggerEventMessaging"
+              },
+              {
+                "$ref": "#/components/schemas/TriggerEventEventCatalog"
               }
             ]
           },
@@ -3855,7 +4022,6 @@
       },
       "WorkflowExecutionContext": {
         "type": "object",
-        "description": "Automation Executions triggered by workflow task automations will always carry information about the triggering workflow. This information is helpful in correlating workflow executions with all the triggered automation executions\n",
         "required": [
           "workflow_exec_id",
           "workflow_role"
@@ -3897,12 +4063,17 @@
                 }
               }
             }
+          },
+          "trigger_user_id": {
+            "type": "string",
+            "description": "Id of the user on whose behalf the workflow task triggered this automation — the caller of a user-initiated run, or the user whose task completion advanced the flow to the automation task. Action workers resolve it as the acting user for template variable resolution (user.*) and email thread assignment, matching the attribution of manually triggered executions. Absent when no human action led to the trigger (scheduler fires, journey-triggered flows).\n",
+            "example": "10006129"
           }
         }
       },
       "WorkflowWaitContext": {
         "type": "object",
-        "description": "Workflow automation tasks can be paused & waiting for journey automation executions to succeed. If such is the case, this context tracks the task_id of the workflow waiting for journey submission success This context is consumed by svc-workflows to resume a task waiting on this journey submission.\n",
+        "description": "Correlation stamped when the triggering submission entity carried workflow wait claims from a journey link (AL-2521). Consumed by svc-workflows to resume a task waiting on this journey submission.\n",
         "required": [
           "workflow_execution_id",
           "workflow_task_id"
@@ -4086,6 +4257,92 @@
           "org_id",
           "activity_id",
           "operation_type"
+        ]
+      },
+      "TriggerEventEventCatalog": {
+        "type": "object",
+        "description": "Set on executions started by an Event Catalog event (see EventCatalogTrigger). The full event payload is not stored inline (it may be up to 256 KB) but by reference in `payload_ref`; automation workers hydrate it before every action.\n",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "event_catalog"
+            ]
+          },
+          "org_id": {
+            "type": "string",
+            "example": "123"
+          },
+          "entity_id": {
+            "$ref": "#/components/schemas/EntityId"
+          },
+          "entity_node_id": {
+            "type": "string",
+            "description": "Node id of the event's entity graph that was resolved to `entity_id`",
+            "example": "ticket"
+          },
+          "event_id": {
+            "type": "string",
+            "description": "Event Catalog event id (ULID) of the published event",
+            "example": "01K3ZK8QZ7Y7Q2M8W1V3N4X5P6"
+          },
+          "event_name": {
+            "type": "string",
+            "example": "CustomerRequestSubmitted"
+          },
+          "event_version": {
+            "type": "string",
+            "description": "Version the payload was delivered in (the version pinned on the trigger)",
+            "example": "1.1"
+          },
+          "published_version": {
+            "type": "string",
+            "description": "Version the event was originally published with, before downgrading to `event_version`",
+            "example": "1.2"
+          },
+          "event_time": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "trigger_source_type": {
+            "type": "string",
+            "description": "How the event was triggered in the catalog (api | automation | operation | portal_user)",
+            "example": "operation"
+          },
+          "trigger_source": {
+            "type": "string",
+            "description": "Opaque source reference from the catalog (e.g. activity id, automation execution id)"
+          },
+          "payload_ref": {
+            "$ref": "#/components/schemas/TriggerEventPayloadRef"
+          }
+        },
+        "required": [
+          "type",
+          "org_id",
+          "entity_id",
+          "entity_node_id",
+          "event_id",
+          "event_name",
+          "event_version"
+        ]
+      },
+      "TriggerEventPayloadRef": {
+        "type": "object",
+        "description": "S3 reference to the stored trigger event payload (`_downgrades` stripped, downgraded to the pinned version)",
+        "properties": {
+          "bucket": {
+            "type": "string",
+            "example": "automation-trigger-payloads-prod"
+          },
+          "key": {
+            "type": "string",
+            "example": "trigger-payloads/123/6c8e5d9a-7f1b-4c2e-9d3a-0b1c2d3e4f5a.json"
+          }
+        },
+        "required": [
+          "bucket",
+          "key"
         ]
       },
       "ApiCallerContext": {
@@ -4999,7 +5256,12 @@
           "updateEntity",
           "deleteEntity",
           "softDeleteEntity",
-          "restoreEntity"
+          "restoreEntity",
+          "relationsAdded",
+          "relationsRemoved",
+          "relationsSoftDeleted",
+          "relationsRestored",
+          "relationsDeleted"
         ]
       },
       "EntitySearchFilter": {
@@ -5204,6 +5466,76 @@
             ]
           }
         ]
+      },
+      "EventCatalogTrigger": {
+        "description": "Starts the flow when an Event Catalog event is published for the organization. The execution runs in the context of one entity from the event's entity graph (`entity_node_id`), and the event payload is available to conditions and actions as the `event` variable context.\n",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AutomationTrigger"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "event_catalog"
+                ]
+              },
+              "configuration": {
+                "type": "object",
+                "properties": {
+                  "event_name": {
+                    "type": "string",
+                    "description": "Name of the Event Catalog event that starts this flow",
+                    "example": "CustomerRequestSubmitted"
+                  },
+                  "event_version": {
+                    "type": "string",
+                    "description": "Event version (MAJOR.MINOR) this trigger is pinned to. Payloads published in a newer version are downgraded to this version before the flow runs, so field references in conditions and actions stay stable.\n",
+                    "example": "1.1"
+                  },
+                  "entity_node_id": {
+                    "type": "string",
+                    "description": "Id of the cardinality-one node in the event's entity graph whose entity becomes the execution's main entity (the entity actions operate on).\n",
+                    "example": "ticket"
+                  },
+                  "entity_schema": {
+                    "type": "string",
+                    "description": "Schema of the entity behind `entity_node_id`, denormalized from the event definition at configuration time",
+                    "example": "ticket"
+                  },
+                  "ignore_automation_triggered": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "When true (default), events that were emitted by an automation (`_trigger_source_type: automation`) do not start this flow. This prevents automation → event → automation chains unless explicitly enabled.\n"
+                  }
+                },
+                "required": [
+                  "event_name",
+                  "event_version",
+                  "entity_node_id",
+                  "entity_schema"
+                ]
+              }
+            },
+            "required": [
+              "type",
+              "configuration"
+            ]
+          }
+        ],
+        "example": {
+          "id": "12d4f45a-1883-4841-a94c-5928cb338a94",
+          "type": "event_catalog",
+          "configuration": {
+            "event_name": "CustomerRequestSubmitted",
+            "event_version": "1.1",
+            "entity_node_id": "ticket",
+            "entity_schema": "ticket",
+            "ignore_automation_triggered": true
+          }
+        }
       },
       "TriggerCondition": {
         "type": "object",

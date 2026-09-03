@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.6.0
+
+### Minor Changes
+
+- Update the journey client with journey-config spec `1.4.3` — environment-backed datasources, an auth gate, and ordered validation rule refs (ER-5354)
+- Add `getJourneyEnvironmentVariables` — the `Map` environment variables a journey block may use as an options source (ER-5356)
+
 ## 0.4.6
 
 ### Patch Changes

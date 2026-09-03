@@ -985,6 +985,14 @@ declare namespace Components {
                 code: "not_found" | "unsupported_type" | "not_set" | "invalid_value" | "incompatible_consumer";
             }[];
         }
+        export interface JourneyEnvironmentVariablesResponse {
+            items: {
+                key: string;
+                type: "Map";
+                value: EnvironmentMap;
+                description?: string;
+            }[];
+        }
         export interface JourneyFeatureFlags {
             featureFlags?: {
                 [name: string]: any;
@@ -1784,6 +1792,17 @@ declare namespace Paths {
             }
         }
     }
+    namespace GetJourneyEnvironmentVariables {
+        namespace Responses {
+            export type $200 = Components.Schemas.JourneyEnvironmentVariablesResponse;
+            export interface $401 {
+            }
+            export interface $403 {
+            }
+            export interface $502 {
+            }
+        }
+    }
     namespace GetJourneyProducts {
         namespace Parameters {
             export type City = string;
@@ -2314,6 +2333,16 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetJourneyEnvironment.Responses.$200>
   /**
+   * getJourneyEnvironmentVariables - getJourneyEnvironmentVariables
+   * 
+   * List the organization's environment variables that a journey block may use as an options source. Only Map variables that currently hold a valid value are returned. Intended for the journey builder's authoring UI; requires a journey authoring token, not an environments token.
+   */
+  'getJourneyEnvironmentVariables'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetJourneyEnvironmentVariables.Responses.$200>
+  /**
    * getJourneyProducts - getJourneyProducts
    * 
    * Get products available in the journey by id. requires public journey token to be passed.
@@ -2503,6 +2532,18 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetJourneyEnvironment.Responses.$200>
   }
+  ['/v1/journey/environment-variables']: {
+    /**
+     * getJourneyEnvironmentVariables - getJourneyEnvironmentVariables
+     * 
+     * List the organization's environment variables that a journey block may use as an options source. Only Map variables that currently hold a valid value are returned. Intended for the journey builder's authoring UI; requires a journey authoring token, not an environments token.
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetJourneyEnvironmentVariables.Responses.$200>
+  }
   ['/v1/journey/products/{id}']: {
     /**
      * getJourneyProducts - getJourneyProducts
@@ -2678,6 +2719,7 @@ export type JourneyAuditInfo = Components.Schemas.JourneyAuditInfo;
 export type JourneyCreationRequest = Components.Schemas.JourneyCreationRequest;
 export type JourneyCreationRequestV2 = Components.Schemas.JourneyCreationRequestV2;
 export type JourneyEnvironmentResponse = Components.Schemas.JourneyEnvironmentResponse;
+export type JourneyEnvironmentVariablesResponse = Components.Schemas.JourneyEnvironmentVariablesResponse;
 export type JourneyFeatureFlags = Components.Schemas.JourneyFeatureFlags;
 export type JourneyProductsResponse = Components.Schemas.JourneyProductsResponse;
 export type JourneyResponse = Components.Schemas.JourneyResponse;

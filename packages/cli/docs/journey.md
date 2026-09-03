@@ -40,6 +40,7 @@ epilot journey getJourneysByOrgId -p id=123
 - [`getJourney`](#getjourney) — Get journey by id. Private journeys requires valid private token to be passed
 - [`removeJourney`](#removejourney) — Remove journey by id
 - [`getJourneyEnvironment`](#getjourneyenvironment) — Resolve the environment variables referenced by this journey. Only browser-safe value types are returned.
+- [`getJourneyEnvironmentVariables`](#getjourneyenvironmentvariables) — List the organization's environment variables that a journey block may use as an options source. Only Map variables that
 - [`getJourneyProducts`](#getjourneyproducts) — Get products available in the journey by id. requires public journey token to be passed.
 - [`createJourney`](#createjourney) — Create a Journey
 - [`updateJourney`](#updatejourney) — Update a Journey
@@ -344,6 +345,52 @@ epilot journey getJourneyEnvironment -p id=123e4567-e89b-12d3-a456-426614174000 
     {
       "datasourceId": "string",
       "code": "not_found"
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `getJourneyEnvironmentVariables`
+
+List the organization's environment variables that a journey block may use as an options source. Only Map variables that
+
+`GET /v1/journey/environment-variables`
+
+**Sample Call**
+
+```bash
+epilot journey getJourneyEnvironmentVariables
+```
+
+With JSONata filter:
+
+```bash
+epilot journey getJourneyEnvironmentVariables --jsonata 'items[0]'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "items": [
+    {
+      "key": "string",
+      "type": "Map",
+      "value": {
+        "fallbackLanguage": "de",
+        "options": [
+          {
+            "key": "string",
+            "value": "string"
+          }
+        ]
+      },
+      "description": "string"
     }
   ]
 }
