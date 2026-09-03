@@ -1,5 +1,4 @@
 ---
-"@epilot/journey-client": minor
 "@epilot/sdk": minor
 ---
 
