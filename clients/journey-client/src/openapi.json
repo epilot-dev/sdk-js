@@ -263,6 +263,50 @@
         }
       }
     },
+    "/v1/journey/environment-variables": {
+      "get": {
+        "operationId": "getJourneyEnvironmentVariables",
+        "summary": "getJourneyEnvironmentVariables",
+        "description": "List the organization's environment variables that a journey block may use as an options source. Only Map variables that currently hold a valid value are returned. Intended for the journey builder's authoring UI; requires a journey authoring token, not an environments token.",
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "tags": [
+          "Journeys"
+        ],
+        "responses": {
+          "200": {
+            "description": "Map environment variables available as an options source",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Always private, no-store"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JourneyEnvironmentVariablesResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authorization token missing"
+          },
+          "403": {
+            "description": "Not permitted to read this organization's journeys"
+          },
+          "502": {
+            "description": "Environment resolver unavailable"
+          }
+        }
+      }
+    },
     "/v1/journey/products/{id}": {
       "get": {
         "operationId": "getJourneyProducts",
@@ -1120,6 +1164,42 @@
                     "invalid_value",
                     "incompatible_consumer"
                   ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "JourneyEnvironmentVariablesResponse": {
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "key",
+                "type",
+                "value"
+              ],
+              "properties": {
+                "key": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "Map"
+                  ]
+                },
+                "value": {
+                  "$ref": "#/components/schemas/EnvironmentMap"
+                },
+                "description": {
+                  "type": "string"
                 }
               }
             }

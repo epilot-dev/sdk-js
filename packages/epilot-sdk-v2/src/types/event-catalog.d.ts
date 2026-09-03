@@ -71,6 +71,46 @@ export declare namespace Components {
             required?: boolean;
         }
         /**
+         * Complete immutable custom-event v1.0 definition. Publication is a separate conditional action.
+         */
+        export interface CreateCustomEventPayload {
+            event_name: string; // ^[A-Z][A-Za-z0-9]{2,79}$
+            event_title: string;
+            event_description?: string;
+            event_tags?: string[];
+            schema_fields: {
+                [name: string]: /* Custom v1 fields support JSON Schema values and context entities; attachment semantics are built-in-only. */ CustomSchemaField;
+            };
+            entity_graph?: /* Entity graph definition for resolving related entities */ GraphDefinition;
+            entity_operation?: /**
+             * Configuration for triggering an event based on entity operations.
+             *
+             * When an entity operation matches the configured criteria, the event will be triggered.
+             * - On createEntity: the attribute must be present in the entity payload
+             * - On updateEntity: the attribute must be in diff.added, diff.updated, or diff.deleted
+             * - On deleteEntity: the event triggers when the entity is deleted (attributes not checked)
+             *
+             */
+            EntityOperationTrigger;
+            automation_trigger?: boolean;
+            mapping?: /* Guided mappings use schema_fields graph_source expressions; raw mode evaluates one JSONata object transform. */ EventMapping;
+            lineage?: /* Optional catalog lineage to a separately named base event. It does not replace the base event. */ CustomEventLineage;
+            example?: {
+                [name: string]: any;
+            };
+        }
+        /**
+         * Optional catalog lineage to a separately named base event. It does not replace the base event.
+         */
+        export interface CustomEventLineage {
+            base_event_name: string;
+            base_event_version: string;
+        }
+        /**
+         * Custom v1 fields support JSON Schema values and context entities; attachment semantics are built-in-only.
+         */
+        export type CustomSchemaField = /* Custom v1 fields support JSON Schema values and context entities; attachment semantics are built-in-only. */ /* A primitive JSON Schema field definition */ PrimitiveField | ContextEntity;
+        /**
          * Configuration for triggering an event based on entity operations.
          *
          * When an entity operation matches the configured criteria, the event will be triggered.
@@ -127,6 +167,10 @@ export declare namespace Components {
              * ]
              */
             purpose?: string[];
+            /**
+             * Stable purpose IDs plus immutable display-name snapshots for custom events.
+             */
+            purpose_filters?: PurposeFilterSnapshot[];
         }
         /**
          * An event instance in the event history
@@ -210,6 +254,10 @@ export declare namespace Components {
              * Inline downgrade chain stamped by Event Catalog at publish time, ordered newest-to-oldest. Present ONLY on multi-version events. Internal versioning transport: consumers (e.g. svc-webhooks) walk the payload back to a pinned version using these JSONata steps, then strip the field before delivery -- end customers never receive it.
              */
             _downgrades?: /* One step of an event's inline `_downgrades` chain. Maps the current-version payload to the previous version via a JSONata expression. Stamped by Event Catalog at publish time; executed by consumers during walk-back, never by EC itself. */ InlineDowngradeStep[];
+            /**
+             * Ordered automation flow ids that caused this event (at most 100), propagated verbatim from the trigger input or the originating entity operation. Internal loop-prevention transport for automation-api; svc-webhooks strips it before delivery.
+             */
+            _automation_chain?: string[];
         }
         /**
          * A file attachment associated with an event
@@ -370,6 +418,10 @@ export declare namespace Components {
                  * ]
                  */
                 purpose?: string[];
+                /**
+                 * Stable purpose IDs plus immutable display-name snapshots for custom events.
+                 */
+                purpose_filters?: PurposeFilterSnapshot[];
             };
             /**
              * Whether this event is enabled for the organization.
@@ -402,6 +454,30 @@ export declare namespace Components {
              * true
              */
             automation_trigger?: boolean;
+            /**
+             * Whether explicit triggering is restricted to Automation. When true, callers must pass
+             * `_trigger_source_type: automation` and a stable `_trigger_source`. The trigger uses
+             * strict entity readiness validation and the durable Automation outbox.
+             * Requires `automation_trigger: true` and cannot be combined with `entity_operation`.
+             *
+             * example:
+             * true
+             */
+            automation_trigger_only?: boolean;
+            /**
+             * Required entity-graph seed node for an Automation-only trigger. When configured, an
+             * explicit trigger using any other node is rejected before hydration.
+             *
+             * example:
+             * ticket
+             */
+            automation_trigger_seed_node?: string;
+            /**
+             * Definition ownership. Built-ins always win a name collision.
+             */
+            event_origin?: "builtin" | "custom";
+            mapping?: /* Guided mappings use schema_fields graph_source expressions; raw mode evaluates one JSONata object transform. */ EventMapping;
+            lineage?: /* Optional catalog lineage to a separately named base event. It does not replace the base event. */ CustomEventLineage;
             /**
              * Org-defined success criteria for this event: the entity attributes that an
              * organization considers must be captured for an event change request to be
@@ -555,6 +631,10 @@ export declare namespace Components {
                  * ]
                  */
                 purpose?: string[];
+                /**
+                 * Stable purpose IDs plus immutable display-name snapshots for custom events.
+                 */
+                purpose_filters?: PurposeFilterSnapshot[];
             };
             /**
              * Whether this event is enabled for the organization.
@@ -587,6 +667,30 @@ export declare namespace Components {
              * true
              */
             automation_trigger?: boolean;
+            /**
+             * Whether explicit triggering is restricted to Automation. When true, callers must pass
+             * `_trigger_source_type: automation` and a stable `_trigger_source`. The trigger uses
+             * strict entity readiness validation and the durable Automation outbox.
+             * Requires `automation_trigger: true` and cannot be combined with `entity_operation`.
+             *
+             * example:
+             * true
+             */
+            automation_trigger_only?: boolean;
+            /**
+             * Required entity-graph seed node for an Automation-only trigger. When configured, an
+             * explicit trigger using any other node is rejected before hydration.
+             *
+             * example:
+             * ticket
+             */
+            automation_trigger_seed_node?: string;
+            /**
+             * Definition ownership. Built-ins always win a name collision.
+             */
+            event_origin?: "builtin" | "custom";
+            mapping?: /* Guided mappings use schema_fields graph_source expressions; raw mode evaluates one JSONata object transform. */ EventMapping;
+            lineage?: /* Optional catalog lineage to a separately named base event. It does not replace the base event. */ CustomEventLineage;
             /**
              * Org-defined success criteria for this event: the entity attributes that an
              * organization considers must be captured for an event change request to be
@@ -763,6 +867,13 @@ export declare namespace Components {
          * }
          */
         export interface EventJsonSchema {
+        }
+        /**
+         * Guided mappings use schema_fields graph_source expressions; raw mode evaluates one JSONata object transform.
+         */
+        export interface EventMapping {
+            mode: "guided" | "jsonata";
+            jsonata?: string;
         }
         /**
          * A lightweight event summary returned by the v2 history endpoint.
@@ -978,6 +1089,12 @@ export declare namespace Components {
              */
             jsonata: string;
         }
+        export interface PreviewEventResponse {
+            payload: {
+                [name: string]: any;
+            };
+            errors: ValidationIssue[];
+        }
         /**
          * A primitive JSON Schema field definition
          */
@@ -1014,6 +1131,18 @@ export declare namespace Components {
              * ticket.meter_reading_value
              */
             graph_source?: string;
+        }
+        export interface PublishCustomEventPayload {
+            enabled?: boolean;
+            auto_trigger?: boolean;
+            /**
+             * Optional publication choice. False disables only the named lineage base event's org auto-trigger overlay.
+             */
+            base_auto_trigger_enabled?: boolean;
+        }
+        export interface PurposeFilterSnapshot {
+            id: string;
+            display_name: string;
         }
         export type SchemaField = /* A primitive JSON Schema field definition */ PrimitiveField | ContextEntity | /**
          * A schema field representing file attachments associated with the event.
@@ -1170,6 +1299,15 @@ export declare namespace Components {
         }
         /**
          * Payload for explicitly triggering an event via API
+         * example:
+         * {
+         *   "seed": {
+         *     "entity_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+         *     "node_id": "ticket"
+         *   },
+         *   "_trigger_source_type": "automation",
+         *   "_trigger_source": "execution-id/action-id"
+         * }
          */
         export interface TriggerEventPayload {
             /**
@@ -1215,16 +1353,22 @@ export declare namespace Components {
              * Identifier of the specific trigger source.
              * Examples: user ID, automation execution ID, activity ID, portal user email
              * Defaults to the calling user ID if not specified.
+             * Required for events marked `automation_trigger_only` and must remain stable across
+             * action retries.
              *
              */
             _trigger_source?: string;
+            /**
+             * Ordered automation flow ids that caused this trigger (at most 100); propagated verbatim onto the published event for automation loop prevention.
+             */
+            _automation_chain?: string[];
         }
         /**
          * Response from triggering an event
          */
         export interface TriggerEventResponse {
             /**
-             * Whether the event was triggered successfully
+             * Whether the event was published successfully
              */
             success: boolean;
             /**
@@ -1232,184 +1376,16 @@ export declare namespace Components {
              */
             event_id: string;
             /**
-             * EventBridge event ID from publishing
+             * EventBridge event ID when synchronous delivery or a completed retry provides it
              */
             event_bridge_event_id?: string;
         }
         /**
-         * Payload for updating an event configuration.
-         * Accepts the same fields as EventConfig (all optional for PATCH).
-         * Currently `enabled`, `auto_trigger` and `success_criteria` fields are processed.
-         *
+         * Mutable org activation overlay. Immutable event definition fields are not accepted.
          */
         export interface UpdateEventPayload {
-            /**
-             * Unique human readable name of the event
-             * example:
-             * AddMeterReading
-             */
-            event_name?: string;
-            /**
-             * Human-friendly title for the event
-             * example:
-             * Add Meter Reading
-             */
-            event_title?: string;
-            /**
-             * Description of when the event is triggered
-             * example:
-             * Triggered when a new meter reading is added
-             */
-            event_description?: string;
-            /**
-             * Event payload version (MAJOR.MINOR)
-             * example:
-             * 1.0
-             */
-            event_version?: string;
-            /**
-             * Status of the event
-             * example:
-             * active
-             */
-            event_status?: "active" | "deprecated" | "draft" | "disabled";
-            /**
-             * Tags associated with the event for categorization and filtering
-             *
-             * The "builtin" tag indicates events that are built into the epilot system.
-             *
-             * example:
-             * [
-             *   "builtin",
-             *   "metering",
-             *   "erp"
-             * ]
-             */
-            event_tags?: string[];
-            /**
-             * Fields that define the event schema
-             */
-            schema_fields?: {
-                [name: string]: SchemaField;
-            };
-            /**
-             * Optional entity graph definition for resolving related entities
-             */
-            entity_graph?: {
-                /**
-                 * List of node definitions in the graph
-                 */
-                nodes: /* A node in the entity graph */ GraphNode[];
-                /**
-                 * List of edge definitions connecting nodes
-                 */
-                edges: /* An edge connecting two nodes in the graph */ GraphEdge[];
-            };
-            /**
-             * Optional configuration for triggering this event based on entity operations
-             */
-            entity_operation?: {
-                /**
-                 * List of entity operations that can trigger this event
-                 * example:
-                 * [
-                 *   "createEntity",
-                 *   "updateEntity"
-                 * ]
-                 */
-                operation: ("createEntity" | "updateEntity" | "deleteEntity")[];
-                /**
-                 * List of entity schema slugs that can trigger this event
-                 * example:
-                 * [
-                 *   "contact",
-                 *   "contract",
-                 *   "order"
-                 * ]
-                 */
-                schema: string[];
-                /**
-                 * Optional list of entity attributes to track for changes.
-                 * If specified, the event only triggers when these attributes are affected.
-                 * - On createEntity: attribute must be defined in the entity payload
-                 * - On updateEntity: attribute must be in diff.added, diff.updated, or diff.deleted
-                 * If not specified, all changes to matching entities will trigger the event.
-                 *
-                 * example:
-                 * [
-                 *   "email",
-                 *   "phone",
-                 *   "status"
-                 * ]
-                 */
-                attribute?: string[];
-                /**
-                 * Optional list of purpose names to filter by.
-                 * The entity must have at least one matching purpose in its _purpose array.
-                 * Purpose names are matched against the taxonomy classification names (e.g., "Kündigung", "Umzug/Auszug").
-                 * If not specified, the event triggers regardless of entity purpose.
-                 *
-                 * example:
-                 * [
-                 *   "Kündigung",
-                 *   "Umzug/Auszug"
-                 * ]
-                 */
-                purpose?: string[];
-            };
-            /**
-             * Whether this event is enabled for the organization.
-             * When disabled, the event will not be triggered by any means
-             * (automatic, API, or automation).
-             * Defaults to true if not specified.
-             *
-             * example:
-             * true
-             */
             enabled?: boolean;
-            /**
-             * Whether the event should be triggered automatically by built-in logic
-             * (e.g., portal submissions, entity mutations, EventBridge rules).
-             * When false, the event can still be triggered manually via API or automations.
-             * Only meaningful for builtin events that have automatic trigger sources.
-             * Defaults to true if not specified.
-             *
-             * example:
-             * true
-             */
             auto_trigger?: boolean;
-            /**
-             * Whether this event can be explicitly triggered by automations.
-             * When true, the event will appear in the automation builder as a
-             * "Trigger Event" action option.
-             * Defaults to false if not specified.
-             *
-             * example:
-             * true
-             */
-            automation_trigger?: boolean;
-            /**
-             * Org-defined success criteria for this event: the entity attributes that an
-             * organization considers must be captured for an event change request to be
-             * treated as complete (e.g. for telephony / self-service flows).
-             *
-             * Advisory metadata — event-catalog does NOT require an org to define any and
-             * does NOT enforce them when an event is triggered or published. The org may
-             * define none (empty array or omitted). When provided, each entry is validated
-             * for well-formedness on write (see SuccessCriterion).
-             *
-             * example:
-             * [
-             *   {
-             *     "entity_schema": "contract",
-             *     "attribute": "installment_amount"
-             *   },
-             *   {
-             *     "entity_schema": "billing_account",
-             *     "attribute": "due_date"
-             *   }
-             * ]
-             */
             success_criteria?: /**
              * A single org-defined success criterion: an entity attribute that must be captured
              * for this event's change request to be considered complete.
@@ -1423,6 +1399,10 @@ export declare namespace Components {
              *
              */
             SuccessCriterion[];
+        }
+        export interface ValidationIssue {
+            path: string;
+            message: string;
         }
         /**
          * One entry of an event's version timeline.
@@ -1461,6 +1441,30 @@ export declare namespace Components {
     }
 }
 export declare namespace Paths {
+    namespace CreateCustomEvent {
+        export type RequestBody = /* Complete immutable custom-event v1.0 definition. Publication is a separate conditional action. */ Components.Schemas.CreateCustomEventPayload;
+        namespace Responses {
+            export type $201 = /* Event configuration with required fields */ Components.Schemas.EventConfig;
+            export interface $409 {
+            }
+        }
+    }
+    namespace DeprecateCustomEvent {
+        namespace Parameters {
+            export type EventName = string;
+        }
+        export interface PathParameters {
+            event_name: Parameters.EventName;
+        }
+        namespace Responses {
+            export interface $204 {
+            }
+            export interface $404 {
+            }
+            export interface $409 {
+            }
+        }
+    }
     namespace GetEvent {
         namespace Parameters {
             export type EventName = string;
@@ -1723,16 +1727,52 @@ export declare namespace Paths {
         export interface PathParameters {
             event_name: Parameters.EventName;
         }
-        export type RequestBody = /**
-         * Payload for updating an event configuration.
-         * Accepts the same fields as EventConfig (all optional for PATCH).
-         * Currently `enabled`, `auto_trigger` and `success_criteria` fields are processed.
-         *
-         */
-        Components.Schemas.UpdateEventPayload;
+        export type RequestBody = /* Mutable org activation overlay. Immutable event definition fields are not accepted. */ Components.Schemas.UpdateEventPayload;
         namespace Responses {
             export type $200 = /* Event configuration with required fields */ Components.Schemas.EventConfig;
             export interface $404 {
+            }
+        }
+    }
+    namespace PreviewCustomEvent {
+        namespace Parameters {
+            export type EventName = string;
+        }
+        export interface PathParameters {
+            event_name: Parameters.EventName;
+        }
+        export type RequestBody = /**
+         * Payload for explicitly triggering an event via API
+         * example:
+         * {
+         *   "seed": {
+         *     "entity_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+         *     "node_id": "ticket"
+         *   },
+         *   "_trigger_source_type": "automation",
+         *   "_trigger_source": "execution-id/action-id"
+         * }
+         */
+        Components.Schemas.TriggerEventPayload;
+        namespace Responses {
+            export type $200 = Components.Schemas.PreviewEventResponse;
+            export interface $400 {
+            }
+            export interface $404 {
+            }
+        }
+    }
+    namespace PublishCustomEventDefinition {
+        namespace Parameters {
+            export type EventName = string;
+        }
+        export interface PathParameters {
+            event_name: Parameters.EventName;
+        }
+        export type RequestBody = Components.Schemas.PublishCustomEventPayload;
+        namespace Responses {
+            export type $200 = /* Event configuration with required fields */ Components.Schemas.EventConfig;
+            export interface $409 {
             }
         }
     }
@@ -1856,7 +1896,19 @@ export declare namespace Paths {
         export interface PathParameters {
             event_name: Parameters.EventName;
         }
-        export type RequestBody = /* Payload for explicitly triggering an event via API */ Components.Schemas.TriggerEventPayload;
+        export type RequestBody = /**
+         * Payload for explicitly triggering an event via API
+         * example:
+         * {
+         *   "seed": {
+         *     "entity_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+         *     "node_id": "ticket"
+         *   },
+         *   "_trigger_source_type": "automation",
+         *   "_trigger_source": "execution-id/action-id"
+         * }
+         */
+        Components.Schemas.TriggerEventPayload;
         namespace Responses {
             export type $200 = /* Response from triggering an event */ Components.Schemas.TriggerEventResponse;
             export interface $400 {
@@ -1864,6 +1916,12 @@ export declare namespace Paths {
             export interface $403 {
             }
             export interface $404 {
+            }
+            export interface $409 {
+            }
+            export interface $425 {
+            }
+            export interface $503 {
             }
         }
     }
@@ -1881,6 +1939,16 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ListEvents.Responses.$200>
+  /**
+   * createCustomEvent - createCustomEvent
+   * 
+   * Reserve an org-scoped custom event name and persist its immutable v1.0 draft definition.
+   */
+  'createCustomEvent'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.CreateCustomEvent.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CreateCustomEvent.Responses.$201>
   /**
    * getEvent - getEvent
    * 
@@ -1901,6 +1969,36 @@ export interface OperationMethods {
     data?: Paths.PatchEvent.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.PatchEvent.Responses.$200>
+  /**
+   * deprecateCustomEvent - deprecateCustomEvent
+   * 
+   * Soft-deprecate an org-scoped custom event. Definitions and v1.0 history remain readable.
+   */
+  'deprecateCustomEvent'(
+    parameters?: Parameters<Paths.DeprecateCustomEvent.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.DeprecateCustomEvent.Responses.$204>
+  /**
+   * previewCustomEvent - previewCustomEvent
+   * 
+   * Assemble and fully validate a persisted custom-event draft without publishing it.
+   */
+  'previewCustomEvent'(
+    parameters?: Parameters<Paths.PreviewCustomEvent.PathParameters> | null,
+    data?: Paths.PreviewCustomEvent.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.PreviewCustomEvent.Responses.$200>
+  /**
+   * publishCustomEventDefinition - publishCustomEventDefinition
+   * 
+   * Conditionally activate an immutable custom-event v1.0 definition.
+   */
+  'publishCustomEventDefinition'(
+    parameters?: Parameters<Paths.PublishCustomEventDefinition.PathParameters> | null,
+    data?: Paths.PublishCustomEventDefinition.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.PublishCustomEventDefinition.Responses.$200>
   /**
    * getEventJSONSchema - getEventJSONSchema
    * 
@@ -1987,6 +2085,9 @@ export interface OperationMethods {
    * - For events without an entity_graph, only fields are needed
    * - Entity operation context fields (operation, trigger_entity, activity_id, activity_type)
    *   are not included when triggering via API
+   * - Events marked `automation_trigger_only` require `_trigger_source_type: automation` and a
+   *   stable execution/action ID in `_trigger_source`; retries with that ID return the same
+   *   logical event, including while durable delivery is pending
    * 
    */
   'triggerEvent'(
@@ -2008,6 +2109,16 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ListEvents.Responses.$200>
+    /**
+     * createCustomEvent - createCustomEvent
+     * 
+     * Reserve an org-scoped custom event name and persist its immutable v1.0 draft definition.
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.CreateCustomEvent.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CreateCustomEvent.Responses.$201>
   }
   ['/v1/events/{event_name}']: {
     /**
@@ -2030,6 +2141,40 @@ export interface PathsDictionary {
       data?: Paths.PatchEvent.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.PatchEvent.Responses.$200>
+    /**
+     * deprecateCustomEvent - deprecateCustomEvent
+     * 
+     * Soft-deprecate an org-scoped custom event. Definitions and v1.0 history remain readable.
+     */
+    'delete'(
+      parameters?: Parameters<Paths.DeprecateCustomEvent.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.DeprecateCustomEvent.Responses.$204>
+  }
+  ['/v1/events/{event_name}:preview']: {
+    /**
+     * previewCustomEvent - previewCustomEvent
+     * 
+     * Assemble and fully validate a persisted custom-event draft without publishing it.
+     */
+    'post'(
+      parameters?: Parameters<Paths.PreviewCustomEvent.PathParameters> | null,
+      data?: Paths.PreviewCustomEvent.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.PreviewCustomEvent.Responses.$200>
+  }
+  ['/v1/events/{event_name}:publish']: {
+    /**
+     * publishCustomEventDefinition - publishCustomEventDefinition
+     * 
+     * Conditionally activate an immutable custom-event v1.0 definition.
+     */
+    'post'(
+      parameters?: Parameters<Paths.PublishCustomEventDefinition.PathParameters> | null,
+      data?: Paths.PublishCustomEventDefinition.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.PublishCustomEventDefinition.Responses.$200>
   }
   ['/v1/events/{event_name}/json_schema']: {
     /**
@@ -2130,6 +2275,9 @@ export interface PathsDictionary {
      * - For events without an entity_graph, only fields are needed
      * - Entity operation context fields (operation, trigger_entity, activity_id, activity_type)
      *   are not included when triggering via API
+     * - Events marked `automation_trigger_only` require `_trigger_source_type: automation` and a
+     *   stable execution/action ID in `_trigger_source`; retries with that ID return the same
+     *   logical event, including while durable delivery is pending
      * 
      */
     'post'(
@@ -2146,12 +2294,16 @@ export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 export type AttachmentField = Components.Schemas.AttachmentField;
 export type CommonEventMetadata = Components.Schemas.CommonEventMetadata;
 export type ContextEntity = Components.Schemas.ContextEntity;
+export type CreateCustomEventPayload = Components.Schemas.CreateCustomEventPayload;
+export type CustomEventLineage = Components.Schemas.CustomEventLineage;
+export type CustomSchemaField = Components.Schemas.CustomSchemaField;
 export type EntityOperationTrigger = Components.Schemas.EntityOperationTrigger;
 export type Event = Components.Schemas.Event;
 export type EventAttachment = Components.Schemas.EventAttachment;
 export type EventConfig = Components.Schemas.EventConfig;
 export type EventConfigBase = Components.Schemas.EventConfigBase;
 export type EventJsonSchema = Components.Schemas.EventJsonSchema;
+export type EventMapping = Components.Schemas.EventMapping;
 export type EventSummary = Components.Schemas.EventSummary;
 export type EventVersionRegistrySummary = Components.Schemas.EventVersionRegistrySummary;
 export type FieldChange = Components.Schemas.FieldChange;
@@ -2160,7 +2312,10 @@ export type GraphDefinition = Components.Schemas.GraphDefinition;
 export type GraphEdge = Components.Schemas.GraphEdge;
 export type GraphNode = Components.Schemas.GraphNode;
 export type InlineDowngradeStep = Components.Schemas.InlineDowngradeStep;
+export type PreviewEventResponse = Components.Schemas.PreviewEventResponse;
 export type PrimitiveField = Components.Schemas.PrimitiveField;
+export type PublishCustomEventPayload = Components.Schemas.PublishCustomEventPayload;
+export type PurposeFilterSnapshot = Components.Schemas.PurposeFilterSnapshot;
 export type SchemaField = Components.Schemas.SchemaField;
 export type SearchOptions = Components.Schemas.SearchOptions;
 export type SearchOptionsV2 = Components.Schemas.SearchOptionsV2;
@@ -2168,4 +2323,5 @@ export type SuccessCriterion = Components.Schemas.SuccessCriterion;
 export type TriggerEventPayload = Components.Schemas.TriggerEventPayload;
 export type TriggerEventResponse = Components.Schemas.TriggerEventResponse;
 export type UpdateEventPayload = Components.Schemas.UpdateEventPayload;
+export type ValidationIssue = Components.Schemas.ValidationIssue;
 export type VersionMeta = Components.Schemas.VersionMeta;

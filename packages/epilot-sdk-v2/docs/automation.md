@@ -71,6 +71,12 @@ const { data } = await automationClient.searchFlows(...)
 - [`MapEntityActionConfig`](#mapentityactionconfig)
 - [`MapEntityAction`](#mapentityaction)
 - [`MapEntityConfig`](#mapentityconfig)
+- [`GraphContextEntry`](#graphcontextentry)
+- [`GraphSeed`](#graphseed)
+- [`GraphDefinition`](#graphdefinition)
+- [`GraphNode`](#graphnode)
+- [`GraphNodeFilter`](#graphnodefilter)
+- [`GraphEdge`](#graphedge)
 - [`MappingConfigRef`](#mappingconfigref)
 - [`RelationAttribute`](#relationattribute)
 - [`MappingAttributeV2`](#mappingattributev2)
@@ -140,6 +146,8 @@ const { data } = await automationClient.searchFlows(...)
 - [`TriggerEventEntityActivity`](#triggerevententityactivity)
 - [`TriggerEventMessaging`](#triggereventmessaging)
 - [`TriggerEventEntityOperation`](#triggerevententityoperation)
+- [`TriggerEventEventCatalog`](#triggereventeventcatalog)
+- [`TriggerEventPayloadRef`](#triggereventpayloadref)
 - [`ApiCallerContext`](#apicallercontext)
 - [`ExecutionStatus`](#executionstatus)
 - [`GetExecutionsResp`](#getexecutionsresp)
@@ -169,6 +177,7 @@ const { data } = await automationClient.searchFlows(...)
 - [`EntitySearchFilter`](#entitysearchfilter)
 - [`EntitySearchFilterValue`](#entitysearchfiltervalue)
 - [`EntityManualTrigger`](#entitymanualtrigger)
+- [`EventCatalogTrigger`](#eventcatalogtrigger)
 - [`TriggerCondition`](#triggercondition)
 - [`Comparison`](#comparison)
 - [`FilterConditionOnEvent`](#filterconditiononevent)
@@ -204,6 +213,7 @@ const { data } = await client.searchFlows({
   from: 1,
   trigger_source_id: 'example',
   target_workflow: 'example',
+  trigger_event_name: 'example',
   include_flows: true,
 })
 ```
@@ -364,7 +374,8 @@ const { data } = await client.startExecution(
           entity_schema: 'string',
           is_primary: true
         }
-      ]
+      ],
+      trigger_user_id: '10006129'
     },
     flow_execution_id: 'string',
     flow_automation_task_id: 'string'
@@ -486,7 +497,8 @@ const { data } = await client.startExecution(
     "_automation_chain": ["string"],
     "entity_contexts": [
       {}
-    ]
+    ],
+    "trigger_user_id": "10006129"
   },
   "workflow_wait_context": {
     "workflow_execution_id": "string",
@@ -858,7 +870,8 @@ const { data } = await client.getExecution({
     "_automation_chain": ["string"],
     "entity_contexts": [
       {}
-    ]
+    ],
+    "trigger_user_id": "10006129"
   },
   "workflow_wait_context": {
     "workflow_execution_id": "string",
@@ -1008,7 +1021,8 @@ const { data } = await client.cancelExecution({
     "_automation_chain": ["string"],
     "entity_contexts": [
       {}
-    ]
+    ],
+    "trigger_user_id": "10006129"
   },
   "workflow_wait_context": {
     "workflow_execution_id": "string",
@@ -1120,7 +1134,8 @@ const { data } = await client.resumeExecutionWithToken(
       "workflow_role": "trigger_workflow",
       "_execution_chain": {},
       "_automation_chain": ["string"],
-      "entity_contexts": []
+      "entity_contexts": [],
+      "trigger_user_id": "10006129"
     },
     "workflow_wait_context": {
       "workflow_execution_id": "string",
@@ -1146,7 +1161,8 @@ const { data } = await client.resumeExecutionWithToken(
       "mapping_attributes": [],
       "relation_attributes": [],
       "linkback_relation_attribute": "mapped_entities",
-      "linkback_relation_tags": ["string"]
+      "linkback_relation_tags": ["string"],
+      "graph_context": []
     },
     "allow_failure": true,
     "created_automatically": true,
@@ -1304,6 +1320,16 @@ type AutomationFlow = {
     configuration?: {
       journey_id?: { ... }
     }
+  } | {
+    id?: string // uuid
+    type: "event_catalog"
+    configuration: {
+      event_name: { ... }
+      event_version: { ... }
+      entity_node_id: { ... }
+      entity_schema: { ... }
+      ignore_automation_triggered?: { ... }
+    }
   }>
   trigger_conditions?: Array<{
     source: string
@@ -1324,16 +1350,6 @@ type AutomationFlow = {
     allow_failure?: boolean
     statements?: Array<{
       id?: { ... }
-      source?: { ... }
-      operation?: { ... }
-      values?: { ... }
-    }>
-  }>
-  schedules?: Array<{
-    id: string
-    scheduleApiId?: string
-    numberOfUnits?: number
-    timePeriod?: "minutes" | "hours" | "days" | "weeks" | "months"
   // ...
 }
 ```
@@ -1396,6 +1412,10 @@ type SearchAutomationsResp = {
       id?: { ... }
       type: { ... }
       configuration?: { ... }
+    } | {
+      id?: { ... }
+      type: { ... }
+      configuration: { ... }
     }>
     trigger_conditions?: Array<{
       source: { ... }
@@ -1445,10 +1465,6 @@ type SearchAutomationsResp = {
       type?: { ... }
       config?: { ... }
     } | {
-      type?: { ... }
-      config?: { ... }
-    } | {
-      type?: { ... }
   // ...
 }
 ```
@@ -1479,7 +1495,7 @@ type AnyTrigger = {
   type: "entity_operation"
   configuration: {
     schema?: string
-    operations?: "createEntity" | "updateEntity" | "deleteEntity" | "softDeleteEntity" | "restoreEntity"[]
+    operations?: "createEntity" | "updateEntity" | "deleteEntity" | "softDeleteEntity" | "restoreEntity" | "relationsAdded" | "relationsRemoved" | "relationsSoftDeleted" | "relationsRestored" | "relationsDeleted"[]
     include_activities?: string[]
     exclude_activities?: string[]
     filter_config?: {
@@ -1523,6 +1539,16 @@ type AnyTrigger = {
   type: "flows_trigger"
   configuration?: {
     journey_id?: string // uuid
+  }
+} | {
+  id?: string // uuid
+  type: "event_catalog"
+  configuration: {
+    event_name: string
+    event_version: string
+    entity_node_id: string
+    entity_schema: string
+    ignore_automation_triggered?: boolean
   }
 }
 ```
@@ -1569,6 +1595,10 @@ type AnyAction = {
     }>
     linkback_relation_attribute?: string
     linkback_relation_tags?: string[]
+    graph_context?: Array<{
+      seed: { ... }
+      graph: { ... }
+    }>
   }
 } | {
   type?: "trigger-workflow"
@@ -1624,12 +1654,8 @@ type AnyAction = {
   type?: "send-email"
   config?: {
     email_template_id?: string
-    language_code?: "de" | "en"
+    language_code?: string
     notify_portal_user_only?: boolean
-    skip_creating_entities?: boolean
-    wait_for_confirmation?: boolean
-    wait_for_journey_submission?: boolean
-    journey_id?: string
   // ...
 }
 ```
@@ -1679,6 +1705,10 @@ type AnyActionConfig = {
     }>
     linkback_relation_attribute?: string
     linkback_relation_tags?: string[]
+    graph_context?: Array<{
+      seed: { ... }
+      graph: { ... }
+    }>
   }
   allow_failure?: boolean
   created_automatically?: boolean
@@ -1733,10 +1763,6 @@ type AnyActionConfig = {
   created_automatically?: boolean
   is_bulk_action?: boolean
   reason?: {
-    message?: string
-    payload?: Record<string, unknown>
-  }
-  condition_id?: string
   // ...
 }
 ```
@@ -2116,6 +2142,10 @@ type MapEntityActionConfig = {
     }>
     linkback_relation_attribute?: string
     linkback_relation_tags?: string[]
+    graph_context?: Array<{
+      seed: { ... }
+      graph: { ... }
+    }>
   }
   allow_failure?: boolean
   created_automatically?: boolean
@@ -2172,6 +2202,10 @@ type MapEntityAction = {
     }>
     linkback_relation_attribute?: string
     linkback_relation_tags?: string[]
+    graph_context?: Array<{
+      seed: { ... }
+      graph: { ... }
+    }>
   }
 }
 ```
@@ -2228,6 +2262,110 @@ type MapEntityConfig = {
   }>
   linkback_relation_attribute?: string
   linkback_relation_tags?: string[]
+  graph_context?: Array<{
+    seed: {
+      entity_id: { ... }
+      node_id: { ... }
+    }
+    graph: {
+      nodes: { ... }
+      edges: { ... }
+    }
+  }>
+}
+```
+
+### `GraphContextEntry`
+
+One multi-hop graph query to run against entity-api's `POST /v1/entity:graph`. Every node
+in `graph.nodes` is merged into the mapping's source context under its own `id`, so
+listing multiple nodes here costs one entity-api call, not one per node. A node's value
+overwrites any existing source-context
+
+```ts
+type GraphContextEntry = {
+  seed: {
+    entity_id: string // uuid
+    node_id: string
+  }
+  graph: {
+    nodes: Array<{
+      id: { ... }
+      schema: { ... }
+      cardinality?: { ... }
+      fields?: { ... }
+      filter?: { ... }
+    }>
+    edges: Array<{
+      from: { ... }
+      to: { ... }
+    }>
+  }
+}
+```
+
+### `GraphSeed`
+
+```ts
+type GraphSeed = {
+  entity_id: string // uuid
+  node_id: string
+}
+```
+
+### `GraphDefinition`
+
+```ts
+type GraphDefinition = {
+  nodes: Array<{
+    id: string
+    schema: string
+    cardinality?: "one" | "many"
+    fields?: string[]
+    filter?: Array<{
+      attribute: { ... }
+      value: { ... }
+    }>
+  }>
+  edges: Array<{
+    from: string
+    to: string
+  }>
+}
+```
+
+### `GraphNode`
+
+```ts
+type GraphNode = {
+  id: string
+  schema: string
+  cardinality?: "one" | "many"
+  fields?: string[]
+  filter?: Array<{
+    attribute: string
+    value: string | number | boolean
+  }>
+}
+```
+
+### `GraphNodeFilter`
+
+Entities are included in this node's result only if `attribute` exactly equals the literal `value`.
+
+```ts
+type GraphNodeFilter = {
+  attribute: string
+  value: string | number | boolean
+}
+```
+
+### `GraphEdge`
+
+```ts
+type GraphEdge = {
+  from: string
+  to: string
 }
 ```
 
@@ -2542,7 +2680,7 @@ type SendEmailActionConfig = {
   type?: "send-email"
   config?: {
     email_template_id?: string
-    language_code?: "de" | "en"
+    language_code?: string
     notify_portal_user_only?: boolean
     skip_creating_entities?: boolean
     wait_for_confirmation?: boolean
@@ -2579,7 +2717,7 @@ type SendEmailAction = {
   type?: "send-email"
   config?: {
     email_template_id?: string
-    language_code?: "de" | "en"
+    language_code?: string
     notify_portal_user_only?: boolean
     skip_creating_entities?: boolean
     wait_for_confirmation?: boolean
@@ -2673,7 +2811,7 @@ type ReplyEmailActionConfig = {
   type?: "reply-email"
   config?: {
     email_template_id?: string
-    language_code?: "de" | "en"
+    language_code?: string
     reply_mode?: "reply_in_thread" | "new_email"
     mark_as_done?: boolean
     mark_as_read?: boolean
@@ -2698,7 +2836,7 @@ type ReplyEmailAction = {
   type?: "reply-email"
   config?: {
     email_template_id?: string
-    language_code?: "de" | "en"
+    language_code?: string
     reply_mode?: "reply_in_thread" | "new_email"
     mark_as_done?: boolean
     mark_as_read?: boolean
@@ -2711,7 +2849,7 @@ type ReplyEmailAction = {
 ```ts
 type ReplyEmailConfig = {
   email_template_id?: string
-  language_code?: "de" | "en"
+  language_code?: string
   reply_mode?: "reply_in_thread" | "new_email"
   mark_as_done?: boolean
   mark_as_read?: boolean
@@ -2723,7 +2861,7 @@ type ReplyEmailConfig = {
 ```ts
 type SendEmailConfig = {
   email_template_id?: string
-  language_code?: "de" | "en"
+  language_code?: string
   notify_portal_user_only?: boolean
   skip_creating_entities?: boolean
   wait_for_confirmation?: boolean
@@ -3196,7 +3334,7 @@ type ConditionStatement = {
   source?: {
     id?: string
     origin?: "trigger" | "action"
-    originType?: "entity" | "workflow" | "journey_block"
+    originType?: "entity" | "workflow" | "journey_block" | "event"
     schema?: string
     attribute?: string
     attributeType?: "string" | "text" | "number" | "boolean" | "date" | "datetime" | "tags" | "country" | "email" | "phone" | "product" | "price" | "status" | "relation" | "multiselect" | "select" | "radio" | "relation_user" | "purpose" | "label" | "payment" | "relation_payment_method"
@@ -3346,6 +3484,7 @@ type AutomationExecution = {
       relation_attributes?: { ... }
       linkback_relation_attribute?: { ... }
       linkback_relation_tags?: { ... }
+      graph_context?: { ... }
     }
   } | {
     type?: "trigger-workflow"
@@ -3383,7 +3522,6 @@ type AutomationExecution = {
       event_inputs?: { ... }
     }
   } | {
-    type?: "create-document"
   // ...
 }
 ```
@@ -3398,9 +3536,6 @@ type AutomationLoopState = {
 ```
 
 ### `WorkflowExecutionContext`
-
-Automation Executions triggered by workflow task automations will always carry information about the triggering workflow. This information is helpful in correlating workflow executions with all the triggered automation executions
-
 
 ```ts
 type WorkflowExecutionContext = {
@@ -3418,12 +3553,13 @@ type WorkflowExecutionContext = {
     entity_schema?: string
     is_primary?: boolean
   }>
+  trigger_user_id?: string
 }
 ```
 
 ### `WorkflowWaitContext`
 
-Workflow automation tasks can be paused & waiting for journey automation executions to succeed. If such is the case, this context tracks the task_id of the workflow waiting for journey submission success This context is consumed by svc-workflows to resume a task waiting on this journey submission.
+Correlation stamped when the triggering submission entity carried workflow wait claims from a journey link (AL-2521). Consumed by svc-workflows to resume a task waiting on this journey submission.
 
 
 ```ts
@@ -3516,7 +3652,43 @@ type TriggerEventEntityOperation = {
   entity_id: string
   org_id: string
   activity_id: string
-  operation_type: "createEntity" | "updateEntity" | "deleteEntity" | "softDeleteEntity" | "restoreEntity"
+  operation_type: "createEntity" | "updateEntity" | "deleteEntity" | "softDeleteEntity" | "restoreEntity" | "relationsAdded" | "relationsRemoved" | "relationsSoftDeleted" | "relationsRestored" | "relationsDeleted"
+}
+```
+
+### `TriggerEventEventCatalog`
+
+Set on executions started by an Event Catalog event (see EventCatalogTrigger). The full event payload is not stored inline (it may be up to 256 KB) but by reference in `payload_ref`; automation workers hydrate it before every action.
+
+
+```ts
+type TriggerEventEventCatalog = {
+  type: "event_catalog"
+  org_id: string
+  entity_id: string
+  entity_node_id: string
+  event_id: string
+  event_name: string
+  event_version: string
+  published_version?: string
+  event_time?: string // date-time
+  trigger_source_type?: string
+  trigger_source?: string
+  payload_ref?: {
+    bucket: string
+    key: string
+  }
+}
+```
+
+### `TriggerEventPayloadRef`
+
+S3 reference to the stored trigger event payload (`_downgrades` stripped, downgraded to the pinned version)
+
+```ts
+type TriggerEventPayloadRef = {
+  bucket: string
+  key: string
 }
 ```
 
@@ -3791,6 +3963,7 @@ type StartExecutionRequest = {
       entity_schema?: { ... }
       is_primary?: { ... }
     }>
+    trigger_user_id?: string
   }
   flow_execution_id?: string
   flow_automation_task_id?: string
@@ -4076,7 +4249,7 @@ type EntityOperationTrigger = {
   type: "entity_operation"
   configuration: {
     schema?: string
-    operations?: "createEntity" | "updateEntity" | "deleteEntity" | "softDeleteEntity" | "restoreEntity"[]
+    operations?: "createEntity" | "updateEntity" | "deleteEntity" | "softDeleteEntity" | "restoreEntity" | "relationsAdded" | "relationsRemoved" | "relationsSoftDeleted" | "relationsRestored" | "relationsDeleted"[]
     include_activities?: string[]
     exclude_activities?: string[]
     filter_config?: {
@@ -4108,7 +4281,7 @@ type ActivityTrigger = {
 ### `EntityOperation`
 
 ```ts
-type EntityOperation = "createEntity" | "updateEntity" | "deleteEntity" | "softDeleteEntity" | "restoreEntity"
+type EntityOperation = "createEntity" | "updateEntity" | "deleteEntity" | "softDeleteEntity" | "restoreEntity" | "relationsAdded" | "relationsRemoved" | "relationsSoftDeleted" | "relationsRestored" | "relationsDeleted"
 ```
 
 ### `EntitySearchFilter`
@@ -4236,6 +4409,25 @@ type EntityManualTrigger = {
   type: "entity_manual"
   configuration: {
     schema?: string
+  }
+}
+```
+
+### `EventCatalogTrigger`
+
+Starts the flow when an Event Catalog event is published for the organization. The execution runs in the context of one entity from the event's entity graph (`entity_node_id`), and the event payload is available to conditions and actions as the `event` variable context.
+
+
+```ts
+type EventCatalogTrigger = {
+  id?: string // uuid
+  type: "event_catalog"
+  configuration: {
+    event_name: string
+    event_version: string
+    entity_node_id: string
+    entity_schema: string
+    ignore_automation_triggered?: boolean
   }
 }
 ```
