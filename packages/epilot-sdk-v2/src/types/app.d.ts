@@ -9,6 +9,12 @@ import type {
 
 export declare namespace Components {
     namespace RequestBodies {
+        export interface CloneVersionRequest {
+            /**
+             * Short description of what the new version will change
+             */
+            changelog?: string;
+        }
         export interface CreateBundlePresignedRequest {
             /**
              * Version of the app
@@ -120,7 +126,11 @@ export declare namespace Components {
              * sensitive and must not declare `sensitive: false`.
              *
              */
-            options?: /* Options for the component configuration */ Schemas.Options[];
+            options?: /* An option declaration — a setting the installing org fills in. Declared at app level. */ Schemas.Options[];
+            /**
+             * Short description of what changed in this version
+             */
+            changelog?: string;
         }
         export type UpsertComponentRequest = Schemas.BaseComponent;
     }
@@ -292,7 +302,7 @@ export declare namespace Components {
             /**
              * List of options for the app component
              */
-            options?: /* Options for the component configuration */ Options[];
+            options?: /* An option declaration — a setting the installing org fills in. Declared at app level. */ Options[];
             /**
              * Keys of app-level options this component uses. Narrows which options are
              * folded back into `options` for legacy consumers (e.g. which values a journey
@@ -305,7 +315,11 @@ export declare namespace Components {
             surfaces?: {
                 [key: string]: any;
             };
-        } & (JourneyBlockComponent | PortalBlockComponent | PortalExtensionComponent | CustomFlowActionComponent | ErpInformToolkitComponent | CustomCapabilityComponent | ExternalProductCatalogComponent | CustomPageComponent | ApiProxyComponent);
+        } & (JourneyBlockComponent | PortalBlockComponent | PortalExtensionComponent | CustomFlowActionComponent | ErpInformToolkitComponent | CustomCapabilityComponent | ExternalProductCatalogComponent | CustomPageComponent | ApiProxyComponent | /**
+         * Exposes typed values resolved from an external system at runtime (e.g. a meter reading prediction). Consumers such as validation rules reference a hook and one of its results by id. Resolution is performed by the external-values-api on behalf of authenticated epilot 360 users and portal end customers.
+         *
+         */
+        ExternalValuesComponent);
         export interface BaseComponentCommon {
             /**
              * Unique identifier for the component
@@ -340,7 +354,7 @@ export declare namespace Components {
             /**
              * List of options for the app component
              */
-            options?: /* Options for the component configuration */ Options[];
+            options?: /* An option declaration — a setting the installing org fills in. Declared at app level. */ Options[];
             /**
              * Keys of app-level options this component uses. Narrows which options are
              * folded back into `options` for legacy consumers (e.g. which values a journey
@@ -538,7 +552,7 @@ export declare namespace Components {
         /**
          * Type of app component
          */
-        export type ComponentType = "CUSTOM_JOURNEY_BLOCK" | "CUSTOM_PORTAL_BLOCK" | "PORTAL_EXTENSION" | "CUSTOM_FLOW_ACTION" | "ERP_INFORM_TOOLKIT" | "CUSTOM_CAPABILITY" | "EXTERNAL_PRODUCT_CATALOG" | "CUSTOM_PAGE" | "API_PROXY" | "APP_FUNCTION";
+        export type ComponentType = "CUSTOM_JOURNEY_BLOCK" | "CUSTOM_PORTAL_BLOCK" | "PORTAL_EXTENSION" | "CUSTOM_FLOW_ACTION" | "ERP_INFORM_TOOLKIT" | "CUSTOM_CAPABILITY" | "EXTERNAL_PRODUCT_CATALOG" | "CUSTOM_PAGE" | "API_PROXY" | "EXTERNAL_VALUES" | "APP_FUNCTION";
         /**
          * Configuration of the published app
          */
@@ -657,7 +671,7 @@ export declare namespace Components {
             /**
              * App-level option declarations (with sensitivity) of this version
              */
-            options?: /* Options for the component configuration */ Options[];
+            options?: /* An option declaration — a setting the installing org fills in. Declared at app level. */ Options[];
             /**
              * Visibility of the app version
              */
@@ -847,7 +861,7 @@ export declare namespace Components {
             /**
              * App-level option declarations (with sensitivity) of this version
              */
-            options?: /* Options for the component configuration */ Options[];
+            options?: /* An option declaration — a setting the installing org fills in. Declared at app level. */ Options[];
             /**
              * Visibility of the app version
              */
@@ -1256,6 +1270,167 @@ export declare namespace Components {
             };
         }
         /**
+         * Exposes typed values resolved from an external system at runtime (e.g. a meter reading prediction). Consumers such as validation rules reference a hook and one of its results by id. Resolution is performed by the external-values-api on behalf of authenticated epilot 360 users and portal end customers.
+         *
+         */
+        export interface ExternalValuesComponent {
+            component_type: "EXTERNAL_VALUES";
+            configuration: /* Configuration for an EXTERNAL_VALUES component */ ExternalValuesConfig;
+        }
+        /**
+         * Configuration for an EXTERNAL_VALUES component
+         */
+        export interface ExternalValuesConfig {
+            /**
+             * Hooks exposed by this component. Hook ids must be unique within the component.
+             */
+            hooks: /**
+             * One external call that returns one or more typed results. Interpolated templates (Liquid) have access to `Input`, `Context`, `Consumer`, `Options`, `Env` and — for `result` templates — `Response` and `AuthResponse`.
+             *
+             */
+            ExternalValuesHook[];
+        }
+        /**
+         * One external call that returns one or more typed results. Interpolated templates (Liquid) have access to `Input`, `Context`, `Consumer`, `Options`, `Env` and — for `result` templates — `Response` and `AuthResponse`.
+         *
+         */
+        export interface ExternalValuesHook {
+            /**
+             * Stable identifier; consumers (e.g. validation rules) reference it. Renaming breaks references.
+             */
+            id: string; // ^[a-zA-Z0-9_-]{1,100}$
+            name: TranslatedString;
+            description?: TranslatedString;
+            /**
+             * Static request authentication applied to the call.
+             * - `none`: no static authentication.
+             * - `header`: sends `auth_secret` in header `auth_header` (default `X-API-Key`).
+             * - `bearer`: sends `Authorization: Bearer <auth_secret>`.
+             * - `hmac`: signs the request per Standard Webhooks (headers `webhook-id`,
+             *   `webhook-timestamp`, `webhook-signature` = `v1,<base64 HMAC-SHA256>` over
+             *   `<id>.<timestamp>.<body>`) using `auth_secret` as a `whsec_`-prefixed
+             *   base64 secret, exactly as epilot webhooks do.
+             *
+             * `auth_secret` is required when `auth_type` is `header`, `bearer` or `hmac`.
+             * Combine with `auth` (a pre-call that fetches a token) when the target needs both.
+             *
+             */
+            auth_type?: "none" | "header" | "bearer" | "hmac";
+            /**
+             * Header name used when `auth_type` is `header`. Defaults to `X-API-Key`.
+             */
+            auth_header?: string;
+            /**
+             * Liquid template resolving to the secret, e.g. "{{Options.api_key}}". Must reference an option declared with `type: secret`; literals are rejected. Required when `auth_type` is `header`, `bearer` or `hmac`.
+             * example:
+             * {{Options.api_key}}
+             */
+            auth_secret?: string;
+            auth?: PortalExtensionAuthBlock;
+            call: {
+                /**
+                 * HTTP method to use for the call
+                 */
+                method?: "GET" | "POST" | "PUT" | "PATCH";
+                /**
+                 * URL to call. Supports variable interpolation.
+                 */
+                url: string;
+                /**
+                 * Headers to send with the call. Supports variable interpolation.
+                 */
+                headers?: {
+                    [name: string]: string;
+                };
+                /**
+                 * Query parameters to append to the URL. Supports variable interpolation.
+                 */
+                params?: {
+                    [name: string]: string;
+                };
+                /**
+                 * JSON body to send. Values support variable interpolation. When omitted, `{ Input, Context, Consumer }` is sent as-is.
+                 */
+                body?: {
+                    [name: string]: any;
+                };
+            };
+            /**
+             * Typed results extracted from the response. Result ids must be unique within the hook.
+             */
+            result: [
+                /**
+                 * A single typed value extracted from the hook response. Exactly one of `template`, `path` or `jsonata` must be set.
+                 *
+                 */
+                ExternalValuesResult,
+                .../**
+                 * A single typed value extracted from the hook response. Exactly one of `template`, `path` or `jsonata` must be set.
+                 *
+                 */
+                ExternalValuesResult[]
+            ];
+            /**
+             * Timeout for the external call in milliseconds.
+             */
+            timeout_ms?: number;
+            /**
+             * Behaviour when the external system is unavailable (timeout, network or upstream error). `skip`: consumers ignore conditions depending on this hook. `block`: consumers treat the dependent action as not allowed.
+             */
+            on_unavailable?: "skip" | "block";
+            /**
+             * Response caching. Off when omitted.
+             */
+            cache?: {
+                /**
+                 * Time to live in seconds. 0 disables caching.
+                 */
+                ttl_seconds: number;
+                /**
+                 * Liquid template for the cache key. Defaults to a hash of org, app, hook, `Input` and `Context`.
+                 */
+                key?: string;
+            };
+            /**
+             * If set, requests are sent from epilot's static egress IPs. Mutually exclusive with secure_proxy.
+             */
+            use_static_ips?: boolean;
+            secure_proxy?: /* If set, requests are routed through the ERP Integration secure proxy. Mutually exclusive with use_static_ips. */ PortalExtensionSecureProxy;
+        }
+        /**
+         * A single typed value extracted from the hook response. Exactly one of `template`, `path` or `jsonata` must be set.
+         *
+         */
+        export interface ExternalValuesResult {
+            /**
+             * Stable identifier of the result within the hook. Renaming breaks references.
+             */
+            id: string; // ^[a-zA-Z0-9_-]{1,100}$
+            /**
+             * Type the extracted value is coerced to.
+             */
+            type: "number" | "text" | "date" | "boolean";
+            name: TranslatedString;
+            /**
+             * Liquid template over `Response` etc.; output coerced to `type`.
+             * example:
+             * {{Response.value}}
+             */
+            template?: string;
+            /**
+             * Dot path into the response body, e.g. "data.limit".
+             * example:
+             * data.limit
+             */
+            path?: string;
+            /**
+             * JSONata expression over `{ Response, Input, Context, Options, Env }`.
+             * example:
+             * $sum(Response.items.amount)
+             */
+            jsonata?: string;
+        }
+        /**
          * A named server-side function belonging to the app. Runs in the epilot code-execution sandbox with an installation-scoped app token. Functions with a schedule are executed automatically once per installation.
          *
          */
@@ -1406,7 +1581,7 @@ export declare namespace Components {
              * `configured` and `value_updated_at` instead.
              *
              */
-            options?: /* Options for the component configuration */ Options[];
+            options?: /* An option declaration — a setting the installing org fills in. Declared at app level. */ Options[];
             /**
              * Version of the app that is installed
              */
@@ -1619,7 +1794,7 @@ export declare namespace Components {
             value: any;
         }
         /**
-         * Options for the component configuration
+         * An option declaration — a setting the installing org fills in. Declared at app level.
          */
         export interface Options {
             /**
@@ -1678,7 +1853,7 @@ export declare namespace Components {
              * Write-only, server-side only value — like a sensitive environment variable
              * (app-level options only). Sensitive values are never serialized in any response;
              * they are resolvable only via server-side channels (API proxy injection, function
-             * `secrets` allowlist, the internal options/resolve endpoint). Non-sensitive values
+             * runs, the internal options/resolve endpoint). Non-sensitive values
              * are readable wherever the app runs, including the end-customer browser (journey and
              * portal runtime). Forced to true for `secret`-touching options. Default: false.
              *
@@ -1856,7 +2031,7 @@ export declare namespace Components {
              *         { "id": "ht", "label": { "en": "High tariff" }, "aggregation_group": "consumption", "statistical_method": "sum", "unit": "kWh", "color": "primary", "precision": 2 },
              *         ...
              *       ],
-             *       "intervals": ["PT15M", "PT1H", "P1D", "P1M"],
+             *       "intervals": ["PT15M", "PT1H", "P1D", "P1M", "P1Y"],
              *       "data_range": { "from": "2024-01-01T00:00:00Z", "to": "2026-05-01T00:00:00Z" }
              *     }
              *   Each type option carries its own `statistical_method`, which describes the method already applied to that type's data and dictates the chart shape: `sum` is rendered as a bar chart; `min`, `average`, and `max` are rendered as a line chart. A single visualization can therefore mix bar-shaped types with line-shaped types. Defaults to `sum` when omitted.
@@ -2733,7 +2908,7 @@ export declare namespace Components {
          *         { "id": "ht", "label": { "en": "High tariff" }, "aggregation_group": "consumption", "statistical_method": "sum", "unit": "kWh", "color": "primary", "precision": 2 },
          *         ...
          *       ],
-         *       "intervals": ["PT15M", "PT1H", "P1D", "P1M"],
+         *       "intervals": ["PT15M", "PT1H", "P1D", "P1M", "P1Y"],
          *       "data_range": { "from": "2024-01-01T00:00:00Z", "to": "2026-05-01T00:00:00Z" }
          *     }
          *   Each type option carries its own `statistical_method`, which describes the method already applied to that type's data and dictates the chart shape: `sum` is rendered as a bar chart; `min`, `average`, and `max` are rendered as a line chart. A single visualization can therefore mix bar-shaped types with line-shaped types. Defaults to `sum` when omitted.
@@ -2921,7 +3096,7 @@ export declare namespace Components {
             /**
              * App-level option declarations (with sensitivity) of this version
              */
-            options?: /* Options for the component configuration */ Options[];
+            options?: /* An option declaration — a setting the installing org fills in. Declared at app level. */ Options[];
             /**
              * Flag to indicate if the app is in beta.
              */
@@ -3031,6 +3206,7 @@ export declare namespace Paths {
             sourceVersion: Parameters.SourceVersion;
             targetVersion: Parameters.TargetVersion;
         }
+        export type RequestBody = Components.RequestBodies.CloneVersionRequest;
         namespace Responses {
             export interface $201 {
                 app_id?: string;
@@ -3614,7 +3790,7 @@ export declare namespace Paths {
         }
         namespace Responses {
             export interface $200 {
-                options?: /* Options for the component configuration */ Components.Schemas.Options[];
+                options?: /* An option declaration — a setting the installing org fills in. Declared at app level. */ Components.Schemas.Options[];
             }
             export interface $403 {
             }
@@ -3920,7 +4096,7 @@ export interface OperationMethods {
    */
   'cloneVersion'(
     parameters?: Parameters<Paths.CloneVersion.PathParameters> | null,
-    data?: any,
+    data?: Paths.CloneVersion.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CloneVersion.Responses.$201>
   /**
@@ -4313,7 +4489,7 @@ export interface PathsDictionary {
      */
     'post'(
       parameters?: Parameters<Paths.CloneVersion.PathParameters> | null,
-      data?: any,
+      data?: Paths.CloneVersion.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.CloneVersion.Responses.$201>
   }
@@ -4500,6 +4676,10 @@ export type ExternalProductCatalogComponent = Components.Schemas.ExternalProduct
 export type ExternalProductCatalogConfig = Components.Schemas.ExternalProductCatalogConfig;
 export type ExternalProductCatalogHookProductRecommendations = Components.Schemas.ExternalProductCatalogHookProductRecommendations;
 export type ExternalProductCatalogHookProducts = Components.Schemas.ExternalProductCatalogHookProducts;
+export type ExternalValuesComponent = Components.Schemas.ExternalValuesComponent;
+export type ExternalValuesConfig = Components.Schemas.ExternalValuesConfig;
+export type ExternalValuesHook = Components.Schemas.ExternalValuesHook;
+export type ExternalValuesResult = Components.Schemas.ExternalValuesResult;
 export type FunctionDefinition = Components.Schemas.FunctionDefinition;
 export type FunctionRefCustomActionConfig = Components.Schemas.FunctionRefCustomActionConfig;
 export type Grants = Components.Schemas.Grants;
