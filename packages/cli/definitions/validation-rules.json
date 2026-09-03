@@ -208,7 +208,7 @@
             }
           },
           "400": {
-            "description": "Bad Request - Invalid request body",
+            "description": "Bad Request - Invalid request body. Invalid external comparison values additionally carry a\n`code` (`external_value_not_found` when the app is not installed or the hook / result does not\nexist, `external_value_incompatible` when the result type does not match the compared kind).\n",
             "content": {
               "application/json": {
                 "schema": {
@@ -217,6 +217,13 @@
                     "message": {
                       "type": "string",
                       "example": "Invalid request body"
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "external_value_not_found",
+                        "external_value_incompatible"
+                      ]
                     }
                   }
                 }
@@ -484,7 +491,7 @@
             }
           },
           "400": {
-            "description": "Bad Request - Invalid request body",
+            "description": "Bad Request - Invalid request body. Invalid external comparison values additionally carry a\n`code` (`external_value_not_found` when the app is not installed or the hook / result does not\nexist, `external_value_incompatible` when the result type does not match the compared kind).\n",
             "content": {
               "application/json": {
                 "schema": {
@@ -493,6 +500,13 @@
                     "message": {
                       "type": "string",
                       "example": "Invalid request body"
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "external_value_not_found",
+                        "external_value_incompatible"
+                      ]
                     }
                   }
                 }
@@ -1984,7 +1998,7 @@
       },
       "ComparisonRuleType": {
         "type": "object",
-        "description": "Declarative validation rule (schema version v2). Supports predefined comparison operators\nover number, date and text inputs, with static, dynamic (context path) and relative-date\ncomparison values.\n",
+        "description": "Declarative validation rule (schema version v2). Supports predefined comparison operators\nover number, date and text inputs, with static, dynamic (context path), relative-date and\nexternal (app-provided) comparison values.\n",
         "required": [
           "input_type",
           "conditions"
@@ -2089,6 +2103,12 @@
             "$ref": "#/components/schemas/RelativeDateValue"
           },
           {
+            "$ref": "#/components/schemas/EnvironmentValue"
+          },
+          {
+            "$ref": "#/components/schemas/ExternalValue"
+          },
+          {
             "$ref": "#/components/schemas/RangeValue"
           },
           {
@@ -2097,7 +2117,7 @@
         ]
       },
       "ScalarValue": {
-        "description": "A single comparison value - static, resolved from context, or a relative date.",
+        "description": "A single comparison value - static, resolved from context, a relative date, an organisation environment variable, or an external value.",
         "oneOf": [
           {
             "$ref": "#/components/schemas/StaticValue"
@@ -2107,8 +2127,81 @@
           },
           {
             "$ref": "#/components/schemas/RelativeDateValue"
+          },
+          {
+            "$ref": "#/components/schemas/EnvironmentValue"
+          },
+          {
+            "$ref": "#/components/schemas/ExternalValue"
           }
         ]
+      },
+      "EnvironmentValue": {
+        "type": "object",
+        "description": "A comparison value resolved at evaluation time from an organisation environment variable\n(environments-api). The rule stores the key, never the value, so one change to the variable\nreaches every rule that references it and a blueprint install never overwrites the\norganisation's own value.\n\nOnly browser-safe variable types are allowed: `Number` for numeric comparisons, `Text` for\ntext comparisons and for dates (ISO 8601 string), `Boolean` for `applies_when` values.\n`String` and `SecretString` variables are rejected at write time. Write-time validation also\nchecks that the variable exists in the organisation; a variable that exists without a value\n(for example seeded by a blueprint install) is accepted and resolves as unavailable until set.\n",
+        "required": [
+          "source",
+          "key"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "source": {
+            "type": "string",
+            "enum": [
+              "environment"
+            ]
+          },
+          "key": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_.\\-]{0,127}$",
+            "description": "Environment variable key, e.g. `abschlag.max`."
+          },
+          "adjust": {
+            "$ref": "#/components/schemas/ValueAdjustment"
+          }
+        }
+      },
+      "ExternalValue": {
+        "type": "object",
+        "description": "A comparison value produced at evaluation time by an External Values hook of an installed\napp (component type `EXTERNAL_VALUES`). The rule stores the reference only; the value is\nresolved server-side by the external-values-api, which executes the hook's HTTP call with\nthe app's credentials and returns the typed result identified by `result_id`.\n\nWrite-time validation checks that the app is installed in the organisation, that the hook\nand result exist, and that the result's type is compatible with the compared kind\n(`number` results for numeric comparisons, `text` for text, `date` for date). External values\nare resolved only for authenticated consumers (epilot 360 users and portal end customers);\nin public journeys the dependent conditions are skipped.\n",
+        "required": [
+          "source",
+          "app_id",
+          "hook_id",
+          "result_id"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "source": {
+            "type": "string",
+            "enum": [
+              "external"
+            ]
+          },
+          "app_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "description": "ID of the installed app that provides the External Values component."
+          },
+          "hook_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[a-zA-Z0-9_-]+$",
+            "description": "ID of the hook within the app's External Values component."
+          },
+          "result_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[a-zA-Z0-9_-]+$",
+            "description": "ID of the result entry within the hook whose value is compared."
+          },
+          "adjust": {
+            "$ref": "#/components/schemas/ValueAdjustment"
+          }
+        }
       },
       "StaticValue": {
         "type": "object",
@@ -2194,6 +2287,9 @@
               },
               {
                 "$ref": "#/components/schemas/ContextValue"
+              },
+              {
+                "$ref": "#/components/schemas/EnvironmentValue"
               }
             ]
           },
@@ -2324,7 +2420,7 @@
             "description": "Comparison applied to the resolved context value. `isEmpty` / `isNotEmpty`\ntake no `value`; all other operators require one.\n"
           },
           "value": {
-            "description": "Static comparison value for binary operators.",
+            "description": "Comparison value for binary operators: a static number, string or boolean, or an\norganisation environment variable (`Number`, `Text` or `Boolean`) so a precondition\ncan act as a per-organisation switch or threshold.\n",
             "oneOf": [
               {
                 "type": "number"
@@ -2334,6 +2430,9 @@
               },
               {
                 "type": "boolean"
+              },
+              {
+                "$ref": "#/components/schemas/EnvironmentValue"
               }
             ]
           }
