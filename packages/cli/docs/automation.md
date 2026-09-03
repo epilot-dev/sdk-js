@@ -73,6 +73,7 @@ Search available automation flows
 | `from` | query | number | No | Pagination: starting for results |
 | `trigger_source_id` | query | string | No | Trigger source identifier |
 | `target_workflow` | query | string | No | Filter by target workflow ID. Returns only automations that have a trigger-workflow action targeting this workflow. |
+| `trigger_event_name` | query | string | No | Filter by Event Catalog event name. Returns only automations that have an event_catalog trigger for this event. |
 | `include_flows` | query | boolean | No | Include flow automations in the response |
 
 **Sample Call**
@@ -357,7 +358,8 @@ epilot automation startExecution \
         "entity_schema": "string",
         "is_primary": true
       }
-    ]
+    ],
+    "trigger_user_id": "10006129"
   },
   "flow_execution_id": "string",
   "flow_automation_task_id": "string"
@@ -490,7 +492,8 @@ epilot automation startExecution --jsonata 'id'
     "_automation_chain": ["string"],
     "entity_contexts": [
       {}
-    ]
+    ],
+    "trigger_user_id": "10006129"
   },
   "workflow_wait_context": {
     "workflow_execution_id": "string",
@@ -948,7 +951,8 @@ epilot automation getExecution -p execution_id=9baf184f-bc81-4128-bca3-d974c90a1
     "_automation_chain": ["string"],
     "entity_contexts": [
       {}
-    ]
+    ],
+    "trigger_user_id": "10006129"
   },
   "workflow_wait_context": {
     "workflow_execution_id": "string",
@@ -1117,7 +1121,8 @@ epilot automation cancelExecution -p execution_id=9baf184f-bc81-4128-bca3-d974c9
     "_automation_chain": ["string"],
     "entity_contexts": [
       {}
-    ]
+    ],
+    "trigger_user_id": "10006129"
   },
   "workflow_wait_context": {
     "workflow_execution_id": "string",
@@ -1264,7 +1269,8 @@ epilot automation resumeExecutionWithToken --jsonata 'execution'
       "workflow_role": "trigger_workflow",
       "_execution_chain": {},
       "_automation_chain": ["string"],
-      "entity_contexts": []
+      "entity_contexts": [],
+      "trigger_user_id": "10006129"
     },
     "workflow_wait_context": {
       "workflow_execution_id": "string",
@@ -1290,7 +1296,8 @@ epilot automation resumeExecutionWithToken --jsonata 'execution'
       "mapping_attributes": [],
       "relation_attributes": [],
       "linkback_relation_attribute": "mapped_entities",
-      "linkback_relation_tags": ["string"]
+      "linkback_relation_tags": ["string"],
+      "graph_context": []
     },
     "allow_failure": true,
     "created_automatically": true,
