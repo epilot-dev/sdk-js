@@ -102,6 +102,12 @@ describe('runtime models are exposed by the SDK', () => {
     expect(OVERRIDABLE_ATTRIBUTE_TYPES.has('ordered_list')).toBe(false);
   });
 
+  it('every relation type is overridable — a variant swaps the whole $relation list', () => {
+    for (const type of RELATION_ATTRIBUTE_TYPE_LIST) {
+      expect(OVERRIDABLE_ATTRIBUTE_TYPES.has(type), `"${type}" should be overridable`).toBe(true);
+    }
+  });
+
   it('exposes the entity relation affinity enum through @epilot/sdk/entity', () => {
     expect(RelationAffinityMode.WEAK).toBe('weak');
     expect(RelationAffinityMode.STRONG).toBe('strong');
