@@ -7375,7 +7375,7 @@
               },
               "options": {
                 "type": "array",
-                "description": "Selectable options, in the same shape a `select` attribute's `options` take: a bare\nvalue or a `{ value, title }` object. May be empty while the condition is being\nconfigured. Unlike a `select` attribute there is no `allow_any`.\n",
+                "description": "Selectable options, in the same shape a `select` attribute's `options` take: a bare\nvalue or a `{ value, title }` object. May be empty while the condition is being\nconfigured.\n",
                 "items": {
                   "anyOf": [
                     {

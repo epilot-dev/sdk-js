@@ -11657,7 +11657,7 @@ export declare namespace Components {
             /**
              * Selectable options, in the same shape a `select` attribute's `options` take: a bare
              * value or a `{ value, title }` object. May be empty while the condition is being
-             * configured. Unlike a `select` attribute there is no `allow_any`.
+             * configured.
              *
              * example:
              * [

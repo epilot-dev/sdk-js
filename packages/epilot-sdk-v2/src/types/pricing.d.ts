@@ -4216,18 +4216,12 @@ export declare namespace Components {
              */
             ConditionType;
             /**
-             * The declared vocabulary of a `select` condition. Absent for every other type.
+             * The declared vocabulary of a `select` condition, in the same shape a `select` attribute's
+             * `options` take: a bare value or a `{ value, title }` object. Absent for every other type.
              *
-             * The same shape a `select` attribute's `options` has on the Entity API, item for item: an
-             * entry is either the value itself or an object carrying that value and an optional display
-             * `title`. A `title` is never pinned by a variant and never matched — two entries differing
-             * only in their title are one vocabulary entry.
-             *
-             * Unlike a `select` attribute, a condition has no `allow_any`: the vocabulary is always
-             * enforced on variant writes, and a pinned value outside it is rejected with
-             * `CONDITION_VALUE_INVALID`. It is *not* enforced on resolve — a vocabulary says what may
-             * be stored, not what may be asked for, so a context value outside it is a query that
-             * simply matches nothing.
+             * Enforced on variant writes: a pinned value outside it is rejected with
+             * `CONDITION_VALUE_INVALID`. Not enforced on resolve — a context value outside it simply
+             * matches nothing.
              *
              * example:
              * [
@@ -4724,7 +4718,7 @@ export declare namespace Components {
              * millisecond-precision UTC, a `daterange` an object carrying `from` and `until` where an empty
              * string is an open end, a `location` of format `zipcode` the postal code itself and one of
              * format `zipcode + town` an object carrying both. A `select` value must be a string, and must
-             * be one the condition's `options` declare — there is no `allow_any` on a condition.
+             * be one the condition's `options` declare.
              *
              * `default`, and any name beginning with `_`, are reserved for the server and cannot be pinned
              * here. Whether a variant is the entity's fallback is set through the request's `default` flag.
@@ -7265,7 +7259,7 @@ export declare namespace Components {
          * millisecond-precision UTC, a `daterange` an object carrying `from` and `until` where an empty
          * string is an open end, a `location` of format `zipcode` the postal code itself and one of
          * format `zipcode + town` an object carrying both. A `select` value must be a string, and must
-         * be one the condition's `options` declare — there is no `allow_any` on a condition.
+         * be one the condition's `options` declare.
          *
          * `default`, and any name beginning with `_`, are reserved for the server and cannot be pinned
          * here. Whether a variant is the entity's fallback is set through the request's `default` flag.
