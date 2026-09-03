@@ -437,7 +437,7 @@
       "post": {
         "operationId": "triggerEvent",
         "summary": "triggerEvent",
-        "description": "Explicitly trigger an event by providing input field values and an optional entity seed\nfor graph hydration. The event must be enabled for the organization.\n\n- For events with an entity_graph, a seed (entity_id + node_id) is required\n- For events without an entity_graph, only fields are needed\n- Entity operation context fields (operation, trigger_entity, activity_id, activity_type)\n  are not included when triggering via API\n",
+        "description": "Explicitly trigger an event by providing input field values and an optional entity seed\nfor graph hydration. The event must be enabled for the organization.\n\n- For events with an entity_graph, a seed (entity_id + node_id) is required\n- For events without an entity_graph, only fields are needed\n- Entity operation context fields (operation, trigger_entity, activity_id, activity_type)\n  are not included when triggering via API\n- Events marked `automation_trigger_only` require `_trigger_source_type: automation` and a\n  stable execution/action ID in `_trigger_source`; retries with that ID return the same\n  logical event, including while durable delivery is pending\n",
         "tags": [
           "Event Catalog"
         ],
@@ -464,7 +464,7 @@
         },
         "responses": {
           "200": {
-            "description": "Event triggered successfully",
+            "description": "Event published successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -481,6 +481,33 @@
           },
           "404": {
             "description": "Event not found"
+          },
+          "409": {
+            "description": "The Automation trigger source was already used with different trigger input, including a different entity seed"
+          },
+          "425": {
+            "description": "The hydrated entity graph is not ready yet, another request currently owns the\nidempotency lease, or a durably queued event (including an already-requested redrive)\nis awaiting publication. Automation must retry with the same trigger source and may\nadvance only after a 200 response.\n",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds before the Automation action should retry",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Durable delivery exhausted its bounded automatic redrives. The same logical event is\nretained and no new event is created. An API retry with the same trigger source\nrequests a redrive of the existing Standard workflow from its failed task checkpoint\nand receives this retryable response. Subsequent retries receive 425 while that\nredrive is pending or running.\n",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds before the Automation action should retry",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            }
           }
         }
       }
@@ -593,6 +620,19 @@
             "description": "Whether this event can be explicitly triggered by automations.\nWhen true, the event will appear in the automation builder as a\n\"Trigger Event\" action option.\nDefaults to false if not specified.\n",
             "default": false,
             "example": true
+          },
+          "automation_trigger_only": {
+            "type": "boolean",
+            "readOnly": true,
+            "description": "Whether explicit triggering is restricted to Automation. When true, callers must pass\n`_trigger_source_type: automation` and a stable `_trigger_source`. The trigger uses\nstrict entity readiness validation and the durable Automation outbox.\nRequires `automation_trigger: true` and cannot be combined with `entity_operation`.\n",
+            "default": false,
+            "example": true
+          },
+          "automation_trigger_seed_node": {
+            "type": "string",
+            "readOnly": true,
+            "description": "Required entity-graph seed node for an Automation-only trigger. When configured, an\nexplicit trigger using any other node is rejected before hydration.\n",
+            "example": "ticket"
           },
           "success_criteria": {
             "type": "array",
@@ -982,6 +1022,13 @@
             "items": {
               "$ref": "#/components/schemas/InlineDowngradeStep"
             }
+          },
+          "_automation_chain": {
+            "type": "array",
+            "description": "Ordered automation flow ids that caused this event (at most 100), propagated verbatim from the trigger input or the originating entity operation. Internal loop-prevention transport for automation-api; svc-webhooks strips it before delivery.",
+            "items": {
+              "type": "string"
+            }
           }
         },
         "required": [
@@ -1300,6 +1347,14 @@
       "TriggerEventPayload": {
         "type": "object",
         "description": "Payload for explicitly triggering an event via API",
+        "example": {
+          "seed": {
+            "entity_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+            "node_id": "ticket"
+          },
+          "_trigger_source_type": "automation",
+          "_trigger_source": "execution-id/action-id"
+        },
         "properties": {
           "seed": {
             "type": "object",
@@ -1338,7 +1393,14 @@
           },
           "_trigger_source": {
             "type": "string",
-            "description": "Identifier of the specific trigger source.\nExamples: user ID, automation execution ID, activity ID, portal user email\nDefaults to the calling user ID if not specified.\n"
+            "description": "Identifier of the specific trigger source.\nExamples: user ID, automation execution ID, activity ID, portal user email\nDefaults to the calling user ID if not specified.\nRequired for events marked `automation_trigger_only` and must remain stable across\naction retries.\n"
+          },
+          "_automation_chain": {
+            "type": "array",
+            "description": "Ordered automation flow ids that caused this trigger (at most 100); propagated verbatim onto the published event for automation loop prevention.",
+            "items": {
+              "type": "string"
+            }
           }
         }
       },
@@ -1348,7 +1410,7 @@
         "properties": {
           "success": {
             "type": "boolean",
-            "description": "Whether the event was triggered successfully"
+            "description": "Whether the event was published successfully"
           },
           "event_id": {
             "type": "string",
@@ -1356,7 +1418,7 @@
           },
           "event_bridge_event_id": {
             "type": "string",
-            "description": "EventBridge event ID from publishing"
+            "description": "EventBridge event ID when synchronous delivery or a completed retry provides it"
           }
         },
         "required": [

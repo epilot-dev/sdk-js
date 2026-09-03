@@ -209,6 +209,10 @@ declare namespace Components {
              * Inline downgrade chain stamped by Event Catalog at publish time, ordered newest-to-oldest. Present ONLY on multi-version events. Internal versioning transport: consumers (e.g. svc-webhooks) walk the payload back to a pinned version using these JSONata steps, then strip the field before delivery -- end customers never receive it.
              */
             _downgrades?: /* One step of an event's inline `_downgrades` chain. Maps the current-version payload to the previous version via a JSONata expression. Stamped by Event Catalog at publish time; executed by consumers during walk-back, never by EC itself. */ InlineDowngradeStep[];
+            /**
+             * Ordered automation flow ids that caused this event (at most 100), propagated verbatim from the trigger input or the originating entity operation. Internal loop-prevention transport for automation-api; svc-webhooks strips it before delivery.
+             */
+            _automation_chain?: string[];
         }
         /**
          * A file attachment associated with an event
@@ -402,6 +406,24 @@ declare namespace Components {
              */
             automation_trigger?: boolean;
             /**
+             * Whether explicit triggering is restricted to Automation. When true, callers must pass
+             * `_trigger_source_type: automation` and a stable `_trigger_source`. The trigger uses
+             * strict entity readiness validation and the durable Automation outbox.
+             * Requires `automation_trigger: true` and cannot be combined with `entity_operation`.
+             *
+             * example:
+             * true
+             */
+            automation_trigger_only?: boolean;
+            /**
+             * Required entity-graph seed node for an Automation-only trigger. When configured, an
+             * explicit trigger using any other node is rejected before hydration.
+             *
+             * example:
+             * ticket
+             */
+            automation_trigger_seed_node?: string;
+            /**
              * Org-defined success criteria for this event: the entity attributes that an
              * organization considers must be captured for an event change request to be
              * treated as complete (e.g. for telephony / self-service flows).
@@ -586,6 +608,24 @@ declare namespace Components {
              * true
              */
             automation_trigger?: boolean;
+            /**
+             * Whether explicit triggering is restricted to Automation. When true, callers must pass
+             * `_trigger_source_type: automation` and a stable `_trigger_source`. The trigger uses
+             * strict entity readiness validation and the durable Automation outbox.
+             * Requires `automation_trigger: true` and cannot be combined with `entity_operation`.
+             *
+             * example:
+             * true
+             */
+            automation_trigger_only?: boolean;
+            /**
+             * Required entity-graph seed node for an Automation-only trigger. When configured, an
+             * explicit trigger using any other node is rejected before hydration.
+             *
+             * example:
+             * ticket
+             */
+            automation_trigger_seed_node?: string;
             /**
              * Org-defined success criteria for this event: the entity attributes that an
              * organization considers must be captured for an event change request to be
@@ -1169,6 +1209,15 @@ declare namespace Components {
         }
         /**
          * Payload for explicitly triggering an event via API
+         * example:
+         * {
+         *   "seed": {
+         *     "entity_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+         *     "node_id": "ticket"
+         *   },
+         *   "_trigger_source_type": "automation",
+         *   "_trigger_source": "execution-id/action-id"
+         * }
          */
         export interface TriggerEventPayload {
             /**
@@ -1214,16 +1263,22 @@ declare namespace Components {
              * Identifier of the specific trigger source.
              * Examples: user ID, automation execution ID, activity ID, portal user email
              * Defaults to the calling user ID if not specified.
+             * Required for events marked `automation_trigger_only` and must remain stable across
+             * action retries.
              *
              */
             _trigger_source?: string;
+            /**
+             * Ordered automation flow ids that caused this trigger (at most 100); propagated verbatim onto the published event for automation loop prevention.
+             */
+            _automation_chain?: string[];
         }
         /**
          * Response from triggering an event
          */
         export interface TriggerEventResponse {
             /**
-             * Whether the event was triggered successfully
+             * Whether the event was published successfully
              */
             success: boolean;
             /**
@@ -1231,7 +1286,7 @@ declare namespace Components {
              */
             event_id: string;
             /**
-             * EventBridge event ID from publishing
+             * EventBridge event ID when synchronous delivery or a completed retry provides it
              */
             event_bridge_event_id?: string;
         }
@@ -1387,6 +1442,24 @@ declare namespace Components {
              * true
              */
             automation_trigger?: boolean;
+            /**
+             * Whether explicit triggering is restricted to Automation. When true, callers must pass
+             * `_trigger_source_type: automation` and a stable `_trigger_source`. The trigger uses
+             * strict entity readiness validation and the durable Automation outbox.
+             * Requires `automation_trigger: true` and cannot be combined with `entity_operation`.
+             *
+             * example:
+             * true
+             */
+            automation_trigger_only?: boolean;
+            /**
+             * Required entity-graph seed node for an Automation-only trigger. When configured, an
+             * explicit trigger using any other node is rejected before hydration.
+             *
+             * example:
+             * ticket
+             */
+            automation_trigger_seed_node?: string;
             /**
              * Org-defined success criteria for this event: the entity attributes that an
              * organization considers must be captured for an event change request to be
@@ -1855,7 +1928,19 @@ declare namespace Paths {
         export interface PathParameters {
             event_name: Parameters.EventName;
         }
-        export type RequestBody = /* Payload for explicitly triggering an event via API */ Components.Schemas.TriggerEventPayload;
+        export type RequestBody = /**
+         * Payload for explicitly triggering an event via API
+         * example:
+         * {
+         *   "seed": {
+         *     "entity_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+         *     "node_id": "ticket"
+         *   },
+         *   "_trigger_source_type": "automation",
+         *   "_trigger_source": "execution-id/action-id"
+         * }
+         */
+        Components.Schemas.TriggerEventPayload;
         namespace Responses {
             export type $200 = /* Response from triggering an event */ Components.Schemas.TriggerEventResponse;
             export interface $400 {
@@ -1863,6 +1948,12 @@ declare namespace Paths {
             export interface $403 {
             }
             export interface $404 {
+            }
+            export interface $409 {
+            }
+            export interface $425 {
+            }
+            export interface $503 {
             }
         }
     }
@@ -1986,6 +2077,9 @@ export interface OperationMethods {
    * - For events without an entity_graph, only fields are needed
    * - Entity operation context fields (operation, trigger_entity, activity_id, activity_type)
    *   are not included when triggering via API
+   * - Events marked `automation_trigger_only` require `_trigger_source_type: automation` and a
+   *   stable execution/action ID in `_trigger_source`; retries with that ID return the same
+   *   logical event, including while durable delivery is pending
    * 
    */
   'triggerEvent'(
@@ -2129,6 +2223,9 @@ export interface PathsDictionary {
      * - For events without an entity_graph, only fields are needed
      * - Entity operation context fields (operation, trigger_entity, activity_id, activity_type)
      *   are not included when triggering via API
+     * - Events marked `automation_trigger_only` require `_trigger_source_type: automation` and a
+     *   stable execution/action ID in `_trigger_source`; retries with that ID return the same
+     *   logical event, including while durable delivery is pending
      * 
      */
     'post'(
