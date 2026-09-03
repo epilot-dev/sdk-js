@@ -393,6 +393,9 @@
             "required": true
           }
         ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/CloneVersionRequest"
+        },
         "responses": {}
       }
     },
@@ -614,6 +617,12 @@
       },
       "PatchVersionRequest": {
         "required": true,
+        "content": {
+          "application/json": {}
+        }
+      },
+      "CloneVersionRequest": {
+        "required": false,
         "content": {
           "application/json": {}
         }
