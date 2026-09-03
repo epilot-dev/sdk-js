@@ -11655,17 +11655,9 @@ export declare namespace Components {
              */
             type: "select";
             /**
-             * The vocabulary a variant may pin this condition to. May be empty while the condition
-             * is being configured.
-             *
-             * The same shape a `select` attribute's `options` has, item for item: an entry is
-             * either the value itself or an object carrying that value and an optional display
-             * `title`. The `title` is what a UI shows; the `value` is what a variant stores and
-             * what a resolve context is matched against. Two entries differing only in their
-             * title are one vocabulary entry.
-             *
-             * Unlike a `select` attribute there is no `allow_any`: a variant can only ever pin a
-             * declared option, because the vocabulary is what makes every variant addressable.
+             * Selectable options, in the same shape a `select` attribute's `options` take: a bare
+             * value or a `{ value, title }` object. May be empty while the condition is being
+             * configured. Unlike a `select` attribute there is no `allow_any`.
              *
              * example:
              * [

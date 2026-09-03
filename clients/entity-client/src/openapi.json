@@ -7375,7 +7375,7 @@
               },
               "options": {
                 "type": "array",
-                "description": "The vocabulary a variant may pin this condition to. May be empty while the condition\nis being configured.\n\nThe same shape a `select` attribute's `options` has, item for item: an entry is\neither the value itself or an object carrying that value and an optional display\n`title`. The `title` is what a UI shows; the `value` is what a variant stores and\nwhat a resolve context is matched against. Two entries differing only in their\ntitle are one vocabulary entry.\n\nUnlike a `select` attribute there is no `allow_any`: a variant can only ever pin a\ndeclared option, because the vocabulary is what makes every variant addressable.\n",
+                "description": "Selectable options, in the same shape a `select` attribute's `options` take: a bare\nvalue or a `{ value, title }` object. May be empty while the condition is being\nconfigured. Unlike a `select` attribute there is no `allow_any`.\n",
                 "items": {
                   "anyOf": [
                     {
