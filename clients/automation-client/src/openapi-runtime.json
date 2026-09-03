@@ -30,6 +30,10 @@
             "in": "query"
           },
           {
+            "name": "trigger_event_name",
+            "in": "query"
+          },
+          {
             "name": "include_flows",
             "in": "query"
           }

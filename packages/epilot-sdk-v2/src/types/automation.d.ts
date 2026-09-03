@@ -561,7 +561,23 @@ export declare namespace Components {
          *       ```
          *
          */
-        EntityOperationTrigger | ActivityTrigger | EntityManualTrigger | ReceivedEmailTrigger | NewEmailThreadTrigger | FlowsTrigger;
+        EntityOperationTrigger | ActivityTrigger | EntityManualTrigger | ReceivedEmailTrigger | NewEmailThreadTrigger | FlowsTrigger | /**
+         * Starts the flow when an Event Catalog event is published for the organization. The execution runs in the context of one entity from the event's entity graph (`entity_node_id`), and the event payload is available to conditions and actions as the `event` variable context.
+         *
+         * example:
+         * {
+         *   "id": "12d4f45a-1883-4841-a94c-5928cb338a94",
+         *   "type": "event_catalog",
+         *   "configuration": {
+         *     "event_name": "CustomerRequestSubmitted",
+         *     "event_version": "1.1",
+         *     "entity_node_id": "ticket",
+         *     "entity_schema": "ticket",
+         *     "ignore_automation_triggered": true
+         *   }
+         * }
+         */
+        EventCatalogTrigger;
         export interface AnythingButCondition {
             "anything-but"?: string[];
         }
@@ -1279,14 +1295,14 @@ export declare namespace Components {
              * 2
              */
             version?: number;
-            trigger_event?: TriggerEventManual | TriggerEventEntityActivity | TriggerEventEntityOperation | TriggerEventFlowAutomationTask | TriggerEventMessaging;
-            workflow_context?: /**
-             * Automation Executions triggered by workflow task automations will always carry information about the triggering workflow. This information is helpful in correlating workflow executions with all the triggered automation executions
+            trigger_event?: TriggerEventManual | TriggerEventEntityActivity | TriggerEventEntityOperation | TriggerEventFlowAutomationTask | TriggerEventMessaging | /**
+             * Set on executions started by an Event Catalog event (see EventCatalogTrigger). The full event payload is not stored inline (it may be up to 256 KB) but by reference in `payload_ref`; automation workers hydrate it before every action.
              *
              */
-            WorkflowExecutionContext;
+            TriggerEventEventCatalog;
+            workflow_context?: WorkflowExecutionContext;
             workflow_wait_context?: /**
-             * Workflow automation tasks can be paused & waiting for journey automation executions to succeed. If such is the case, this context tracks the task_id of the workflow waiting for journey submission success This context is consumed by svc-workflows to resume a task waiting on this journey submission.
+             * Correlation stamped when the triggering submission entity carried workflow wait claims from a journey link (AL-2521). Consumed by svc-workflows to resume a task waiting on this journey submission.
              *
              */
             WorkflowWaitContext;
@@ -1877,7 +1893,11 @@ export declare namespace Components {
                  */
                 id?: string;
                 origin?: "trigger" | "action";
-                originType?: "entity" | "workflow" | "journey_block";
+                /**
+                 * `event` reads the operand from the trigger's Event Catalog payload instead of an entity: `attribute` is then a dot path into the payload (e.g. `ticket.subject`). Only valid with `origin: trigger` on flows started by an EventCatalogTrigger.
+                 *
+                 */
+                originType?: "entity" | "workflow" | "journey_block" | "event";
                 schema?: string;
                 attribute?: string;
                 attributeType?: "string" | "text" | "number" | "boolean" | "date" | "datetime" | "tags" | "country" | "email" | "phone" | "product" | "price" | "status" | "relation" | "multiselect" | "select" | "radio" | "relation_user" | "purpose" | "label" | "payment" | "relation_payment_method";
@@ -2230,7 +2250,7 @@ export declare namespace Components {
                 schema?: string;
             };
         }
-        export type EntityOperation = "createEntity" | "updateEntity" | "deleteEntity" | "softDeleteEntity" | "restoreEntity";
+        export type EntityOperation = "createEntity" | "updateEntity" | "deleteEntity" | "softDeleteEntity" | "restoreEntity" | "relationsAdded" | "relationsRemoved" | "relationsSoftDeleted" | "relationsRestored" | "relationsDeleted";
         /**
          * - If provides filter_config, executes an automation based on the filtered configuration when an entity event occurs.
          * - The conditions on a filter follows the event bridge patterns - `https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-event-patterns.html`
@@ -2636,6 +2656,63 @@ export declare namespace Components {
             error_info?: {
                 [name: string]: any;
                 details?: ErrorDetail[];
+            };
+        }
+        /**
+         * Starts the flow when an Event Catalog event is published for the organization. The execution runs in the context of one entity from the event's entity graph (`entity_node_id`), and the event payload is available to conditions and actions as the `event` variable context.
+         *
+         * example:
+         * {
+         *   "id": "12d4f45a-1883-4841-a94c-5928cb338a94",
+         *   "type": "event_catalog",
+         *   "configuration": {
+         *     "event_name": "CustomerRequestSubmitted",
+         *     "event_version": "1.1",
+         *     "entity_node_id": "ticket",
+         *     "entity_schema": "ticket",
+         *     "ignore_automation_triggered": true
+         *   }
+         * }
+         */
+        export interface EventCatalogTrigger {
+            /**
+             * example:
+             * 12d4f45a-1883-4841-a94c-5928cb338a94
+             */
+            id?: string; // uuid
+            type: "event_catalog";
+            configuration: {
+                /**
+                 * Name of the Event Catalog event that starts this flow
+                 * example:
+                 * CustomerRequestSubmitted
+                 */
+                event_name: string;
+                /**
+                 * Event version (MAJOR.MINOR) this trigger is pinned to. Payloads published in a newer version are downgraded to this version before the flow runs, so field references in conditions and actions stay stable.
+                 *
+                 * example:
+                 * 1.1
+                 */
+                event_version: string;
+                /**
+                 * Id of the cardinality-one node in the event's entity graph whose entity becomes the execution's main entity (the entity actions operate on).
+                 *
+                 * example:
+                 * ticket
+                 */
+                entity_node_id: string;
+                /**
+                 * Schema of the entity behind `entity_node_id`, denormalized from the event definition at configuration time
+                 * example:
+                 * ticket
+                 */
+                entity_schema: string;
+                /**
+                 * When true (default), events that were emitted by an automation (`_trigger_source_type: automation`) do not start this flow. This prevents automation → event → automation chains unless explicitly enabled.
+                 *
+                 */
+                ignore_automation_triggered?: boolean;
             };
         }
         /**
@@ -3054,6 +3131,107 @@ export declare namespace Components {
         export interface GetExecutionsResp {
             total: number;
             results: AutomationExecution[];
+        }
+        /**
+         * One multi-hop graph query to run against entity-api's `POST /v1/entity:graph`. Every node
+         * in `graph.nodes` is merged into the mapping's source context under its own `id`, so
+         * listing multiple nodes here costs one entity-api call, not one per node. A node's value
+         * overwrites any existing source-context key of the same name (the source entity, a 1-hop
+         * relation, or another graph node).
+         *
+         */
+        export interface GraphContextEntry {
+            seed: GraphSeed;
+            graph: GraphDefinition;
+        }
+        export interface GraphDefinition {
+            /**
+             * List of node definitions in the graph
+             */
+            nodes: GraphNode[];
+            /**
+             * List of edge definitions connecting nodes
+             */
+            edges: GraphEdge[];
+        }
+        export interface GraphEdge {
+            /**
+             * Source node ID
+             * example:
+             * contact
+             */
+            from: string;
+            /**
+             * Target node ID
+             * example:
+             * billing_account
+             */
+            to: string;
+        }
+        export interface GraphNode {
+            /**
+             * Unique identifier for this node in the graph definition
+             * example:
+             * contact
+             */
+            id: string;
+            /**
+             * Entity schema slug for this node
+             * example:
+             * contact
+             */
+            schema: string;
+            /**
+             * "one": this node resolves to a single entity. "many" (default if unset): this node
+             * resolves to an array of entities. The seed node always returns a single entity
+             * regardless of this setting.
+             *
+             * example:
+             * one
+             */
+            cardinality?: "one" | "many";
+            /**
+             * Optional entity fields to include in the hydrated response for this node.
+             */
+            fields?: string[];
+            /**
+             * Narrows this node's traversal results to entities matching every filter (AND
+             * semantics). Useful for disambiguating among multiple entities reachable via the same
+             * graph edge.
+             *
+             */
+            filter?: /* Entities are included in this node's result only if `attribute` exactly equals the literal `value`. */ GraphNodeFilter[];
+        }
+        /**
+         * Entities are included in this node's result only if `attribute` exactly equals the literal `value`.
+         */
+        export interface GraphNodeFilter {
+            /**
+             * Entity attribute name to match against.
+             * example:
+             * order_number
+             */
+            attribute: string;
+            /**
+             * Literal value the attribute must exactly equal for the entity to be included in this node's result. Supports `{{handlebars}}` placeholders resolved against sourceContext when given as a string.
+             * example:
+             * OR-113
+             */
+            value: /**
+             * Literal value the attribute must exactly equal for the entity to be included in this node's result. Supports `{{handlebars}}` placeholders resolved against sourceContext when given as a string.
+             * example:
+             * OR-113
+             */
+            (string | null) | number | boolean;
+        }
+        export interface GraphSeed {
+            entity_id: string; // uuid
+            /**
+             * The node ID in the graph definition that corresponds to the seed entity
+             * example:
+             * contact
+             */
+            node_id: string;
         }
         export interface InformERPAction {
             id?: /**
@@ -3510,6 +3688,27 @@ export declare namespace Components {
              * Relation tags (labels) to include in main entity linkback relation attribute
              */
             linkback_relation_tags?: string[];
+            /**
+             * Multi-hop graph queries (executed via entity-api's `POST /v1/entity:graph`), each
+             * merging every traversed node into the mapping's source context under its own node id,
+             * so `mapping_attributes` (e.g. `_copy` / `_template`) can reference it alongside the
+             * main entity, e.g. `{ "_copy": "order.line_items" }`.
+             *
+             * `seed.entity_id` and any node `filter[].value` may contain `{{handlebars}}`
+             * placeholders (e.g. `{{trigger.entity._id}}`) that are resolved at execution time
+             * against the mapping's source context. Resolution and graph execution happen in
+             * entity-mapping-api; this API only accepts, validates and passes through this field.
+             *
+             */
+            graph_context?: /**
+             * One multi-hop graph query to run against entity-api's `POST /v1/entity:graph`. Every node
+             * in `graph.nodes` is merged into the mapping's source context under its own `id`, so
+             * listing multiple nodes here costs one entity-api call, not one per node. A node's value
+             * overwrites any existing source-context key of the same name (the source entity, a 1-hop
+             * relation, or another graph node).
+             *
+             */
+            GraphContextEntry[];
         }
         export type MappingAttribute = SetValueMapper | CopyValueMapper | AppendValueMapper;
         /**
@@ -3893,8 +4092,10 @@ export declare namespace Components {
             email_template_id?: string;
             /**
              * Language code for the email template
+             * example:
+             * de
              */
-            language_code?: "de" | "en";
+            language_code?: string;
             /**
              * Controls how the reply email is sent.
              * - reply_in_thread: Sends the email as a reply within the existing email thread (default).
@@ -4123,7 +4324,11 @@ export declare namespace Components {
         }
         export interface SendEmailConfig {
             email_template_id?: string;
-            language_code?: "de" | "en";
+            /**
+             * example:
+             * de
+             */
+            language_code?: string;
             /**
              * Send an email exclusively to the portal user if they are registered on the portal.
              */
@@ -4257,11 +4462,7 @@ export declare namespace Components {
              * 7791b04a-16d2-44a2-9af9-2d59c25c512f
              */
             AutomationFlowId;
-            workflow_context?: /**
-             * Automation Executions triggered by workflow task automations will always carry information about the triggering workflow. This information is helpful in correlating workflow executions with all the triggered automation executions
-             *
-             */
-            WorkflowExecutionContext;
+            workflow_context?: WorkflowExecutionContext;
             /**
              * Use workflow_context.workflow_exec_id instead
              */
@@ -4488,6 +4689,64 @@ export declare namespace Components {
             ActivityId;
             operation_type: EntityOperation;
         }
+        /**
+         * Set on executions started by an Event Catalog event (see EventCatalogTrigger). The full event payload is not stored inline (it may be up to 256 KB) but by reference in `payload_ref`; automation workers hydrate it before every action.
+         *
+         */
+        export interface TriggerEventEventCatalog {
+            type: "event_catalog";
+            /**
+             * example:
+             * 123
+             */
+            org_id: string;
+            entity_id: /**
+             * example:
+             * e3d3ebac-baab-4395-abf4-50b5bf1f8b74
+             */
+            EntityId;
+            /**
+             * Node id of the event's entity graph that was resolved to `entity_id`
+             * example:
+             * ticket
+             */
+            entity_node_id: string;
+            /**
+             * Event Catalog event id (ULID) of the published event
+             * example:
+             * 01K3ZK8QZ7Y7Q2M8W1V3N4X5P6
+             */
+            event_id: string;
+            /**
+             * example:
+             * CustomerRequestSubmitted
+             */
+            event_name: string;
+            /**
+             * Version the payload was delivered in (the version pinned on the trigger)
+             * example:
+             * 1.1
+             */
+            event_version: string;
+            /**
+             * Version the event was originally published with, before downgrading to `event_version`
+             * example:
+             * 1.2
+             */
+            published_version?: string;
+            event_time?: string; // date-time
+            /**
+             * How the event was triggered in the catalog (api | automation | operation | portal_user)
+             * example:
+             * operation
+             */
+            trigger_source_type?: string;
+            /**
+             * Opaque source reference from the catalog (e.g. activity id, automation execution id)
+             */
+            trigger_source?: string;
+            payload_ref?: /* S3 reference to the stored trigger event payload (`_downgrades` stripped, downgraded to the pinned version) */ TriggerEventPayloadRef;
+        }
         export interface TriggerEventFlowAutomationTask {
             type?: "flow_automation_task";
             /**
@@ -4540,6 +4799,21 @@ export declare namespace Components {
              * e3d3ebac-baab-4395-abf4-50b5bf1f8b74
              */
             EntityId;
+        }
+        /**
+         * S3 reference to the stored trigger event payload (`_downgrades` stripped, downgraded to the pinned version)
+         */
+        export interface TriggerEventPayloadRef {
+            /**
+             * example:
+             * automation-trigger-payloads-prod
+             */
+            bucket: string;
+            /**
+             * example:
+             * trigger-payloads/123/6c8e5d9a-7f1b-4c2e-9d3a-0b1c2d3e4f5a.json
+             */
+            key: string;
         }
         export interface TriggerShareEntityAction {
             id?: /**
@@ -5038,10 +5312,6 @@ export declare namespace Components {
          * The role this automation plays in the workflow.
          */
         export type WorkflowContextRole = "trigger_workflow" | "run_task_automation";
-        /**
-         * Automation Executions triggered by workflow task automations will always carry information about the triggering workflow. This information is helpful in correlating workflow executions with all the triggered automation executions
-         *
-         */
         export interface WorkflowExecutionContext {
             workflow_exec_id: string;
             workflow_exec_task_id?: string;
@@ -5061,9 +5331,16 @@ export declare namespace Components {
                 entity_schema?: string;
                 is_primary?: boolean;
             }[];
+            /**
+             * Id of the user on whose behalf the workflow task triggered this automation — the caller of a user-initiated run, or the user whose task completion advanced the flow to the automation task. Action workers resolve it as the acting user for template variable resolution (user.*) and email thread assignment, matching the attribution of manually triggered executions. Absent when no human action led to the trigger (scheduler fires, journey-triggered flows).
+             *
+             * example:
+             * 10006129
+             */
+            trigger_user_id?: string;
         }
         /**
-         * Workflow automation tasks can be paused & waiting for journey automation executions to succeed. If such is the case, this context tracks the task_id of the workflow waiting for journey submission success This context is consumed by svc-workflows to resume a task waiting on this journey submission.
+         * Correlation stamped when the triggering submission entity carried workflow wait claims from a journey link (AL-2521). Consumed by svc-workflows to resume a task waiting on this journey submission.
          *
          */
         export interface WorkflowWaitContext {
@@ -5500,6 +5777,11 @@ export declare namespace Paths {
             export type TargetWorkflow = string;
             /**
              * example:
+             * CustomerRequestSubmitted
+             */
+            export type TriggerEventName = string;
+            /**
+             * example:
              * 600945fe-212e-4b97-acf7-391d64648384
              */
             export type TriggerSourceId = string;
@@ -5522,6 +5804,11 @@ export declare namespace Paths {
              * wfABCDEFGH
              */
             Parameters.TargetWorkflow;
+            trigger_event_name?: /**
+             * example:
+             * CustomerRequestSubmitted
+             */
+            Parameters.TriggerEventName;
             include_flows?: Parameters.IncludeFlows;
         }
         namespace Responses {
@@ -5994,6 +6281,7 @@ export type ErrorCode = Components.Schemas.ErrorCode;
 export type ErrorDetail = Components.Schemas.ErrorDetail;
 export type ErrorObject = Components.Schemas.ErrorObject;
 export type ErrorOutput = Components.Schemas.ErrorOutput;
+export type EventCatalogTrigger = Components.Schemas.EventCatalogTrigger;
 export type ExecItem = Components.Schemas.ExecItem;
 export type ExecutionChain = Components.Schemas.ExecutionChain;
 export type ExecutionStatus = Components.Schemas.ExecutionStatus;
@@ -6008,6 +6296,12 @@ export type ForwardEmailActionConfig = Components.Schemas.ForwardEmailActionConf
 export type ForwardEmailConfig = Components.Schemas.ForwardEmailConfig;
 export type FrontendSubmitTrigger = Components.Schemas.FrontendSubmitTrigger;
 export type GetExecutionsResp = Components.Schemas.GetExecutionsResp;
+export type GraphContextEntry = Components.Schemas.GraphContextEntry;
+export type GraphDefinition = Components.Schemas.GraphDefinition;
+export type GraphEdge = Components.Schemas.GraphEdge;
+export type GraphNode = Components.Schemas.GraphNode;
+export type GraphNodeFilter = Components.Schemas.GraphNodeFilter;
+export type GraphSeed = Components.Schemas.GraphSeed;
 export type InformERPAction = Components.Schemas.InformERPAction;
 export type InformERPActionConfig = Components.Schemas.InformERPActionConfig;
 export type InformERPConfig = Components.Schemas.InformERPConfig;
@@ -6059,9 +6353,11 @@ export type TriggerEventActionConfig = Components.Schemas.TriggerEventActionConf
 export type TriggerEventConfig = Components.Schemas.TriggerEventConfig;
 export type TriggerEventEntityActivity = Components.Schemas.TriggerEventEntityActivity;
 export type TriggerEventEntityOperation = Components.Schemas.TriggerEventEntityOperation;
+export type TriggerEventEventCatalog = Components.Schemas.TriggerEventEventCatalog;
 export type TriggerEventFlowAutomationTask = Components.Schemas.TriggerEventFlowAutomationTask;
 export type TriggerEventManual = Components.Schemas.TriggerEventManual;
 export type TriggerEventMessaging = Components.Schemas.TriggerEventMessaging;
+export type TriggerEventPayloadRef = Components.Schemas.TriggerEventPayloadRef;
 export type TriggerShareEntityAction = Components.Schemas.TriggerShareEntityAction;
 export type TriggerShareEntityActionConfig = Components.Schemas.TriggerShareEntityActionConfig;
 export type TriggerShareEntityConfig = Components.Schemas.TriggerShareEntityConfig;
