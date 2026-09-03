@@ -83,6 +83,7 @@ const { data } = await appClient.getPublicFacingComponent(...)
 - [`BaseComponentCommon`](#basecomponentcommon)
 - [`BaseComponent`](#basecomponent)
 - [`ApiProxyComponent`](#apiproxycomponent)
+- [`ExternalValuesComponent`](#externalvaluescomponent)
 - [`CustomCapabilityComponent`](#customcapabilitycomponent)
 - [`CustomPageComponent`](#custompagecomponent)
 - [`CustomPageConfig`](#custompageconfig)
@@ -133,6 +134,9 @@ const { data } = await appClient.getPublicFacingComponent(...)
 - [`ConfigurationMetadata`](#configurationmetadata)
 - [`ConfigurationVersion`](#configurationversion)
 - [`ApiProxyConfig`](#apiproxyconfig)
+- [`ExternalValuesConfig`](#externalvaluesconfig)
+- [`ExternalValuesHook`](#externalvalueshook)
+- [`ExternalValuesResult`](#externalvaluesresult)
 - [`Grants`](#grants)
 - [`BlueprintRef`](#blueprintref)
 - [`Installation`](#installation)
@@ -1136,7 +1140,8 @@ const { data } = await client.patchVersion(
         lifted: true,
         value_updated_at: 'string'
       }
-    ]
+    ],
+    changelog: 'string'
   },
 )
 ```
@@ -1337,11 +1342,16 @@ Clone an existing app version to create a new version
 `POST /v1/app-configurations/{appId}/versions/{sourceVersion}/clone-to/{targetVersion}`
 
 ```ts
-const { data } = await client.cloneVersion({
-  appId: 'example',
-  sourceVersion: 'example',
-  targetVersion: 'example',
-})
+const { data } = await client.cloneVersion(
+  {
+    appId: 'example',
+    sourceVersion: 'example',
+    targetVersion: 'example',
+  },
+  {
+    changelog: 'string'
+  },
+)
 ```
 
 <details>
@@ -2017,7 +2027,7 @@ type Role = {
 
 ### `Options`
 
-Options for the component configuration
+An option declaration — a setting the installing org fills in. Declared at app level.
 
 ```ts
 type Options = {
@@ -2093,7 +2103,7 @@ type S3Reference = {
 Type of app component
 
 ```ts
-type ComponentType = "CUSTOM_JOURNEY_BLOCK" | "CUSTOM_PORTAL_BLOCK" | "PORTAL_EXTENSION" | "CUSTOM_FLOW_ACTION" | "ERP_INFORM_TOOLKIT" | "CUSTOM_CAPABILITY" | "EXTERNAL_PRODUCT_CATALOG" | "CUSTOM_PAGE" | "API_PROXY" | "APP_FUNCTION"
+type ComponentType = "CUSTOM_JOURNEY_BLOCK" | "CUSTOM_PORTAL_BLOCK" | "PORTAL_EXTENSION" | "CUSTOM_FLOW_ACTION" | "ERP_INFORM_TOOLKIT" | "CUSTOM_CAPABILITY" | "EXTERNAL_PRODUCT_CATALOG" | "CUSTOM_PAGE" | "API_PROXY" | "EXTERNAL_VALUES" | "APP_FUNCTION"
 ```
 
 ### `FunctionDefinition`
@@ -2234,6 +2244,34 @@ type ApiProxyComponent = {
     auth_header?: string
     token_url?: string // uri
     headers?: Record<string, string>
+  }
+}
+```
+
+### `ExternalValuesComponent`
+
+Exposes typed values resolved from an external system at runtime (e.g. a meter reading prediction). Consumers such as validation rules reference a hook and one of its results by id. Resolution is performed by the external-values-api on behalf of authenticated epilot 360 users and portal end customer
+
+```ts
+type ExternalValuesComponent = {
+  component_type: "EXTERNAL_VALUES"
+  configuration: {
+    hooks: Array<{
+      id: { ... }
+      name: { ... }
+      description?: { ... }
+      auth_type?: { ... }
+      auth_header?: { ... }
+      auth_secret?: { ... }
+      auth?: { ... }
+      call: { ... }
+      result: { ... }
+      timeout_ms?: { ... }
+      on_unavailable?: { ... }
+      cache?: { ... }
+      use_static_ips?: { ... }
+      secure_proxy?: { ... }
+    }>
   }
 }
 ```
@@ -3712,6 +3750,144 @@ type ApiProxyConfig = {
 }
 ```
 
+### `ExternalValuesConfig`
+
+Configuration for an EXTERNAL_VALUES component
+
+```ts
+type ExternalValuesConfig = {
+  hooks: Array<{
+    id: string
+    name: {
+      en?: { ... }
+      de: { ... }
+    }
+    description?: {
+      en?: { ... }
+      de: { ... }
+    }
+    auth_type?: "none" | "header" | "bearer" | "hmac"
+    auth_header?: string
+    auth_secret?: string
+    auth?: {
+      method?: { ... }
+      url: { ... }
+      params?: { ... }
+      headers?: { ... }
+      body?: { ... }
+      cache?: { ... }
+    }
+    call: {
+      method?: { ... }
+      url: { ... }
+      headers?: { ... }
+      params?: { ... }
+      body?: { ... }
+    }
+    result: Array<{
+      id: { ... }
+      type: { ... }
+      name: { ... }
+      template?: { ... }
+      path?: { ... }
+      jsonata?: { ... }
+    }>
+    timeout_ms?: number
+    on_unavailable?: "skip" | "block"
+    cache?: {
+      ttl_seconds: { ... }
+      key?: { ... }
+    }
+    use_static_ips?: boolean
+    secure_proxy?: {
+      integration_id: { ... }
+      use_case_slug: { ... }
+    }
+  }>
+}
+```
+
+### `ExternalValuesHook`
+
+One external call that returns one or more typed results. Interpolated templates (Liquid) have access to `Input`, `Context`, `Consumer`, `Options`, `Env` and — for `result` templates — `Response` and `AuthResponse`.
+
+
+```ts
+type ExternalValuesHook = {
+  id: string
+  name: {
+    en?: string
+    de: string
+  }
+  description?: {
+    en?: string
+    de: string
+  }
+  auth_type?: "none" | "header" | "bearer" | "hmac"
+  auth_header?: string
+  auth_secret?: string
+  auth?: {
+    method?: string
+    url: string
+    params?: Record<string, string>
+    headers?: Record<string, string>
+    body?: Record<string, unknown>
+    cache?: {
+      key: { ... }
+      ttl: { ... }
+    }
+  }
+  call: {
+    method?: "GET" | "POST" | "PUT" | "PATCH"
+    url: string
+    headers?: Record<string, string>
+    params?: Record<string, string>
+    body?: Record<string, unknown>
+  }
+  result: Array<{
+    id: string
+    type: "number" | "text" | "date" | "boolean"
+    name: {
+      en?: { ... }
+      de: { ... }
+    }
+    template?: string
+    path?: string
+    jsonata?: string
+  }>
+  timeout_ms?: number
+  on_unavailable?: "skip" | "block"
+  cache?: {
+    ttl_seconds: number
+    key?: string
+  }
+  use_static_ips?: boolean
+  secure_proxy?: {
+    integration_id: string // uuid
+    use_case_slug: string
+  }
+}
+```
+
+### `ExternalValuesResult`
+
+A single typed value extracted from the hook response. Exactly one of `template`, `path` or `jsonata` must be set.
+
+
+```ts
+type ExternalValuesResult = {
+  id: string
+  type: "number" | "text" | "date" | "boolean"
+  name: {
+    en?: string
+    de: string
+  }
+  template?: string
+  path?: string
+  jsonata?: string
+}
+```
+
 ### `Grants`
 
 Required grants for the app in order to call APIs for the installing tenant
@@ -4083,7 +4259,7 @@ type BatchEventRequest = {
     timestamp?: string
     correlation_id?: string
     event_type: "ERROR" | "WARNING" | "INFO"
-    source: "CUSTOM_JOURNEY_BLOCK" | "CUSTOM_PORTAL_BLOCK" | "PORTAL_EXTENSION" | "CUSTOM_FLOW_ACTION" | "ERP_INFORM_TOOLKIT" | "CUSTOM_CAPABILITY" | "EXTERNAL_PRODUCT_CATALOG" | "CUSTOM_PAGE" | "API_PROXY" | "APP_FUNCTION"
+    source: "CUSTOM_JOURNEY_BLOCK" | "CUSTOM_PORTAL_BLOCK" | "PORTAL_EXTENSION" | "CUSTOM_FLOW_ACTION" | "ERP_INFORM_TOOLKIT" | "CUSTOM_CAPABILITY" | "EXTERNAL_PRODUCT_CATALOG" | "CUSTOM_PAGE" | "API_PROXY" | "EXTERNAL_VALUES" | "APP_FUNCTION"
     actor: {
       org_id?: { ... }
       user_id?: { ... }
@@ -4115,7 +4291,7 @@ type AppEventData = {
   timestamp?: string
   correlation_id?: string
   event_type: "ERROR" | "WARNING" | "INFO"
-  source: "CUSTOM_JOURNEY_BLOCK" | "CUSTOM_PORTAL_BLOCK" | "PORTAL_EXTENSION" | "CUSTOM_FLOW_ACTION" | "ERP_INFORM_TOOLKIT" | "CUSTOM_CAPABILITY" | "EXTERNAL_PRODUCT_CATALOG" | "CUSTOM_PAGE" | "API_PROXY" | "APP_FUNCTION"
+  source: "CUSTOM_JOURNEY_BLOCK" | "CUSTOM_PORTAL_BLOCK" | "PORTAL_EXTENSION" | "CUSTOM_FLOW_ACTION" | "ERP_INFORM_TOOLKIT" | "CUSTOM_CAPABILITY" | "EXTERNAL_PRODUCT_CATALOG" | "CUSTOM_PAGE" | "API_PROXY" | "EXTERNAL_VALUES" | "APP_FUNCTION"
   actor: {
     org_id?: string
     user_id?: string
@@ -4135,7 +4311,7 @@ type EventsQuery = {
     preset?: "1h" | "6h" | "24h" | "7d" | "30d"
   }
   filters?: {
-    source?: "CUSTOM_JOURNEY_BLOCK" | "CUSTOM_PORTAL_BLOCK" | "PORTAL_EXTENSION" | "CUSTOM_FLOW_ACTION" | "ERP_INFORM_TOOLKIT" | "CUSTOM_CAPABILITY" | "EXTERNAL_PRODUCT_CATALOG" | "CUSTOM_PAGE" | "API_PROXY" | "APP_FUNCTION"[]
+    source?: "CUSTOM_JOURNEY_BLOCK" | "CUSTOM_PORTAL_BLOCK" | "PORTAL_EXTENSION" | "CUSTOM_FLOW_ACTION" | "ERP_INFORM_TOOLKIT" | "CUSTOM_CAPABILITY" | "EXTERNAL_PRODUCT_CATALOG" | "CUSTOM_PAGE" | "API_PROXY" | "EXTERNAL_VALUES" | "APP_FUNCTION"[]
     component_id?: string[]
     event_type?: "ERROR" | "WARNING" | "INFO"[]
     correlation_id?: string
@@ -4231,7 +4407,7 @@ type RawEvents = {
     timestamp?: string
     correlation_id?: string
     event_type: "ERROR" | "WARNING" | "INFO"
-    source: "CUSTOM_JOURNEY_BLOCK" | "CUSTOM_PORTAL_BLOCK" | "PORTAL_EXTENSION" | "CUSTOM_FLOW_ACTION" | "ERP_INFORM_TOOLKIT" | "CUSTOM_CAPABILITY" | "EXTERNAL_PRODUCT_CATALOG" | "CUSTOM_PAGE" | "API_PROXY" | "APP_FUNCTION"
+    source: "CUSTOM_JOURNEY_BLOCK" | "CUSTOM_PORTAL_BLOCK" | "PORTAL_EXTENSION" | "CUSTOM_FLOW_ACTION" | "ERP_INFORM_TOOLKIT" | "CUSTOM_CAPABILITY" | "EXTERNAL_PRODUCT_CATALOG" | "CUSTOM_PAGE" | "API_PROXY" | "EXTERNAL_VALUES" | "APP_FUNCTION"
     actor: {
       org_id?: { ... }
       user_id?: { ... }

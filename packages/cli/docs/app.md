@@ -1363,7 +1363,8 @@ epilot app patchVersion \
       "lifted": true,
       "value_updated_at": "string"
     }
-  ]
+  ],
+  "changelog": "string"
 }'
 ```
 
@@ -1756,19 +1757,28 @@ Clone an existing app version to create a new version
 | `sourceVersion` | path | string | Yes | Source version to clone from |
 | `targetVersion` | path | string | Yes | Target version to create |
 
+**Request Body**
+
 **Sample Call**
 
 ```bash
 epilot app cloneVersion \
   -p appId=123e4567-e89b-12d3-a456-426614174000 \
   -p sourceVersion=example \
-  -p targetVersion=example
+  -p targetVersion=example \
+  -d '{"changelog":"string"}'
 ```
 
 Using positional args for path parameters:
 
 ```bash
 epilot app cloneVersion 123e4567-e89b-12d3-a456-426614174000 example example
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot app cloneVersion -p appId=123e4567-e89b-12d3-a456-426614174000 -p sourceVersion=example -p targetVersion=example
 ```
 
 With JSONata filter:
@@ -1802,7 +1812,7 @@ Retrieve a list of installed apps for the organization.
 
 | Name | In | Type | Required | Description |
 | ---- | -- | ---- | -------- | ----------- |
-| `componentType` | query | "CUSTOM_JOURNEY_BLOCK" \| "CUSTOM_PORTAL_BLOCK" \| "PORTAL_EXTENSION" \| "CUSTOM_FLOW_ACTION" \| "ERP_INFORM_TOOLKIT" \| "CUSTOM_CAPABILITY" \| "EXTERNAL_PRODUCT_CATALOG" \| "CUSTOM_PAGE" \| "API_PROXY" \| "APP_FUNCTION" | No | Filter apps by specific component type |
+| `componentType` | query | "CUSTOM_JOURNEY_BLOCK" \| "CUSTOM_PORTAL_BLOCK" \| "PORTAL_EXTENSION" \| "CUSTOM_FLOW_ACTION" \| "ERP_INFORM_TOOLKIT" \| "CUSTOM_CAPABILITY" \| "EXTERNAL_PRODUCT_CATALOG" \| "CUSTOM_PAGE" \| "API_PROXY" \| "EXTERNAL_VALUES" \| "APP_FUNCTION" | No | Filter apps by specific component type |
 | `enabled` | query | boolean | No | Filter apps by enabled status |
 | `page` | query | number | No | Page number for pagination |
 | `pageSize` | query | number | No | Number of items per page |

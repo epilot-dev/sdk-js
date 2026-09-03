@@ -57,6 +57,8 @@ const { data } = await validationRulesClient.getValidationRules(...)
 - [`Operator`](#operator)
 - [`ConditionValue`](#conditionvalue)
 - [`ScalarValue`](#scalarvalue)
+- [`EnvironmentValue`](#environmentvalue)
+- [`ExternalValue`](#externalvalue)
 - [`StaticValue`](#staticvalue)
 - [`ContextValue`](#contextvalue)
 - [`ValueAdjustment`](#valueadjustment)
@@ -1670,8 +1672,8 @@ type NumericFactCondition = {
 ### `ComparisonRuleType`
 
 Declarative validation rule (schema version v2). Supports predefined comparison operators
-over number, date and text inputs, with static, dynamic (context path) and relative-date
-comparison values.
+over number, date and text inputs, with static, dynamic (context path), relative-date and
+external (app-provided) comparison values.
 
 
 ```ts
@@ -1692,6 +1694,16 @@ type ComparisonRuleType = {
       offset: { ... }
       unit: { ... }
       anchor?: { ... }
+    } | {
+      source: { ... }
+      key: { ... }
+      adjust?: { ... }
+    } | {
+      source: { ... }
+      app_id: { ... }
+      hook_id: { ... }
+      result_id: { ... }
+      adjust?: { ... }
     } | {
       source: { ... }
       min: { ... }
@@ -1736,6 +1748,26 @@ type Condition = {
     unit: "days" | "months" | "years"
     anchor?: "today"
   } | {
+    source: "environment"
+    key: string
+    adjust?: {
+      type: { ... }
+      value: { ... }
+      direction: { ... }
+      rounding?: { ... }
+    }
+  } | {
+    source: "external"
+    app_id: string
+    hook_id: string
+    result_id: string
+    adjust?: {
+      type: { ... }
+      value: { ... }
+      direction: { ... }
+      rounding?: { ... }
+    }
+  } | {
     source: "range"
     min: {
       source: { ... }
@@ -1749,6 +1781,16 @@ type Condition = {
       offset: { ... }
       unit: { ... }
       anchor?: { ... }
+    } | {
+      source: { ... }
+      key: { ... }
+      adjust?: { ... }
+    } | {
+      source: { ... }
+      app_id: { ... }
+      hook_id: { ... }
+      result_id: { ... }
+      adjust?: { ... }
     }
     max: {
       source: { ... }
@@ -1762,6 +1804,16 @@ type Condition = {
       offset: { ... }
       unit: { ... }
       anchor?: { ... }
+    } | {
+      source: { ... }
+      key: { ... }
+      adjust?: { ... }
+    } | {
+      source: { ... }
+      app_id: { ... }
+      hook_id: { ... }
+      result_id: { ... }
+      adjust?: { ... }
     }
   } | {
     source: "none"
@@ -1770,9 +1822,12 @@ type Condition = {
   applies_when?: {
     path: string
     operator: "equal" | "notEqual" | "greaterThan" | "greaterThanInclusive" | "lessThan" | "lessThanInclusive" | "isEmpty" | "isNotEmpty"
-    value?: number | string | boolean
-  }
-  allow_failure?: boolean
+    value?: number | string | boolean | {
+      source: { ... }
+      key: { ... }
+      adjust?: { ... }
+    }
+  // ...
 }
 ```
 
@@ -1804,6 +1859,10 @@ type ConditionValue = {
       source: { ... }
       path: { ... }
       adjust?: { ... }
+    } | {
+      source: { ... }
+      key: { ... }
+      adjust?: { ... }
     }
     direction: "increase" | "decrease"
     rounding?: "up" | "down"
@@ -1813,6 +1872,42 @@ type ConditionValue = {
   offset: number
   unit: "days" | "months" | "years"
   anchor?: "today"
+} | {
+  source: "environment"
+  key: string
+  adjust?: {
+    type: "percent" | "absolute"
+    value: number | {
+      source: { ... }
+      path: { ... }
+      adjust?: { ... }
+    } | {
+      source: { ... }
+      key: { ... }
+      adjust?: { ... }
+    }
+    direction: "increase" | "decrease"
+    rounding?: "up" | "down"
+  }
+} | {
+  source: "external"
+  app_id: string
+  hook_id: string
+  result_id: string
+  adjust?: {
+    type: "percent" | "absolute"
+    value: number | {
+      source: { ... }
+      path: { ... }
+      adjust?: { ... }
+    } | {
+      source: { ... }
+      key: { ... }
+      adjust?: { ... }
+    }
+    direction: "increase" | "decrease"
+    rounding?: "up" | "down"
+  }
 } | {
   source: "range"
   min: {
@@ -1832,13 +1927,9 @@ type ConditionValue = {
     offset: number
     unit: "days" | "months" | "years"
     anchor?: "today"
-  }
-  max: {
-    source: "static"
-    data: number | string | boolean
   } | {
-    source: "context"
-    path: string
+    source: "environment"
+    key: string
     adjust?: {
       type: { ... }
       value: { ... }
@@ -1846,19 +1937,23 @@ type ConditionValue = {
       rounding?: { ... }
     }
   } | {
-    source: "relative_date"
-    offset: number
-    unit: "days" | "months" | "years"
-    anchor?: "today"
-  }
-} | {
-  source: "none"
+    source: "external"
+    app_id: string
+    hook_id: string
+    result_id: string
+    adjust?: {
+      type: { ... }
+      value: { ... }
+      direction: { ... }
+      rounding?: { ... }
+    }
+  // ...
 }
 ```
 
 ### `ScalarValue`
 
-A single comparison value - static, resolved from context, or a relative date.
+A single comparison value - static, resolved from context, a relative date, an organisation environment variable, or an external value.
 
 ```ts
 type ScalarValue = {
@@ -1873,6 +1968,10 @@ type ScalarValue = {
       source: { ... }
       path: { ... }
       adjust?: { ... }
+    } | {
+      source: { ... }
+      key: { ... }
+      adjust?: { ... }
     }
     direction: "increase" | "decrease"
     rounding?: "up" | "down"
@@ -1882,6 +1981,102 @@ type ScalarValue = {
   offset: number
   unit: "days" | "months" | "years"
   anchor?: "today"
+} | {
+  source: "environment"
+  key: string
+  adjust?: {
+    type: "percent" | "absolute"
+    value: number | {
+      source: { ... }
+      path: { ... }
+      adjust?: { ... }
+    } | {
+      source: { ... }
+      key: { ... }
+      adjust?: { ... }
+    }
+    direction: "increase" | "decrease"
+    rounding?: "up" | "down"
+  }
+} | {
+  source: "external"
+  app_id: string
+  hook_id: string
+  result_id: string
+  adjust?: {
+    type: "percent" | "absolute"
+    value: number | {
+      source: { ... }
+      path: { ... }
+      adjust?: { ... }
+    } | {
+      source: { ... }
+      key: { ... }
+      adjust?: { ... }
+    }
+    direction: "increase" | "decrease"
+    rounding?: "up" | "down"
+  }
+}
+```
+
+### `EnvironmentValue`
+
+A comparison value resolved at evaluation time from an organisation environment variable
+(environments-api). The rule stores the key, never the value, so one change to the variable
+reaches every rule that references it and a blueprint install never overwrites the
+organisation's own value.
+
+Only brow
+
+```ts
+type EnvironmentValue = {
+  source: "environment"
+  key: string
+  adjust?: {
+    type: "percent" | "absolute"
+    value: number | {
+      source: { ... }
+      path: { ... }
+      adjust?: { ... }
+    } | {
+      source: { ... }
+      key: { ... }
+      adjust?: { ... }
+    }
+    direction: "increase" | "decrease"
+    rounding?: "up" | "down"
+  }
+}
+```
+
+### `ExternalValue`
+
+A comparison value produced at evaluation time by an External Values hook of an installed
+app (component type `EXTERNAL_VALUES`). The rule stores the reference only; the value is
+resolved server-side by the external-values-api, which executes the hook's HTTP call with
+the app's credentials and retur
+
+```ts
+type ExternalValue = {
+  source: "external"
+  app_id: string
+  hook_id: string
+  result_id: string
+  adjust?: {
+    type: "percent" | "absolute"
+    value: number | {
+      source: { ... }
+      path: { ... }
+      adjust?: { ... }
+    } | {
+      source: { ... }
+      key: { ... }
+      adjust?: { ... }
+    }
+    direction: "increase" | "decrease"
+    rounding?: "up" | "down"
+  }
 }
 ```
 
@@ -1913,6 +2108,10 @@ type ContextValue = {
       source: { ... }
       path: { ... }
       adjust?: { ... }
+    } | {
+      source: { ... }
+      key: { ... }
+      adjust?: { ... }
     }
     direction: "increase" | "decrease"
     rounding?: "up" | "down"
@@ -1932,6 +2131,15 @@ type ValueAdjustment = {
   value: number | {
     source: "context"
     path: string
+    adjust?: {
+      type: { ... }
+      value: { ... }
+      direction: { ... }
+      rounding?: { ... }
+    }
+  } | {
+    source: "environment"
+    key: string
     adjust?: {
       type: { ... }
       value: { ... }
@@ -1981,6 +2189,26 @@ type RangeValue = {
     offset: number
     unit: "days" | "months" | "years"
     anchor?: "today"
+  } | {
+    source: "environment"
+    key: string
+    adjust?: {
+      type: { ... }
+      value: { ... }
+      direction: { ... }
+      rounding?: { ... }
+    }
+  } | {
+    source: "external"
+    app_id: string
+    hook_id: string
+    result_id: string
+    adjust?: {
+      type: { ... }
+      value: { ... }
+      direction: { ... }
+      rounding?: { ... }
+    }
   }
   max: {
     source: "static"
@@ -1999,6 +2227,26 @@ type RangeValue = {
     offset: number
     unit: "days" | "months" | "years"
     anchor?: "today"
+  } | {
+    source: "environment"
+    key: string
+    adjust?: {
+      type: { ... }
+      value: { ... }
+      direction: { ... }
+      rounding?: { ... }
+    }
+  } | {
+    source: "external"
+    app_id: string
+    hook_id: string
+    result_id: string
+    adjust?: {
+      type: { ... }
+      value: { ... }
+      direction: { ... }
+      rounding?: { ... }
+    }
   }
 }
 ```
@@ -2025,7 +2273,16 @@ plausibility check only when a context value reaches a threshold.
 type AppliesWhen = {
   path: string
   operator: "equal" | "notEqual" | "greaterThan" | "greaterThanInclusive" | "lessThan" | "lessThanInclusive" | "isEmpty" | "isNotEmpty"
-  value?: number | string | boolean
+  value?: number | string | boolean | {
+    source: "environment"
+    key: string
+    adjust?: {
+      type: { ... }
+      value: { ... }
+      direction: { ... }
+      rounding?: { ... }
+    }
+  }
 }
 ```
 
