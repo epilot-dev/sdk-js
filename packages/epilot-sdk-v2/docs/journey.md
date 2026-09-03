@@ -29,6 +29,7 @@ const { data } = await journeyClient.getJourneysByOrgId(...)
 - [`getJourney`](#getjourney)
 - [`removeJourney`](#removejourney)
 - [`getJourneyEnvironment`](#getjourneyenvironment)
+- [`getJourneyEnvironmentVariables`](#getjourneyenvironmentvariables)
 - [`getJourneyProducts`](#getjourneyproducts)
 - [`createJourney`](#createjourney)
 - [`updateJourney`](#updatejourney)
@@ -49,6 +50,7 @@ const { data } = await journeyClient.getJourneysByOrgId(...)
 - [`EnvironmentMapEntry`](#environmentmapentry)
 - [`EnvironmentMap`](#environmentmap)
 - [`JourneyEnvironmentResponse`](#journeyenvironmentresponse)
+- [`JourneyEnvironmentVariablesResponse`](#journeyenvironmentvariablesresponse)
 - [`GetJourneysResponse`](#getjourneysresponse)
 - [`JourneyResponse`](#journeyresponse)
 - [`JourneyProductsResponse`](#journeyproductsresponse)
@@ -283,6 +285,44 @@ const { data } = await client.getJourneyEnvironment({
     {
       "datasourceId": "string",
       "code": "not_found"
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `getJourneyEnvironmentVariables`
+
+List the organization's environment variables that a journey block may use as an options source. Only Map variables that currently hold a valid value are returned. Intended for the journey builder's a
+
+`GET /v1/journey/environment-variables`
+
+```ts
+const { data } = await client.getJourneyEnvironmentVariables()
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "items": [
+    {
+      "key": "string",
+      "type": "Map",
+      "value": {
+        "fallbackLanguage": "de",
+        "options": [
+          {
+            "key": "string",
+            "value": "string"
+          }
+        ]
+      },
+      "description": "string"
     }
   ]
 }
@@ -1794,6 +1834,22 @@ type JourneyEnvironmentResponse = {
   errors: Array<{
     datasourceId: string
     code: "not_found" | "unsupported_type" | "not_set" | "invalid_value" | "incompatible_consumer"
+  }>
+}
+```
+
+### `JourneyEnvironmentVariablesResponse`
+
+```ts
+type JourneyEnvironmentVariablesResponse = {
+  items: Array<{
+    key: string
+    type: "Map"
+    value: {
+      fallbackLanguage?: { ... }
+      options: { ... }
+    }
+    description?: string
   }>
 }
 ```
