@@ -9192,7 +9192,10 @@ type SelectConditionDefinition = {
   name: string
   label: string
   type: "select"
-  values?: string[]
+  options?: Array<string | {
+    value: string
+    title?: string
+  }>
 }
 ```
 
@@ -9211,7 +9214,7 @@ type LocationConditionDefinition = {
 ### `ConditionDefinition`
 
 One dimension that conditional variants of an entity type are keyed by. `type`
-discriminates the variants: only a `select` condition carries `values`, and only a
+discriminates the variants: only a `select` condition carries `options`, and only a
 `location` condition carries `format`.
 
 
@@ -9226,7 +9229,10 @@ type ConditionDefinition = {
   name: string
   label: string
   type: "select"
-  values?: string[]
+  options?: Array<string | {
+    value: string
+    title?: string
+  }>
 } | {
   id: string // uuid
   name: string

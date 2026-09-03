@@ -397,6 +397,10 @@ declare namespace Components {
              * Only meaningful on schemas that declare `conditions`. Unflagged attributes stay
              * fixed on the base entity.
              *
+             * Accepted on scalar attributes and on relations — a variant overrides a relation by
+             * replacing its whole `$relation` list (e.g. a product's prices). Rejected on system
+             * (`_`-prefixed), `readonly`, `hidden`, `computed` and `repeatable` attributes.
+             *
              */
             overridable_attribute?: boolean;
             default_value?: any;
@@ -631,6 +635,10 @@ declare namespace Components {
              * Allow conditional variants of the entity to override this attribute's value.
              * Only meaningful on schemas that declare `conditions`. Unflagged attributes stay
              * fixed on the base entity.
+             *
+             * Accepted on scalar attributes and on relations — a variant overrides a relation by
+             * replacing its whole `$relation` list (e.g. a product's prices). Rejected on system
+             * (`_`-prefixed), `readonly`, `hidden`, `computed` and `repeatable` attributes.
              *
              */
             overridable_attribute?: boolean;
@@ -896,6 +904,10 @@ declare namespace Components {
              * Allow conditional variants of the entity to override this attribute's value.
              * Only meaningful on schemas that declare `conditions`. Unflagged attributes stay
              * fixed on the base entity.
+             *
+             * Accepted on scalar attributes and on relations — a variant overrides a relation by
+             * replacing its whole `$relation` list (e.g. a product's prices). Rejected on system
+             * (`_`-prefixed), `readonly`, `hidden`, `computed` and `repeatable` attributes.
              *
              */
             overridable_attribute?: boolean;
@@ -1163,6 +1175,10 @@ declare namespace Components {
              * Allow conditional variants of the entity to override this attribute's value.
              * Only meaningful on schemas that declare `conditions`. Unflagged attributes stay
              * fixed on the base entity.
+             *
+             * Accepted on scalar attributes and on relations — a variant overrides a relation by
+             * replacing its whole `$relation` list (e.g. a product's prices). Rejected on system
+             * (`_`-prefixed), `readonly`, `hidden`, `computed` and `repeatable` attributes.
              *
              */
             overridable_attribute?: boolean;
@@ -1496,6 +1512,10 @@ declare namespace Components {
              * Only meaningful on schemas that declare `conditions`. Unflagged attributes stay
              * fixed on the base entity.
              *
+             * Accepted on scalar attributes and on relations — a variant overrides a relation by
+             * replacing its whole `$relation` list (e.g. a product's prices). Rejected on system
+             * (`_`-prefixed), `readonly`, `hidden`, `computed` and `repeatable` attributes.
+             *
              */
             overridable_attribute?: boolean;
             default_value?: any;
@@ -1808,6 +1828,10 @@ declare namespace Components {
              * Only meaningful on schemas that declare `conditions`. Unflagged attributes stay
              * fixed on the base entity.
              *
+             * Accepted on scalar attributes and on relations — a variant overrides a relation by
+             * replacing its whole `$relation` list (e.g. a product's prices). Rejected on system
+             * (`_`-prefixed), `readonly`, `hidden`, `computed` and `repeatable` attributes.
+             *
              */
             overridable_attribute?: boolean;
             default_value?: any;
@@ -2005,13 +2029,13 @@ declare namespace Components {
         }
         /**
          * One dimension that conditional variants of an entity type are keyed by. `type`
-         * discriminates the variants: only a `select` condition carries `values`, and only a
+         * discriminates the variants: only a `select` condition carries `options`, and only a
          * `location` condition carries `format`.
          *
          */
         export type ConditionDefinition = /**
          * One dimension that conditional variants of an entity type are keyed by. `type`
-         * discriminates the variants: only a `select` condition carries `values`, and only a
+         * discriminates the variants: only a `select` condition carries `options`, and only a
          * `location` condition carries `format`.
          *
          */
@@ -2048,6 +2072,10 @@ declare namespace Components {
              * Allow conditional variants of the entity to override this attribute's value.
              * Only meaningful on schemas that declare `conditions`. Unflagged attributes stay
              * fixed on the base entity.
+             *
+             * Accepted on scalar attributes and on relations — a variant overrides a relation by
+             * replacing its whole `$relation` list (e.g. a product's prices). Rejected on system
+             * (`_`-prefixed), `readonly`, `hidden`, `computed` and `repeatable` attributes.
              *
              */
             overridable_attribute?: boolean;
@@ -2260,6 +2288,10 @@ declare namespace Components {
              * Only meaningful on schemas that declare `conditions`. Unflagged attributes stay
              * fixed on the base entity.
              *
+             * Accepted on scalar attributes and on relations — a variant overrides a relation by
+             * replacing its whole `$relation` list (e.g. a product's prices). Rejected on system
+             * (`_`-prefixed), `readonly`, `hidden`, `computed` and `repeatable` attributes.
+             *
              */
             overridable_attribute?: boolean;
             default_value?: any;
@@ -2468,6 +2500,10 @@ declare namespace Components {
              * Allow conditional variants of the entity to override this attribute's value.
              * Only meaningful on schemas that declare `conditions`. Unflagged attributes stay
              * fixed on the base entity.
+             *
+             * Accepted on scalar attributes and on relations — a variant overrides a relation by
+             * replacing its whole `$relation` list (e.g. a product's prices). Rejected on system
+             * (`_`-prefixed), `readonly`, `hidden`, `computed` and `repeatable` attributes.
              *
              */
             overridable_attribute?: boolean;
@@ -2687,6 +2723,10 @@ declare namespace Components {
              * Allow conditional variants of the entity to override this attribute's value.
              * Only meaningful on schemas that declare `conditions`. Unflagged attributes stay
              * fixed on the base entity.
+             *
+             * Accepted on scalar attributes and on relations — a variant overrides a relation by
+             * replacing its whole `$relation` list (e.g. a product's prices). Rejected on system
+             * (`_`-prefixed), `readonly`, `hidden`, `computed` and `repeatable` attributes.
              *
              */
             overridable_attribute?: boolean;
@@ -2977,6 +3017,10 @@ declare namespace Components {
              * Allow conditional variants of the entity to override this attribute's value.
              * Only meaningful on schemas that declare `conditions`. Unflagged attributes stay
              * fixed on the base entity.
+             *
+             * Accepted on scalar attributes and on relations — a variant overrides a relation by
+             * replacing its whole `$relation` list (e.g. a product's prices). Rejected on system
+             * (`_`-prefixed), `readonly`, `hidden`, `computed` and `repeatable` attributes.
              *
              */
             overridable_attribute?: boolean;
@@ -4780,7 +4824,7 @@ declare namespace Components {
              */
             conditions?: /**
              * One dimension that conditional variants of an entity type are keyed by. `type`
-             * discriminates the variants: only a `select` condition carries `values`, and only a
+             * discriminates the variants: only a `select` condition carries `options`, and only a
              * `location` condition carries `format`.
              *
              */
@@ -5235,7 +5279,7 @@ declare namespace Components {
              */
             conditions?: /**
              * One dimension that conditional variants of an entity type are keyed by. `type`
-             * discriminates the variants: only a `select` condition carries `values`, and only a
+             * discriminates the variants: only a `select` condition carries `options`, and only a
              * `location` condition carries `format`.
              *
              */
@@ -5788,6 +5832,10 @@ declare namespace Components {
              * Allow conditional variants of the entity to override this attribute's value.
              * Only meaningful on schemas that declare `conditions`. Unflagged attributes stay
              * fixed on the base entity.
+             *
+             * Accepted on scalar attributes and on relations — a variant overrides a relation by
+             * replacing its whole `$relation` list (e.g. a product's prices). Rejected on system
+             * (`_`-prefixed), `readonly`, `hidden`, `computed` and `repeatable` attributes.
              *
              */
             overridable_attribute?: boolean;
@@ -6711,6 +6759,10 @@ declare namespace Components {
              * Only meaningful on schemas that declare `conditions`. Unflagged attributes stay
              * fixed on the base entity.
              *
+             * Accepted on scalar attributes and on relations — a variant overrides a relation by
+             * replacing its whole `$relation` list (e.g. a product's prices). Rejected on system
+             * (`_`-prefixed), `readonly`, `hidden`, `computed` and `repeatable` attributes.
+             *
              */
             overridable_attribute?: boolean;
             default_value?: any;
@@ -6920,6 +6972,10 @@ declare namespace Components {
              * Only meaningful on schemas that declare `conditions`. Unflagged attributes stay
              * fixed on the base entity.
              *
+             * Accepted on scalar attributes and on relations — a variant overrides a relation by
+             * replacing its whole `$relation` list (e.g. a product's prices). Rejected on system
+             * (`_`-prefixed), `readonly`, `hidden`, `computed` and `repeatable` attributes.
+             *
              */
             overridable_attribute?: boolean;
             default_value?: any;
@@ -7128,6 +7184,10 @@ declare namespace Components {
              * Allow conditional variants of the entity to override this attribute's value.
              * Only meaningful on schemas that declare `conditions`. Unflagged attributes stay
              * fixed on the base entity.
+             *
+             * Accepted on scalar attributes and on relations — a variant overrides a relation by
+             * replacing its whole `$relation` list (e.g. a product's prices). Rejected on system
+             * (`_`-prefixed), `readonly`, `hidden`, `computed` and `repeatable` attributes.
              *
              */
             overridable_attribute?: boolean;
@@ -7345,6 +7405,10 @@ declare namespace Components {
              * Allow conditional variants of the entity to override this attribute's value.
              * Only meaningful on schemas that declare `conditions`. Unflagged attributes stay
              * fixed on the base entity.
+             *
+             * Accepted on scalar attributes and on relations — a variant overrides a relation by
+             * replacing its whole `$relation` list (e.g. a product's prices). Rejected on system
+             * (`_`-prefixed), `readonly`, `hidden`, `computed` and `repeatable` attributes.
              *
              */
             overridable_attribute?: boolean;
@@ -7609,6 +7673,10 @@ declare namespace Components {
              * Allow conditional variants of the entity to override this attribute's value.
              * Only meaningful on schemas that declare `conditions`. Unflagged attributes stay
              * fixed on the base entity.
+             *
+             * Accepted on scalar attributes and on relations — a variant overrides a relation by
+             * replacing its whole `$relation` list (e.g. a product's prices). Rejected on system
+             * (`_`-prefixed), `readonly`, `hidden`, `computed` and `repeatable` attributes.
              *
              */
             overridable_attribute?: boolean;
@@ -7905,6 +7973,10 @@ declare namespace Components {
              * Allow conditional variants of the entity to override this attribute's value.
              * Only meaningful on schemas that declare `conditions`. Unflagged attributes stay
              * fixed on the base entity.
+             *
+             * Accepted on scalar attributes and on relations — a variant overrides a relation by
+             * replacing its whole `$relation` list (e.g. a product's prices). Rejected on system
+             * (`_`-prefixed), `readonly`, `hidden`, `computed` and `repeatable` attributes.
              *
              */
             overridable_attribute?: boolean;
@@ -8226,6 +8298,10 @@ declare namespace Components {
              * Only meaningful on schemas that declare `conditions`. Unflagged attributes stay
              * fixed on the base entity.
              *
+             * Accepted on scalar attributes and on relations — a variant overrides a relation by
+             * replacing its whole `$relation` list (e.g. a product's prices). Rejected on system
+             * (`_`-prefixed), `readonly`, `hidden`, `computed` and `repeatable` attributes.
+             *
              */
             overridable_attribute?: boolean;
             default_value?: any;
@@ -8444,6 +8520,10 @@ declare namespace Components {
              * Only meaningful on schemas that declare `conditions`. Unflagged attributes stay
              * fixed on the base entity.
              *
+             * Accepted on scalar attributes and on relations — a variant overrides a relation by
+             * replacing its whole `$relation` list (e.g. a product's prices). Rejected on system
+             * (`_`-prefixed), `readonly`, `hidden`, `computed` and `repeatable` attributes.
+             *
              */
             overridable_attribute?: boolean;
             default_value?: any;
@@ -8652,6 +8732,10 @@ declare namespace Components {
              * Allow conditional variants of the entity to override this attribute's value.
              * Only meaningful on schemas that declare `conditions`. Unflagged attributes stay
              * fixed on the base entity.
+             *
+             * Accepted on scalar attributes and on relations — a variant overrides a relation by
+             * replacing its whole `$relation` list (e.g. a product's prices). Rejected on system
+             * (`_`-prefixed), `readonly`, `hidden`, `computed` and `repeatable` attributes.
              *
              */
             overridable_attribute?: boolean;
@@ -8862,6 +8946,10 @@ declare namespace Components {
              * Only meaningful on schemas that declare `conditions`. Unflagged attributes stay
              * fixed on the base entity.
              *
+             * Accepted on scalar attributes and on relations — a variant overrides a relation by
+             * replacing its whole `$relation` list (e.g. a product's prices). Rejected on system
+             * (`_`-prefixed), `readonly`, `hidden`, `computed` and `repeatable` attributes.
+             *
              */
             overridable_attribute?: boolean;
             default_value?: any;
@@ -9070,6 +9158,10 @@ declare namespace Components {
              * Allow conditional variants of the entity to override this attribute's value.
              * Only meaningful on schemas that declare `conditions`. Unflagged attributes stay
              * fixed on the base entity.
+             *
+             * Accepted on scalar attributes and on relations — a variant overrides a relation by
+             * replacing its whole `$relation` list (e.g. a product's prices). Rejected on system
+             * (`_`-prefixed), `readonly`, `hidden`, `computed` and `repeatable` attributes.
              *
              */
             overridable_attribute?: boolean;
@@ -9280,6 +9372,10 @@ declare namespace Components {
              * Only meaningful on schemas that declare `conditions`. Unflagged attributes stay
              * fixed on the base entity.
              *
+             * Accepted on scalar attributes and on relations — a variant overrides a relation by
+             * replacing its whole `$relation` list (e.g. a product's prices). Rejected on system
+             * (`_`-prefixed), `readonly`, `hidden`, `computed` and `repeatable` attributes.
+             *
              */
             overridable_attribute?: boolean;
             default_value?: any;
@@ -9488,6 +9584,10 @@ declare namespace Components {
              * Allow conditional variants of the entity to override this attribute's value.
              * Only meaningful on schemas that declare `conditions`. Unflagged attributes stay
              * fixed on the base entity.
+             *
+             * Accepted on scalar attributes and on relations — a variant overrides a relation by
+             * replacing its whole `$relation` list (e.g. a product's prices). Rejected on system
+             * (`_`-prefixed), `readonly`, `hidden`, `computed` and `repeatable` attributes.
              *
              */
             overridable_attribute?: boolean;
@@ -9698,6 +9798,10 @@ declare namespace Components {
              * Only meaningful on schemas that declare `conditions`. Unflagged attributes stay
              * fixed on the base entity.
              *
+             * Accepted on scalar attributes and on relations — a variant overrides a relation by
+             * replacing its whole `$relation` list (e.g. a product's prices). Rejected on system
+             * (`_`-prefixed), `readonly`, `hidden`, `computed` and `repeatable` attributes.
+             *
              */
             overridable_attribute?: boolean;
             default_value?: any;
@@ -9907,6 +10011,10 @@ declare namespace Components {
              * Only meaningful on schemas that declare `conditions`. Unflagged attributes stay
              * fixed on the base entity.
              *
+             * Accepted on scalar attributes and on relations — a variant overrides a relation by
+             * replacing its whole `$relation` list (e.g. a product's prices). Rejected on system
+             * (`_`-prefixed), `readonly`, `hidden`, `computed` and `repeatable` attributes.
+             *
              */
             overridable_attribute?: boolean;
             default_value?: any;
@@ -10115,6 +10223,10 @@ declare namespace Components {
              * Allow conditional variants of the entity to override this attribute's value.
              * Only meaningful on schemas that declare `conditions`. Unflagged attributes stay
              * fixed on the base entity.
+             *
+             * Accepted on scalar attributes and on relations — a variant overrides a relation by
+             * replacing its whole `$relation` list (e.g. a product's prices). Rejected on system
+             * (`_`-prefixed), `readonly`, `hidden`, `computed` and `repeatable` attributes.
              *
              */
             overridable_attribute?: boolean;
@@ -10339,6 +10451,10 @@ declare namespace Components {
              * Allow conditional variants of the entity to override this attribute's value.
              * Only meaningful on schemas that declare `conditions`. Unflagged attributes stay
              * fixed on the base entity.
+             *
+             * Accepted on scalar attributes and on relations — a variant overrides a relation by
+             * replacing its whole `$relation` list (e.g. a product's prices). Rejected on system
+             * (`_`-prefixed), `readonly`, `hidden`, `computed` and `repeatable` attributes.
              *
              */
             overridable_attribute?: boolean;
@@ -10774,6 +10890,10 @@ declare namespace Components {
              * Allow conditional variants of the entity to override this attribute's value.
              * Only meaningful on schemas that declare `conditions`. Unflagged attributes stay
              * fixed on the base entity.
+             *
+             * Accepted on scalar attributes and on relations — a variant overrides a relation by
+             * replacing its whole `$relation` list (e.g. a product's prices). Rejected on system
+             * (`_`-prefixed), `readonly`, `hidden`, `computed` and `repeatable` attributes.
              *
              */
             overridable_attribute?: boolean;
@@ -11438,6 +11558,10 @@ declare namespace Components {
              * Only meaningful on schemas that declare `conditions`. Unflagged attributes stay
              * fixed on the base entity.
              *
+             * Accepted on scalar attributes and on relations — a variant overrides a relation by
+             * replacing its whole `$relation` list (e.g. a product's prices). Rejected on system
+             * (`_`-prefixed), `readonly`, `hidden`, `computed` and `repeatable` attributes.
+             *
              */
             overridable_attribute?: boolean;
             default_value?: any;
@@ -11654,14 +11778,23 @@ declare namespace Components {
              */
             type: "select";
             /**
-             * Selectable options. May be empty while the condition is being configured.
+             * Selectable options, in the same shape a `select` attribute's `options` take: a bare
+             * value or a `{ value, title }` object. May be empty while the condition is being
+             * configured.
+             *
              * example:
              * [
              *   "12_months",
-             *   "24_months"
+             *   {
+             *     "value": "24_months",
+             *     "title": "24 months"
+             *   }
              * ]
              */
-            values?: string[];
+            options?: (string | {
+                value: string;
+                title?: string;
+            })[];
         }
         /**
          * Sequence of unique identifiers
@@ -11695,6 +11828,10 @@ declare namespace Components {
              * Allow conditional variants of the entity to override this attribute's value.
              * Only meaningful on schemas that declare `conditions`. Unflagged attributes stay
              * fixed on the base entity.
+             *
+             * Accepted on scalar attributes and on relations — a variant overrides a relation by
+             * replacing its whole `$relation` list (e.g. a product's prices). Rejected on system
+             * (`_`-prefixed), `readonly`, `hidden`, `computed` and `repeatable` attributes.
              *
              */
             overridable_attribute?: boolean;
@@ -11921,6 +12058,10 @@ declare namespace Components {
              * Allow conditional variants of the entity to override this attribute's value.
              * Only meaningful on schemas that declare `conditions`. Unflagged attributes stay
              * fixed on the base entity.
+             *
+             * Accepted on scalar attributes and on relations — a variant overrides a relation by
+             * replacing its whole `$relation` list (e.g. a product's prices). Rejected on system
+             * (`_`-prefixed), `readonly`, `hidden`, `computed` and `repeatable` attributes.
              *
              */
             overridable_attribute?: boolean;
@@ -12227,6 +12368,10 @@ declare namespace Components {
              * Only meaningful on schemas that declare `conditions`. Unflagged attributes stay
              * fixed on the base entity.
              *
+             * Accepted on scalar attributes and on relations — a variant overrides a relation by
+             * replacing its whole `$relation` list (e.g. a product's prices). Rejected on system
+             * (`_`-prefixed), `readonly`, `hidden`, `computed` and `repeatable` attributes.
+             *
              */
             overridable_attribute?: boolean;
             default_value?: any;
@@ -12491,6 +12636,10 @@ declare namespace Components {
              * Allow conditional variants of the entity to override this attribute's value.
              * Only meaningful on schemas that declare `conditions`. Unflagged attributes stay
              * fixed on the base entity.
+             *
+             * Accepted on scalar attributes and on relations — a variant overrides a relation by
+             * replacing its whole `$relation` list (e.g. a product's prices). Rejected on system
+             * (`_`-prefixed), `readonly`, `hidden`, `computed` and `repeatable` attributes.
              *
              */
             overridable_attribute?: boolean;
@@ -12903,6 +13052,10 @@ declare namespace Components {
              * Only meaningful on schemas that declare `conditions`. Unflagged attributes stay
              * fixed on the base entity.
              *
+             * Accepted on scalar attributes and on relations — a variant overrides a relation by
+             * replacing its whole `$relation` list (e.g. a product's prices). Rejected on system
+             * (`_`-prefixed), `readonly`, `hidden`, `computed` and `repeatable` attributes.
+             *
              */
             overridable_attribute?: boolean;
             default_value?: any;
@@ -13124,6 +13277,10 @@ declare namespace Components {
              * Allow conditional variants of the entity to override this attribute's value.
              * Only meaningful on schemas that declare `conditions`. Unflagged attributes stay
              * fixed on the base entity.
+             *
+             * Accepted on scalar attributes and on relations — a variant overrides a relation by
+             * replacing its whole `$relation` list (e.g. a product's prices). Rejected on system
+             * (`_`-prefixed), `readonly`, `hidden`, `computed` and `repeatable` attributes.
              *
              */
             overridable_attribute?: boolean;

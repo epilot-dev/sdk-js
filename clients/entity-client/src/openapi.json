@@ -5701,7 +5701,7 @@
           "overridable_attribute": {
             "type": "boolean",
             "default": false,
-            "description": "Allow conditional variants of the entity to override this attribute's value.\nOnly meaningful on schemas that declare `conditions`. Unflagged attributes stay\nfixed on the base entity.\n"
+            "description": "Allow conditional variants of the entity to override this attribute's value.\nOnly meaningful on schemas that declare `conditions`. Unflagged attributes stay\nfixed on the base entity.\n\nAccepted on scalar attributes and on relations — a variant overrides a relation by\nreplacing its whole `$relation` list (e.g. a product's prices). Rejected on system\n(`_`-prefixed), `readonly`, `hidden`, `computed` and `repeatable` attributes.\n"
           },
           "default_value": {},
           "group": {
@@ -7373,15 +7373,36 @@
                   "select"
                 ]
               },
-              "values": {
+              "options": {
                 "type": "array",
-                "description": "Selectable options. May be empty while the condition is being configured.",
+                "description": "Selectable options, in the same shape a `select` attribute's `options` take: a bare\nvalue or a `{ value, title }` object. May be empty while the condition is being\nconfigured.\n",
                 "items": {
-                  "type": "string"
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "value": {
+                          "type": "string"
+                        },
+                        "title": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "value"
+                      ]
+                    }
+                  ]
                 },
                 "example": [
                   "12_months",
-                  "24_months"
+                  {
+                    "value": "24_months",
+                    "title": "24 months"
+                  }
                 ]
               }
             },
@@ -7423,7 +7444,7 @@
         ]
       },
       "ConditionDefinition": {
-        "description": "One dimension that conditional variants of an entity type are keyed by. `type`\ndiscriminates the variants: only a `select` condition carries `values`, and only a\n`location` condition carries `format`.\n",
+        "description": "One dimension that conditional variants of an entity type are keyed by. `type`\ndiscriminates the variants: only a `select` condition carries `options`, and only a\n`location` condition carries `format`.\n",
         "oneOf": [
           {
             "$ref": "#/components/schemas/ScalarConditionDefinition"
