@@ -1,5 +1,6 @@
 # Metering API
 
+- **Base URL:** `https://metering.sls.epilot.io`
 - **API Docs:** [https://docs.epilot.io/api/metering](https://docs.epilot.io/api/metering)
 
 The Metering API manages smart meter data, meter counters, and meter readings for epilot customers and administrators.
@@ -47,6 +48,7 @@ epilot metering getCustomerMeters
 - [`createMeterReading`](#createmeterreading) — Inserts a new meter reading.
 - [`createMeterReadings`](#createmeterreadings) — Inserts multiple meter readings at once. Limited to 100 readings per request.
 - [`batchWriteMeterReadings`](#batchwritemeterreadings) — Upserts or deletes multiple meter readings at once. Limited to 100 readings per request.
+- [`pruneMeterReadings`](#prunemeterreadings) — Deletes every reading of a meter whose `external_id` is NOT in the provided keep list — in a single request.
 - [`createMeterReadingFromSubmission`](#createmeterreadingfromsubmission) — Creates meter readings from a journey submission payload.
 - [`getAllowedReadingForMeter`](#getallowedreadingformeter) — Returns the allowed min/max reading range for each counter of the given meter.
 - [`createReadingWithMeter`](#createreadingwithmeter) — Creates a meter reading along with meter lookup or creation by MA-LO ID and OBIS number.
@@ -686,6 +688,9 @@ Inserts multiple meter readings at once. Limited to 100 readings per request.
 If set to false or not provided, the system performs the following validations:
   Validation Rule |
 | `direct` | query | boolean | No | When true, bypasses changeset interception and writes directly to ClickHouse. Used by trusted integrations (e.g., ERP sync) to confirm changes and auto-clear matching pending changesets. |
+| `create_ticket` | query | boolean | No | Controls whether a manual-intervention ("Übermittlung Zählerstand") ticket is created for the
+written readings. Defaults to true, preserving portal/journey behaviour (readings with
+source ECP or journ |
 
 **Request Body** (required)
 
@@ -888,6 +893,9 @@ If set to false or not provided, the system performs the following validations:
   Validation Rule |
 | `activity_id` | query | string (ulid) | No | Activity to include in event feed |
 | `direct` | query | boolean | No | When true, bypasses changeset interception and writes directly to ClickHouse. Used by trusted integrations (e.g., ERP sync) to confirm changes and auto-clear matching pending changesets. |
+| `create_ticket` | query | boolean | No | Controls whether a manual-intervention ("Übermittlung Zählerstand") ticket is created for the
+written readings. Defaults to true, preserving portal/journey behaviour (readings with
+source ECP or journ |
 
 **Request Body** (required)
 
@@ -966,6 +974,71 @@ epilot metering batchWriteMeterReadings --jsonata 'data'
       "unit": "string"
     }
   ]
+}
+```
+
+</details>
+
+---
+
+### `pruneMeterReadings`
+
+Deletes every reading of a meter whose `external_id` is NOT in the provided keep list — in a single request.
+
+`POST /v2/metering/readings/prune`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `async` | query | boolean | No | Don't wait for the deletions to become visible in GetReadings API. Useful for large prunes |
+| `activity_id` | query | string (ulid) | No | Activity to include in event feed |
+| `create_ticket` | query | boolean | No | Controls whether a manual-intervention ("Übermittlung Zählerstand") ticket is created for the
+written readings. Defaults to true, preserving portal/journey behaviour (readings with
+source ECP or journ |
+| `dry_run` | query | boolean | No | When true, computes and returns the deleted/kept counts without deleting anything. |
+
+**Request Body** (required)
+
+**Sample Call**
+
+```bash
+epilot metering pruneMeterReadings
+```
+
+With request body:
+
+```bash
+epilot metering pruneMeterReadings \
+  -d '{
+  "meter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "counter_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "source": "ECP",
+  "keep_external_ids": ["erp-reading-1", "erp-reading-2"]
+}'
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot metering pruneMeterReadings
+```
+
+With JSONata filter:
+
+```bash
+epilot metering pruneMeterReadings --jsonata 'data'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "data": {
+    "deleted_count": 42,
+    "kept_count": 12
+  }
 }
 ```
 

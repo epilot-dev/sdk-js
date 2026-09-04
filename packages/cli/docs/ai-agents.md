@@ -1,4 +1,4 @@
-# AI Agents API - OpenAPI 3.0
+# AI Agents API
 
 - **Base URL:** `https://ai-agents.sls.epilot.io`
 - **API Docs:** [https://docs.epilot.io/api/ai-agents](https://docs.epilot.io/api/ai-agents)
@@ -44,12 +44,25 @@ epilot ai-agents listAgents
 
 **Agent Execution**
 - [`executeAgent`](#executeagent) — Executes an agent (system skill or custom agent).
-- [`listExecutions`](#listexecutions) — GET /v1/executions
-- [`getExecution`](#getexecution) — GET /v1/executions/{execution_id}
-- [`cancelExecution`](#cancelexecution) — DELETE /v1/executions/{execution_id}
+- [`executeAgentStream`](#executeagentstream) — Executes an agent with real-time streaming of tokens and tool events.
+- [`listExecutions`](#listexecutions) — List executions
+- [`getExecution`](#getexecution) — Get execution by ID
+- [`cancelExecution`](#cancelexecution) — Cancel execution
 - [`getExecutionTrace`](#getexecutiontrace) — Returns the step-by-step reasoning and tool calls for ReAct mode executions. Returns empty iterations array for direct m
+- [`getExecutionFeedback`](#getexecutionfeedback) — Returns the authenticated user's feedback for an execution.
+- [`putExecutionFeedback`](#putexecutionfeedback) — Upserts thumbs up/down feedback and mirrors it to the execution's Langfuse trace.
 - [`approveExecution`](#approveexecution) — Approves a pending tool action when execution is in waiting_approval status
 - [`rejectExecution`](#rejectexecution) — Rejects a pending tool action when execution is in waiting_approval status
+- [`streamExecution`](#streamexecution) — Reconnects to an execution's event stream after approval. Replays missed events from event log and continues streaming i
+
+**Chat**
+- [`chat`](#chat) — Initiates a streaming chat session with an AI agent. Supports server-side conversation memory via conversationId or clie
+
+**Conversations**
+- [`listConversations`](#listconversations) — Lists conversations for the authenticated user, sorted by most recent.
+- [`getConversation`](#getconversation) — Retrieves a conversation and its message history.
+- [`deleteConversation`](#deleteconversation) — Deletes a conversation and all its messages.
+- [`submitConversationFeedback`](#submitconversationfeedback) — Records a thumbs up/down (with optional comment) for the assistant turn identified by its Langfuse trace id. The rating 
 
 ### `listAgents`
 
@@ -62,7 +75,7 @@ Lists agents from both system skills and custom agents.
 | Name | In | Type | Required | Description |
 | ---- | -- | ---- | -------- | ----------- |
 | `source` | query | "system" \| "custom" | No | Filter by agent source (system = pre-built skills, custom = user-created) |
-| `availability` | query | "flows" \| "copilot" \| "all" | No | Filter by availability context (flows, copilot) |
+| `availability` | query | "flows" \| "copilot" \| "portals" \| "all" | No | Filter by availability context (flows, copilot) |
 | `entity_schema` | query | string | No | Filter by allowed entity schema (e.g., "message" for email-related skills) |
 
 **Sample Call**
@@ -98,7 +111,9 @@ epilot ai-agents listAgents --jsonata 'agents'
       "model_config": {
         "model_id": "anthropic.claude-3-5-sonnet-20241022-v2:0",
         "temperature": 0.7,
-        "max_tokens": 4096
+        "max_tokens": 4096,
+        "thinking": false,
+        "thinking_budget": 10000
       },
       "max_iterations": 0,
       "execution_pattern": "direct",
@@ -166,7 +181,9 @@ epilot ai-agents createAgent \
   "model_config": {
     "model_id": "anthropic.claude-3-5-sonnet-20241022-v2:0",
     "temperature": 0.7,
-    "max_tokens": 4096
+    "max_tokens": 4096,
+    "thinking": false,
+    "thinking_budget": 10000
   },
   "max_iterations": 10,
   "execution_pattern": "direct",
@@ -226,7 +243,9 @@ epilot ai-agents createAgent --jsonata 'agent_id'
   "model_config": {
     "model_id": "anthropic.claude-3-5-sonnet-20241022-v2:0",
     "temperature": 0.7,
-    "max_tokens": 4096
+    "max_tokens": 4096,
+    "thinking": false,
+    "thinking_budget": 10000
   },
   "max_iterations": 0,
   "execution_pattern": "direct",
@@ -313,7 +332,9 @@ epilot ai-agents getAgentById -p agent_id=skill:email-categorizer --jsonata 'age
   "model_config": {
     "model_id": "anthropic.claude-3-5-sonnet-20241022-v2:0",
     "temperature": 0.7,
-    "max_tokens": 4096
+    "max_tokens": 4096,
+    "thinking": false,
+    "thinking_budget": 10000
   },
   "max_iterations": 0,
   "execution_pattern": "direct",
@@ -386,7 +407,9 @@ epilot ai-agents updateAgentById \
   "model_config": {
     "model_id": "anthropic.claude-3-5-sonnet-20241022-v2:0",
     "temperature": 0.7,
-    "max_tokens": 4096
+    "max_tokens": 4096,
+    "thinking": false,
+    "thinking_budget": 10000
   },
   "max_iterations": 1,
   "execution_pattern": "direct",
@@ -452,7 +475,9 @@ epilot ai-agents updateAgentById -p agent_id=skill:email-categorizer --jsonata '
   "model_config": {
     "model_id": "anthropic.claude-3-5-sonnet-20241022-v2:0",
     "temperature": 0.7,
-    "max_tokens": 4096
+    "max_tokens": 4096,
+    "thinking": false,
+    "thinking_budget": 10000
   },
   "max_iterations": 0,
   "execution_pattern": "direct",
@@ -634,7 +659,15 @@ epilot ai-agents executeAgent -p agent_id=skill:email-categorizer --jsonata 'exe
     "iteration_count": 0
   },
   "started_at": "1970-01-01T00:00:00.000Z",
-  "completed_at": "1970-01-01T00:00:00.000Z"
+  "completed_at": "1970-01-01T00:00:00.000Z",
+  "iterations": [
+    {
+      "index": 0,
+      "tool": "string",
+      "status": "running",
+      "timestamp": "1970-01-01T00:00:00.000Z"
+    }
+  ]
 }
 ```
 
@@ -642,7 +675,78 @@ epilot ai-agents executeAgent -p agent_id=skill:email-categorizer --jsonata 'exe
 
 ---
 
+### `executeAgentStream`
+
+Executes an agent with real-time streaming of tokens and tool events.
+
+`POST /v1/agents/{agent_id}/execute/stream`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `agent_id` | path | string | Yes |  |
+
+**Request Body**
+
+**Sample Call**
+
+```bash
+epilot ai-agents executeAgentStream \
+  -p agent_id=skill:email-categorizer
+```
+
+With request body:
+
+```bash
+epilot ai-agents executeAgentStream \
+  -p agent_id=skill:email-categorizer \
+  -d '{
+  "input": {
+    "entity_id": "string",
+    "entity_schema": "string",
+    "workflow_id": "string",
+    "workflow_execution_id": "string",
+    "task_id": "string",
+    "custom_data": {},
+    "flow_context": [
+      {
+        "entity_id": "string",
+        "entity_schema": "string"
+      }
+    ]
+  },
+  "parameters": {},
+  "execution_mode_override": "automatic",
+  "execution_context": "flows",
+  "callback_url": "https://example.com/path",
+  "timeout_ms": 30000
+}'
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot ai-agents executeAgentStream skill:email-categorizer
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot ai-agents executeAgentStream -p agent_id=skill:email-categorizer
+```
+
+With JSONata filter:
+
+```bash
+epilot ai-agents executeAgentStream -p agent_id=skill:email-categorizer --jsonata '$'
+```
+
+---
+
 ### `listExecutions`
+
+List executions
 
 `GET /v1/executions`
 
@@ -687,7 +791,8 @@ epilot ai-agents listExecutions --jsonata 'executions'
       "pending_action": {},
       "metrics": {},
       "started_at": "1970-01-01T00:00:00.000Z",
-      "completed_at": "1970-01-01T00:00:00.000Z"
+      "completed_at": "1970-01-01T00:00:00.000Z",
+      "iterations": []
     }
   ],
   "next_cursor": "string"
@@ -699,6 +804,8 @@ epilot ai-agents listExecutions --jsonata 'executions'
 ---
 
 ### `getExecution`
+
+Get execution by ID
 
 `GET /v1/executions/{execution_id}`
 
@@ -772,7 +879,15 @@ epilot ai-agents getExecution -p execution_id=123e4567-e89b-12d3-a456-4266141740
     "iteration_count": 0
   },
   "started_at": "1970-01-01T00:00:00.000Z",
-  "completed_at": "1970-01-01T00:00:00.000Z"
+  "completed_at": "1970-01-01T00:00:00.000Z",
+  "iterations": [
+    {
+      "index": 0,
+      "tool": "string",
+      "status": "running",
+      "timestamp": "1970-01-01T00:00:00.000Z"
+    }
+  ]
 }
 ```
 
@@ -781,6 +896,8 @@ epilot ai-agents getExecution -p execution_id=123e4567-e89b-12d3-a456-4266141740
 ---
 
 ### `cancelExecution`
+
+Cancel execution
 
 `DELETE /v1/executions/{execution_id}`
 
@@ -854,7 +971,15 @@ epilot ai-agents cancelExecution -p execution_id=123e4567-e89b-12d3-a456-4266141
     "iteration_count": 0
   },
   "started_at": "1970-01-01T00:00:00.000Z",
-  "completed_at": "1970-01-01T00:00:00.000Z"
+  "completed_at": "1970-01-01T00:00:00.000Z",
+  "iterations": [
+    {
+      "index": 0,
+      "tool": "string",
+      "status": "running",
+      "timestamp": "1970-01-01T00:00:00.000Z"
+    }
+  ]
 }
 ```
 
@@ -921,6 +1046,113 @@ epilot ai-agents getExecutionTrace -p execution_id=123e4567-e89b-12d3-a456-42661
 
 ---
 
+### `getExecutionFeedback`
+
+Returns the authenticated user's feedback for an execution.
+
+`GET /v1/executions/{execution_id}/feedback`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `execution_id` | path | string (uuid) | Yes |  |
+
+**Sample Call**
+
+```bash
+epilot ai-agents getExecutionFeedback \
+  -p execution_id=123e4567-e89b-12d3-a456-426614174000
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot ai-agents getExecutionFeedback 123e4567-e89b-12d3-a456-426614174000
+```
+
+With JSONata filter:
+
+```bash
+epilot ai-agents getExecutionFeedback -p execution_id=123e4567-e89b-12d3-a456-426614174000 --jsonata 'feedback'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "feedback": {
+    "rating": "up",
+    "comment": "string",
+    "user_id": "string",
+    "submitted_at": "1970-01-01T00:00:00.000Z"
+  }
+}
+```
+
+</details>
+
+---
+
+### `putExecutionFeedback`
+
+Upserts thumbs up/down feedback and mirrors it to the execution's Langfuse trace.
+
+`PUT /v1/executions/{execution_id}/feedback`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `execution_id` | path | string (uuid) | Yes |  |
+
+**Request Body** (required)
+
+**Sample Call**
+
+```bash
+epilot ai-agents putExecutionFeedback \
+  -p execution_id=123e4567-e89b-12d3-a456-426614174000 \
+  -d '{"rating":"up","comment":"string"}'
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot ai-agents putExecutionFeedback 123e4567-e89b-12d3-a456-426614174000
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot ai-agents putExecutionFeedback -p execution_id=123e4567-e89b-12d3-a456-426614174000
+```
+
+With JSONata filter:
+
+```bash
+epilot ai-agents putExecutionFeedback -p execution_id=123e4567-e89b-12d3-a456-426614174000 --jsonata 'feedback'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "feedback": {
+    "rating": "up",
+    "comment": "string",
+    "user_id": "string",
+    "submitted_at": "1970-01-01T00:00:00.000Z"
+  }
+}
+```
+
+</details>
+
+---
+
 ### `approveExecution`
 
 Approves a pending tool action when execution is in waiting_approval status
@@ -940,7 +1172,7 @@ Approves a pending tool action when execution is in waiting_approval status
 ```bash
 epilot ai-agents approveExecution \
   -p execution_id=123e4567-e89b-12d3-a456-426614174000 \
-  -d '{"reason":"string"}'
+  -d '{"reason":"string","approved_action_ids":["string"],"rejected_action_ids":["string"]}'
 ```
 
 Using positional args for path parameters:
@@ -1006,7 +1238,15 @@ epilot ai-agents approveExecution -p execution_id=123e4567-e89b-12d3-a456-426614
     "iteration_count": 0
   },
   "started_at": "1970-01-01T00:00:00.000Z",
-  "completed_at": "1970-01-01T00:00:00.000Z"
+  "completed_at": "1970-01-01T00:00:00.000Z",
+  "iterations": [
+    {
+      "index": 0,
+      "tool": "string",
+      "status": "running",
+      "timestamp": "1970-01-01T00:00:00.000Z"
+    }
+  ]
 }
 ```
 
@@ -1099,7 +1339,341 @@ epilot ai-agents rejectExecution -p execution_id=123e4567-e89b-12d3-a456-4266141
     "iteration_count": 0
   },
   "started_at": "1970-01-01T00:00:00.000Z",
-  "completed_at": "1970-01-01T00:00:00.000Z"
+  "completed_at": "1970-01-01T00:00:00.000Z",
+  "iterations": [
+    {
+      "index": 0,
+      "tool": "string",
+      "status": "running",
+      "timestamp": "1970-01-01T00:00:00.000Z"
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `streamExecution`
+
+Reconnects to an execution's event stream after approval. Replays missed events from event log and continues streaming i
+
+`GET /v1/executions/{execution_id}/stream`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `execution_id` | path | string (uuid) | Yes |  |
+| `from_sequence` | query | number | No | Resume from this event sequence number (for reconnection) |
+
+**Sample Call**
+
+```bash
+epilot ai-agents streamExecution \
+  -p execution_id=123e4567-e89b-12d3-a456-426614174000
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot ai-agents streamExecution 123e4567-e89b-12d3-a456-426614174000
+```
+
+With JSONata filter:
+
+```bash
+epilot ai-agents streamExecution -p execution_id=123e4567-e89b-12d3-a456-426614174000 --jsonata '$'
+```
+
+---
+
+### `chat`
+
+Initiates a streaming chat session with an AI agent. Supports server-side conversation memory via conversationId or clie
+
+`POST /v1/chat`
+
+**Request Body** (required)
+
+**Sample Call**
+
+```bash
+epilot ai-agents chat
+```
+
+With request body:
+
+```bash
+epilot ai-agents chat \
+  -d '{
+  "agentId": "string",
+  "message": "string",
+  "conversationId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "clientHistory": [
+    {
+      "role": "user",
+      "content": "string",
+      "tool_calls": [
+        {
+          "id": "string",
+          "name": "string",
+          "input": {},
+          "output": "string"
+        }
+      ]
+    }
+  ],
+  "context": {
+    "entityId": "string",
+    "customData": {}
+  },
+  "streaming": {
+    "mode": "updates",
+    "streamTokens": false,
+    "includeMetadata": false
+  }
+}'
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot ai-agents chat
+```
+
+With JSONata filter:
+
+```bash
+epilot ai-agents chat --jsonata '$'
+```
+
+---
+
+### `listConversations`
+
+Lists conversations for the authenticated user, sorted by most recent.
+
+`GET /v1/conversations`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `agent_id` | query | string | No | Filter by agent ID |
+| `limit` | query | number | No | Maximum number of conversations to return |
+| `cursor` | query | string | No | Pagination cursor |
+
+**Sample Call**
+
+```bash
+epilot ai-agents listConversations
+```
+
+With JSONata filter:
+
+```bash
+epilot ai-agents listConversations --jsonata 'conversations'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "conversations": [
+    {
+      "conversation_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "user_id": "string",
+      "agent_id": "string",
+      "title": "string",
+      "message_count": 0,
+      "last_message": "string",
+      "last_message_at": "1970-01-01T00:00:00.000Z",
+      "context": {
+        "entityId": "string",
+        "customData": {}
+      },
+      "created_at": "1970-01-01T00:00:00.000Z",
+      "updated_at": "1970-01-01T00:00:00.000Z"
+    }
+  ],
+  "next_cursor": "string"
+}
+```
+
+</details>
+
+---
+
+### `getConversation`
+
+Retrieves a conversation and its message history.
+
+`GET /v1/conversations/{conversation_id}`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `conversation_id` | path | string (uuid) | Yes |  |
+| `message_limit` | query | number | No | Maximum number of messages to return |
+
+**Sample Call**
+
+```bash
+epilot ai-agents getConversation \
+  -p conversation_id=123e4567-e89b-12d3-a456-426614174000
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot ai-agents getConversation 123e4567-e89b-12d3-a456-426614174000
+```
+
+With JSONata filter:
+
+```bash
+epilot ai-agents getConversation -p conversation_id=123e4567-e89b-12d3-a456-426614174000 --jsonata 'conversation'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "conversation": {
+    "conversation_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "user_id": "string",
+    "agent_id": "string",
+    "title": "string",
+    "message_count": 0,
+    "last_message": "string",
+    "last_message_at": "1970-01-01T00:00:00.000Z",
+    "context": {
+      "entityId": "string",
+      "customData": {}
+    },
+    "created_at": "1970-01-01T00:00:00.000Z",
+    "updated_at": "1970-01-01T00:00:00.000Z"
+  },
+  "messages": [
+    {
+      "conversation_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "role": "user",
+      "content": "string",
+      "timestamp": "1970-01-01T00:00:00.000Z",
+      "tool_calls": [
+        {
+          "id": "string",
+          "name": "string",
+          "input": {},
+          "output": "string"
+        }
+      ],
+      "token_count": 0,
+      "trace_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "feedback": {
+        "rating": "up",
+        "comment": "string",
+        "user_id": "string",
+        "submitted_at": "1970-01-01T00:00:00.000Z"
+      }
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `deleteConversation`
+
+Deletes a conversation and all its messages.
+
+`DELETE /v1/conversations/{conversation_id}`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `conversation_id` | path | string (uuid) | Yes |  |
+
+**Sample Call**
+
+```bash
+epilot ai-agents deleteConversation \
+  -p conversation_id=123e4567-e89b-12d3-a456-426614174000
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot ai-agents deleteConversation 123e4567-e89b-12d3-a456-426614174000
+```
+
+With JSONata filter:
+
+```bash
+epilot ai-agents deleteConversation -p conversation_id=123e4567-e89b-12d3-a456-426614174000 --jsonata '$'
+```
+
+---
+
+### `submitConversationFeedback`
+
+Records a thumbs up/down (with optional comment) for the assistant turn identified by its Langfuse trace id. The rating 
+
+`POST /v1/conversations/{conversation_id}/feedback`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `conversation_id` | path | string (uuid) | Yes |  |
+
+**Request Body** (required)
+
+**Sample Call**
+
+```bash
+epilot ai-agents submitConversationFeedback \
+  -p conversation_id=123e4567-e89b-12d3-a456-426614174000 \
+  -d '{"trace_id":"3fa85f64-5717-4562-b3fc-2c963f66afa6","rating":"up","comment":"string"}'
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot ai-agents submitConversationFeedback 123e4567-e89b-12d3-a456-426614174000
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot ai-agents submitConversationFeedback -p conversation_id=123e4567-e89b-12d3-a456-426614174000
+```
+
+With JSONata filter:
+
+```bash
+epilot ai-agents submitConversationFeedback -p conversation_id=123e4567-e89b-12d3-a456-426614174000 --jsonata 'feedback'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "feedback": {
+    "rating": "up",
+    "comment": "string",
+    "user_id": "string",
+    "submitted_at": "1970-01-01T00:00:00.000Z"
+  }
 }
 ```
 
