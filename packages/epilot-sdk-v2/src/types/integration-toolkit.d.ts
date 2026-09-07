@@ -1353,7 +1353,7 @@ export declare namespace Components {
             include_preview?: boolean;
             /**
              * Repoint an EXISTING import at this file instead of registering a new one — same row, same id, so iterating on which file to import leaves one entry in the history rather than one per attempt.
-             * Only a PENDING import may be repointed; any other status returns 409 with code `IMPORT_NOT_REPLACEABLE`. Past the first check the previous verdict is what tells the user what to fix, and a job that reached the execute phase may already have published rows under `correlation_id`.
+             * Repointing is allowed exactly while the import has written nothing: from PENDING and READY, and from FAILED when `error.code` is one of `VALIDATION_BLOCKED`, `VALIDATE_TIMEOUT` or `FILE_FORMAT_UNSUPPORTED`. Anything else returns 409 with code `IMPORT_NOT_REPLACEABLE`. The repoint clears any verdict the import had.
              * An id that names nothing returns 404. It never falls back to registering a new import: a stale id must fail loudly rather than quietly produce a second one.
              */
             import_id?: string;
@@ -1468,6 +1468,15 @@ export declare namespace Components {
              * Configuration defining environment variables needed by this integration. Values are stored in the Environments API.
              */
             environment_config?: EnvironmentFieldConfig[];
+            /**
+             * Re-usable key/value maps (e.g. salutation codes) declared by this integration (max 50). Each map is synced to the Environments API as a non-secret variable of type `JSON` and is available in JSONata mappings as `$env.<key>`, together with the `$mapValue(map, key, default)` and `$mapKey(map, value, default)` helpers.
+             *
+             */
+            maps?: /**
+             * A flat key/value map stored as an Environments API variable of type `JSON`. Values must be strings, numbers, booleans or null; the serialised map must not exceed 32 KB.
+             *
+             */
+            IntegrationMap[];
             settings?: /* Settings for the integration */ IntegrationSettings;
             /**
              * Type of integration. "erp" is the ERP integration with inbound/outbound use cases. "connector" is for complex proxy integrations with external APIs.
@@ -1778,10 +1787,10 @@ export declare namespace Components {
          * entity verbatim (except `$relation` / `$relation_ref` envelopes, which are validated and
          * resolved).
          *
-         * One event lands as one queue message, so the whole event (including this payload) must
-         * stay within the 256 KiB message budget. Identical consecutive payloads within 5 minutes
-         * can be deduplicated by the queue - use the event's `deduplication_id` deliberately when
-         * re-sending identical data.
+         * One event lands as one queue message, so the whole serialized event (including this
+         * payload and its internal envelope) must stay within the 1 MiB message budget. Identical
+         * consecutive payloads within 5 minutes can be deduplicated by the queue - use the event's
+         * `deduplication_id` deliberately when re-sending identical data.
          *
          */
         export interface DirectPayload {
@@ -2033,10 +2042,10 @@ export declare namespace Components {
              * entity verbatim (except `$relation` / `$relation_ref` envelopes, which are validated and
              * resolved).
              *
-             * One event lands as one queue message, so the whole event (including this payload) must
-             * stay within the 256 KiB message budget. Identical consecutive payloads within 5 minutes
-             * can be deduplicated by the queue - use the event's `deduplication_id` deliberately when
-             * re-sending identical data.
+             * One event lands as one queue message, so the whole serialized event (including this
+             * payload and its internal envelope) must stay within the 1 MiB message budget. Identical
+             * consecutive payloads within 5 minutes can be deduplicated by the queue - use the event's
+             * `deduplication_id` deliberately when re-sending identical data.
              *
              */
             DirectPayload;
@@ -2892,6 +2901,30 @@ export declare namespace Components {
             correlation_id?: string;
         };
         /**
+         * One entity instance the import will write, attributed to the mapping target that produces it.
+         */
+        export interface ErpImportEntityDetail {
+            /**
+             * Which `config.entities[]` target produced this entity — the join key back to the mapping.
+             */
+            mapping_index: number;
+            entity_schema: string;
+            /**
+             * The entity's identity: its `unique_ids` as the mapping resolved them, keyed by attribute name in the order the target declares them. Values are strings, as they arrive from CSV.
+             */
+            business_key: {
+                [name: string]: string;
+            };
+            /**
+             * Distinct condition tuples. Absent when the entity is not conditional.
+             */
+            variants?: number;
+            /**
+             * Version writes — one per variant per effective date. Absent when the entity is not conditional.
+             */
+            versions?: number;
+        }
+        /**
          * Why the import failed — present if and only if status = FAILED. `code` is the translation key; for VALIDATION_BLOCKED the specifics are in `validation`.
          */
         export interface ErpImportError {
@@ -2899,7 +2932,7 @@ export declare namespace Components {
              * Enum of possible error codes.
              *
              */
-            code: "VALIDATION_BLOCKED" | "FILE_FORMAT_UNSUPPORTED" | "FILE_UNAVAILABLE" | "VALIDATE_TIMEOUT" | "IMPORT_TIMEOUT" | "USE_CASE_NOT_USABLE" | "IMPORT_NO_PROGRESS" | "INTERNAL_ERROR";
+            code: "VALIDATION_BLOCKED" | "FILE_FORMAT_UNSUPPORTED" | "FILE_UNAVAILABLE" | "VALIDATE_TIMEOUT" | "IMPORT_TIMEOUT" | "USE_CASE_NOT_USABLE" | "IMPORT_NO_PROGRESS" | "TIER_ROWS_NOT_GROUPED" | "INTERNAL_ERROR";
             /**
              * One English sentence, derived from `code` so the two always agree. A fallback for a client that has no translation for this code — prefer translating `code`, and never parse this. It deliberately does NOT restate `validation.issues`.
              */
@@ -2919,15 +2952,36 @@ export declare namespace Components {
             rows: string[][];
         }
         /**
-         * A problem found during validation, scoped to the file as a whole rather than to individual rows.
-         * `code` is the translation key and the other fields are its parameters — there is deliberately no message to display. Each code appears at most once, with everything it has to say aggregated into that one entry.
+         * A problem found during validation, scoped to the file as a whole rather than to
+         * individual rows.
+         *
+         * `code` is the translation key and the other fields are its parameters — there is
+         * deliberately no message to display. Each code appears at most once, with
+         * everything it has to say aggregated into that one entry.
+         *
+         * The conditional codes describe a file that cannot be written as variants:
+         *
+         * - `TIER_ROWS_NOT_GROUPED` — rows of one variant are spread through the file;
+         *   `columns` names what to group by.
+         * - `TIER_BANDS_CONFLICT` — two rows of one variant claim the same band.
+         * - `CONDITION_VALUE_MISSING` — a condition column is blank in every row.
+         * - `VARIANT_VALUE_CONFLICT` — rows of one variant disagree on a value that is not
+         *   the one being folded; the first row's value is what would be written.
+         * - `ATTRIBUTE_NOT_OVERRIDABLE` — the schema does not let a variant override this
+         *   attribute, so the mapped value would be discarded.
+         * - `ATTRIBUTE_NOT_IN_SCHEMA` — the schema does not have the attribute at all.
+         *
+         * The rest reject the mapping against the entity schemas, before the file is read, and
+         * name the thing at fault in `subject`: `IS_CONDITIONAL_NOT_CONSTANT`,
+         * `SCHEMA_NOT_CONDITIONABLE`, `SCHEMA_NOT_FOUND`, `SCHEMA_DECLARES_NO_CONDITIONS`,
+         * `GROUPING_KEY_NOT_A_COLUMN`, `GROUPING_KEY_IS_FOLD_COLUMN`.
          */
         export interface ErpImportIssue {
             /**
              * Enum of possible issue codes.
              *
              */
-            code: "UNIQUE_ID_COLUMN_MISSING" | "MAPPED_COLUMN_MISSING" | "MALFORMED_ROW" | "INVALID_ENCODING" | "EMPTY_FILE" | "TOO_MANY_ROWS" | "BLANK_ROWS_SKIPPED";
+            code: "UNIQUE_ID_COLUMN_MISSING" | "MAPPED_COLUMN_MISSING" | "MALFORMED_ROW" | "INVALID_ENCODING" | "EMPTY_FILE" | "TOO_MANY_ROWS" | "BLANK_ROWS_SKIPPED" | "TIER_ROWS_NOT_GROUPED" | "TIER_BANDS_CONFLICT" | "CONDITION_VALUE_MISSING" | "VARIANT_VALUE_CONFLICT" | "ATTRIBUTE_NOT_OVERRIDABLE" | "ATTRIBUTE_NOT_IN_SCHEMA" | "IS_CONDITIONAL_NOT_CONSTANT" | "SCHEMA_NOT_CONDITIONABLE" | "SCHEMA_NOT_FOUND" | "SCHEMA_DECLARES_NO_CONDITIONS" | "GROUPING_KEY_NOT_A_COLUMN" | "GROUPING_KEY_IS_FOLD_COLUMN";
             severity: "warning" | "blocking";
             /**
              * The columns this issue is about, at most one entry per column per entity.
@@ -2943,6 +2997,10 @@ export declare namespace Components {
                  */
                 entity?: string;
             }[];
+            /**
+             * What the issue is about — an attribute, an entity type slug, or an "attribute reads column" pair — to substitute into the client's copy for the code. Independent of `columns`; a code can carry both.
+             */
+            subject?: string;
             /**
              * The offending data row, 1-based as the user counts rows. MALFORMED_ROW only.
              */
@@ -3036,8 +3094,9 @@ export declare namespace Components {
         export interface ErpImportValidation {
             /**
              * Data rows the import will act on. Rows with no value in any column are dropped before they are counted, and reported as BLANK_ROWS_SKIPPED — so this can be lower than the line count of the file.
+             * ABSENT when the verdict was reached without reading the file, as a mapping refused against the entity schemas alone is. Do not default it to zero.
              */
-            total_rows: number;
+            total_rows?: number;
             /**
              * Blocking problems found, counting per-row ones that are not listed in `issues`.
              */
@@ -3050,11 +3109,40 @@ export declare namespace Components {
                 [name: string]: number;
             };
             /**
+             * What this import will write, one entry per entity instance, capped at 20 in first-appearance order. `entities` stays exact regardless.
+             */
+            entity_details?: /* One entity instance the import will write, attributed to the mapping target that produces it. */ ErpImportEntityDetail[];
+            /**
+             * More entities exist than `entity_details` lists.
+             */
+            entity_details_truncated?: boolean;
+            /**
              * Whole-file issues, at most one per `code`. Do not expect the length to match blocking + warnings: those also count per-row problems, which are recorded for support but never listed here. Warnings here are what `ack_warnings` on `:execute` acknowledges.
              */
             issues?: /**
-             * A problem found during validation, scoped to the file as a whole rather than to individual rows.
-             * `code` is the translation key and the other fields are its parameters — there is deliberately no message to display. Each code appears at most once, with everything it has to say aggregated into that one entry.
+             * A problem found during validation, scoped to the file as a whole rather than to
+             * individual rows.
+             *
+             * `code` is the translation key and the other fields are its parameters — there is
+             * deliberately no message to display. Each code appears at most once, with
+             * everything it has to say aggregated into that one entry.
+             *
+             * The conditional codes describe a file that cannot be written as variants:
+             *
+             * - `TIER_ROWS_NOT_GROUPED` — rows of one variant are spread through the file;
+             *   `columns` names what to group by.
+             * - `TIER_BANDS_CONFLICT` — two rows of one variant claim the same band.
+             * - `CONDITION_VALUE_MISSING` — a condition column is blank in every row.
+             * - `VARIANT_VALUE_CONFLICT` — rows of one variant disagree on a value that is not
+             *   the one being folded; the first row's value is what would be written.
+             * - `ATTRIBUTE_NOT_OVERRIDABLE` — the schema does not let a variant override this
+             *   attribute, so the mapped value would be discarded.
+             * - `ATTRIBUTE_NOT_IN_SCHEMA` — the schema does not have the attribute at all.
+             *
+             * The rest reject the mapping against the entity schemas, before the file is read, and
+             * name the thing at fault in `subject`: `IS_CONDITIONAL_NOT_CONSTANT`,
+             * `SCHEMA_NOT_CONDITIONABLE`, `SCHEMA_NOT_FOUND`, `SCHEMA_DECLARES_NO_CONDITIONS`,
+             * `GROUPING_KEY_NOT_A_COLUMN`, `GROUPING_KEY_IS_FOLD_COLUMN`.
              */
             ErpImportIssue[];
         }
@@ -4774,6 +4862,15 @@ export declare namespace Components {
              * Configuration defining environment variables needed by this integration. Values are stored in the Environments API.
              */
             environment_config?: EnvironmentFieldConfig[];
+            /**
+             * Re-usable key/value maps (e.g. salutation codes) declared by this integration (max 50). Each map is synced to the Environments API as a non-secret variable of type `JSON` and is available in JSONata mappings as `$env.<key>`, together with the `$mapValue(map, key, default)` and `$mapKey(map, value, default)` helpers.
+             *
+             */
+            maps?: /**
+             * A flat key/value map stored as an Environments API variable of type `JSON`. Values must be strings, numbers, booleans or null; the serialised map must not exceed 32 KB.
+             *
+             */
+            IntegrationMap[];
             settings?: /* Settings for the integration */ IntegrationSettings;
             /**
              * Type of integration. "erp" is the ERP integration with inbound/outbound use cases. "connector" is for complex proxy integrations with external APIs.
@@ -4845,6 +4942,15 @@ export declare namespace Components {
              * Configuration defining environment variables needed by this integration. Values are stored in the Environments API.
              */
             environment_config?: EnvironmentFieldConfig[];
+            /**
+             * Re-usable key/value maps (e.g. salutation codes) declared by this integration (max 50). Each map is synced to the Environments API as a non-secret variable of type `JSON` and is available in JSONata mappings as `$env.<key>`, together with the `$mapValue(map, key, default)` and `$mapKey(map, value, default)` helpers.
+             *
+             */
+            maps?: /**
+             * A flat key/value map stored as an Environments API variable of type `JSON`. Values must be strings, numbers, booleans or null; the serialised map must not exceed 32 KB.
+             *
+             */
+            IntegrationMap[];
             settings?: /* Settings for the integration */ IntegrationSettings;
             /**
              * Type of integration. "erp" is the ERP integration with inbound/outbound use cases. "connector" is for complex proxy integrations with external APIs.
@@ -4904,6 +5010,18 @@ export declare namespace Components {
              *
              */
             fields?: IntegrationEntityField[];
+            conditional?: /* Conditional Pricing extras for this target, used when it writes a conditional entity (a Product, Price or Coupon carrying context-dependent variants). The conditions themselves are declared on the entity schema, not here. */ IntegrationEntityConditional;
+        }
+        /**
+         * Conditional Pricing extras for this target, used when it writes a conditional entity (a Product, Price or Coupon carrying context-dependent variants). The conditions themselves are declared on the entity schema, not here.
+         */
+        export interface IntegrationEntityConditional {
+            /**
+             * Row folds for this target. Exactly one is supported; the array is the shape for later, not a capability claim.
+             */
+            folds: [
+                /* Collapse the rows of one variant-version into a single array attribute, ordered by a column. A commodity file carries one row per consumption band, while a variant-version holds exactly one `tiers` array. */ IntegrationEntityFold
+            ];
         }
         export interface IntegrationEntityField {
             /**
@@ -4956,6 +5074,40 @@ export declare namespace Components {
              */
             EnvVarRefConfig;
         }
+        /**
+         * Collapse the rows of one variant-version into a single array attribute, ordered by a column. A commodity file carries one row per consumption band, while a variant-version holds exactly one `tiers` array.
+         */
+        export interface IntegrationEntityFold {
+            /**
+             * The array attribute this fold builds, e.g. `tiers`.
+             */
+            attribute: string;
+            /**
+             * Orders the group's rows. Coerced to a number, so `10000` sorts after `5000` rather than before it as strings.
+             */
+            sort_by: /* Orders the group's rows. Coerced to a number, so `10000` sorts after `5000` rather than before it as strings. */ {
+                /**
+                 * Source column name, or a JSONPath expression when it starts with $
+                 */
+                field: string;
+            } | {
+                /**
+                 * Constant value, of any type
+                 */
+                constant: any;
+            } | {
+                /**
+                 * JSONata expression evaluated against the row
+                 */
+                jsonataExpression: string;
+            };
+            /**
+             * Attribute name to field value, shaping one array item from one row. `jsonataExpression` is often needed here: German ERP exports carry decimal commas (`31,25`) that `Number()` cannot parse.
+             */
+            item: {
+                [name: string]: /* One mapped value. Exactly one of field, constant or jsonataExpression must be set — the same three forms `IntegrationEntityField` accepts. */ MappedFieldValue;
+            };
+        }
         export interface IntegrationFieldV1 {
             /**
              * Target entity slug
@@ -4973,6 +5125,30 @@ export declare namespace Components {
              * JSONata expression for transformation (mutually exclusive with field)
              */
             jsonataExpression?: string;
+        }
+        /**
+         * A flat key/value map stored as an Environments API variable of type `JSON`. Values must be strings, numbers, booleans or null; the serialised map must not exceed 32 KB.
+         *
+         */
+        export interface IntegrationMap {
+            /**
+             * Environment variable key the map is synced to (`$env.<key>` in JSONata).
+             */
+            key: string; // ^[a-z0-9][a-z0-9_.\-]{0,127}$
+            /**
+             * Display label for the map in the UI
+             */
+            label: string;
+            /**
+             * Help text shown for the map
+             */
+            description?: string;
+            /**
+             * The map itself, e.g. `{"Mr.": 1, "Ms. / Mrs.": 2}`
+             */
+            value: {
+                [name: string]: any;
+            };
         }
         export interface IntegrationMeterReading {
             /**
@@ -5103,6 +5279,15 @@ export declare namespace Components {
              * Configuration defining environment variables needed by this integration. Values are stored in the Environments API.
              */
             environment_config?: EnvironmentFieldConfig[];
+            /**
+             * Re-usable key/value maps (e.g. salutation codes) declared by this integration (max 50). Each map is synced to the Environments API as a non-secret variable of type `JSON` and is available in JSONata mappings as `$env.<key>`, together with the `$mapValue(map, key, default)` and `$mapKey(map, value, default)` helpers.
+             *
+             */
+            maps?: /**
+             * A flat key/value map stored as an Environments API variable of type `JSON`. Values must be strings, numbers, booleans or null; the serialised map must not exceed 32 KB.
+             *
+             */
+            IntegrationMap[];
             settings?: /* Settings for the integration */ IntegrationSettings;
             /**
              * Type of integration. "erp" is the ERP integration with inbound/outbound use cases. "connector" is for complex proxy integrations with external APIs.
@@ -5378,6 +5563,25 @@ export declare namespace Components {
              */
             types_locked?: boolean;
         }
+        /**
+         * One mapped value. Exactly one of field, constant or jsonataExpression must be set — the same three forms `IntegrationEntityField` accepts.
+         */
+        export type MappedFieldValue = /* One mapped value. Exactly one of field, constant or jsonataExpression must be set — the same three forms `IntegrationEntityField` accepts. */ {
+            /**
+             * Source column name, or a JSONPath expression when it starts with $
+             */
+            field: string;
+        } | {
+            /**
+             * Constant value, of any type
+             */
+            constant: any;
+        } | {
+            /**
+             * JSONata expression evaluated against the row
+             */
+            jsonataExpression: string;
+        };
         export interface MappingSimulationRequest {
             mapping_configuration: IntegrationConfigurationV1 | IntegrationConfigurationV2;
             /**
@@ -8031,6 +8235,15 @@ export declare namespace Components {
              * Configuration defining environment variables needed by this integration. Values are stored in the Environments API.
              */
             environment_config?: EnvironmentFieldConfig[];
+            /**
+             * Re-usable key/value maps (e.g. salutation codes) declared by this integration (max 50). Each map is synced to the Environments API as a non-secret variable of type `JSON` and is available in JSONata mappings as `$env.<key>`, together with the `$mapValue(map, key, default)` and `$mapKey(map, value, default)` helpers.
+             *
+             */
+            maps?: /**
+             * A flat key/value map stored as an Environments API variable of type `JSON`. Values must be strings, numbers, booleans or null; the serialised map must not exceed 32 KB.
+             *
+             */
+            IntegrationMap[];
             settings?: /* Settings for the integration */ IntegrationSettings;
             /**
              * Type of integration. "erp" is the ERP integration with inbound/outbound use cases. "connector" is for complex proxy integrations with external APIs.
@@ -8440,7 +8653,7 @@ export declare namespace Paths {
             export type $202 = Components.Schemas.ErpImportJob;
             export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
-            export type $409 = Components.Responses.Conflict;
+            export type $409 = Components.Schemas.ErrorResponseBase;
             export type $422 = Components.Schemas.ErrorResponseBase;
             export type $500 = Components.Responses.InternalServerError;
         }
@@ -9939,6 +10152,10 @@ export interface OperationMethods {
    * the ERP. Returns an empty list for entities no inbound use case has
    * processed. Org-scoped via the caller's token.
    * 
+   * Deprecated alias: `GET /v1/entities/{entityId}/sync-status` is still
+   * served (rewritten to this path in the API handler) but will be removed —
+   * migrate callers to this path.
+   * 
    */
   'getEntitySyncStatus'(
     parameters?: Parameters<Paths.GetEntitySyncStatus.QueryParameters & Paths.GetEntitySyncStatus.PathParameters> | null,
@@ -10239,7 +10456,7 @@ export interface OperationMethods {
    * createErpImport - createErpImport
    * 
    * Register an already-uploaded file (S3 ref) as a pricing-file import job. Returns the job and a file preview. Nothing runs yet: no use case is chosen and no validation starts here. Optionally rank candidates with POST /v2/erp/imports/{importId}:suggest-use-cases, then start validation with POST /v2/erp/imports/{importId}:validate.
-   * Pass `import_id` to repoint an existing PENDING import at a different file instead, keeping its id and its place in the history.
+   * Pass `import_id` to repoint an existing import at a different file instead, keeping its id and its place in the history — allowed while the import has written nothing.
    */
   'createErpImport'(
     parameters?: Parameters<UnknownParamsObject> | null,
@@ -10293,6 +10510,7 @@ export interface OperationMethods {
    * executeErpImport - executeErpImport
    * 
    * Confirm and run the write phase of a validated import. Only a READY job may be executed; any other status returns 409.
+   * The verdict is re-checked against live inputs first: if the mapping or an entity schema changed since the check, this returns 409 `VALIDATION_STALE` and leaves the verdict untouched for `:validate` to re-form.
    */
   'executeErpImport'(
     parameters?: Parameters<Paths.ExecuteErpImport.PathParameters> | null,
@@ -10894,7 +11112,7 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetOutboundStatus.Responses.$200>
   }
-  ['/v1/entities/{entityId}/sync-status']: {
+  ['/v1/integrations/entities/{entityId}/sync-status']: {
     /**
      * getEntitySyncStatus - getEntitySyncStatus
      * 
@@ -10906,6 +11124,10 @@ export interface PathsDictionary {
      * `_updated_at` bump). Use it to tell whether an entity is up to date with
      * the ERP. Returns an empty list for entities no inbound use case has
      * processed. Org-scoped via the caller's token.
+     * 
+     * Deprecated alias: `GET /v1/entities/{entityId}/sync-status` is still
+     * served (rewritten to this path in the API handler) but will be removed —
+     * migrate callers to this path.
      * 
      */
     'get'(
@@ -11232,7 +11454,7 @@ export interface PathsDictionary {
      * createErpImport - createErpImport
      * 
      * Register an already-uploaded file (S3 ref) as a pricing-file import job. Returns the job and a file preview. Nothing runs yet: no use case is chosen and no validation starts here. Optionally rank candidates with POST /v2/erp/imports/{importId}:suggest-use-cases, then start validation with POST /v2/erp/imports/{importId}:validate.
-     * Pass `import_id` to repoint an existing PENDING import at a different file instead, keeping its id and its place in the history.
+     * Pass `import_id` to repoint an existing import at a different file instead, keeping its id and its place in the history — allowed while the import has written nothing.
      */
     'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
@@ -11309,6 +11531,7 @@ export interface PathsDictionary {
      * executeErpImport - executeErpImport
      * 
      * Confirm and run the write phase of a validated import. Only a READY job may be executed; any other status returns 409.
+     * The verdict is re-checked against live inputs first: if the mapping or an entity schema changed since the check, this returns 409 `VALIDATION_STALE` and leaves the verdict untouched for `:validate` to re-form.
      */
     'post'(
       parameters?: Parameters<Paths.ExecuteErpImport.PathParameters> | null,
@@ -11382,6 +11605,7 @@ export type EnvVarRefConfig = Components.Schemas.EnvVarRefConfig;
 export type EnvironmentFieldConfig = Components.Schemas.EnvironmentFieldConfig;
 export type ErpEvent = Components.Schemas.ErpEvent;
 export type ErpEventV3 = Components.Schemas.ErpEventV3;
+export type ErpImportEntityDetail = Components.Schemas.ErpImportEntityDetail;
 export type ErpImportError = Components.Schemas.ErpImportError;
 export type ErpImportFilePreview = Components.Schemas.ErpImportFilePreview;
 export type ErpImportIssue = Components.Schemas.ErpImportIssue;
@@ -11428,8 +11652,11 @@ export type IntegrationConfigurationV1 = Components.Schemas.IntegrationConfigura
 export type IntegrationConfigurationV2 = Components.Schemas.IntegrationConfigurationV2;
 export type IntegrationEditableFields = Components.Schemas.IntegrationEditableFields;
 export type IntegrationEntity = Components.Schemas.IntegrationEntity;
+export type IntegrationEntityConditional = Components.Schemas.IntegrationEntityConditional;
 export type IntegrationEntityField = Components.Schemas.IntegrationEntityField;
+export type IntegrationEntityFold = Components.Schemas.IntegrationEntityFold;
 export type IntegrationFieldV1 = Components.Schemas.IntegrationFieldV1;
+export type IntegrationMap = Components.Schemas.IntegrationMap;
 export type IntegrationMeterReading = Components.Schemas.IntegrationMeterReading;
 export type IntegrationNotificationConfig = Components.Schemas.IntegrationNotificationConfig;
 export type IntegrationObjectV1 = Components.Schemas.IntegrationObjectV1;
@@ -11443,6 +11670,7 @@ export type ManagedCallOperation = Components.Schemas.ManagedCallOperation;
 export type ManagedCallOperationConfig = Components.Schemas.ManagedCallOperationConfig;
 export type ManagedCallUseCase = Components.Schemas.ManagedCallUseCase;
 export type ManagedCallUseCaseHistoryEntry = Components.Schemas.ManagedCallUseCaseHistoryEntry;
+export type MappedFieldValue = Components.Schemas.MappedFieldValue;
 export type MappingSimulationRequest = Components.Schemas.MappingSimulationRequest;
 export type MappingSimulationResponse = Components.Schemas.MappingSimulationResponse;
 export type MappingSimulationV2Request = Components.Schemas.MappingSimulationV2Request;

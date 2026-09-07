@@ -113,6 +113,7 @@ const { data } = await integrationToolkitClient.acknowledgeTracking(...)
 - [`ExecuteErpImportRequest`](#executeerpimportrequest)
 - [`ErpImportIssue`](#erpimportissue)
 - [`ErpImportValidation`](#erpimportvalidation)
+- [`ErpImportEntityDetail`](#erpimportentitydetail)
 - [`ErpImportProgress`](#erpimportprogress)
 - [`ErpImportError`](#erpimporterror)
 - [`ErpImportFilePreview`](#erpimportfilepreview)
@@ -140,6 +141,7 @@ const { data } = await integrationToolkitClient.acknowledgeTracking(...)
 - [`Integration`](#integration)
 - [`CreateIntegrationRequest`](#createintegrationrequest)
 - [`UpdateIntegrationRequest`](#updateintegrationrequest)
+- [`IntegrationMap`](#integrationmap)
 - [`EnvironmentFieldConfig`](#environmentfieldconfig)
 - [`IntegrationSettings`](#integrationsettings)
 - [`AutoRefreshSettings`](#autorefreshsettings)
@@ -156,6 +158,9 @@ const { data } = await integrationToolkitClient.acknowledgeTracking(...)
 - [`InboundIntegrationEventConfiguration`](#inboundintegrationeventconfiguration)
 - [`OutboundIntegrationEventConfiguration`](#outboundintegrationeventconfiguration)
 - [`IntegrationEntity`](#integrationentity)
+- [`IntegrationEntityConditional`](#integrationentityconditional)
+- [`IntegrationEntityFold`](#integrationentityfold)
+- [`MappedFieldValue`](#mappedfieldvalue)
 - [`IntegrationMeterReading`](#integrationmeterreading)
 - [`PruneScopeConfig`](#prunescopeconfig)
 - [`MeterReadingPruneScopeConfig`](#meterreadingprunescopeconfig)
@@ -728,6 +733,7 @@ const { data } = await client.listIntegrations()
       "access_token_ids": ["string"],
       "app_ids": ["string"],
       "environment_config": [],
+      "maps": [],
       "settings": {},
       "integration_type": "erp",
       "connector_config": {},
@@ -764,6 +770,14 @@ const { data } = await client.createIntegration(
         description: 'string',
         required: false,
         order: 0
+      }
+    ],
+    maps: [
+      {
+        key: 'string',
+        label: 'string',
+        description: 'string',
+        value: {}
       }
     ],
     settings: {
@@ -833,6 +847,14 @@ const { data } = await client.createIntegration(
       "description": "string",
       "required": false,
       "order": 0
+    }
+  ],
+  "maps": [
+    {
+      "key": "string",
+      "label": "string",
+      "description": "string",
+      "value": {}
     }
   ],
   "settings": {
@@ -917,6 +939,14 @@ const { data } = await client.getIntegration({
       "description": "string",
       "required": false,
       "order": 0
+    }
+  ],
+  "maps": [
+    {
+      "key": "string",
+      "label": "string",
+      "description": "string",
+      "value": {}
     }
   ],
   "settings": {
@@ -1004,6 +1034,14 @@ const { data } = await client.updateIntegration(
       "description": "string",
       "required": false,
       "order": 0
+    }
+  ],
+  "maps": [
+    {
+      "key": "string",
+      "label": "string",
+      "description": "string",
+      "value": {}
     }
   ],
   "settings": {
@@ -1622,6 +1660,7 @@ const { data } = await client.listIntegrationsV2()
       "access_token_ids": ["string"],
       "app_ids": ["string"],
       "environment_config": [],
+      "maps": [],
       "settings": {},
       "integration_type": "erp",
       "connector_config": {},
@@ -1659,6 +1698,14 @@ const { data } = await client.createIntegrationV2(
         description: 'string',
         required: false,
         order: 0
+      }
+    ],
+    maps: [
+      {
+        key: 'string',
+        label: 'string',
+        description: 'string',
+        value: {}
       }
     ],
     settings: {
@@ -1739,6 +1786,14 @@ const { data } = await client.createIntegrationV2(
       "description": "string",
       "required": false,
       "order": 0
+    }
+  ],
+  "maps": [
+    {
+      "key": "string",
+      "label": "string",
+      "description": "string",
+      "value": {}
     }
   ],
   "settings": {
@@ -1840,6 +1895,14 @@ const { data } = await client.getIntegrationV2({
       "order": 0
     }
   ],
+  "maps": [
+    {
+      "key": "string",
+      "label": "string",
+      "description": "string",
+      "value": {}
+    }
+  ],
   "settings": {
     "autoRefresh": {
       "enabled": false,
@@ -1934,6 +1997,14 @@ const { data } = await client.updateIntegrationV2(
         order: 0
       }
     ],
+    maps: [
+      {
+        key: 'string',
+        label: 'string',
+        description: 'string',
+        value: {}
+      }
+    ],
     settings: {
       autoRefresh: {
         enabled: false,
@@ -2012,6 +2083,14 @@ const { data } = await client.updateIntegrationV2(
       "description": "string",
       "required": false,
       "order": 0
+    }
+  ],
+  "maps": [
+    {
+      "key": "string",
+      "label": "string",
+      "description": "string",
+      "value": {}
     }
   ],
   "settings": {
@@ -2660,7 +2739,7 @@ Get the inbound ERP sync status of an entity: when each integration last
 synchronized (checked) the entity against the ERP, and when it last
 actually changed it. `last_synced_at` also advances on no-o
 
-`GET /v1/entities/{entityId}/sync-status`
+`GET /v1/integrations/entities/{entityId}/sync-status`
 
 ```ts
 const { data } = await client.getEntitySyncStatus({
@@ -3553,6 +3632,16 @@ const { data } = await client.createErpImport(
       "blocking": 0,
       "warnings": 0,
       "entities": {},
+      "entity_details": [
+        {
+          "mapping_index": 0,
+          "entity_schema": "string",
+          "business_key": {},
+          "variants": 0,
+          "versions": 0
+        }
+      ],
+      "entity_details_truncated": true,
       "issues": [
         {
           "code": "UNIQUE_ID_COLUMN_MISSING",
@@ -3563,6 +3652,7 @@ const { data } = await client.createErpImport(
               "entity": "string"
             }
           ],
+          "subject": "string",
           "row": 0
         }
       ]
@@ -3631,6 +3721,16 @@ const { data } = await client.listErpImports({
         "blocking": 0,
         "warnings": 0,
         "entities": {},
+        "entity_details": [
+          {
+            "mapping_index": 0,
+            "entity_schema": "string",
+            "business_key": {},
+            "variants": 0,
+            "versions": 0
+          }
+        ],
+        "entity_details_truncated": true,
         "issues": [
           {
             "code": "UNIQUE_ID_COLUMN_MISSING",
@@ -3641,6 +3741,7 @@ const { data } = await client.listErpImports({
                 "entity": "string"
               }
             ],
+            "subject": "string",
             "row": 0
           }
         ]
@@ -3702,6 +3803,16 @@ const { data } = await client.getErpImport({
     "blocking": 0,
     "warnings": 0,
     "entities": {},
+    "entity_details": [
+      {
+        "mapping_index": 0,
+        "entity_schema": "string",
+        "business_key": {},
+        "variants": 0,
+        "versions": 0
+      }
+    ],
+    "entity_details_truncated": true,
     "issues": [
       {
         "code": "UNIQUE_ID_COLUMN_MISSING",
@@ -3712,6 +3823,7 @@ const { data } = await client.getErpImport({
             "entity": "string"
           }
         ],
+        "subject": "string",
         "row": 0
       }
     ]
@@ -3808,6 +3920,7 @@ const { data } = await client.suggestErpImportUseCases({
 ### `executeErpImport`
 
 Confirm and run the write phase of a validated import. Only a READY job may be executed; any other status returns 409.
+The verdict is re-checked against live inputs first: if the mapping or an entity 
 
 `POST /v2/erp/imports/{importId}:execute`
 
@@ -3915,17 +4028,22 @@ type ExecuteErpImportRequest = {
 
 ### `ErpImportIssue`
 
-A problem found during validation, scoped to the file as a whole rather than to individual rows.
-`code` is the translation key and the other fields are its parameters — there is deliberately no message to display. Each code appears at most once, with everything it has to say aggregated into that one
+A problem found during validation, scoped to the file as a whole rather than to
+individual rows.
+
+`code` is the translation key and the other fields are its parameters — there is
+deliberately no message to display. Each code appears at most once, with
+everything it has to say aggregated into that on
 
 ```ts
 type ErpImportIssue = {
-  code: "UNIQUE_ID_COLUMN_MISSING" | "MAPPED_COLUMN_MISSING" | "MALFORMED_ROW" | "INVALID_ENCODING" | "EMPTY_FILE" | "TOO_MANY_ROWS" | "BLANK_ROWS_SKIPPED"
+  code: "UNIQUE_ID_COLUMN_MISSING" | "MAPPED_COLUMN_MISSING" | "MALFORMED_ROW" | "INVALID_ENCODING" | "EMPTY_FILE" | "TOO_MANY_ROWS" | "BLANK_ROWS_SKIPPED" | "TIER_ROWS_NOT_GROUPED" | "TIER_BANDS_CONFLICT" | "CONDITION_VALUE_MISSING" | "VARIANT_VALUE_CONFLICT" | "ATTRIBUTE_NOT_OVERRIDABLE" | "ATTRIBUTE_NOT_IN_SCHEMA" | "IS_CONDITIONAL_NOT_CONSTANT" | "SCHEMA_NOT_CONDITIONABLE" | "SCHEMA_NOT_FOUND" | "SCHEMA_DECLARES_NO_CONDITIONS" | "GROUPING_KEY_NOT_A_COLUMN" | "GROUPING_KEY_IS_FOLD_COLUMN"
   severity: "warning" | "blocking"
   columns?: Array<{
     name: string
     entity?: string
   }>
+  subject?: string
   row?: number
 }
 ```
@@ -3936,19 +4054,42 @@ Validate-phase summary: what the file will create, and whether it may be confirm
 
 ```ts
 type ErpImportValidation = {
-  total_rows: number
+  total_rows?: number
   blocking: number
   warnings: number
   entities: Record<string, number>
+  entity_details?: Array<{
+    mapping_index: number
+    entity_schema: string
+    business_key: Record<string, string>
+    variants?: number
+    versions?: number
+  }>
+  entity_details_truncated?: boolean
   issues?: Array<{
-    code: "UNIQUE_ID_COLUMN_MISSING" | "MAPPED_COLUMN_MISSING" | "MALFORMED_ROW" | "INVALID_ENCODING" | "EMPTY_FILE" | "TOO_MANY_ROWS" | "BLANK_ROWS_SKIPPED"
+    code: "UNIQUE_ID_COLUMN_MISSING" | "MAPPED_COLUMN_MISSING" | "MALFORMED_ROW" | "INVALID_ENCODING" | "EMPTY_FILE" | "TOO_MANY_ROWS" | "BLANK_ROWS_SKIPPED" | "TIER_ROWS_NOT_GROUPED" | "TIER_BANDS_CONFLICT" | "CONDITION_VALUE_MISSING" | "VARIANT_VALUE_CONFLICT" | "ATTRIBUTE_NOT_OVERRIDABLE" | "ATTRIBUTE_NOT_IN_SCHEMA" | "IS_CONDITIONAL_NOT_CONSTANT" | "SCHEMA_NOT_CONDITIONABLE" | "SCHEMA_NOT_FOUND" | "SCHEMA_DECLARES_NO_CONDITIONS" | "GROUPING_KEY_NOT_A_COLUMN" | "GROUPING_KEY_IS_FOLD_COLUMN"
     severity: "warning" | "blocking"
     columns?: Array<{
       name: { ... }
       entity?: { ... }
     }>
+    subject?: string
     row?: number
   }>
+}
+```
+
+### `ErpImportEntityDetail`
+
+One entity instance the import will write, attributed to the mapping target that produces it.
+
+```ts
+type ErpImportEntityDetail = {
+  mapping_index: number
+  entity_schema: string
+  business_key: Record<string, string>
+  variants?: number
+  versions?: number
 }
 ```
 
@@ -3970,7 +4111,7 @@ Why the import failed — present if and only if status = FAILED. `code` is the 
 
 ```ts
 type ErpImportError = {
-  code: "VALIDATION_BLOCKED" | "FILE_FORMAT_UNSUPPORTED" | "FILE_UNAVAILABLE" | "VALIDATE_TIMEOUT" | "IMPORT_TIMEOUT" | "USE_CASE_NOT_USABLE" | "IMPORT_NO_PROGRESS" | "INTERNAL_ERROR"
+  code: "VALIDATION_BLOCKED" | "FILE_FORMAT_UNSUPPORTED" | "FILE_UNAVAILABLE" | "VALIDATE_TIMEOUT" | "IMPORT_TIMEOUT" | "USE_CASE_NOT_USABLE" | "IMPORT_NO_PROGRESS" | "TIER_ROWS_NOT_GROUPED" | "INTERNAL_ERROR"
   message: string
 }
 ```
@@ -4005,10 +4146,12 @@ type CreateErpImportResponse = {
     size_bytes?: number
     column_count?: number
     validation?: {
-      total_rows: { ... }
+      total_rows?: { ... }
       blocking: { ... }
       warnings: { ... }
       entities: { ... }
+      entity_details?: { ... }
+      entity_details_truncated?: { ... }
       issues?: { ... }
     }
     progress?: {
@@ -4049,14 +4192,23 @@ type ErpImportJob = {
   size_bytes?: number
   column_count?: number
   validation?: {
-    total_rows: number
+    total_rows?: number
     blocking: number
     warnings: number
     entities: Record<string, number>
+    entity_details?: Array<{
+      mapping_index: { ... }
+      entity_schema: { ... }
+      business_key: { ... }
+      variants?: { ... }
+      versions?: { ... }
+    }>
+    entity_details_truncated?: boolean
     issues?: Array<{
       code: { ... }
       severity: { ... }
       columns?: { ... }
+      subject?: { ... }
       row?: { ... }
     }>
   }
@@ -4065,7 +4217,7 @@ type ErpImportJob = {
     total_rows?: number
   }
   error?: {
-    code: "VALIDATION_BLOCKED" | "FILE_FORMAT_UNSUPPORTED" | "FILE_UNAVAILABLE" | "VALIDATE_TIMEOUT" | "IMPORT_TIMEOUT" | "USE_CASE_NOT_USABLE" | "IMPORT_NO_PROGRESS" | "INTERNAL_ERROR"
+    code: "VALIDATION_BLOCKED" | "FILE_FORMAT_UNSUPPORTED" | "FILE_UNAVAILABLE" | "VALIDATE_TIMEOUT" | "IMPORT_TIMEOUT" | "USE_CASE_NOT_USABLE" | "IMPORT_NO_PROGRESS" | "TIER_ROWS_NOT_GROUPED" | "INTERNAL_ERROR"
     message: string
   }
   correlation_id?: string
@@ -4094,10 +4246,12 @@ type ErpImportList = {
     size_bytes?: number
     column_count?: number
     validation?: {
-      total_rows: { ... }
+      total_rows?: { ... }
       blocking: { ... }
       warnings: { ... }
       entities: { ... }
+      entity_details?: { ... }
+      entity_details_truncated?: { ... }
       issues?: { ... }
     }
     progress?: {
@@ -4363,6 +4517,12 @@ type IntegrationEditableFields = {
     required?: boolean
     order?: number
   }>
+  maps?: Array<{
+    key: string
+    label: string
+    description?: string
+    value: Record<string, unknown>
+  }>
   settings?: {
     autoRefresh?: {
       enabled?: { ... }
@@ -4488,6 +4648,12 @@ type Integration = {
     required?: boolean
     order?: number
   }>
+  maps?: Array<{
+    key: string
+    label: string
+    description?: string
+    value: Record<string, unknown>
+  }>
   settings?: {
     autoRefresh?: {
       enabled?: { ... }
@@ -4552,6 +4718,12 @@ type CreateIntegrationRequest = {
     description?: string
     required?: boolean
     order?: number
+  }>
+  maps?: Array<{
+    key: string
+    label: string
+    description?: string
+    value: Record<string, unknown>
   }>
   settings?: {
     autoRefresh?: {
@@ -4618,6 +4790,12 @@ type UpdateIntegrationRequest = {
     required?: boolean
     order?: number
   }>
+  maps?: Array<{
+    key: string
+    label: string
+    description?: string
+    value: Record<string, unknown>
+  }>
   settings?: {
     autoRefresh?: {
       enabled?: { ... }
@@ -4664,6 +4842,20 @@ type UpdateIntegrationRequest = {
   }
   protected?: boolean
   _manifest?: string[]
+}
+```
+
+### `IntegrationMap`
+
+A flat key/value map stored as an Environments API variable of type `JSON`. Values must be strings, numbers, booleans or null; the serialised map must not exceed 32 KB.
+
+
+```ts
+type IntegrationMap = {
+  key: string
+  label: string
+  description?: string
+  value: Record<string, unknown>
 }
 ```
 
@@ -5001,6 +5193,12 @@ type UpsertIntegrationWithUseCasesRequest = {
     required?: boolean
     order?: number
   }>
+  maps?: Array<{
+    key: string
+    label: string
+    description?: string
+    value: Record<string, unknown>
+  }>
   settings?: {
     autoRefresh?: {
       enabled?: { ... }
@@ -5082,12 +5280,6 @@ type UpsertIntegrationWithUseCasesRequest = {
     configuration?: {
       direction?: { ... }
       upload?: { ... }
-      fan_out?: { ... }
-      secure_proxy?: { ... }
-      auth?: { ... }
-      params?: { ... }
-      allowed_origins?: { ... }
-      steps: { ... }
   // ...
 }
 ```
@@ -5124,6 +5316,9 @@ type InboundIntegrationEventConfiguration = {
       portal_ref?: { ... }
       env_var_ref?: { ... }
     }>
+    conditional?: {
+      folds: { ... }
+    }
   }>
   meter_readings?: Array<{
     jsonataExpression?: string
@@ -5261,6 +5456,77 @@ type IntegrationEntity = {
       jsonataExpression: { ... }
     }
   }>
+  conditional?: {
+    folds: Array<{
+      attribute: { ... }
+      sort_by: { ... }
+      item: { ... }
+    }>
+  }
+}
+```
+
+### `IntegrationEntityConditional`
+
+Conditional Pricing extras for this target, used when it writes a conditional entity (a Product, Price or Coupon carrying context-dependent variants). The conditions themselves are declared on the entity schema, not here.
+
+```ts
+type IntegrationEntityConditional = {
+  folds: Array<{
+    attribute: string
+    sort_by: {
+      field: { ... }
+    } | {
+      constant: { ... }
+    } | {
+      jsonataExpression: { ... }
+    }
+    item: Record<string, {
+      field: { ... }
+    } | {
+      constant: { ... }
+    } | {
+      jsonataExpression: { ... }
+    }>
+  }>
+}
+```
+
+### `IntegrationEntityFold`
+
+Collapse the rows of one variant-version into a single array attribute, ordered by a column. A commodity file carries one row per consumption band, while a variant-version holds exactly one `tiers` array.
+
+```ts
+type IntegrationEntityFold = {
+  attribute: string
+  sort_by: {
+    field: string
+  } | {
+    constant: unknown
+  } | {
+    jsonataExpression: string
+  }
+  item: Record<string, {
+    field: string
+  } | {
+    constant: unknown
+  } | {
+    jsonataExpression: string
+  }>
+}
+```
+
+### `MappedFieldValue`
+
+One mapped value. Exactly one of field, constant or jsonataExpression must be set — the same three forms `IntegrationEntityField` accepts.
+
+```ts
+type MappedFieldValue = {
+  field: string
+} | {
+  constant: unknown
+} | {
+  jsonataExpression: string
 }
 ```
 
@@ -5626,6 +5892,7 @@ type EmbeddedUseCaseRequest = {
       mode?: { ... }
       scope?: { ... }
       fields?: { ... }
+      conditional?: { ... }
     }>
     meter_readings?: Array<{
       jsonataExpression?: { ... }
@@ -5708,7 +5975,6 @@ type EmbeddedUseCaseRequest = {
       response_type: { ... }
     }>
     response?: {
-      body: { ... }
   // ...
 }
 ```
@@ -5745,6 +6011,7 @@ type EmbeddedInboundUseCaseRequest = {
       mode?: { ... }
       scope?: { ... }
       fields?: { ... }
+      conditional?: { ... }
     }>
     meter_readings?: Array<{
       jsonataExpression?: { ... }
@@ -5932,6 +6199,7 @@ type InboundUseCase = {
       mode?: { ... }
       scope?: { ... }
       fields?: { ... }
+      conditional?: { ... }
     }>
     meter_readings?: Array<{
       jsonataExpression?: { ... }
@@ -6123,6 +6391,7 @@ type UseCase = {
       mode?: { ... }
       scope?: { ... }
       fields?: { ... }
+      conditional?: { ... }
     }>
     meter_readings?: Array<{
       jsonataExpression?: { ... }
@@ -6201,7 +6470,6 @@ type UseCase = {
       name: { ... }
       required: { ... }
       description?: { ... }
-    }>
   // ...
 }
 ```
@@ -6224,6 +6492,7 @@ type CreateUseCaseRequest = {
       mode?: { ... }
       scope?: { ... }
       fields?: { ... }
+      conditional?: { ... }
     }>
     meter_readings?: Array<{
       jsonataExpression?: { ... }
@@ -6308,7 +6577,6 @@ type CreateUseCaseRequest = {
       content_type?: { ... }
     }
     prevent_indirect_serving?: boolean
-  }
   // ...
 }
 ```
@@ -6341,6 +6609,7 @@ type CreateInboundUseCaseRequest = {
       mode?: { ... }
       scope?: { ... }
       fields?: { ... }
+      conditional?: { ... }
     }>
     meter_readings?: Array<{
       jsonataExpression?: { ... }
@@ -6498,6 +6767,7 @@ type UpdateUseCaseRequest = {
       mode?: { ... }
       scope?: { ... }
       fields?: { ... }
+      conditional?: { ... }
     }>
     meter_readings?: Array<{
       jsonataExpression?: { ... }
@@ -6581,7 +6851,6 @@ type UpdateUseCaseRequest = {
       body: { ... }
       encoding: { ... }
       filename?: { ... }
-      content_type?: { ... }
   // ...
 }
 ```
@@ -6616,6 +6885,7 @@ type UpdateInboundUseCaseRequest = {
       mode?: { ... }
       scope?: { ... }
       fields?: { ... }
+      conditional?: { ... }
     }>
     meter_readings?: Array<{
       jsonataExpression?: { ... }
@@ -6788,6 +7058,7 @@ type UseCaseHistoryEntry = {
       mode?: { ... }
       scope?: { ... }
       fields?: { ... }
+      conditional?: { ... }
     }>
     meter_readings?: Array<{
       jsonataExpression?: { ... }
@@ -6864,7 +7135,6 @@ type UseCaseHistoryEntry = {
       password?: { ... }
       body_params?: { ... }
       headers?: { ... }
-      query_params?: { ... }
   // ...
 }
 ```
@@ -6913,6 +7183,7 @@ type InboundUseCaseHistoryEntry = {
       mode?: { ... }
       scope?: { ... }
       fields?: { ... }
+      conditional?: { ... }
     }>
     meter_readings?: Array<{
       jsonataExpression?: { ... }
@@ -7696,6 +7967,7 @@ type MappingSimulationV2Request = {
       mode?: { ... }
       scope?: { ... }
       fields?: { ... }
+      conditional?: { ... }
     }>
     meter_readings?: Array<{
       jsonataExpression?: { ... }
@@ -8022,6 +8294,7 @@ type DirectSimulationRequest = {
       mode?: { ... }
       scope?: { ... }
       fields?: { ... }
+      conditional?: { ... }
     }>
     meter_readings?: Array<{
       jsonataExpression?: { ... }
