@@ -668,7 +668,7 @@
         "responses": {}
       }
     },
-    "/v1/entities/{entityId}/sync-status": {
+    "/v1/integrations/entities/{entityId}/sync-status": {
       "get": {
         "operationId": "getEntitySyncStatus",
         "parameters": [
