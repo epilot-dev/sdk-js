@@ -39,6 +39,8 @@ const { data } = await environmentsClient.listEnvironmentVariables(...)
 - [`StringTranslations`](#stringtranslations)
 - [`MapEntry`](#mapentry)
 - [`MapValue`](#mapvalue)
+- [`JsonValue`](#jsonvalue)
+- [`LinkValue`](#linkvalue)
 - [`EnvironmentValue`](#environmentvalue)
 - [`EnvironmentVariable`](#environmentvariable)
 - [`EnvironmentVariableListItem`](#environmentvariablelistitem)
@@ -292,21 +294,21 @@ const { data } = await client.deleteEnvironmentVariable({
 ### `EnvironmentValueType`
 
 The structure a variable's value holds. `SecretString` is encrypted at rest and
-its value is never returned. `Text`, `Number`, `Boolean` and `Map` may be
-served to browser-facing consumers; `String` and `SecretString` may not.
+its value is never returned. `Text`, `Number`, `Boolean`, `Map`, `JSON` and `Link`
+may be served to browser-facing consumers; `String` and `SecretString` may not.
 
 
 ```ts
-type EnvironmentValueType = "String" | "SecretString" | "Text" | "Number" | "Boolean" | "Map"
+type EnvironmentValueType = "String" | "SecretString" | "Text" | "Number" | "Boolean" | "Map" | "JSON" | "Link"
 ```
 
 ### `StringTranslations`
 
 A string translated per language. Keys are language codes (e.g. `de`,
 `en-US`), matching the hyphen-only BCP-47 form epilot's i18n stack uses
-everywhere else. Must match LANGUAGE_KEY_PATTERN in
-src/core/value-types.ts — the two are not otherwise linked.
-
+everywhere else: `^[a-z]{2,3}(-[A-Za-z0-9]+)*$`. The server enforces
+that with LANGUAGE_KEY_PATTERN in src/core/value-types.ts — the two are
+not otherwise lin
 
 ```ts
 type StringTranslations = Record<string, string>
@@ -338,12 +340,41 @@ type MapValue = {
 }
 ```
 
+### `JsonValue`
+
+Arbitrary JSON object, e.g. a flat key/value map used by integrations for
+enum translation: {"Mr.": 1, "Ms. / Mrs.": 2}. Max 32 KB serialised.
+
+
+```ts
+type JsonValue = Record<string, unknown>
+```
+
+### `LinkValue`
+
+One URL with a label and description a customer reads. `label` and
+`description` are each either a plain string or one string per language;
+the two fields decide that independently — a plain string means "the
+same in every language". A translated field must carry the fallback
+language.
+
+The URL must
+
+```ts
+type LinkValue = {
+  url: string
+  label: string | Record<string, string>
+  description?: string | Record<string, string>
+  fallbackLanguage?: string
+}
+```
+
 ### `EnvironmentValue`
 
 A variable's value. The JSON type corresponds to the variable's `type`:
 `String`, `SecretString` and `Text` are strings, `Number` is a number,
-`Boolean` is a boolean, and `Map` is an object. Numbers are IEEE 754
-doubles; integers above 2^53 may lose precision on round-trip.
+`Boolean` is a boolean, and `Map`, `JSON` and `Link` are objects. Numbers are
+IEEE 754 doubles; integers above 2^53 may lose precision on round-trip.
 
 
 ```ts
@@ -353,6 +384,11 @@ type EnvironmentValue = string | number | boolean | {
     key: string
     value: string | Record<string, string>
   }>
+} | Record<string, unknown> | {
+  url: string
+  label: string | Record<string, string>
+  description?: string | Record<string, string>
+  fallbackLanguage?: string
 }
 ```
 
@@ -361,7 +397,7 @@ type EnvironmentValue = string | number | boolean | {
 ```ts
 type EnvironmentVariable = {
   key: string
-  type: "String" | "SecretString" | "Text" | "Number" | "Boolean" | "Map"
+  type: "String" | "SecretString" | "Text" | "Number" | "Boolean" | "Map" | "JSON" | "Link"
   description?: string
   group?: string
   value?: string | number | boolean | {
@@ -370,6 +406,11 @@ type EnvironmentVariable = {
       key: { ... }
       value: { ... }
     }>
+  } | Record<string, unknown> | {
+    url: string
+    label: string | Record<string, string>
+    description?: string | Record<string, string>
+    fallbackLanguage?: string
   }
   protected?: boolean
   created_at: string // date-time
@@ -382,7 +423,7 @@ type EnvironmentVariable = {
 ```ts
 type EnvironmentVariableListItem = {
   key: string
-  type: "String" | "SecretString" | "Text" | "Number" | "Boolean" | "Map"
+  type: "String" | "SecretString" | "Text" | "Number" | "Boolean" | "Map" | "JSON" | "Link"
   description?: string
   group?: string
   value?: string | number | boolean | {
@@ -391,6 +432,11 @@ type EnvironmentVariableListItem = {
       key: { ... }
       value: { ... }
     }>
+  } | Record<string, unknown> | {
+    url: string
+    label: string | Record<string, string>
+    description?: string | Record<string, string>
+    fallbackLanguage?: string
   }
   protected?: boolean
   created_at: string // date-time
@@ -404,12 +450,17 @@ type EnvironmentVariableListItem = {
 type EnvironmentVariableList = {
   items: Array<{
     key: string
-    type: "String" | "SecretString" | "Text" | "Number" | "Boolean" | "Map"
+    type: "String" | "SecretString" | "Text" | "Number" | "Boolean" | "Map" | "JSON" | "Link"
     description?: string
     group?: string
     value?: string | number | boolean | {
       fallbackLanguage?: { ... }
       options: { ... }
+    } | Record<string, unknown> | {
+      url: { ... }
+      label: { ... }
+      description?: { ... }
+      fallbackLanguage?: { ... }
     }
     protected?: boolean
     created_at: string // date-time
@@ -423,7 +474,7 @@ type EnvironmentVariableList = {
 ```ts
 type EnvironmentVariableCreateRequest = {
   key: string
-  type: "String" | "SecretString" | "Text" | "Number" | "Boolean" | "Map"
+  type: "String" | "SecretString" | "Text" | "Number" | "Boolean" | "Map" | "JSON" | "Link"
   description?: string
   group?: string
   value?: string | number | boolean | {
@@ -432,6 +483,11 @@ type EnvironmentVariableCreateRequest = {
       key: { ... }
       value: { ... }
     }>
+  } | Record<string, unknown> | {
+    url: string
+    label: string | Record<string, string>
+    description?: string | Record<string, string>
+    fallbackLanguage?: string
   }
   protected?: boolean
 }
@@ -441,13 +497,18 @@ type EnvironmentVariableCreateRequest = {
 
 ```ts
 type EnvironmentVariableUpdateRequest = {
-  type?: "String" | "SecretString" | "Text" | "Number" | "Boolean" | "Map"
+  type?: "String" | "SecretString" | "Text" | "Number" | "Boolean" | "Map" | "JSON" | "Link"
   value?: string | number | boolean | {
     fallbackLanguage?: string
     options: Array<{
       key: { ... }
       value: { ... }
     }>
+  } | Record<string, unknown> | {
+    url: string
+    label: string | Record<string, string>
+    description?: string | Record<string, string>
+    fallbackLanguage?: string
   }
   description?: string
   group?: string

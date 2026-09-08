@@ -348,23 +348,22 @@
     "schemas": {
       "EnvironmentValueType": {
         "type": "string",
-        "description": "The structure a variable's value holds. `SecretString` is encrypted at rest and\nits value is never returned. `Text`, `Number`, `Boolean` and `Map` may be\nserved to browser-facing consumers; `String` and `SecretString` may not.\n",
+        "description": "The structure a variable's value holds. `SecretString` is encrypted at rest and\nits value is never returned. `Text`, `Number`, `Boolean`, `Map`, `JSON` and `Link`\nmay be served to browser-facing consumers; `String` and `SecretString` may not.\n",
         "enum": [
           "String",
           "SecretString",
           "Text",
           "Number",
           "Boolean",
-          "Map"
+          "Map",
+          "JSON",
+          "Link"
         ]
       },
       "StringTranslations": {
-        "description": "A string translated per language. Keys are language codes (e.g. `de`,\n`en-US`), matching the hyphen-only BCP-47 form epilot's i18n stack uses\neverywhere else. Must match LANGUAGE_KEY_PATTERN in\nsrc/core/value-types.ts — the two are not otherwise linked.\n",
+        "description": "A string translated per language. Keys are language codes (e.g. `de`,\n`en-US`), matching the hyphen-only BCP-47 form epilot's i18n stack uses\neverywhere else: `^[a-z]{2,3}(-[A-Za-z0-9]+)*$`. The server enforces\nthat with LANGUAGE_KEY_PATTERN in src/core/value-types.ts — the two are\nnot otherwise linked. The pattern is documented rather than declared\nbecause `propertyNames` is JSON Schema / OAS 3.1 and this document is\n3.0.3, where it fails `spectral lint` (oas3-schema).\n",
         "type": "object",
         "minProperties": 1,
-        "propertyNames": {
-          "pattern": "^[a-z]{2,3}(-[A-Za-z0-9]+)*$"
-        },
         "additionalProperties": {
           "type": "string",
           "minLength": 1
@@ -417,9 +416,59 @@
           }
         }
       },
+      "JsonValue": {
+        "description": "Arbitrary JSON object, e.g. a flat key/value map used by integrations for\nenum translation: {\"Mr.\": 1, \"Ms. / Mrs.\": 2}. Max 32 KB serialised.\n",
+        "type": "object",
+        "additionalProperties": true
+      },
+      "LinkValue": {
+        "description": "One URL with a label and description a customer reads. `label` and\n`description` are each either a plain string or one string per language;\nthe two fields decide that independently — a plain string means \"the\nsame in every language\". A translated field must carry the fallback\nlanguage.\n\nThe URL must be absolute and `http`/`https` only. This value is served\nto browser-facing consumers, so `javascript:` and `data:` URLs are\nrejected at write time.\n\nWritten flat rather than composed from a shared field set: `allOf` plus\n`additionalProperties: false` is rejected by most validators, because\neach branch sees the sibling's properties as unknown. The composition\nlives in zod (LinkFieldsSchema) — see src/core/value-types.ts.\n\nEach translated value of `label` and `description` is also limited to\nthe same maximum as the plain-string form above — 255 characters for\n`label`, 1024 for `description`. The limit is enforced by the server\neven though the shared `StringTranslations` schema referenced below\ndoes not itself declare it.\n",
+        "type": "object",
+        "required": [
+          "url",
+          "label"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "url": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048
+          },
+          "label": {
+            "oneOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 255
+              },
+              {
+                "$ref": "#/components/schemas/StringTranslations"
+              }
+            ]
+          },
+          "description": {
+            "oneOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1024
+              },
+              {
+                "$ref": "#/components/schemas/StringTranslations"
+              }
+            ]
+          },
+          "fallbackLanguage": {
+            "type": "string",
+            "minLength": 2,
+            "default": "de"
+          }
+        }
+      },
       "EnvironmentValue": {
-        "description": "A variable's value. The JSON type corresponds to the variable's `type`:\n`String`, `SecretString` and `Text` are strings, `Number` is a number,\n`Boolean` is a boolean, and `Map` is an object. Numbers are IEEE 754\ndoubles; integers above 2^53 may lose precision on round-trip.\n",
-        "oneOf": [
+        "description": "A variable's value. The JSON type corresponds to the variable's `type`:\n`String`, `SecretString` and `Text` are strings, `Number` is a number,\n`Boolean` is a boolean, and `Map`, `JSON` and `Link` are objects. Numbers are\nIEEE 754 doubles; integers above 2^53 may lose precision on round-trip.\n",
+        "anyOf": [
           {
             "type": "string"
           },
@@ -431,6 +480,12 @@
           },
           {
             "$ref": "#/components/schemas/MapValue"
+          },
+          {
+            "$ref": "#/components/schemas/JsonValue"
+          },
+          {
+            "$ref": "#/components/schemas/LinkValue"
           }
         ]
       },

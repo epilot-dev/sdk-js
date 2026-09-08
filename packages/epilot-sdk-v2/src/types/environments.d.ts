@@ -24,31 +24,59 @@ export declare namespace Components {
         /**
          * A variable's value. The JSON type corresponds to the variable's `type`:
          * `String`, `SecretString` and `Text` are strings, `Number` is a number,
-         * `Boolean` is a boolean, and `Map` is an object. Numbers are IEEE 754
-         * doubles; integers above 2^53 may lose precision on round-trip.
+         * `Boolean` is a boolean, and `Map`, `JSON` and `Link` are objects. Numbers are
+         * IEEE 754 doubles; integers above 2^53 may lose precision on round-trip.
          *
          */
         export type EnvironmentValue = /**
          * A variable's value. The JSON type corresponds to the variable's `type`:
          * `String`, `SecretString` and `Text` are strings, `Number` is a number,
-         * `Boolean` is a boolean, and `Map` is an object. Numbers are IEEE 754
-         * doubles; integers above 2^53 may lose precision on round-trip.
+         * `Boolean` is a boolean, and `Map`, `JSON` and `Link` are objects. Numbers are
+         * IEEE 754 doubles; integers above 2^53 may lose precision on round-trip.
          *
          */
-        string | number | boolean | MapValue;
+        string | number | boolean | MapValue | /**
+         * Arbitrary JSON object, e.g. a flat key/value map used by integrations for
+         * enum translation: {"Mr.": 1, "Ms. / Mrs.": 2}. Max 32 KB serialised.
+         *
+         */
+        JsonValue | /**
+         * One URL with a label and description a customer reads. `label` and
+         * `description` are each either a plain string or one string per language;
+         * the two fields decide that independently — a plain string means "the
+         * same in every language". A translated field must carry the fallback
+         * language.
+         *
+         * The URL must be absolute and `http`/`https` only. This value is served
+         * to browser-facing consumers, so `javascript:` and `data:` URLs are
+         * rejected at write time.
+         *
+         * Written flat rather than composed from a shared field set: `allOf` plus
+         * `additionalProperties: false` is rejected by most validators, because
+         * each branch sees the sibling's properties as unknown. The composition
+         * lives in zod (LinkFieldsSchema) — see src/core/value-types.ts.
+         *
+         * Each translated value of `label` and `description` is also limited to
+         * the same maximum as the plain-string form above — 255 characters for
+         * `label`, 1024 for `description`. The limit is enforced by the server
+         * even though the shared `StringTranslations` schema referenced below
+         * does not itself declare it.
+         *
+         */
+        LinkValue;
         /**
          * The structure a variable's value holds. `SecretString` is encrypted at rest and
-         * its value is never returned. `Text`, `Number`, `Boolean` and `Map` may be
-         * served to browser-facing consumers; `String` and `SecretString` may not.
+         * its value is never returned. `Text`, `Number`, `Boolean`, `Map`, `JSON` and `Link`
+         * may be served to browser-facing consumers; `String` and `SecretString` may not.
          *
          */
-        export type EnvironmentValueType = "String" | "SecretString" | "Text" | "Number" | "Boolean" | "Map";
+        export type EnvironmentValueType = "String" | "SecretString" | "Text" | "Number" | "Boolean" | "Map" | "JSON" | "Link";
         export interface EnvironmentVariable {
             key: string; // ^[a-z0-9][a-z0-9_.\-]{0,127}$
             type: /**
              * The structure a variable's value holds. `SecretString` is encrypted at rest and
-             * its value is never returned. `Text`, `Number`, `Boolean` and `Map` may be
-             * served to browser-facing consumers; `String` and `SecretString` may not.
+             * its value is never returned. `Text`, `Number`, `Boolean`, `Map`, `JSON` and `Link`
+             * may be served to browser-facing consumers; `String` and `SecretString` may not.
              *
              */
             EnvironmentValueType;
@@ -69,7 +97,35 @@ export declare namespace Components {
              * install, which syncs a variable's key and type but never its value.
              *
              */
-            string | number | boolean | MapValue;
+            string | number | boolean | MapValue | /**
+             * Arbitrary JSON object, e.g. a flat key/value map used by integrations for
+             * enum translation: {"Mr.": 1, "Ms. / Mrs.": 2}. Max 32 KB serialised.
+             *
+             */
+            JsonValue | /**
+             * One URL with a label and description a customer reads. `label` and
+             * `description` are each either a plain string or one string per language;
+             * the two fields decide that independently — a plain string means "the
+             * same in every language". A translated field must carry the fallback
+             * language.
+             *
+             * The URL must be absolute and `http`/`https` only. This value is served
+             * to browser-facing consumers, so `javascript:` and `data:` URLs are
+             * rejected at write time.
+             *
+             * Written flat rather than composed from a shared field set: `allOf` plus
+             * `additionalProperties: false` is rejected by most validators, because
+             * each branch sees the sibling's properties as unknown. The composition
+             * lives in zod (LinkFieldsSchema) — see src/core/value-types.ts.
+             *
+             * Each translated value of `label` and `description` is also limited to
+             * the same maximum as the plain-string form above — 255 characters for
+             * `label`, 1024 for `description`. The limit is enforced by the server
+             * even though the shared `StringTranslations` schema referenced below
+             * does not itself declare it.
+             *
+             */
+            LinkValue;
             /**
              * Whether the variable is protected from editing
              */
@@ -81,8 +137,8 @@ export declare namespace Components {
             key: string; // ^[a-z0-9][a-z0-9_.\-]{0,127}$
             type: /**
              * The structure a variable's value holds. `SecretString` is encrypted at rest and
-             * its value is never returned. `Text`, `Number`, `Boolean` and `Map` may be
-             * served to browser-facing consumers; `String` and `SecretString` may not.
+             * its value is never returned. `Text`, `Number`, `Boolean`, `Map`, `JSON` and `Link`
+             * may be served to browser-facing consumers; `String` and `SecretString` may not.
              *
              */
             EnvironmentValueType;
@@ -91,8 +147,8 @@ export declare namespace Components {
             value?: /**
              * A variable's value. The JSON type corresponds to the variable's `type`:
              * `String`, `SecretString` and `Text` are strings, `Number` is a number,
-             * `Boolean` is a boolean, and `Map` is an object. Numbers are IEEE 754
-             * doubles; integers above 2^53 may lose precision on round-trip.
+             * `Boolean` is a boolean, and `Map`, `JSON` and `Link` are objects. Numbers are
+             * IEEE 754 doubles; integers above 2^53 may lose precision on round-trip.
              *
              */
             EnvironmentValue;
@@ -108,8 +164,8 @@ export declare namespace Components {
             key: string;
             type: /**
              * The structure a variable's value holds. `SecretString` is encrypted at rest and
-             * its value is never returned. `Text`, `Number`, `Boolean` and `Map` may be
-             * served to browser-facing consumers; `String` and `SecretString` may not.
+             * its value is never returned. `Text`, `Number`, `Boolean`, `Map`, `JSON` and `Link`
+             * may be served to browser-facing consumers; `String` and `SecretString` may not.
              *
              */
             EnvironmentValueType;
@@ -130,7 +186,35 @@ export declare namespace Components {
              * install, which syncs a variable's key and type but never its value.
              *
              */
-            string | number | boolean | MapValue;
+            string | number | boolean | MapValue | /**
+             * Arbitrary JSON object, e.g. a flat key/value map used by integrations for
+             * enum translation: {"Mr.": 1, "Ms. / Mrs.": 2}. Max 32 KB serialised.
+             *
+             */
+            JsonValue | /**
+             * One URL with a label and description a customer reads. `label` and
+             * `description` are each either a plain string or one string per language;
+             * the two fields decide that independently — a plain string means "the
+             * same in every language". A translated field must carry the fallback
+             * language.
+             *
+             * The URL must be absolute and `http`/`https` only. This value is served
+             * to browser-facing consumers, so `javascript:` and `data:` URLs are
+             * rejected at write time.
+             *
+             * Written flat rather than composed from a shared field set: `allOf` plus
+             * `additionalProperties: false` is rejected by most validators, because
+             * each branch sees the sibling's properties as unknown. The composition
+             * lives in zod (LinkFieldsSchema) — see src/core/value-types.ts.
+             *
+             * Each translated value of `label` and `description` is also limited to
+             * the same maximum as the plain-string form above — 255 characters for
+             * `label`, 1024 for `description`. The limit is enforced by the server
+             * even though the shared `StringTranslations` schema referenced below
+             * does not itself declare it.
+             *
+             */
+            LinkValue;
             /**
              * Whether the variable is protected from editing
              */
@@ -142,12 +226,12 @@ export declare namespace Components {
             /**
              * Type of variable. Used when creating a new variable. Defaults to String.
              */
-            type?: "String" | "SecretString" | "Text" | "Number" | "Boolean" | "Map";
+            type?: "String" | "SecretString" | "Text" | "Number" | "Boolean" | "Map" | "JSON" | "Link";
             value?: /**
              * A variable's value. The JSON type corresponds to the variable's `type`:
              * `String`, `SecretString` and `Text` are strings, `Number` is a number,
-             * `Boolean` is a boolean, and `Map` is an object. Numbers are IEEE 754
-             * doubles; integers above 2^53 may lose precision on round-trip.
+             * `Boolean` is a boolean, and `Map`, `JSON` and `Link` are objects. Numbers are
+             * IEEE 754 doubles; integers above 2^53 may lose precision on round-trip.
              *
              */
             EnvironmentValue;
@@ -157,6 +241,63 @@ export declare namespace Components {
              * Whether the variable is protected from editing
              */
             protected?: boolean;
+        }
+        /**
+         * Arbitrary JSON object, e.g. a flat key/value map used by integrations for
+         * enum translation: {"Mr.": 1, "Ms. / Mrs.": 2}. Max 32 KB serialised.
+         *
+         */
+        export interface JsonValue {
+            [name: string]: any;
+        }
+        /**
+         * One URL with a label and description a customer reads. `label` and
+         * `description` are each either a plain string or one string per language;
+         * the two fields decide that independently — a plain string means "the
+         * same in every language". A translated field must carry the fallback
+         * language.
+         *
+         * The URL must be absolute and `http`/`https` only. This value is served
+         * to browser-facing consumers, so `javascript:` and `data:` URLs are
+         * rejected at write time.
+         *
+         * Written flat rather than composed from a shared field set: `allOf` plus
+         * `additionalProperties: false` is rejected by most validators, because
+         * each branch sees the sibling's properties as unknown. The composition
+         * lives in zod (LinkFieldsSchema) — see src/core/value-types.ts.
+         *
+         * Each translated value of `label` and `description` is also limited to
+         * the same maximum as the plain-string form above — 255 characters for
+         * `label`, 1024 for `description`. The limit is enforced by the server
+         * even though the shared `StringTranslations` schema referenced below
+         * does not itself declare it.
+         *
+         */
+        export interface LinkValue {
+            url: string;
+            label: string | /**
+             * A string translated per language. Keys are language codes (e.g. `de`,
+             * `en-US`), matching the hyphen-only BCP-47 form epilot's i18n stack uses
+             * everywhere else: `^[a-z]{2,3}(-[A-Za-z0-9]+)*$`. The server enforces
+             * that with LANGUAGE_KEY_PATTERN in src/core/value-types.ts — the two are
+             * not otherwise linked. The pattern is documented rather than declared
+             * because `propertyNames` is JSON Schema / OAS 3.1 and this document is
+             * 3.0.3, where it fails `spectral lint` (oas3-schema).
+             *
+             */
+            StringTranslations;
+            description?: string | /**
+             * A string translated per language. Keys are language codes (e.g. `de`,
+             * `en-US`), matching the hyphen-only BCP-47 form epilot's i18n stack uses
+             * everywhere else: `^[a-z]{2,3}(-[A-Za-z0-9]+)*$`. The server enforces
+             * that with LANGUAGE_KEY_PATTERN in src/core/value-types.ts — the two are
+             * not otherwise linked. The pattern is documented rather than declared
+             * because `propertyNames` is JSON Schema / OAS 3.1 and this document is
+             * 3.0.3, where it fails `spectral lint` (oas3-schema).
+             *
+             */
+            StringTranslations;
+            fallbackLanguage?: string;
         }
         /**
          * One entry of a Map. `key` is the token a journey submits; `value` is
@@ -169,8 +310,11 @@ export declare namespace Components {
             value: string | /**
              * A string translated per language. Keys are language codes (e.g. `de`,
              * `en-US`), matching the hyphen-only BCP-47 form epilot's i18n stack uses
-             * everywhere else. Must match LANGUAGE_KEY_PATTERN in
-             * src/core/value-types.ts — the two are not otherwise linked.
+             * everywhere else: `^[a-z]{2,3}(-[A-Za-z0-9]+)*$`. The server enforces
+             * that with LANGUAGE_KEY_PATTERN in src/core/value-types.ts — the two are
+             * not otherwise linked. The pattern is documented rather than declared
+             * because `propertyNames` is JSON Schema / OAS 3.1 and this document is
+             * 3.0.3, where it fails `spectral lint` (oas3-schema).
              *
              */
             StringTranslations;
@@ -197,8 +341,11 @@ export declare namespace Components {
         /**
          * A string translated per language. Keys are language codes (e.g. `de`,
          * `en-US`), matching the hyphen-only BCP-47 form epilot's i18n stack uses
-         * everywhere else. Must match LANGUAGE_KEY_PATTERN in
-         * src/core/value-types.ts — the two are not otherwise linked.
+         * everywhere else: `^[a-z]{2,3}(-[A-Za-z0-9]+)*$`. The server enforces
+         * that with LANGUAGE_KEY_PATTERN in src/core/value-types.ts — the two are
+         * not otherwise linked. The pattern is documented rather than declared
+         * because `propertyNames` is JSON Schema / OAS 3.1 and this document is
+         * 3.0.3, where it fails `spectral lint` (oas3-schema).
          *
          */
         export interface StringTranslations {
@@ -522,6 +669,8 @@ export type EnvironmentVariableCreateRequest = Components.Schemas.EnvironmentVar
 export type EnvironmentVariableList = Components.Schemas.EnvironmentVariableList;
 export type EnvironmentVariableListItem = Components.Schemas.EnvironmentVariableListItem;
 export type EnvironmentVariableUpdateRequest = Components.Schemas.EnvironmentVariableUpdateRequest;
+export type JsonValue = Components.Schemas.JsonValue;
+export type LinkValue = Components.Schemas.LinkValue;
 export type MapEntry = Components.Schemas.MapEntry;
 export type MapValue = Components.Schemas.MapValue;
 export type StringTranslations = Components.Schemas.StringTranslations;
