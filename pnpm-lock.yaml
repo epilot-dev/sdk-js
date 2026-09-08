@@ -2691,6 +2691,18 @@ importers:
         specifier: ^4.10.0
         version: 4.10.0(webpack@5.105.4)
 
+  packages/agent-auth:
+    devDependencies:
+      tsup:
+        specifier: ^8.0.0
+        version: 8.5.1(postcss@8.5.6)(tsx@4.21.0)(typescript@5.7.3)
+      typescript:
+        specifier: ^5.3.0
+        version: 5.7.3
+      vitest:
+        specifier: ^1.0.0
+        version: 1.6.1(@types/node@24.2.0)(jsdom@26.1.0)(terser@5.46.0)
+
   packages/app-bridge:
     dependencies:
       common-tags:
@@ -2752,6 +2764,9 @@ importers:
 
   packages/cli:
     dependencies:
+      '@epilot/agent-auth':
+        specifier: workspace:^
+        version: link:../agent-auth
       '@inquirer/prompts':
         specifier: ^7.0.0
         version: 7.10.1(@types/node@24.2.0)
@@ -12642,7 +12657,7 @@ snapshots:
 
   sucrase@3.35.1:
     dependencies:
-      '@jridgewell/gen-mapping': 0.3.12
+      '@jridgewell/gen-mapping': 0.3.13
       commander: 4.1.1
       lines-and-columns: 1.2.4
       mz: 2.7.0
