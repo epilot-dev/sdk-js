@@ -128,30 +128,69 @@ Run epilot <api> <operationId> --help for operation details.
 
 ## Authentication
 
+The CLI authenticates through the [Agent Auth Protocol](https://agentauthprotocol.com/specification/v1.0-draft)
+(via [`@epilot/agent-auth`](../agent-auth)): your machine is a **host**, the CLI is an **agent** you approve once in
+the browser, and short-lived epilot tokens are issued per organization and refreshed silently.
+
 ```bash
-# Browser-based login (opens epilot portal)
+# Log in: prints a verification code, opens the epilot 360 login to approve the CLI, then stores a token
 epilot auth login
 
-# Manual token
+# Log in for a specific organization, read-only and with personal data anonymized
+epilot auth login --org 739224 --readonly --anonymize
+
+# Non-interactive (CI / agents): requires --org; prints the approval URL and polls until approved
+epilot auth login --org 739224 --no-interactive --json
+
+# Manual token (API token or copied user token)
 epilot auth login --token <your-token>
+epilot auth token
 
-# Or pass token per-command
+# Previous browser callback login (kept for one release)
+epilot auth login --legacy
+
+# Or pass a token per command / via environment variable
 epilot entity listSchemas --token <your-token>
-
-# Or via environment variable
 EPILOT_TOKEN=<your-token> epilot entity listSchemas
 
-# Check auth status
+# Status (token, agent id, host id, per-organization grants) and logout (revokes the agent)
 epilot auth status
-
-# Logout
 epilot auth logout
 ```
+
+The approval page shows the same verification code as your terminal — check that they match before approving.
+On the page you can only narrow what the CLI asked for (e.g. force read-only or anonymized), never widen it.
+
+### Organizations
+
+One approval grants access to one organization. Switching or adding organizations goes through `epilot org`:
+
+```bash
+epilot org list                 # your organizations with access status (granted / read-only / anonymized / pending)
+epilot org current              # the active organization
+epilot org use 911210           # switch: issues a token for a granted organization (asks for access otherwise)
+epilot org request 911210       # ask for read-only, anonymized access (approved in the browser)
+epilot org request 911210 --write --full-pii --reason "Import meter readings"
+epilot org request 911210 --no-interactive --json   # prints the approval and exits 0 with status "pending"
+```
+
+After an approval that happened outside the CLI (e.g. from a `--no-interactive` request), `epilot org use <id>`
+completes the switch.
+
+### Silent refresh
+
+Issued tokens are short-lived. Whenever a command runs and the stored token is missing or expires within two minutes,
+the CLI issues a fresh one through the agent and stores it — you stay logged in for as long as the agent is active
+(server-side session and lifetime limits apply). If the agent was revoked or expired, run `epilot auth login` again.
+
+Local state lives in `~/.config/epilot/agent-auth/` (`host.json` for the machine key, `agents/<profile>.json` for
+the per-profile agent; both mode 0600). `EPILOT_AGENT_AUTH_ISSUER` overrides the Agent Auth server URL (defaults per
+stage: `--use-dev`, `--use-staging`).
 
 Token resolution order:
 1. `--token` flag
 2. `EPILOT_TOKEN` environment variable
-3. Active profile token
+3. Active profile token (silently refreshed through the profile's agent when needed)
 4. Stored credentials (`~/.config/epilot/credentials.json`)
 5. Interactive prompt (if TTY)
 
@@ -376,6 +415,9 @@ Full documentation with sample calls and responses for all APIs:
 ```bash
 # Install dependencies
 pnpm install
+
+# Build the workspace dependency once (bundled into the CLI by tsup; also needed by tests and `pnpm dev`)
+pnpm --filter @epilot/agent-auth build
 
 # Generate API commands + definitions + docs from client specs
 pnpm generate
