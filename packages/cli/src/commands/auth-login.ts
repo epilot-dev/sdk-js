@@ -1,8 +1,30 @@
 import { defineCommand } from 'citty';
 import { randomBytes } from 'node:crypto';
 import { createServer } from 'node:http';
+import { hostname } from 'node:os';
+import {
+  type AgentStatusResponse,
+  type DeviceAuthorizationApproval,
+  EPILOT_CAPABILITIES,
+  type EpilotOrganization,
+  AgentAuthError,
+  generateKeyPair,
+  listEpilotOrganizations,
+  organizationAccessCapability,
+} from '@epilot/agent-auth';
+import {
+  type AgentRecord,
+  agentProfileKey,
+  ensureHostKey,
+  getAgentAuthClient,
+  issueTokenForOrg,
+  loadAgentIdentity,
+  resolveAgentAuthIssuer,
+  saveAgentRecord,
+} from '../lib/agent-auth.js';
 import { saveCredentials } from '../lib/auth-store.js';
 import { type Environment, getPortalUrl, resolveEnvironment } from '../lib/environment.js';
+import { isInteractive } from '../lib/interactive.js';
 import { BOLD, RESET, GREEN, RED, DIM, YELLOW, CYAN } from '../lib/utils.js';
 
 export default defineCommand({
@@ -10,11 +32,15 @@ export default defineCommand({
   args: {
     token: { type: 'string', description: 'Manually provide a token instead of browser login' },
     profile: { type: 'string', description: 'Save credentials to this profile' },
-    readonly: { type: 'boolean', description: 'Generate a read-only token (cannot perform write actions)' },
+    org: { type: 'string', description: 'Organization ID to request access to (default: your login organization)' },
+    readonly: { type: 'boolean', description: 'Request read-only access (cannot perform write actions)' },
     anonymize: {
       type: 'boolean',
-      description: 'Generate an anonymized token (personal data is masked in all API responses)',
+      description: 'Request anonymized access (personal data is masked in all API responses)',
     },
+    legacy: { type: 'boolean', description: 'Use the previous browser callback login instead of Agent Auth' },
+    json: { type: 'boolean', description: 'Output the login result as JSON' },
+    interactive: { type: 'boolean', default: true, description: 'Interactive mode (--no-interactive to disable)' },
     'use-dev': { type: 'boolean', description: 'Use dev environment (portal.dev.epilot.cloud)' },
     'use-staging': { type: 'boolean', description: 'Use staging environment (portal.staging.epilot.cloud)' },
   },
@@ -32,25 +58,281 @@ export default defineCommand({
       return;
     }
 
-    if (!process.stdin.isTTY) {
-      process.stderr.write(`${RED}Browser login requires an interactive terminal.${RESET}\n`);
+    if (args.legacy) {
+      if (!process.stdin.isTTY) {
+        process.stderr.write(`${RED}Browser login requires an interactive terminal.${RESET}\n`);
+        process.stderr.write(
+          `Use ${BOLD}epilot auth login --token <token>${RESET} or ${BOLD}epilot auth token${RESET} instead.\n`,
+        );
+        process.exit(1);
+      }
+      const token = await legacyBrowserLogin(profileName, env, readonly, anonymize);
+      if (token) {
+        process.stdout.write(`${GREEN}${BOLD}Login successful!${RESET}\n`);
+      } else {
+        process.stderr.write(`${RED}Login failed or was cancelled.${RESET}\n`);
+        process.exit(1);
+      }
+      return;
+    }
+
+    const interactive = isInteractive({ interactive: args.interactive }) && !!process.stdin.isTTY;
+    if (!interactive && !args.org) {
+      process.stderr.write(`${RED}Non-interactive login requires --org <organization-id>.${RESET}\n`);
       process.stderr.write(
-        `Use ${BOLD}epilot auth login --token <token>${RESET} or ${BOLD}epilot auth token${RESET} instead.\n`,
+        `Run ${BOLD}epilot auth login --org <id> --no-interactive${RESET}, or use ${BOLD}--token <token>${RESET}.\n`,
       );
       process.exit(1);
     }
 
-    const token = await browserLogin(profileName, env, readonly, anonymize);
-    if (token) {
-      process.stdout.write(`${GREEN}${BOLD}Login successful!${RESET}\n`);
-    } else {
-      process.stderr.write(`${RED}Login failed or was cancelled.${RESET}\n`);
+    try {
+      const result = await agentLogin({
+        profileName,
+        env,
+        org: args.org,
+        readonly,
+        anonymize,
+        interactive,
+        json: Boolean(args.json),
+      });
+      if (args.json) {
+        process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
+      }
+    } catch (error) {
+      if (error instanceof AgentAuthError) {
+        process.stderr.write(`${RED}Login failed: ${error.message}${RESET} ${DIM}(${error.code})${RESET}\n`);
+      } else {
+        process.stderr.write(`${RED}Login failed: ${error instanceof Error ? error.message : String(error)}${RESET}\n`);
+      }
       process.exit(1);
     }
   },
 });
 
-const browserLogin = async (
+// ── Agent Auth login ──────────────────────────────────────────────────────────
+
+export type AgentLoginOptions = {
+  profileName?: string;
+  env: Environment;
+  /** Organization to request; when omitted the approval page grants the login organization. */
+  org?: string;
+  readonly: boolean;
+  anonymize: boolean;
+  interactive: boolean;
+  /** Progress goes to stderr so stdout stays machine-readable. */
+  json: boolean;
+};
+
+export type AgentLoginResult = {
+  agent_id: string;
+  host_id: string;
+  issuer: string;
+  organization_id: string;
+  organization_name?: string;
+  user_id: string;
+  read_only: boolean;
+  anonymize: boolean;
+  expires_at: string;
+  profile?: string;
+};
+
+const isDeviceAuthorization = (approval: unknown): approval is DeviceAuthorizationApproval =>
+  !!approval && (approval as { method?: string }).method === 'device_authorization';
+
+/** Print the approval URL and user code the way the legacy login printed its verification code. */
+export const printApproval = (approval: DeviceAuthorizationApproval, out: (s: string) => void): void => {
+  out('\n');
+  out(`  ${YELLOW}Verification code: ${BOLD}${approval.user_code}${RESET}\n`);
+  out('\n');
+  out(`${DIM}Verify this code matches what is shown in your browser before approving.${RESET}\n`);
+  out(`${DIM}This ensures you are approving the correct CLI session.${RESET}\n`);
+  out('\n');
+  out(`${DIM}Approval URL: ${approval.verification_uri_complete}${RESET}\n\n`);
+};
+
+export const openBrowser = async (url: string, out: (s: string) => void): Promise<void> => {
+  try {
+    const open = (await import('open')).default;
+    await open(url);
+    out(`${CYAN}Browser opened.${RESET} Waiting for approval`);
+  } catch {
+    out(`Could not open browser. Please visit this URL manually:\n\n  ${url}\n\nWaiting for approval`);
+  }
+};
+
+/**
+ * Register an agent for this machine, wait for the user's approval in the
+ * browser, pick the active organization and store an access token.
+ */
+export const agentLogin = async (options: AgentLoginOptions): Promise<AgentLoginResult> => {
+  const out = (s: string) => (options.json ? process.stderr : process.stdout).write(s);
+  const suffix = options.profileName ? ` ${DIM}(profile: ${options.profileName})${RESET}` : '';
+  out(`\n${BOLD}epilot CLI Login${RESET}${suffix}\n\n`);
+  out('This registers the epilot CLI on this machine as an agent and asks you to approve it in your browser.\n');
+  if (options.readonly) {
+    out(`${YELLOW}Read-only mode: the CLI session will not be able to perform write actions.${RESET}\n`);
+  }
+  if (options.anonymize) {
+    out(`${YELLOW}Anonymize mode: personal data will be masked in all API responses for this CLI session.${RESET}\n`);
+  }
+
+  const hostKey = ensureHostKey();
+  const agentKey = generateKeyPair();
+  const issuer = resolveAgentAuthIssuer(options.env);
+  const client = getAgentAuthClient(issuer);
+  const machine = hostname();
+
+  const registration = await client.registerAgent(hostKey, agentKey, {
+    name: `epilot CLI @ ${machine}`,
+    host_name: machine,
+    mode: 'delegated',
+    reason: 'epilot CLI login',
+    capabilities: [
+      EPILOT_CAPABILITIES.organizationsList,
+      organizationAccessCapability({
+        organizationId: options.org,
+        readOnly: options.readonly,
+        anonymize: options.anonymize,
+      }),
+    ],
+  });
+
+  const record: AgentRecord = {
+    agent_id: registration.agent_id,
+    host_id: registration.host_id,
+    privateKey: agentKey.privateKey,
+    issuer,
+    name: registration.name,
+    created_at: new Date().toISOString(),
+  };
+
+  let status: AgentStatusResponse | undefined;
+  if (registration.status === 'pending') {
+    if (!isDeviceAuthorization(registration.approval)) {
+      throw new AgentAuthError(
+        0,
+        'unsupported_approval',
+        `The server requires an unsupported approval method (${String(registration.approval?.method)}).`,
+      );
+    }
+    printApproval(registration.approval, out);
+    if (options.interactive) {
+      await openBrowser(registration.approval.verification_uri_complete, out);
+    } else {
+      out('Waiting for approval');
+    }
+    status = await client.waitForApproval(hostKey, registration.agent_id, registration.approval, {
+      onPoll: () => out('.'),
+    });
+    out('\n');
+  }
+
+  const agentStatus = status?.status ?? registration.status;
+  if (agentStatus !== 'active') {
+    throw new AgentAuthError(0, `agent_${agentStatus}`, `The agent was not approved (status: ${agentStatus}).`);
+  }
+
+  // Persist the identity before issuing so a failed org selection can be completed with `epilot org use`.
+  saveAgentRecord(record, options.profileName);
+  const loaded = loadAgentIdentity(options.profileName);
+  if (!loaded) throw new Error('Failed to store the agent identity.');
+
+  const { organizations } = await listEpilotOrganizations(client, loaded.identity);
+  const org = await chooseOrganization(organizations, options);
+
+  const issued = await issueTokenForOrg(loaded, org.organization_id, {
+    readOnly: options.readonly,
+    anonymize: options.anonymize,
+    profileName: options.profileName,
+  });
+
+  out(`${GREEN}${BOLD}Login successful!${RESET}\n`);
+  out(
+    `  Organization: ${org.organization_name ? `${org.organization_name} ${DIM}(${org.organization_id})${RESET}` : org.organization_id}\n`,
+  );
+  out(
+    `  Access:       ${issued.read_only ? `${YELLOW}read-only${RESET}` : `${GREEN}read-write${RESET}`}${issued.anonymize ? `, ${YELLOW}anonymized${RESET}` : ''}\n`,
+  );
+  out(`  Token expires: ${issued.expires_at} ${DIM}(refreshed automatically while the agent is active)${RESET}\n`);
+  out(`${DIM}Switch organizations with ${RESET}epilot org list${DIM} / ${RESET}epilot org use <id>${DIM}.${RESET}\n`);
+
+  return {
+    agent_id: registration.agent_id,
+    host_id: registration.host_id,
+    issuer,
+    organization_id: org.organization_id,
+    organization_name: org.organization_name,
+    user_id: issued.user_id,
+    read_only: issued.read_only,
+    anonymize: issued.anonymize,
+    expires_at: issued.expires_at,
+    profile: agentProfileKey(options.profileName),
+  };
+};
+
+/** --org flag → the only granted organization → interactive select → error. */
+export const chooseOrganization = async (
+  organizations: EpilotOrganization[],
+  options: { org?: string; interactive: boolean },
+): Promise<EpilotOrganization> => {
+  const granted = organizations.filter((o) => o.access?.granted);
+
+  if (options.org) {
+    const match = organizations.find((o) => o.organization_id === options.org);
+    if (!match) {
+      throw new AgentAuthError(
+        0,
+        'organization_not_found',
+        `Organization ${options.org} is not available to your user.`,
+      );
+    }
+    if (!match.access?.granted) {
+      const hint = match.access?.pending ? 'is still pending approval' : 'was not granted';
+      throw new AgentAuthError(
+        0,
+        'organization_not_granted',
+        `Access to organization ${options.org} ${hint}. Run \`epilot org request ${options.org}\` to ask for access.`,
+      );
+    }
+    return match;
+  }
+
+  if (granted.length === 1) return granted[0];
+  if (granted.length === 0) {
+    throw new AgentAuthError(
+      0,
+      'no_organization_granted',
+      'No organization was granted. Approve the request in your browser or run `epilot org request <id>`.',
+    );
+  }
+
+  if (!options.interactive) {
+    throw new AgentAuthError(
+      0,
+      'organization_required',
+      `Several organizations are granted (${granted.map((o) => o.organization_id).join(', ')}). Pass --org <id>.`,
+    );
+  }
+
+  const { select } = await import('@inquirer/prompts');
+  const organizationId = await select({
+    message: 'Select the organization to use:',
+    choices: granted.map((o) => ({
+      name: `${o.organization_name ?? o.organization_id} ${DIM}${o.organization_id}${accessLabel(o)}${RESET}`,
+      value: o.organization_id,
+    })),
+  });
+  return granted.find((o) => o.organization_id === organizationId)!;
+};
+
+const accessLabel = (o: EpilotOrganization): string => {
+  const parts = [o.access?.read_only ? 'read-only' : '', o.access?.anonymized ? 'anonymized' : ''].filter(Boolean);
+  return parts.length ? ` · ${parts.join(', ')}` : '';
+};
+
+// ── Legacy browser callback login ─────────────────────────────────────────────
+
+export const legacyBrowserLogin = async (
   profileName?: string,
   env: Environment = 'production',
   readonly = false,

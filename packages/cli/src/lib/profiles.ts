@@ -28,7 +28,8 @@ export type ProfileConfig = {
   stage?: string;
 };
 
-const getConfigDir = (): string => {
+/** CLI config directory: `$XDG_CONFIG_HOME/epilot` or `~/.config/epilot`. */
+export const getConfigDir = (): string => {
   const xdgConfig = process.env.XDG_CONFIG_HOME;
   const base = xdgConfig || join(homedir(), '.config');
   return join(base, 'epilot');

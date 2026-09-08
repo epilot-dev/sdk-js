@@ -20,6 +20,7 @@ export const main = defineCommand({
   },
   subCommands: {
     auth: () => import('./commands/auth.js').then((m) => m.default),
+    org: () => import('./commands/org.js').then((m) => m.default),
     profile: () => import('./commands/profile.js').then((m) => m.default),
     config: () => import('./commands/config.js').then((m) => m.default),
     completion: () => import('./commands/completion.js').then((m) => m.default),
