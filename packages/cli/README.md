@@ -53,10 +53,15 @@ PARAMETER FLAGS
   -i, --include            Include response headers in output
 
 COMMANDS
-  auth login              Authenticate with epilot (browser)
+  auth login              Authenticate with epilot (approve the CLI in your browser)
+  auth login --org <id>   Log in and request access to a specific organization
   auth token              Store an API token directly
-  auth status             Show authentication status
-  auth logout             Remove stored credentials
+  auth status             Show authentication status, agent and grants
+  auth logout             Revoke the agent and remove stored credentials
+  org list                List your organizations and this CLI's access
+  org use <id>            Switch the active organization
+  org request <id>        Request access to an organization (--write, --full-pii)
+  org current             Show the active organization
   profile                 Manage named profiles
   completion              Generate shell completion scripts
 
@@ -115,6 +120,7 @@ APIs
 
 EXAMPLES
   $ epilot auth login
+  $ epilot org use 739224
   $ epilot user getMeV2
   $ epilot entity getEntity contact abc123
   $ epilot entity searchEntities -d '{"q":"*"}'
