@@ -23,15 +23,17 @@ declare namespace Components {
         /**
          * A variable's value. The JSON type corresponds to the variable's `type`:
          * `String`, `SecretString` and `Text` are strings, `Number` is a number,
-         * `Boolean` is a boolean, and `Map`, `JSON` and `Link` are objects. Numbers are
-         * IEEE 754 doubles; integers above 2^53 may lose precision on round-trip.
+         * `Boolean` is a boolean, and `Map`, `JSON`, `Link` and `List` are objects.
+         * Numbers are IEEE 754 doubles; integers above 2^53 may lose precision on
+         * round-trip.
          *
          */
         export type EnvironmentValue = /**
          * A variable's value. The JSON type corresponds to the variable's `type`:
          * `String`, `SecretString` and `Text` are strings, `Number` is a number,
-         * `Boolean` is a boolean, and `Map`, `JSON` and `Link` are objects. Numbers are
-         * IEEE 754 doubles; integers above 2^53 may lose precision on round-trip.
+         * `Boolean` is a boolean, and `Map`, `JSON`, `Link` and `List` are objects.
+         * Numbers are IEEE 754 doubles; integers above 2^53 may lose precision on
+         * round-trip.
          *
          */
         string | number | boolean | MapValue | /**
@@ -62,20 +64,28 @@ declare namespace Components {
          * does not itself declare it.
          *
          */
-        LinkValue;
-        /**
-         * The structure a variable's value holds. `SecretString` is encrypted at rest and
-         * its value is never returned. `Text`, `Number`, `Boolean`, `Map`, `JSON` and `Link`
-         * may be served to browser-facing consumers; `String` and `SecretString` may not.
+        LinkValue | /**
+         * An ordered collection of one declared element type. Items round-trip in
+         * the order written; nothing sorts them. Holds at most 100 items.
+         *
+         * The whole value is limited to 32768 characters when serialised — the
+         * server enforces this, and it is not expressible per-property here.
          *
          */
-        export type EnvironmentValueType = "String" | "SecretString" | "Text" | "Number" | "Boolean" | "Map" | "JSON" | "Link";
+        ListValue;
+        /**
+         * The structure a variable's value holds. `SecretString` is encrypted at rest and
+         * its value is never returned. `Text`, `Number`, `Boolean`, `Map`, `JSON`, `Link` and
+         * `List` may be served to browser-facing consumers; `String` and `SecretString` may not.
+         *
+         */
+        export type EnvironmentValueType = "String" | "SecretString" | "Text" | "Number" | "Boolean" | "Map" | "JSON" | "Link" | "List";
         export interface EnvironmentVariable {
             key: string; // ^[a-z0-9][a-z0-9_.\-]{0,127}$
             type: /**
              * The structure a variable's value holds. `SecretString` is encrypted at rest and
-             * its value is never returned. `Text`, `Number`, `Boolean`, `Map`, `JSON` and `Link`
-             * may be served to browser-facing consumers; `String` and `SecretString` may not.
+             * its value is never returned. `Text`, `Number`, `Boolean`, `Map`, `JSON`, `Link` and
+             * `List` may be served to browser-facing consumers; `String` and `SecretString` may not.
              *
              */
             EnvironmentValueType;
@@ -124,7 +134,15 @@ declare namespace Components {
              * does not itself declare it.
              *
              */
-            LinkValue;
+            LinkValue | /**
+             * An ordered collection of one declared element type. Items round-trip in
+             * the order written; nothing sorts them. Holds at most 100 items.
+             *
+             * The whole value is limited to 32768 characters when serialised — the
+             * server enforces this, and it is not expressible per-property here.
+             *
+             */
+            ListValue;
             /**
              * Whether the variable is protected from editing
              */
@@ -136,8 +154,8 @@ declare namespace Components {
             key: string; // ^[a-z0-9][a-z0-9_.\-]{0,127}$
             type: /**
              * The structure a variable's value holds. `SecretString` is encrypted at rest and
-             * its value is never returned. `Text`, `Number`, `Boolean`, `Map`, `JSON` and `Link`
-             * may be served to browser-facing consumers; `String` and `SecretString` may not.
+             * its value is never returned. `Text`, `Number`, `Boolean`, `Map`, `JSON`, `Link` and
+             * `List` may be served to browser-facing consumers; `String` and `SecretString` may not.
              *
              */
             EnvironmentValueType;
@@ -146,8 +164,9 @@ declare namespace Components {
             value?: /**
              * A variable's value. The JSON type corresponds to the variable's `type`:
              * `String`, `SecretString` and `Text` are strings, `Number` is a number,
-             * `Boolean` is a boolean, and `Map`, `JSON` and `Link` are objects. Numbers are
-             * IEEE 754 doubles; integers above 2^53 may lose precision on round-trip.
+             * `Boolean` is a boolean, and `Map`, `JSON`, `Link` and `List` are objects.
+             * Numbers are IEEE 754 doubles; integers above 2^53 may lose precision on
+             * round-trip.
              *
              */
             EnvironmentValue;
@@ -163,8 +182,8 @@ declare namespace Components {
             key: string;
             type: /**
              * The structure a variable's value holds. `SecretString` is encrypted at rest and
-             * its value is never returned. `Text`, `Number`, `Boolean`, `Map`, `JSON` and `Link`
-             * may be served to browser-facing consumers; `String` and `SecretString` may not.
+             * its value is never returned. `Text`, `Number`, `Boolean`, `Map`, `JSON`, `Link` and
+             * `List` may be served to browser-facing consumers; `String` and `SecretString` may not.
              *
              */
             EnvironmentValueType;
@@ -213,7 +232,15 @@ declare namespace Components {
              * does not itself declare it.
              *
              */
-            LinkValue;
+            LinkValue | /**
+             * An ordered collection of one declared element type. Items round-trip in
+             * the order written; nothing sorts them. Holds at most 100 items.
+             *
+             * The whole value is limited to 32768 characters when serialised — the
+             * server enforces this, and it is not expressible per-property here.
+             *
+             */
+            ListValue;
             /**
              * Whether the variable is protected from editing
              */
@@ -225,12 +252,13 @@ declare namespace Components {
             /**
              * Type of variable. Used when creating a new variable. Defaults to String.
              */
-            type?: "String" | "SecretString" | "Text" | "Number" | "Boolean" | "Map" | "JSON" | "Link";
+            type?: "String" | "SecretString" | "Text" | "Number" | "Boolean" | "Map" | "JSON" | "Link" | "List";
             value?: /**
              * A variable's value. The JSON type corresponds to the variable's `type`:
              * `String`, `SecretString` and `Text` are strings, `Number` is a number,
-             * `Boolean` is a boolean, and `Map`, `JSON` and `Link` are objects. Numbers are
-             * IEEE 754 doubles; integers above 2^53 may lose precision on round-trip.
+             * `Boolean` is a boolean, and `Map`, `JSON`, `Link` and `List` are objects.
+             * Numbers are IEEE 754 doubles; integers above 2^53 may lose precision on
+             * round-trip.
              *
              */
             EnvironmentValue;
@@ -248,6 +276,42 @@ declare namespace Components {
          */
         export interface JsonValue {
             [name: string]: any;
+        }
+        /**
+         * The fields of a link, without a fallback language — the shape a `List`
+         * item carries. Inside a list the fallback belongs to the wrapper, which
+         * owns the language tabs for every row.
+         *
+         * Restated rather than composed with `LinkValue`: `allOf` plus
+         * `additionalProperties: false` is rejected by most validators, because
+         * each branch sees the sibling's properties as unknown. zod composes
+         * properly — see LinkFieldsSchema in src/core/value-types.ts.
+         *
+         */
+        export interface LinkFields {
+            url: string;
+            label: string | /**
+             * A string translated per language. Keys are language codes (e.g. `de`,
+             * `en-US`), matching the hyphen-only BCP-47 form epilot's i18n stack uses
+             * everywhere else: `^[a-z]{2,3}(-[A-Za-z0-9]+)*$`. The server enforces
+             * that with LANGUAGE_KEY_PATTERN in src/core/value-types.ts — the two are
+             * not otherwise linked. The pattern is documented rather than declared
+             * because `propertyNames` is JSON Schema / OAS 3.1 and this document is
+             * 3.0.3, where it fails `spectral lint` (oas3-schema).
+             *
+             */
+            StringTranslations;
+            description?: string | /**
+             * A string translated per language. Keys are language codes (e.g. `de`,
+             * `en-US`), matching the hyphen-only BCP-47 form epilot's i18n stack uses
+             * everywhere else: `^[a-z]{2,3}(-[A-Za-z0-9]+)*$`. The server enforces
+             * that with LANGUAGE_KEY_PATTERN in src/core/value-types.ts — the two are
+             * not otherwise linked. The pattern is documented rather than declared
+             * because `propertyNames` is JSON Schema / OAS 3.1 and this document is
+             * 3.0.3, where it fails `spectral lint` (oas3-schema).
+             *
+             */
+            StringTranslations;
         }
         /**
          * One URL with a label and description a customer reads. `label` and
@@ -298,6 +362,105 @@ declare namespace Components {
             StringTranslations;
             fallbackLanguage?: string;
         }
+        /**
+         * The element type a `List` holds. `String` and `SecretString` are absent
+         * deliberately: they are the two types never served to browser-facing
+         * consumers, and a `List` is. `Map` is already a keyed collection, and a
+         * list of lists has no consumer.
+         *
+         */
+        export type ListItemType = "Text" | "Number" | "Boolean" | "JSON" | "Link";
+        export interface ListOfBoolean {
+            itemType: "Boolean";
+            items: [
+                boolean,
+                ...boolean[]
+            ];
+        }
+        export interface ListOfJson {
+            itemType: "JSON";
+            items: [
+                {
+                    [name: string]: any;
+                },
+                ...{
+                    [name: string]: any;
+                }[]
+            ];
+        }
+        /**
+         * A list of links. `fallbackLanguage` applies to every item's translated
+         * `label` and `description`; items may mix plain and translated fields
+         * freely, since a plain string is a complete answer for any language.
+         *
+         */
+        export interface ListOfLink {
+            itemType: "Link";
+            fallbackLanguage?: string;
+            items: [
+                /**
+                 * The fields of a link, without a fallback language — the shape a `List`
+                 * item carries. Inside a list the fallback belongs to the wrapper, which
+                 * owns the language tabs for every row.
+                 *
+                 * Restated rather than composed with `LinkValue`: `allOf` plus
+                 * `additionalProperties: false` is rejected by most validators, because
+                 * each branch sees the sibling's properties as unknown. zod composes
+                 * properly — see LinkFieldsSchema in src/core/value-types.ts.
+                 *
+                 */
+                LinkFields,
+                .../**
+                 * The fields of a link, without a fallback language — the shape a `List`
+                 * item carries. Inside a list the fallback belongs to the wrapper, which
+                 * owns the language tabs for every row.
+                 *
+                 * Restated rather than composed with `LinkValue`: `allOf` plus
+                 * `additionalProperties: false` is rejected by most validators, because
+                 * each branch sees the sibling's properties as unknown. zod composes
+                 * properly — see LinkFieldsSchema in src/core/value-types.ts.
+                 *
+                 */
+                LinkFields[]
+            ];
+        }
+        export interface ListOfNumber {
+            itemType: "Number";
+            items: [
+                number,
+                ...number[]
+            ];
+        }
+        export interface ListOfText {
+            itemType: "Text";
+            items: [
+                string,
+                ...string[]
+            ];
+        }
+        /**
+         * An ordered collection of one declared element type. Items round-trip in
+         * the order written; nothing sorts them. Holds at most 100 items.
+         *
+         * The whole value is limited to 32768 characters when serialised — the
+         * server enforces this, and it is not expressible per-property here.
+         *
+         */
+        export type ListValue = /**
+         * An ordered collection of one declared element type. Items round-trip in
+         * the order written; nothing sorts them. Holds at most 100 items.
+         *
+         * The whole value is limited to 32768 characters when serialised — the
+         * server enforces this, and it is not expressible per-property here.
+         *
+         */
+        ListOfText | ListOfNumber | ListOfBoolean | ListOfJson | /**
+         * A list of links. `fallbackLanguage` applies to every item's translated
+         * `label` and `description`; items may mix plain and translated fields
+         * freely, since a plain string is a complete answer for any language.
+         *
+         */
+        ListOfLink;
         /**
          * One entry of a Map. `key` is the token a journey submits; `value` is
          * what the customer reads — either one string, or one string per
@@ -669,7 +832,15 @@ export type EnvironmentVariableList = Components.Schemas.EnvironmentVariableList
 export type EnvironmentVariableListItem = Components.Schemas.EnvironmentVariableListItem;
 export type EnvironmentVariableUpdateRequest = Components.Schemas.EnvironmentVariableUpdateRequest;
 export type JsonValue = Components.Schemas.JsonValue;
+export type LinkFields = Components.Schemas.LinkFields;
 export type LinkValue = Components.Schemas.LinkValue;
+export type ListItemType = Components.Schemas.ListItemType;
+export type ListOfBoolean = Components.Schemas.ListOfBoolean;
+export type ListOfJson = Components.Schemas.ListOfJson;
+export type ListOfLink = Components.Schemas.ListOfLink;
+export type ListOfNumber = Components.Schemas.ListOfNumber;
+export type ListOfText = Components.Schemas.ListOfText;
+export type ListValue = Components.Schemas.ListValue;
 export type MapEntry = Components.Schemas.MapEntry;
 export type MapValue = Components.Schemas.MapValue;
 export type StringTranslations = Components.Schemas.StringTranslations;

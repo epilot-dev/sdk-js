@@ -41,6 +41,14 @@ const { data } = await environmentsClient.listEnvironmentVariables(...)
 - [`MapValue`](#mapvalue)
 - [`JsonValue`](#jsonvalue)
 - [`LinkValue`](#linkvalue)
+- [`LinkFields`](#linkfields)
+- [`ListItemType`](#listitemtype)
+- [`ListOfText`](#listoftext)
+- [`ListOfNumber`](#listofnumber)
+- [`ListOfBoolean`](#listofboolean)
+- [`ListOfJson`](#listofjson)
+- [`ListOfLink`](#listoflink)
+- [`ListValue`](#listvalue)
 - [`EnvironmentValue`](#environmentvalue)
 - [`EnvironmentVariable`](#environmentvariable)
 - [`EnvironmentVariableListItem`](#environmentvariablelistitem)
@@ -294,12 +302,12 @@ const { data } = await client.deleteEnvironmentVariable({
 ### `EnvironmentValueType`
 
 The structure a variable's value holds. `SecretString` is encrypted at rest and
-its value is never returned. `Text`, `Number`, `Boolean`, `Map`, `JSON` and `Link`
-may be served to browser-facing consumers; `String` and `SecretString` may not.
+its value is never returned. `Text`, `Number`, `Boolean`, `Map`, `JSON`, `Link` and
+`List` may be served to browser-facing consumers; `String` and `SecretString` may not.
 
 
 ```ts
-type EnvironmentValueType = "String" | "SecretString" | "Text" | "Number" | "Boolean" | "Map" | "JSON" | "Link"
+type EnvironmentValueType = "String" | "SecretString" | "Text" | "Number" | "Boolean" | "Map" | "JSON" | "Link" | "List"
 ```
 
 ### `StringTranslations`
@@ -369,13 +377,130 @@ type LinkValue = {
 }
 ```
 
+### `LinkFields`
+
+The fields of a link, without a fallback language — the shape a `List`
+item carries. Inside a list the fallback belongs to the wrapper, which
+owns the language tabs for every row.
+
+Restated rather than composed with `LinkValue`: `allOf` plus
+`additionalProperties: false` is rejected by most validato
+
+```ts
+type LinkFields = {
+  url: string
+  label: string | Record<string, string>
+  description?: string | Record<string, string>
+}
+```
+
+### `ListItemType`
+
+The element type a `List` holds. `String` and `SecretString` are absent
+deliberately: they are the two types never served to browser-facing
+consumers, and a `List` is. `Map` is already a keyed collection, and a
+list of lists has no consumer.
+
+
+```ts
+type ListItemType = "Text" | "Number" | "Boolean" | "JSON" | "Link"
+```
+
+### `ListOfText`
+
+```ts
+type ListOfText = {
+  itemType: "Text"
+  items: string[]
+}
+```
+
+### `ListOfNumber`
+
+```ts
+type ListOfNumber = {
+  itemType: "Number"
+  items: number[]
+}
+```
+
+### `ListOfBoolean`
+
+```ts
+type ListOfBoolean = {
+  itemType: "Boolean"
+  items: boolean[]
+}
+```
+
+### `ListOfJson`
+
+```ts
+type ListOfJson = {
+  itemType: "JSON"
+  items: Record<string, unknown>[]
+}
+```
+
+### `ListOfLink`
+
+A list of links. `fallbackLanguage` applies to every item's translated
+`label` and `description`; items may mix plain and translated fields
+freely, since a plain string is a complete answer for any language.
+
+
+```ts
+type ListOfLink = {
+  itemType: "Link"
+  fallbackLanguage?: string
+  items: Array<{
+    url: string
+    label: string | Record<string, string>
+    description?: string | Record<string, string>
+  }>
+}
+```
+
+### `ListValue`
+
+An ordered collection of one declared element type. Items round-trip in
+the order written; nothing sorts them. Holds at most 100 items.
+
+The whole value is limited to 32768 characters when serialised — the
+server enforces this, and it is not expressible per-property here.
+
+
+```ts
+type ListValue = {
+  itemType: "Text"
+  items: string[]
+} | {
+  itemType: "Number"
+  items: number[]
+} | {
+  itemType: "Boolean"
+  items: boolean[]
+} | {
+  itemType: "JSON"
+  items: Record<string, unknown>[]
+} | {
+  itemType: "Link"
+  fallbackLanguage?: string
+  items: Array<{
+    url: string
+    label: string | Record<string, string>
+    description?: string | Record<string, string>
+  }>
+}
+```
+
 ### `EnvironmentValue`
 
 A variable's value. The JSON type corresponds to the variable's `type`:
 `String`, `SecretString` and `Text` are strings, `Number` is a number,
-`Boolean` is a boolean, and `Map`, `JSON` and `Link` are objects. Numbers are
-IEEE 754 doubles; integers above 2^53 may lose precision on round-trip.
-
+`Boolean` is a boolean, and `Map`, `JSON`, `Link` and `List` are objects.
+Numbers are IEEE 754 doubles; integers above 2^53 may lose precision on
+round-trip.
 
 ```ts
 type EnvironmentValue = string | number | boolean | {
@@ -389,6 +514,26 @@ type EnvironmentValue = string | number | boolean | {
   label: string | Record<string, string>
   description?: string | Record<string, string>
   fallbackLanguage?: string
+} | {
+  itemType: "Text"
+  items: string[]
+} | {
+  itemType: "Number"
+  items: number[]
+} | {
+  itemType: "Boolean"
+  items: boolean[]
+} | {
+  itemType: "JSON"
+  items: Record<string, unknown>[]
+} | {
+  itemType: "Link"
+  fallbackLanguage?: string
+  items: Array<{
+    url: string
+    label: string | Record<string, string>
+    description?: string | Record<string, string>
+  }>
 }
 ```
 
@@ -397,7 +542,7 @@ type EnvironmentValue = string | number | boolean | {
 ```ts
 type EnvironmentVariable = {
   key: string
-  type: "String" | "SecretString" | "Text" | "Number" | "Boolean" | "Map" | "JSON" | "Link"
+  type: "String" | "SecretString" | "Text" | "Number" | "Boolean" | "Map" | "JSON" | "Link" | "List"
   description?: string
   group?: string
   value?: string | number | boolean | {
@@ -411,6 +556,26 @@ type EnvironmentVariable = {
     label: string | Record<string, string>
     description?: string | Record<string, string>
     fallbackLanguage?: string
+  } | {
+    itemType: "Text"
+    items: string[]
+  } | {
+    itemType: "Number"
+    items: number[]
+  } | {
+    itemType: "Boolean"
+    items: boolean[]
+  } | {
+    itemType: "JSON"
+    items: Record<string, unknown>[]
+  } | {
+    itemType: "Link"
+    fallbackLanguage?: string
+    items: Array<{
+      url: { ... }
+      label: { ... }
+      description?: { ... }
+    }>
   }
   protected?: boolean
   created_at: string // date-time
@@ -423,7 +588,7 @@ type EnvironmentVariable = {
 ```ts
 type EnvironmentVariableListItem = {
   key: string
-  type: "String" | "SecretString" | "Text" | "Number" | "Boolean" | "Map" | "JSON" | "Link"
+  type: "String" | "SecretString" | "Text" | "Number" | "Boolean" | "Map" | "JSON" | "Link" | "List"
   description?: string
   group?: string
   value?: string | number | boolean | {
@@ -437,6 +602,26 @@ type EnvironmentVariableListItem = {
     label: string | Record<string, string>
     description?: string | Record<string, string>
     fallbackLanguage?: string
+  } | {
+    itemType: "Text"
+    items: string[]
+  } | {
+    itemType: "Number"
+    items: number[]
+  } | {
+    itemType: "Boolean"
+    items: boolean[]
+  } | {
+    itemType: "JSON"
+    items: Record<string, unknown>[]
+  } | {
+    itemType: "Link"
+    fallbackLanguage?: string
+    items: Array<{
+      url: { ... }
+      label: { ... }
+      description?: { ... }
+    }>
   }
   protected?: boolean
   created_at: string // date-time
@@ -450,7 +635,7 @@ type EnvironmentVariableListItem = {
 type EnvironmentVariableList = {
   items: Array<{
     key: string
-    type: "String" | "SecretString" | "Text" | "Number" | "Boolean" | "Map" | "JSON" | "Link"
+    type: "String" | "SecretString" | "Text" | "Number" | "Boolean" | "Map" | "JSON" | "Link" | "List"
     description?: string
     group?: string
     value?: string | number | boolean | {
@@ -461,6 +646,22 @@ type EnvironmentVariableList = {
       label: { ... }
       description?: { ... }
       fallbackLanguage?: { ... }
+    } | {
+      itemType: { ... }
+      items: { ... }
+    } | {
+      itemType: { ... }
+      items: { ... }
+    } | {
+      itemType: { ... }
+      items: { ... }
+    } | {
+      itemType: { ... }
+      items: { ... }
+    } | {
+      itemType: { ... }
+      fallbackLanguage?: { ... }
+      items: { ... }
     }
     protected?: boolean
     created_at: string // date-time
@@ -474,7 +675,7 @@ type EnvironmentVariableList = {
 ```ts
 type EnvironmentVariableCreateRequest = {
   key: string
-  type: "String" | "SecretString" | "Text" | "Number" | "Boolean" | "Map" | "JSON" | "Link"
+  type: "String" | "SecretString" | "Text" | "Number" | "Boolean" | "Map" | "JSON" | "Link" | "List"
   description?: string
   group?: string
   value?: string | number | boolean | {
@@ -488,6 +689,26 @@ type EnvironmentVariableCreateRequest = {
     label: string | Record<string, string>
     description?: string | Record<string, string>
     fallbackLanguage?: string
+  } | {
+    itemType: "Text"
+    items: string[]
+  } | {
+    itemType: "Number"
+    items: number[]
+  } | {
+    itemType: "Boolean"
+    items: boolean[]
+  } | {
+    itemType: "JSON"
+    items: Record<string, unknown>[]
+  } | {
+    itemType: "Link"
+    fallbackLanguage?: string
+    items: Array<{
+      url: { ... }
+      label: { ... }
+      description?: { ... }
+    }>
   }
   protected?: boolean
 }
@@ -497,7 +718,7 @@ type EnvironmentVariableCreateRequest = {
 
 ```ts
 type EnvironmentVariableUpdateRequest = {
-  type?: "String" | "SecretString" | "Text" | "Number" | "Boolean" | "Map" | "JSON" | "Link"
+  type?: "String" | "SecretString" | "Text" | "Number" | "Boolean" | "Map" | "JSON" | "Link" | "List"
   value?: string | number | boolean | {
     fallbackLanguage?: string
     options: Array<{
@@ -509,6 +730,26 @@ type EnvironmentVariableUpdateRequest = {
     label: string | Record<string, string>
     description?: string | Record<string, string>
     fallbackLanguage?: string
+  } | {
+    itemType: "Text"
+    items: string[]
+  } | {
+    itemType: "Number"
+    items: number[]
+  } | {
+    itemType: "Boolean"
+    items: boolean[]
+  } | {
+    itemType: "JSON"
+    items: Record<string, unknown>[]
+  } | {
+    itemType: "Link"
+    fallbackLanguage?: string
+    items: Array<{
+      url: { ... }
+      label: { ... }
+      description?: { ... }
+    }>
   }
   description?: string
   group?: string
