@@ -4461,7 +4461,7 @@
       },
       "ConditionType": {
         "type": "string",
-        "description": "The kind of value a condition holds, which decides how a variant's pinned value is matched\nagainst a resolve context.\n\n- `string`: an arbitrary string, matched exactly and case-sensitively\n- `number`: a numeric value\n- `date`: a single date\n- `daterange`: a window with a from and an until timestamp; both ends may be left open\n- `boolean`: a true/false value\n- `select`: one of the values declared in `options`, unless `allow_any` is set\n- `location`: a geographic value, shaped by `format`\n\nThere is no condition type for the fallback variant. Being the entity's fallback is a\nproperty of the variant, set by the `default` flag on a variant write, and needs nothing\ndeclared in the schema.\n",
+        "description": "The kind of value a condition holds, which decides how a variant's pinned value is matched\nagainst a resolve context.\n\n- `string`: an arbitrary string, matched exactly and case-sensitively\n- `number`: a numeric value\n- `date`: a single date\n- `daterange`: a window with a from and an until timestamp; both ends may be left open\n- `boolean`: a true/false value\n- `select`: one of the values declared in `options`\n- `location`: a geographic value, shaped by `format`\n\nThere is no condition type for the fallback variant. Being the entity's fallback is a\nproperty of the variant, set by the `default` flag on a variant write, and needs nothing\ndeclared in the schema.\n",
         "enum": [
           "string",
           "number",
@@ -4496,12 +4496,11 @@
           },
           "options": {
             "type": "array",
-            "description": "The declared vocabulary of a `select` condition. Absent for every other type.\n\nThe same shape a `select` attribute's `options` has on the Entity API, item for item: an\nentry is either the value itself or an object carrying that value and an optional display\n`title`. A `title` is never pinned by a variant and never matched — two entries differing\nonly in their title are one vocabulary entry.\n\nEnforced on variant writes, unless `allow_any` is true: a pinned value outside the\nvocabulary is rejected with `CONDITION_VALUE_INVALID`. It is *not* enforced on resolve —\na vocabulary says what may be stored, not what may be asked for, so a context value\noutside it is a query that simply matches nothing.\n",
+            "description": "The declared vocabulary of a `select` condition, in the same shape a `select` attribute's\n`options` take: a bare value or a `{ value, title }` object. Absent for every other type.\n\nEnforced on variant writes: a pinned value outside it is rejected with\n`CONDITION_VALUE_INVALID`. Not enforced on resolve — a context value outside it simply\nmatches nothing.\n",
             "items": {
               "anyOf": [
                 {
-                  "type": "string",
-                  "nullable": true
+                  "type": "string"
                 },
                 {
                   "type": "object",
@@ -4521,13 +4520,11 @@
             },
             "example": [
               "private",
-              "commercial"
+              {
+                "value": "commercial",
+                "title": "Commercial customers"
+              }
             ]
-          },
-          "allow_any": {
-            "type": "boolean",
-            "description": "Allow arbitrary stored values in addition to the declared `options`. Absent means strict:\na variant may only pin a declared option.\n",
-            "example": false
           },
           "format": {
             "type": "string",
@@ -4750,7 +4747,7 @@
       "PinnedConditions": {
         "type": "object",
         "additionalProperties": true,
-        "description": "The situation this variant applies to: a flat map keyed by condition name, as the entity's\nschema declares them. A condition left out is a wildcard — the variant applies whatever the\ncontext says for it, which is what makes adding a condition to a schema non-breaking for the\nvariants that already exist.\n\nExact values only. Predicates are accepted in a resolve context and nowhere else, so that\nmatching is decided in exactly one place.\n\nValues are typed by their condition and stored canonicalized for that type: a `date` becomes\nmillisecond-precision UTC, a `daterange` an object carrying `from` and `until` where an empty\nstring is an open end, a `location` of format `zipcode` the postal code itself and one of\nformat `zipcode + town` an object carrying both. A `select` value must be a string, and must\nbe one the condition's `options` declare unless it sets `allow_any`.\n\n`default`, and any name beginning with `_`, are reserved for the server and cannot be pinned\nhere. Whether a variant is the entity's fallback is set through the request's `default` flag.\n",
+        "description": "The situation this variant applies to: a flat map keyed by condition name, as the entity's\nschema declares them. A condition left out is a wildcard — the variant applies whatever the\ncontext says for it, which is what makes adding a condition to a schema non-breaking for the\nvariants that already exist.\n\nExact values only. Predicates are accepted in a resolve context and nowhere else, so that\nmatching is decided in exactly one place.\n\nValues are typed by their condition and stored canonicalized for that type: a `date` becomes\nmillisecond-precision UTC, a `daterange` an object carrying `from` and `until` where an empty\nstring is an open end, a `location` of format `zipcode` the postal code itself and one of\nformat `zipcode + town` an object carrying both. A `select` value must be a string, and must\nbe one the condition's `options` declare.\n\n`default`, and any name beginning with `_`, are reserved for the server and cannot be pinned\nhere. Whether a variant is the entity's fallback is set through the request's `default` flag.\n",
         "example": {
           "postal_code": "46045"
         }
