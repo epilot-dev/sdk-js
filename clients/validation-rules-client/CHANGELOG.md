@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.6.0-rc.1
+
+### Minor Changes
+
+- Add `DocumentRuleType`: v2 validation rules for uploaded files with a `check.level` (basic, standard, advanced), `DocumentOperator` checks (fileTypeIn, sizeBelow, pageCountBetween, resolutionAtLeast, resolutionAtMost, isNotBlank, isNotPasswordProtected, meetsCriteria) and the `FileTypesValue` / `CriteriaValue` condition values
+
 ## 1.1.10
 
 ### Patch Changes
