@@ -62,6 +62,96 @@
         "responses": {}
       }
     },
+    "/v1/journey/configuration/{id}/revisions": {
+      "post": {
+        "operationId": "createJourneyRevision",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "get": {
+        "operationId": "listJourneyRevisions",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/journey/configuration/{id}/revisions/{revision_id}": {
+      "get": {
+        "operationId": "getJourneyRevision",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "revision_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/journey/configuration/{id}/publish": {
+      "post": {
+        "operationId": "publishJourneyRevision",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/journey/configuration/{id}/publish-state": {
+      "get": {
+        "operationId": "getJourneyPublishState",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v1/journey/configuration/{id}/environment": {
       "get": {
         "operationId": "getJourneyEnvironment",
