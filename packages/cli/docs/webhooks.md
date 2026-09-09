@@ -585,7 +585,7 @@ Replay a batch of webhook events
 ```bash
 epilot webhooks batchReplayEvents \
   -p configId=7hj28aasgag2gha2 \
-  -d '{"eventIds":["2f1b7cf8-ff55-4359-966f-e56f39a52c94","48c984bf-466b-470b-b743-d07cea168243"]}'
+  -d '{"eventIds":["2f1b7cf8-ff55-4359-966f-e56f39a52c94","48c984bf-466b-470b-b743-d07cea168243"],"reapply_transform":false}'
 ```
 
 Using positional args for path parameters:
@@ -674,7 +674,10 @@ epilot webhooks getEventById -p configId=7hj28aasgag2gha2 -p eventId=123e4567-e8
   "status": "succeeded",
   "http_method": "GET",
   "payload": "string",
-  "retry_attempt": 0
+  "original_payload": "string",
+  "retry_attempt": 0,
+  "can_reapply_transform": true,
+  "can_reapply_transform_reason": "available"
 }
 ```
 
@@ -695,18 +698,27 @@ Replay a webhook event
 | `configId` | path | string | Yes | Short uuid to identify the webhook configuration. |
 | `eventId` | path | string | Yes | Event id |
 
+**Request Body**
+
 **Sample Call**
 
 ```bash
 epilot webhooks replayEvent \
   -p configId=7hj28aasgag2gha2 \
-  -p eventId=123e4567-e89b-12d3-a456-426614174000
+  -p eventId=123e4567-e89b-12d3-a456-426614174000 \
+  -d '{"reapply_transform":false}'
 ```
 
 Using positional args for path parameters:
 
 ```bash
 epilot webhooks replayEvent 7hj28aasgag2gha2 123e4567-e89b-12d3-a456-426614174000
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot webhooks replayEvent -p configId=7hj28aasgag2gha2 -p eventId=123e4567-e89b-12d3-a456-426614174000
 ```
 
 With JSONata filter:
@@ -880,7 +892,10 @@ epilot webhooks getWebhookEventsV2 -p configId=7hj28aasgag2gha2 --jsonata 'data'
       "status": "succeeded",
       "http_method": "GET",
       "payload": "string",
-      "retry_attempt": 0
+      "original_payload": "string",
+      "retry_attempt": 0,
+      "can_reapply_transform": true,
+      "can_reapply_transform_reason": "available"
     }
   ],
   "next_cursor": {

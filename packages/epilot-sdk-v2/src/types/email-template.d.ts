@@ -993,6 +993,7 @@ export declare namespace Paths {
     }
 }
 
+
 export interface OperationMethods {
   /**
    * saveTemplate - saveTemplate
@@ -1158,6 +1159,7 @@ export interface PathsDictionary {
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
+
 
 export type ApproveAction = Components.Schemas.ApproveAction;
 export type ApprovedAt = Components.Schemas.ApprovedAt;

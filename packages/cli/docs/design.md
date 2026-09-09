@@ -39,6 +39,7 @@ epilot design getAllDesigns
 - [`getDesign`](#getdesign) — Search for a especific design owned by user organization
 - [`updateDesign`](#updatedesign) — Update a especific design owned by user organization
 - [`deleteDesign`](#deletedesign) — Search and delete for a especific design owned by user organization
+- [`duplicateDesign`](#duplicatedesign) — Duplicate an existing design owned by the user organization. The copy carries over the style, custom CSS and name (marke
 - [`getThemeFromDesign`](#getthemefromdesign) — Search for a especific design owned by user organization and parse them to a new or old theme
 - [`getFiles`](#getfiles) — List all files for the user organization bucket
 - [`uploadFile`](#uploadfile) — Upload a new file for the user organization bucket
@@ -610,6 +611,138 @@ With JSONata filter:
 ```bash
 epilot design deleteDesign -p designId=4a062990-a6a3-11eb-9828-4f3da7d4935a --jsonata '$'
 ```
+
+---
+
+### `duplicateDesign`
+
+Duplicate an existing design owned by the user organization. The copy carries over the style, custom CSS and name (marke
+
+`POST /v1/designs/{designId}/duplicate`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `designId` | path | string | Yes |  |
+
+**Sample Call**
+
+```bash
+epilot design duplicateDesign \
+  -p designId=4a062990-a6a3-11eb-9828-4f3da7d4935a
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot design duplicateDesign 4a062990-a6a3-11eb-9828-4f3da7d4935a
+```
+
+With JSONata filter:
+
+```bash
+epilot design duplicateDesign -p designId=4a062990-a6a3-11eb-9828-4f3da7d4935a --jsonata 'design'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "design": {
+    "id": "string",
+    "created_at": "2021-01-30T08:30:00Z",
+    "created_by": "string",
+    "edited": true,
+    "last_modified_at": "string",
+    "brand_id": "string",
+    "brand_name": "string",
+    "user": {
+      "emailaddress": "string",
+      "fullname": "string",
+      "name": "string",
+      "userid": "string"
+    },
+    "style_name": "string",
+    "style": {
+      "logo": {},
+      "palette": {},
+      "typography": {},
+      "shape": {},
+      "consumer": {}
+    },
+    "is_default": true,
+    "_manifest": ["string"],
+    "custom_theme": "string",
+    "use_custom_theme": true,
+    "design_tokens": {
+      "coupon": "string",
+      "cashback": "string",
+      "custom_css": "string",
+      "accent_color": "string",
+      "outline_color": "string",
+      "divider_color": "string",
+      "link_color": "string",
+      "link_hover_color": "string",
+      "font_size_scale": "xs",
+      "topbar_height": 0,
+      "topbar_logo_alignment": "flex-start",
+      "logo_size": 0,
+      "input_background": "string",
+      "input_border_color": "string",
+      "input_text_color": "string",
+      "input_label_color": "string",
+      "input_border_radius": 0,
+      "input_height": 0,
+      "input_variant": "outlined",
+      "button_primary_bg": "string",
+      "button_primary_text": "string",
+      "button_primary_hover_bg": "string",
+      "button_primary_hover_text": "string",
+      "button_outlined_border": "string",
+      "button_outlined_text": "string",
+      "button_outlined_hover_bg": "string",
+      "button_outlined_hover_text": "string",
+      "button_ghost_bg": "string",
+      "button_ghost_text": "string",
+      "button_ghost_hover_bg": "string",
+      "button_ghost_hover_text": "string",
+      "button_border_radius": 0,
+      "button_height": 0,
+      "card_background": "string",
+      "card_border_color": "string",
+      "card_variant": "shadow",
+      "summary_card_background": "string",
+      "toggle_selected_bg": "string",
+      "toggle_selected_text": "string",
+      "toggle_hover_bg": "string",
+      "toggle_hover_text": "string",
+      "toggle_border_color": "string",
+      "dropdown_hover_bg": "string",
+      "dropdown_hover_text": "string",
+      "dropdown_selected_bg": "string",
+      "dropdown_selected_text": "string",
+      "switch_unchecked_color": "string",
+      "switch_unchecked_bg": "string",
+      "switch_border_radius": 0,
+      "checkbox_unchecked_color": "string",
+      "checkbox_label_color": "string",
+      "radio_unchecked_color": "string",
+      "radio_label_color": "string",
+      "datepicker_selected_bg": "string",
+      "datepicker_selected_color": "string",
+      "datepicker_border_radius": 0,
+      "chip_background": "string",
+      "chip_hover_background": "string",
+      "chip_text_color": "string",
+      "chip_hover_text_color": "string"
+    }
+  }
+}
+```
+
+</details>
 
 ---
 

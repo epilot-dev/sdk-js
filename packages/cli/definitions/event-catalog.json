@@ -48,6 +48,39 @@
             }
           }
         }
+      },
+      "post": {
+        "operationId": "createCustomEvent",
+        "summary": "createCustomEvent",
+        "description": "Reserve an org-scoped custom event name and persist its immutable v1.0 draft definition.",
+        "tags": [
+          "Event Catalog"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCustomEventPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Custom event draft created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventConfig"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Name is reserved by a built-in or existing org event"
+          }
+        }
       }
     },
     "/v1/events/{event_name}": {
@@ -123,6 +156,127 @@
           },
           "404": {
             "description": "Event not found"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deprecateCustomEvent",
+        "summary": "deprecateCustomEvent",
+        "description": "Soft-deprecate an org-scoped custom event. Definitions and v1.0 history remain readable.",
+        "tags": [
+          "Event Catalog"
+        ],
+        "parameters": [
+          {
+            "name": "event_name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Custom event deprecated"
+          },
+          "404": {
+            "description": "Event not found"
+          },
+          "409": {
+            "description": "Built-ins cannot be deprecated or lifecycle cannot transition"
+          }
+        }
+      }
+    },
+    "/v1/events/{event_name}:preview": {
+      "post": {
+        "operationId": "previewCustomEvent",
+        "summary": "previewCustomEvent",
+        "description": "Assemble and fully validate a persisted custom-event draft without publishing it.",
+        "tags": [
+          "Event Catalog"
+        ],
+        "parameters": [
+          {
+            "name": "event_name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TriggerEventPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Deterministic preview result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PreviewEventResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Projection or schema validation failed"
+          },
+          "404": {
+            "description": "Custom event not found"
+          }
+        }
+      }
+    },
+    "/v1/events/{event_name}:publish": {
+      "post": {
+        "operationId": "publishCustomEventDefinition",
+        "summary": "publishCustomEventDefinition",
+        "description": "Conditionally activate an immutable custom-event v1.0 definition.",
+        "tags": [
+          "Event Catalog"
+        ],
+        "parameters": [
+          {
+            "name": "event_name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PublishCustomEventPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Published event configuration",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventConfig"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Definition is not a draft or base publication choice is invalid"
           }
         }
       }
@@ -437,7 +591,7 @@
       "post": {
         "operationId": "triggerEvent",
         "summary": "triggerEvent",
-        "description": "Explicitly trigger an event by providing input field values and an optional entity seed\nfor graph hydration. The event must be enabled for the organization.\n\n- For events with an entity_graph, a seed (entity_id + node_id) is required\n- For events without an entity_graph, only fields are needed\n- Entity operation context fields (operation, trigger_entity, activity_id, activity_type)\n  are not included when triggering via API\n",
+        "description": "Explicitly trigger an event by providing input field values and an optional entity seed\nfor graph hydration. The event must be enabled for the organization.\n\n- For events with an entity_graph, a seed (entity_id + node_id) is required\n- For events without an entity_graph, only fields are needed\n- Entity operation context fields (operation, trigger_entity, activity_id, activity_type)\n  are not included when triggering via API\n- Events marked `automation_trigger_only` require `_trigger_source_type: automation` and a\n  stable execution/action ID in `_trigger_source`; retries with that ID return the same\n  logical event, including while durable delivery is pending\n",
         "tags": [
           "Event Catalog"
         ],
@@ -464,7 +618,7 @@
         },
         "responses": {
           "200": {
-            "description": "Event triggered successfully",
+            "description": "Event published successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -481,6 +635,33 @@
           },
           "404": {
             "description": "Event not found"
+          },
+          "409": {
+            "description": "The Automation trigger source was already used with different trigger input, including a different entity seed"
+          },
+          "425": {
+            "description": "The hydrated entity graph is not ready yet, another request currently owns the\nidempotency lease, or a durably queued event (including an already-requested redrive)\nis awaiting publication. Automation must retry with the same trigger source and may\nadvance only after a 200 response.\n",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds before the Automation action should retry",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Durable delivery exhausted its bounded automatic redrives. The same logical event is\nretained and no new event is created. An API retry with the same trigger source\nrequests a redrive of the existing Standard workflow from its failed task checkpoint\nand receives this retryable response. Subsequent retries receive 425 while that\nredrive is pending or running.\n",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds before the Automation action should retry",
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            }
           }
         }
       }
@@ -593,6 +774,51 @@
             "description": "Whether this event can be explicitly triggered by automations.\nWhen true, the event will appear in the automation builder as a\n\"Trigger Event\" action option.\nDefaults to false if not specified.\n",
             "default": false,
             "example": true
+          },
+          "automation_trigger_only": {
+            "type": "boolean",
+            "readOnly": true,
+            "description": "Whether explicit triggering is restricted to Automation. When true, callers must pass\n`_trigger_source_type: automation` and a stable `_trigger_source`. The trigger uses\nstrict entity readiness validation and the durable Automation outbox.\nRequires `automation_trigger: true` and cannot be combined with `entity_operation`.\n",
+            "default": false,
+            "example": true
+          },
+          "automation_trigger_seed_node": {
+            "type": "string",
+            "readOnly": true,
+            "description": "Required entity-graph seed node for an Automation-only trigger. When configured, an\nexplicit trigger using any other node is rejected before hydration.\n",
+            "example": "ticket"
+          },
+          "event_origin": {
+            "type": "string",
+            "readOnly": true,
+            "enum": [
+              "builtin",
+              "custom"
+            ],
+            "description": "Definition ownership. Built-ins always win a name collision."
+          },
+          "mapping": {
+            "$ref": "#/components/schemas/EventMapping"
+          },
+          "lineage": {
+            "$ref": "#/components/schemas/CustomEventLineage"
+          },
+          "success_criteria": {
+            "type": "array",
+            "description": "Org-defined success criteria for this event: the entity attributes that an\norganization considers must be captured for an event change request to be\ntreated as complete (e.g. for telephony / self-service flows).\n\nAdvisory metadata — event-catalog does NOT require an org to define any and\ndoes NOT enforce them when an event is triggered or published. The org may\ndefine none (empty array or omitted). When provided, each entry is validated\nfor well-formedness on write (see SuccessCriterion).\n",
+            "items": {
+              "$ref": "#/components/schemas/SuccessCriterion"
+            },
+            "example": [
+              {
+                "entity_schema": "contract",
+                "attribute": "installment_amount"
+              },
+              {
+                "entity_schema": "billing_account",
+                "attribute": "due_date"
+              }
+            ]
           }
         }
       },
@@ -612,16 +838,186 @@
           }
         ]
       },
-      "UpdateEventPayload": {
-        "description": "Payload for updating an event configuration.\nAccepts the same fields as EventConfig (all optional for PATCH).\nCurrently `enabled` and `auto_trigger` fields are processed.\n",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/EventConfigBase"
+      "CreateCustomEventPayload": {
+        "type": "object",
+        "description": "Complete immutable custom-event v1.0 definition. Publication is a separate conditional action.",
+        "properties": {
+          "event_name": {
+            "type": "string",
+            "pattern": "^[A-Z][A-Za-z0-9]{2,79}$"
           },
-          {
-            "type": "object"
+          "event_title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "event_description": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "event_tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "schema_fields": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/CustomSchemaField"
+            }
+          },
+          "entity_graph": {
+            "$ref": "#/components/schemas/GraphDefinition"
+          },
+          "entity_operation": {
+            "$ref": "#/components/schemas/EntityOperationTrigger"
+          },
+          "automation_trigger": {
+            "type": "boolean",
+            "default": true
+          },
+          "mapping": {
+            "$ref": "#/components/schemas/EventMapping"
+          },
+          "lineage": {
+            "$ref": "#/components/schemas/CustomEventLineage"
+          },
+          "example": {
+            "type": "object",
+            "additionalProperties": true
           }
+        },
+        "required": [
+          "event_name",
+          "event_title",
+          "schema_fields"
         ]
+      },
+      "EventMapping": {
+        "type": "object",
+        "description": "Guided mappings use schema_fields graph_source expressions; raw mode evaluates one JSONata object transform.",
+        "properties": {
+          "mode": {
+            "type": "string",
+            "enum": [
+              "guided",
+              "jsonata"
+            ],
+            "default": "guided"
+          },
+          "jsonata": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 20000
+          }
+        },
+        "required": [
+          "mode"
+        ]
+      },
+      "CustomEventLineage": {
+        "type": "object",
+        "description": "Optional catalog lineage to a separately named base event. It does not replace the base event.",
+        "properties": {
+          "base_event_name": {
+            "type": "string"
+          },
+          "base_event_version": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "base_event_name",
+          "base_event_version"
+        ]
+      },
+      "PurposeFilterSnapshot": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "display_name": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "id",
+          "display_name"
+        ]
+      },
+      "PublishCustomEventPayload": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "default": true
+          },
+          "auto_trigger": {
+            "type": "boolean",
+            "default": true
+          },
+          "base_auto_trigger_enabled": {
+            "type": "boolean",
+            "description": "Optional publication choice. False disables only the named lineage base event's org auto-trigger overlay."
+          }
+        }
+      },
+      "ValidationIssue": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "path",
+          "message"
+        ]
+      },
+      "PreviewEventResponse": {
+        "type": "object",
+        "properties": {
+          "payload": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ValidationIssue"
+            }
+          }
+        },
+        "required": [
+          "payload",
+          "errors"
+        ]
+      },
+      "UpdateEventPayload": {
+        "type": "object",
+        "description": "Mutable org activation overlay. Immutable event definition fields are not accepted.",
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "auto_trigger": {
+            "type": "boolean"
+          },
+          "success_criteria": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SuccessCriterion"
+            }
+          }
+        },
+        "additionalProperties": false
       },
       "PrimitiveField": {
         "type": "object",
@@ -683,6 +1079,17 @@
           "items"
         ]
       },
+      "CustomSchemaField": {
+        "description": "Custom v1 fields support JSON Schema values and context entities; attachment semantics are built-in-only.",
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/PrimitiveField"
+          },
+          {
+            "$ref": "#/components/schemas/ContextEntity"
+          }
+        ]
+      },
       "SchemaField": {
         "oneOf": [
           {
@@ -694,6 +1101,26 @@
           {
             "$ref": "#/components/schemas/AttachmentField"
           }
+        ]
+      },
+      "SuccessCriterion": {
+        "type": "object",
+        "description": "A single org-defined success criterion: an entity attribute that must be captured\nfor this event's change request to be considered complete.\n\nIdentity is the entity schema plus the attribute name — mirroring the\nEntityOperationTrigger `schema`/`attribute` vocabulary. On write (PATCH), both\n`attribute` and `entity_schema` are required and `entity_schema` must match the\n`schema` of a node in the event's `entity_graph` (else the request is rejected) —\nthis prevents unsatisfiable criteria. The criteria themselves are advisory and are\nnever enforced when an event is triggered or published.\n",
+        "properties": {
+          "entity_schema": {
+            "type": "string",
+            "description": "Entity schema slug the attribute belongs to (matches a node schema in the event's entity_graph).",
+            "example": "contract"
+          },
+          "attribute": {
+            "type": "string",
+            "description": "Attribute name on the entity schema.",
+            "example": "installment_amount"
+          }
+        },
+        "required": [
+          "entity_schema",
+          "attribute"
         ]
       },
       "CommonEventMetadata": {
@@ -878,6 +1305,24 @@
           ]
         }
       },
+      "InlineDowngradeStep": {
+        "type": "object",
+        "description": "One step of an event's inline `_downgrades` chain. Maps the current-version payload to the previous version via a JSONata expression. Stamped by Event Catalog at publish time; executed by consumers during walk-back, never by EC itself.",
+        "properties": {
+          "to": {
+            "type": "string",
+            "description": "Version label this step downgrades to (the previous version)."
+          },
+          "jsonata": {
+            "type": "string",
+            "description": "JSONata expression mapping the current-shape payload to the previous-shape payload."
+          }
+        },
+        "required": [
+          "to",
+          "jsonata"
+        ]
+      },
       "Event": {
         "type": "object",
         "description": "An event instance in the event history",
@@ -920,6 +1365,20 @@
           "_ack_id": {
             "type": "string",
             "description": "Unique acknowledgment tracking ID for the event.\nUsed to track event delivery and processing status.\n"
+          },
+          "_downgrades": {
+            "type": "array",
+            "description": "Inline downgrade chain stamped by Event Catalog at publish time, ordered newest-to-oldest. Present ONLY on multi-version events. Internal versioning transport: consumers (e.g. svc-webhooks) walk the payload back to a pinned version using these JSONata steps, then strip the field before delivery -- end customers never receive it.",
+            "items": {
+              "$ref": "#/components/schemas/InlineDowngradeStep"
+            }
+          },
+          "_automation_chain": {
+            "type": "array",
+            "description": "Ordered automation flow ids that caused this event (at most 100), propagated verbatim from the trigger input or the originating entity operation. Internal loop-prevention transport for automation-api; svc-webhooks strips it before delivery.",
+            "items": {
+              "type": "string"
+            }
           }
         },
         "required": [
@@ -1146,6 +1605,13 @@
               "Kündigung",
               "Umzug/Auszug"
             ]
+          },
+          "purpose_filters": {
+            "type": "array",
+            "description": "Stable purpose IDs plus immutable display-name snapshots for custom events.",
+            "items": {
+              "$ref": "#/components/schemas/PurposeFilterSnapshot"
+            }
           }
         },
         "required": [
@@ -1238,6 +1704,14 @@
       "TriggerEventPayload": {
         "type": "object",
         "description": "Payload for explicitly triggering an event via API",
+        "example": {
+          "seed": {
+            "entity_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+            "node_id": "ticket"
+          },
+          "_trigger_source_type": "automation",
+          "_trigger_source": "execution-id/action-id"
+        },
         "properties": {
           "seed": {
             "type": "object",
@@ -1276,7 +1750,14 @@
           },
           "_trigger_source": {
             "type": "string",
-            "description": "Identifier of the specific trigger source.\nExamples: user ID, automation execution ID, activity ID, portal user email\nDefaults to the calling user ID if not specified.\n"
+            "description": "Identifier of the specific trigger source.\nExamples: user ID, automation execution ID, activity ID, portal user email\nDefaults to the calling user ID if not specified.\nRequired for events marked `automation_trigger_only` and must remain stable across\naction retries.\n"
+          },
+          "_automation_chain": {
+            "type": "array",
+            "description": "Ordered automation flow ids that caused this trigger (at most 100); propagated verbatim onto the published event for automation loop prevention.",
+            "items": {
+              "type": "string"
+            }
           }
         }
       },
@@ -1286,7 +1767,7 @@
         "properties": {
           "success": {
             "type": "boolean",
-            "description": "Whether the event was triggered successfully"
+            "description": "Whether the event was published successfully"
           },
           "event_id": {
             "type": "string",
@@ -1294,7 +1775,7 @@
           },
           "event_bridge_event_id": {
             "type": "string",
-            "description": "EventBridge event ID from publishing"
+            "description": "EventBridge event ID when synchronous delivery or a completed retry provides it"
           }
         },
         "required": [

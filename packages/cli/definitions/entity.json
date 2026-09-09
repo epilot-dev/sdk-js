@@ -2,7 +2,7 @@
   "openapi": "3.0.2",
   "info": {
     "title": "Entity API",
-    "version": "2.9.0",
+    "version": "2.10.0",
     "description": "Flexible data layer for epilot Entities.\n\nUse this API configure and access your business objects like Contacts, Opportunities and Products.\n\n[Feature Documentation](https://docs.epilot.io/docs/entities/flexible-entities)\n"
   },
   "tags": [
@@ -75,7 +75,8 @@
           {
             "in": "query",
             "name": "latest",
-            "description": "When true, return the latest version instead of the frozen version for frozen schemas.",
+            "deprecated": true,
+            "description": "No longer has any effect: schema freezing is retired and the latest version is always returned.\n",
             "schema": {
               "type": "boolean",
               "default": false
@@ -161,7 +162,8 @@
           {
             "in": "query",
             "name": "latest",
-            "description": "When true, return the latest version instead of the frozen version for frozen schemas.",
+            "deprecated": true,
+            "description": "No longer has any effect: schema freezing is retired and the latest version is always returned.\n",
             "schema": {
               "type": "boolean",
               "default": false
@@ -223,7 +225,7 @@
       "get": {
         "operationId": "getSchema",
         "summary": "getSchema",
-        "description": "By default gets the current version of the Schema (frozen version if frozen, otherwise latest).\nPass ?latest=true to get the latest version when the schema is frozen.\nPass ?id= to get a specific version by ID.\n",
+        "description": "Gets the latest version of the Schema.\nPass ?id= to get a specific version by ID.\n",
         "tags": [
           "Schemas"
         ],
@@ -241,7 +243,8 @@
           {
             "in": "query",
             "name": "latest",
-            "description": "When true, return the latest version instead of the frozen version for frozen schemas.",
+            "deprecated": true,
+            "description": "No longer has any effect: schema freezing is retired and the latest version is always returned.\n",
             "schema": {
               "type": "boolean",
               "default": false
@@ -267,7 +270,7 @@
       "put": {
         "operationId": "putSchema",
         "summary": "putSchema",
-        "description": "Create or update a schema with a new version.\nWhen the schema is frozen, writes update the latest version without affecting the frozen version.\n",
+        "description": "Create or update a schema with a new version.\n",
         "tags": [
           "Schemas"
         ],
@@ -792,7 +795,8 @@
                       "type": "boolean"
                     },
                     "frozen_version": {
-                      "description": "The version ID that is currently frozen, if any",
+                      "deprecated": true,
+                      "description": "No longer returned: schema freezing is retired.\n",
                       "allOf": [
                         {
                           "$ref": "#/components/schemas/SchemaId"
@@ -815,7 +819,8 @@
       "post": {
         "operationId": "freezeSchema",
         "summary": "freezeSchema",
-        "description": "Freeze a schema at its current version, or at a specific version.\nWhen frozen, getSchema returns the frozen version by default.\nNew edits via putSchema update the latest version without affecting the frozen version.\n",
+        "deprecated": true,
+        "description": "Deprecated no-op: schema freezing is retired and every read returns the latest version.\nReturns the latest version of the schema unchanged. This endpoint will be removed.\n",
         "tags": [
           "Schemas"
         ],
@@ -864,7 +869,8 @@
       "post": {
         "operationId": "unfreezeSchema",
         "summary": "unfreezeSchema",
-        "description": "Unfreeze a schema. Promotes the latest version to the current version for all users.\n",
+        "deprecated": true,
+        "description": "Deprecated: schema freezing is retired. Cleans up a leftover frozen pointer by promoting the\nlatest version to the current version, and succeeds when there is nothing to clean up.\nThis endpoint will be removed.\n",
         "tags": [
           "Schemas"
         ],
@@ -1420,6 +1426,9 @@
             "$ref": "#/components/parameters/HydrateEntitiesQueryParam"
           },
           {
+            "$ref": "#/components/parameters/AnonymizeQueryParam"
+          },
+          {
             "in": "query",
             "name": "fields",
             "description": "List of entity fields to include in results",
@@ -1568,6 +1577,9 @@
           },
           {
             "$ref": "#/components/parameters/HydrateEntitiesQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/AnonymizeQueryParam"
           }
         ],
         "responses": {
@@ -1777,6 +1789,9 @@
         ],
         "parameters": [
           {
+            "$ref": "#/components/parameters/AnonymizeQueryParam"
+          },
+          {
             "name": "input",
             "in": "query",
             "description": "Input to autocomplete",
@@ -1944,6 +1959,9 @@
           "Activity"
         ],
         "parameters": [
+          {
+            "$ref": "#/components/parameters/AnonymizeQueryParam"
+          },
           {
             "$ref": "#/components/parameters/ActivityIdPathParam"
           },
@@ -2141,6 +2159,9 @@
         ],
         "parameters": [
           {
+            "$ref": "#/components/parameters/AnonymizeQueryParam"
+          },
+          {
             "$ref": "#/components/parameters/EntitySlugPathParam"
           },
           {
@@ -2173,6 +2194,9 @@
           "Activity"
         ],
         "parameters": [
+          {
+            "$ref": "#/components/parameters/AnonymizeQueryParam"
+          },
           {
             "$ref": "#/components/parameters/EntitySlugPathParam"
           },
@@ -2324,6 +2348,9 @@
           },
           {
             "$ref": "#/components/parameters/HydrateEntitiesQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/AnonymizeQueryParam"
           },
           {
             "$ref": "#/components/parameters/IncludeReverseQueryParam"
@@ -2552,6 +2579,9 @@
             "$ref": "#/components/parameters/HydrateEntitiesQueryParam"
           },
           {
+            "$ref": "#/components/parameters/AnonymizeQueryParam"
+          },
+          {
             "in": "query",
             "name": "query",
             "description": "Input to filter search results",
@@ -2619,6 +2649,9 @@
           },
           {
             "$ref": "#/components/parameters/HydrateEntitiesQueryParam"
+          },
+          {
+            "$ref": "#/components/parameters/AnonymizeQueryParam"
           },
           {
             "$ref": "#/components/parameters/IncludeReverseDeprecatedQueryParam"
@@ -2940,6 +2973,69 @@
         }
       }
     },
+    "/v1/entity:abortImport": {
+      "post": {
+        "operationId": "abortEntityImport",
+        "summary": "Abort a running entity import",
+        "description": "Asks a running import to stop. Rows already imported are **kept** - this is a stop, not a\nrollback - and the job still produces its result reports for everything that landed before\nthe stop, then reaches the terminal status `CANCELLED`.\n\nThe stop is cooperative: the worker notices the request at its next batch boundary, so the\njob typically reaches `CANCELLED` within seconds. Poll `POST /v1/entity:import` with the\n`job_id` as usual to observe it.\n\nIdempotent - aborting an already-aborted or already-finished job is not an error.\n",
+        "tags": [
+          "Import-Export"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "job_id",
+            "required": true,
+            "description": "The ID of the import job to stop.",
+            "schema": {
+              "$ref": "#/components/schemas/ExportJobId"
+            }
+          },
+          {
+            "in": "query",
+            "name": "schema",
+            "required": true,
+            "description": "Slug of the schema being imported, used to authorize the caller.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "The stop was requested. The job is still running until the worker picks the request up.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "description": "The job status at the time of the request."
+                    },
+                    "jobPollId": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "No such import job"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequestsError"
+          }
+        }
+      }
+    },
     "/v1/entity/views": {
       "get": {
         "operationId": "listSavedViews",
@@ -2988,6 +3084,15 @@
               "default": 80,
               "minimum": 1,
               "maximum": 250
+            }
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "description": "Free-text search on the saved view name (case-insensitive)",
+            "required": false,
+            "schema": {
+              "type": "string"
             }
           },
           {
@@ -3158,7 +3263,10 @@
         ],
         "responses": {
           "200": {
-            "description": "List of all available saved views"
+            "description": "The saved view was deleted"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
           },
           "429": {
             "$ref": "#/components/responses/TooManyRequestsError"
@@ -4967,6 +5075,63 @@
                     "example": true
                   }
                 }
+              },
+              "grid_layout": {
+                "type": "object",
+                "deprecated": true,
+                "description": "Superseded by `widget_widths`. A whole-grid layout preset that assigned each widget a width by its POSITION, so a widget that rendered nothing shifted every width after it. Neither the entity app nor the entity builder reads it any more; values stored before it was replaced are left in place rather than migrated.",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "Identifier of the chosen grid-layout preset."
+                  },
+                  "columns": {
+                    "type": "number",
+                    "description": "Number of columns in the widget grid."
+                  },
+                  "cells": {
+                    "type": "array",
+                    "description": "Per-cell column span, positionally paired with the widgets in order.",
+                    "items": {
+                      "type": "number"
+                    }
+                  }
+                }
+              },
+              "widget_order": {
+                "type": "array",
+                "description": "Ordered list of widget ids controlling the entity-details widget-grid order. Each id is a capability widget's `component` (or `summary` for the synthesized summary card); widgets absent from the list keep their natural order at the end.",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "widget_visibility": {
+                "type": "object",
+                "description": "Per-widget on/off state for the entity-details widget grid, keyed by widget id (a capability widget's `component`, or `summary` for the synthesized summary card). Holds only the admin's deviations from each widget's declared default: a widget absent from this map falls back to its ui_hook `default_visible`, and then to visible. Do not seed this map from migrations — doing so would freeze today's defaults into the schema.",
+                "additionalProperties": {
+                  "type": "boolean"
+                },
+                "example": {
+                  "next_best_action": true,
+                  "address_map": false
+                }
+              },
+              "widget_widths": {
+                "type": "object",
+                "description": "Per-widget width in the entity-details widget grid, keyed by widget id (a capability widget's `component`, or `summary` for the synthesized summary card). Spans a 12-column grid: `one_third_width` = 4, `half_width` = 6, `two_third_width` = 8, `full_width` = 12. Holds only the admin's deviations from each widget's declared default: a widget absent from this map falls back to its ui_hook `default_width`, and then to `full_width`. Do not seed this map from migrations — doing so would freeze today's defaults into the schema. Replaces the positional `grid_layout` preset.",
+                "additionalProperties": {
+                  "type": "string",
+                  "enum": [
+                    "one_third_width",
+                    "half_width",
+                    "two_third_width",
+                    "full_width"
+                  ]
+                },
+                "example": {
+                  "address_map": "full_width",
+                  "recent_communications": "one_third_width"
+                }
               }
             }
           },
@@ -5094,6 +5259,14 @@
             "items": {
               "$ref": "#/components/schemas/GroupHeadline"
             }
+          },
+          "conditions": {
+            "type": "array",
+            "nullable": true,
+            "description": "Dimensions that conditional variants of this entity type are keyed by.\n\nAbsent or `null` means entities of this type are not conditional. Attributes whose\nvalues a variant may override are marked with `overridable_attribute`.\n",
+            "items": {
+              "$ref": "#/components/schemas/ConditionDefinition"
+            }
           }
         },
         "required": [
@@ -5133,11 +5306,13 @@
                 }
               },
               "frozen": {
-                "description": "Indicates this schema is currently frozen. Present when the returned version is the frozen version.",
+                "deprecated": true,
+                "description": "No longer returned: schema freezing is retired.\n",
                 "type": "boolean"
               },
               "latest": {
-                "description": "Indicates this is the latest version of the schema. Both frozen and latest can be true if no changes were made since freezing.",
+                "deprecated": true,
+                "description": "No longer returned: every read returns the latest version.\n",
                 "type": "boolean"
               },
               "_summary": {
@@ -5523,6 +5698,11 @@
             "type": "boolean",
             "default": false
           },
+          "overridable_attribute": {
+            "type": "boolean",
+            "default": false,
+            "description": "Allow conditional variants of the entity to override this attribute's value.\nOnly meaningful on schemas that declare `conditions`. Unflagged attributes stay\nfixed on the base entity.\n"
+          },
           "default_value": {},
           "group": {
             "description": "Which group the attribute should appear in. Accepts group ID or group name",
@@ -5548,6 +5728,14 @@
           "render_condition": {
             "type": "string",
             "description": "Defines the conditional rendering expression for showing this field.\nWhen a valid expression is parsed, their evaluation defines the visibility of this attribute.\nNote: Empty or invalid expression have no effect on the field visibility.\n"
+          },
+          "data_classification": {
+            "type": "string",
+            "enum": [
+              "public",
+              "pii"
+            ],
+            "description": "Data classification of the attribute, used by anonymized responses (`?anonymize=true` or tokens minted with `anonymize: true`).\n\n- `pii`: the attribute value is always anonymized in anonymized responses (use to opt in free-text fields containing personal data)\n- `public`: the attribute value is never anonymized (use to opt out fields matched by built-in defaults, e.g. non-personal identifiers)\n\nWhen unset, built-in defaults apply based on the attribute type (email, phone, address, payment) and a curated list of well-known PII fields.\n"
           },
           "_purpose": {
             "type": "array",
@@ -7115,11 +7303,162 @@
           }
         ]
       },
+      "BaseConditionDefinition": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Stable identity of the condition, generated by the client when the condition is\ncreated. It is what makes a rename distinguishable from a remove + add, so it must\nbe round-tripped unchanged for the lifetime of the condition.\n",
+            "example": "d5839b94-ba20-4225-a78e-76951d352bd6"
+          },
+          "name": {
+            "type": "string",
+            "pattern": "^[a-z0-9_]+$",
+            "description": "The key variant values are stored under. Unique within the schema and immutable\nonce the condition has been saved.\n",
+            "example": "delivery_area"
+          },
+          "label": {
+            "type": "string",
+            "description": "Display label. Always editable.",
+            "example": "Delivery Area"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "label"
+        ]
+      },
+      "ScalarConditionDefinition": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseConditionDefinition"
+          },
+          {
+            "type": "object",
+            "description": "A condition whose value is a plain scalar, with no further configuration.",
+            "properties": {
+              "type": {
+                "type": "string",
+                "description": "Immutable once the condition has been saved.",
+                "enum": [
+                  "string",
+                  "number",
+                  "date",
+                  "daterange",
+                  "boolean"
+                ]
+              }
+            },
+            "required": [
+              "type"
+            ]
+          }
+        ]
+      },
+      "SelectConditionDefinition": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseConditionDefinition"
+          },
+          {
+            "type": "object",
+            "description": "A condition whose value is one of a fixed set of options.",
+            "properties": {
+              "type": {
+                "type": "string",
+                "description": "Immutable once the condition has been saved.",
+                "enum": [
+                  "select"
+                ]
+              },
+              "values": {
+                "type": "array",
+                "description": "Selectable options. May be empty while the condition is being configured.",
+                "items": {
+                  "type": "string"
+                },
+                "example": [
+                  "12_months",
+                  "24_months"
+                ]
+              }
+            },
+            "required": [
+              "type"
+            ]
+          }
+        ]
+      },
+      "LocationConditionDefinition": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseConditionDefinition"
+          },
+          {
+            "type": "object",
+            "description": "A condition whose value identifies a place.",
+            "properties": {
+              "type": {
+                "type": "string",
+                "description": "Immutable once the condition has been saved.",
+                "enum": [
+                  "location"
+                ]
+              },
+              "format": {
+                "type": "string",
+                "description": "The shape of the location value. Immutable once the condition has been saved.",
+                "enum": [
+                  "zipcode",
+                  "zipcode_town"
+                ]
+              }
+            },
+            "required": [
+              "type"
+            ]
+          }
+        ]
+      },
+      "ConditionDefinition": {
+        "description": "One dimension that conditional variants of an entity type are keyed by. `type`\ndiscriminates the variants: only a `select` condition carries `values`, and only a\n`location` condition carries `format`.\n",
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/ScalarConditionDefinition"
+          },
+          {
+            "$ref": "#/components/schemas/SelectConditionDefinition"
+          },
+          {
+            "$ref": "#/components/schemas/LocationConditionDefinition"
+          }
+        ]
+      },
       "EntitySlug": {
         "description": "URL-friendly identifier for the entity schema",
         "type": "string",
         "pattern": "^[a-zA-Z0-9_-]+$",
         "example": "contact"
+      },
+      "AdjustInstallmentCapabilityConfig": {
+        "description": "Configuration for adjusting a contract installment through a Journey.",
+        "type": "object",
+        "additionalProperties": false,
+        "example": {
+          "journey_id": "adjust-installment-flow"
+        },
+        "required": [
+          "journey_id"
+        ],
+        "properties": {
+          "journey_id": {
+            "type": "string",
+            "minLength": 1,
+            "description": "ID of the Flow Journey to open when adjusting the installment."
+          }
+        }
       },
       "EntityCapability": {
         "description": "Capabilities the Entity has. Turn features on/off for entities.",
@@ -7146,6 +7485,11 @@
               "$ref": "#/components/schemas/Attribute"
             }
           },
+          "overridable_attribute": {
+            "type": "boolean",
+            "default": false,
+            "description": "Allow conditional variants of the entity to override the values managed by this\ncapability. Only meaningful on schemas that declare `conditions` and on capabilities\nthat render an attribute group (`EntityAttributes:Group` ui hook), e.g. pricing tiers.\nAttributes carried by the capability opt in individually via their own\n`overridable_attribute` flag.\n"
+          },
           "_purpose": {
             "type": "array",
             "items": {
@@ -7166,6 +7510,9 @@
             "type": "string",
             "description": "ID of the app if the capability is provided by an app",
             "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "adjust_installment": {
+            "$ref": "#/components/schemas/AdjustInstallmentCapabilityConfig"
           },
           "ui_config": {
             "type": "object",
@@ -7250,6 +7597,27 @@
                   "required": [
                     "action"
                   ]
+                },
+                "default_visible": {
+                  "type": "boolean",
+                  "description": "Whether this widget is switched on by default for entity types that have the capability. Only meaningful on the `EntityDetailsV2:Widget` hook. Defaults to true when omitted. An admin's explicit choice in the entity builder is stored in the schema's `ui_config.widget_visibility` and wins over this.",
+                  "example": false
+                },
+                "default_width": {
+                  "type": "string",
+                  "enum": [
+                    "one_third_width",
+                    "half_width",
+                    "two_third_width",
+                    "full_width"
+                  ],
+                  "description": "How wide this widget is by default in the entity-details widget grid. Only meaningful on the `EntityDetailsV2:Widget` and `EntityDetailsV2:Header` hooks. Defaults to `full_width` when omitted — deliberately unlike the attribute layout default of `half_width`, because a full-width widget can never leave a hole in a row. An admin's explicit choice in the entity builder is stored in the schema's `ui_config.widget_widths` and wins over this.",
+                  "example": "half_width"
+                },
+                "pricing_tier_setting": {
+                  "type": "string",
+                  "description": "The pricing-tier settings key an organisation must have enabled to use this widget. Omit for widgets available to everyone. Resolved against `GET /v2/pricing-tiers/me` as `override_settings[key].enabled ?? settings[key].enabled`. Note this is commercial packaging enforced in the UI, not a security control — the key must also be added to the pricing tier settings list in epilot-admin-portal, or it can never be switched on for a tier.",
+                  "example": "entity_address_maps"
                 }
               },
               "required": [
@@ -8090,6 +8458,7 @@
               "from": {},
               "size": {},
               "hydrate": {},
+              "anonymize": {},
               "fields": {},
               "aggs": {},
               "include_deleted": {},
@@ -8174,6 +8543,7 @@
               "from": {},
               "size": {},
               "hydrate": {},
+              "anonymize": {},
               "fields": {},
               "aggs": {},
               "include_deleted": {},
@@ -8396,6 +8766,11 @@
           "hydrate": {
             "type": "boolean",
             "description": "When true, enables entity hydration to resolve nested $relation & $relation_ref references in-place.",
+            "default": false
+          },
+          "anonymize": {
+            "type": "boolean",
+            "description": "When true, anonymizes PII in the response: identifiers are replaced with deterministic pseudonyms,\naddresses are generalized and well-known free-text fields are redacted.\nAnonymization is forced (regardless of this parameter) when the access token was created with `anonymize: true`.\n",
             "default": false
           },
           "fields": {
@@ -8626,6 +9001,39 @@
                 "description": "Optional array of field names to include in the hydrated entity response for this node.\nWhen specified, only the requested fields plus required internal fields (_id, _schema, _org) will be returned.\nOnly applies when hydrate=true.\n"
               }
             ]
+          },
+          "filter": {
+            "type": "array",
+            "description": "Narrows this node's traversal results to entities matching every filter (AND semantics). Useful for\ndisambiguating among multiple entities reachable via the same graph edge.\n",
+            "items": {
+              "$ref": "#/components/schemas/GraphNodeFilter"
+            }
+          }
+        }
+      },
+      "GraphNodeFilter": {
+        "type": "object",
+        "description": "Entities are included in this node's result only if `attribute` exactly equals the literal `value`.",
+        "required": [
+          "attribute",
+          "value"
+        ],
+        "properties": {
+          "attribute": {
+            "type": "string",
+            "description": "Entity attribute name to match against. Must be a plain attribute name, not an Elasticsearch field path.",
+            "example": "order_number"
+          },
+          "value": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SearchFilterValue"
+              },
+              {
+                "description": "Literal value the attribute must exactly equal for the entity to be included in this node's result."
+              }
+            ],
+            "example": "OR-113"
           }
         }
       },
@@ -9030,6 +9438,9 @@
               }
             }
           },
+          "source_context": {
+            "$ref": "#/components/schemas/EntityOperationSourceContext"
+          },
           "_workflow_origin": {
             "type": "object",
             "description": "Internal property for workflow origin tracking and infinite loop prevention.\nPopulated when an entity update originates from a workflow execution.\nThis allows downstream automation services to prevent circular triggering.\n",
@@ -9043,12 +9454,72 @@
                 "description": "The flow template ID - used to detect and prevent circular triggering"
               }
             }
+          },
+          "_automation_chain": {
+            "type": "array",
+            "description": "Ordered automation flow ids that caused this change; used to break multi-automation trigger loops.",
+            "items": {
+              "type": "string"
+            }
           }
         },
         "required": [
           "entity",
           "org",
           "operation"
+        ]
+      },
+      "EntityOperationSourceContext": {
+        "type": "object",
+        "description": "Billing and audit source context for the operation event.",
+        "properties": {
+          "source": {
+            "type": "string",
+            "description": "Normalized source bucket for the operation.",
+            "enum": [
+              "portal",
+              "epilot",
+              "erp",
+              "system",
+              "api",
+              "external",
+              "journey",
+              "automation",
+              "unknown"
+            ]
+          },
+          "source_label": {
+            "type": "string",
+            "description": "Original free-form source label from the caller or changeset, when available."
+          },
+          "source_system": {
+            "type": "string",
+            "description": "Optional upstream system label, for example an ERP system name."
+          },
+          "source_reference": {
+            "type": "string",
+            "description": "Optional upstream change reference."
+          },
+          "actor_type": {
+            "type": "string",
+            "enum": [
+              "user",
+              "portal_user",
+              "api_client",
+              "automation",
+              "system"
+            ]
+          },
+          "actor_id": {
+            "type": "string"
+          },
+          "effective_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "source"
         ]
       },
       "BaseActivityItem": {
@@ -9192,6 +9663,11 @@
                   "user_id": {
                     "type": "string",
                     "example": "10598"
+                  },
+                  "org_id": {
+                    "type": "string",
+                    "description": "The organization ID of the user who created the view. Used for partner access control.",
+                    "example": "739224"
                   }
                 }
               },
@@ -9372,7 +9848,8 @@
           "message",
           "portal_user",
           "request",
-          "comment"
+          "comment",
+          "user"
         ]
       },
       "TaxonomySearchIncludeArchivedParam": {
@@ -10052,6 +10529,16 @@
       }
     },
     "parameters": {
+      "AnonymizeQueryParam": {
+        "name": "anonymize",
+        "description": "When true, anonymizes PII in the response: identifiers (names, emails, phone numbers, IBANs) are replaced\nwith deterministic pseudonyms (stable within an org), addresses are generalized to postal code / city / country,\nand well-known free-text fields (e.g. note content) are redacted.\n\nUseful for AI agents and data analysis use cases that must not access personal data.\n\nAnonymization is forced (regardless of this parameter) when the access token was created with `anonymize: true`.\n",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "boolean",
+          "default": false
+        }
+      },
       "EntityIdPathParam": {
         "name": "id",
         "description": "Entity id",

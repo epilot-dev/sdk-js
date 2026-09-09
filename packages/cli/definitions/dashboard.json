@@ -18,6 +18,9 @@
       "name": "Dashboards"
     },
     {
+      "name": "Insights"
+    },
+    {
       "name": "Visualisations"
     },
     {
@@ -33,6 +36,53 @@
         "tags": [
           "Dashboards"
         ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Search"
+          },
+          {
+            "$ref": "#/components/parameters/CreatedBy"
+          },
+          {
+            "$ref": "#/components/parameters/CreatedAfter"
+          },
+          {
+            "$ref": "#/components/parameters/CreatedBefore"
+          },
+          {
+            "$ref": "#/components/parameters/UpdatedAfter"
+          },
+          {
+            "$ref": "#/components/parameters/UpdatedBefore"
+          },
+          {
+            "$ref": "#/components/parameters/SharedWith"
+          },
+          {
+            "$ref": "#/components/parameters/Owner"
+          },
+          {
+            "$ref": "#/components/parameters/AccessibleTo"
+          },
+          {
+            "$ref": "#/components/parameters/Favorite"
+          },
+          {
+            "$ref": "#/components/parameters/FavoritesFirst"
+          },
+          {
+            "$ref": "#/components/parameters/Sort"
+          },
+          {
+            "$ref": "#/components/parameters/Order"
+          },
+          {
+            "$ref": "#/components/parameters/Limit"
+          },
+          {
+            "$ref": "#/components/parameters/Offset"
+          }
+        ],
         "responses": {
           "200": {
             "description": "List of dashboards available to the user",
@@ -46,8 +96,15 @@
                       "items": {
                         "$ref": "#/components/schemas/Dashboard"
                       }
+                    },
+                    "pagination": {
+                      "$ref": "#/components/schemas/Pagination"
                     }
-                  }
+                  },
+                  "required": [
+                    "results",
+                    "pagination"
+                  ]
                 }
               }
             }
@@ -81,6 +138,81 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/v1/dashboard/dashboards/favorites": {
+      "get": {
+        "operationId": "listFavoriteDashboardIds",
+        "summary": "listFavoriteDashboardIds",
+        "description": "Returns the current user's favorited dashboard ids, with no dashboard metadata. Lets a\nclient decide whether to default to a favorites-only view without first fetching the full\ndashboards list.\n",
+        "tags": [
+          "Dashboards"
+        ],
+        "responses": {
+          "200": {
+            "description": "The current user's favorited dashboard ids",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "dashboard_ids": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/DashboardID"
+                      }
+                    },
+                    "total": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "dashboard_ids",
+                    "total"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/dashboard/dashboards/{id}/favorite": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/DashboardID"
+          }
+        }
+      ],
+      "put": {
+        "operationId": "favoriteDashboard",
+        "summary": "favoriteDashboard",
+        "description": "Marks the dashboard as favorited by the current user. Idempotent — favoriting an\nalready-favorited dashboard is not an error. Requires only view-level access to the\ndashboard (unlike the edit-level check on `PATCH .../dashboards/{id}`).\n",
+        "tags": [
+          "Dashboards"
+        ],
+        "responses": {
+          "204": {
+            "description": "The dashboard is now favorited by the current user"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "unfavoriteDashboard",
+        "summary": "unfavoriteDashboard",
+        "description": "Removes the current user's favorite for the dashboard. Idempotent — unfavoriting a\ndashboard that was not favorited is not an error, and neither is unfavoriting one that no\nlonger exists or is no longer shared with you. Requires no access to the dashboard, so that\na stale favorite always remains removable.\n",
+        "tags": [
+          "Dashboards"
+        ],
+        "responses": {
+          "204": {
+            "description": "The dashboard is no longer favorited by the current user"
           }
         }
       }
@@ -146,6 +278,36 @@
           }
         }
       },
+      "patch": {
+        "operationId": "patchDashboard",
+        "summary": "patchDashboard",
+        "description": "Partially update a dashboard by ID. Update content (title/tiles) and/or manage sharing\n(owners, shared_with, org_access) — only owners may change sharing.\n`owners` and `shared_with` replace the whole array (send the complete list); omit them to leave\nsharing unchanged, or send `shared_with: []` to revoke all per-user grants.\n",
+        "tags": [
+          "Dashboards"
+        ],
+        "requestBody": {
+          "description": "The dashboard fields to update",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DashboardPatch"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The updated dashboard",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Dashboard"
+                }
+              }
+            }
+          }
+        }
+      },
       "delete": {
         "operationId": "deleteDashboard",
         "summary": "deleteDashboard",
@@ -160,6 +322,265 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Dashboard"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/dashboard/insights": {
+      "get": {
+        "operationId": "listInsights",
+        "summary": "listInsights",
+        "description": "List insights (saved charts) available to the user",
+        "tags": [
+          "Insights"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Search"
+          },
+          {
+            "$ref": "#/components/parameters/VisualisationIdFilter"
+          },
+          {
+            "$ref": "#/components/parameters/TagsFilter"
+          },
+          {
+            "$ref": "#/components/parameters/TagsMatch"
+          },
+          {
+            "$ref": "#/components/parameters/CreatedBy"
+          },
+          {
+            "$ref": "#/components/parameters/CreatedAfter"
+          },
+          {
+            "$ref": "#/components/parameters/CreatedBefore"
+          },
+          {
+            "$ref": "#/components/parameters/UpdatedAfter"
+          },
+          {
+            "$ref": "#/components/parameters/UpdatedBefore"
+          },
+          {
+            "$ref": "#/components/parameters/SharedWith"
+          },
+          {
+            "$ref": "#/components/parameters/Owner"
+          },
+          {
+            "$ref": "#/components/parameters/AccessibleTo"
+          },
+          {
+            "$ref": "#/components/parameters/Sort"
+          },
+          {
+            "$ref": "#/components/parameters/Order"
+          },
+          {
+            "$ref": "#/components/parameters/Limit"
+          },
+          {
+            "$ref": "#/components/parameters/Offset"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of insights available to the user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Insight"
+                      }
+                    },
+                    "pagination": {
+                      "$ref": "#/components/schemas/Pagination"
+                    }
+                  },
+                  "required": [
+                    "results",
+                    "pagination"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "createInsight",
+        "summary": "createInsight",
+        "description": "Create a new insight (saved chart). The caller becomes the owner.",
+        "tags": [
+          "Insights"
+        ],
+        "requestBody": {
+          "description": "The insight to create",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Insight"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The created insight",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Insight"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/dashboard/insights/tags": {
+      "get": {
+        "operationId": "listInsightTags",
+        "summary": "listInsightTags",
+        "description": "List the distinct tags used by insights in the organization (for filter facets)",
+        "tags": [
+          "Insights"
+        ],
+        "responses": {
+          "200": {
+            "description": "Distinct tags used by insights in the organization",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/dashboard/insights/{id}": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/InsightID"
+          }
+        }
+      ],
+      "get": {
+        "operationId": "getInsight",
+        "summary": "getInsight",
+        "description": "Get insight by ID",
+        "tags": [
+          "Insights"
+        ],
+        "responses": {
+          "200": {
+            "description": "The insight with the passed ID",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Insight"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "operationId": "putInsight",
+        "summary": "putInsight",
+        "description": "Replace an insight's content by ID. Sharing is managed via patchInsight.",
+        "tags": [
+          "Insights"
+        ],
+        "requestBody": {
+          "description": "The updated insight",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Insight"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The insight with the passed ID",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Insight"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "patchInsight",
+        "summary": "patchInsight",
+        "description": "Partially update an insight by ID. Update content (name/description/visualisation/tags) and/or\nmanage sharing (owners, shared_with, org_access) — only owners may change sharing.\n`owners` and `shared_with` replace the whole array (send the complete list); omit them to leave\nsharing unchanged, or send `shared_with: []` to revoke all per-user grants.\n",
+        "tags": [
+          "Insights"
+        ],
+        "requestBody": {
+          "description": "The insight fields to update",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InsightPatch"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The updated insight",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Insight"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteInsight",
+        "summary": "deleteInsight",
+        "description": "Delete an insight by ID. Only owners may delete.",
+        "tags": [
+          "Insights"
+        ],
+        "responses": {
+          "200": {
+            "description": "The deleted insight",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Insight"
                 }
               }
             }
@@ -251,62 +672,46 @@
         "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
       },
       "Dashboard": {
-        "type": "object",
-        "description": "Adashboard configuration with tiles",
-        "properties": {
-          "id": {
-            "$ref": "#/components/schemas/DashboardID"
+        "description": "A dashboard configuration. A dashboard is a canvas whose tiles arrange and\nposition insights (saved charts). Tiles may reference an insight by `insight_id`\nor, for backwards compatibility, embed a visualisation inline.\n",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AccessControl"
           },
-          "title": {
-            "type": "string",
-            "example": "Employee Dashboard"
-          },
-          "tiles": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/DashboardTile"
-            },
-            "example": [
-              {
-                "id": "e4af1297-1fd6-440f-9846-f475f580d40f",
-                "coordinates": {},
-                "visualisation": "timechart",
-                "visualisation_config": {
-                  "query": {
-                    "dataset": "entity_operations",
-                    "measure": "count_operations",
-                    "filters": [
-                      {
-                        "operation": [
-                          "createEntity"
-                        ]
-                      },
-                      {
-                        "entity_schema": [
-                          "opportunity"
-                        ]
-                      }
-                    ],
-                    "dimensions": [
-                      {
-                        "time_with_granularity": "month"
-                      },
-                      {
-                        "entity_attribute": "source.title"
-                      }
-                    ]
-                  },
-                  "options": {
-                    "type": "line"
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "$ref": "#/components/schemas/DashboardID"
+              },
+              "title": {
+                "type": "string",
+                "example": "Employee Dashboard"
+              },
+              "tiles": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/DashboardTile"
+                },
+                "example": [
+                  {
+                    "id": "e4af1297-1fd6-440f-9846-f475f580d40f",
+                    "coordinates": {},
+                    "insight_id": "8d2e1c7a-3b4f-4a2e-9c1d-2f3a4b5c6d7e"
                   }
-                }
+                ]
+              },
+              "favorited": {
+                "description": "Whether the requesting user has favorited this dashboard.",
+                "type": "boolean",
+                "readOnly": true,
+                "example": false
               }
+            },
+            "required": [
+              "title",
+              "tiles"
             ]
           }
-        },
-        "required": [
-          "title",
-          "tiles"
         ]
       },
       "DashboardTileID": {
@@ -315,8 +720,265 @@
         "format": "uuid",
         "example": "e4af1297-1fd6-440f-9846-f475f580d40f"
       },
+      "SharePermission": {
+        "description": "Permission level granted to a user (or the whole organization) on a shared resource.\n`view` allows read-only access; `edit` additionally allows updating the content.\nFull control (delete and managing sharing) is reserved for owners.\n",
+        "type": "string",
+        "enum": [
+          "view",
+          "edit"
+        ],
+        "example": "view"
+      },
+      "ShareGrant": {
+        "description": "Grants a single user a permission level on a resource",
+        "type": "object",
+        "properties": {
+          "user_id": {
+            "description": "The id of the user the resource is shared with",
+            "type": "string",
+            "example": "10598"
+          },
+          "permission": {
+            "$ref": "#/components/schemas/SharePermission"
+          }
+        },
+        "required": [
+          "user_id",
+          "permission"
+        ]
+      },
+      "OrgAccess": {
+        "description": "Optional organization-wide grant. When set, every user in the resource's organization\nis granted this permission level. `null` (or omitted) means the resource is not shared\norg-wide.\n",
+        "anyOf": [
+          {
+            "type": "string",
+            "enum": [
+              "view",
+              "edit"
+            ]
+          },
+          {
+            "enum": [
+              null
+            ]
+          }
+        ],
+        "example": "view"
+      },
+      "AccessControl": {
+        "description": "Ownership and sharing metadata common to dashboards and insights. `created_*`/`updated_*`\nfields are managed by the server. `owners`, `shared_with` and `org_access` describe who\nmay access the resource. New resources are private to their creator until shared.\n",
+        "type": "object",
+        "properties": {
+          "created_by": {
+            "description": "Id of the user who created the resource",
+            "type": "string",
+            "readOnly": true,
+            "example": "10598"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "updated_by": {
+            "description": "Id of the user who last updated the resource",
+            "type": "string",
+            "readOnly": true,
+            "example": "10598"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "owner_org_id": {
+            "description": "Id of the organisation that owns the resource. Set at creation time and immutable.",
+            "type": "string",
+            "readOnly": true,
+            "example": "739224"
+          },
+          "owners": {
+            "description": "User ids with full control over the resource (view, edit, delete and manage sharing).\nThe creator is always an owner. There must always be at least one owner.\n",
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "10598"
+            ]
+          },
+          "shared_with": {
+            "description": "Per-user sharing grants",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ShareGrant"
+            }
+          },
+          "org_access": {
+            "$ref": "#/components/schemas/OrgAccess"
+          }
+        }
+      },
+      "AccessControlUpdate": {
+        "description": "Sharing fields that can be mutated via PATCH (owners only). `owners` and `shared_with` are\nfull replacements of their arrays, not merges — omit a field to leave it unchanged.\n",
+        "type": "object",
+        "properties": {
+          "owners": {
+            "description": "Replaces the entire list of owner user ids. Must keep at least one owner (else 400).\nOmit to leave owners unchanged.\n",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "shared_with": {
+            "description": "Replaces the entire list of per-user grants — any existing grant not included is removed.\nOmit to leave sharing unchanged; send an empty array to revoke all per-user grants.\n",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ShareGrant"
+            }
+          },
+          "org_access": {
+            "$ref": "#/components/schemas/OrgAccess"
+          }
+        }
+      },
+      "DashboardPatch": {
+        "description": "Fields that can be partially updated on a dashboard",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AccessControlUpdate"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string",
+                "example": "Employee Dashboard"
+              },
+              "tiles": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/DashboardTile"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "InsightID": {
+        "description": "Unique identifier for an insight (a saved chart / visualisation)",
+        "type": "string",
+        "format": "uuid",
+        "example": "8d2e1c7a-3b4f-4a2e-9c1d-2f3a4b5c6d7e"
+      },
+      "Insight": {
+        "description": "An insight is a saved, reusable chart definition (a visualisation plus its query/options).\nInsights exist independently of dashboards: they can be created, shared and edited on their\nown, and referenced by one or more dashboard tiles via `insight_id`.\n",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AccessControl"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "$ref": "#/components/schemas/InsightID"
+              },
+              "name": {
+                "description": "Human readable name of the insight",
+                "type": "string",
+                "example": "Opportunities created by journeys every month"
+              },
+              "description": {
+                "type": "string",
+                "example": "Monthly count of opportunities grouped by source journey"
+              },
+              "visualisation_id": {
+                "$ref": "#/components/schemas/VisualisationId"
+              },
+              "visualisation_config": {
+                "$ref": "#/components/schemas/VisualisationConfig"
+              },
+              "tags": {
+                "$ref": "#/components/schemas/Tags"
+              }
+            },
+            "required": [
+              "name",
+              "visualisation_id"
+            ]
+          }
+        ]
+      },
+      "InsightPatch": {
+        "description": "Fields that can be partially updated on an insight",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AccessControlUpdate"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "visualisation_id": {
+                "$ref": "#/components/schemas/VisualisationId"
+              },
+              "visualisation_config": {
+                "$ref": "#/components/schemas/VisualisationConfig"
+              },
+              "tags": {
+                "$ref": "#/components/schemas/Tags"
+              }
+            }
+          }
+        ]
+      },
+      "Tags": {
+        "description": "Free-form labels for grouping and filtering insights",
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "example": [
+          "revenue",
+          "marketing"
+        ]
+      },
+      "Pagination": {
+        "description": "Offset-based pagination metadata for list responses",
+        "type": "object",
+        "properties": {
+          "total": {
+            "description": "Total number of results matching the query (ignoring limit/offset)",
+            "type": "integer"
+          },
+          "limit": {
+            "description": "Page size used for this response",
+            "type": "integer"
+          },
+          "offset": {
+            "description": "Number of results skipped before this page",
+            "type": "integer"
+          },
+          "has_more": {
+            "description": "Whether more results exist beyond this page",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "total",
+          "limit",
+          "offset",
+          "has_more"
+        ]
+      },
       "DashboardTile": {
         "type": "object",
+        "description": "A positioned tile on a dashboard canvas. A tile references a saved insight via\n`insight_id`. Inline `visualisation_id`/`visualisation_config` remain supported for\nbackwards compatibility (ad-hoc tiles that are not backed by a shared insight).\n",
         "properties": {
           "id": {
             "$ref": "#/components/schemas/DashboardTileID"
@@ -327,6 +989,10 @@
           "title": {
             "type": "string",
             "example": "Number of opportunities created by journeys every month"
+          },
+          "insight_id": {
+            "description": "Reference to a saved insight rendered by this tile",
+            "$ref": "#/components/schemas/InsightID"
           },
           "visualisation_id": {
             "$ref": "#/components/schemas/VisualisationId"
@@ -458,6 +1124,211 @@
             "description": "URL to Visualisation MFE bundle to import",
             "example": "https://epilot-dashboard-visualisations.epilot.io/epilot360-datalake-visualisation/bundle.js?version=1650592827"
           }
+        }
+      }
+    },
+    "parameters": {
+      "Search": {
+        "name": "q",
+        "in": "query",
+        "required": false,
+        "description": "Free-text search over name/title and description (case-insensitive substring).",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "VisualisationIdFilter": {
+        "name": "visualisation_id",
+        "in": "query",
+        "required": false,
+        "description": "Filter insights by one or more visualisation ids.",
+        "style": "form",
+        "explode": true,
+        "schema": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/VisualisationId"
+          }
+        }
+      },
+      "TagsFilter": {
+        "name": "tags",
+        "in": "query",
+        "required": false,
+        "description": "Filter by one or more tags (see tags_match for any/all semantics).",
+        "style": "form",
+        "explode": true,
+        "schema": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "TagsMatch": {
+        "name": "tags_match",
+        "in": "query",
+        "required": false,
+        "description": "Whether a result must match any (default) or all of the given tags.",
+        "schema": {
+          "type": "string",
+          "enum": [
+            "any",
+            "all"
+          ],
+          "default": "any"
+        }
+      },
+      "CreatedBy": {
+        "name": "created_by",
+        "in": "query",
+        "required": false,
+        "description": "Filter by the id of the creating user.",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "CreatedAfter": {
+        "name": "created_after",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "CreatedBefore": {
+        "name": "created_before",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "UpdatedAfter": {
+        "name": "updated_after",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "UpdatedBefore": {
+        "name": "updated_before",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "SharedWith": {
+        "name": "shared_with",
+        "in": "query",
+        "required": false,
+        "description": "Filter to resources shared with any of the given user ids.",
+        "style": "form",
+        "explode": true,
+        "schema": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "Owner": {
+        "name": "owner",
+        "in": "query",
+        "required": false,
+        "description": "Filter to resources owned by any of the given user ids.",
+        "style": "form",
+        "explode": true,
+        "schema": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "AccessibleTo": {
+        "name": "accessible_to",
+        "in": "query",
+        "required": false,
+        "description": "Filter to resources the given user id may view (owner, shared, org-wide or legacy).",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "Favorite": {
+        "name": "favorite",
+        "in": "query",
+        "required": false,
+        "description": "Dashboards only. Filter to only (`true`) or exclude (`false`) the requesting user's\nfavorited dashboards. A user with zero favorites and `favorite=true` gets an empty page,\nnot the unfiltered list.\n",
+        "schema": {
+          "type": "boolean"
+        }
+      },
+      "FavoritesFirst": {
+        "name": "favorites_first",
+        "in": "query",
+        "required": false,
+        "description": "Dashboards only. No filtering — sorts the requesting user's favorited dashboards first,\npreserving the existing secondary ordering (`sort`/`order`) otherwise.\n",
+        "schema": {
+          "type": "boolean"
+        }
+      },
+      "Sort": {
+        "name": "sort",
+        "in": "query",
+        "required": false,
+        "description": "Field to sort by. `name` and `title` are aliases for the resource's display name and are normalised per resource: dashboards sort by `title` and insights by `name`, whichever of the two values is sent. String sorts are case-insensitive.",
+        "schema": {
+          "type": "string",
+          "enum": [
+            "created_at",
+            "updated_at",
+            "name",
+            "title"
+          ],
+          "default": "updated_at"
+        }
+      },
+      "Order": {
+        "name": "order",
+        "in": "query",
+        "required": false,
+        "description": "Sort direction. Defaults to ascending (preserving the pre-migration order).",
+        "schema": {
+          "type": "string",
+          "enum": [
+            "asc",
+            "desc"
+          ],
+          "default": "asc"
+        }
+      },
+      "Limit": {
+        "name": "limit",
+        "in": "query",
+        "required": false,
+        "description": "Maximum results to return (max 200). Omit to return all matching results (pagination is opt-in).",
+        "schema": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 200
+        }
+      },
+      "Offset": {
+        "name": "offset",
+        "in": "query",
+        "required": false,
+        "description": "Number of results to skip, for pagination. Use with limit (page N = offset N*limit).",
+        "schema": {
+          "type": "integer",
+          "minimum": 0,
+          "default": 0
         }
       }
     },

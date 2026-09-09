@@ -1,5 +1,6 @@
 # Permissions API
 
+- **Base URL:** `https://permissions.sls.epilot.io`
 - **API Docs:** [https://docs.epilot.io/api/permissions](https://docs.epilot.io/api/permissions)
 
 Flexible Role-based Access Control for epilot

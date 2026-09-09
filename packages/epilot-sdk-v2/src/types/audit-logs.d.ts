@@ -1,6 +1,4 @@
 /* Auto-copied from audit-logs-client */
-/* eslint-disable */
-
 import type {
   OpenAPIClient,
   Parameters,

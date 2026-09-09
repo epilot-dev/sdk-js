@@ -1,6 +1,4 @@
 /* Auto-copied from consent-client */
-/* eslint-disable */
-
 import type {
   OpenAPIClient,
   Parameters,

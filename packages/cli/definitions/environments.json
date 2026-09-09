@@ -20,7 +20,7 @@
     "/v1/environments": {
       "get": {
         "operationId": "listEnvironmentVariables",
-        "summary": "List environment variables",
+        "summary": "listEnvironmentVariables",
         "description": "List all environment variables for the organization. Returns metadata only, no secret values.",
         "tags": [
           "environments"
@@ -49,8 +49,8 @@
       },
       "post": {
         "operationId": "createEnvironmentVariable",
-        "summary": "Create environment variable",
-        "description": "Create a new environment variable or secret for the organization.",
+        "summary": "createEnvironmentVariable",
+        "description": "Create a new environment variable or secret for the organization. If `group` is provided and the group does not yet exist, it is created automatically.",
         "tags": [
           "environments"
         ],
@@ -96,7 +96,7 @@
     "/v1/environments/groups": {
       "get": {
         "operationId": "listEnvironmentGroups",
-        "summary": "List environment groups",
+        "summary": "listEnvironmentGroups",
         "description": "List all environment groups for the organization.",
         "tags": [
           "environments"
@@ -138,6 +138,7 @@
       "put": {
         "operationId": "putEnvironmentGroup",
         "summary": "putEnvironmentGroup",
+        "description": "Create or update an environment group by name. Acts as an upsert — creates the group if it does not exist.",
         "tags": [
           "environments"
         ],
@@ -185,7 +186,7 @@
       },
       "delete": {
         "operationId": "deleteEnvironmentGroup",
-        "summary": "Delete an environment group",
+        "summary": "deleteEnvironmentGroup",
         "description": "Deletes a group. Variables assigned to this group become ungrouped.",
         "tags": [
           "environments"
@@ -224,8 +225,8 @@
       ],
       "get": {
         "operationId": "getEnvironmentVariable",
-        "summary": "Get environment variable",
-        "description": "Get an environment variable by key. Returns value only for String type, omitted for SecretString.",
+        "summary": "getEnvironmentVariable",
+        "description": "Get an environment variable by key. Returns value for non-secret types, omitted for SecretString.",
         "tags": [
           "environments"
         ],
@@ -256,8 +257,8 @@
       },
       "put": {
         "operationId": "updateEnvironmentVariable",
-        "summary": "Update environment variable",
-        "description": "Create or update an environment variable. Acts as an upsert — creates the variable if it does not exist.",
+        "summary": "updateEnvironmentVariable",
+        "description": "Create or update an environment variable. Acts as an upsert — creates the variable if it does not exist. If `group` is provided and the group does not yet exist, it is created automatically.",
         "tags": [
           "environments"
         ],
@@ -301,6 +302,9 @@
           "403": {
             "description": "Forbidden"
           },
+          "409": {
+            "description": "Cannot change the type of a variable that currently holds a value"
+          },
           "500": {
             "description": "Internal server error"
           }
@@ -308,7 +312,7 @@
       },
       "delete": {
         "operationId": "deleteEnvironmentVariable",
-        "summary": "Delete environment variable",
+        "summary": "deleteEnvironmentVariable",
         "description": "Delete an environment variable by key.",
         "tags": [
           "environments"
@@ -344,9 +348,90 @@
     "schemas": {
       "EnvironmentValueType": {
         "type": "string",
+        "description": "The structure a variable's value holds. `SecretString` is encrypted at rest and\nits value is never returned. `Text`, `Number`, `Boolean` and `Map` may be\nserved to browser-facing consumers; `String` and `SecretString` may not.\n",
         "enum": [
           "String",
-          "SecretString"
+          "SecretString",
+          "Text",
+          "Number",
+          "Boolean",
+          "Map"
+        ]
+      },
+      "StringTranslations": {
+        "description": "A string translated per language. Keys are language codes (e.g. `de`,\n`en-US`), matching the hyphen-only BCP-47 form epilot's i18n stack uses\neverywhere else. Must match LANGUAGE_KEY_PATTERN in\nsrc/core/value-types.ts — the two are not otherwise linked.\n",
+        "type": "object",
+        "minProperties": 1,
+        "propertyNames": {
+          "pattern": "^[a-z]{2,3}(-[A-Za-z0-9]+)*$"
+        },
+        "additionalProperties": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "MapEntry": {
+        "description": "One entry of a Map. `key` is the token a journey submits; `value` is\nwhat the customer reads — either one string, or one string per\nlanguage. Every entry of a Map must agree on which of the two it uses.\n",
+        "type": "object",
+        "required": [
+          "key",
+          "value"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "key": {
+            "type": "string",
+            "minLength": 1
+          },
+          "value": {
+            "oneOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "$ref": "#/components/schemas/StringTranslations"
+              }
+            ]
+          }
+        }
+      },
+      "MapValue": {
+        "type": "object",
+        "required": [
+          "options"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "fallbackLanguage": {
+            "type": "string",
+            "minLength": 2,
+            "default": "de"
+          },
+          "options": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "$ref": "#/components/schemas/MapEntry"
+            }
+          }
+        }
+      },
+      "EnvironmentValue": {
+        "description": "A variable's value. The JSON type corresponds to the variable's `type`:\n`String`, `SecretString` and `Text` are strings, `Number` is a number,\n`Boolean` is a boolean, and `Map` is an object. Numbers are IEEE 754\ndoubles; integers above 2^53 may lose precision on round-trip.\n",
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "number"
+          },
+          {
+            "type": "boolean"
+          },
+          {
+            "$ref": "#/components/schemas/MapValue"
+          }
         ]
       },
       "EnvironmentVariable": {
@@ -373,8 +458,16 @@
             "description": "Optional group name for organising variables in the UI"
           },
           "value": {
-            "type": "string",
-            "description": "Value is returned for String type, omitted for SecretString"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EnvironmentValue"
+              }
+            ],
+            "description": "Returned for non-secret types, omitted for SecretString. Also omitted when\nthe variable has been created without a value — for example by a blueprint\ninstall, which syncs a variable's key and type but never its value.\n"
+          },
+          "protected": {
+            "type": "boolean",
+            "description": "Whether the variable is protected from editing"
           },
           "created_at": {
             "type": "string",
@@ -409,8 +502,16 @@
             "description": "Optional group name for organising variables in the UI"
           },
           "value": {
-            "type": "string",
-            "description": "Value is returned for String type, omitted for SecretString"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EnvironmentValue"
+              }
+            ],
+            "description": "Returned for non-secret types, omitted for SecretString. Also omitted when\nthe variable has been created without a value — for example by a blueprint\ninstall, which syncs a variable's key and type but never its value.\n"
+          },
+          "protected": {
+            "type": "boolean",
+            "description": "Whether the variable is protected from editing"
           },
           "created_at": {
             "type": "string",
@@ -457,7 +558,11 @@
             "type": "string"
           },
           "value": {
-            "type": "string"
+            "$ref": "#/components/schemas/EnvironmentValue"
+          },
+          "protected": {
+            "type": "boolean",
+            "description": "Whether the variable is protected from editing"
           }
         }
       },
@@ -473,13 +578,17 @@
             ]
           },
           "value": {
-            "type": "string"
+            "$ref": "#/components/schemas/EnvironmentValue"
           },
           "description": {
             "type": "string"
           },
           "group": {
             "type": "string"
+          },
+          "protected": {
+            "type": "boolean",
+            "description": "Whether the variable is protected from editing"
           }
         }
       },

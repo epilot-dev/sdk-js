@@ -38,13 +38,18 @@ epilot snapshot listSnapshots
 **Snapshots**
 - [`listSnapshots`](#listsnapshots) — List snapshots for the caller's organization, newest first.
 - [`createSnapshot`](#createsnapshot) — Create a new snapshot of the given resources. Async — returns immediately
-- [`captureOrgSnapshot`](#captureorgsnapshot) — Snapshot the caller's whole organization now. Fetches a fresh inventory
+- [`captureOrgSnapshot`](#captureorgsnapshot) — Snapshot the caller's whole organization now. Creates a `scope: "org"`
 - [`getSnapshot`](#getsnapshot) — Fetch a snapshot's metadata. Poll this endpoint to track create/restore progress.
 - [`deleteSnapshot`](#deletesnapshot) — Delete a snapshot's metadata and S3 manifest.
 - [`restoreSnapshot`](#restoresnapshot) — Restore a snapshot to the org. Async — returns immediately; client polls
 - [`listSnapshotResources`](#listsnapshotresources) — List the resources captured in this snapshot. Returns lightweight
 - [`getSnapshotResource`](#getsnapshotresource) — Fetch one captured resource with its full payload. For UI views
 - [`listDependencies`](#listdependencies) — Walk the dependency tree for a set of resources and return the full
+
+**ScheduledSnapshots**
+- [`getOrgSnapshotSchedule`](#getorgsnapshotschedule) — Return the scheduled-snapshot enrollment config for the caller's org.
+- [`putOrgSnapshotSchedule`](#putorgsnapshotschedule) — Create or update the scheduled-snapshot enrollment config for the
+- [`deleteOrgSnapshotSchedule`](#deleteorgsnapshotschedule) — Remove the scheduled-snapshot enrollment for the caller's org.
 
 ### `listSnapshots`
 
@@ -62,6 +67,9 @@ List snapshots for the caller's organization, newest first.
 `<type>:<id>`. Split on the first colon — the `<id>` half may
 contain colons (e.g., role acl ids like `role:acl:internal:foo`).
 Repeat the  |
+| `trigger` | query | "manual" \| "sync" \| "blueprint_install" \| "scheduled" | No | Filter to snapshots with a specific trigger. Uses the `byTrigger` GSI
+for an efficient indexed query — no table scan. Only snapshots created
+after the GSI was added carry this index entry; pre-existin |
 
 **Sample Call**
 
@@ -101,13 +109,7 @@ epilot snapshot listSnapshots --jsonata 'results[0]'
           "name": "string",
           "user_id": "string",
           "token_id": "string"
-        },
-        "skipped": [
-          {
-            "lineage_id": "string",
-            "reason": "modified"
-          }
-        ]
+        }
       },
       "restores": [
         {
@@ -120,13 +122,7 @@ epilot snapshot listSnapshots --jsonata 'results[0]'
             "name": "string",
             "user_id": "string",
             "token_id": "string"
-          },
-          "skipped": [
-            {
-              "lineage_id": "string",
-              "reason": "modified"
-            }
-          ]
+          }
         }
       ],
       "matched_count": 0,
@@ -195,7 +191,7 @@ epilot snapshot createSnapshot --jsonata '$'
 
 ### `captureOrgSnapshot`
 
-Snapshot the caller's whole organization now. Fetches a fresh inventory
+Snapshot the caller's whole organization now. Creates a `scope: "org"`
 
 `POST /v1/snapshots:capture-org`
 
@@ -275,13 +271,7 @@ epilot snapshot getSnapshot -p id=123e4567-e89b-12d3-a456-426614174000 --jsonata
       "name": "string",
       "user_id": "string",
       "token_id": "string"
-    },
-    "skipped": [
-      {
-        "lineage_id": "string",
-        "reason": "modified"
-      }
-    ]
+    }
   },
   "restores": [
     {
@@ -294,13 +284,7 @@ epilot snapshot getSnapshot -p id=123e4567-e89b-12d3-a456-426614174000 --jsonata
         "name": "string",
         "user_id": "string",
         "token_id": "string"
-      },
-      "skipped": [
-        {
-          "lineage_id": "string",
-          "reason": "modified"
-        }
-      ]
+      }
     }
   ],
   "matched_count": 0,
@@ -371,7 +355,7 @@ Restore a snapshot to the org. Async — returns immediately; client polls
 ```bash
 epilot snapshot restoreSnapshot \
   -p id=123e4567-e89b-12d3-a456-426614174000 \
-  -d '{"preserve_modified":false,"preserve_co_owned":false}'
+  -d '{"exclude_target_ids":["string"]}'
 ```
 
 Using positional args for path parameters:
@@ -492,6 +476,142 @@ epilot snapshot getSnapshotResource -p id=123e4567-e89b-12d3-a456-426614174000 -
 ```
 
 </details>
+
+---
+
+### `getOrgSnapshotSchedule`
+
+Return the scheduled-snapshot enrollment config for the caller's org.
+
+`GET /v1/org-snapshot-schedule`
+
+**Sample Call**
+
+```bash
+epilot snapshot getOrgSnapshotSchedule
+```
+
+With JSONata filter:
+
+```bash
+epilot snapshot getOrgSnapshotSchedule --jsonata 'org_id'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "org_id": "string",
+  "enabled": true,
+  "cron_expression": "cron(0 2 * * ? *)",
+  "timezone": "string",
+  "retention": {
+    "value": 1,
+    "unit": "days"
+  },
+  "excluded_types": ["string"],
+  "schedule_name": "string",
+  "last_started_at": "1970-01-01T00:00:00.000Z",
+  "last_completed_at": "1970-01-01T00:00:00.000Z",
+  "last_status": "completed",
+  "created_by": "string",
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "updated_at": "1970-01-01T00:00:00.000Z"
+}
+```
+
+</details>
+
+---
+
+### `putOrgSnapshotSchedule`
+
+Create or update the scheduled-snapshot enrollment config for the
+
+`PUT /v1/org-snapshot-schedule`
+
+**Request Body**
+
+**Sample Call**
+
+```bash
+epilot snapshot putOrgSnapshotSchedule
+```
+
+With request body:
+
+```bash
+epilot snapshot putOrgSnapshotSchedule \
+  -d '{
+  "enabled": true,
+  "cron_expression": "cron(0 2 * * ? *)",
+  "timezone": "Europe/Berlin",
+  "retention": {
+    "value": 1,
+    "unit": "days"
+  },
+  "excluded_types": ["string"]
+}'
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot snapshot putOrgSnapshotSchedule
+```
+
+With JSONata filter:
+
+```bash
+epilot snapshot putOrgSnapshotSchedule --jsonata 'org_id'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "org_id": "string",
+  "enabled": true,
+  "cron_expression": "cron(0 2 * * ? *)",
+  "timezone": "string",
+  "retention": {
+    "value": 1,
+    "unit": "days"
+  },
+  "excluded_types": ["string"],
+  "schedule_name": "string",
+  "last_started_at": "1970-01-01T00:00:00.000Z",
+  "last_completed_at": "1970-01-01T00:00:00.000Z",
+  "last_status": "completed",
+  "created_by": "string",
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "updated_at": "1970-01-01T00:00:00.000Z"
+}
+```
+
+</details>
+
+---
+
+### `deleteOrgSnapshotSchedule`
+
+Remove the scheduled-snapshot enrollment for the caller's org.
+
+`DELETE /v1/org-snapshot-schedule`
+
+**Sample Call**
+
+```bash
+epilot snapshot deleteOrgSnapshotSchedule
+```
+
+With JSONata filter:
+
+```bash
+epilot snapshot deleteOrgSnapshotSchedule --jsonata '$'
+```
 
 ---
 

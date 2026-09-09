@@ -1,6 +1,4 @@
 /* Auto-copied from iban-client */
-/* eslint-disable */
-
 import type {
   OpenAPIClient,
   Parameters,

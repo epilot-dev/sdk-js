@@ -75,6 +75,20 @@ epilot pricing $calculatePricingDetails
 **Product Recommendations API**
 - [`$productRecommendations`](#$productrecommendations) — Get a list of product recommendations based on the search parameters.
 
+**Conditional Pricing API**
+- [`$getConditionSets`](#$getconditionsets) — Returns the condition sets built in for one conditional entity type: the situations a
+- [`$resolveConditionalEntity`](#$resolveconditionalentity) — Resolves which of a conditional entity's variants apply to a situation, and returns each one
+- [`$createConditionalVariant`](#$createconditionalvariant) — Creates one variant of a conditional entity, together with the first version carrying its
+- [`$getActiveConditionalVariantVersion`](#$getactiveconditionalvariantversion) — Returns the version of this variant that is currently in effect — the one with the latest
+- [`$replaceActiveConditionalVariantVersion`](#$replaceactiveconditionalvariantversion) — Replaces the values of the version currently in effect, wholesale.
+- [`$patchActiveConditionalVariantVersion`](#$patchactiveconditionalvariantversion) — Changes only the fields it names on the version currently in effect.
+- [`$deleteConditionalVariant`](#$deleteconditionalvariant) — Removes one variant of a conditional entity: the condition tuple it holds, its registration
+- [`$appendConditionalVariantVersion`](#$appendconditionalvariantversion) — Appends a version to a variant: a new set of values taking effect at its own instant.
+- [`$getConditionalVariantVersion`](#$getconditionalvariantversion) — Returns one specific version of a variant, by the instant it takes effect — what a form editing
+- [`$replaceConditionalVariantVersion`](#$replaceconditionalvariantversion) — Replaces one version's values wholesale, addressed by its `valid_from`.
+- [`$patchConditionalVariantVersion`](#$patchconditionalvariantversion) — Changes only the fields it names on one version, addressed by its `valid_from`.
+- [`$deleteConditionalVariantVersion`](#$deleteconditionalvariantversion) — Removes one version of a variant.
+
 ### `$calculatePricingDetails`
 
 Computes a set of pricing details that can be persisted on an entity with the pricing capability enabled, e.g: Orders or
@@ -427,7 +441,7 @@ Update an existing Order
 
 | Name | In | Type | Required | Description |
 | ---- | -- | ---- | -------- | ----------- |
-| `id` | path | string | Yes | Order entity ID |
+| `id` | path | string (uuid) | Yes | Order entity ID |
 
 **Request Body** (required)
 
@@ -2122,6 +2136,981 @@ epilot pricing $productRecommendations --jsonata 'results[0]'
         "_id": "73f857a4-0fbc-4aa6-983f-87c0d6d410a6",
         "_title": "Cool box"
       }
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `$getConditionSets`
+
+Returns the condition sets built in for one conditional entity type: the situations a
+
+`GET /v1/conditional-pricing/{slug}/condition-sets`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `slug` | path | "product" \| "price" \| "coupon" | Yes | The conditional entity type whose built-in condition sets to return |
+
+**Sample Call**
+
+```bash
+epilot pricing $getConditionSets \
+  -p slug=price
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot pricing $getConditionSets price
+```
+
+With JSONata filter:
+
+```bash
+epilot pricing $getConditionSets -p slug=price --jsonata 'results[0]'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "results": [
+    {
+      "id": "delivery_area",
+      "label": "Delivery Area",
+      "description": "string",
+      "conditions": [
+        {
+          "name": "postal_code",
+          "label": "Postal Code",
+          "type": "string",
+          "options": ["private", "commercial"],
+          "allow_any": false,
+          "format": "zipcode"
+        }
+      ]
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `$resolveConditionalEntity`
+
+Resolves which of a conditional entity's variants apply to a situation, and returns each one
+
+`POST /v1/conditional-pricing:resolve`
+
+**Request Body** (required)
+
+**Sample Call**
+
+```bash
+epilot pricing $resolveConditionalEntity
+```
+
+With request body:
+
+```bash
+epilot pricing $resolveConditionalEntity \
+  -d '{
+  "schema": "product",
+  "entity_id": "price-sp26d1yo",
+  "context": {
+    "postal_code": "46045",
+    "consumption": {
+      "lt": 5000
+    }
+  },
+  "as_of": "2027-03-15T00:00:00Z",
+  "options": {
+    "resolve_one": false
+  }
+}'
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot pricing $resolveConditionalEntity
+```
+
+With JSONata filter:
+
+```bash
+epilot pricing $resolveConditionalEntity --jsonata 'results[0]'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "results": [
+    {
+      "_id": "price-sp26d1yo",
+      "_variant_id": "var-46045",
+      "_version_valid_from": "2027-01-01T00:00:00.000Z",
+      "_conditions": {
+        "postal_code": "46045",
+        "default": false
+      }
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `$createConditionalVariant`
+
+Creates one variant of a conditional entity, together with the first version carrying its
+
+`POST /v1/conditional-pricing/{slug}/entities/{entity_id}/variants`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `slug` | path | "product" \| "price" \| "coupon" | Yes | The conditional entity type this variant belongs to |
+| `entity_id` | path | string | Yes | The conditional entity to add a variant to |
+
+**Request Body** (required)
+
+**Sample Call**
+
+```bash
+epilot pricing $createConditionalVariant \
+  -p slug=price \
+  -p entity_id=price-sp26d1yo
+```
+
+With request body:
+
+```bash
+epilot pricing $createConditionalVariant \
+  -p slug=price \
+  -p entity_id=price-sp26d1yo \
+  -d '{
+  "conditions": {
+    "postal_code": "46045"
+  },
+  "default": false,
+  "valid_from": "2027-01-01T00:00:00Z",
+  "values": {
+    "unit_amount": 2499,
+    "unit_amount_decimal": "24.99"
+  }
+}'
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot pricing $createConditionalVariant price price-sp26d1yo
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot pricing $createConditionalVariant -p slug=price -p entity_id=price-sp26d1yo
+```
+
+With JSONata filter:
+
+```bash
+epilot pricing $createConditionalVariant -p slug=price -p entity_id=price-sp26d1yo --jsonata 'variant_id'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "variant_id": "var-46045",
+  "entity_id": "price-sp26d1yo",
+  "schema": "product",
+  "conditions": {
+    "postal_code": "46045",
+    "default": false
+  },
+  "valid_from": "2027-01-01T00:00:00.000Z",
+  "values": {
+    "unit_amount": 2499,
+    "unit_amount_decimal": "24.99"
+  },
+  "_created_at": "string",
+  "_updated_at": "string",
+  "_revision": 0,
+  "warnings": [
+    {
+      "code": "VARIANT_COUNT_APPROACHING_CAP",
+      "message": "string",
+      "variant_count": 0,
+      "cap": 0
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `$getActiveConditionalVariantVersion`
+
+Returns the version of this variant that is currently in effect — the one with the latest
+
+`GET /v1/conditional-pricing/{slug}/entities/{entity_id}/variants/{variant_id}`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `slug` | path | "product" \| "price" \| "coupon" | Yes | The conditional entity type this variant belongs to |
+| `entity_id` | path | string | Yes | The conditional entity the variant belongs to |
+| `variant_id` | path | string | Yes | The variant whose timeline this call addresses |
+
+**Sample Call**
+
+```bash
+epilot pricing $getActiveConditionalVariantVersion \
+  -p slug=price \
+  -p entity_id=price-sp26d1yo \
+  -p variant_id=var-46045
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot pricing $getActiveConditionalVariantVersion price price-sp26d1yo var-46045
+```
+
+With JSONata filter:
+
+```bash
+epilot pricing $getActiveConditionalVariantVersion -p slug=price -p entity_id=price-sp26d1yo -p variant_id=var-46045 --jsonata 'variant_id'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "variant_id": "var-46045",
+  "entity_id": "price-sp26d1yo",
+  "schema": "product",
+  "conditions": {
+    "postal_code": "46045",
+    "default": false
+  },
+  "valid_from": "2027-01-01T00:00:00.000Z",
+  "values": {
+    "unit_amount": 2499,
+    "unit_amount_decimal": "24.99"
+  },
+  "_created_at": "string",
+  "_updated_at": "string",
+  "_revision": 3
+}
+```
+
+</details>
+
+---
+
+### `$replaceActiveConditionalVariantVersion`
+
+Replaces the values of the version currently in effect, wholesale.
+
+`PUT /v1/conditional-pricing/{slug}/entities/{entity_id}/variants/{variant_id}`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `slug` | path | "product" \| "price" \| "coupon" | Yes | The conditional entity type this variant belongs to |
+| `entity_id` | path | string | Yes | The conditional entity the variant belongs to |
+| `variant_id` | path | string | Yes | The variant whose timeline this call addresses |
+
+**Request Body** (required)
+
+**Sample Call**
+
+```bash
+epilot pricing $replaceActiveConditionalVariantVersion \
+  -p slug=price \
+  -p entity_id=price-sp26d1yo \
+  -p variant_id=var-46045
+```
+
+With request body:
+
+```bash
+epilot pricing $replaceActiveConditionalVariantVersion \
+  -p slug=price \
+  -p entity_id=price-sp26d1yo \
+  -p variant_id=var-46045 \
+  -d '{
+  "values": {
+    "unit_amount": 2499,
+    "unit_amount_decimal": "24.99"
+  },
+  "_revision": 3,
+  "valid_from": "string",
+  "conditions": {
+    "postal_code": "46045"
+  }
+}'
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot pricing $replaceActiveConditionalVariantVersion price price-sp26d1yo var-46045
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot pricing $replaceActiveConditionalVariantVersion -p slug=price -p entity_id=price-sp26d1yo -p variant_id=var-46045
+```
+
+With JSONata filter:
+
+```bash
+epilot pricing $replaceActiveConditionalVariantVersion -p slug=price -p entity_id=price-sp26d1yo -p variant_id=var-46045 --jsonata '$'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "variant_id": "var-46045",
+  "entity_id": "price-sp26d1yo",
+  "schema": "product",
+  "conditions": {
+    "postal_code": "46045",
+    "default": false
+  },
+  "valid_from": "2027-01-01T00:00:00.000Z",
+  "values": {
+    "unit_amount": 2499,
+    "unit_amount_decimal": "24.99"
+  },
+  "_created_at": "string",
+  "_updated_at": "string",
+  "_revision": 3,
+  "warnings": [
+    {
+      "code": "ACTIVE_VERSION_REPLACED",
+      "message": "string",
+      "valid_from": "2026-08-01T00:00:00.000Z",
+      "active_valid_from": "2026-01-01T00:00:00.000Z"
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `$patchActiveConditionalVariantVersion`
+
+Changes only the fields it names on the version currently in effect.
+
+`PATCH /v1/conditional-pricing/{slug}/entities/{entity_id}/variants/{variant_id}`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `slug` | path | "product" \| "price" \| "coupon" | Yes | The conditional entity type this variant belongs to |
+| `entity_id` | path | string | Yes | The conditional entity the variant belongs to |
+| `variant_id` | path | string | Yes | The variant whose timeline this call addresses |
+
+**Request Body** (required)
+
+**Sample Call**
+
+```bash
+epilot pricing $patchActiveConditionalVariantVersion \
+  -p slug=price \
+  -p entity_id=price-sp26d1yo \
+  -p variant_id=var-46045
+```
+
+With request body:
+
+```bash
+epilot pricing $patchActiveConditionalVariantVersion \
+  -p slug=price \
+  -p entity_id=price-sp26d1yo \
+  -p variant_id=var-46045 \
+  -d '{
+  "values": {
+    "unit_amount": 2499,
+    "unit_amount_decimal": "24.99"
+  },
+  "_revision": 3,
+  "valid_from": "string",
+  "conditions": {
+    "postal_code": "46045"
+  }
+}'
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot pricing $patchActiveConditionalVariantVersion price price-sp26d1yo var-46045
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot pricing $patchActiveConditionalVariantVersion -p slug=price -p entity_id=price-sp26d1yo -p variant_id=var-46045
+```
+
+With JSONata filter:
+
+```bash
+epilot pricing $patchActiveConditionalVariantVersion -p slug=price -p entity_id=price-sp26d1yo -p variant_id=var-46045 --jsonata '$'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "variant_id": "var-46045",
+  "entity_id": "price-sp26d1yo",
+  "schema": "product",
+  "conditions": {
+    "postal_code": "46045",
+    "default": false
+  },
+  "valid_from": "2027-01-01T00:00:00.000Z",
+  "values": {
+    "unit_amount": 2499,
+    "unit_amount_decimal": "24.99"
+  },
+  "_created_at": "string",
+  "_updated_at": "string",
+  "_revision": 3,
+  "warnings": [
+    {
+      "code": "ACTIVE_VERSION_REPLACED",
+      "message": "string",
+      "valid_from": "2026-08-01T00:00:00.000Z",
+      "active_valid_from": "2026-01-01T00:00:00.000Z"
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `$deleteConditionalVariant`
+
+Removes one variant of a conditional entity: the condition tuple it holds, its registration
+
+`DELETE /v1/conditional-pricing/{slug}/entities/{entity_id}/variants/{variant_id}`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `slug` | path | "product" \| "price" \| "coupon" | Yes | The conditional entity type this variant belongs to |
+| `entity_id` | path | string | Yes | The conditional entity the variant belongs to |
+| `variant_id` | path | string | Yes | The variant to remove |
+
+**Sample Call**
+
+```bash
+epilot pricing $deleteConditionalVariant \
+  -p slug=price \
+  -p entity_id=price-sp26d1yo \
+  -p variant_id=var-46045
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot pricing $deleteConditionalVariant price price-sp26d1yo var-46045
+```
+
+With JSONata filter:
+
+```bash
+epilot pricing $deleteConditionalVariant -p slug=price -p entity_id=price-sp26d1yo -p variant_id=var-46045 --jsonata 'variant_id'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "variant_id": "var-46045",
+  "entity_id": "price-sp26d1yo",
+  "schema": "product",
+  "tuple_released": true,
+  "versions_deleted": 0
+}
+```
+
+</details>
+
+---
+
+### `$appendConditionalVariantVersion`
+
+Appends a version to a variant: a new set of values taking effect at its own instant.
+
+`POST /v1/conditional-pricing/{slug}/entities/{entity_id}/variants/{variant_id}/versions`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `slug` | path | "product" \| "price" \| "coupon" | Yes | The conditional entity type this variant belongs to |
+| `entity_id` | path | string | Yes | The conditional entity the variant belongs to |
+| `variant_id` | path | string | Yes | The variant whose timeline this call addresses |
+
+**Request Body** (required)
+
+**Sample Call**
+
+```bash
+epilot pricing $appendConditionalVariantVersion \
+  -p slug=price \
+  -p entity_id=price-sp26d1yo \
+  -p variant_id=var-46045
+```
+
+With request body:
+
+```bash
+epilot pricing $appendConditionalVariantVersion \
+  -p slug=price \
+  -p entity_id=price-sp26d1yo \
+  -p variant_id=var-46045 \
+  -d '{
+  "valid_from": "2027-01-01T00:00:00Z",
+  "values": {
+    "unit_amount": 2499,
+    "unit_amount_decimal": "24.99"
+  },
+  "conditions": {
+    "postal_code": "46045"
+  }
+}'
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot pricing $appendConditionalVariantVersion price price-sp26d1yo var-46045
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot pricing $appendConditionalVariantVersion -p slug=price -p entity_id=price-sp26d1yo -p variant_id=var-46045
+```
+
+With JSONata filter:
+
+```bash
+epilot pricing $appendConditionalVariantVersion -p slug=price -p entity_id=price-sp26d1yo -p variant_id=var-46045 --jsonata '$'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "variant_id": "var-46045",
+  "entity_id": "price-sp26d1yo",
+  "schema": "product",
+  "conditions": {
+    "postal_code": "46045",
+    "default": false
+  },
+  "valid_from": "2027-01-01T00:00:00.000Z",
+  "values": {
+    "unit_amount": 2499,
+    "unit_amount_decimal": "24.99"
+  },
+  "_created_at": "string",
+  "_updated_at": "string",
+  "_revision": 3,
+  "warnings": [
+    {
+      "code": "ACTIVE_VERSION_REPLACED",
+      "message": "string",
+      "valid_from": "2026-08-01T00:00:00.000Z",
+      "active_valid_from": "2026-01-01T00:00:00.000Z"
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `$getConditionalVariantVersion`
+
+Returns one specific version of a variant, by the instant it takes effect — what a form editing
+
+`GET /v1/conditional-pricing/{slug}/entities/{entity_id}/variants/{variant_id}/versions/{valid_from}`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `slug` | path | "product" \| "price" \| "coupon" | Yes | The conditional entity type this variant belongs to |
+| `entity_id` | path | string | Yes | The conditional entity the variant belongs to |
+| `variant_id` | path | string | Yes | The variant whose timeline this call addresses |
+| `valid_from` | path | string | Yes | The version to address, by the instant it takes effect.
+
+An RFC 3339 date (`2026-01-01`, read as midnight UTC) or date-time
+(`2026-01-01T00:00:00Z`), to at most millisecond precision. Written any acce |
+
+**Sample Call**
+
+```bash
+epilot pricing $getConditionalVariantVersion \
+  -p slug=price \
+  -p entity_id=price-sp26d1yo \
+  -p variant_id=var-46045 \
+  -p valid_from=2027-01-01T00:00:00.000Z
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot pricing $getConditionalVariantVersion price price-sp26d1yo var-46045 2027-01-01T00:00:00.000Z
+```
+
+With JSONata filter:
+
+```bash
+epilot pricing $getConditionalVariantVersion -p slug=price -p entity_id=price-sp26d1yo -p variant_id=var-46045 -p valid_from=2027-01-01T00:00:00.000Z --jsonata 'variant_id'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "variant_id": "var-46045",
+  "entity_id": "price-sp26d1yo",
+  "schema": "product",
+  "conditions": {
+    "postal_code": "46045",
+    "default": false
+  },
+  "valid_from": "2027-01-01T00:00:00.000Z",
+  "values": {
+    "unit_amount": 2499,
+    "unit_amount_decimal": "24.99"
+  },
+  "_created_at": "string",
+  "_updated_at": "string",
+  "_revision": 3
+}
+```
+
+</details>
+
+---
+
+### `$replaceConditionalVariantVersion`
+
+Replaces one version's values wholesale, addressed by its `valid_from`.
+
+`PUT /v1/conditional-pricing/{slug}/entities/{entity_id}/variants/{variant_id}/versions/{valid_from}`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `slug` | path | "product" \| "price" \| "coupon" | Yes | The conditional entity type this variant belongs to |
+| `entity_id` | path | string | Yes | The conditional entity the variant belongs to |
+| `variant_id` | path | string | Yes | The variant whose timeline this call addresses |
+| `valid_from` | path | string | Yes | The version to address, by the instant it takes effect.
+
+An RFC 3339 date (`2026-01-01`, read as midnight UTC) or date-time
+(`2026-01-01T00:00:00Z`), to at most millisecond precision. Written any acce |
+
+**Request Body** (required)
+
+**Sample Call**
+
+```bash
+epilot pricing $replaceConditionalVariantVersion \
+  -p slug=price \
+  -p entity_id=price-sp26d1yo \
+  -p variant_id=var-46045 \
+  -p valid_from=2027-01-01T00:00:00.000Z
+```
+
+With request body:
+
+```bash
+epilot pricing $replaceConditionalVariantVersion \
+  -p slug=price \
+  -p entity_id=price-sp26d1yo \
+  -p variant_id=var-46045 \
+  -p valid_from=2027-01-01T00:00:00.000Z \
+  -d '{
+  "values": {
+    "unit_amount": 2499,
+    "unit_amount_decimal": "24.99"
+  },
+  "_revision": 3,
+  "valid_from": "string",
+  "conditions": {
+    "postal_code": "46045"
+  }
+}'
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot pricing $replaceConditionalVariantVersion price price-sp26d1yo var-46045 2027-01-01T00:00:00.000Z
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot pricing $replaceConditionalVariantVersion -p slug=price -p entity_id=price-sp26d1yo -p variant_id=var-46045 -p valid_from=2027-01-01T00:00:00.000Z
+```
+
+With JSONata filter:
+
+```bash
+epilot pricing $replaceConditionalVariantVersion -p slug=price -p entity_id=price-sp26d1yo -p variant_id=var-46045 -p valid_from=2027-01-01T00:00:00.000Z --jsonata '$'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "variant_id": "var-46045",
+  "entity_id": "price-sp26d1yo",
+  "schema": "product",
+  "conditions": {
+    "postal_code": "46045",
+    "default": false
+  },
+  "valid_from": "2027-01-01T00:00:00.000Z",
+  "values": {
+    "unit_amount": 2499,
+    "unit_amount_decimal": "24.99"
+  },
+  "_created_at": "string",
+  "_updated_at": "string",
+  "_revision": 3,
+  "warnings": [
+    {
+      "code": "ACTIVE_VERSION_REPLACED",
+      "message": "string",
+      "valid_from": "2026-08-01T00:00:00.000Z",
+      "active_valid_from": "2026-01-01T00:00:00.000Z"
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `$patchConditionalVariantVersion`
+
+Changes only the fields it names on one version, addressed by its `valid_from`.
+
+`PATCH /v1/conditional-pricing/{slug}/entities/{entity_id}/variants/{variant_id}/versions/{valid_from}`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `slug` | path | "product" \| "price" \| "coupon" | Yes | The conditional entity type this variant belongs to |
+| `entity_id` | path | string | Yes | The conditional entity the variant belongs to |
+| `variant_id` | path | string | Yes | The variant whose timeline this call addresses |
+| `valid_from` | path | string | Yes | The version to address, by the instant it takes effect.
+
+An RFC 3339 date (`2026-01-01`, read as midnight UTC) or date-time
+(`2026-01-01T00:00:00Z`), to at most millisecond precision. Written any acce |
+
+**Request Body** (required)
+
+**Sample Call**
+
+```bash
+epilot pricing $patchConditionalVariantVersion \
+  -p slug=price \
+  -p entity_id=price-sp26d1yo \
+  -p variant_id=var-46045 \
+  -p valid_from=2027-01-01T00:00:00.000Z
+```
+
+With request body:
+
+```bash
+epilot pricing $patchConditionalVariantVersion \
+  -p slug=price \
+  -p entity_id=price-sp26d1yo \
+  -p variant_id=var-46045 \
+  -p valid_from=2027-01-01T00:00:00.000Z \
+  -d '{
+  "values": {
+    "unit_amount": 2499,
+    "unit_amount_decimal": "24.99"
+  },
+  "_revision": 3,
+  "valid_from": "string",
+  "conditions": {
+    "postal_code": "46045"
+  }
+}'
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot pricing $patchConditionalVariantVersion price price-sp26d1yo var-46045 2027-01-01T00:00:00.000Z
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot pricing $patchConditionalVariantVersion -p slug=price -p entity_id=price-sp26d1yo -p variant_id=var-46045 -p valid_from=2027-01-01T00:00:00.000Z
+```
+
+With JSONata filter:
+
+```bash
+epilot pricing $patchConditionalVariantVersion -p slug=price -p entity_id=price-sp26d1yo -p variant_id=var-46045 -p valid_from=2027-01-01T00:00:00.000Z --jsonata '$'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "variant_id": "var-46045",
+  "entity_id": "price-sp26d1yo",
+  "schema": "product",
+  "conditions": {
+    "postal_code": "46045",
+    "default": false
+  },
+  "valid_from": "2027-01-01T00:00:00.000Z",
+  "values": {
+    "unit_amount": 2499,
+    "unit_amount_decimal": "24.99"
+  },
+  "_created_at": "string",
+  "_updated_at": "string",
+  "_revision": 3,
+  "warnings": [
+    {
+      "code": "ACTIVE_VERSION_REPLACED",
+      "message": "string",
+      "valid_from": "2026-08-01T00:00:00.000Z",
+      "active_valid_from": "2026-01-01T00:00:00.000Z"
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `$deleteConditionalVariantVersion`
+
+Removes one version of a variant.
+
+`DELETE /v1/conditional-pricing/{slug}/entities/{entity_id}/variants/{variant_id}/versions/{valid_from}`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `slug` | path | "product" \| "price" \| "coupon" | Yes | The conditional entity type this variant belongs to |
+| `entity_id` | path | string | Yes | The conditional entity the variant belongs to |
+| `variant_id` | path | string | Yes | The variant whose timeline this call addresses |
+| `valid_from` | path | string | Yes | The version to address, by the instant it takes effect.
+
+An RFC 3339 date (`2026-01-01`, read as midnight UTC) or date-time
+(`2026-01-01T00:00:00Z`), to at most millisecond precision. Written any acce |
+| `_revision` | query | number | Yes | The revision marker read from the version being deleted. The delete is refused if the
+version has been written since.
+
+A query parameter rather than a body field, since a DELETE carrying a body travel |
+
+**Sample Call**
+
+```bash
+epilot pricing $deleteConditionalVariantVersion \
+  -p slug=price \
+  -p entity_id=price-sp26d1yo \
+  -p variant_id=var-46045 \
+  -p valid_from=2027-01-01T00:00:00.000Z \
+  -p _revision=3
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot pricing $deleteConditionalVariantVersion price price-sp26d1yo var-46045 2027-01-01T00:00:00.000Z
+```
+
+With JSONata filter:
+
+```bash
+epilot pricing $deleteConditionalVariantVersion -p slug=price -p entity_id=price-sp26d1yo -p variant_id=var-46045 -p valid_from=2027-01-01T00:00:00.000Z -p _revision=3 --jsonata 'variant_id'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "variant_id": "var-46045",
+  "entity_id": "price-sp26d1yo",
+  "schema": "product",
+  "valid_from": "2027-01-01T00:00:00.000Z",
+  "warnings": [
+    {
+      "code": "ACTIVE_VERSION_REPLACED",
+      "message": "string",
+      "valid_from": "2026-08-01T00:00:00.000Z",
+      "active_valid_from": "2026-01-01T00:00:00.000Z"
     }
   ]
 }

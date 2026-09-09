@@ -1,6 +1,4 @@
 /* Auto-copied from submission-client */
-/* eslint-disable */
-
 import type {
   OpenAPIClient,
   Parameters,
