@@ -481,6 +481,54 @@
         "responses": {}
       }
     },
+    "/v1/conditional-pricing/{slug}/entities/{entity_id}/variants:list": {
+      "post": {
+        "operationId": "$listConditionalVariants",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/conditional-pricing/{slug}/entities/{entity_id}/variants:tree": {
+      "post": {
+        "operationId": "$getConditionalVariantTree",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v1/conditional-pricing/{slug}/entities/{entity_id}/variants/{variant_id}": {
       "get": {
         "operationId": "$getActiveConditionalVariantVersion",
@@ -580,6 +628,42 @@
       }
     },
     "/v1/conditional-pricing/{slug}/entities/{entity_id}/variants/{variant_id}/versions": {
+      "get": {
+        "operationId": "$listConditionalVariantVersions",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "variant_id",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "order",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "required": false
+          }
+        ],
+        "responses": {}
+      },
       "post": {
         "operationId": "$appendConditionalVariantVersion",
         "parameters": [
@@ -728,6 +812,44 @@
             "required": true
           }
         ],
+        "responses": {}
+      }
+    },
+    "/v1/conditional-pricing/{slug}/variants:batchUpsert": {
+      "post": {
+        "operationId": "$batchUpsertConditionalVariants",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/conditional-pricing/{slug}/variants:batchDelete": {
+      "post": {
+        "operationId": "$batchDeleteConditionalVariants",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
         "responses": {}
       }
     }
