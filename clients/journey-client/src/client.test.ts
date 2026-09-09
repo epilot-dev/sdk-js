@@ -15,5 +15,21 @@ describe('client', () => {
 
       expect(operations.length).toBeGreaterThan(0);
     });
+
+    it('should have the journey versioning operations', async () => {
+      const client = getClient();
+
+      const operationIds = client.api.getOperations().map(({ operationId }) => operationId);
+
+      expect(operationIds).toEqual(
+        expect.arrayContaining([
+          'createJourneyRevision',
+          'listJourneyRevisions',
+          'getJourneyRevision',
+          'publishJourneyRevision',
+          'getJourneyPublishState',
+        ]),
+      );
+    });
   });
 });
