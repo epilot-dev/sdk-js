@@ -172,8 +172,7 @@ declare namespace Components {
              * When this version takes effect. Defaults to now.
              *
              * An RFC 3339 date (`2026-01-01`, read as midnight UTC) or date-time
-             * (`2026-01-01T00:00:00Z`), to at most millisecond precision. Deliberately not declared as
-             * `format: date-time`, which would reject the plain-date form that this accepts.
+             * (`2026-01-01T00:00:00Z`), to at most millisecond precision.
              *
              * A date in the past is accepted and answered with warnings, never refused. A date the
              * variant already has a version at is refused as `VERSION_CONFLICT`.
@@ -187,23 +186,11 @@ declare namespace Components {
              * 2027-01-01T00:00:00Z
              */
             valid_from?: string;
-            values: /**
-             * The attribute values this version overrides on the base entity, keyed by attribute name.
-             *
-             * Only attributes currently declaring `overridable_attribute` are applied. Metadata fields
-             * (anything underscore-prefixed), readonly attributes, hidden attributes and non-overridable
-             * attributes present here are ignored rather than rejected, so a client working from a slightly
-             * stale schema snapshot still succeeds instead of failing on fields it could not have known to
-             * drop. An attribute's `render_condition` says when to show it and has no bearing on whether a
-             * variant may override it.
-             *
-             * Ignored means *not updated*, never *removed*: a value already stored for an attribute that is
-             * not currently overridable is preserved, so removing and restoring the flag deactivates and
-             * then reactivates the same override.
-             *
-             * A composite price's `price_components` is an ordinary overridable relation attribute: a
-             * composite variant pins its component variants here the same way any other relation value is
-             * set, with no special handling.
+            /**
+             * The attribute overrides this version carries. An append seeds the attributes the variant
+             * may not override from the version in effect at this version's own `valid_from` and then
+             * applies these values over them, so the stored values are not a pure function of this
+             * body. An append dated before the variant's earliest version inherits nothing.
              *
              * example:
              * {
@@ -211,7 +198,9 @@ declare namespace Components {
              *   "unit_amount_decimal": "24.99"
              * }
              */
-            VariantValues;
+            values: {
+                [name: string]: any;
+            };
             /**
              * Optional, and never applied: a variant's conditions are fixed when it is created. Accepted
              * only so that a client building its body from the version it loaded is not forced to strip
@@ -526,6 +515,12 @@ declare namespace Components {
              */
             is_composite_price: true;
             /**
+             * The flag for entities whose values vary by context. Resolve the values that apply with
+             * `POST /v1/conditional-pricing:resolve`.
+             *
+             */
+            is_conditional?: boolean;
+            /**
              * The price creation date
              */
             _created_at?: string;
@@ -606,6 +601,12 @@ declare namespace Components {
             Currency;
             cashback_period?: /* The cashback period, for now it's limited to either 0 months or 12 months */ CashbackPeriod;
             active?: boolean;
+            /**
+             * The flag for entities whose values vary by context. Resolve the values that apply with
+             * `POST /v1/conditional-pricing:resolve`.
+             *
+             */
+            is_conditional?: boolean;
             /**
              * Whether the coupon requires a promo code to be applied
              */
@@ -953,6 +954,12 @@ declare namespace Components {
                     $relation?: EntityRelation[];
                 };
                 /**
+                 * The flag for entities whose values vary by context. Resolve the values that apply with
+                 * `POST /v1/conditional-pricing:resolve`.
+                 *
+                 */
+                is_conditional?: boolean;
+                /**
                  * Stores references to the availability files that define where this product is available.
                  * These files are used when interacting with products via epilot Journeys, thought the AvailabilityCheck block.
                  *
@@ -1293,6 +1300,12 @@ declare namespace Components {
                     $relation?: EntityRelation[];
                 };
                 /**
+                 * The flag for entities whose values vary by context. Resolve the values that apply with
+                 * `POST /v1/conditional-pricing:resolve`.
+                 *
+                 */
+                is_conditional?: boolean;
+                /**
                  * Stores references to the availability files that define where this product is available.
                  * These files are used when interacting with products via epilot Journeys, thought the AvailabilityCheck block.
                  *
@@ -1513,6 +1526,12 @@ declare namespace Components {
                     $relation?: EntityRelation[];
                 };
                 /**
+                 * The flag for entities whose values vary by context. Resolve the values that apply with
+                 * `POST /v1/conditional-pricing:resolve`.
+                 *
+                 */
+                is_conditional?: boolean;
+                /**
                  * Stores references to the availability files that define where this product is available.
                  * These files are used when interacting with products via epilot Journeys, thought the AvailabilityCheck block.
                  *
@@ -1606,6 +1625,5029 @@ declare namespace Components {
              * https://api.example.com
              */
             base_url?: string;
+        }
+        /**
+         * A delete addressing its variant by the situation it applies to — the form an importer uses
+         * when it knows the source rows rather than the ids they produced.
+         *
+         * `conditions` is optional because the entity's fallback variant pins nothing: an item
+         * addressing it sends `default: true` and no `conditions`, exactly as a create marks one.
+         *
+         * **An item that addresses no variant is a per-item `VARIANT_UNPINNED`, not an envelope
+         * `400` and not a `skipped`.** Three shapes reach it: no `conditions` and no `default`,
+         * `conditions: {}`, and `default: false` alone — an empty postal-code column in a source row,
+         * serialized one way or another.
+         *
+         * Two more shapes validate here and are refused per item rather than described by the schema:
+         * an item marking `default` while also pinning `conditions` — a fallback variant applies only
+         * when nothing else does, so it cannot also pin — and an item carrying `valid_from` with no
+         * variant addressed at all. Both carry a message and no code, as the create path refuses the
+         * first today.
+         *
+         */
+        export interface BatchDeleteByConditions {
+            /**
+             * The conditional entity the variant belongs to. Required, as it is beside a `variant_id`.
+             *
+             * example:
+             * price-sp26d1yo
+             */
+            entity_id: string;
+            conditions?: /**
+             * The situation this variant applies to: a flat map keyed by condition name, as the entity's
+             * schema declares them. A condition left out is a wildcard — the variant applies whatever the
+             * context says for it, which is what makes adding a condition to a schema non-breaking for the
+             * variants that already exist.
+             *
+             * Exact values only. A predicate is a read-side thing — a resolve context or a listing's
+             * condition filter — and is never stored: what a variant applies to is one situation, not a
+             * range of them.
+             *
+             * Values are typed by their condition and stored canonicalized for that type: a `date` becomes
+             * millisecond-precision UTC, a `daterange` an object carrying `from` and `until` where an empty
+             * string is an open end, a `location` of format `zipcode` the postal code itself and one of
+             * format `zipcode_town` an object carrying both. A `select` value must be a string, and must
+             * be one the condition's `options` declare, which is always a closed vocabulary.
+             *
+             * `default`, and any name beginning with `_`, are reserved for the server and cannot be pinned
+             * here. Whether a variant is the entity's fallback is set through the request's `default` flag.
+             *
+             * example:
+             * {
+             *   "postal_code": "46045"
+             * }
+             */
+            PinnedConditions;
+            /**
+             * Address the entity's fallback variant, the one it serves when nothing else applies. A
+             * property of the variant, as it is on a write, never an entry in `conditions`.
+             *
+             */
+            default?: boolean;
+            /**
+             * The one version to remove, by the instant it takes effect. Omitted, the whole variant
+             * goes.
+             *
+             * An RFC 3339 date or date-time, to at most millisecond precision, canonicalized before it
+             * is matched.
+             *
+             * example:
+             * 2027-01-01T00:00:00Z
+             */
+            valid_from?: string;
+        }
+        /**
+         * A delete addressing its variant by id — the form a cleanup pass uses after the schema has
+         * drifted, since a tuple naming a condition the schema no longer declares addresses nothing.
+         *
+         */
+        export interface BatchDeleteByVariantId {
+            /**
+             * The conditional entity the variant belongs to. **Required beside `variant_id`, and not
+             * redundant**: a variant id alone addresses nothing in this API.
+             *
+             * example:
+             * price-sp26d1yo
+             */
+            entity_id: string;
+            /**
+             * The variant to remove, or whose version to remove.
+             * example:
+             * var-46045
+             */
+            variant_id: string;
+            /**
+             * The one version to remove, by the instant it takes effect. Omitted, the whole variant
+             * goes — its tuple, its index registration and every version it accumulated.
+             *
+             * An RFC 3339 date or date-time, to at most millisecond precision, canonicalized before it
+             * is matched.
+             *
+             * example:
+             * 2027-01-01T00:00:00Z
+             */
+            valid_from?: string;
+        }
+        /**
+         * How many items reached each outcome. Keyed by exactly the values of `BatchDeleteOutcome`, all
+         * of them present, and summing to the length of `results`. No `total`.
+         *
+         */
+        export interface BatchDeleteCounts {
+            /**
+             * example:
+             * 1
+             */
+            deleted: number;
+            /**
+             * example:
+             * 1
+             */
+            skipped: number;
+            /**
+             * example:
+             * 1
+             */
+            error: number;
+        }
+        /**
+         * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+         * the one version of it to remove.
+         *
+         * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+         * neither branch and is an envelope `400`, since the request validator rejects the body before
+         * any item runs.
+         *
+         */
+        export type BatchDeleteItem = /**
+         * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+         * the one version of it to remove.
+         *
+         * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+         * neither branch and is an envelope `400`, since the request validator rejects the body before
+         * any item runs.
+         *
+         */
+        /**
+         * A delete addressing its variant by id — the form a cleanup pass uses after the schema has
+         * drifted, since a tuple naming a condition the schema no longer declares addresses nothing.
+         *
+         */
+        BatchDeleteByVariantId | /**
+         * A delete addressing its variant by the situation it applies to — the form an importer uses
+         * when it knows the source rows rather than the ids they produced.
+         *
+         * `conditions` is optional because the entity's fallback variant pins nothing: an item
+         * addressing it sends `default: true` and no `conditions`, exactly as a create marks one.
+         *
+         * **An item that addresses no variant is a per-item `VARIANT_UNPINNED`, not an envelope
+         * `400` and not a `skipped`.** Three shapes reach it: no `conditions` and no `default`,
+         * `conditions: {}`, and `default: false` alone — an empty postal-code column in a source row,
+         * serialized one way or another.
+         *
+         * Two more shapes validate here and are refused per item rather than described by the schema:
+         * an item marking `default` while also pinning `conditions` — a fallback variant applies only
+         * when nothing else does, so it cannot also pin — and an item carrying `valid_from` with no
+         * variant addressed at all. Both carry a message and no code, as the create path refuses the
+         * first today.
+         *
+         */
+        BatchDeleteByConditions;
+        /**
+         * What one delete item did.
+         *
+         * - `deleted`: the variant, or the one version the item named, is gone.
+         * - `skipped`: the item addressed nothing — **the variant or the version**, never the entity. An
+         *   entity that cannot answer the item is an `error` carrying `ENTITY_NOT_FOUND`,
+         *   `ENTITY_TYPE_MISMATCH` or `ENTITY_NOT_CONDITIONAL`.
+         * - `error`: this item alone failed, and the entry's `error` says why.
+         *
+         */
+        export type BatchDeleteOutcome = "deleted" | "skipped" | "error";
+        /**
+         * What a batch delete did: one entry per item, in request order, and a count per outcome.
+         *
+         */
+        export interface BatchDeleteResult {
+            /**
+             * The `correlation_id` the request carried, echoed only when it was sent.
+             * example:
+             * postal-code-cleanup-2026-09
+             */
+            correlation_id?: string;
+            counts: /**
+             * How many items reached each outcome. Keyed by exactly the values of `BatchDeleteOutcome`, all
+             * of them present, and summing to the length of `results`. No `total`.
+             *
+             */
+            BatchDeleteCounts;
+            /**
+             * One entry per item, **in request order** — position is what maps an outcome back to its
+             * source row.
+             *
+             */
+            results: /**
+             * What one delete item did, and anything worth knowing about it.
+             *
+             * The same six properties as a batch upsert entry, and it carries nothing else.
+             *
+             */
+            BatchDeleteResultEntry[];
+        }
+        /**
+         * What one delete item did, and anything worth knowing about it.
+         *
+         * The same six properties as a batch upsert entry, and it carries nothing else.
+         *
+         */
+        export interface BatchDeleteResultEntry {
+            outcome: /**
+             * What one delete item did.
+             *
+             * - `deleted`: the variant, or the one version the item named, is gone.
+             * - `skipped`: the item addressed nothing — **the variant or the version**, never the entity. An
+             *   entity that cannot answer the item is an `error` carrying `ENTITY_NOT_FOUND`,
+             *   `ENTITY_TYPE_MISMATCH` or `ENTITY_NOT_CONDITIONAL`.
+             * - `error`: this item alone failed, and the entry's `error` says why.
+             *
+             */
+            BatchDeleteOutcome;
+            /**
+             * The entity this item removed from, echoed from the item — present whatever happened.
+             * example:
+             * price-sp26d1yo
+             */
+            entity_id: string;
+            /**
+             * The variant this item removed, or whose version it removed. Present wherever it is known:
+             * always for an item that named one, and for an item addressing a condition tuple only once
+             * that tuple resolved. **A `skipped` entry for a tuple no variant pins therefore names no
+             * variant.**
+             *
+             * example:
+             * var-46045
+             */
+            variant_id?: string;
+            /**
+             * The version this item removed, canonicalized to millisecond-precision UTC. Absent where
+             * the item removed the whole variant, which is what distinguishes the two deletes this one
+             * endpoint performs.
+             *
+             * example:
+             * 2027-01-01T00:00:00.000Z
+             */
+            valid_from?: string;
+            /**
+             * Things worth knowing that did not stop this item's delete — chiefly which reads the
+             * removal moved: `ACTIVE_VERSION_CHANGED` where what resolves now changed, and
+             * `SUPERSEDED_VERSION_WRITTEN` where a past-dated read did. Always present and possibly
+             * empty, on every outcome, as batch upsert's is.
+             *
+             */
+            warnings: /**
+             * Something worth knowing that did not stop a write.
+             *
+             * One vocabulary for every write, so a client branches on what happened rather than on which
+             * endpoint it called. `code` and `message` are the only two fields every code shares; everything
+             * else lives in a `details` object typed per code, so narrowing on `code` yields a payload the
+             * client can read rather than an untyped bag. A write raises each code at most once, and in the
+             * ordinary case raises none of them.
+             *
+             */
+            WriteWarning[];
+            /**
+             * Why this item failed, present only with `outcome: error`. The same typed shape a
+             * single-item delete is refused with.
+             *
+             * `LAST_VERSION_UNDELETABLE` is the refusal specific to this endpoint's dated form;
+             * `VARIANT_UNPINNED` is an item that addresses no variant — no `variant_id`, no
+             * `default`, and no or empty `conditions`; `ENTITY_NOT_FOUND`, `ENTITY_TYPE_MISMATCH` and
+             * `ENTITY_NOT_CONDITIONAL` are per item, since each item names its own entity;
+             * `WRITE_CONFLICT` is transient contention.
+             * A missing variant or version is not here at all — that is `skipped`.
+             *
+             */
+            error?: /**
+             * Why this item failed, present only with `outcome: error`. The same typed shape a
+             * single-item delete is refused with.
+             *
+             * `LAST_VERSION_UNDELETABLE` is the refusal specific to this endpoint's dated form;
+             * `VARIANT_UNPINNED` is an item that addresses no variant — no `variant_id`, no
+             * `default`, and no or empty `conditions`; `ENTITY_NOT_FOUND`, `ENTITY_TYPE_MISMATCH` and
+             * `ENTITY_NOT_CONDITIONAL` are per item, since each item names its own entity;
+             * `WRITE_CONFLICT` is transient contention.
+             * A missing variant or version is not here at all — that is `skipped`.
+             *
+             */
+            {
+                code: "SCHEMA_NOT_FOUND";
+                details: {
+                    /**
+                     * The entity type the request addressed.
+                     * example:
+                     * price
+                     */
+                    schema: string;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "ENTITY_NOT_FOUND";
+                details: {
+                    /**
+                     * The entity type the request addressed.
+                     * example:
+                     * price
+                     */
+                    schema: string;
+                    /**
+                     * The conditional entity the request addressed.
+                     * example:
+                     * price-sp26d1yo
+                     */
+                    entity_id: string;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "ENTITY_TYPE_MISMATCH";
+                details: {
+                    /**
+                     * The entity type the request addressed.
+                     * example:
+                     * price
+                     */
+                    schema: string;
+                    /**
+                     * The conditional entity the request addressed.
+                     * example:
+                     * price-sp26d1yo
+                     */
+                    entity_id: string;
+                    /**
+                     * The entity type that id belongs to. Where it is a conditional entity type, it
+                     * is the slug to send instead.
+                     *
+                     * example:
+                     * product
+                     */
+                    actual_schema: string;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "ENTITY_NOT_CONDITIONAL";
+                details: {
+                    /**
+                     * The entity type the request addressed.
+                     * example:
+                     * price
+                     */
+                    schema: string;
+                    /**
+                     * The conditional entity the request addressed.
+                     * example:
+                     * price-sp26d1yo
+                     */
+                    entity_id: string;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "VARIANT_NOT_FOUND";
+                details: {
+                    /**
+                     * The conditional entity the request addressed.
+                     * example:
+                     * price-sp26d1yo
+                     */
+                    entity_id: string;
+                    /**
+                     * The variant the request addressed.
+                     * example:
+                     * var-46045
+                     */
+                    variant_id: string;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "VERSION_NOT_FOUND";
+                details: {
+                    /**
+                     * The variant the request addressed.
+                     * example:
+                     * var-46045
+                     */
+                    variant_id: string;
+                    /**
+                     * The version the request addressed, by the instant it takes effect from.
+                     * example:
+                     * 2027-01-01T00:00:00.000Z
+                     */
+                    valid_from: string;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "NO_MATCHES";
+                details: {
+                    /**
+                     * The entity type the request addressed.
+                     * example:
+                     * price
+                     */
+                    schema: string;
+                    /**
+                     * The conditional entity the resolve was scoped to.
+                     * example:
+                     * price-sp26d1yo
+                     */
+                    entity_id: string;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "NO_ACTIVE_VERSION";
+                details: {
+                    /**
+                     * The variant the request addressed.
+                     * example:
+                     * var-46045
+                     */
+                    variant_id: string;
+                    /**
+                     * The instant a version in effect was asked for at.
+                     * example:
+                     * 2026-06-01T00:00:00.000Z
+                     */
+                    as_of: string;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "AMBIGUOUS_RESOLUTION";
+                details: {
+                    /**
+                     * Every variant that applied, each with the conditions it pins — which is what
+                     * makes the overlap actionable: two variants both apply because their pins do
+                     * not distinguish the context they were both asked about.
+                     *
+                     * Bounded by the same cap `TOO_MANY_MATCHES` reports, which is checked first,
+                     * so this list is never longer than one response may carry.
+                     *
+                     */
+                    candidates: [
+                        {
+                            /**
+                             * The candidate variant.
+                             * example:
+                             * var-46045
+                             */
+                            variant_id: string;
+                            conditions: /**
+                             * A variant's pinned conditions as a reader sees them: the pins the schema declares, plus a
+                             * boolean `default` saying whether this is the entity's fallback.
+                             *
+                             * `default` is always present and always a boolean, so a client can branch on "did I get the
+                             * fallback?" without knowing how one is stored. The reserved condition a fallback is actually
+                             * pinned under never appears here.
+                             *
+                             * example:
+                             * {
+                             *   "postal_code": "46045",
+                             *   "default": false
+                             * }
+                             */
+                            VariantConditions;
+                        },
+                        {
+                            /**
+                             * The candidate variant.
+                             * example:
+                             * var-46045
+                             */
+                            variant_id: string;
+                            conditions: /**
+                             * A variant's pinned conditions as a reader sees them: the pins the schema declares, plus a
+                             * boolean `default` saying whether this is the entity's fallback.
+                             *
+                             * `default` is always present and always a boolean, so a client can branch on "did I get the
+                             * fallback?" without knowing how one is stored. The reserved condition a fallback is actually
+                             * pinned under never appears here.
+                             *
+                             * example:
+                             * {
+                             *   "postal_code": "46045",
+                             *   "default": false
+                             * }
+                             */
+                            VariantConditions;
+                        },
+                        ...{
+                            /**
+                             * The candidate variant.
+                             * example:
+                             * var-46045
+                             */
+                            variant_id: string;
+                            conditions: /**
+                             * A variant's pinned conditions as a reader sees them: the pins the schema declares, plus a
+                             * boolean `default` saying whether this is the entity's fallback.
+                             *
+                             * `default` is always present and always a boolean, so a client can branch on "did I get the
+                             * fallback?" without knowing how one is stored. The reserved condition a fallback is actually
+                             * pinned under never appears here.
+                             *
+                             * example:
+                             * {
+                             *   "postal_code": "46045",
+                             *   "default": false
+                             * }
+                             */
+                            VariantConditions;
+                        }[]
+                    ];
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "TUPLE_CONFLICT";
+                details: {
+                    /**
+                     * The variant the write addressed.
+                     * example:
+                     * var-46045
+                     */
+                    variant_id: string;
+                    /**
+                     * The variant already holding the tuple, where the write read it back.
+                     *
+                     * example:
+                     * var-50667
+                     */
+                    conflicting_variant_id?: string;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "VERSION_CONFLICT";
+                details: {
+                    /**
+                     * The variant the write addressed.
+                     * example:
+                     * var-46045
+                     */
+                    variant_id: string;
+                    /**
+                     * The instant already claimed by a version of that variant.
+                     * example:
+                     * 2027-01-01T00:00:00.000Z
+                     */
+                    valid_from: string;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "CONDITION_UNDEFINED";
+                details: {
+                    /**
+                     * The condition named by the request and absent from the schema.
+                     * example:
+                     * postal_code
+                     */
+                    condition_name: string;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "OPERATOR_UNSUPPORTED";
+                details: {
+                    /**
+                     * example:
+                     * postal_code
+                     */
+                    condition_name: string;
+                    /**
+                     * The type the schema declares that condition with, which is what decides the
+                     * operators it accepts.
+                     *
+                     * example:
+                     * location
+                     */
+                    condition_type: string;
+                    /**
+                     * The operator the context or filter asked for.
+                     * example:
+                     * between
+                     */
+                    operator: string;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "CONTEXT_FORMAT_INVALID";
+                details: {
+                    /**
+                     * example:
+                     * postal_code
+                     */
+                    condition_name: string;
+                    /**
+                     * What a value for that condition has to be, in prose.
+                     * example:
+                     * a postal code
+                     */
+                    expected: string;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "CONDITION_VALUE_INVALID";
+                details: {
+                    /**
+                     * example:
+                     * segment
+                     */
+                    condition_name: string;
+                    /**
+                     * The value the write pinned, as it arrived. Declared without a type: the
+                     * vocabulary holds strings, so anything else is out of it by definition and is
+                     * reported as sent.
+                     *
+                     * example:
+                     * industrial
+                     */
+                    value: any;
+                    /**
+                     * The vocabulary *as enforced* — after the entries this deploy cannot read have
+                     * been dropped, so a tenant whose `options` holds a title-only entry is told
+                     * what the API actually checked against rather than what they believe they
+                     * wrote.
+                     *
+                     * example:
+                     * [
+                     *   "private",
+                     *   "commercial"
+                     * ]
+                     */
+                    options: string[];
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "TOO_MANY_MATCHES";
+                details: {
+                    /**
+                     * The most variants one resolve may compose.
+                     * example:
+                     * 100
+                     */
+                    limit: number;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "WRITE_CONFLICT";
+                details: {
+                    /**
+                     * The variant the write addressed.
+                     * example:
+                     * var-46045
+                     */
+                    variant_id: string;
+                    /**
+                     * The version the write addressed, where one was addressed.
+                     * example:
+                     * 2027-01-01T00:00:00.000Z
+                     */
+                    valid_from?: string;
+                    /**
+                     * The revision the write required the stored version to still be at.
+                     * example:
+                     * 3
+                     */
+                    expected_revision?: number;
+                    /**
+                     * The revision the version is actually at, where the failed write read it back.
+                     * Absent when it could not be.
+                     *
+                     * example:
+                     * 4
+                     */
+                    current_revision?: number;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "OFFSET_WINDOW_EXCEEDED";
+                details: {
+                    /**
+                     * The offset the request asked for.
+                     * example:
+                     * 24990
+                     */
+                    from: number;
+                    /**
+                     * The page size the request asked for, after clamping. Present because the two
+                     * together are what exceeded the window — an offset inside it can still be
+                     * refused for the page it would have to read.
+                     *
+                     * example:
+                     * 25
+                     */
+                    size: number;
+                    /**
+                     * The last row this deploy's index will serve from an offset. Read it to size a
+                     * page control, never to decide when to switch to the cursor — a caller can page
+                     * on with `next` from any page.
+                     *
+                     * example:
+                     * 25000
+                     */
+                    window: number;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "CURSOR_INVALID";
+                details: {
+                    /**
+                     * Which check the cursor failed, in prose.
+                     * example:
+                     * The cursor was issued for a different sort order
+                     */
+                    reason: string;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "VARIANT_LIMIT_REACHED";
+                details: {
+                    /**
+                     * Variants this entity already holds.
+                     * example:
+                     * 5000
+                     */
+                    variant_count: number;
+                    /**
+                     * Variants this entity may hold. Configurable per deploy, the same value for
+                     * every organization on it.
+                     *
+                     * example:
+                     * 5000
+                     */
+                    cap: number;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "PIN_FORMAT_INVALID";
+                details: {
+                    /**
+                     * example:
+                     * valid_period
+                     */
+                    condition_name: string;
+                    /**
+                     * The type the schema declares that condition with, which is what decides the
+                     * values it accepts.
+                     *
+                     * example:
+                     * daterange
+                     */
+                    condition_type: string;
+                    /**
+                     * What a pin for that condition has to be, in prose — the same field
+                     * `CONTEXT_FORMAT_INVALID` carries, worded for the write side. It says what
+                     * `condition_type` cannot: a `location` of format `zipcode` wants a postal code
+                     * and one of format `zipcode_town` wants an object carrying both, and the type
+                     * is `location` either way.
+                     *
+                     * example:
+                     * an object carrying a from and an until date, either may be open
+                     */
+                    expected: string;
+                    /**
+                     * The value the write pinned, as it arrived. Declared without a type, since
+                     * what makes it invalid is that it is not of the condition's type.
+                     *
+                     * example:
+                     * 2027-01-01/2027-12-31
+                     */
+                    value: any;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "VARIANT_UNPINNED";
+                details: {
+                    /**
+                     * The conditional entity the item addressed.
+                     * example:
+                     * price-sp26d1yo
+                     */
+                    entity_id: string;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "LAST_VERSION_UNDELETABLE";
+                details: {
+                    /**
+                     * The variant whose last version the delete addressed.
+                     * example:
+                     * var-46045
+                     */
+                    variant_id: string;
+                    /**
+                     * The version the delete addressed, by the instant it takes effect from.
+                     * example:
+                     * 2027-01-01T00:00:00.000Z
+                     */
+                    valid_from: string;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                error?: /**
+                 * The `error` field of an error response: the message, or — where the request itself failed
+                 * validation before any handler ran — the validation errors themselves, which those 400s put
+                 * here in place of a string.
+                 *
+                 * A conditional-pricing operation answers a body its schema rejects with the list, and
+                 * everything else it refuses with the message.
+                 *
+                 */
+                ReportedError;
+            };
+        }
+        /**
+         * A batch of variant and version deletes under one schema, each item naming the entity it
+         * removes from.
+         *
+         */
+        export interface BatchDeleteVariantsRequest {
+            /**
+             * An opaque string the caller uses to tie this response to the file and cycle that produced
+             * it. Echoed back verbatim, only when it was sent, and never interpreted.
+             *
+             * example:
+             * postal-code-cleanup-2026-09
+             */
+            correlation_id?: string;
+            /**
+             * The deletes to apply, in the order they should apply where two of them address the same
+             * variant — which is decided after every condition tuple has been resolved to a variant id,
+             * so the order holds across the two addressing forms. At most 100 per call.
+             *
+             */
+            items: [
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove.
+                 *
+                 * Exactly one of the two forms. An item carrying both a `variant_id` and `conditions` matches
+                 * neither branch and is an envelope `400`, since the request validator rejects the body before
+                 * any item runs.
+                 *
+                 */
+                BatchDeleteItem?
+            ];
+        }
+        /**
+         * How many items reached each outcome. Keyed by exactly the values of `BatchUpsertOutcome`, all
+         * of them present, so a logger reads a count without `?? 0`.
+         *
+         * **They sum to the length of `results`.** There is no `total`.
+         *
+         */
+        export interface BatchUpsertCounts {
+            /**
+             * example:
+             * 1
+             */
+            variant_created: number;
+            /**
+             * example:
+             * 1
+             */
+            version_created: number;
+            /**
+             * example:
+             * 1
+             */
+            updated: number;
+            /**
+             * example:
+             * 1
+             */
+            skipped: number;
+            /**
+             * example:
+             * 1
+             */
+            error: number;
+        }
+        /**
+         * One variant write: the entity it belongs to, the situation it applies to, and the values it
+         * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+         * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+         * variant already holding it.
+         *
+         * There is no `variant_id`. An upsert creates variants that have no id yet.
+         *
+         */
+        export interface BatchUpsertItem {
+            /**
+             * The conditional entity this item writes to. On the item rather than in the path, so one
+             * call can refresh a whole tariff hierarchy — a composite price and its components
+             * together.
+             *
+             * example:
+             * price-sp26d1yo
+             */
+            entity_id: string;
+            conditions?: /**
+             * The situation this variant applies to: a flat map keyed by condition name, as the entity's
+             * schema declares them. A condition left out is a wildcard — the variant applies whatever the
+             * context says for it, which is what makes adding a condition to a schema non-breaking for the
+             * variants that already exist.
+             *
+             * Exact values only. A predicate is a read-side thing — a resolve context or a listing's
+             * condition filter — and is never stored: what a variant applies to is one situation, not a
+             * range of them.
+             *
+             * Values are typed by their condition and stored canonicalized for that type: a `date` becomes
+             * millisecond-precision UTC, a `daterange` an object carrying `from` and `until` where an empty
+             * string is an open end, a `location` of format `zipcode` the postal code itself and one of
+             * format `zipcode_town` an object carrying both. A `select` value must be a string, and must
+             * be one the condition's `options` declare, which is always a closed vocabulary.
+             *
+             * `default`, and any name beginning with `_`, are reserved for the server and cannot be pinned
+             * here. Whether a variant is the entity's fallback is set through the request's `default` flag.
+             *
+             * example:
+             * {
+             *   "postal_code": "46045"
+             * }
+             */
+            PinnedConditions;
+            /**
+             * Mark this variant as the entity's fallback, exactly as a create does: a property of the
+             * variant, never an entry in `conditions`. An item that pins nothing and is not the default
+             * is `VARIANT_UNPINNED` — the empty postal-code column in a source file.
+             *
+             */
+            default?: boolean;
+            /**
+             * When the version this item writes takes effect. Omitted, it is a current-state,
+             * last-write-wins write with no `skipped` detection.
+             *
+             * An RFC 3339 date (`2026-01-01`, read as midnight UTC) or date-time
+             * (`2026-01-01T00:00:00Z`), to at most millisecond precision.
+             *
+             * A past instant is written like any other and answered with the timeline warnings on this
+             * item, so an importer stamping one `valid_from` across a batch sees them on every item.
+             *
+             * example:
+             * 2027-01-01T00:00:00Z
+             */
+            valid_from?: string;
+            values: /**
+             * The attribute values this version overrides on the base entity, keyed by attribute name.
+             *
+             * Only attributes currently declaring `overridable_attribute` are applied. Metadata fields
+             * (anything underscore-prefixed), readonly attributes, hidden attributes, computed attributes
+             * and non-overridable attributes present here are not applied rather than rejected, and each one
+             * is named in the write's `warnings`, so a client working from a slightly stale schema snapshot
+             * still succeeds instead of failing on fields it could not have known to drop, and still learns
+             * which of them did not land — the naming half published ahead of the behaviour, so until the
+             * `ATTRIBUTES_NOT_APPLIED` warning is emitted an unapplied attribute is dropped silently. An attribute's `render_condition` says when to show it and has no
+             * bearing on whether a variant may override it.
+             *
+             * Not applied means *not updated*, never *removed*: a value already stored for an attribute that
+             * is not currently overridable is preserved, so removing and restoring the flag deactivates and
+             * then reactivates the same override. An append seeds the attributes the variant may not
+             * override from the version in effect at its own `valid_from`, so its stored values are not a
+             * pure function of the body that wrote it; a variant's first version, and an append dated before
+             * the variant's earliest version, inherit nothing.
+             *
+             * A composite price's `price_components` is an ordinary overridable relation attribute. A
+             * composite variant's override references different component *entities*, never a variant or a
+             * version of one, and holds whatever a relation attribute ordinarily holds — this API defines no
+             * reference shape of its own.
+             *
+             * example:
+             * {
+             *   "unit_amount": 2499,
+             *   "unit_amount_decimal": "24.99"
+             * }
+             */
+            VariantValues;
+        }
+        /**
+         * What one upsert item did, derived from what was stored rather than from a mode the caller
+         * declared.
+         *
+         * - `variant_created`: the condition tuple was unknown, so a variant and its first version were
+         *   created. The entry's `variant_id` is the id an order or contract pins.
+         * - `version_created`: the tuple was known and had no version at the item's `valid_from`, so
+         *   one was appended. The ordinary monthly-refresh case, and a separate value from
+         *   `variant_created` so an importer's counts can tell "new postal codes appeared" from
+         *   "existing variants got their scheduled adjustment".
+         * - `updated`: a version existed at that exact instant and was written in place.
+         * - `skipped`: reserved for a write whose values are identical to what is stored, so re-running
+         *   an unchanged import reads as a no-op. An item without `valid_from` has no `skipped`
+         *   detection at all.
+         * - `error`: this item alone failed, and the entry's `error` says why.
+         *
+         */
+        export type BatchUpsertOutcome = "variant_created" | "version_created" | "updated" | "skipped" | "error";
+        /**
+         * What a batch upsert did: one entry per item, in request order, and a count per outcome.
+         *
+         */
+        export interface BatchUpsertResult {
+            /**
+             * The `correlation_id` the request carried, echoed only when it was sent.
+             * example:
+             * tariff-refresh-2027-01
+             */
+            correlation_id?: string;
+            counts: /**
+             * How many items reached each outcome. Keyed by exactly the values of `BatchUpsertOutcome`, all
+             * of them present, so a logger reads a count without `?? 0`.
+             *
+             * **They sum to the length of `results`.** There is no `total`.
+             *
+             */
+            BatchUpsertCounts;
+            /**
+             * One entry per item, **in request order** — position is what maps an outcome back to its
+             * source row, and no entry carries an index of its own.
+             *
+             */
+            results: /**
+             * What one upsert item did, and anything worth knowing about it.
+             *
+             * **It carries nothing else.** Position in `results` is the contract, so no entry carries an
+             * index; nothing the caller sent is echoed back beyond `entity_id`; and there is no `_revision`
+             * — an editing screen re-reads the version it is about to write through its own `GET`.
+             *
+             */
+            BatchUpsertResultEntry[];
+        }
+        /**
+         * What one upsert item did, and anything worth knowing about it.
+         *
+         * **It carries nothing else.** Position in `results` is the contract, so no entry carries an
+         * index; nothing the caller sent is echoed back beyond `entity_id`; and there is no `_revision`
+         * — an editing screen re-reads the version it is about to write through its own `GET`.
+         *
+         */
+        export interface BatchUpsertResultEntry {
+            outcome: /**
+             * What one upsert item did, derived from what was stored rather than from a mode the caller
+             * declared.
+             *
+             * - `variant_created`: the condition tuple was unknown, so a variant and its first version were
+             *   created. The entry's `variant_id` is the id an order or contract pins.
+             * - `version_created`: the tuple was known and had no version at the item's `valid_from`, so
+             *   one was appended. The ordinary monthly-refresh case, and a separate value from
+             *   `variant_created` so an importer's counts can tell "new postal codes appeared" from
+             *   "existing variants got their scheduled adjustment".
+             * - `updated`: a version existed at that exact instant and was written in place.
+             * - `skipped`: reserved for a write whose values are identical to what is stored, so re-running
+             *   an unchanged import reads as a no-op. An item without `valid_from` has no `skipped`
+             *   detection at all.
+             * - `error`: this item alone failed, and the entry's `error` says why.
+             *
+             */
+            BatchUpsertOutcome;
+            /**
+             * The entity this item wrote to, echoed from the item — present whatever happened.
+             * example:
+             * price-sp26d1yo
+             */
+            entity_id: string;
+            /**
+             * The variant this item created or wrote to. Present on every outcome but `error`: for a
+             * `variant_created` item it is the id an importer needs to pin, and for the rest it is the
+             * variant the item's condition tuple resolved to.
+             *
+             * example:
+             * var-46045
+             */
+            variant_id?: string;
+            /**
+             * The version this item wrote, canonicalized to millisecond-precision UTC. Present on every
+             * outcome but `error`, including for an item that sent none — the server stamps the instant
+             * a current-state write takes effect, and this is where the caller reads it back.
+             *
+             * example:
+             * 2027-01-01T00:00:00.000Z
+             */
+            valid_from?: string;
+            /**
+             * Things worth knowing that did not stop this item's write. **Always present, and possibly
+             * empty** — on a `skipped` and an `error` entry too — so a client reads its length rather
+             * than branching on its absence, as every other write in this document already asks.
+             * `skipped` describes what storage did; a warning describes what the request asked for, and
+             * the two are not the same fact.
+             *
+             * Every warning fires per item, with no batch-level suppression:
+             * `VARIANT_COUNT_APPROACHING_CAP` included, even where an entity past its threshold
+             * produces it on all 100 entries. A logger dedupes by code.
+             *
+             */
+            warnings: /**
+             * Something worth knowing that did not stop a write.
+             *
+             * One vocabulary for every write, so a client branches on what happened rather than on which
+             * endpoint it called. `code` and `message` are the only two fields every code shares; everything
+             * else lives in a `details` object typed per code, so narrowing on `code` yields a payload the
+             * client can read rather than an untyped bag. A write raises each code at most once, and in the
+             * ordinary case raises none of them.
+             *
+             */
+            WriteWarning[];
+            /**
+             * Why this item failed, present only with `outcome: error`. The same typed shape a
+             * single-item write is refused with, so a per-item failure and a single-item failure are
+             * read by one client type.
+             *
+             * An item carries the codes variant create raises — `VARIANT_UNPINNED`,
+             * `CONDITION_UNDEFINED`, `CONDITION_VALUE_INVALID`, `PIN_FORMAT_INVALID`,
+             * `VARIANT_LIMIT_REACHED`, `WRITE_CONFLICT` for transient contention, and the three the
+             * addressed entity answers with: `ENTITY_NOT_FOUND`, `ENTITY_TYPE_MISMATCH` and
+             * `ENTITY_NOT_CONDITIONAL` — less two. Those three are per item because each item names its
+             * own entity, while `SCHEMA_NOT_FOUND` is the envelope's, since the slug is in the path. `TUPLE_CONFLICT` never appears on an item, and neither does `VERSION_CONFLICT`: a
+             * guard failure on a brand-new tuple is re-read and re-derived, and an existing
+             * `valid_from` is a replacement.
+             *
+             */
+            error?: /**
+             * Why this item failed, present only with `outcome: error`. The same typed shape a
+             * single-item write is refused with, so a per-item failure and a single-item failure are
+             * read by one client type.
+             *
+             * An item carries the codes variant create raises — `VARIANT_UNPINNED`,
+             * `CONDITION_UNDEFINED`, `CONDITION_VALUE_INVALID`, `PIN_FORMAT_INVALID`,
+             * `VARIANT_LIMIT_REACHED`, `WRITE_CONFLICT` for transient contention, and the three the
+             * addressed entity answers with: `ENTITY_NOT_FOUND`, `ENTITY_TYPE_MISMATCH` and
+             * `ENTITY_NOT_CONDITIONAL` — less two. Those three are per item because each item names its
+             * own entity, while `SCHEMA_NOT_FOUND` is the envelope's, since the slug is in the path. `TUPLE_CONFLICT` never appears on an item, and neither does `VERSION_CONFLICT`: a
+             * guard failure on a brand-new tuple is re-read and re-derived, and an existing
+             * `valid_from` is a replacement.
+             *
+             */
+            {
+                code: "SCHEMA_NOT_FOUND";
+                details: {
+                    /**
+                     * The entity type the request addressed.
+                     * example:
+                     * price
+                     */
+                    schema: string;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[] | string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "ENTITY_NOT_FOUND";
+                details: {
+                    /**
+                     * The entity type the request addressed.
+                     * example:
+                     * price
+                     */
+                    schema: string;
+                    /**
+                     * The conditional entity the request addressed.
+                     * example:
+                     * price-sp26d1yo
+                     */
+                    entity_id: string;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[] | string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "ENTITY_TYPE_MISMATCH";
+                details: {
+                    /**
+                     * The entity type the request addressed.
+                     * example:
+                     * price
+                     */
+                    schema: string;
+                    /**
+                     * The conditional entity the request addressed.
+                     * example:
+                     * price-sp26d1yo
+                     */
+                    entity_id: string;
+                    /**
+                     * The entity type that id belongs to. Where it is a conditional entity type, it
+                     * is the slug to send instead.
+                     *
+                     * example:
+                     * product
+                     */
+                    actual_schema: string;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[] | string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "ENTITY_NOT_CONDITIONAL";
+                details: {
+                    /**
+                     * The entity type the request addressed.
+                     * example:
+                     * price
+                     */
+                    schema: string;
+                    /**
+                     * The conditional entity the request addressed.
+                     * example:
+                     * price-sp26d1yo
+                     */
+                    entity_id: string;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[] | string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "VARIANT_NOT_FOUND";
+                details: {
+                    /**
+                     * The conditional entity the request addressed.
+                     * example:
+                     * price-sp26d1yo
+                     */
+                    entity_id: string;
+                    /**
+                     * The variant the request addressed.
+                     * example:
+                     * var-46045
+                     */
+                    variant_id: string;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[] | string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "VERSION_NOT_FOUND";
+                details: {
+                    /**
+                     * The variant the request addressed.
+                     * example:
+                     * var-46045
+                     */
+                    variant_id: string;
+                    /**
+                     * The version the request addressed, by the instant it takes effect from.
+                     * example:
+                     * 2027-01-01T00:00:00.000Z
+                     */
+                    valid_from: string;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[] | string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "NO_MATCHES";
+                details: {
+                    /**
+                     * The entity type the request addressed.
+                     * example:
+                     * price
+                     */
+                    schema: string;
+                    /**
+                     * The conditional entity the resolve was scoped to.
+                     * example:
+                     * price-sp26d1yo
+                     */
+                    entity_id: string;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[] | string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "NO_ACTIVE_VERSION";
+                details: {
+                    /**
+                     * The variant the request addressed.
+                     * example:
+                     * var-46045
+                     */
+                    variant_id: string;
+                    /**
+                     * The instant a version in effect was asked for at.
+                     * example:
+                     * 2026-06-01T00:00:00.000Z
+                     */
+                    as_of: string;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[] | string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "AMBIGUOUS_RESOLUTION";
+                details: {
+                    /**
+                     * Every variant that applied, each with the conditions it pins — which is what
+                     * makes the overlap actionable: two variants both apply because their pins do
+                     * not distinguish the context they were both asked about.
+                     *
+                     * Bounded by the same cap `TOO_MANY_MATCHES` reports, which is checked first,
+                     * so this list is never longer than one response may carry.
+                     *
+                     */
+                    candidates: [
+                        {
+                            /**
+                             * The candidate variant.
+                             * example:
+                             * var-46045
+                             */
+                            variant_id: string;
+                            conditions: /**
+                             * A variant's pinned conditions as a reader sees them: the pins the schema declares, plus a
+                             * boolean `default` saying whether this is the entity's fallback.
+                             *
+                             * `default` is always present and always a boolean, so a client can branch on "did I get the
+                             * fallback?" without knowing how one is stored. The reserved condition a fallback is actually
+                             * pinned under never appears here.
+                             *
+                             * example:
+                             * {
+                             *   "postal_code": "46045",
+                             *   "default": false
+                             * }
+                             */
+                            VariantConditions;
+                        },
+                        {
+                            /**
+                             * The candidate variant.
+                             * example:
+                             * var-46045
+                             */
+                            variant_id: string;
+                            conditions: /**
+                             * A variant's pinned conditions as a reader sees them: the pins the schema declares, plus a
+                             * boolean `default` saying whether this is the entity's fallback.
+                             *
+                             * `default` is always present and always a boolean, so a client can branch on "did I get the
+                             * fallback?" without knowing how one is stored. The reserved condition a fallback is actually
+                             * pinned under never appears here.
+                             *
+                             * example:
+                             * {
+                             *   "postal_code": "46045",
+                             *   "default": false
+                             * }
+                             */
+                            VariantConditions;
+                        },
+                        ...{
+                            /**
+                             * The candidate variant.
+                             * example:
+                             * var-46045
+                             */
+                            variant_id: string;
+                            conditions: /**
+                             * A variant's pinned conditions as a reader sees them: the pins the schema declares, plus a
+                             * boolean `default` saying whether this is the entity's fallback.
+                             *
+                             * `default` is always present and always a boolean, so a client can branch on "did I get the
+                             * fallback?" without knowing how one is stored. The reserved condition a fallback is actually
+                             * pinned under never appears here.
+                             *
+                             * example:
+                             * {
+                             *   "postal_code": "46045",
+                             *   "default": false
+                             * }
+                             */
+                            VariantConditions;
+                        }[]
+                    ];
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[] | string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "TUPLE_CONFLICT";
+                details: {
+                    /**
+                     * The variant the write addressed.
+                     * example:
+                     * var-46045
+                     */
+                    variant_id: string;
+                    /**
+                     * The variant already holding the tuple, where the write read it back.
+                     *
+                     * example:
+                     * var-50667
+                     */
+                    conflicting_variant_id?: string;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[] | string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "VERSION_CONFLICT";
+                details: {
+                    /**
+                     * The variant the write addressed.
+                     * example:
+                     * var-46045
+                     */
+                    variant_id: string;
+                    /**
+                     * The instant already claimed by a version of that variant.
+                     * example:
+                     * 2027-01-01T00:00:00.000Z
+                     */
+                    valid_from: string;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[] | string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "CONDITION_UNDEFINED";
+                details: {
+                    /**
+                     * The condition named by the request and absent from the schema.
+                     * example:
+                     * postal_code
+                     */
+                    condition_name: string;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[] | string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "OPERATOR_UNSUPPORTED";
+                details: {
+                    /**
+                     * example:
+                     * postal_code
+                     */
+                    condition_name: string;
+                    /**
+                     * The type the schema declares that condition with, which is what decides the
+                     * operators it accepts.
+                     *
+                     * example:
+                     * location
+                     */
+                    condition_type: string;
+                    /**
+                     * The operator the context or filter asked for.
+                     * example:
+                     * between
+                     */
+                    operator: string;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[] | string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "CONTEXT_FORMAT_INVALID";
+                details: {
+                    /**
+                     * example:
+                     * postal_code
+                     */
+                    condition_name: string;
+                    /**
+                     * What a value for that condition has to be, in prose.
+                     * example:
+                     * a postal code
+                     */
+                    expected: string;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[] | string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "CONDITION_VALUE_INVALID";
+                details: {
+                    /**
+                     * example:
+                     * segment
+                     */
+                    condition_name: string;
+                    /**
+                     * The value the write pinned, as it arrived. Declared without a type: the
+                     * vocabulary holds strings, so anything else is out of it by definition and is
+                     * reported as sent.
+                     *
+                     * example:
+                     * industrial
+                     */
+                    value: any;
+                    /**
+                     * The vocabulary *as enforced* — after the entries this deploy cannot read have
+                     * been dropped, so a tenant whose `options` holds a title-only entry is told
+                     * what the API actually checked against rather than what they believe they
+                     * wrote.
+                     *
+                     * example:
+                     * [
+                     *   "private",
+                     *   "commercial"
+                     * ]
+                     */
+                    options: string[];
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[] | string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "TOO_MANY_MATCHES";
+                details: {
+                    /**
+                     * The most variants one resolve may compose.
+                     * example:
+                     * 100
+                     */
+                    limit: number;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[] | string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "WRITE_CONFLICT";
+                details: {
+                    /**
+                     * The variant the write addressed.
+                     * example:
+                     * var-46045
+                     */
+                    variant_id: string;
+                    /**
+                     * The version the write addressed, where one was addressed.
+                     * example:
+                     * 2027-01-01T00:00:00.000Z
+                     */
+                    valid_from?: string;
+                    /**
+                     * The revision the write required the stored version to still be at.
+                     * example:
+                     * 3
+                     */
+                    expected_revision?: number;
+                    /**
+                     * The revision the version is actually at, where the failed write read it back.
+                     * Absent when it could not be.
+                     *
+                     * example:
+                     * 4
+                     */
+                    current_revision?: number;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[] | string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "OFFSET_WINDOW_EXCEEDED";
+                details: {
+                    /**
+                     * The offset the request asked for.
+                     * example:
+                     * 24990
+                     */
+                    from: number;
+                    /**
+                     * The page size the request asked for, after clamping. Present because the two
+                     * together are what exceeded the window — an offset inside it can still be
+                     * refused for the page it would have to read.
+                     *
+                     * example:
+                     * 25
+                     */
+                    size: number;
+                    /**
+                     * The last row this deploy's index will serve from an offset. Read it to size a
+                     * page control, never to decide when to switch to the cursor — a caller can page
+                     * on with `next` from any page.
+                     *
+                     * example:
+                     * 25000
+                     */
+                    window: number;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[] | string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "CURSOR_INVALID";
+                details: {
+                    /**
+                     * Which check the cursor failed, in prose.
+                     * example:
+                     * The cursor was issued for a different sort order
+                     */
+                    reason: string;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[] | string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "VARIANT_LIMIT_REACHED";
+                details: {
+                    /**
+                     * Variants this entity already holds.
+                     * example:
+                     * 5000
+                     */
+                    variant_count: number;
+                    /**
+                     * Variants this entity may hold. Configurable per deploy, the same value for
+                     * every organization on it.
+                     *
+                     * example:
+                     * 5000
+                     */
+                    cap: number;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[] | string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "PIN_FORMAT_INVALID";
+                details: {
+                    /**
+                     * example:
+                     * valid_period
+                     */
+                    condition_name: string;
+                    /**
+                     * The type the schema declares that condition with, which is what decides the
+                     * values it accepts.
+                     *
+                     * example:
+                     * daterange
+                     */
+                    condition_type: string;
+                    /**
+                     * What a pin for that condition has to be, in prose — the same field
+                     * `CONTEXT_FORMAT_INVALID` carries, worded for the write side. It says what
+                     * `condition_type` cannot: a `location` of format `zipcode` wants a postal code
+                     * and one of format `zipcode_town` wants an object carrying both, and the type
+                     * is `location` either way.
+                     *
+                     * example:
+                     * an object carrying a from and an until date, either may be open
+                     */
+                    expected: string;
+                    /**
+                     * The value the write pinned, as it arrived. Declared without a type, since
+                     * what makes it invalid is that it is not of the condition's type.
+                     *
+                     * example:
+                     * 2027-01-01/2027-12-31
+                     */
+                    value: any;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[] | string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "VARIANT_UNPINNED";
+                details: {
+                    /**
+                     * The conditional entity the item addressed.
+                     * example:
+                     * price-sp26d1yo
+                     */
+                    entity_id: string;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[] | string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "LAST_VERSION_UNDELETABLE";
+                details: {
+                    /**
+                     * The variant whose last version the delete addressed.
+                     * example:
+                     * var-46045
+                     */
+                    variant_id: string;
+                    /**
+                     * The version the delete addressed, by the instant it takes effect from.
+                     * example:
+                     * 2027-01-01T00:00:00.000Z
+                     */
+                    valid_from: string;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong, in the field responses have always used and every caller to date
+                 * reads. Carries the same string as `message` — which the shared `Error` schema
+                 * requires — except on a request-validation failure, which puts the list of validation
+                 * errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[] | string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                error?: /**
+                 * The `error` field of an error response: the message, or — where the request itself failed
+                 * validation before any handler ran — the validation errors themselves, which those 400s put
+                 * here in place of a string.
+                 *
+                 * A conditional-pricing operation answers a body its schema rejects with the list, and
+                 * everything else it refuses with the message.
+                 *
+                 */
+                ReportedError;
+            };
+        }
+        /**
+         * A batch of variant writes under one schema, each item naming the entity it writes to.
+         *
+         */
+        export interface BatchUpsertVariantsRequest {
+            /**
+             * An opaque string the caller uses to tie this response to the file and cycle that produced
+             * it. Echoed back verbatim, only when it was sent, and never interpreted.
+             *
+             * example:
+             * tariff-refresh-2027-01
+             */
+            correlation_id?: string;
+            /**
+             * The writes to apply, in the order they should apply where two of them address the same
+             * variant. At most 100 per call — a limit on one request, distinct from the per-entity
+             * variant cap, which limits stored state.
+             *
+             */
+            items: [
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the entity it belongs to, the situation it applies to, and the values it
+                 * carries — the single-item create's body plus `entity_id`. The two differ on `conditions`: on
+                 * a create an existing tuple is `TUPLE_CONFLICT`, and here it is a version appended to the
+                 * variant already holding it.
+                 *
+                 * There is no `variant_id`. An upsert creates variants that have no id yet.
+                 *
+                 */
+                BatchUpsertItem?
+            ];
         }
         export type BillingPeriod = "weekly" | "monthly" | "every_quarter" | "every_6_months" | "yearly";
         /**
@@ -3174,6 +8216,12 @@ declare namespace Components {
                     $relation?: EntityRelation[];
                 };
                 /**
+                 * The flag for entities whose values vary by context. Resolve the values that apply with
+                 * `POST /v1/conditional-pricing:resolve`.
+                 *
+                 */
+                is_conditional?: boolean;
+                /**
                  * Stores references to the availability files that define where this product is available.
                  * These files are used when interacting with products via epilot Journeys, thought the AvailabilityCheck block.
                  *
@@ -3368,6 +8416,12 @@ declare namespace Components {
                 Currency;
                 cashback_period?: /* The cashback period, for now it's limited to either 0 months or 12 months */ CashbackPeriod;
                 active?: boolean;
+                /**
+                 * The flag for entities whose values vary by context. Resolve the values that apply with
+                 * `POST /v1/conditional-pricing:resolve`.
+                 *
+                 */
+                is_conditional?: boolean;
                 /**
                  * Whether the coupon requires a promo code to be applied
                  */
@@ -3779,6 +8833,12 @@ declare namespace Components {
                     $relation?: EntityRelation[];
                 };
                 /**
+                 * The flag for entities whose values vary by context. Resolve the values that apply with
+                 * `POST /v1/conditional-pricing:resolve`.
+                 *
+                 */
+                is_conditional?: boolean;
+                /**
                  * Stores references to the availability files that define where this product is available.
                  * These files are used when interacting with products via epilot Journeys, thought the AvailabilityCheck block.
                  *
@@ -4180,6 +9240,17 @@ declare namespace Components {
          */
         export interface ConditionDefinition {
             /**
+             * Stable identity of the condition, round-tripped unchanged for the lifetime of the
+             * condition: it is what tells a rename apart from a remove plus an add. The Entity API
+             * mints none of its own, so whoever creates a condition supplies one — a catalog condition
+             * arrives with the identity the catalog gives it, the same in every org, and is copied into
+             * the schema along with the rest of the object.
+             *
+             * example:
+             * d5839b94-ba20-4225-a78e-76951d352bd6
+             */
+            id: string; // uuid
+            /**
              * How variants and resolve contexts refer to this condition. Independent of attribute
              * names: a value needed as an attribute too is duplicated onto the variant.
              *
@@ -4205,7 +9276,7 @@ declare namespace Components {
              * - `date`: a single date
              * - `daterange`: a window with a from and an until timestamp; both ends may be left open
              * - `boolean`: a true/false value
-             * - `select`: one of the values declared in `options`, unless `allow_any` is set
+             * - `select`: one of the values declared in `options`, which is always a closed vocabulary
              * - `location`: a geographic value, shaped by `format`
              *
              * There is no condition type for the fallback variant. Being the entity's fallback is a
@@ -4217,38 +9288,33 @@ declare namespace Components {
             /**
              * The declared vocabulary of a `select` condition. Absent for every other type.
              *
-             * The same shape a `select` attribute's `options` has on the Entity API, item for item: an
+             * The same shape a `select` condition's `options` has on the Entity API, item for item: an
              * entry is either the value itself or an object carrying that value and an optional display
              * `title`. A `title` is never pinned by a variant and never matched — two entries differing
              * only in their title are one vocabulary entry.
              *
-             * Enforced on variant writes, unless `allow_any` is true: a pinned value outside the
-             * vocabulary is rejected with `CONDITION_VALUE_INVALID`. It is *not* enforced on resolve —
-             * a vocabulary says what may be stored, not what may be asked for, so a context value
-             * outside it is a query that simply matches nothing.
+             * The vocabulary is always closed: a condition carries no flag widening it, so a pinned
+             * value outside a declared vocabulary is rejected with `CONDITION_VALUE_INVALID`. It is
+             * *not* enforced on resolve — a vocabulary says what may be stored, not what may be asked
+             * for, so a context value outside it is a query that simply matches nothing.
              *
              * example:
              * [
              *   "private",
-             *   "commercial"
+             *   {
+             *     "value": "commercial",
+             *     "title": "Commercial customers"
+             *   }
              * ]
              */
-            options?: ((string | null) | {
+            options?: (string | {
                 value: string;
                 title?: string;
             })[];
             /**
-             * Allow arbitrary stored values in addition to the declared `options`. Absent means strict:
-             * a variant may only pin a declared option.
-             *
-             * example:
-             * false
-             */
-            allow_any?: boolean;
-            /**
              * The value shape of a `location` condition. Absent for every other type.
              */
-            format?: "zipcode" | "zipcode + town";
+            format?: "zipcode" | "zipcode_town";
         }
         /**
          * A named bundle of condition definitions, built in for one entity type.
@@ -4296,7 +9362,7 @@ declare namespace Components {
          * - `date`: a single date
          * - `daterange`: a window with a from and an until timestamp; both ends may be left open
          * - `boolean`: a true/false value
-         * - `select`: one of the values declared in `options`, unless `allow_any` is set
+         * - `select`: one of the values declared in `options`, which is always a closed vocabulary
          * - `location`: a geographic value, shaped by `format`
          *
          * There is no condition type for the fallback variant. Being the entity's fallback is a
@@ -4312,14 +9378,51 @@ declare namespace Components {
          */
         export type ConditionalEntitySlug = "product" | "price" | "coupon";
         /**
-         * An error from a conditional-pricing operation, carrying a machine-readable `code`
-         * from the conditional-pricing vocabulary plus any structured data about the failure,
-         * so a client can branch on the kind of failure rather than parse the message.
+         * An error from a conditional-pricing operation, carrying a machine-readable `code` from the
+         * conditional-pricing vocabulary plus the structured data that code explains, so a client can
+         * branch on the kind of failure rather than parse the message.
          * Referenced only by the operations that emit these codes; every other operation
          * keeps the plain `Error` shape.
          *
+         * `details` is typed per code. Narrow on `code` and the object under it declares exactly the
+         * fields that code sends — never a field it does not send, and nothing beyond the declaration —
+         * so the conflicting variant id, or the value and vocabulary behind a rejected pin, is read
+         * directly.
+         *
+         * Not every failure these operations raise is in the vocabulary. A request body that is simply
+         * malformed earns a message and nothing to branch on, and is answered with neither `code` nor
+         * `details` — the last member of the union, so testing `code` for absence is how a client tells
+         * one of those from the twenty-three coded failures.
+         *
          */
-        export interface ConditionalPricingError {
+        export type ConditionalPricingError = /**
+         * An error from a conditional-pricing operation, carrying a machine-readable `code` from the
+         * conditional-pricing vocabulary plus the structured data that code explains, so a client can
+         * branch on the kind of failure rather than parse the message.
+         * Referenced only by the operations that emit these codes; every other operation
+         * keeps the plain `Error` shape.
+         *
+         * `details` is typed per code. Narrow on `code` and the object under it declares exactly the
+         * fields that code sends — never a field it does not send, and nothing beyond the declaration —
+         * so the conflicting variant id, or the value and vocabulary behind a rejected pin, is read
+         * directly.
+         *
+         * Not every failure these operations raise is in the vocabulary. A request body that is simply
+         * malformed earns a message and nothing to branch on, and is answered with neither `code` nor
+         * `details` — the last member of the union, so testing `code` for absence is how a client tells
+         * one of those from the twenty-three coded failures.
+         *
+         */
+        {
+            code: "SCHEMA_NOT_FOUND";
+            details: {
+                /**
+                 * The entity type the request addressed.
+                 * example:
+                 * price
+                 */
+                schema: string;
+            };
             /**
              * Error message
              */
@@ -4333,62 +9436,1305 @@ declare namespace Components {
              */
             cause?: string;
             /**
-             * The error message. Carries the same string as `message`, which the shared `Error`
-             * schema requires — `error` is the field responses have always used, and every caller
-             * to date reads. Declared here rather than on the shared `Error` because a request
-             * validation failure puts a list of validation errors in this field instead of a
-             * string, and those responses reference `Error` directly.
+             * What went wrong, in the field responses have always used and every caller to date
+             * reads. Carries the same string as `message` — which the shared `Error` schema
+             * requires — except on a request-validation failure, which puts the list of validation
+             * errors here instead.
              *
              */
-            error?: string;
-            code?: /**
-             * Machine-readable failure mode of a conditional-pricing operation, allowing clients
-             * to branch on the kind of failure instead of parsing the error message.
-             *
-             * - `NOT_FOUND` (404): the addressed entity, variant or version does not exist
-             * - `AMBIGUOUS_RESOLUTION` (409): several variants match the given context while a single result was requested
-             * - `TUPLE_CONFLICT` (409): the condition tuple is already claimed by another variant
-             * - `VERSION_CONFLICT` (409): a version already exists at the given `valid_from` on that variant
-             * - `CONDITION_UNDEFINED` (400): the context names a condition the entity's schema does not define
-             * - `OPERATOR_UNSUPPORTED` (400): the requested operator is not applicable to the condition's type
-             * - `CONTEXT_FORMAT_INVALID` (400): a context value is malformed for its condition type
-             * - `CONDITION_VALUE_INVALID` (400): a variant write pins a `select` value the condition's declared `options` do not contain
-             * - `TOO_MANY_MATCHES` (400): a multi-match resolve exceeded its result cap
-             * - `WRITE_CONFLICT` (409): transient write contention, retryable unlike `TUPLE_CONFLICT`
-             *
-             * Each code is emitted with the HTTP status shown above, and only with that status.
+            error?: /**
+             * What went wrong, in the field responses have always used and every caller to date
+             * reads. Carries the same string as `message` — which the shared `Error` schema
+             * requires — except on a request-validation failure, which puts the list of validation
+             * errors here instead.
              *
              */
-            ConditionalPricingErrorCode;
-            /**
-             * Structured data about the failure, shaped by the accompanying `code`
-             * (e.g. the candidate variants of an `ambiguous-resolution`). Only present
-             * when the failure has structured data to report, and never without a `code`.
-             *
-             */
-            details?: {
+            string | {
                 [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[];
+        } | {
+            code: "ENTITY_NOT_FOUND";
+            details: {
+                /**
+                 * The entity type the request addressed.
+                 * example:
+                 * price
+                 */
+                schema: string;
+                /**
+                 * The conditional entity the request addressed.
+                 * example:
+                 * price-sp26d1yo
+                 */
+                entity_id: string;
             };
-        }
+            /**
+             * Error message
+             */
+            message: string;
+            /**
+             * The HTTP status code
+             */
+            status?: number;
+            /**
+             * The cause of the error (visible for bad requests - http 400)
+             */
+            cause?: string;
+            /**
+             * What went wrong, in the field responses have always used and every caller to date
+             * reads. Carries the same string as `message` — which the shared `Error` schema
+             * requires — except on a request-validation failure, which puts the list of validation
+             * errors here instead.
+             *
+             */
+            error?: /**
+             * What went wrong, in the field responses have always used and every caller to date
+             * reads. Carries the same string as `message` — which the shared `Error` schema
+             * requires — except on a request-validation failure, which puts the list of validation
+             * errors here instead.
+             *
+             */
+            string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[];
+        } | {
+            code: "ENTITY_TYPE_MISMATCH";
+            details: {
+                /**
+                 * The entity type the request addressed.
+                 * example:
+                 * price
+                 */
+                schema: string;
+                /**
+                 * The conditional entity the request addressed.
+                 * example:
+                 * price-sp26d1yo
+                 */
+                entity_id: string;
+                /**
+                 * The entity type that id belongs to. Where it is a conditional entity type, it
+                 * is the slug to send instead.
+                 *
+                 * example:
+                 * product
+                 */
+                actual_schema: string;
+            };
+            /**
+             * Error message
+             */
+            message: string;
+            /**
+             * The HTTP status code
+             */
+            status?: number;
+            /**
+             * The cause of the error (visible for bad requests - http 400)
+             */
+            cause?: string;
+            /**
+             * What went wrong, in the field responses have always used and every caller to date
+             * reads. Carries the same string as `message` — which the shared `Error` schema
+             * requires — except on a request-validation failure, which puts the list of validation
+             * errors here instead.
+             *
+             */
+            error?: /**
+             * What went wrong, in the field responses have always used and every caller to date
+             * reads. Carries the same string as `message` — which the shared `Error` schema
+             * requires — except on a request-validation failure, which puts the list of validation
+             * errors here instead.
+             *
+             */
+            string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[];
+        } | {
+            code: "ENTITY_NOT_CONDITIONAL";
+            details: {
+                /**
+                 * The entity type the request addressed.
+                 * example:
+                 * price
+                 */
+                schema: string;
+                /**
+                 * The conditional entity the request addressed.
+                 * example:
+                 * price-sp26d1yo
+                 */
+                entity_id: string;
+            };
+            /**
+             * Error message
+             */
+            message: string;
+            /**
+             * The HTTP status code
+             */
+            status?: number;
+            /**
+             * The cause of the error (visible for bad requests - http 400)
+             */
+            cause?: string;
+            /**
+             * What went wrong, in the field responses have always used and every caller to date
+             * reads. Carries the same string as `message` — which the shared `Error` schema
+             * requires — except on a request-validation failure, which puts the list of validation
+             * errors here instead.
+             *
+             */
+            error?: /**
+             * What went wrong, in the field responses have always used and every caller to date
+             * reads. Carries the same string as `message` — which the shared `Error` schema
+             * requires — except on a request-validation failure, which puts the list of validation
+             * errors here instead.
+             *
+             */
+            string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[];
+        } | {
+            code: "VARIANT_NOT_FOUND";
+            details: {
+                /**
+                 * The conditional entity the request addressed.
+                 * example:
+                 * price-sp26d1yo
+                 */
+                entity_id: string;
+                /**
+                 * The variant the request addressed.
+                 * example:
+                 * var-46045
+                 */
+                variant_id: string;
+            };
+            /**
+             * Error message
+             */
+            message: string;
+            /**
+             * The HTTP status code
+             */
+            status?: number;
+            /**
+             * The cause of the error (visible for bad requests - http 400)
+             */
+            cause?: string;
+            /**
+             * What went wrong, in the field responses have always used and every caller to date
+             * reads. Carries the same string as `message` — which the shared `Error` schema
+             * requires — except on a request-validation failure, which puts the list of validation
+             * errors here instead.
+             *
+             */
+            error?: /**
+             * What went wrong, in the field responses have always used and every caller to date
+             * reads. Carries the same string as `message` — which the shared `Error` schema
+             * requires — except on a request-validation failure, which puts the list of validation
+             * errors here instead.
+             *
+             */
+            string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[];
+        } | {
+            code: "VERSION_NOT_FOUND";
+            details: {
+                /**
+                 * The variant the request addressed.
+                 * example:
+                 * var-46045
+                 */
+                variant_id: string;
+                /**
+                 * The version the request addressed, by the instant it takes effect from.
+                 * example:
+                 * 2027-01-01T00:00:00.000Z
+                 */
+                valid_from: string;
+            };
+            /**
+             * Error message
+             */
+            message: string;
+            /**
+             * The HTTP status code
+             */
+            status?: number;
+            /**
+             * The cause of the error (visible for bad requests - http 400)
+             */
+            cause?: string;
+            /**
+             * What went wrong, in the field responses have always used and every caller to date
+             * reads. Carries the same string as `message` — which the shared `Error` schema
+             * requires — except on a request-validation failure, which puts the list of validation
+             * errors here instead.
+             *
+             */
+            error?: /**
+             * What went wrong, in the field responses have always used and every caller to date
+             * reads. Carries the same string as `message` — which the shared `Error` schema
+             * requires — except on a request-validation failure, which puts the list of validation
+             * errors here instead.
+             *
+             */
+            string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[];
+        } | {
+            code: "NO_MATCHES";
+            details: {
+                /**
+                 * The entity type the request addressed.
+                 * example:
+                 * price
+                 */
+                schema: string;
+                /**
+                 * The conditional entity the resolve was scoped to.
+                 * example:
+                 * price-sp26d1yo
+                 */
+                entity_id: string;
+            };
+            /**
+             * Error message
+             */
+            message: string;
+            /**
+             * The HTTP status code
+             */
+            status?: number;
+            /**
+             * The cause of the error (visible for bad requests - http 400)
+             */
+            cause?: string;
+            /**
+             * What went wrong, in the field responses have always used and every caller to date
+             * reads. Carries the same string as `message` — which the shared `Error` schema
+             * requires — except on a request-validation failure, which puts the list of validation
+             * errors here instead.
+             *
+             */
+            error?: /**
+             * What went wrong, in the field responses have always used and every caller to date
+             * reads. Carries the same string as `message` — which the shared `Error` schema
+             * requires — except on a request-validation failure, which puts the list of validation
+             * errors here instead.
+             *
+             */
+            string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[];
+        } | {
+            code: "NO_ACTIVE_VERSION";
+            details: {
+                /**
+                 * The variant the request addressed.
+                 * example:
+                 * var-46045
+                 */
+                variant_id: string;
+                /**
+                 * The instant a version in effect was asked for at.
+                 * example:
+                 * 2026-06-01T00:00:00.000Z
+                 */
+                as_of: string;
+            };
+            /**
+             * Error message
+             */
+            message: string;
+            /**
+             * The HTTP status code
+             */
+            status?: number;
+            /**
+             * The cause of the error (visible for bad requests - http 400)
+             */
+            cause?: string;
+            /**
+             * What went wrong, in the field responses have always used and every caller to date
+             * reads. Carries the same string as `message` — which the shared `Error` schema
+             * requires — except on a request-validation failure, which puts the list of validation
+             * errors here instead.
+             *
+             */
+            error?: /**
+             * What went wrong, in the field responses have always used and every caller to date
+             * reads. Carries the same string as `message` — which the shared `Error` schema
+             * requires — except on a request-validation failure, which puts the list of validation
+             * errors here instead.
+             *
+             */
+            string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[];
+        } | {
+            code: "AMBIGUOUS_RESOLUTION";
+            details: {
+                /**
+                 * Every variant that applied, each with the conditions it pins — which is what
+                 * makes the overlap actionable: two variants both apply because their pins do
+                 * not distinguish the context they were both asked about.
+                 *
+                 * Bounded by the same cap `TOO_MANY_MATCHES` reports, which is checked first,
+                 * so this list is never longer than one response may carry.
+                 *
+                 */
+                candidates: [
+                    {
+                        /**
+                         * The candidate variant.
+                         * example:
+                         * var-46045
+                         */
+                        variant_id: string;
+                        conditions: /**
+                         * A variant's pinned conditions as a reader sees them: the pins the schema declares, plus a
+                         * boolean `default` saying whether this is the entity's fallback.
+                         *
+                         * `default` is always present and always a boolean, so a client can branch on "did I get the
+                         * fallback?" without knowing how one is stored. The reserved condition a fallback is actually
+                         * pinned under never appears here.
+                         *
+                         * example:
+                         * {
+                         *   "postal_code": "46045",
+                         *   "default": false
+                         * }
+                         */
+                        VariantConditions;
+                    },
+                    {
+                        /**
+                         * The candidate variant.
+                         * example:
+                         * var-46045
+                         */
+                        variant_id: string;
+                        conditions: /**
+                         * A variant's pinned conditions as a reader sees them: the pins the schema declares, plus a
+                         * boolean `default` saying whether this is the entity's fallback.
+                         *
+                         * `default` is always present and always a boolean, so a client can branch on "did I get the
+                         * fallback?" without knowing how one is stored. The reserved condition a fallback is actually
+                         * pinned under never appears here.
+                         *
+                         * example:
+                         * {
+                         *   "postal_code": "46045",
+                         *   "default": false
+                         * }
+                         */
+                        VariantConditions;
+                    },
+                    ...{
+                        /**
+                         * The candidate variant.
+                         * example:
+                         * var-46045
+                         */
+                        variant_id: string;
+                        conditions: /**
+                         * A variant's pinned conditions as a reader sees them: the pins the schema declares, plus a
+                         * boolean `default` saying whether this is the entity's fallback.
+                         *
+                         * `default` is always present and always a boolean, so a client can branch on "did I get the
+                         * fallback?" without knowing how one is stored. The reserved condition a fallback is actually
+                         * pinned under never appears here.
+                         *
+                         * example:
+                         * {
+                         *   "postal_code": "46045",
+                         *   "default": false
+                         * }
+                         */
+                        VariantConditions;
+                    }[]
+                ];
+            };
+            /**
+             * Error message
+             */
+            message: string;
+            /**
+             * The HTTP status code
+             */
+            status?: number;
+            /**
+             * The cause of the error (visible for bad requests - http 400)
+             */
+            cause?: string;
+            /**
+             * What went wrong, in the field responses have always used and every caller to date
+             * reads. Carries the same string as `message` — which the shared `Error` schema
+             * requires — except on a request-validation failure, which puts the list of validation
+             * errors here instead.
+             *
+             */
+            error?: /**
+             * What went wrong, in the field responses have always used and every caller to date
+             * reads. Carries the same string as `message` — which the shared `Error` schema
+             * requires — except on a request-validation failure, which puts the list of validation
+             * errors here instead.
+             *
+             */
+            string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[];
+        } | {
+            code: "TUPLE_CONFLICT";
+            details: {
+                /**
+                 * The variant the write addressed.
+                 * example:
+                 * var-46045
+                 */
+                variant_id: string;
+                /**
+                 * The variant already holding the tuple, where the write read it back.
+                 *
+                 * example:
+                 * var-50667
+                 */
+                conflicting_variant_id?: string;
+            };
+            /**
+             * Error message
+             */
+            message: string;
+            /**
+             * The HTTP status code
+             */
+            status?: number;
+            /**
+             * The cause of the error (visible for bad requests - http 400)
+             */
+            cause?: string;
+            /**
+             * What went wrong, in the field responses have always used and every caller to date
+             * reads. Carries the same string as `message` — which the shared `Error` schema
+             * requires — except on a request-validation failure, which puts the list of validation
+             * errors here instead.
+             *
+             */
+            error?: /**
+             * What went wrong, in the field responses have always used and every caller to date
+             * reads. Carries the same string as `message` — which the shared `Error` schema
+             * requires — except on a request-validation failure, which puts the list of validation
+             * errors here instead.
+             *
+             */
+            string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[];
+        } | {
+            code: "VERSION_CONFLICT";
+            details: {
+                /**
+                 * The variant the write addressed.
+                 * example:
+                 * var-46045
+                 */
+                variant_id: string;
+                /**
+                 * The instant already claimed by a version of that variant.
+                 * example:
+                 * 2027-01-01T00:00:00.000Z
+                 */
+                valid_from: string;
+            };
+            /**
+             * Error message
+             */
+            message: string;
+            /**
+             * The HTTP status code
+             */
+            status?: number;
+            /**
+             * The cause of the error (visible for bad requests - http 400)
+             */
+            cause?: string;
+            /**
+             * What went wrong, in the field responses have always used and every caller to date
+             * reads. Carries the same string as `message` — which the shared `Error` schema
+             * requires — except on a request-validation failure, which puts the list of validation
+             * errors here instead.
+             *
+             */
+            error?: /**
+             * What went wrong, in the field responses have always used and every caller to date
+             * reads. Carries the same string as `message` — which the shared `Error` schema
+             * requires — except on a request-validation failure, which puts the list of validation
+             * errors here instead.
+             *
+             */
+            string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[];
+        } | {
+            code: "CONDITION_UNDEFINED";
+            details: {
+                /**
+                 * The condition named by the request and absent from the schema.
+                 * example:
+                 * postal_code
+                 */
+                condition_name: string;
+            };
+            /**
+             * Error message
+             */
+            message: string;
+            /**
+             * The HTTP status code
+             */
+            status?: number;
+            /**
+             * The cause of the error (visible for bad requests - http 400)
+             */
+            cause?: string;
+            /**
+             * What went wrong, in the field responses have always used and every caller to date
+             * reads. Carries the same string as `message` — which the shared `Error` schema
+             * requires — except on a request-validation failure, which puts the list of validation
+             * errors here instead.
+             *
+             */
+            error?: /**
+             * What went wrong, in the field responses have always used and every caller to date
+             * reads. Carries the same string as `message` — which the shared `Error` schema
+             * requires — except on a request-validation failure, which puts the list of validation
+             * errors here instead.
+             *
+             */
+            string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[];
+        } | {
+            code: "OPERATOR_UNSUPPORTED";
+            details: {
+                /**
+                 * example:
+                 * postal_code
+                 */
+                condition_name: string;
+                /**
+                 * The type the schema declares that condition with, which is what decides the
+                 * operators it accepts.
+                 *
+                 * example:
+                 * location
+                 */
+                condition_type: string;
+                /**
+                 * The operator the context or filter asked for.
+                 * example:
+                 * between
+                 */
+                operator: string;
+            };
+            /**
+             * Error message
+             */
+            message: string;
+            /**
+             * The HTTP status code
+             */
+            status?: number;
+            /**
+             * The cause of the error (visible for bad requests - http 400)
+             */
+            cause?: string;
+            /**
+             * What went wrong, in the field responses have always used and every caller to date
+             * reads. Carries the same string as `message` — which the shared `Error` schema
+             * requires — except on a request-validation failure, which puts the list of validation
+             * errors here instead.
+             *
+             */
+            error?: /**
+             * What went wrong, in the field responses have always used and every caller to date
+             * reads. Carries the same string as `message` — which the shared `Error` schema
+             * requires — except on a request-validation failure, which puts the list of validation
+             * errors here instead.
+             *
+             */
+            string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[];
+        } | {
+            code: "CONTEXT_FORMAT_INVALID";
+            details: {
+                /**
+                 * example:
+                 * postal_code
+                 */
+                condition_name: string;
+                /**
+                 * What a value for that condition has to be, in prose.
+                 * example:
+                 * a postal code
+                 */
+                expected: string;
+            };
+            /**
+             * Error message
+             */
+            message: string;
+            /**
+             * The HTTP status code
+             */
+            status?: number;
+            /**
+             * The cause of the error (visible for bad requests - http 400)
+             */
+            cause?: string;
+            /**
+             * What went wrong, in the field responses have always used and every caller to date
+             * reads. Carries the same string as `message` — which the shared `Error` schema
+             * requires — except on a request-validation failure, which puts the list of validation
+             * errors here instead.
+             *
+             */
+            error?: /**
+             * What went wrong, in the field responses have always used and every caller to date
+             * reads. Carries the same string as `message` — which the shared `Error` schema
+             * requires — except on a request-validation failure, which puts the list of validation
+             * errors here instead.
+             *
+             */
+            string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[];
+        } | {
+            code: "CONDITION_VALUE_INVALID";
+            details: {
+                /**
+                 * example:
+                 * segment
+                 */
+                condition_name: string;
+                /**
+                 * The value the write pinned, as it arrived. Declared without a type: the
+                 * vocabulary holds strings, so anything else is out of it by definition and is
+                 * reported as sent.
+                 *
+                 * example:
+                 * industrial
+                 */
+                value: any;
+                /**
+                 * The vocabulary *as enforced* — after the entries this deploy cannot read have
+                 * been dropped, so a tenant whose `options` holds a title-only entry is told
+                 * what the API actually checked against rather than what they believe they
+                 * wrote.
+                 *
+                 * example:
+                 * [
+                 *   "private",
+                 *   "commercial"
+                 * ]
+                 */
+                options: string[];
+            };
+            /**
+             * Error message
+             */
+            message: string;
+            /**
+             * The HTTP status code
+             */
+            status?: number;
+            /**
+             * The cause of the error (visible for bad requests - http 400)
+             */
+            cause?: string;
+            /**
+             * What went wrong, in the field responses have always used and every caller to date
+             * reads. Carries the same string as `message` — which the shared `Error` schema
+             * requires — except on a request-validation failure, which puts the list of validation
+             * errors here instead.
+             *
+             */
+            error?: /**
+             * What went wrong, in the field responses have always used and every caller to date
+             * reads. Carries the same string as `message` — which the shared `Error` schema
+             * requires — except on a request-validation failure, which puts the list of validation
+             * errors here instead.
+             *
+             */
+            string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[];
+        } | {
+            code: "TOO_MANY_MATCHES";
+            details: {
+                /**
+                 * The most variants one resolve may compose.
+                 * example:
+                 * 100
+                 */
+                limit: number;
+            };
+            /**
+             * Error message
+             */
+            message: string;
+            /**
+             * The HTTP status code
+             */
+            status?: number;
+            /**
+             * The cause of the error (visible for bad requests - http 400)
+             */
+            cause?: string;
+            /**
+             * What went wrong, in the field responses have always used and every caller to date
+             * reads. Carries the same string as `message` — which the shared `Error` schema
+             * requires — except on a request-validation failure, which puts the list of validation
+             * errors here instead.
+             *
+             */
+            error?: /**
+             * What went wrong, in the field responses have always used and every caller to date
+             * reads. Carries the same string as `message` — which the shared `Error` schema
+             * requires — except on a request-validation failure, which puts the list of validation
+             * errors here instead.
+             *
+             */
+            string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[];
+        } | {
+            code: "WRITE_CONFLICT";
+            details: {
+                /**
+                 * The variant the write addressed.
+                 * example:
+                 * var-46045
+                 */
+                variant_id: string;
+                /**
+                 * The version the write addressed, where one was addressed.
+                 * example:
+                 * 2027-01-01T00:00:00.000Z
+                 */
+                valid_from?: string;
+                /**
+                 * The revision the write required the stored version to still be at.
+                 * example:
+                 * 3
+                 */
+                expected_revision?: number;
+                /**
+                 * The revision the version is actually at, where the failed write read it back.
+                 * Absent when it could not be.
+                 *
+                 * example:
+                 * 4
+                 */
+                current_revision?: number;
+            };
+            /**
+             * Error message
+             */
+            message: string;
+            /**
+             * The HTTP status code
+             */
+            status?: number;
+            /**
+             * The cause of the error (visible for bad requests - http 400)
+             */
+            cause?: string;
+            /**
+             * What went wrong, in the field responses have always used and every caller to date
+             * reads. Carries the same string as `message` — which the shared `Error` schema
+             * requires — except on a request-validation failure, which puts the list of validation
+             * errors here instead.
+             *
+             */
+            error?: /**
+             * What went wrong, in the field responses have always used and every caller to date
+             * reads. Carries the same string as `message` — which the shared `Error` schema
+             * requires — except on a request-validation failure, which puts the list of validation
+             * errors here instead.
+             *
+             */
+            string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[];
+        } | {
+            code: "OFFSET_WINDOW_EXCEEDED";
+            details: {
+                /**
+                 * The offset the request asked for.
+                 * example:
+                 * 24990
+                 */
+                from: number;
+                /**
+                 * The page size the request asked for, after clamping. Present because the two
+                 * together are what exceeded the window — an offset inside it can still be
+                 * refused for the page it would have to read.
+                 *
+                 * example:
+                 * 25
+                 */
+                size: number;
+                /**
+                 * The last row this deploy's index will serve from an offset. Read it to size a
+                 * page control, never to decide when to switch to the cursor — a caller can page
+                 * on with `next` from any page.
+                 *
+                 * example:
+                 * 25000
+                 */
+                window: number;
+            };
+            /**
+             * Error message
+             */
+            message: string;
+            /**
+             * The HTTP status code
+             */
+            status?: number;
+            /**
+             * The cause of the error (visible for bad requests - http 400)
+             */
+            cause?: string;
+            /**
+             * What went wrong, in the field responses have always used and every caller to date
+             * reads. Carries the same string as `message` — which the shared `Error` schema
+             * requires — except on a request-validation failure, which puts the list of validation
+             * errors here instead.
+             *
+             */
+            error?: /**
+             * What went wrong, in the field responses have always used and every caller to date
+             * reads. Carries the same string as `message` — which the shared `Error` schema
+             * requires — except on a request-validation failure, which puts the list of validation
+             * errors here instead.
+             *
+             */
+            string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[];
+        } | {
+            code: "CURSOR_INVALID";
+            details: {
+                /**
+                 * Which check the cursor failed, in prose.
+                 * example:
+                 * The cursor was issued for a different sort order
+                 */
+                reason: string;
+            };
+            /**
+             * Error message
+             */
+            message: string;
+            /**
+             * The HTTP status code
+             */
+            status?: number;
+            /**
+             * The cause of the error (visible for bad requests - http 400)
+             */
+            cause?: string;
+            /**
+             * What went wrong, in the field responses have always used and every caller to date
+             * reads. Carries the same string as `message` — which the shared `Error` schema
+             * requires — except on a request-validation failure, which puts the list of validation
+             * errors here instead.
+             *
+             */
+            error?: /**
+             * What went wrong, in the field responses have always used and every caller to date
+             * reads. Carries the same string as `message` — which the shared `Error` schema
+             * requires — except on a request-validation failure, which puts the list of validation
+             * errors here instead.
+             *
+             */
+            string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[];
+        } | {
+            code: "VARIANT_LIMIT_REACHED";
+            details: {
+                /**
+                 * Variants this entity already holds.
+                 * example:
+                 * 5000
+                 */
+                variant_count: number;
+                /**
+                 * Variants this entity may hold. Configurable per deploy, the same value for
+                 * every organization on it.
+                 *
+                 * example:
+                 * 5000
+                 */
+                cap: number;
+            };
+            /**
+             * Error message
+             */
+            message: string;
+            /**
+             * The HTTP status code
+             */
+            status?: number;
+            /**
+             * The cause of the error (visible for bad requests - http 400)
+             */
+            cause?: string;
+            /**
+             * What went wrong, in the field responses have always used and every caller to date
+             * reads. Carries the same string as `message` — which the shared `Error` schema
+             * requires — except on a request-validation failure, which puts the list of validation
+             * errors here instead.
+             *
+             */
+            error?: /**
+             * What went wrong, in the field responses have always used and every caller to date
+             * reads. Carries the same string as `message` — which the shared `Error` schema
+             * requires — except on a request-validation failure, which puts the list of validation
+             * errors here instead.
+             *
+             */
+            string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[];
+        } | {
+            code: "PIN_FORMAT_INVALID";
+            details: {
+                /**
+                 * example:
+                 * valid_period
+                 */
+                condition_name: string;
+                /**
+                 * The type the schema declares that condition with, which is what decides the
+                 * values it accepts.
+                 *
+                 * example:
+                 * daterange
+                 */
+                condition_type: string;
+                /**
+                 * What a pin for that condition has to be, in prose — the same field
+                 * `CONTEXT_FORMAT_INVALID` carries, worded for the write side. It says what
+                 * `condition_type` cannot: a `location` of format `zipcode` wants a postal code
+                 * and one of format `zipcode_town` wants an object carrying both, and the type
+                 * is `location` either way.
+                 *
+                 * example:
+                 * an object carrying a from and an until date, either may be open
+                 */
+                expected: string;
+                /**
+                 * The value the write pinned, as it arrived. Declared without a type, since
+                 * what makes it invalid is that it is not of the condition's type.
+                 *
+                 * example:
+                 * 2027-01-01/2027-12-31
+                 */
+                value: any;
+            };
+            /**
+             * Error message
+             */
+            message: string;
+            /**
+             * The HTTP status code
+             */
+            status?: number;
+            /**
+             * The cause of the error (visible for bad requests - http 400)
+             */
+            cause?: string;
+            /**
+             * What went wrong, in the field responses have always used and every caller to date
+             * reads. Carries the same string as `message` — which the shared `Error` schema
+             * requires — except on a request-validation failure, which puts the list of validation
+             * errors here instead.
+             *
+             */
+            error?: /**
+             * What went wrong, in the field responses have always used and every caller to date
+             * reads. Carries the same string as `message` — which the shared `Error` schema
+             * requires — except on a request-validation failure, which puts the list of validation
+             * errors here instead.
+             *
+             */
+            string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[];
+        } | {
+            code: "VARIANT_UNPINNED";
+            details: {
+                /**
+                 * The conditional entity the item addressed.
+                 * example:
+                 * price-sp26d1yo
+                 */
+                entity_id: string;
+            };
+            /**
+             * Error message
+             */
+            message: string;
+            /**
+             * The HTTP status code
+             */
+            status?: number;
+            /**
+             * The cause of the error (visible for bad requests - http 400)
+             */
+            cause?: string;
+            /**
+             * What went wrong, in the field responses have always used and every caller to date
+             * reads. Carries the same string as `message` — which the shared `Error` schema
+             * requires — except on a request-validation failure, which puts the list of validation
+             * errors here instead.
+             *
+             */
+            error?: /**
+             * What went wrong, in the field responses have always used and every caller to date
+             * reads. Carries the same string as `message` — which the shared `Error` schema
+             * requires — except on a request-validation failure, which puts the list of validation
+             * errors here instead.
+             *
+             */
+            string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[];
+        } | {
+            code: "LAST_VERSION_UNDELETABLE";
+            details: {
+                /**
+                 * The variant whose last version the delete addressed.
+                 * example:
+                 * var-46045
+                 */
+                variant_id: string;
+                /**
+                 * The version the delete addressed, by the instant it takes effect from.
+                 * example:
+                 * 2027-01-01T00:00:00.000Z
+                 */
+                valid_from: string;
+            };
+            /**
+             * Error message
+             */
+            message: string;
+            /**
+             * The HTTP status code
+             */
+            status?: number;
+            /**
+             * The cause of the error (visible for bad requests - http 400)
+             */
+            cause?: string;
+            /**
+             * What went wrong, in the field responses have always used and every caller to date
+             * reads. Carries the same string as `message` — which the shared `Error` schema
+             * requires — except on a request-validation failure, which puts the list of validation
+             * errors here instead.
+             *
+             */
+            error?: /**
+             * What went wrong, in the field responses have always used and every caller to date
+             * reads. Carries the same string as `message` — which the shared `Error` schema
+             * requires — except on a request-validation failure, which puts the list of validation
+             * errors here instead.
+             *
+             */
+            string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[];
+        } | {
+            /**
+             * Error message
+             */
+            message: string;
+            /**
+             * The HTTP status code
+             */
+            status?: number;
+            /**
+             * The cause of the error (visible for bad requests - http 400)
+             */
+            cause?: string;
+            error?: /**
+             * The `error` field of an error response: the message, or — where the request itself failed
+             * validation before any handler ran — the validation errors themselves, which those 400s put
+             * here in place of a string.
+             *
+             * A conditional-pricing operation answers a body its schema rejects with the list, and
+             * everything else it refuses with the message.
+             *
+             */
+            ReportedError;
+        };
         /**
          * Machine-readable failure mode of a conditional-pricing operation, allowing clients
          * to branch on the kind of failure instead of parsing the error message.
          *
-         * - `NOT_FOUND` (404): the addressed entity, variant or version does not exist
+         * - `SCHEMA_NOT_FOUND` (404): no conditional entity type by that slug
+         * - `ENTITY_NOT_FOUND` (404): the schema holds no entity with that id
+         * - `ENTITY_TYPE_MISMATCH` (400): that id belongs to an entity of another type than the slug named
+         * - `ENTITY_NOT_CONDITIONAL` (400): the entity is of the right type but was not created as a conditional one
+         * - `VARIANT_NOT_FOUND` (404): the entity has no such variant
+         * - `VERSION_NOT_FOUND` (404): the variant has no version at that `valid_from`
+         * - `NO_MATCHES` (404): nothing applied to the context and the entity has no `default` variant
+         * - `NO_ACTIVE_VERSION` (404): the variant has no version in effect at the instant asked about
          * - `AMBIGUOUS_RESOLUTION` (409): several variants match the given context while a single result was requested
          * - `TUPLE_CONFLICT` (409): the condition tuple is already claimed by another variant
          * - `VERSION_CONFLICT` (409): a version already exists at the given `valid_from` on that variant
-         * - `CONDITION_UNDEFINED` (400): the context names a condition the entity's schema does not define
+         * - `CONDITION_UNDEFINED` (400): a resolve context, a listing filter or a variant's pins name a condition the entity's schema does not define
          * - `OPERATOR_UNSUPPORTED` (400): the requested operator is not applicable to the condition's type
-         * - `CONTEXT_FORMAT_INVALID` (400): a context value is malformed for its condition type
+         * - `CONTEXT_FORMAT_INVALID` (400): a resolve context or listing filter value is malformed for its condition type
          * - `CONDITION_VALUE_INVALID` (400): a variant write pins a `select` value the condition's declared `options` do not contain
          * - `TOO_MANY_MATCHES` (400): a multi-match resolve exceeded its result cap
          * - `WRITE_CONFLICT` (409): transient write contention, retryable unlike `TUPLE_CONFLICT`
+         * - `OFFSET_WINDOW_EXCEEDED` (400): a listing's `from` plus `size` reaches past the offset window the search index allows
+         * - `CURSOR_INVALID` (400): a paging cursor cannot be read, or does not belong to the read it was sent with
+         * - `VARIANT_LIMIT_REACHED` (400): the entity already holds every variant it may hold
+         * - `PIN_FORMAT_INVALID` (400): a variant pins a value malformed for its condition's type
+         * - `VARIANT_UNPINNED` (400): a variant write pins no condition and is not marked `default`, or a batch delete item addresses no variant
+         * - `LAST_VERSION_UNDELETABLE` (400): the delete would leave the variant with no version at all
          *
-         * Each code is emitted with the HTTP status shown above, and only with that status.
+         * In a batch, the last four are the refusals an importer branches on: `VARIANT_LIMIT_REACHED`
+         * means stop the import, `PIN_FORMAT_INVALID` means one bad row, `LAST_VERSION_UNDELETABLE`
+         * means delete the variant instead.
+         *
+         * Not every refusal has a code. These carry a message and neither `code` nor `details`, and
+         * each operation's `400` names its own: a write pinning the reserved marker (`default` or
+         * `_default`), a variant marked `default` that also pins a real condition, a pin on a condition
+         * whose declared type this deploy cannot read, an id this store cannot key by, a `valid_from`
+         * this store cannot sort by, and a version write or delete with no `_revision`. Testing `code`
+         * for absence is how a client tells them from the coded failures.
+         *
+         * Four of the 404s say that something the request addressed does not exist, and are fixed by
+         * correcting an id or accepting the thing is gone. The other two say the opposite: everything
+         * addressed exists and there is still nothing to serve — no variant applies to this situation,
+         * or none of a variant's versions is in effect yet. Those are ordinary business outcomes, told
+         * apart from a wrong id by their code.
+         *
+         * `ENTITY_TYPE_MISMATCH` and `ENTITY_NOT_CONDITIONAL` are `400`s, not 404s: the entity the
+         * request addressed **was** found, and the fix is the slug beside it. A slug that names no
+         * conditional entity type at all is a `400` too.
+         *
+         * Each code is emitted with the HTTP status shown above, and only with that status, and each
+         * one is pinned by a member of `ConditionalPricingError` — which is where the structured data
+         * that code carries is declared.
          *
          */
-        export type ConditionalPricingErrorCode = "NOT_FOUND" | "AMBIGUOUS_RESOLUTION" | "TUPLE_CONFLICT" | "VERSION_CONFLICT" | "CONDITION_UNDEFINED" | "OPERATOR_UNSUPPORTED" | "CONTEXT_FORMAT_INVALID" | "CONDITION_VALUE_INVALID" | "TOO_MANY_MATCHES" | "WRITE_CONFLICT";
+        export type ConditionalPricingErrorCode = "SCHEMA_NOT_FOUND" | "ENTITY_NOT_FOUND" | "ENTITY_TYPE_MISMATCH" | "ENTITY_NOT_CONDITIONAL" | "VARIANT_NOT_FOUND" | "VERSION_NOT_FOUND" | "NO_MATCHES" | "NO_ACTIVE_VERSION" | "AMBIGUOUS_RESOLUTION" | "TUPLE_CONFLICT" | "VERSION_CONFLICT" | "CONDITION_UNDEFINED" | "OPERATOR_UNSUPPORTED" | "CONTEXT_FORMAT_INVALID" | "CONDITION_VALUE_INVALID" | "TOO_MANY_MATCHES" | "WRITE_CONFLICT" | "OFFSET_WINDOW_EXCEEDED" | "CURSOR_INVALID" | "VARIANT_LIMIT_REACHED" | "PIN_FORMAT_INVALID" | "VARIANT_UNPINNED" | "LAST_VERSION_UNDELETABLE";
         export type ConsumptionTypeGetAg = "household" | "heating_pump" | "night_storage_heating" | "night_storage_heating_common_meter";
         /**
          * The coupon entity
@@ -4474,6 +10820,12 @@ declare namespace Components {
             Currency;
             cashback_period?: /* The cashback period, for now it's limited to either 0 months or 12 months */ CashbackPeriod;
             active?: boolean;
+            /**
+             * The flag for entities whose values vary by context. Resolve the values that apply with
+             * `POST /v1/conditional-pricing:resolve`.
+             *
+             */
+            is_conditional?: boolean;
             /**
              * Whether the coupon requires a promo code to be applied
              */
@@ -4586,6 +10938,12 @@ declare namespace Components {
             cashback_period?: /* The cashback period, for now it's limited to either 0 months or 12 months */ CashbackPeriod;
             active?: boolean;
             /**
+             * The flag for entities whose values vary by context. Resolve the values that apply with
+             * `POST /v1/conditional-pricing:resolve`.
+             *
+             */
+            is_conditional?: boolean;
+            /**
              * Whether the coupon requires a promo code to be applied
              */
             requires_promo_code?: boolean;
@@ -4675,6 +11033,12 @@ declare namespace Components {
             cashback_period?: /* The cashback period, for now it's limited to either 0 months or 12 months */ CashbackPeriod;
             active?: boolean;
             /**
+             * The flag for entities whose values vary by context. Resolve the values that apply with
+             * `POST /v1/conditional-pricing:resolve`.
+             *
+             */
+            is_conditional?: boolean;
+            /**
              * Whether the coupon requires a promo code to be applied
              */
             requires_promo_code?: boolean;
@@ -4720,14 +11084,15 @@ declare namespace Components {
              * context says for it, which is what makes adding a condition to a schema non-breaking for the
              * variants that already exist.
              *
-             * Exact values only. Predicates are accepted in a resolve context and nowhere else, so that
-             * matching is decided in exactly one place.
+             * Exact values only. A predicate is a read-side thing — a resolve context or a listing's
+             * condition filter — and is never stored: what a variant applies to is one situation, not a
+             * range of them.
              *
              * Values are typed by their condition and stored canonicalized for that type: a `date` becomes
              * millisecond-precision UTC, a `daterange` an object carrying `from` and `until` where an empty
              * string is an open end, a `location` of format `zipcode` the postal code itself and one of
-             * format `zipcode + town` an object carrying both. A `select` value must be a string, and must
-             * be one the condition's `options` declare unless it sets `allow_any`.
+             * format `zipcode_town` an object carrying both. A `select` value must be a string, and must
+             * be one the condition's `options` declare, which is always a closed vocabulary.
              *
              * `default`, and any name beginning with `_`, are reserved for the server and cannot be pinned
              * here. Whether a variant is the entity's fallback is set through the request's `default` flag.
@@ -4741,14 +11106,11 @@ declare namespace Components {
             /**
              * Mark this variant as the entity's fallback: the one served when no other variant applies.
              *
-             * A property of the variant, never an entry in `conditions` — a variant claiming a value for
-             * the marker would hold a real condition tuple while being permanently unmatchable, since no
-             * resolve context ever supplies it. A default variant cannot pin anything else, and an
-             * entity can have at most one.
+             * A property of the variant, never an entry in `conditions`. A default variant cannot pin
+             * anything else, and an entity can have at most one; a second is refused as
+             * `TUPLE_CONFLICT`.
              *
              * Available to every conditional entity: nothing has to be declared in the schema first.
-             * The variant is stored pinning one reserved condition, which is what makes the ordinary
-             * condition-tuple guard enforce at-most-one-per-entity with no rule of its own.
              *
              */
             default?: boolean;
@@ -4756,8 +11118,7 @@ declare namespace Components {
              * When the first version takes effect. Defaults to now.
              *
              * An RFC 3339 date (`2026-01-01`, read as midnight UTC) or date-time
-             * (`2026-01-01T00:00:00Z`), to at most millisecond precision. Deliberately not declared as
-             * `format: date-time`, which would reject the plain-date form that this accepts.
+             * (`2026-01-01T00:00:00Z`), to at most millisecond precision.
              *
              * example:
              * 2027-01-01T00:00:00Z
@@ -4767,19 +11128,25 @@ declare namespace Components {
              * The attribute values this version overrides on the base entity, keyed by attribute name.
              *
              * Only attributes currently declaring `overridable_attribute` are applied. Metadata fields
-             * (anything underscore-prefixed), readonly attributes, hidden attributes and non-overridable
-             * attributes present here are ignored rather than rejected, so a client working from a slightly
-             * stale schema snapshot still succeeds instead of failing on fields it could not have known to
-             * drop. An attribute's `render_condition` says when to show it and has no bearing on whether a
-             * variant may override it.
+             * (anything underscore-prefixed), readonly attributes, hidden attributes, computed attributes
+             * and non-overridable attributes present here are not applied rather than rejected, and each one
+             * is named in the write's `warnings`, so a client working from a slightly stale schema snapshot
+             * still succeeds instead of failing on fields it could not have known to drop, and still learns
+             * which of them did not land — the naming half published ahead of the behaviour, so until the
+             * `ATTRIBUTES_NOT_APPLIED` warning is emitted an unapplied attribute is dropped silently. An attribute's `render_condition` says when to show it and has no
+             * bearing on whether a variant may override it.
              *
-             * Ignored means *not updated*, never *removed*: a value already stored for an attribute that is
-             * not currently overridable is preserved, so removing and restoring the flag deactivates and
-             * then reactivates the same override.
+             * Not applied means *not updated*, never *removed*: a value already stored for an attribute that
+             * is not currently overridable is preserved, so removing and restoring the flag deactivates and
+             * then reactivates the same override. An append seeds the attributes the variant may not
+             * override from the version in effect at its own `valid_from`, so its stored values are not a
+             * pure function of the body that wrote it; a variant's first version, and an append dated before
+             * the variant's earliest version, inherit nothing.
              *
-             * A composite price's `price_components` is an ordinary overridable relation attribute: a
-             * composite variant pins its component variants here the same way any other relation value is
-             * set, with no special handling.
+             * A composite price's `price_components` is an ordinary overridable relation attribute. A
+             * composite variant's override references different component *entities*, never a variant or a
+             * version of one, and holds whatever a relation attribute ordinarily holds — this API defines no
+             * reference shape of its own.
              *
              * example:
              * {
@@ -4791,9 +11158,8 @@ declare namespace Components {
         }
         export interface CreatedVariant {
             /**
-             * Server-generated, always. This is the durable key orders and contracts pin, so it is never
-             * accepted from a client — a client-suppliable id would risk collisions between independent
-             * importers.
+             * Server-generated, always, and never accepted from a client. This is the durable key orders
+             * and contracts pin.
              *
              * example:
              * var-46045
@@ -4834,19 +11200,25 @@ declare namespace Components {
              * The attribute values this version overrides on the base entity, keyed by attribute name.
              *
              * Only attributes currently declaring `overridable_attribute` are applied. Metadata fields
-             * (anything underscore-prefixed), readonly attributes, hidden attributes and non-overridable
-             * attributes present here are ignored rather than rejected, so a client working from a slightly
-             * stale schema snapshot still succeeds instead of failing on fields it could not have known to
-             * drop. An attribute's `render_condition` says when to show it and has no bearing on whether a
-             * variant may override it.
+             * (anything underscore-prefixed), readonly attributes, hidden attributes, computed attributes
+             * and non-overridable attributes present here are not applied rather than rejected, and each one
+             * is named in the write's `warnings`, so a client working from a slightly stale schema snapshot
+             * still succeeds instead of failing on fields it could not have known to drop, and still learns
+             * which of them did not land — the naming half published ahead of the behaviour, so until the
+             * `ATTRIBUTES_NOT_APPLIED` warning is emitted an unapplied attribute is dropped silently. An attribute's `render_condition` says when to show it and has no
+             * bearing on whether a variant may override it.
              *
-             * Ignored means *not updated*, never *removed*: a value already stored for an attribute that is
-             * not currently overridable is preserved, so removing and restoring the flag deactivates and
-             * then reactivates the same override.
+             * Not applied means *not updated*, never *removed*: a value already stored for an attribute that
+             * is not currently overridable is preserved, so removing and restoring the flag deactivates and
+             * then reactivates the same override. An append seeds the attributes the variant may not
+             * override from the version in effect at its own `valid_from`, so its stored values are not a
+             * pure function of the body that wrote it; a variant's first version, and an append dated before
+             * the variant's earliest version, inherit nothing.
              *
-             * A composite price's `price_components` is an ordinary overridable relation attribute: a
-             * composite variant pins its component variants here the same way any other relation value is
-             * set, with no special handling.
+             * A composite price's `price_components` is an ordinary overridable relation attribute. A
+             * composite variant's override references different component *entities*, never a variant or a
+             * version of one, and holds whatever a relation attribute ordinarily holds — this API defines no
+             * reference shape of its own.
              *
              * example:
              * {
@@ -4864,8 +11236,7 @@ declare namespace Components {
              */
             _updated_at: string;
             /**
-             * The revision a later write to this version must carry to be accepted. Genuinely current,
-             * unlike one read back later from an eventually-consistent read.
+             * The revision a later write to this version must carry to be accepted.
              *
              */
             _revision: number;
@@ -4874,7 +11245,17 @@ declare namespace Components {
              * reads its length rather than branching on its absence.
              *
              */
-            warnings: VariantWriteWarning[];
+            warnings: /**
+             * Something worth knowing that did not stop a write.
+             *
+             * One vocabulary for every write, so a client branches on what happened rather than on which
+             * endpoint it called. `code` and `message` are the only two fields every code shares; everything
+             * else lives in a `details` object typed per code, so narrowing on `code` yields a payload the
+             * client can read rather than an untyped bag. A write raises each code at most once, and in the
+             * ordinary case raises none of them.
+             *
+             */
+            WriteWarning[];
         }
         /**
          * Three-letter ISO currency code, in lowercase. Must be a supported currency.
@@ -4958,16 +11339,21 @@ declare namespace Components {
              */
             valid_from: string;
             /**
-             * What the delete moved, if anything. Empty when a scheduled version was withdrawn.
-             */
-            warnings: /**
-             * Something a version write moved. A version write is never refused for being late — backdating a
-             * version, and editing or deleting one that has already been superseded, are both accepted — so
-             * what a caller gets instead is a warning naming exactly what changed. One write can carry both
-             * codes.
+             * What the delete moved, if anything. Empty when a scheduled version was withdrawn — a
+             * client reads its length rather than branching on its absence.
              *
              */
-            VersionWriteWarning[];
+            warnings: /**
+             * Something worth knowing that did not stop a write.
+             *
+             * One vocabulary for every write, so a client branches on what happened rather than on which
+             * endpoint it called. `code` and `message` are the only two fields every code shares; everything
+             * else lives in a `details` object typed per code, so narrowing on `code` yields a payload the
+             * client can read rather than an untyped bag. A write raises each code at most once, and in the
+             * ordinary case raises none of them.
+             *
+             */
+            WriteWarning[];
         }
         export interface DiscountAmounts {
             /**
@@ -5725,6 +12111,12 @@ declare namespace Components {
              */
             is_composite_price: true;
             /**
+             * The flag for entities whose values vary by context. Resolve the values that apply with
+             * `POST /v1/conditional-pricing:resolve`.
+             *
+             */
+            is_conditional?: boolean;
+            /**
              * The price creation date
              */
             _created_at?: string;
@@ -5749,6 +12141,73 @@ declare namespace Components {
              */
             _tags?: string[];
         }
+        /**
+         * One override that did not apply, and why.
+         *
+         * The same entry on both sides of the feature: a write reports the attributes in its body it did
+         * not store, and a resolved payload reports the stored overrides composition did not apply. Those
+         * are the same fact observed at two moments, so a client learns one shape and reads it in both
+         * places.
+         *
+         */
+        export interface InertOverride {
+            /**
+             * The attribute's name, as the request body or the stored version spells it.
+             * example:
+             * unit_amount
+             */
+            attribute: string;
+            reason: /**
+             * Why one override did not apply.
+             *
+             * - `ATTRIBUTE_NOT_OVERRIDABLE`: the entity's schema declares the attribute but has not granted
+             *   it `overridable_attribute`. Granting the flag is an ordinary schema edit, which makes this
+             *   the reason most often worth acting on.
+             * - `ATTRIBUTE_READONLY`: the attribute is declared readonly, and a readonly attribute cannot
+             *   be granted the flag.
+             * - `ATTRIBUTE_HIDDEN`: the attribute is declared hidden, and a hidden attribute cannot be
+             *   granted the flag.
+             * - `ATTRIBUTE_COMPUTED`: the attribute's value is derived (`type: computed` or
+             *   `computed: true`) rather than stored, so an override would be recomputed away.
+             * - `ATTRIBUTE_UNDECLARED`: the entity's schema declares no attribute of that name. On a write
+             *   that is usually a typo; on a resolved payload it is a stored override whose attribute has
+             *   since left the schema — a stored value outlives the flag being withdrawn, so it can outlive
+             *   its own attribute too. This API keeps no record of what a schema once declared, so it states
+             *   only the observable fact and does not distinguish the two.
+             * - `TYPE_NOT_OVERRIDABLE`: the attribute's type is not one a variant may override, whatever
+             *   the schema says about that particular attribute.
+             * - `CAPABILITY_NOT_OVERRIDABLE`: the attribute is contributed by a capability rather than
+             *   declared on the entity's schema. Published for completeness and not emitted in this version,
+             *   in which no capability attribute can be overridden at all.
+             *
+             */
+            InertOverrideReason;
+        }
+        /**
+         * Why one override did not apply.
+         *
+         * - `ATTRIBUTE_NOT_OVERRIDABLE`: the entity's schema declares the attribute but has not granted
+         *   it `overridable_attribute`. Granting the flag is an ordinary schema edit, which makes this
+         *   the reason most often worth acting on.
+         * - `ATTRIBUTE_READONLY`: the attribute is declared readonly, and a readonly attribute cannot
+         *   be granted the flag.
+         * - `ATTRIBUTE_HIDDEN`: the attribute is declared hidden, and a hidden attribute cannot be
+         *   granted the flag.
+         * - `ATTRIBUTE_COMPUTED`: the attribute's value is derived (`type: computed` or
+         *   `computed: true`) rather than stored, so an override would be recomputed away.
+         * - `ATTRIBUTE_UNDECLARED`: the entity's schema declares no attribute of that name. On a write
+         *   that is usually a typo; on a resolved payload it is a stored override whose attribute has
+         *   since left the schema — a stored value outlives the flag being withdrawn, so it can outlive
+         *   its own attribute too. This API keeps no record of what a schema once declared, so it states
+         *   only the observable fact and does not distinguish the two.
+         * - `TYPE_NOT_OVERRIDABLE`: the attribute's type is not one a variant may override, whatever
+         *   the schema says about that particular attribute.
+         * - `CAPABILITY_NOT_OVERRIDABLE`: the attribute is contributed by a capability rather than
+         *   declared on the entity's schema. Published for completeness and not emitted in this version,
+         *   in which no capability attribute can be overridden at all.
+         *
+         */
+        export type InertOverrideReason = "ATTRIBUTE_NOT_OVERRIDABLE" | "ATTRIBUTE_READONLY" | "ATTRIBUTE_HIDDEN" | "ATTRIBUTE_COMPUTED" | "ATTRIBUTE_UNDECLARED" | "TYPE_NOT_OVERRIDABLE" | "CAPABILITY_NOT_OVERRIDABLE";
         /**
          * The auth credentials for external integrations
          */
@@ -5825,6 +12284,120 @@ declare namespace Components {
                     [name: string]: any;
                 };
             }[];
+        }
+        /**
+         * How to narrow and page a variant listing. Every property is optional, so `{}` is a valid body
+         * and asks for the first ten variants of the entity in `variant_id` order — the body itself is
+         * required, and an omitted one is a request-validation `400` rather than an unnarrowed page.
+         *
+         * `conditions` and `search` narrow independently and a variant has to satisfy both.
+         *
+         */
+        export interface ListVariantsRequest {
+            conditions?: /**
+             * Which pins a variant must carry to be listed: a flat map keyed by condition name, as the
+             * entity's schema declares them. A condition left out of the map is not filtered on at all.
+             *
+             * Each value is either an exact value, typed by its condition, or a single-operator predicate
+             * object — the same seven a resolve context accepts, because in both cases a predicate is
+             * applied to the variant's *pinned* value, so nothing about matching moves:
+             *
+             * - `{ "lt": v }`, `{ "lte": v }`, `{ "gt": v }`, `{ "gte": v }` — order against a `number` or
+             *   `date` condition.
+             * - `{ "in": [...] }` — membership, against a `string`, `select` or `number` condition.
+             * - `{ "between": "2026-03-01" }` — the explicit spelling of `daterange` containment; a plain
+             *   date supplied for a `daterange` condition means the same thing.
+             * - `{ "exists": true }` — pinned to any value. `{ "exists": false }` — the condition left
+             *   unpinned.
+             *
+             * An `in` list carries at most 50,000 values; a longer one is `CONTEXT_FORMAT_INVALID`. To
+             * filter on a condition whatever its pinned value, send `{ "exists": true }` rather than
+             * enumerating its vocabulary.
+             *
+             * **A variant matches only where it pins the condition** — the one place a filter and a resolve
+             * context differ. On `:resolve` a condition a variant does not pin matches any value; here,
+             * asking for postal code 46045 does not return the variants that pin no postal code at all.
+             * `{ "exists": false }` is how those are asked for.
+             *
+             * Values are typed and canonicalized exactly as a resolve context's are, by the same code, so
+             * one instant written two ways filters the same way either way. A condition the schema does not
+             * declare is `CONDITION_UNDEFINED`, a predicate its type does not support is
+             * `OPERATOR_UNSUPPORTED`, and a value malformed for its type is `CONTEXT_FORMAT_INVALID`.
+             *
+             * **`default` is accepted here**, as the exact boolean every row reports it as: `true` selects
+             * the entity's fallback variant, `false` every variant that is not it.
+             *
+             * It takes no predicate. `default` is not a condition and has no type, so ordering and
+             * membership have nothing to apply to. It is also the one key the pinned-only rule above does
+             * not describe literally: a variant that is not the fallback does not pin the marker to `false`,
+             * it does not pin it at all, so `false` selects the variants that leave it unpinned.
+             *
+             * Names beginning with `_` stay reserved for the server and cannot be filtered on — `_default`,
+             * the marker a fallback is actually stored under, included. `default` is the spelling every read
+             * reports and the only one this accepts.
+             *
+             * example:
+             * {
+             *   "postal_code": "46045",
+             *   "consumption": {
+             *     "lt": 5000
+             *   }
+             * }
+             */
+            VariantConditionFilter;
+            /**
+             * Free text matched against the variant's pinned values — how someone finds one postal code
+             * among 800,000.
+             *
+             * Matches `string`, `select` and `number` pins only. A `location` pin is stored as an array
+             * of its format's parts and a `daterange` pin as an object carrying `from` and `until`, so
+             * neither is text a user could have typed.
+             *
+             * example:
+             * 460
+             */
+            search?: string;
+            /**
+             * `conditions.<name>:asc` or `conditions.<name>:desc`, for a `string`, `select`, `number` or
+             * `date` pin. Anything else — another field, or a pin of another type — is a `400`.
+             *
+             * **`variant_id:asc` is appended by the server**, always, so the order is total: many
+             * variants can pin one postal code, and without a tiebreaker a cursor would repeat or skip
+             * rows between pages. Asking for no sort is `variant_id:asc` alone.
+             *
+             * example:
+             * conditions.postal_code:asc
+             */
+            sort?: string;
+            /**
+             * The offset to read from. Not read when a `cursor` is sent, which carries its own position.
+             *
+             * Bounded by the search index's offset window, together with `size`: the window bounds the
+             * last row a page may contain, so the final servable offset is the window minus the page
+             * size. A page reaching past it is `OFFSET_WINDOW_EXCEEDED`, naming all three numbers,
+             * rather than a page clamped back inside it as entity listing does. The window is the
+             * deploy's: read its size from the error, not from here.
+             *
+             */
+            from?: number;
+            /**
+             * Rows per page. Clamped silently at 1000, as entity listing's is.
+             *
+             */
+            size?: number;
+            /**
+             * Continue from a previous response's `next`, which is where a caller goes when the offset
+             * window runs out. Opaque: it encodes the position and the listing it was issued for, and
+             * nothing a client should read or construct.
+             *
+             * `conditions`, `search` and `sort` must be the ones the cursor was issued with — a cursor
+             * resumes one listing, and cannot mean anything against a different one. A cursor that is
+             * malformed, or does not match the listing it is sent with, is a `400`.
+             *
+             * example:
+             * eyJmcm9tIjoyNSwibGlzdGluZyI6IjNmOWMxZTJhIn0
+             */
+            cursor?: string;
         }
         /**
          * Market participant data
@@ -6024,6 +12597,12 @@ declare namespace Components {
              * The flag for prices that contain price components.
              */
             is_composite_price: true;
+            /**
+             * The flag for entities whose values vary by context. Resolve the values that apply with
+             * `POST /v1/conditional-pricing:resolve`.
+             *
+             */
+            is_conditional?: boolean;
             /**
              * The price creation date
              */
@@ -7228,7 +13807,7 @@ declare namespace Components {
             valid_from?: string;
             /**
              * Optional, and never applied. A partial update that tries to change a pinned condition value
-             * is refused — this is the path that rule is most likely to be broken on by accident.
+             * is refused.
              *
              * example:
              * {
@@ -7261,14 +13840,15 @@ declare namespace Components {
          * context says for it, which is what makes adding a condition to a schema non-breaking for the
          * variants that already exist.
          *
-         * Exact values only. Predicates are accepted in a resolve context and nowhere else, so that
-         * matching is decided in exactly one place.
+         * Exact values only. A predicate is a read-side thing — a resolve context or a listing's
+         * condition filter — and is never stored: what a variant applies to is one situation, not a
+         * range of them.
          *
          * Values are typed by their condition and stored canonicalized for that type: a `date` becomes
          * millisecond-precision UTC, a `daterange` an object carrying `from` and `until` where an empty
          * string is an open end, a `location` of format `zipcode` the postal code itself and one of
-         * format `zipcode + town` an object carrying both. A `select` value must be a string, and must
-         * be one the condition's `options` declare unless it sets `allow_any`.
+         * format `zipcode_town` an object carrying both. A `select` value must be a string, and must
+         * be one the condition's `options` declare, which is always a closed vocabulary.
          *
          * `default`, and any name beginning with `_`, are reserved for the server and cannot be pinned
          * here. Whether a variant is the entity's fallback is set through the request's `default` flag.
@@ -7280,6 +13860,40 @@ declare namespace Components {
          */
         export interface PinnedConditions {
             [name: string]: any;
+        }
+        /**
+         * The options a pinned resolve accepts — `hydrate` and nothing else. `resolve_one` has nothing
+         * to change on this branch, where the answer is exactly one result or a 404, so a body sending
+         * it is a validation `400`. `hydrate` means what `ResolveOptions.hydrate` means.
+         *
+         */
+        export interface PinnedResolveOptions {
+            /**
+             * Return the entities a relation attribute references in place of the references
+             * themselves, one level deep, exactly as an entity read with hydration does.
+             *
+             * A fetch, not a second resolution: a referenced entity comes back as it is read, and one
+             * that is itself conditional carries its own flag — acting on that is the consumer's
+             * choice, and this API does not resolve it on their behalf.
+             *
+             * Applied after composition, so a relation attribute whose value this variant's version
+             * replaced is hydrated too. That is what makes a composite price work: the override
+             * references different component *entities*, which exist only in the composed payload.
+             *
+             * A reference that cannot be fetched comes back exactly as entity hydration returns it —
+             * no drop, no failure, and no field reporting it. A resolved payload behaves as an entity
+             * of the same shape would, and the discriminators are the only difference.
+             *
+             * Costs one fetch per referenced entity per result, and carries no cap of its own: the
+             * per-attribute limits are entity hydration's, and the 100-result cap on the resolve itself
+             * is unchanged.
+             *
+             * **Published ahead of the behaviour.** Until hydration is built, `true` is answered `501`
+             * rather than served as unhydrated references; `false`, which asks for what this path
+             * already does, resolves normally.
+             *
+             */
+            hydrate?: boolean;
         }
         export interface PortalContext {
             [name: string]: any;
@@ -7431,6 +14045,12 @@ declare namespace Components {
              * The flag for prices that contain price components.
              */
             is_composite_price?: false;
+            /**
+             * The flag for entities whose values vary by context. Resolve the values that apply with
+             * `POST /v1/conditional-pricing:resolve`.
+             *
+             */
+            is_conditional?: boolean;
             /**
              * Describes how to compute the price per period. Either `per_unit`, `tiered_graduated` or `tiered_volume`.
              * - `per_unit` indicates that the fixed amount (specified in unit_amount or unit_amount_decimal) will be charged per unit in quantity
@@ -8117,6 +14737,12 @@ declare namespace Components {
                     $relation?: EntityRelation[];
                 };
                 /**
+                 * The flag for entities whose values vary by context. Resolve the values that apply with
+                 * `POST /v1/conditional-pricing:resolve`.
+                 *
+                 */
+                is_conditional?: boolean;
+                /**
                  * Stores references to the availability files that define where this product is available.
                  * These files are used when interacting with products via epilot Journeys, thought the AvailabilityCheck block.
                  *
@@ -8515,6 +15141,12 @@ declare namespace Components {
                     $relation?: EntityRelation[];
                 };
                 /**
+                 * The flag for entities whose values vary by context. Resolve the values that apply with
+                 * `POST /v1/conditional-pricing:resolve`.
+                 *
+                 */
+                is_conditional?: boolean;
+                /**
                  * Stores references to the availability files that define where this product is available.
                  * These files are used when interacting with products via epilot Journeys, thought the AvailabilityCheck block.
                  *
@@ -8686,6 +15318,12 @@ declare namespace Components {
                  * The flag for prices that contain price components.
                  */
                 is_composite_price?: false;
+                /**
+                 * The flag for entities whose values vary by context. Resolve the values that apply with
+                 * `POST /v1/conditional-pricing:resolve`.
+                 *
+                 */
+                is_conditional?: boolean;
                 /**
                  * Describes how to compute the price per period. Either `per_unit`, `tiered_graduated` or `tiered_volume`.
                  * - `per_unit` indicates that the fixed amount (specified in unit_amount or unit_amount_decimal) will be charged per unit in quantity
@@ -9536,6 +16174,12 @@ declare namespace Components {
                 $relation?: EntityRelation[];
             };
             /**
+             * The flag for entities whose values vary by context. Resolve the values that apply with
+             * `POST /v1/conditional-pricing:resolve`.
+             *
+             */
+            is_conditional?: boolean;
+            /**
              * Stores references to the availability files that define where this product is available.
              * These files are used when interacting with products via epilot Journeys, thought the AvailabilityCheck block.
              *
@@ -10116,10 +16760,8 @@ declare namespace Components {
              * The complete set of attribute overrides this version carries. An overridable attribute
              * absent from here stops being overridden.
              *
-             * Attributes the variant may not override are ignored where this carries them, and their
-             * **stored value is kept rather than dropped** — otherwise a routine full-snapshot write
-             * would erase an override the moment its attribute's `overridable_attribute`, `readonly` or
-             * `hidden` flag happened to be off.
+             * Attributes the variant may not override are not applied where this carries them, and
+             * their **stored value is kept rather than dropped**.
              *
              * example:
              * {
@@ -10133,10 +16775,6 @@ declare namespace Components {
             /**
              * The revision marker read from the version being written. The write is refused with
              * `WRITE_CONFLICT` if the version has been written since.
-             *
-             * Required rather than optional: an optional one is a guarantee every client can opt out of
-             * by forgetting a field, and the write it protects is the one that overwrites somebody
-             * else's edit.
              *
              * example:
              * 3
@@ -10163,7 +16801,33 @@ declare namespace Components {
                 [name: string]: any;
             };
         }
-        export interface ResolveConditionalEntityRequest {
+        /**
+         * The `error` field of an error response: the message, or — where the request itself failed
+         * validation before any handler ran — the validation errors themselves, which those 400s put
+         * here in place of a string.
+         *
+         * A conditional-pricing operation answers a body its schema rejects with the list, and
+         * everything else it refuses with the message.
+         *
+         */
+        export type ReportedError = /**
+         * The `error` field of an error response: the message, or — where the request itself failed
+         * validation before any handler ran — the validation errors themselves, which those 400s put
+         * here in place of a string.
+         *
+         * A conditional-pricing operation answers a body its schema rejects with the list, and
+         * everything else it refuses with the message.
+         *
+         */
+        string | {
+            [name: string]: any;
+        }[];
+        /**
+         * Resolve by matching a situation: which of this entity's variants apply to `context`, each
+         * composed with the version in effect at `as_of`.
+         *
+         */
+        export interface ResolveByContextRequest {
             schema: /**
              * Schema slug of an entity type that can be conditional — the `{slug}` of every
              * conditional-pricing route.
@@ -10176,7 +16840,7 @@ declare namespace Components {
              * price-sp26d1yo
              */
             entity_id: string;
-            context?: /**
+            context: /**
              * The situation to resolve for: a flat map keyed by condition name, as the entity's schema
              * declares them. A condition left out of the map is not a wildcard — it matches only variants
              * that leave that condition unpinned.
@@ -10192,13 +16856,21 @@ declare namespace Components {
              * - `{ "exists": true }` — pinned to any value. `{ "exists": false }` says what leaving the key
              *   out says.
              *
+             * An `in` list carries at most 50,000 values; a longer one is `CONTEXT_FORMAT_INVALID`. To match
+             * a condition whatever its value, send `{ "exists": true }` rather than enumerating its
+             * vocabulary.
+             *
              * Exact values are typed by their condition: a `string` or `select` matches exactly and
              * case-sensitively, with no trimming; a `location` of format `zipcode` is the postal code
-             * itself, and one of format `zipcode + town` an object carrying both, whose town is compared
+             * itself, and one of format `zipcode_town` an object carrying both, whose town is compared
              * case- and whitespace-insensitively while its postal code is not.
              *
              * `default`, and any name beginning with `_`, are reserved for the server and cannot be
              * supplied here.
+             *
+             * An empty map is valid and means what it says: it supplies no value, so it matches no variant
+             * that pins a condition, and the entity's `default` variant is what comes back. It is the only way to
+             * ask for the default variant without knowing its id.
              *
              * example:
              * {
@@ -10214,16 +16886,115 @@ declare namespace Components {
              * before it. Defaults to now. A variant whose first version is later than this is
              * scheduled rather than applicable, and is excluded from resolution entirely.
              *
+             * That exclusion belongs to context matching only: a set of results may quietly drop a
+             * member, where a pin naming one variant cannot answer with silence and is told
+             * `NO_ACTIVE_VERSION` instead.
+             *
              * An RFC 3339 date (`2026-01-01`, read as midnight UTC) or date-time
-             * (`2026-01-01T00:00:00Z`), to at most millisecond precision. Deliberately not declared as
-             * `format: date-time`, which would reject the plain-date form that this accepts.
+             * (`2026-01-01T00:00:00Z`), to at most millisecond precision.
              *
              * example:
              * 2027-03-15T00:00:00Z
              */
             as_of?: string;
-            options?: ResolveOptions;
+            options?: /* The options a context resolve accepts. A pin takes `PinnedResolveOptions` instead. */ ResolveOptions;
         }
+        /**
+         * Resolve by naming a variant: compose this one, whatever a context would have matched. What an
+         * order needs to show the numbers a customer agreed to, and what a contract needs to show what
+         * is billable now — the two differ only in whether `as_of` is supplied.
+         *
+         */
+        export interface ResolveByPinRequest {
+            schema: /**
+             * Schema slug of an entity type that can be conditional — the `{slug}` of every
+             * conditional-pricing route.
+             *
+             */
+            ConditionalEntitySlug;
+            /**
+             * The conditional entity to resolve. Resolution is always scoped to exactly one.
+             * example:
+             * price-sp26d1yo
+             */
+            entity_id: string;
+            /**
+             * The variant to compose. Condition matching is skipped entirely: no `context` is read, the
+             * `default` fallback does not apply, and `results` carries exactly one entry — a pin asks
+             * for one variant by name.
+             *
+             * A `variant_id` this entity has no variant under is `VARIANT_NOT_FOUND`, and so is one
+             * naming a variant of a different entity: a variant id alone addresses nothing.
+             * `SCHEMA_NOT_FOUND` and `ENTITY_NOT_FOUND` are still answered ahead of both.
+             *
+             * **Published ahead of the behaviour.** Until the pinned path is built, a body carrying
+             * this field is answered `501`, ahead of every check above — the field exists so consumers
+             * can build against it, and declining it is how a deployed stage says so rather than
+             * quietly returning the `default` variant.
+             *
+             * example:
+             * var-46045
+             */
+            variant_id: string;
+            /**
+             * The instant the version is selected at — the version with the latest `valid_from` at or
+             * before it. Defaults to now. The same selector, by the same rule, as on a context resolve:
+             * how the variant was chosen is orthogonal to which of its versions applies, so a caller
+             * replaying a recorded resolution instant supplies it here.
+             *
+             * A pinned variant whose first version is later than this is `NO_ACTIVE_VERSION`, carrying
+             * the instant in `details.as_of`, rather than being dropped the way context matching drops
+             * a scheduled variant.
+             *
+             * An RFC 3339 date (`2026-01-01`, read as midnight UTC) or date-time
+             * (`2026-01-01T00:00:00Z`), to at most millisecond precision.
+             *
+             * example:
+             * 2027-03-15T00:00:00Z
+             */
+            as_of?: string;
+            options?: /**
+             * The options a pinned resolve accepts — `hydrate` and nothing else. `resolve_one` has nothing
+             * to change on this branch, where the answer is exactly one result or a 404, so a body sending
+             * it is a validation `400`. `hydrate` means what `ResolveOptions.hydrate` means.
+             *
+             */
+            PinnedResolveOptions;
+        }
+        /**
+         * A resolve names one conditional entity, then says which of its variants it means — one of two
+         * ways, and never both. `context` describes a situation and asks which variants apply to it;
+         * `variant_id` names one variant and skips matching entirely.
+         *
+         * A body carrying both, or neither, is a validation `400`. Asking for the default variant
+         * without knowing its id is `context: {}`, which matches nothing and therefore falls back to it.
+         *
+         * Everything below the variant selection is the same on both branches, `as_of` included.
+         *
+         */
+        export type ResolveConditionalEntityRequest = /**
+         * A resolve names one conditional entity, then says which of its variants it means — one of two
+         * ways, and never both. `context` describes a situation and asks which variants apply to it;
+         * `variant_id` names one variant and skips matching entirely.
+         *
+         * A body carrying both, or neither, is a validation `400`. Asking for the default variant
+         * without knowing its id is `context: {}`, which matches nothing and therefore falls back to it.
+         *
+         * Everything below the variant selection is the same on both branches, `as_of` included.
+         *
+         */
+        /**
+         * Resolve by matching a situation: which of this entity's variants apply to `context`, each
+         * composed with the version in effect at `as_of`.
+         *
+         */
+        ResolveByContextRequest | /**
+         * Resolve by naming a variant: compose this one, whatever a context would have matched. What an
+         * order needs to show the numbers a customer agreed to, and what a contract needs to show what
+         * is billable now — the two differ only in whether `as_of` is supplied.
+         *
+         */
+        ResolveByPinRequest;
         /**
          * The situation to resolve for: a flat map keyed by condition name, as the entity's schema
          * declares them. A condition left out of the map is not a wildcard — it matches only variants
@@ -10240,13 +17011,21 @@ declare namespace Components {
          * - `{ "exists": true }` — pinned to any value. `{ "exists": false }` says what leaving the key
          *   out says.
          *
+         * An `in` list carries at most 50,000 values; a longer one is `CONTEXT_FORMAT_INVALID`. To match
+         * a condition whatever its value, send `{ "exists": true }` rather than enumerating its
+         * vocabulary.
+         *
          * Exact values are typed by their condition: a `string` or `select` matches exactly and
          * case-sensitively, with no trimming; a `location` of format `zipcode` is the postal code
-         * itself, and one of format `zipcode + town` an object carrying both, whose town is compared
+         * itself, and one of format `zipcode_town` an object carrying both, whose town is compared
          * case- and whitespace-insensitively while its postal code is not.
          *
          * `default`, and any name beginning with `_`, are reserved for the server and cannot be
          * supplied here.
+         *
+         * An empty map is valid and means what it says: it supplies no value, so it matches no variant
+         * that pins a condition, and the entity's `default` variant is what comes back. It is the only way to
+         * ask for the default variant without knowing its id.
          *
          * example:
          * {
@@ -10259,19 +17038,52 @@ declare namespace Components {
         export interface ResolveContext {
             [name: string]: any;
         }
+        /**
+         * The options a context resolve accepts. A pin takes `PinnedResolveOptions` instead.
+         */
         export interface ResolveOptions {
             /**
              * Ask for an unambiguous answer. Several applicable variants become `AMBIGUOUS_RESOLUTION`
-             * rather than a set, and nothing applicable becomes `NOT_FOUND` rather than an empty one.
+             * rather than a set, and nothing applicable becomes `NO_MATCHES` rather than an empty one.
              * The response shape does not change: `results` simply carries exactly one entry.
              *
              */
             resolve_one?: boolean;
+            /**
+             * Return the entities a relation attribute references in place of the references
+             * themselves, one level deep, exactly as an entity read with hydration does.
+             *
+             * A fetch, not a second resolution: a referenced entity comes back as it is read, and one
+             * that is itself conditional carries its own flag — acting on that is the consumer's
+             * choice, and this API does not resolve it on their behalf.
+             *
+             * Applied after composition, so a relation attribute whose value this variant's version
+             * replaced is hydrated too. That is what makes a composite price work: the override
+             * references different component *entities*, which exist only in the composed payload.
+             *
+             * A reference that cannot be fetched comes back exactly as entity hydration returns it —
+             * no drop, no failure, and no field reporting it. A resolved payload behaves as an entity
+             * of the same shape would, and the discriminators are the only difference.
+             *
+             * Costs one fetch per referenced entity per result, and carries no cap of its own: the
+             * per-attribute limits are entity hydration's, and the 100-result cap on the resolve itself
+             * is unchanged.
+             *
+             * **Published ahead of the behaviour.** Until hydration is built, `true` is answered `501`
+             * rather than served as unhydrated references; `false`, which asks for what this path
+             * already does, resolves normally.
+             *
+             */
+            hydrate?: boolean;
         }
         /**
          * The entity as this variant leaves it — every attribute of a plain entity read, with the
          * applicable version's overrides applied — plus the discriminators saying where the numbers
          * came from.
+         *
+         * With `options.hydrate`, a relation attribute holds the entities it references rather than the
+         * references themselves. That changes what an attribute holds, not the payload's shape, so
+         * nothing is declared here for it.
          *
          */
         export interface ResolvedVariant {
@@ -10301,9 +17113,6 @@ declare namespace Components {
             /**
              * The conditions this variant pins, plus the boolean `default` discriminator.
              *
-             * Underscore-prefixed, like every other discriminator here, so that it cannot collide with
-             * an attribute an organization happens to have called `conditions`.
-             *
              * example:
              * {
              *   "postal_code": "46045",
@@ -10314,18 +17123,43 @@ declare namespace Components {
                 [name: string]: any;
                 default: boolean;
             };
+            /**
+             * The variant's stored overrides this payload did not apply, and why. Always present, and
+             * empty in the ordinary case — a client reads its length rather than branching on its
+             * absence, the same way it reads a write's `warnings`.
+             *
+             * Computed per read from the schema as it stands, never stored, so granting or withdrawing
+             * `overridable_attribute` changes what resolves — and this list — without any data being
+             * rewritten. A version read reports what is stored and carries no such list; this is the
+             * only surface that honours the schema.
+             *
+             */
+            _inert_overrides: /**
+             * One override that did not apply, and why.
+             *
+             * The same entry on both sides of the feature: a write reports the attributes in its body it did
+             * not store, and a resolved payload reports the stored overrides composition did not apply. Those
+             * are the same fact observed at two moments, so a client learns one shape and reads it in both
+             * places.
+             *
+             */
+            InertOverride[];
         }
         export interface ResolvedVariants {
             /**
              * One composed payload per applicable variant, capped at 100 — a context selecting more
-             * than that is answered with `TOO_MANY_MATCHES` instead, since each result costs its own
-             * version lookup. No dominance or specificity ordering is applied between them.
+             * than that is answered with `TOO_MANY_MATCHES` instead. No dominance or specificity
+             * ordering is applied between them.
              *
              */
             results: /**
              * The entity as this variant leaves it — every attribute of a plain entity read, with the
              * applicable version's overrides applied — plus the discriminators saying where the numbers
              * came from.
+             *
+             * With `options.hydrate`, a relation attribute holds the entities it references rather than the
+             * references themselves. That changes what an attribute holds, not the payload's shape, so
+             * nothing is declared here for it.
              *
              */
             ResolvedVariant[];
@@ -10714,6 +17548,59 @@ declare namespace Components {
             errors: /* The availability rule error */ ValidateAvailabilityFileError[];
         }
         /**
+         * Which pins a variant must carry to be listed: a flat map keyed by condition name, as the
+         * entity's schema declares them. A condition left out of the map is not filtered on at all.
+         *
+         * Each value is either an exact value, typed by its condition, or a single-operator predicate
+         * object — the same seven a resolve context accepts, because in both cases a predicate is
+         * applied to the variant's *pinned* value, so nothing about matching moves:
+         *
+         * - `{ "lt": v }`, `{ "lte": v }`, `{ "gt": v }`, `{ "gte": v }` — order against a `number` or
+         *   `date` condition.
+         * - `{ "in": [...] }` — membership, against a `string`, `select` or `number` condition.
+         * - `{ "between": "2026-03-01" }` — the explicit spelling of `daterange` containment; a plain
+         *   date supplied for a `daterange` condition means the same thing.
+         * - `{ "exists": true }` — pinned to any value. `{ "exists": false }` — the condition left
+         *   unpinned.
+         *
+         * An `in` list carries at most 50,000 values; a longer one is `CONTEXT_FORMAT_INVALID`. To
+         * filter on a condition whatever its pinned value, send `{ "exists": true }` rather than
+         * enumerating its vocabulary.
+         *
+         * **A variant matches only where it pins the condition** — the one place a filter and a resolve
+         * context differ. On `:resolve` a condition a variant does not pin matches any value; here,
+         * asking for postal code 46045 does not return the variants that pin no postal code at all.
+         * `{ "exists": false }` is how those are asked for.
+         *
+         * Values are typed and canonicalized exactly as a resolve context's are, by the same code, so
+         * one instant written two ways filters the same way either way. A condition the schema does not
+         * declare is `CONDITION_UNDEFINED`, a predicate its type does not support is
+         * `OPERATOR_UNSUPPORTED`, and a value malformed for its type is `CONTEXT_FORMAT_INVALID`.
+         *
+         * **`default` is accepted here**, as the exact boolean every row reports it as: `true` selects
+         * the entity's fallback variant, `false` every variant that is not it.
+         *
+         * It takes no predicate. `default` is not a condition and has no type, so ordering and
+         * membership have nothing to apply to. It is also the one key the pinned-only rule above does
+         * not describe literally: a variant that is not the fallback does not pin the marker to `false`,
+         * it does not pin it at all, so `false` selects the variants that leave it unpinned.
+         *
+         * Names beginning with `_` stay reserved for the server and cannot be filtered on — `_default`,
+         * the marker a fallback is actually stored under, included. `default` is the spelling every read
+         * reports and the only one this accepts.
+         *
+         * example:
+         * {
+         *   "postal_code": "46045",
+         *   "consumption": {
+         *     "lt": 5000
+         *   }
+         * }
+         */
+        export interface VariantConditionFilter {
+            [name: string]: any;
+        }
+        /**
          * A variant's pinned conditions as a reader sees them: the pins the schema declares, plus a
          * boolean `default` saying whether this is the entity's fallback.
          *
@@ -10731,23 +17618,422 @@ declare namespace Components {
             [name: string]: any;
             default: boolean;
         }
+        export interface VariantList {
+            /**
+             * How many variants match, exactly, at any depth — not how many this page carries. Exact,
+             * as entity listing's is.
+             *
+             * example:
+             * 8128
+             */
+            hits: number;
+            results: /**
+             * One variant as a listing reports it: which variant it is and what it pins.
+             *
+             * No `_revision` — a write re-reads its version through that version's own `GET` — and no
+             * `_inert_overrides`, since a listing reports what is stored and only `:resolve` honours the
+             * schema.
+             *
+             */
+            VariantListRow[];
+            /**
+             * The cursor that continues this listing, absent on the last page. Send it back as `cursor`,
+             * with the same filter, search and sort.
+             *
+             * example:
+             * eyJmcm9tIjoyNSwibGlzdGluZyI6IjNmOWMxZTJhIn0
+             */
+            next?: string;
+        }
+        /**
+         * One variant as a listing reports it: which variant it is and what it pins.
+         *
+         * No `_revision` — a write re-reads its version through that version's own `GET` — and no
+         * `_inert_overrides`, since a listing reports what is stored and only `:resolve` honours the
+         * schema.
+         *
+         */
+        export interface VariantListRow {
+            /**
+             * example:
+             * var-46045
+             */
+            variant_id: string;
+            /**
+             * example:
+             * price-sp26d1yo
+             */
+            entity_id: string;
+            schema: /**
+             * Schema slug of an entity type that can be conditional — the `{slug}` of every
+             * conditional-pricing route.
+             *
+             */
+            ConditionalEntitySlug;
+            /**
+             * The situation this variant applies to, plus the boolean `default` discriminator — the same
+             * shape a variant write returns.
+             *
+             * May lag: a variant just created can be missing from a page, and one just deleted can still
+             * be on it. The pins shown for a variant are never stale, since a variant's conditions are
+             * immutable after creation.
+             *
+             * example:
+             * {
+             *   "postal_code": "46045",
+             *   "default": false
+             * }
+             */
+            conditions: {
+                [name: string]: any;
+                default: boolean;
+            };
+        }
+        export interface VariantTree {
+            /**
+             * How many variants match, exactly, at any depth — not how many this page carries. Exact,
+             * as entity listing's is.
+             *
+             * example:
+             * 8128
+             */
+            hits: number;
+            /**
+             * One row per matching variant, in the requested order.
+             *
+             * A variant the index still holds but whose versions are already gone — a variant
+             * mid-delete — is **omitted** rather than returned without a `version`. So `results` can be
+             * shorter than `hits` implies, for the width of that lag and no longer. Paging still ends
+             * where `next` does.
+             *
+             */
+            results: /**
+             * A listing row plus the one version the tree view shows for it, and the status saying which
+             * version that is.
+             *
+             */
+            VariantTreeRow[];
+            /**
+             * The cursor that continues this listing, absent on the last page. Send it back as `cursor`,
+             * with the same filter, search and sort.
+             *
+             * `as_of` is free to change between pages. It selects which version each row shows and has
+             * no bearing on which variants match or on the order they come back in, so a screen whose
+             * date picker moves mid-listing keeps paging rather than starting over.
+             *
+             * example:
+             * eyJmcm9tIjoyNSwibGlzdGluZyI6IjNmOWMxZTJhIn0
+             */
+            next?: string;
+        }
+        /**
+         * The variants list's request plus `as_of`, the instant each row's version is selected at.
+         * `size` is clamped at 100 here; every other shared property means what it means on the list.
+         *
+         */
+        export interface VariantTreeRequest {
+            conditions?: /**
+             * Which pins a variant must carry to be listed: a flat map keyed by condition name, as the
+             * entity's schema declares them. A condition left out of the map is not filtered on at all.
+             *
+             * Each value is either an exact value, typed by its condition, or a single-operator predicate
+             * object — the same seven a resolve context accepts, because in both cases a predicate is
+             * applied to the variant's *pinned* value, so nothing about matching moves:
+             *
+             * - `{ "lt": v }`, `{ "lte": v }`, `{ "gt": v }`, `{ "gte": v }` — order against a `number` or
+             *   `date` condition.
+             * - `{ "in": [...] }` — membership, against a `string`, `select` or `number` condition.
+             * - `{ "between": "2026-03-01" }` — the explicit spelling of `daterange` containment; a plain
+             *   date supplied for a `daterange` condition means the same thing.
+             * - `{ "exists": true }` — pinned to any value. `{ "exists": false }` — the condition left
+             *   unpinned.
+             *
+             * An `in` list carries at most 50,000 values; a longer one is `CONTEXT_FORMAT_INVALID`. To
+             * filter on a condition whatever its pinned value, send `{ "exists": true }` rather than
+             * enumerating its vocabulary.
+             *
+             * **A variant matches only where it pins the condition** — the one place a filter and a resolve
+             * context differ. On `:resolve` a condition a variant does not pin matches any value; here,
+             * asking for postal code 46045 does not return the variants that pin no postal code at all.
+             * `{ "exists": false }` is how those are asked for.
+             *
+             * Values are typed and canonicalized exactly as a resolve context's are, by the same code, so
+             * one instant written two ways filters the same way either way. A condition the schema does not
+             * declare is `CONDITION_UNDEFINED`, a predicate its type does not support is
+             * `OPERATOR_UNSUPPORTED`, and a value malformed for its type is `CONTEXT_FORMAT_INVALID`.
+             *
+             * **`default` is accepted here**, as the exact boolean every row reports it as: `true` selects
+             * the entity's fallback variant, `false` every variant that is not it.
+             *
+             * It takes no predicate. `default` is not a condition and has no type, so ordering and
+             * membership have nothing to apply to. It is also the one key the pinned-only rule above does
+             * not describe literally: a variant that is not the fallback does not pin the marker to `false`,
+             * it does not pin it at all, so `false` selects the variants that leave it unpinned.
+             *
+             * Names beginning with `_` stay reserved for the server and cannot be filtered on — `_default`,
+             * the marker a fallback is actually stored under, included. `default` is the spelling every read
+             * reports and the only one this accepts.
+             *
+             * example:
+             * {
+             *   "postal_code": "46045",
+             *   "consumption": {
+             *     "lt": 5000
+             *   }
+             * }
+             */
+            VariantConditionFilter;
+            /**
+             * Free text matched against the variant's pinned values — how someone finds one postal code
+             * among 800,000.
+             *
+             * Matches `string`, `select` and `number` pins only. A `location` pin is stored as an array
+             * of its format's parts and a `daterange` pin as an object carrying `from` and `until`, so
+             * neither is text a user could have typed.
+             *
+             * example:
+             * 460
+             */
+            search?: string;
+            /**
+             * `conditions.<name>:asc` or `conditions.<name>:desc`, for a `string`, `select`, `number` or
+             * `date` pin. Anything else — another field, or a pin of another type — is a `400`.
+             *
+             * **`variant_id:asc` is appended by the server**, always, so the order is total: many
+             * variants can pin one postal code, and without a tiebreaker a cursor would repeat or skip
+             * rows between pages. Asking for no sort is `variant_id:asc` alone.
+             *
+             * example:
+             * conditions.postal_code:asc
+             */
+            sort?: string;
+            /**
+             * The offset to read from. Not read when a `cursor` is sent, which carries its own position.
+             *
+             * Bounded by the search index's offset window, together with `size`: the window bounds the
+             * last row a page may contain, so the final servable offset is the window minus the page
+             * size. A page reaching past it is `OFFSET_WINDOW_EXCEEDED`, naming all three numbers,
+             * rather than a page clamped back inside it as entity listing does. The window is the
+             * deploy's: read its size from the error, not from here.
+             *
+             */
+            from?: number;
+            /**
+             * Rows per page. Clamped silently at 100, a tenth of the variants list's cap: every row here
+             * costs its own version lookup.
+             *
+             */
+            size?: number;
+            /**
+             * Continue from a previous response's `next`, which is where a caller goes when the offset
+             * window runs out. Opaque: it encodes the position and the listing it was issued for, and
+             * nothing a client should read or construct.
+             *
+             * `conditions`, `search` and `sort` must be the ones the cursor was issued with — a cursor
+             * resumes one listing, and cannot mean anything against a different one. A cursor that is
+             * malformed, or does not match the listing it is sent with, is a `400`.
+             *
+             * example:
+             * eyJmcm9tIjoyNSwibGlzdGluZyI6IjNmOWMxZTJhIn0
+             */
+            cursor?: string;
+            /**
+             * The instant each row's version is selected at — the version with the latest `valid_from`
+             * at or before it. Defaults to now. The same selector, by the same rule, as `:resolve`'s.
+             *
+             * A variant whose first version is later than this is not dropped the way context matching
+             * drops it: it is a row with `status: scheduled` carrying that upcoming first version, which
+             * is what makes a staged price visible on the editing screen.
+             *
+             * An RFC 3339 date (`2026-01-01`, read as midnight UTC) or date-time
+             * (`2026-01-01T00:00:00Z`), to at most millisecond precision.
+             *
+             * example:
+             * 2027-03-15T00:00:00Z
+             */
+            as_of?: string;
+        }
+        /**
+         * A listing row plus the one version the tree view shows for it, and the status saying which
+         * version that is.
+         *
+         */
+        export interface VariantTreeRow {
+            /**
+             * example:
+             * var-46045
+             */
+            variant_id: string;
+            /**
+             * example:
+             * price-sp26d1yo
+             */
+            entity_id: string;
+            schema: /**
+             * Schema slug of an entity type that can be conditional — the `{slug}` of every
+             * conditional-pricing route.
+             *
+             */
+            ConditionalEntitySlug;
+            /**
+             * The situation this variant applies to, plus the boolean `default` discriminator — the same
+             * shape a variant write returns.
+             *
+             * May lag: a variant just created can be missing from a page, and one just deleted can still
+             * be on it. The pins shown for a variant are never stale, since a variant's conditions are
+             * immutable after creation.
+             *
+             * example:
+             * {
+             *   "postal_code": "46045",
+             *   "default": false
+             * }
+             */
+            conditions: {
+                [name: string]: any;
+                default: boolean;
+            };
+            status: /**
+             * Whether a tree row's version is the one in effect at `as_of`, or one still ahead of it.
+             *
+             * Exactly two values, and every row has one: a variant always has at least one version, so
+             * either a version is in effect at `as_of` or every version of that variant is still to come.
+             *
+             * - `active`: `version` is the version with the latest `valid_from` at or before `as_of` —
+             *   the same version `active_valid_from` and `NO_ACTIVE_VERSION` speak of.
+             * - `scheduled`: the variant's first version is later than `as_of`, and `version` is that
+             *   upcoming first version.
+             *
+             */
+            VariantTreeRowStatus;
+            /**
+             * The version this row shows: the one in effect at `as_of`, or — where every version of the
+             * variant is still ahead of it — that upcoming first one. `status` says which of the two it
+             * is.
+             *
+             * Always present. A variant always has at least one version, and the one case where a row
+             * could have none — a variant whose delete has removed its versions but not yet its index
+             * document — is omitted from `results` instead, so a consumer never reads this field
+             * defensively.
+             *
+             */
+            version: {
+                /**
+                 * example:
+                 * var-46045
+                 */
+                variant_id: string;
+                /**
+                 * example:
+                 * price-sp26d1yo
+                 */
+                entity_id: string;
+                schema: /**
+                 * Schema slug of an entity type that can be conditional — the `{slug}` of every
+                 * conditional-pricing route.
+                 *
+                 */
+                ConditionalEntitySlug;
+                /**
+                 * The situation the variant applies to, plus the boolean `default` discriminator. A property
+                 * of the variant rather than of this version: every version of a variant carries the same
+                 * one, and no version write can change it.
+                 *
+                 * example:
+                 * {
+                 *   "postal_code": "46045",
+                 *   "default": false
+                 * }
+                 */
+                conditions: {
+                    [name: string]: any;
+                    default: boolean;
+                };
+                /**
+                 * When this version takes effect, canonicalized to millisecond-precision UTC. A version's
+                 * identity within its variant — it never moves.
+                 *
+                 * example:
+                 * 2027-01-01T00:00:00.000Z
+                 */
+                valid_from: string;
+                values: /**
+                 * The attribute values this version overrides on the base entity, keyed by attribute name.
+                 *
+                 * Only attributes currently declaring `overridable_attribute` are applied. Metadata fields
+                 * (anything underscore-prefixed), readonly attributes, hidden attributes, computed attributes
+                 * and non-overridable attributes present here are not applied rather than rejected, and each one
+                 * is named in the write's `warnings`, so a client working from a slightly stale schema snapshot
+                 * still succeeds instead of failing on fields it could not have known to drop, and still learns
+                 * which of them did not land — the naming half published ahead of the behaviour, so until the
+                 * `ATTRIBUTES_NOT_APPLIED` warning is emitted an unapplied attribute is dropped silently. An attribute's `render_condition` says when to show it and has no
+                 * bearing on whether a variant may override it.
+                 *
+                 * Not applied means *not updated*, never *removed*: a value already stored for an attribute that
+                 * is not currently overridable is preserved, so removing and restoring the flag deactivates and
+                 * then reactivates the same override. An append seeds the attributes the variant may not
+                 * override from the version in effect at its own `valid_from`, so its stored values are not a
+                 * pure function of the body that wrote it; a variant's first version, and an append dated before
+                 * the variant's earliest version, inherit nothing.
+                 *
+                 * A composite price's `price_components` is an ordinary overridable relation attribute. A
+                 * composite variant's override references different component *entities*, never a variant or a
+                 * version of one, and holds whatever a relation attribute ordinarily holds — this API defines no
+                 * reference shape of its own.
+                 *
+                 * example:
+                 * {
+                 *   "unit_amount": 2499,
+                 *   "unit_amount_decimal": "24.99"
+                 * }
+                 */
+                VariantValues;
+                /**
+                 * When this version was created.
+                 */
+                _created_at: string;
+                /**
+                 * When this version was last written.
+                 */
+                _updated_at: string;
+            };
+        }
+        /**
+         * Whether a tree row's version is the one in effect at `as_of`, or one still ahead of it.
+         *
+         * Exactly two values, and every row has one: a variant always has at least one version, so
+         * either a version is in effect at `as_of` or every version of that variant is still to come.
+         *
+         * - `active`: `version` is the version with the latest `valid_from` at or before `as_of` —
+         *   the same version `active_valid_from` and `NO_ACTIVE_VERSION` speak of.
+         * - `scheduled`: the variant's first version is later than `as_of`, and `version` is that
+         *   upcoming first version.
+         *
+         */
+        export type VariantTreeRowStatus = "active" | "scheduled";
         /**
          * The attribute values this version overrides on the base entity, keyed by attribute name.
          *
          * Only attributes currently declaring `overridable_attribute` are applied. Metadata fields
-         * (anything underscore-prefixed), readonly attributes, hidden attributes and non-overridable
-         * attributes present here are ignored rather than rejected, so a client working from a slightly
-         * stale schema snapshot still succeeds instead of failing on fields it could not have known to
-         * drop. An attribute's `render_condition` says when to show it and has no bearing on whether a
-         * variant may override it.
+         * (anything underscore-prefixed), readonly attributes, hidden attributes, computed attributes
+         * and non-overridable attributes present here are not applied rather than rejected, and each one
+         * is named in the write's `warnings`, so a client working from a slightly stale schema snapshot
+         * still succeeds instead of failing on fields it could not have known to drop, and still learns
+         * which of them did not land — the naming half published ahead of the behaviour, so until the
+         * `ATTRIBUTES_NOT_APPLIED` warning is emitted an unapplied attribute is dropped silently. An attribute's `render_condition` says when to show it and has no
+         * bearing on whether a variant may override it.
          *
-         * Ignored means *not updated*, never *removed*: a value already stored for an attribute that is
-         * not currently overridable is preserved, so removing and restoring the flag deactivates and
-         * then reactivates the same override.
+         * Not applied means *not updated*, never *removed*: a value already stored for an attribute that
+         * is not currently overridable is preserved, so removing and restoring the flag deactivates and
+         * then reactivates the same override. An append seeds the attributes the variant may not
+         * override from the version in effect at its own `valid_from`, so its stored values are not a
+         * pure function of the body that wrote it; a variant's first version, and an append dated before
+         * the variant's earliest version, inherit nothing.
          *
-         * A composite price's `price_components` is an ordinary overridable relation attribute: a
-         * composite variant pins its component variants here the same way any other relation value is
-         * set, with no special handling.
+         * A composite price's `price_components` is an ordinary overridable relation attribute. A
+         * composite variant's override references different component *entities*, never a variant or a
+         * version of one, and holds whatever a relation attribute ordinarily holds — this API defines no
+         * reference shape of its own.
          *
          * example:
          * {
@@ -10811,19 +18097,25 @@ declare namespace Components {
              * The attribute values this version overrides on the base entity, keyed by attribute name.
              *
              * Only attributes currently declaring `overridable_attribute` are applied. Metadata fields
-             * (anything underscore-prefixed), readonly attributes, hidden attributes and non-overridable
-             * attributes present here are ignored rather than rejected, so a client working from a slightly
-             * stale schema snapshot still succeeds instead of failing on fields it could not have known to
-             * drop. An attribute's `render_condition` says when to show it and has no bearing on whether a
-             * variant may override it.
+             * (anything underscore-prefixed), readonly attributes, hidden attributes, computed attributes
+             * and non-overridable attributes present here are not applied rather than rejected, and each one
+             * is named in the write's `warnings`, so a client working from a slightly stale schema snapshot
+             * still succeeds instead of failing on fields it could not have known to drop, and still learns
+             * which of them did not land — the naming half published ahead of the behaviour, so until the
+             * `ATTRIBUTES_NOT_APPLIED` warning is emitted an unapplied attribute is dropped silently. An attribute's `render_condition` says when to show it and has no
+             * bearing on whether a variant may override it.
              *
-             * Ignored means *not updated*, never *removed*: a value already stored for an attribute that is
-             * not currently overridable is preserved, so removing and restoring the flag deactivates and
-             * then reactivates the same override.
+             * Not applied means *not updated*, never *removed*: a value already stored for an attribute that
+             * is not currently overridable is preserved, so removing and restoring the flag deactivates and
+             * then reactivates the same override. An append seeds the attributes the variant may not
+             * override from the version in effect at its own `valid_from`, so its stored values are not a
+             * pure function of the body that wrote it; a variant's first version, and an append dated before
+             * the variant's earliest version, inherit nothing.
              *
-             * A composite price's `price_components` is an ordinary overridable relation attribute: a
-             * composite variant pins its component variants here the same way any other relation value is
-             * set, with no special handling.
+             * A composite price's `price_components` is an ordinary overridable relation attribute. A
+             * composite variant's override references different component *entities*, never a variant or a
+             * version of one, and holds whatever a relation attribute ordinarily holds — this API defines no
+             * reference shape of its own.
              *
              * example:
              * {
@@ -10850,41 +18142,131 @@ declare namespace Components {
              */
             _revision: number;
         }
-        export interface VariantWriteWarning {
+        export interface VariantVersionList {
             /**
-             * - `VARIANT_COUNT_APPROACHING_CAP`: this entity is nearing the number of variants it may
-             *   hold. Surfaced rather than rejected, so an importer finds out with a whole run's notice
-             *   instead of discovering the limit halfway through a refresh.
+             * A page of the variant's timeline, in the requested `order`.
              *
              */
-            code: "VARIANT_COUNT_APPROACHING_CAP";
-            message: string;
-            /**
-             * Variants this entity holds, including the one just created.
+            results: /**
+             * One version of one variant as a listing reports it: `VariantVersion` without `_revision`.
+             *
+             * The revision is missing on purpose. An editing screen re-reads the one version it is about to
+             * write through that version's own `GET`, which is strongly consistent, and writes with the
+             * revision it gets back.
+             *
+             * Everything else is `VariantVersion` field for field, including the variant's `conditions`,
+             * which every version of a variant repeats.
+             *
              */
-            variant_count: number;
+            VariantVersionSnapshot[];
             /**
-             * Variants this entity may hold. Configurable per organization.
+             * The cursor that continues this timeline, absent only on the last page.
+             *
+             * The only end-of-data signal: a page shorter than `limit`, or an empty one, can still carry
+             * a cursor, so a client pages until this field is absent rather than until a page looks
+             * short. Send it back as `cursor`, against the same variant and the same `order`.
+             *
+             * example:
+             * eyJzayI6IlYjcHJpY2Utc3AyNmQxeW8jdmFyLTQ2MDQ1IzIwMjYtMDEtMDFUMDA6MDA6MDAuMDAwWiIsIm9yZGVyIjoiYXNjIn0
              */
-            cap: number;
+            next?: string;
         }
         /**
-         * Something a version write moved. A version write is never refused for being late — backdating a
-         * version, and editing or deleting one that has already been superseded, are both accepted — so
-         * what a caller gets instead is a warning naming exactly what changed. One write can carry both
-         * codes.
+         * One version of one variant as a listing reports it: `VariantVersion` without `_revision`.
+         *
+         * The revision is missing on purpose. An editing screen re-reads the one version it is about to
+         * write through that version's own `GET`, which is strongly consistent, and writes with the
+         * revision it gets back.
+         *
+         * Everything else is `VariantVersion` field for field, including the variant's `conditions`,
+         * which every version of a variant repeats.
          *
          */
-        export interface VersionWriteWarning {
+        export interface VariantVersionSnapshot {
             /**
-             * - `ACTIVE_VERSION_REPLACED`: what resolves **now** changed, other than by a newer version
-             *   taking effect. The version in effect was written behind, or removed.
-             * - `SUPERSEDED_VERSION_WRITTEN`: what a past-dated (`as_of`) read returns changed. The write
-             *   landed on, or created, a version that is not the one currently in effect.
+             * example:
+             * var-46045
+             */
+            variant_id: string;
+            /**
+             * example:
+             * price-sp26d1yo
+             */
+            entity_id: string;
+            schema: /**
+             * Schema slug of an entity type that can be conditional — the `{slug}` of every
+             * conditional-pricing route.
              *
              */
-            code: "ACTIVE_VERSION_REPLACED" | "SUPERSEDED_VERSION_WRITTEN";
-            message: string;
+            ConditionalEntitySlug;
+            /**
+             * The situation the variant applies to, plus the boolean `default` discriminator. A property
+             * of the variant rather than of this version: every version of a variant carries the same
+             * one, and no version write can change it.
+             *
+             * example:
+             * {
+             *   "postal_code": "46045",
+             *   "default": false
+             * }
+             */
+            conditions: {
+                [name: string]: any;
+                default: boolean;
+            };
+            /**
+             * When this version takes effect, canonicalized to millisecond-precision UTC. A version's
+             * identity within its variant — it never moves.
+             *
+             * example:
+             * 2027-01-01T00:00:00.000Z
+             */
+            valid_from: string;
+            values: /**
+             * The attribute values this version overrides on the base entity, keyed by attribute name.
+             *
+             * Only attributes currently declaring `overridable_attribute` are applied. Metadata fields
+             * (anything underscore-prefixed), readonly attributes, hidden attributes, computed attributes
+             * and non-overridable attributes present here are not applied rather than rejected, and each one
+             * is named in the write's `warnings`, so a client working from a slightly stale schema snapshot
+             * still succeeds instead of failing on fields it could not have known to drop, and still learns
+             * which of them did not land — the naming half published ahead of the behaviour, so until the
+             * `ATTRIBUTES_NOT_APPLIED` warning is emitted an unapplied attribute is dropped silently. An attribute's `render_condition` says when to show it and has no
+             * bearing on whether a variant may override it.
+             *
+             * Not applied means *not updated*, never *removed*: a value already stored for an attribute that
+             * is not currently overridable is preserved, so removing and restoring the flag deactivates and
+             * then reactivates the same override. An append seeds the attributes the variant may not
+             * override from the version in effect at its own `valid_from`, so its stored values are not a
+             * pure function of the body that wrote it; a variant's first version, and an append dated before
+             * the variant's earliest version, inherit nothing.
+             *
+             * A composite price's `price_components` is an ordinary overridable relation attribute. A
+             * composite variant's override references different component *entities*, never a variant or a
+             * version of one, and holds whatever a relation attribute ordinarily holds — this API defines no
+             * reference shape of its own.
+             *
+             * example:
+             * {
+             *   "unit_amount": 2499,
+             *   "unit_amount_decimal": "24.99"
+             * }
+             */
+            VariantValues;
+            /**
+             * When this version was created.
+             */
+            _created_at: string;
+            /**
+             * When this version was last written.
+             */
+            _updated_at: string;
+        }
+        /**
+         * Which version a write moved, and which one was in effect while it did.
+         *
+         */
+        export interface VersionMoved {
             /**
              * The version this write created, changed or removed.
              * example:
@@ -10895,11 +18277,94 @@ declare namespace Components {
              * The version in effect when the write landed, before it did. Absent when the variant had
              * none — every version of it still scheduled.
              *
+             * May lag the variant's timeline by milliseconds, so a version written moments earlier may
+             * not be named here. Advisory, like the warning carrying it: nothing branches on it except a
+             * human reading the message.
+             *
              * example:
              * 2026-01-01T00:00:00.000Z
              */
             active_valid_from?: string;
         }
+        /**
+         * Something worth knowing that did not stop a write.
+         *
+         * One vocabulary for every write, so a client branches on what happened rather than on which
+         * endpoint it called. `code` and `message` are the only two fields every code shares; everything
+         * else lives in a `details` object typed per code, so narrowing on `code` yields a payload the
+         * client can read rather than an untyped bag. A write raises each code at most once, and in the
+         * ordinary case raises none of them.
+         *
+         */
+        export type WriteWarning = /**
+         * Something worth knowing that did not stop a write.
+         *
+         * One vocabulary for every write, so a client branches on what happened rather than on which
+         * endpoint it called. `code` and `message` are the only two fields every code shares; everything
+         * else lives in a `details` object typed per code, so narrowing on `code` yields a payload the
+         * client can read rather than an untyped bag. A write raises each code at most once, and in the
+         * ordinary case raises none of them.
+         *
+         */
+        {
+            code: "VARIANT_COUNT_APPROACHING_CAP";
+            message: string;
+            details: {
+                /**
+                 * Variants this entity holds, including the one just written.
+                 */
+                variant_count: number;
+                /**
+                 * Variants this entity may hold. Configurable per deploy, the same value for every
+                 * organization on it.
+                 *
+                 */
+                cap: number;
+            };
+        } | {
+            code: "ACTIVE_VERSION_CHANGED";
+            message: string;
+            details: /**
+             * Which version a write moved, and which one was in effect while it did.
+             *
+             */
+            VersionMoved;
+        } | {
+            code: "SUPERSEDED_VERSION_WRITTEN";
+            message: string;
+            details: /**
+             * Which version a write moved, and which one was in effect while it did.
+             *
+             */
+            VersionMoved;
+        } | {
+            code: "ATTRIBUTES_NOT_APPLIED";
+            message: string;
+            details: {
+                attributes: [
+                    /**
+                     * One override that did not apply, and why.
+                     *
+                     * The same entry on both sides of the feature: a write reports the attributes in its body it did
+                     * not store, and a resolved payload reports the stored overrides composition did not apply. Those
+                     * are the same fact observed at two moments, so a client learns one shape and reads it in both
+                     * places.
+                     *
+                     */
+                    InertOverride,
+                    .../**
+                     * One override that did not apply, and why.
+                     *
+                     * The same entry on both sides of the feature: a write reports the attributes in its body it did
+                     * not store, and a resolved payload reports the stored overrides composition did not apply. Those
+                     * are the same fact observed at two moments, so a client learns one shape and reads it in both
+                     * places.
+                     *
+                     */
+                    InertOverride[]
+                ];
+            };
+        };
         /**
          * A version as a write left it, together with anything the write moved.
          *
@@ -10948,19 +18413,25 @@ declare namespace Components {
              * The attribute values this version overrides on the base entity, keyed by attribute name.
              *
              * Only attributes currently declaring `overridable_attribute` are applied. Metadata fields
-             * (anything underscore-prefixed), readonly attributes, hidden attributes and non-overridable
-             * attributes present here are ignored rather than rejected, so a client working from a slightly
-             * stale schema snapshot still succeeds instead of failing on fields it could not have known to
-             * drop. An attribute's `render_condition` says when to show it and has no bearing on whether a
-             * variant may override it.
+             * (anything underscore-prefixed), readonly attributes, hidden attributes, computed attributes
+             * and non-overridable attributes present here are not applied rather than rejected, and each one
+             * is named in the write's `warnings`, so a client working from a slightly stale schema snapshot
+             * still succeeds instead of failing on fields it could not have known to drop, and still learns
+             * which of them did not land — the naming half published ahead of the behaviour, so until the
+             * `ATTRIBUTES_NOT_APPLIED` warning is emitted an unapplied attribute is dropped silently. An attribute's `render_condition` says when to show it and has no
+             * bearing on whether a variant may override it.
              *
-             * Ignored means *not updated*, never *removed*: a value already stored for an attribute that is
-             * not currently overridable is preserved, so removing and restoring the flag deactivates and
-             * then reactivates the same override.
+             * Not applied means *not updated*, never *removed*: a value already stored for an attribute that
+             * is not currently overridable is preserved, so removing and restoring the flag deactivates and
+             * then reactivates the same override. An append seeds the attributes the variant may not
+             * override from the version in effect at its own `valid_from`, so its stored values are not a
+             * pure function of the body that wrote it; a variant's first version, and an append dated before
+             * the variant's earliest version, inherit nothing.
              *
-             * A composite price's `price_components` is an ordinary overridable relation attribute: a
-             * composite variant pins its component variants here the same way any other relation value is
-             * set, with no special handling.
+             * A composite price's `price_components` is an ordinary overridable relation attribute. A
+             * composite variant's override references different component *entities*, never a variant or a
+             * version of one, and holds whatever a relation attribute ordinarily holds — this API defines no
+             * reference shape of its own.
              *
              * example:
              * {
@@ -10987,18 +18458,21 @@ declare namespace Components {
              */
             _revision: number;
             /**
-             * What this write moved, if anything. Empty in the ordinary case — a client reads its
-             * length rather than branching on its absence.
+             * What this write moved, and anything in the body it did not store. Empty in the
+             * ordinary case — a client reads its length rather than branching on its absence.
              *
              */
             warnings: /**
-             * Something a version write moved. A version write is never refused for being late — backdating a
-             * version, and editing or deleting one that has already been superseded, are both accepted — so
-             * what a caller gets instead is a warning naming exactly what changed. One write can carry both
-             * codes.
+             * Something worth knowing that did not stop a write.
+             *
+             * One vocabulary for every write, so a client branches on what happened rather than on which
+             * endpoint it called. `code` and `message` are the only two fields every code shares; everything
+             * else lives in a `details` object typed per code, so narrowing on `code` yields a payload the
+             * client can read rather than an untyped bag. A write raises each code at most once, and in the
+             * ordinary case raises none of them.
              *
              */
-            VersionWriteWarning[];
+            WriteWarning[];
         }
     }
 }
@@ -11027,29 +18501,59 @@ declare namespace Paths {
              */
             Components.Schemas.WrittenVariantVersion;
             export type $400 = /**
-             * An error from a conditional-pricing operation, carrying a machine-readable `code`
-             * from the conditional-pricing vocabulary plus any structured data about the failure,
-             * so a client can branch on the kind of failure rather than parse the message.
+             * An error from a conditional-pricing operation, carrying a machine-readable `code` from the
+             * conditional-pricing vocabulary plus the structured data that code explains, so a client can
+             * branch on the kind of failure rather than parse the message.
              * Referenced only by the operations that emit these codes; every other operation
              * keeps the plain `Error` shape.
+             *
+             * `details` is typed per code. Narrow on `code` and the object under it declares exactly the
+             * fields that code sends — never a field it does not send, and nothing beyond the declaration —
+             * so the conflicting variant id, or the value and vocabulary behind a rejected pin, is read
+             * directly.
+             *
+             * Not every failure these operations raise is in the vocabulary. A request body that is simply
+             * malformed earns a message and nothing to branch on, and is answered with neither `code` nor
+             * `details` — the last member of the union, so testing `code` for absence is how a client tells
+             * one of those from the twenty-three coded failures.
              *
              */
             Components.Schemas.ConditionalPricingError;
             export type $404 = /**
-             * An error from a conditional-pricing operation, carrying a machine-readable `code`
-             * from the conditional-pricing vocabulary plus any structured data about the failure,
-             * so a client can branch on the kind of failure rather than parse the message.
+             * An error from a conditional-pricing operation, carrying a machine-readable `code` from the
+             * conditional-pricing vocabulary plus the structured data that code explains, so a client can
+             * branch on the kind of failure rather than parse the message.
              * Referenced only by the operations that emit these codes; every other operation
              * keeps the plain `Error` shape.
+             *
+             * `details` is typed per code. Narrow on `code` and the object under it declares exactly the
+             * fields that code sends — never a field it does not send, and nothing beyond the declaration —
+             * so the conflicting variant id, or the value and vocabulary behind a rejected pin, is read
+             * directly.
+             *
+             * Not every failure these operations raise is in the vocabulary. A request body that is simply
+             * malformed earns a message and nothing to branch on, and is answered with neither `code` nor
+             * `details` — the last member of the union, so testing `code` for absence is how a client tells
+             * one of those from the twenty-three coded failures.
              *
              */
             Components.Schemas.ConditionalPricingError;
             export type $409 = /**
-             * An error from a conditional-pricing operation, carrying a machine-readable `code`
-             * from the conditional-pricing vocabulary plus any structured data about the failure,
-             * so a client can branch on the kind of failure rather than parse the message.
+             * An error from a conditional-pricing operation, carrying a machine-readable `code` from the
+             * conditional-pricing vocabulary plus the structured data that code explains, so a client can
+             * branch on the kind of failure rather than parse the message.
              * Referenced only by the operations that emit these codes; every other operation
              * keeps the plain `Error` shape.
+             *
+             * `details` is typed per code. Narrow on `code` and the object under it declares exactly the
+             * fields that code sends — never a field it does not send, and nothing beyond the declaration —
+             * so the conflicting variant id, or the value and vocabulary behind a rejected pin, is read
+             * directly.
+             *
+             * Not every failure these operations raise is in the vocabulary. A request body that is simply
+             * malformed earns a message and nothing to branch on, and is answered with neither `code` nor
+             * `details` — the last member of the union, so testing `code` for absence is how a client tells
+             * one of those from the twenty-three coded failures.
              *
              */
             Components.Schemas.ConditionalPricingError;
@@ -11102,6 +18606,135 @@ declare namespace Paths {
             export type $200 = Components.Schemas.AverageMarketPriceResult;
             export type $400 = Components.Schemas.Error;
             export type $404 = Components.Schemas.Error;
+        }
+    }
+    namespace $BatchDeleteConditionalVariants {
+        namespace Parameters {
+            export type Slug = /**
+             * Schema slug of an entity type that can be conditional — the `{slug}` of every
+             * conditional-pricing route.
+             *
+             */
+            Components.Schemas.ConditionalEntitySlug;
+        }
+        export interface PathParameters {
+            slug: Parameters.Slug;
+        }
+        export type RequestBody = /**
+         * A batch of variant and version deletes under one schema, each item naming the entity it
+         * removes from.
+         *
+         */
+        Components.Schemas.BatchDeleteVariantsRequest;
+        namespace Responses {
+            export type $200 = /**
+             * What a batch delete did: one entry per item, in request order, and a count per outcome.
+             *
+             */
+            Components.Schemas.BatchDeleteResult;
+            export type $400 = /**
+             * An error from a conditional-pricing operation, carrying a machine-readable `code` from the
+             * conditional-pricing vocabulary plus the structured data that code explains, so a client can
+             * branch on the kind of failure rather than parse the message.
+             * Referenced only by the operations that emit these codes; every other operation
+             * keeps the plain `Error` shape.
+             *
+             * `details` is typed per code. Narrow on `code` and the object under it declares exactly the
+             * fields that code sends — never a field it does not send, and nothing beyond the declaration —
+             * so the conflicting variant id, or the value and vocabulary behind a rejected pin, is read
+             * directly.
+             *
+             * Not every failure these operations raise is in the vocabulary. A request body that is simply
+             * malformed earns a message and nothing to branch on, and is answered with neither `code` nor
+             * `details` — the last member of the union, so testing `code` for absence is how a client tells
+             * one of those from the twenty-three coded failures.
+             *
+             */
+            Components.Schemas.ConditionalPricingError;
+            export type $404 = /**
+             * An error from a conditional-pricing operation, carrying a machine-readable `code` from the
+             * conditional-pricing vocabulary plus the structured data that code explains, so a client can
+             * branch on the kind of failure rather than parse the message.
+             * Referenced only by the operations that emit these codes; every other operation
+             * keeps the plain `Error` shape.
+             *
+             * `details` is typed per code. Narrow on `code` and the object under it declares exactly the
+             * fields that code sends — never a field it does not send, and nothing beyond the declaration —
+             * so the conflicting variant id, or the value and vocabulary behind a rejected pin, is read
+             * directly.
+             *
+             * Not every failure these operations raise is in the vocabulary. A request body that is simply
+             * malformed earns a message and nothing to branch on, and is answered with neither `code` nor
+             * `details` — the last member of the union, so testing `code` for absence is how a client tells
+             * one of those from the twenty-three coded failures.
+             *
+             */
+            Components.Schemas.ConditionalPricingError;
+            export type $501 = Components.Schemas.Error;
+        }
+    }
+    namespace $BatchUpsertConditionalVariants {
+        namespace Parameters {
+            export type Slug = /**
+             * Schema slug of an entity type that can be conditional — the `{slug}` of every
+             * conditional-pricing route.
+             *
+             */
+            Components.Schemas.ConditionalEntitySlug;
+        }
+        export interface PathParameters {
+            slug: Parameters.Slug;
+        }
+        export type RequestBody = /**
+         * A batch of variant writes under one schema, each item naming the entity it writes to.
+         *
+         */
+        Components.Schemas.BatchUpsertVariantsRequest;
+        namespace Responses {
+            export type $200 = /**
+             * What a batch upsert did: one entry per item, in request order, and a count per outcome.
+             *
+             */
+            Components.Schemas.BatchUpsertResult;
+            export type $400 = /**
+             * An error from a conditional-pricing operation, carrying a machine-readable `code` from the
+             * conditional-pricing vocabulary plus the structured data that code explains, so a client can
+             * branch on the kind of failure rather than parse the message.
+             * Referenced only by the operations that emit these codes; every other operation
+             * keeps the plain `Error` shape.
+             *
+             * `details` is typed per code. Narrow on `code` and the object under it declares exactly the
+             * fields that code sends — never a field it does not send, and nothing beyond the declaration —
+             * so the conflicting variant id, or the value and vocabulary behind a rejected pin, is read
+             * directly.
+             *
+             * Not every failure these operations raise is in the vocabulary. A request body that is simply
+             * malformed earns a message and nothing to branch on, and is answered with neither `code` nor
+             * `details` — the last member of the union, so testing `code` for absence is how a client tells
+             * one of those from the twenty-three coded failures.
+             *
+             */
+            Components.Schemas.ConditionalPricingError;
+            export type $404 = /**
+             * An error from a conditional-pricing operation, carrying a machine-readable `code` from the
+             * conditional-pricing vocabulary plus the structured data that code explains, so a client can
+             * branch on the kind of failure rather than parse the message.
+             * Referenced only by the operations that emit these codes; every other operation
+             * keeps the plain `Error` shape.
+             *
+             * `details` is typed per code. Narrow on `code` and the object under it declares exactly the
+             * fields that code sends — never a field it does not send, and nothing beyond the declaration —
+             * so the conflicting variant id, or the value and vocabulary behind a rejected pin, is read
+             * directly.
+             *
+             * Not every failure these operations raise is in the vocabulary. A request body that is simply
+             * malformed earns a message and nothing to branch on, and is answered with neither `code` nor
+             * `details` — the last member of the union, so testing `code` for absence is how a client tells
+             * one of those from the twenty-three coded failures.
+             *
+             */
+            Components.Schemas.ConditionalPricingError;
+            export type $501 = Components.Schemas.Error;
         }
     }
     namespace $CalculatePricingDetails {
@@ -11163,29 +18796,59 @@ declare namespace Paths {
         namespace Responses {
             export type $201 = Components.Schemas.CreatedVariant;
             export type $400 = /**
-             * An error from a conditional-pricing operation, carrying a machine-readable `code`
-             * from the conditional-pricing vocabulary plus any structured data about the failure,
-             * so a client can branch on the kind of failure rather than parse the message.
+             * An error from a conditional-pricing operation, carrying a machine-readable `code` from the
+             * conditional-pricing vocabulary plus the structured data that code explains, so a client can
+             * branch on the kind of failure rather than parse the message.
              * Referenced only by the operations that emit these codes; every other operation
              * keeps the plain `Error` shape.
+             *
+             * `details` is typed per code. Narrow on `code` and the object under it declares exactly the
+             * fields that code sends — never a field it does not send, and nothing beyond the declaration —
+             * so the conflicting variant id, or the value and vocabulary behind a rejected pin, is read
+             * directly.
+             *
+             * Not every failure these operations raise is in the vocabulary. A request body that is simply
+             * malformed earns a message and nothing to branch on, and is answered with neither `code` nor
+             * `details` — the last member of the union, so testing `code` for absence is how a client tells
+             * one of those from the twenty-three coded failures.
              *
              */
             Components.Schemas.ConditionalPricingError;
             export type $404 = /**
-             * An error from a conditional-pricing operation, carrying a machine-readable `code`
-             * from the conditional-pricing vocabulary plus any structured data about the failure,
-             * so a client can branch on the kind of failure rather than parse the message.
+             * An error from a conditional-pricing operation, carrying a machine-readable `code` from the
+             * conditional-pricing vocabulary plus the structured data that code explains, so a client can
+             * branch on the kind of failure rather than parse the message.
              * Referenced only by the operations that emit these codes; every other operation
              * keeps the plain `Error` shape.
+             *
+             * `details` is typed per code. Narrow on `code` and the object under it declares exactly the
+             * fields that code sends — never a field it does not send, and nothing beyond the declaration —
+             * so the conflicting variant id, or the value and vocabulary behind a rejected pin, is read
+             * directly.
+             *
+             * Not every failure these operations raise is in the vocabulary. A request body that is simply
+             * malformed earns a message and nothing to branch on, and is answered with neither `code` nor
+             * `details` — the last member of the union, so testing `code` for absence is how a client tells
+             * one of those from the twenty-three coded failures.
              *
              */
             Components.Schemas.ConditionalPricingError;
             export type $409 = /**
-             * An error from a conditional-pricing operation, carrying a machine-readable `code`
-             * from the conditional-pricing vocabulary plus any structured data about the failure,
-             * so a client can branch on the kind of failure rather than parse the message.
+             * An error from a conditional-pricing operation, carrying a machine-readable `code` from the
+             * conditional-pricing vocabulary plus the structured data that code explains, so a client can
+             * branch on the kind of failure rather than parse the message.
              * Referenced only by the operations that emit these codes; every other operation
              * keeps the plain `Error` shape.
+             *
+             * `details` is typed per code. Narrow on `code` and the object under it declares exactly the
+             * fields that code sends — never a field it does not send, and nothing beyond the declaration —
+             * so the conflicting variant id, or the value and vocabulary behind a rejected pin, is read
+             * directly.
+             *
+             * Not every failure these operations raise is in the vocabulary. A request body that is simply
+             * malformed earns a message and nothing to branch on, and is answered with neither `code` nor
+             * `details` — the last member of the union, so testing `code` for absence is how a client tells
+             * one of those from the twenty-three coded failures.
              *
              */
             Components.Schemas.ConditionalPricingError;
@@ -11210,29 +18873,59 @@ declare namespace Paths {
         namespace Responses {
             export type $200 = Components.Schemas.DeletedVariant;
             export type $400 = /**
-             * An error from a conditional-pricing operation, carrying a machine-readable `code`
-             * from the conditional-pricing vocabulary plus any structured data about the failure,
-             * so a client can branch on the kind of failure rather than parse the message.
+             * An error from a conditional-pricing operation, carrying a machine-readable `code` from the
+             * conditional-pricing vocabulary plus the structured data that code explains, so a client can
+             * branch on the kind of failure rather than parse the message.
              * Referenced only by the operations that emit these codes; every other operation
              * keeps the plain `Error` shape.
+             *
+             * `details` is typed per code. Narrow on `code` and the object under it declares exactly the
+             * fields that code sends — never a field it does not send, and nothing beyond the declaration —
+             * so the conflicting variant id, or the value and vocabulary behind a rejected pin, is read
+             * directly.
+             *
+             * Not every failure these operations raise is in the vocabulary. A request body that is simply
+             * malformed earns a message and nothing to branch on, and is answered with neither `code` nor
+             * `details` — the last member of the union, so testing `code` for absence is how a client tells
+             * one of those from the twenty-three coded failures.
              *
              */
             Components.Schemas.ConditionalPricingError;
             export type $404 = /**
-             * An error from a conditional-pricing operation, carrying a machine-readable `code`
-             * from the conditional-pricing vocabulary plus any structured data about the failure,
-             * so a client can branch on the kind of failure rather than parse the message.
+             * An error from a conditional-pricing operation, carrying a machine-readable `code` from the
+             * conditional-pricing vocabulary plus the structured data that code explains, so a client can
+             * branch on the kind of failure rather than parse the message.
              * Referenced only by the operations that emit these codes; every other operation
              * keeps the plain `Error` shape.
+             *
+             * `details` is typed per code. Narrow on `code` and the object under it declares exactly the
+             * fields that code sends — never a field it does not send, and nothing beyond the declaration —
+             * so the conflicting variant id, or the value and vocabulary behind a rejected pin, is read
+             * directly.
+             *
+             * Not every failure these operations raise is in the vocabulary. A request body that is simply
+             * malformed earns a message and nothing to branch on, and is answered with neither `code` nor
+             * `details` — the last member of the union, so testing `code` for absence is how a client tells
+             * one of those from the twenty-three coded failures.
              *
              */
             Components.Schemas.ConditionalPricingError;
             export type $409 = /**
-             * An error from a conditional-pricing operation, carrying a machine-readable `code`
-             * from the conditional-pricing vocabulary plus any structured data about the failure,
-             * so a client can branch on the kind of failure rather than parse the message.
+             * An error from a conditional-pricing operation, carrying a machine-readable `code` from the
+             * conditional-pricing vocabulary plus the structured data that code explains, so a client can
+             * branch on the kind of failure rather than parse the message.
              * Referenced only by the operations that emit these codes; every other operation
              * keeps the plain `Error` shape.
+             *
+             * `details` is typed per code. Narrow on `code` and the object under it declares exactly the
+             * fields that code sends — never a field it does not send, and nothing beyond the declaration —
+             * so the conflicting variant id, or the value and vocabulary behind a rejected pin, is read
+             * directly.
+             *
+             * Not every failure these operations raise is in the vocabulary. A request body that is simply
+             * malformed earns a message and nothing to branch on, and is answered with neither `code` nor
+             * `details` — the last member of the union, so testing `code` for absence is how a client tells
+             * one of those from the twenty-three coded failures.
              *
              */
             Components.Schemas.ConditionalPricingError;
@@ -11263,29 +18956,59 @@ declare namespace Paths {
         namespace Responses {
             export type $200 = Components.Schemas.DeletedVariantVersion;
             export type $400 = /**
-             * An error from a conditional-pricing operation, carrying a machine-readable `code`
-             * from the conditional-pricing vocabulary plus any structured data about the failure,
-             * so a client can branch on the kind of failure rather than parse the message.
+             * An error from a conditional-pricing operation, carrying a machine-readable `code` from the
+             * conditional-pricing vocabulary plus the structured data that code explains, so a client can
+             * branch on the kind of failure rather than parse the message.
              * Referenced only by the operations that emit these codes; every other operation
              * keeps the plain `Error` shape.
+             *
+             * `details` is typed per code. Narrow on `code` and the object under it declares exactly the
+             * fields that code sends — never a field it does not send, and nothing beyond the declaration —
+             * so the conflicting variant id, or the value and vocabulary behind a rejected pin, is read
+             * directly.
+             *
+             * Not every failure these operations raise is in the vocabulary. A request body that is simply
+             * malformed earns a message and nothing to branch on, and is answered with neither `code` nor
+             * `details` — the last member of the union, so testing `code` for absence is how a client tells
+             * one of those from the twenty-three coded failures.
              *
              */
             Components.Schemas.ConditionalPricingError;
             export type $404 = /**
-             * An error from a conditional-pricing operation, carrying a machine-readable `code`
-             * from the conditional-pricing vocabulary plus any structured data about the failure,
-             * so a client can branch on the kind of failure rather than parse the message.
+             * An error from a conditional-pricing operation, carrying a machine-readable `code` from the
+             * conditional-pricing vocabulary plus the structured data that code explains, so a client can
+             * branch on the kind of failure rather than parse the message.
              * Referenced only by the operations that emit these codes; every other operation
              * keeps the plain `Error` shape.
+             *
+             * `details` is typed per code. Narrow on `code` and the object under it declares exactly the
+             * fields that code sends — never a field it does not send, and nothing beyond the declaration —
+             * so the conflicting variant id, or the value and vocabulary behind a rejected pin, is read
+             * directly.
+             *
+             * Not every failure these operations raise is in the vocabulary. A request body that is simply
+             * malformed earns a message and nothing to branch on, and is answered with neither `code` nor
+             * `details` — the last member of the union, so testing `code` for absence is how a client tells
+             * one of those from the twenty-three coded failures.
              *
              */
             Components.Schemas.ConditionalPricingError;
             export type $409 = /**
-             * An error from a conditional-pricing operation, carrying a machine-readable `code`
-             * from the conditional-pricing vocabulary plus any structured data about the failure,
-             * so a client can branch on the kind of failure rather than parse the message.
+             * An error from a conditional-pricing operation, carrying a machine-readable `code` from the
+             * conditional-pricing vocabulary plus the structured data that code explains, so a client can
+             * branch on the kind of failure rather than parse the message.
              * Referenced only by the operations that emit these codes; every other operation
              * keeps the plain `Error` shape.
+             *
+             * `details` is typed per code. Narrow on `code` and the object under it declares exactly the
+             * fields that code sends — never a field it does not send, and nothing beyond the declaration —
+             * so the conflicting variant id, or the value and vocabulary behind a rejected pin, is read
+             * directly.
+             *
+             * Not every failure these operations raise is in the vocabulary. A request body that is simply
+             * malformed earns a message and nothing to branch on, and is answered with neither `code` nor
+             * `details` — the last member of the union, so testing `code` for absence is how a client tells
+             * one of those from the twenty-three coded failures.
              *
              */
             Components.Schemas.ConditionalPricingError;
@@ -11332,20 +19055,40 @@ declare namespace Paths {
              */
             Components.Schemas.VariantVersion;
             export type $400 = /**
-             * An error from a conditional-pricing operation, carrying a machine-readable `code`
-             * from the conditional-pricing vocabulary plus any structured data about the failure,
-             * so a client can branch on the kind of failure rather than parse the message.
+             * An error from a conditional-pricing operation, carrying a machine-readable `code` from the
+             * conditional-pricing vocabulary plus the structured data that code explains, so a client can
+             * branch on the kind of failure rather than parse the message.
              * Referenced only by the operations that emit these codes; every other operation
              * keeps the plain `Error` shape.
+             *
+             * `details` is typed per code. Narrow on `code` and the object under it declares exactly the
+             * fields that code sends — never a field it does not send, and nothing beyond the declaration —
+             * so the conflicting variant id, or the value and vocabulary behind a rejected pin, is read
+             * directly.
+             *
+             * Not every failure these operations raise is in the vocabulary. A request body that is simply
+             * malformed earns a message and nothing to branch on, and is answered with neither `code` nor
+             * `details` — the last member of the union, so testing `code` for absence is how a client tells
+             * one of those from the twenty-three coded failures.
              *
              */
             Components.Schemas.ConditionalPricingError;
             export type $404 = /**
-             * An error from a conditional-pricing operation, carrying a machine-readable `code`
-             * from the conditional-pricing vocabulary plus any structured data about the failure,
-             * so a client can branch on the kind of failure rather than parse the message.
+             * An error from a conditional-pricing operation, carrying a machine-readable `code` from the
+             * conditional-pricing vocabulary plus the structured data that code explains, so a client can
+             * branch on the kind of failure rather than parse the message.
              * Referenced only by the operations that emit these codes; every other operation
              * keeps the plain `Error` shape.
+             *
+             * `details` is typed per code. Narrow on `code` and the object under it declares exactly the
+             * fields that code sends — never a field it does not send, and nothing beyond the declaration —
+             * so the conflicting variant id, or the value and vocabulary behind a rejected pin, is read
+             * directly.
+             *
+             * Not every failure these operations raise is in the vocabulary. A request body that is simply
+             * malformed earns a message and nothing to branch on, and is answered with neither `code` nor
+             * `details` — the last member of the union, so testing `code` for absence is how a client tells
+             * one of those from the twenty-three coded failures.
              *
              */
             Components.Schemas.ConditionalPricingError;
@@ -11366,6 +19109,69 @@ declare namespace Paths {
         namespace Responses {
             export type $200 = Components.Schemas.ConditionSetCatalog;
             export type $400 = Components.Schemas.Error;
+        }
+    }
+    namespace $GetConditionalVariantTree {
+        namespace Parameters {
+            export type EntityId = string;
+            export type Slug = /**
+             * Schema slug of an entity type that can be conditional — the `{slug}` of every
+             * conditional-pricing route.
+             *
+             */
+            Components.Schemas.ConditionalEntitySlug;
+        }
+        export interface PathParameters {
+            slug: Parameters.Slug;
+            entity_id: Parameters.EntityId;
+        }
+        export type RequestBody = /**
+         * The variants list's request plus `as_of`, the instant each row's version is selected at.
+         * `size` is clamped at 100 here; every other shared property means what it means on the list.
+         *
+         */
+        Components.Schemas.VariantTreeRequest;
+        namespace Responses {
+            export type $200 = Components.Schemas.VariantTree;
+            export type $400 = /**
+             * An error from a conditional-pricing operation, carrying a machine-readable `code` from the
+             * conditional-pricing vocabulary plus the structured data that code explains, so a client can
+             * branch on the kind of failure rather than parse the message.
+             * Referenced only by the operations that emit these codes; every other operation
+             * keeps the plain `Error` shape.
+             *
+             * `details` is typed per code. Narrow on `code` and the object under it declares exactly the
+             * fields that code sends — never a field it does not send, and nothing beyond the declaration —
+             * so the conflicting variant id, or the value and vocabulary behind a rejected pin, is read
+             * directly.
+             *
+             * Not every failure these operations raise is in the vocabulary. A request body that is simply
+             * malformed earns a message and nothing to branch on, and is answered with neither `code` nor
+             * `details` — the last member of the union, so testing `code` for absence is how a client tells
+             * one of those from the twenty-three coded failures.
+             *
+             */
+            Components.Schemas.ConditionalPricingError;
+            export type $404 = /**
+             * An error from a conditional-pricing operation, carrying a machine-readable `code` from the
+             * conditional-pricing vocabulary plus the structured data that code explains, so a client can
+             * branch on the kind of failure rather than parse the message.
+             * Referenced only by the operations that emit these codes; every other operation
+             * keeps the plain `Error` shape.
+             *
+             * `details` is typed per code. Narrow on `code` and the object under it declares exactly the
+             * fields that code sends — never a field it does not send, and nothing beyond the declaration —
+             * so the conflicting variant id, or the value and vocabulary behind a rejected pin, is read
+             * directly.
+             *
+             * Not every failure these operations raise is in the vocabulary. A request body that is simply
+             * malformed earns a message and nothing to branch on, and is answered with neither `code` nor
+             * `details` — the last member of the union, so testing `code` for absence is how a client tells
+             * one of those from the twenty-three coded failures.
+             *
+             */
+            Components.Schemas.ConditionalPricingError;
+            export type $501 = Components.Schemas.Error;
         }
     }
     namespace $GetConditionalVariantVersion {
@@ -11398,20 +19204,40 @@ declare namespace Paths {
              */
             Components.Schemas.VariantVersion;
             export type $400 = /**
-             * An error from a conditional-pricing operation, carrying a machine-readable `code`
-             * from the conditional-pricing vocabulary plus any structured data about the failure,
-             * so a client can branch on the kind of failure rather than parse the message.
+             * An error from a conditional-pricing operation, carrying a machine-readable `code` from the
+             * conditional-pricing vocabulary plus the structured data that code explains, so a client can
+             * branch on the kind of failure rather than parse the message.
              * Referenced only by the operations that emit these codes; every other operation
              * keeps the plain `Error` shape.
+             *
+             * `details` is typed per code. Narrow on `code` and the object under it declares exactly the
+             * fields that code sends — never a field it does not send, and nothing beyond the declaration —
+             * so the conflicting variant id, or the value and vocabulary behind a rejected pin, is read
+             * directly.
+             *
+             * Not every failure these operations raise is in the vocabulary. A request body that is simply
+             * malformed earns a message and nothing to branch on, and is answered with neither `code` nor
+             * `details` — the last member of the union, so testing `code` for absence is how a client tells
+             * one of those from the twenty-three coded failures.
              *
              */
             Components.Schemas.ConditionalPricingError;
             export type $404 = /**
-             * An error from a conditional-pricing operation, carrying a machine-readable `code`
-             * from the conditional-pricing vocabulary plus any structured data about the failure,
-             * so a client can branch on the kind of failure rather than parse the message.
+             * An error from a conditional-pricing operation, carrying a machine-readable `code` from the
+             * conditional-pricing vocabulary plus the structured data that code explains, so a client can
+             * branch on the kind of failure rather than parse the message.
              * Referenced only by the operations that emit these codes; every other operation
              * keeps the plain `Error` shape.
+             *
+             * `details` is typed per code. Narrow on `code` and the object under it declares exactly the
+             * fields that code sends — never a field it does not send, and nothing beyond the declaration —
+             * so the conflicting variant id, or the value and vocabulary behind a rejected pin, is read
+             * directly.
+             *
+             * Not every failure these operations raise is in the vocabulary. A request body that is simply
+             * malformed earns a message and nothing to branch on, and is answered with neither `code` nor
+             * `details` — the last member of the union, so testing `code` for absence is how a client tells
+             * one of those from the twenty-three coded failures.
              *
              */
             Components.Schemas.ConditionalPricingError;
@@ -11563,6 +19389,139 @@ declare namespace Paths {
             export type $404 = Components.Schemas.Error;
         }
     }
+    namespace $ListConditionalVariantVersions {
+        namespace Parameters {
+            export type Cursor = string;
+            export type EntityId = string;
+            export type Limit = number;
+            export type Order = "asc" | "desc";
+            export type Slug = /**
+             * Schema slug of an entity type that can be conditional — the `{slug}` of every
+             * conditional-pricing route.
+             *
+             */
+            Components.Schemas.ConditionalEntitySlug;
+            export type VariantId = string;
+        }
+        export interface PathParameters {
+            slug: Parameters.Slug;
+            entity_id: Parameters.EntityId;
+            variant_id: Parameters.VariantId;
+        }
+        export interface QueryParameters {
+            limit?: Parameters.Limit;
+            order?: Parameters.Order;
+            cursor?: Parameters.Cursor;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.VariantVersionList;
+            export type $400 = /**
+             * An error from a conditional-pricing operation, carrying a machine-readable `code` from the
+             * conditional-pricing vocabulary plus the structured data that code explains, so a client can
+             * branch on the kind of failure rather than parse the message.
+             * Referenced only by the operations that emit these codes; every other operation
+             * keeps the plain `Error` shape.
+             *
+             * `details` is typed per code. Narrow on `code` and the object under it declares exactly the
+             * fields that code sends — never a field it does not send, and nothing beyond the declaration —
+             * so the conflicting variant id, or the value and vocabulary behind a rejected pin, is read
+             * directly.
+             *
+             * Not every failure these operations raise is in the vocabulary. A request body that is simply
+             * malformed earns a message and nothing to branch on, and is answered with neither `code` nor
+             * `details` — the last member of the union, so testing `code` for absence is how a client tells
+             * one of those from the twenty-three coded failures.
+             *
+             */
+            Components.Schemas.ConditionalPricingError;
+            export type $404 = /**
+             * An error from a conditional-pricing operation, carrying a machine-readable `code` from the
+             * conditional-pricing vocabulary plus the structured data that code explains, so a client can
+             * branch on the kind of failure rather than parse the message.
+             * Referenced only by the operations that emit these codes; every other operation
+             * keeps the plain `Error` shape.
+             *
+             * `details` is typed per code. Narrow on `code` and the object under it declares exactly the
+             * fields that code sends — never a field it does not send, and nothing beyond the declaration —
+             * so the conflicting variant id, or the value and vocabulary behind a rejected pin, is read
+             * directly.
+             *
+             * Not every failure these operations raise is in the vocabulary. A request body that is simply
+             * malformed earns a message and nothing to branch on, and is answered with neither `code` nor
+             * `details` — the last member of the union, so testing `code` for absence is how a client tells
+             * one of those from the twenty-three coded failures.
+             *
+             */
+            Components.Schemas.ConditionalPricingError;
+            export type $501 = Components.Schemas.Error;
+        }
+    }
+    namespace $ListConditionalVariants {
+        namespace Parameters {
+            export type EntityId = string;
+            export type Slug = /**
+             * Schema slug of an entity type that can be conditional — the `{slug}` of every
+             * conditional-pricing route.
+             *
+             */
+            Components.Schemas.ConditionalEntitySlug;
+        }
+        export interface PathParameters {
+            slug: Parameters.Slug;
+            entity_id: Parameters.EntityId;
+        }
+        export type RequestBody = /**
+         * How to narrow and page a variant listing. Every property is optional, so `{}` is a valid body
+         * and asks for the first ten variants of the entity in `variant_id` order — the body itself is
+         * required, and an omitted one is a request-validation `400` rather than an unnarrowed page.
+         *
+         * `conditions` and `search` narrow independently and a variant has to satisfy both.
+         *
+         */
+        Components.Schemas.ListVariantsRequest;
+        namespace Responses {
+            export type $200 = Components.Schemas.VariantList;
+            export type $400 = /**
+             * An error from a conditional-pricing operation, carrying a machine-readable `code` from the
+             * conditional-pricing vocabulary plus the structured data that code explains, so a client can
+             * branch on the kind of failure rather than parse the message.
+             * Referenced only by the operations that emit these codes; every other operation
+             * keeps the plain `Error` shape.
+             *
+             * `details` is typed per code. Narrow on `code` and the object under it declares exactly the
+             * fields that code sends — never a field it does not send, and nothing beyond the declaration —
+             * so the conflicting variant id, or the value and vocabulary behind a rejected pin, is read
+             * directly.
+             *
+             * Not every failure these operations raise is in the vocabulary. A request body that is simply
+             * malformed earns a message and nothing to branch on, and is answered with neither `code` nor
+             * `details` — the last member of the union, so testing `code` for absence is how a client tells
+             * one of those from the twenty-three coded failures.
+             *
+             */
+            Components.Schemas.ConditionalPricingError;
+            export type $404 = /**
+             * An error from a conditional-pricing operation, carrying a machine-readable `code` from the
+             * conditional-pricing vocabulary plus the structured data that code explains, so a client can
+             * branch on the kind of failure rather than parse the message.
+             * Referenced only by the operations that emit these codes; every other operation
+             * keeps the plain `Error` shape.
+             *
+             * `details` is typed per code. Narrow on `code` and the object under it declares exactly the
+             * fields that code sends — never a field it does not send, and nothing beyond the declaration —
+             * so the conflicting variant id, or the value and vocabulary behind a rejected pin, is read
+             * directly.
+             *
+             * Not every failure these operations raise is in the vocabulary. A request body that is simply
+             * malformed earns a message and nothing to branch on, and is answered with neither `code` nor
+             * `details` — the last member of the union, so testing `code` for absence is how a client tells
+             * one of those from the twenty-three coded failures.
+             *
+             */
+            Components.Schemas.ConditionalPricingError;
+            export type $501 = Components.Schemas.Error;
+        }
+    }
     namespace $PatchActiveConditionalVariantVersion {
         namespace Parameters {
             export type EntityId = string;
@@ -11587,29 +19546,59 @@ declare namespace Paths {
              */
             Components.Schemas.WrittenVariantVersion;
             export type $400 = /**
-             * An error from a conditional-pricing operation, carrying a machine-readable `code`
-             * from the conditional-pricing vocabulary plus any structured data about the failure,
-             * so a client can branch on the kind of failure rather than parse the message.
+             * An error from a conditional-pricing operation, carrying a machine-readable `code` from the
+             * conditional-pricing vocabulary plus the structured data that code explains, so a client can
+             * branch on the kind of failure rather than parse the message.
              * Referenced only by the operations that emit these codes; every other operation
              * keeps the plain `Error` shape.
+             *
+             * `details` is typed per code. Narrow on `code` and the object under it declares exactly the
+             * fields that code sends — never a field it does not send, and nothing beyond the declaration —
+             * so the conflicting variant id, or the value and vocabulary behind a rejected pin, is read
+             * directly.
+             *
+             * Not every failure these operations raise is in the vocabulary. A request body that is simply
+             * malformed earns a message and nothing to branch on, and is answered with neither `code` nor
+             * `details` — the last member of the union, so testing `code` for absence is how a client tells
+             * one of those from the twenty-three coded failures.
              *
              */
             Components.Schemas.ConditionalPricingError;
             export type $404 = /**
-             * An error from a conditional-pricing operation, carrying a machine-readable `code`
-             * from the conditional-pricing vocabulary plus any structured data about the failure,
-             * so a client can branch on the kind of failure rather than parse the message.
+             * An error from a conditional-pricing operation, carrying a machine-readable `code` from the
+             * conditional-pricing vocabulary plus the structured data that code explains, so a client can
+             * branch on the kind of failure rather than parse the message.
              * Referenced only by the operations that emit these codes; every other operation
              * keeps the plain `Error` shape.
+             *
+             * `details` is typed per code. Narrow on `code` and the object under it declares exactly the
+             * fields that code sends — never a field it does not send, and nothing beyond the declaration —
+             * so the conflicting variant id, or the value and vocabulary behind a rejected pin, is read
+             * directly.
+             *
+             * Not every failure these operations raise is in the vocabulary. A request body that is simply
+             * malformed earns a message and nothing to branch on, and is answered with neither `code` nor
+             * `details` — the last member of the union, so testing `code` for absence is how a client tells
+             * one of those from the twenty-three coded failures.
              *
              */
             Components.Schemas.ConditionalPricingError;
             export type $409 = /**
-             * An error from a conditional-pricing operation, carrying a machine-readable `code`
-             * from the conditional-pricing vocabulary plus any structured data about the failure,
-             * so a client can branch on the kind of failure rather than parse the message.
+             * An error from a conditional-pricing operation, carrying a machine-readable `code` from the
+             * conditional-pricing vocabulary plus the structured data that code explains, so a client can
+             * branch on the kind of failure rather than parse the message.
              * Referenced only by the operations that emit these codes; every other operation
              * keeps the plain `Error` shape.
+             *
+             * `details` is typed per code. Narrow on `code` and the object under it declares exactly the
+             * fields that code sends — never a field it does not send, and nothing beyond the declaration —
+             * so the conflicting variant id, or the value and vocabulary behind a rejected pin, is read
+             * directly.
+             *
+             * Not every failure these operations raise is in the vocabulary. A request body that is simply
+             * malformed earns a message and nothing to branch on, and is answered with neither `code` nor
+             * `details` — the last member of the union, so testing `code` for absence is how a client tells
+             * one of those from the twenty-three coded failures.
              *
              */
             Components.Schemas.ConditionalPricingError;
@@ -11641,29 +19630,59 @@ declare namespace Paths {
              */
             Components.Schemas.WrittenVariantVersion;
             export type $400 = /**
-             * An error from a conditional-pricing operation, carrying a machine-readable `code`
-             * from the conditional-pricing vocabulary plus any structured data about the failure,
-             * so a client can branch on the kind of failure rather than parse the message.
+             * An error from a conditional-pricing operation, carrying a machine-readable `code` from the
+             * conditional-pricing vocabulary plus the structured data that code explains, so a client can
+             * branch on the kind of failure rather than parse the message.
              * Referenced only by the operations that emit these codes; every other operation
              * keeps the plain `Error` shape.
+             *
+             * `details` is typed per code. Narrow on `code` and the object under it declares exactly the
+             * fields that code sends — never a field it does not send, and nothing beyond the declaration —
+             * so the conflicting variant id, or the value and vocabulary behind a rejected pin, is read
+             * directly.
+             *
+             * Not every failure these operations raise is in the vocabulary. A request body that is simply
+             * malformed earns a message and nothing to branch on, and is answered with neither `code` nor
+             * `details` — the last member of the union, so testing `code` for absence is how a client tells
+             * one of those from the twenty-three coded failures.
              *
              */
             Components.Schemas.ConditionalPricingError;
             export type $404 = /**
-             * An error from a conditional-pricing operation, carrying a machine-readable `code`
-             * from the conditional-pricing vocabulary plus any structured data about the failure,
-             * so a client can branch on the kind of failure rather than parse the message.
+             * An error from a conditional-pricing operation, carrying a machine-readable `code` from the
+             * conditional-pricing vocabulary plus the structured data that code explains, so a client can
+             * branch on the kind of failure rather than parse the message.
              * Referenced only by the operations that emit these codes; every other operation
              * keeps the plain `Error` shape.
+             *
+             * `details` is typed per code. Narrow on `code` and the object under it declares exactly the
+             * fields that code sends — never a field it does not send, and nothing beyond the declaration —
+             * so the conflicting variant id, or the value and vocabulary behind a rejected pin, is read
+             * directly.
+             *
+             * Not every failure these operations raise is in the vocabulary. A request body that is simply
+             * malformed earns a message and nothing to branch on, and is answered with neither `code` nor
+             * `details` — the last member of the union, so testing `code` for absence is how a client tells
+             * one of those from the twenty-three coded failures.
              *
              */
             Components.Schemas.ConditionalPricingError;
             export type $409 = /**
-             * An error from a conditional-pricing operation, carrying a machine-readable `code`
-             * from the conditional-pricing vocabulary plus any structured data about the failure,
-             * so a client can branch on the kind of failure rather than parse the message.
+             * An error from a conditional-pricing operation, carrying a machine-readable `code` from the
+             * conditional-pricing vocabulary plus the structured data that code explains, so a client can
+             * branch on the kind of failure rather than parse the message.
              * Referenced only by the operations that emit these codes; every other operation
              * keeps the plain `Error` shape.
+             *
+             * `details` is typed per code. Narrow on `code` and the object under it declares exactly the
+             * fields that code sends — never a field it does not send, and nothing beyond the declaration —
+             * so the conflicting variant id, or the value and vocabulary behind a rejected pin, is read
+             * directly.
+             *
+             * Not every failure these operations raise is in the vocabulary. A request body that is simply
+             * malformed earns a message and nothing to branch on, and is answered with neither `code` nor
+             * `details` — the last member of the union, so testing `code` for absence is how a client tells
+             * one of those from the twenty-three coded failures.
              *
              */
             Components.Schemas.ConditionalPricingError;
@@ -11740,29 +19759,59 @@ declare namespace Paths {
              */
             Components.Schemas.WrittenVariantVersion;
             export type $400 = /**
-             * An error from a conditional-pricing operation, carrying a machine-readable `code`
-             * from the conditional-pricing vocabulary plus any structured data about the failure,
-             * so a client can branch on the kind of failure rather than parse the message.
+             * An error from a conditional-pricing operation, carrying a machine-readable `code` from the
+             * conditional-pricing vocabulary plus the structured data that code explains, so a client can
+             * branch on the kind of failure rather than parse the message.
              * Referenced only by the operations that emit these codes; every other operation
              * keeps the plain `Error` shape.
+             *
+             * `details` is typed per code. Narrow on `code` and the object under it declares exactly the
+             * fields that code sends — never a field it does not send, and nothing beyond the declaration —
+             * so the conflicting variant id, or the value and vocabulary behind a rejected pin, is read
+             * directly.
+             *
+             * Not every failure these operations raise is in the vocabulary. A request body that is simply
+             * malformed earns a message and nothing to branch on, and is answered with neither `code` nor
+             * `details` — the last member of the union, so testing `code` for absence is how a client tells
+             * one of those from the twenty-three coded failures.
              *
              */
             Components.Schemas.ConditionalPricingError;
             export type $404 = /**
-             * An error from a conditional-pricing operation, carrying a machine-readable `code`
-             * from the conditional-pricing vocabulary plus any structured data about the failure,
-             * so a client can branch on the kind of failure rather than parse the message.
+             * An error from a conditional-pricing operation, carrying a machine-readable `code` from the
+             * conditional-pricing vocabulary plus the structured data that code explains, so a client can
+             * branch on the kind of failure rather than parse the message.
              * Referenced only by the operations that emit these codes; every other operation
              * keeps the plain `Error` shape.
+             *
+             * `details` is typed per code. Narrow on `code` and the object under it declares exactly the
+             * fields that code sends — never a field it does not send, and nothing beyond the declaration —
+             * so the conflicting variant id, or the value and vocabulary behind a rejected pin, is read
+             * directly.
+             *
+             * Not every failure these operations raise is in the vocabulary. A request body that is simply
+             * malformed earns a message and nothing to branch on, and is answered with neither `code` nor
+             * `details` — the last member of the union, so testing `code` for absence is how a client tells
+             * one of those from the twenty-three coded failures.
              *
              */
             Components.Schemas.ConditionalPricingError;
             export type $409 = /**
-             * An error from a conditional-pricing operation, carrying a machine-readable `code`
-             * from the conditional-pricing vocabulary plus any structured data about the failure,
-             * so a client can branch on the kind of failure rather than parse the message.
+             * An error from a conditional-pricing operation, carrying a machine-readable `code` from the
+             * conditional-pricing vocabulary plus the structured data that code explains, so a client can
+             * branch on the kind of failure rather than parse the message.
              * Referenced only by the operations that emit these codes; every other operation
              * keeps the plain `Error` shape.
+             *
+             * `details` is typed per code. Narrow on `code` and the object under it declares exactly the
+             * fields that code sends — never a field it does not send, and nothing beyond the declaration —
+             * so the conflicting variant id, or the value and vocabulary behind a rejected pin, is read
+             * directly.
+             *
+             * Not every failure these operations raise is in the vocabulary. A request body that is simply
+             * malformed earns a message and nothing to branch on, and is answered with neither `code` nor
+             * `details` — the last member of the union, so testing `code` for absence is how a client tells
+             * one of those from the twenty-three coded failures.
              *
              */
             Components.Schemas.ConditionalPricingError;
@@ -11794,65 +19843,137 @@ declare namespace Paths {
              */
             Components.Schemas.WrittenVariantVersion;
             export type $400 = /**
-             * An error from a conditional-pricing operation, carrying a machine-readable `code`
-             * from the conditional-pricing vocabulary plus any structured data about the failure,
-             * so a client can branch on the kind of failure rather than parse the message.
+             * An error from a conditional-pricing operation, carrying a machine-readable `code` from the
+             * conditional-pricing vocabulary plus the structured data that code explains, so a client can
+             * branch on the kind of failure rather than parse the message.
              * Referenced only by the operations that emit these codes; every other operation
              * keeps the plain `Error` shape.
+             *
+             * `details` is typed per code. Narrow on `code` and the object under it declares exactly the
+             * fields that code sends — never a field it does not send, and nothing beyond the declaration —
+             * so the conflicting variant id, or the value and vocabulary behind a rejected pin, is read
+             * directly.
+             *
+             * Not every failure these operations raise is in the vocabulary. A request body that is simply
+             * malformed earns a message and nothing to branch on, and is answered with neither `code` nor
+             * `details` — the last member of the union, so testing `code` for absence is how a client tells
+             * one of those from the twenty-three coded failures.
              *
              */
             Components.Schemas.ConditionalPricingError;
             export type $404 = /**
-             * An error from a conditional-pricing operation, carrying a machine-readable `code`
-             * from the conditional-pricing vocabulary plus any structured data about the failure,
-             * so a client can branch on the kind of failure rather than parse the message.
+             * An error from a conditional-pricing operation, carrying a machine-readable `code` from the
+             * conditional-pricing vocabulary plus the structured data that code explains, so a client can
+             * branch on the kind of failure rather than parse the message.
              * Referenced only by the operations that emit these codes; every other operation
              * keeps the plain `Error` shape.
+             *
+             * `details` is typed per code. Narrow on `code` and the object under it declares exactly the
+             * fields that code sends — never a field it does not send, and nothing beyond the declaration —
+             * so the conflicting variant id, or the value and vocabulary behind a rejected pin, is read
+             * directly.
+             *
+             * Not every failure these operations raise is in the vocabulary. A request body that is simply
+             * malformed earns a message and nothing to branch on, and is answered with neither `code` nor
+             * `details` — the last member of the union, so testing `code` for absence is how a client tells
+             * one of those from the twenty-three coded failures.
              *
              */
             Components.Schemas.ConditionalPricingError;
             export type $409 = /**
-             * An error from a conditional-pricing operation, carrying a machine-readable `code`
-             * from the conditional-pricing vocabulary plus any structured data about the failure,
-             * so a client can branch on the kind of failure rather than parse the message.
+             * An error from a conditional-pricing operation, carrying a machine-readable `code` from the
+             * conditional-pricing vocabulary plus the structured data that code explains, so a client can
+             * branch on the kind of failure rather than parse the message.
              * Referenced only by the operations that emit these codes; every other operation
              * keeps the plain `Error` shape.
+             *
+             * `details` is typed per code. Narrow on `code` and the object under it declares exactly the
+             * fields that code sends — never a field it does not send, and nothing beyond the declaration —
+             * so the conflicting variant id, or the value and vocabulary behind a rejected pin, is read
+             * directly.
+             *
+             * Not every failure these operations raise is in the vocabulary. A request body that is simply
+             * malformed earns a message and nothing to branch on, and is answered with neither `code` nor
+             * `details` — the last member of the union, so testing `code` for absence is how a client tells
+             * one of those from the twenty-three coded failures.
              *
              */
             Components.Schemas.ConditionalPricingError;
         }
     }
     namespace $ResolveConditionalEntity {
-        export type RequestBody = Components.Schemas.ResolveConditionalEntityRequest;
+        export type RequestBody = /**
+         * A resolve names one conditional entity, then says which of its variants it means — one of two
+         * ways, and never both. `context` describes a situation and asks which variants apply to it;
+         * `variant_id` names one variant and skips matching entirely.
+         *
+         * A body carrying both, or neither, is a validation `400`. Asking for the default variant
+         * without knowing its id is `context: {}`, which matches nothing and therefore falls back to it.
+         *
+         * Everything below the variant selection is the same on both branches, `as_of` included.
+         *
+         */
+        Components.Schemas.ResolveConditionalEntityRequest;
         namespace Responses {
             export type $200 = Components.Schemas.ResolvedVariants;
             export type $400 = /**
-             * An error from a conditional-pricing operation, carrying a machine-readable `code`
-             * from the conditional-pricing vocabulary plus any structured data about the failure,
-             * so a client can branch on the kind of failure rather than parse the message.
+             * An error from a conditional-pricing operation, carrying a machine-readable `code` from the
+             * conditional-pricing vocabulary plus the structured data that code explains, so a client can
+             * branch on the kind of failure rather than parse the message.
              * Referenced only by the operations that emit these codes; every other operation
              * keeps the plain `Error` shape.
+             *
+             * `details` is typed per code. Narrow on `code` and the object under it declares exactly the
+             * fields that code sends — never a field it does not send, and nothing beyond the declaration —
+             * so the conflicting variant id, or the value and vocabulary behind a rejected pin, is read
+             * directly.
+             *
+             * Not every failure these operations raise is in the vocabulary. A request body that is simply
+             * malformed earns a message and nothing to branch on, and is answered with neither `code` nor
+             * `details` — the last member of the union, so testing `code` for absence is how a client tells
+             * one of those from the twenty-three coded failures.
              *
              */
             Components.Schemas.ConditionalPricingError;
             export type $404 = /**
-             * An error from a conditional-pricing operation, carrying a machine-readable `code`
-             * from the conditional-pricing vocabulary plus any structured data about the failure,
-             * so a client can branch on the kind of failure rather than parse the message.
+             * An error from a conditional-pricing operation, carrying a machine-readable `code` from the
+             * conditional-pricing vocabulary plus the structured data that code explains, so a client can
+             * branch on the kind of failure rather than parse the message.
              * Referenced only by the operations that emit these codes; every other operation
              * keeps the plain `Error` shape.
+             *
+             * `details` is typed per code. Narrow on `code` and the object under it declares exactly the
+             * fields that code sends — never a field it does not send, and nothing beyond the declaration —
+             * so the conflicting variant id, or the value and vocabulary behind a rejected pin, is read
+             * directly.
+             *
+             * Not every failure these operations raise is in the vocabulary. A request body that is simply
+             * malformed earns a message and nothing to branch on, and is answered with neither `code` nor
+             * `details` — the last member of the union, so testing `code` for absence is how a client tells
+             * one of those from the twenty-three coded failures.
              *
              */
             Components.Schemas.ConditionalPricingError;
             export type $409 = /**
-             * An error from a conditional-pricing operation, carrying a machine-readable `code`
-             * from the conditional-pricing vocabulary plus any structured data about the failure,
-             * so a client can branch on the kind of failure rather than parse the message.
+             * An error from a conditional-pricing operation, carrying a machine-readable `code` from the
+             * conditional-pricing vocabulary plus the structured data that code explains, so a client can
+             * branch on the kind of failure rather than parse the message.
              * Referenced only by the operations that emit these codes; every other operation
              * keeps the plain `Error` shape.
              *
+             * `details` is typed per code. Narrow on `code` and the object under it declares exactly the
+             * fields that code sends — never a field it does not send, and nothing beyond the declaration —
+             * so the conflicting variant id, or the value and vocabulary behind a rejected pin, is read
+             * directly.
+             *
+             * Not every failure these operations raise is in the vocabulary. A request body that is simply
+             * malformed earns a message and nothing to branch on, and is answered with neither `code` nor
+             * `details` — the last member of the union, so testing `code` for absence is how a client tells
+             * one of those from the twenty-three coded failures.
+             *
              */
             Components.Schemas.ConditionalPricingError;
+            export type $501 = Components.Schemas.Error;
         }
     }
     namespace $SaveCredentials {
@@ -13422,12 +21543,17 @@ export interface OperationMethods {
   /**
    * $resolveConditionalEntity - $resolveConditionalEntity
    * 
-   * Resolves which of a conditional entity's variants apply to a situation, and returns each one
-   * composed: the base entity overlaid with the values of the version in effect at `as_of`.
+   * Resolves which of a conditional entity's variants apply, and returns each one composed: the
+   * base entity overlaid with the values of the version in effect at `as_of`.
    * 
-   * Resolution is two selections in a fixed order — the variant, by matching `context` against
-   * the conditions each variant pins; then the version, by `as_of`. It is always scoped to one
-   * logical entity, so it stays a cheap, predictable lookup rather than an open search.
+   * Resolution is two selections in a fixed order — the variant, then the version by `as_of`. It
+   * is always scoped to one logical entity, so it stays a cheap, predictable lookup rather than
+   * an open search.
+   * 
+   * **The variant is selected one of two ways, and the body says which.** A `context` describes a
+   * situation and is matched against the conditions each variant pins. A `variant_id` names one
+   * variant and skips matching entirely. Exactly one of the two: a body carrying both, or
+   * neither, is a `400`.
    * 
    * Matching follows two rules worth knowing before assembling a context. A condition a variant
    * does **not** pin matches any value, which is what lets a condition be added to a schema
@@ -13436,8 +21562,12 @@ export interface OperationMethods {
    * nothing rather than silently matching another segment's variants.
    * 
    * When nothing matches, the entity's `default` variant is returned if it has one. There is no
-   * implicit fallback to the unmodified base entity — its values are the ones no variant
-   * overrode, which is not an answer to "what applies here".
+   * implicit fallback to the unmodified base entity: an empty `results` means nothing applies to
+   * this situation, and the base entity's values are not an answer to it. A pin does not reach
+   * that fallback at all: it asks for one variant by name, and answers with it or with a 404.
+   * 
+   * `options.hydrate` returns the entities a relation attribute references in place of the
+   * references, on either branch.
    * 
    * Availability is a separate mechanism and is never consulted here.
    * 
@@ -13451,8 +21581,7 @@ export interface OperationMethods {
    * $createConditionalVariant - $createConditionalVariant
    * 
    * Creates one variant of a conditional entity, together with the first version carrying its
-   * values. Never two calls: a variant that existed without a version would be an entity holding
-   * a condition tuple it cannot answer with.
+   * values: a variant always has at least one version.
    * 
    * The body pins the situation the variant applies to. Pins are exact values only — predicates
    * are a read-side concept and are rejected here — and are stored canonicalized for their
@@ -13466,8 +21595,8 @@ export interface OperationMethods {
    *   than a fallback and far easier to create by accident.
    * - `default` is a property of the variant, set by the `default` flag, and is never a value in
    *   `conditions` — not even `false`. A `default` variant cannot pin anything else, and an entity
-   *   can have only one, enforced by the ordinary condition-tuple guard rather than by a rule of
-   *   its own. Any entity may have one; nothing is declared in the schema to allow it.
+   *   can have only one; a second is refused as `TUPLE_CONFLICT`. Any entity may have one;
+   *   nothing is declared in the schema to allow it.
    * - Condition values are immutable afterwards. A variant's identity is the situation it applies
    *   to, and orders and contracts pin it. **A condition added to a schema that already has
    *   variants is effectively one-way**: every existing variant is a wildcard on the new
@@ -13475,12 +21604,16 @@ export interface OperationMethods {
    *   retro-pinning the others is blocked by this same rule.
    * 
    * Attribute values are applied only for attributes currently carrying `overridable_attribute`.
-   * Metadata and non-overridable fields present in the body are ignored rather than rejected, so a
-   * client working from a slightly stale schema snapshot still succeeds.
+   * Metadata and non-overridable fields present in the body are not applied rather than rejected,
+   * and each one is named in the response's `warnings`, so a client working from a slightly stale
+   * schema snapshot still succeeds and still learns which fields did not land. The reporting half
+   * is published ahead of the behaviour: this operation is dispatched, so until the
+   * `ATTRIBUTES_NOT_APPLIED` warning starts being emitted a field that is not applied is dropped
+   * with nothing in the response naming it. Applying only overridable attributes is today's
+   * behaviour; being told which ones did not land is not yet.
    * 
    * `variant_id` is always server-generated and returned, and is not accepted in the body — the
-   * request schema admits no such property. It is the durable key orders and contracts pin, so it
-   * cannot be something two independent importers could collide on.
+   * request schema admits no such property. It is the durable key orders and contracts pin.
    * 
    */
   '$createConditionalVariant'(
@@ -13488,6 +21621,72 @@ export interface OperationMethods {
     data?: Paths.$CreateConditionalVariant.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.$CreateConditionalVariant.Responses.$201>
+  /**
+   * $listConditionalVariants - $listConditionalVariants
+   * 
+   * Lists a conditional entity's variants and the conditions each one pins — the browse, filter
+   * and search read behind the Entity UI's variant screens.
+   * 
+   * A `POST` because the condition filter is a structured object and needs a body; nothing is
+   * written. Every property in that body is optional, so `{}` is the whole of "the first ten
+   * variants, in `variant_id` order" — but the body itself is required, so send `{}` rather than
+   * nothing at all.
+   * 
+   * Three ways to narrow, and they combine. `conditions` filters on the pins themselves and takes
+   * the same seven predicates a resolve context does; `search` is free text over pinned values;
+   * `sort` orders by one pin. **A variant matches the filter only where it pins the condition** —
+   * the one place a filter and a resolve context differ: asking for the variants pinning postal
+   * code 46045 does not return every variant that pins no postal code at all.
+   * 
+   * Rows report what is *stored*, not what resolves: no version data, no `_revision` and no
+   * `_inert_overrides`.
+   * 
+   * Paging is by offset for the first pages and by an opaque `cursor` beyond them. `size` defaults
+   * to 10 and is clamped at 1000; a `from` past the offset window is refused rather than clamped,
+   * and the refusal names the cursor to continue with.
+   * 
+   * **Published ahead of the behaviour.** No handler serves this yet, so a deployed stage answers
+   * `501`. The examples below are what a consumer builds against in the meantime.
+   * 
+   */
+  '$listConditionalVariants'(
+    parameters?: Parameters<Paths.$ListConditionalVariants.PathParameters> | null,
+    data?: Paths.$ListConditionalVariants.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.$ListConditionalVariants.Responses.$200>
+  /**
+   * $getConditionalVariantTree - $getConditionalVariantTree
+   * 
+   * The variants list, each row carrying the version in effect at `as_of` — the Entity UI's main
+   * editing screen in one call rather than one call per row.
+   * 
+   * Everything the variants list accepts, filtering, search, sort and paging alike, means the same
+   * here. Three differences, all from the version lookup each row costs: the body takes an
+   * `as_of`, `size` is clamped at 100 rather than 1000, and a variant with no version to show is
+   * omitted from `results` (see `VariantTree`).
+   * 
+   * Every row carries a `version`, and a `status` saying which one it got. A variant always has at
+   * least one version, so at any instant either a version is in effect (`active`) or every
+   * version of that variant is still ahead of it (`scheduled`) — in which case `version` is that
+   * upcoming first one, which is what makes a staged variant visible on the screen rather than
+   * blank.
+   * 
+   * The version on a row carries no `_revision`. An editing screen re-reads the one version it is
+   * about to write through that version's own `GET`, which is strongly consistent, and writes with
+   * the revision it returns.
+   * 
+   * The base entity is not part of this response. The screen's standard-price row is an ordinary
+   * entity read, and a variant's full timeline is the versions list.
+   * 
+   * **Published ahead of the behaviour.** No handler serves this yet, so a deployed stage answers
+   * `501`.
+   * 
+   */
+  '$getConditionalVariantTree'(
+    parameters?: Parameters<Paths.$GetConditionalVariantTree.PathParameters> | null,
+    data?: Paths.$GetConditionalVariantTree.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.$GetConditionalVariantTree.Responses.$200>
   /**
    * $getActiveConditionalVariantVersion - $getActiveConditionalVariantVersion
    * 
@@ -13517,9 +21716,7 @@ export interface OperationMethods {
    * 
    * The body is the complete set of attribute overrides: an attribute the variant may override and
    * that is absent from it stops being overridden. Attributes the variant may **not** override are
-   * ignored where the body carries them, and their stored value is kept rather than dropped — a
-   * routine full-snapshot write must not erase an override the moment its attribute's flag happens
-   * to be off.
+   * not applied where the body carries them, and their stored value is kept rather than dropped.
    * 
    * Editing the version in effect is the ordinary way a live price is corrected, and warns about
    * nothing: what changes is what that version *says*, not which version is in effect.
@@ -13543,9 +21740,8 @@ export interface OperationMethods {
    * `null` is a value like any other rather than a deletion; a client that wants an attribute to
    * stop being overridden sends the complete snapshot without it through `PUT`.
    * 
-   * Attempting to change a pinned condition value is refused here in particular: a partial update
-   * is the path a caller reaches for by accident, and a variant's conditions are the situation it
-   * applies to, which the orders and contracts pinning it depend on not shifting.
+   * Attempting to change a pinned condition value is refused, as on every version write: a
+   * variant's conditions are fixed at creation.
    * 
    */
   '$patchActiveConditionalVariantVersion'(
@@ -13571,8 +21767,7 @@ export interface OperationMethods {
    * 
    * This removes the **variant**, not one of its versions. To remove a single version, name it on
    * `…/variants/{variant_id}/versions/{valid_from}` — including the one currently in effect, which
-   * deliberately has no "delete whichever is live" shorthand: that is exactly the write nobody
-   * should be able to ask for without saying which version they meant.
+   * has no shorthand delete: a delete names the version it removes.
    * 
    */
   '$deleteConditionalVariant'(
@@ -13580,6 +21775,34 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.$DeleteConditionalVariant.Responses.$200>
+  /**
+   * $listConditionalVariantVersions - $listConditionalVariantVersions
+   * 
+   * Lists one variant's versions — its whole timeline, oldest first, which is what expanding a row
+   * of the tree loads.
+   * 
+   * Its paging differs from the two variant reads: cursor paging only, no `from` and no `size`,
+   * and **no `hits`**.
+   * 
+   * Two paging facts a client gets wrong if it assumes otherwise. **A page may be shorter than
+   * `limit`, or empty, and still carry a `next`**, so a client pages until `next` is absent rather
+   * than until a page looks short. And **a cursor belongs to one variant and one `order`**:
+   * replaying one against another variant, or against the opposite order, is a `400` rather than a
+   * plausible-looking wrong page.
+   * 
+   * Versions carry no `_revision` here. An editing screen re-reads the one version it is about to
+   * write through that version's own `GET`, which is strongly consistent, and writes with the
+   * revision it returns.
+   * 
+   * **Published ahead of the behaviour.** No handler serves this yet, so a deployed stage answers
+   * `501`.
+   * 
+   */
+  '$listConditionalVariantVersions'(
+    parameters?: Parameters<Paths.$ListConditionalVariantVersions.QueryParameters & Paths.$ListConditionalVariantVersions.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.$ListConditionalVariantVersions.Responses.$200>
   /**
    * $appendConditionalVariantVersion - $appendConditionalVariantVersion
    * 
@@ -13593,8 +21816,7 @@ export interface OperationMethods {
    * **A version is never refused for being late.** A `valid_from` in the past is written like any
    * other and answered with warnings in `warnings` naming what it moved — what resolves now, what a
    * past-dated read returns, or both. Correcting a price that took effect last week is ordinary
-   * work; the alternative, deleting and recreating the variant, breaks every order and contract
-   * pinning its id.
+   * work.
    * 
    * What is refused is appending at a `valid_from` the variant already has: that write means either
    * "replace it" or "and also this", and only the caller knows which. The two operations both
@@ -13629,13 +21851,10 @@ export interface OperationMethods {
    * 
    * Replaces one version's values wholesale, addressed by its `valid_from`.
    * 
-   * Editable whatever its date, at both ends of the timeline: a scheduled version must stay
-   * editable so a staged price can be corrected before it goes live rather than accumulating dead
-   * versions beside it, and a past one must stay editable because correcting history is ordinary
-   * work. Writing a superseded version is answered with a warning naming what a past-dated read now
-   * returns; it is not refused.
+   * Editable whatever its date, scheduled or past. Writing a superseded version is answered with a
+   * warning naming what a past-dated read now returns; it is not refused.
    * 
-   * Attributes the variant may not override are ignored where the body carries them, and their
+   * Attributes the variant may not override are not applied where the body carries them, and their
    * stored value is preserved rather than dropped.
    * 
    */
@@ -13650,8 +21869,7 @@ export interface OperationMethods {
    * Changes only the fields it names on one version, addressed by its `valid_from`.
    * 
    * Everything the body does not mention is left as stored. A partial update that tries to change a
-   * pinned condition value is refused: condition values are immutable after a variant is created,
-   * and this is the path that rule is most likely to be broken on by accident.
+   * pinned condition value is refused: condition values are immutable after a variant is created.
    * 
    */
   '$patchConditionalVariantVersion'(
@@ -13681,6 +21899,108 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.$DeleteConditionalVariantVersion.Responses.$200>
+  /**
+   * $batchUpsertConditionalVariants - $batchUpsertConditionalVariants
+   * 
+   * Writes up to 100 variants or versions in one call — the endpoint a bulk importer drives a
+   * refresh cycle through, so hundreds of thousands of keys are a stream of calls rather than a
+   * call per key.
+   * 
+   * **One schema in the path, one entity per item.** A single call may name several entities, so
+   * it can refresh a whole tariff hierarchy — a composite price and its components together —
+   * and the entity id rides each item instead of the path.
+   * 
+   * **An item addresses a condition tuple, never a `variant_id`.** An upsert creates a variant
+   * that has no id yet. The id it created, or found, is on the result entry.
+   * 
+   * Each item's outcome is derived from what is stored, with no mode for the caller to declare,
+   * in this order: an unknown tuple is `variant_created`, a known tuple with no version at the
+   * item's `valid_from` is `version_created`, and an existing version at that exact instant is
+   * `updated` — or `skipped`, which is reserved for a write whose values are identical to what is
+   * stored, so re-running an unchanged import still reads as a no-op. `version_created` is
+   * distinct from `variant_created` so an importer's counts can tell "new postal codes appeared"
+   * from "existing variants got their scheduled adjustment".
+   * 
+   * An item without `valid_from` is a current-state, last-write-wins write, and has no `skipped`
+   * detection. A `valid_from` in the past changes nothing about the outcome — it is written like
+   * any other and answered with the timeline warnings on that item. An importer stamping one
+   * `valid_from` across a batch therefore sees backdate warnings on every item; omitting the
+   * field is how it avoids them.
+   * 
+   * **Items addressing the same variant apply in array order; items addressing different
+   * variants are processed in parallel.** Here "the same variant" is the same `(entity_id,
+   * condition tuple)`, so two items sharing a tuple and a `valid_from` apply in order and the
+   * last one wins. There is no cross-item rollback.
+   * 
+   * **This write is unguarded.** No `_revision` is accepted on an item or returned on an entry;
+   * an editing screen that needs a guard re-reads the one version it is about to write through
+   * its own `GET`.
+   * 
+   * Three refusals a client would otherwise expect do not occur here. `VERSION_CONFLICT` never
+   * does: an existing `valid_from` is a replacement rather than a collision. A tuple-uniqueness
+   * guard lost to a concurrent writer is not reported as `TUPLE_CONFLICT` either — the item is
+   * re-read against current state and re-derived through the same outcome order above, which is
+   * content-aware. `WRITE_CONFLICT` marks the case that is genuinely worth retrying: transient
+   * contention on one entity's rows.
+   * 
+   * **Published ahead of the behaviour.** No handler serves this yet, so a deployed stage answers
+   * `501`. The examples below are what an importer builds against in the meantime.
+   * 
+   */
+  '$batchUpsertConditionalVariants'(
+    parameters?: Parameters<Paths.$BatchUpsertConditionalVariants.PathParameters> | null,
+    data?: Paths.$BatchUpsertConditionalVariants.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.$BatchUpsertConditionalVariants.Responses.$200>
+  /**
+   * $batchDeleteConditionalVariants - $batchDeleteConditionalVariants
+   * 
+   * Removes up to 100 variants or versions in one call — the symmetric bulk withdrawal, so
+   * retiring a generation of variants, or a scheduled adjustment across many of them, is as
+   * cheap as creating it was.
+   * 
+   * The noun is `variants` on both batch endpoints, although an item carrying `valid_from`
+   * removes one **version** rather than the variant: an item without it removes the whole variant
+   * — its condition tuple, its registration in the index, and every version it accumulated — and
+   * an item with it removes exactly that version, under the single-item rules. A future version
+   * and a superseded one are both deletable and both answered with the warnings that say what
+   * moved; a variant's last remaining version is refused
+   * (`LAST_VERSION_UNDELETABLE`), because such a variant would still hold its tuple and still
+   * resolve to nothing. Delete the variant instead.
+   * 
+   * **An item addresses its variant one of two ways, and never both**: by `variant_id`, or by the
+   * condition tuple it pins. Use ids once the schema has drifted: a tuple naming a condition the
+   * schema no longer declares cannot be canonicalized, so it addresses nothing. An item naming
+   * both fails validation and is an envelope `400`, not a per-item error: the request validator
+   * rejects the body before any item runs.
+   * 
+   * **`entity_id` is required beside a `variant_id`, and is not redundant.** A variant id alone
+   * addresses nothing in this API.
+   * 
+   * **Items addressing the same variant apply in array order; items addressing different variants
+   * are processed in parallel.** Because an item addresses its variant two ways, "the same
+   * variant" is decided after addressing, in three steps: every condition tuple is resolved to a
+   * variant id, items are grouped by that id, and each group is applied in array order. So one
+   * call may hold an item naming `var-46045` and an item naming the tuple that variant pins, and
+   * the guarantee holds across both. There is no cross-item rollback.
+   * 
+   * **An item that addresses nothing is `skipped` — but only when the variant or the version is
+   * what is missing.** A missing *entity* is a per-item `ENTITY_NOT_FOUND`.
+   * 
+   * An interrupted call is safe to send again. A whole-variant delete frees the tuple in its
+   * first phase and removes the version rows afterwards, so a re-run picks up where it stopped
+   * and reports `skipped` for what has already gone. Nothing is archived: a variant an order or
+   * contract pins stops resolving, and a pinned `:resolve` naming it answers `VARIANT_NOT_FOUND`.
+   * 
+   * **Published ahead of the behaviour.** No handler serves this yet, so a deployed stage answers
+   * `501`.
+   * 
+   */
+  '$batchDeleteConditionalVariants'(
+    parameters?: Parameters<Paths.$BatchDeleteConditionalVariants.PathParameters> | null,
+    data?: Paths.$BatchDeleteConditionalVariants.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.$BatchDeleteConditionalVariants.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -13985,12 +22305,17 @@ export interface PathsDictionary {
     /**
      * $resolveConditionalEntity - $resolveConditionalEntity
      * 
-     * Resolves which of a conditional entity's variants apply to a situation, and returns each one
-     * composed: the base entity overlaid with the values of the version in effect at `as_of`.
+     * Resolves which of a conditional entity's variants apply, and returns each one composed: the
+     * base entity overlaid with the values of the version in effect at `as_of`.
      * 
-     * Resolution is two selections in a fixed order — the variant, by matching `context` against
-     * the conditions each variant pins; then the version, by `as_of`. It is always scoped to one
-     * logical entity, so it stays a cheap, predictable lookup rather than an open search.
+     * Resolution is two selections in a fixed order — the variant, then the version by `as_of`. It
+     * is always scoped to one logical entity, so it stays a cheap, predictable lookup rather than
+     * an open search.
+     * 
+     * **The variant is selected one of two ways, and the body says which.** A `context` describes a
+     * situation and is matched against the conditions each variant pins. A `variant_id` names one
+     * variant and skips matching entirely. Exactly one of the two: a body carrying both, or
+     * neither, is a `400`.
      * 
      * Matching follows two rules worth knowing before assembling a context. A condition a variant
      * does **not** pin matches any value, which is what lets a condition be added to a schema
@@ -13999,8 +22324,12 @@ export interface PathsDictionary {
      * nothing rather than silently matching another segment's variants.
      * 
      * When nothing matches, the entity's `default` variant is returned if it has one. There is no
-     * implicit fallback to the unmodified base entity — its values are the ones no variant
-     * overrode, which is not an answer to "what applies here".
+     * implicit fallback to the unmodified base entity: an empty `results` means nothing applies to
+     * this situation, and the base entity's values are not an answer to it. A pin does not reach
+     * that fallback at all: it asks for one variant by name, and answers with it or with a 404.
+     * 
+     * `options.hydrate` returns the entities a relation attribute references in place of the
+     * references, on either branch.
      * 
      * Availability is a separate mechanism and is never consulted here.
      * 
@@ -14016,8 +22345,7 @@ export interface PathsDictionary {
      * $createConditionalVariant - $createConditionalVariant
      * 
      * Creates one variant of a conditional entity, together with the first version carrying its
-     * values. Never two calls: a variant that existed without a version would be an entity holding
-     * a condition tuple it cannot answer with.
+     * values: a variant always has at least one version.
      * 
      * The body pins the situation the variant applies to. Pins are exact values only — predicates
      * are a read-side concept and are rejected here — and are stored canonicalized for their
@@ -14031,8 +22359,8 @@ export interface PathsDictionary {
      *   than a fallback and far easier to create by accident.
      * - `default` is a property of the variant, set by the `default` flag, and is never a value in
      *   `conditions` — not even `false`. A `default` variant cannot pin anything else, and an entity
-     *   can have only one, enforced by the ordinary condition-tuple guard rather than by a rule of
-     *   its own. Any entity may have one; nothing is declared in the schema to allow it.
+     *   can have only one; a second is refused as `TUPLE_CONFLICT`. Any entity may have one;
+     *   nothing is declared in the schema to allow it.
      * - Condition values are immutable afterwards. A variant's identity is the situation it applies
      *   to, and orders and contracts pin it. **A condition added to a schema that already has
      *   variants is effectively one-way**: every existing variant is a wildcard on the new
@@ -14040,12 +22368,16 @@ export interface PathsDictionary {
      *   retro-pinning the others is blocked by this same rule.
      * 
      * Attribute values are applied only for attributes currently carrying `overridable_attribute`.
-     * Metadata and non-overridable fields present in the body are ignored rather than rejected, so a
-     * client working from a slightly stale schema snapshot still succeeds.
+     * Metadata and non-overridable fields present in the body are not applied rather than rejected,
+     * and each one is named in the response's `warnings`, so a client working from a slightly stale
+     * schema snapshot still succeeds and still learns which fields did not land. The reporting half
+     * is published ahead of the behaviour: this operation is dispatched, so until the
+     * `ATTRIBUTES_NOT_APPLIED` warning starts being emitted a field that is not applied is dropped
+     * with nothing in the response naming it. Applying only overridable attributes is today's
+     * behaviour; being told which ones did not land is not yet.
      * 
      * `variant_id` is always server-generated and returned, and is not accepted in the body — the
-     * request schema admits no such property. It is the durable key orders and contracts pin, so it
-     * cannot be something two independent importers could collide on.
+     * request schema admits no such property. It is the durable key orders and contracts pin.
      * 
      */
     'post'(
@@ -14053,6 +22385,76 @@ export interface PathsDictionary {
       data?: Paths.$CreateConditionalVariant.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.$CreateConditionalVariant.Responses.$201>
+  }
+  ['/v1/conditional-pricing/{slug}/entities/{entity_id}/variants:list']: {
+    /**
+     * $listConditionalVariants - $listConditionalVariants
+     * 
+     * Lists a conditional entity's variants and the conditions each one pins — the browse, filter
+     * and search read behind the Entity UI's variant screens.
+     * 
+     * A `POST` because the condition filter is a structured object and needs a body; nothing is
+     * written. Every property in that body is optional, so `{}` is the whole of "the first ten
+     * variants, in `variant_id` order" — but the body itself is required, so send `{}` rather than
+     * nothing at all.
+     * 
+     * Three ways to narrow, and they combine. `conditions` filters on the pins themselves and takes
+     * the same seven predicates a resolve context does; `search` is free text over pinned values;
+     * `sort` orders by one pin. **A variant matches the filter only where it pins the condition** —
+     * the one place a filter and a resolve context differ: asking for the variants pinning postal
+     * code 46045 does not return every variant that pins no postal code at all.
+     * 
+     * Rows report what is *stored*, not what resolves: no version data, no `_revision` and no
+     * `_inert_overrides`.
+     * 
+     * Paging is by offset for the first pages and by an opaque `cursor` beyond them. `size` defaults
+     * to 10 and is clamped at 1000; a `from` past the offset window is refused rather than clamped,
+     * and the refusal names the cursor to continue with.
+     * 
+     * **Published ahead of the behaviour.** No handler serves this yet, so a deployed stage answers
+     * `501`. The examples below are what a consumer builds against in the meantime.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.$ListConditionalVariants.PathParameters> | null,
+      data?: Paths.$ListConditionalVariants.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.$ListConditionalVariants.Responses.$200>
+  }
+  ['/v1/conditional-pricing/{slug}/entities/{entity_id}/variants:tree']: {
+    /**
+     * $getConditionalVariantTree - $getConditionalVariantTree
+     * 
+     * The variants list, each row carrying the version in effect at `as_of` — the Entity UI's main
+     * editing screen in one call rather than one call per row.
+     * 
+     * Everything the variants list accepts, filtering, search, sort and paging alike, means the same
+     * here. Three differences, all from the version lookup each row costs: the body takes an
+     * `as_of`, `size` is clamped at 100 rather than 1000, and a variant with no version to show is
+     * omitted from `results` (see `VariantTree`).
+     * 
+     * Every row carries a `version`, and a `status` saying which one it got. A variant always has at
+     * least one version, so at any instant either a version is in effect (`active`) or every
+     * version of that variant is still ahead of it (`scheduled`) — in which case `version` is that
+     * upcoming first one, which is what makes a staged variant visible on the screen rather than
+     * blank.
+     * 
+     * The version on a row carries no `_revision`. An editing screen re-reads the one version it is
+     * about to write through that version's own `GET`, which is strongly consistent, and writes with
+     * the revision it returns.
+     * 
+     * The base entity is not part of this response. The screen's standard-price row is an ordinary
+     * entity read, and a variant's full timeline is the versions list.
+     * 
+     * **Published ahead of the behaviour.** No handler serves this yet, so a deployed stage answers
+     * `501`.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.$GetConditionalVariantTree.PathParameters> | null,
+      data?: Paths.$GetConditionalVariantTree.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.$GetConditionalVariantTree.Responses.$200>
   }
   ['/v1/conditional-pricing/{slug}/entities/{entity_id}/variants/{variant_id}']: {
     /**
@@ -14084,9 +22486,7 @@ export interface PathsDictionary {
      * 
      * The body is the complete set of attribute overrides: an attribute the variant may override and
      * that is absent from it stops being overridden. Attributes the variant may **not** override are
-     * ignored where the body carries them, and their stored value is kept rather than dropped — a
-     * routine full-snapshot write must not erase an override the moment its attribute's flag happens
-     * to be off.
+     * not applied where the body carries them, and their stored value is kept rather than dropped.
      * 
      * Editing the version in effect is the ordinary way a live price is corrected, and warns about
      * nothing: what changes is what that version *says*, not which version is in effect.
@@ -14110,9 +22510,8 @@ export interface PathsDictionary {
      * `null` is a value like any other rather than a deletion; a client that wants an attribute to
      * stop being overridden sends the complete snapshot without it through `PUT`.
      * 
-     * Attempting to change a pinned condition value is refused here in particular: a partial update
-     * is the path a caller reaches for by accident, and a variant's conditions are the situation it
-     * applies to, which the orders and contracts pinning it depend on not shifting.
+     * Attempting to change a pinned condition value is refused, as on every version write: a
+     * variant's conditions are fixed at creation.
      * 
      */
     'patch'(
@@ -14138,8 +22537,7 @@ export interface PathsDictionary {
      * 
      * This removes the **variant**, not one of its versions. To remove a single version, name it on
      * `…/variants/{variant_id}/versions/{valid_from}` — including the one currently in effect, which
-     * deliberately has no "delete whichever is live" shorthand: that is exactly the write nobody
-     * should be able to ask for without saying which version they meant.
+     * has no shorthand delete: a delete names the version it removes.
      * 
      */
     'delete'(
@@ -14149,6 +22547,34 @@ export interface PathsDictionary {
     ): OperationResponse<Paths.$DeleteConditionalVariant.Responses.$200>
   }
   ['/v1/conditional-pricing/{slug}/entities/{entity_id}/variants/{variant_id}/versions']: {
+    /**
+     * $listConditionalVariantVersions - $listConditionalVariantVersions
+     * 
+     * Lists one variant's versions — its whole timeline, oldest first, which is what expanding a row
+     * of the tree loads.
+     * 
+     * Its paging differs from the two variant reads: cursor paging only, no `from` and no `size`,
+     * and **no `hits`**.
+     * 
+     * Two paging facts a client gets wrong if it assumes otherwise. **A page may be shorter than
+     * `limit`, or empty, and still carry a `next`**, so a client pages until `next` is absent rather
+     * than until a page looks short. And **a cursor belongs to one variant and one `order`**:
+     * replaying one against another variant, or against the opposite order, is a `400` rather than a
+     * plausible-looking wrong page.
+     * 
+     * Versions carry no `_revision` here. An editing screen re-reads the one version it is about to
+     * write through that version's own `GET`, which is strongly consistent, and writes with the
+     * revision it returns.
+     * 
+     * **Published ahead of the behaviour.** No handler serves this yet, so a deployed stage answers
+     * `501`.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.$ListConditionalVariantVersions.QueryParameters & Paths.$ListConditionalVariantVersions.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.$ListConditionalVariantVersions.Responses.$200>
     /**
      * $appendConditionalVariantVersion - $appendConditionalVariantVersion
      * 
@@ -14162,8 +22588,7 @@ export interface PathsDictionary {
      * **A version is never refused for being late.** A `valid_from` in the past is written like any
      * other and answered with warnings in `warnings` naming what it moved — what resolves now, what a
      * past-dated read returns, or both. Correcting a price that took effect last week is ordinary
-     * work; the alternative, deleting and recreating the variant, breaks every order and contract
-     * pinning its id.
+     * work.
      * 
      * What is refused is appending at a `valid_from` the variant already has: that write means either
      * "replace it" or "and also this", and only the caller knows which. The two operations both
@@ -14200,13 +22625,10 @@ export interface PathsDictionary {
      * 
      * Replaces one version's values wholesale, addressed by its `valid_from`.
      * 
-     * Editable whatever its date, at both ends of the timeline: a scheduled version must stay
-     * editable so a staged price can be corrected before it goes live rather than accumulating dead
-     * versions beside it, and a past one must stay editable because correcting history is ordinary
-     * work. Writing a superseded version is answered with a warning naming what a past-dated read now
-     * returns; it is not refused.
+     * Editable whatever its date, scheduled or past. Writing a superseded version is answered with a
+     * warning naming what a past-dated read now returns; it is not refused.
      * 
-     * Attributes the variant may not override are ignored where the body carries them, and their
+     * Attributes the variant may not override are not applied where the body carries them, and their
      * stored value is preserved rather than dropped.
      * 
      */
@@ -14221,8 +22643,7 @@ export interface PathsDictionary {
      * Changes only the fields it names on one version, addressed by its `valid_from`.
      * 
      * Everything the body does not mention is left as stored. A partial update that tries to change a
-     * pinned condition value is refused: condition values are immutable after a variant is created,
-     * and this is the path that rule is most likely to be broken on by accident.
+     * pinned condition value is refused: condition values are immutable after a variant is created.
      * 
      */
     'patch'(
@@ -14253,6 +22674,112 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.$DeleteConditionalVariantVersion.Responses.$200>
   }
+  ['/v1/conditional-pricing/{slug}/variants:batchUpsert']: {
+    /**
+     * $batchUpsertConditionalVariants - $batchUpsertConditionalVariants
+     * 
+     * Writes up to 100 variants or versions in one call — the endpoint a bulk importer drives a
+     * refresh cycle through, so hundreds of thousands of keys are a stream of calls rather than a
+     * call per key.
+     * 
+     * **One schema in the path, one entity per item.** A single call may name several entities, so
+     * it can refresh a whole tariff hierarchy — a composite price and its components together —
+     * and the entity id rides each item instead of the path.
+     * 
+     * **An item addresses a condition tuple, never a `variant_id`.** An upsert creates a variant
+     * that has no id yet. The id it created, or found, is on the result entry.
+     * 
+     * Each item's outcome is derived from what is stored, with no mode for the caller to declare,
+     * in this order: an unknown tuple is `variant_created`, a known tuple with no version at the
+     * item's `valid_from` is `version_created`, and an existing version at that exact instant is
+     * `updated` — or `skipped`, which is reserved for a write whose values are identical to what is
+     * stored, so re-running an unchanged import still reads as a no-op. `version_created` is
+     * distinct from `variant_created` so an importer's counts can tell "new postal codes appeared"
+     * from "existing variants got their scheduled adjustment".
+     * 
+     * An item without `valid_from` is a current-state, last-write-wins write, and has no `skipped`
+     * detection. A `valid_from` in the past changes nothing about the outcome — it is written like
+     * any other and answered with the timeline warnings on that item. An importer stamping one
+     * `valid_from` across a batch therefore sees backdate warnings on every item; omitting the
+     * field is how it avoids them.
+     * 
+     * **Items addressing the same variant apply in array order; items addressing different
+     * variants are processed in parallel.** Here "the same variant" is the same `(entity_id,
+     * condition tuple)`, so two items sharing a tuple and a `valid_from` apply in order and the
+     * last one wins. There is no cross-item rollback.
+     * 
+     * **This write is unguarded.** No `_revision` is accepted on an item or returned on an entry;
+     * an editing screen that needs a guard re-reads the one version it is about to write through
+     * its own `GET`.
+     * 
+     * Three refusals a client would otherwise expect do not occur here. `VERSION_CONFLICT` never
+     * does: an existing `valid_from` is a replacement rather than a collision. A tuple-uniqueness
+     * guard lost to a concurrent writer is not reported as `TUPLE_CONFLICT` either — the item is
+     * re-read against current state and re-derived through the same outcome order above, which is
+     * content-aware. `WRITE_CONFLICT` marks the case that is genuinely worth retrying: transient
+     * contention on one entity's rows.
+     * 
+     * **Published ahead of the behaviour.** No handler serves this yet, so a deployed stage answers
+     * `501`. The examples below are what an importer builds against in the meantime.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.$BatchUpsertConditionalVariants.PathParameters> | null,
+      data?: Paths.$BatchUpsertConditionalVariants.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.$BatchUpsertConditionalVariants.Responses.$200>
+  }
+  ['/v1/conditional-pricing/{slug}/variants:batchDelete']: {
+    /**
+     * $batchDeleteConditionalVariants - $batchDeleteConditionalVariants
+     * 
+     * Removes up to 100 variants or versions in one call — the symmetric bulk withdrawal, so
+     * retiring a generation of variants, or a scheduled adjustment across many of them, is as
+     * cheap as creating it was.
+     * 
+     * The noun is `variants` on both batch endpoints, although an item carrying `valid_from`
+     * removes one **version** rather than the variant: an item without it removes the whole variant
+     * — its condition tuple, its registration in the index, and every version it accumulated — and
+     * an item with it removes exactly that version, under the single-item rules. A future version
+     * and a superseded one are both deletable and both answered with the warnings that say what
+     * moved; a variant's last remaining version is refused
+     * (`LAST_VERSION_UNDELETABLE`), because such a variant would still hold its tuple and still
+     * resolve to nothing. Delete the variant instead.
+     * 
+     * **An item addresses its variant one of two ways, and never both**: by `variant_id`, or by the
+     * condition tuple it pins. Use ids once the schema has drifted: a tuple naming a condition the
+     * schema no longer declares cannot be canonicalized, so it addresses nothing. An item naming
+     * both fails validation and is an envelope `400`, not a per-item error: the request validator
+     * rejects the body before any item runs.
+     * 
+     * **`entity_id` is required beside a `variant_id`, and is not redundant.** A variant id alone
+     * addresses nothing in this API.
+     * 
+     * **Items addressing the same variant apply in array order; items addressing different variants
+     * are processed in parallel.** Because an item addresses its variant two ways, "the same
+     * variant" is decided after addressing, in three steps: every condition tuple is resolved to a
+     * variant id, items are grouped by that id, and each group is applied in array order. So one
+     * call may hold an item naming `var-46045` and an item naming the tuple that variant pins, and
+     * the guarantee holds across both. There is no cross-item rollback.
+     * 
+     * **An item that addresses nothing is `skipped` — but only when the variant or the version is
+     * what is missing.** A missing *entity* is a per-item `ENTITY_NOT_FOUND`.
+     * 
+     * An interrupted call is safe to send again. A whole-variant delete frees the tuple in its
+     * first phase and removes the version rows afterwards, so a re-run picks up where it stopped
+     * and reports `skipped` for what has already gone. Nothing is archived: a variant an order or
+     * contract pins stops resolving, and a pinned `:resolve` naming it answers `VARIANT_NOT_FOUND`.
+     * 
+     * **Published ahead of the behaviour.** No handler serves this yet, so a deployed stage answers
+     * `501`.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.$BatchDeleteConditionalVariants.PathParameters> | null,
+      data?: Paths.$BatchDeleteConditionalVariants.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.$BatchDeleteConditionalVariants.Responses.$200>
+  }
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
@@ -14276,6 +22803,20 @@ export type BasePriceItemCommon = Components.Schemas.BasePriceItemCommon;
 export type BasePriceItemDto = Components.Schemas.BasePriceItemDto;
 export type BasicAuthCredentials = Components.Schemas.BasicAuthCredentials;
 export type BasicAuthIntegration = Components.Schemas.BasicAuthIntegration;
+export type BatchDeleteByConditions = Components.Schemas.BatchDeleteByConditions;
+export type BatchDeleteByVariantId = Components.Schemas.BatchDeleteByVariantId;
+export type BatchDeleteCounts = Components.Schemas.BatchDeleteCounts;
+export type BatchDeleteItem = Components.Schemas.BatchDeleteItem;
+export type BatchDeleteOutcome = Components.Schemas.BatchDeleteOutcome;
+export type BatchDeleteResult = Components.Schemas.BatchDeleteResult;
+export type BatchDeleteResultEntry = Components.Schemas.BatchDeleteResultEntry;
+export type BatchDeleteVariantsRequest = Components.Schemas.BatchDeleteVariantsRequest;
+export type BatchUpsertCounts = Components.Schemas.BatchUpsertCounts;
+export type BatchUpsertItem = Components.Schemas.BatchUpsertItem;
+export type BatchUpsertOutcome = Components.Schemas.BatchUpsertOutcome;
+export type BatchUpsertResult = Components.Schemas.BatchUpsertResult;
+export type BatchUpsertResultEntry = Components.Schemas.BatchUpsertResultEntry;
+export type BatchUpsertVariantsRequest = Components.Schemas.BatchUpsertVariantsRequest;
 export type BillingPeriod = Components.Schemas.BillingPeriod;
 export type CartDto = Components.Schemas.CartDto;
 export type CashbackAmount = Components.Schemas.CashbackAmount;
@@ -14340,10 +22881,13 @@ export type GasMarketAreaDetails = Components.Schemas.GasMarketAreaDetails;
 export type HistoricMarketPriceRecord = Components.Schemas.HistoricMarketPriceRecord;
 export type HistoricMarketPricesResult = Components.Schemas.HistoricMarketPricesResult;
 export type HydratedCompositePrice = Components.Schemas.HydratedCompositePrice;
+export type InertOverride = Components.Schemas.InertOverride;
+export type InertOverrideReason = Components.Schemas.InertOverrideReason;
 export type IntegrationAuthCredentials = Components.Schemas.IntegrationAuthCredentials;
 export type IntegrationCredentialsResult = Components.Schemas.IntegrationCredentialsResult;
 export type IntegrationId = Components.Schemas.IntegrationId;
 export type JourneyContext = Components.Schemas.JourneyContext;
+export type ListVariantsRequest = Components.Schemas.ListVariantsRequest;
 export type MarketParticipant = Components.Schemas.MarketParticipant;
 export type MarkupPricingModel = Components.Schemas.MarkupPricingModel;
 export type MetaData = Components.Schemas.MetaData;
@@ -14362,6 +22906,7 @@ export type OrderStatus = Components.Schemas.OrderStatus;
 export type PatchVersionRequest = Components.Schemas.PatchVersionRequest;
 export type PaymentMethod = Components.Schemas.PaymentMethod;
 export type PinnedConditions = Components.Schemas.PinnedConditions;
+export type PinnedResolveOptions = Components.Schemas.PinnedResolveOptions;
 export type PortalContext = Components.Schemas.PortalContext;
 export type PowerMarketAreaDetails = Components.Schemas.PowerMarketAreaDetails;
 export type PowerMeterType = Components.Schemas.PowerMeterType;
@@ -14396,6 +22941,9 @@ export type RecurrenceAmountDto = Components.Schemas.RecurrenceAmountDto;
 export type RecurrenceAmountWithTax = Components.Schemas.RecurrenceAmountWithTax;
 export type RedeemedPromo = Components.Schemas.RedeemedPromo;
 export type ReplaceVersionRequest = Components.Schemas.ReplaceVersionRequest;
+export type ReportedError = Components.Schemas.ReportedError;
+export type ResolveByContextRequest = Components.Schemas.ResolveByContextRequest;
+export type ResolveByPinRequest = Components.Schemas.ResolveByPinRequest;
 export type ResolveConditionalEntityRequest = Components.Schemas.ResolveConditionalEntityRequest;
 export type ResolveContext = Components.Schemas.ResolveContext;
 export type ResolveOptions = Components.Schemas.ResolveOptions;
@@ -14427,9 +22975,18 @@ export type TotalDetails = Components.Schemas.TotalDetails;
 export type TypeGetAg = Components.Schemas.TypeGetAg;
 export type ValidateAvailabilityFileError = Components.Schemas.ValidateAvailabilityFileError;
 export type ValidateAvailabilityFileResult = Components.Schemas.ValidateAvailabilityFileResult;
+export type VariantConditionFilter = Components.Schemas.VariantConditionFilter;
 export type VariantConditions = Components.Schemas.VariantConditions;
+export type VariantList = Components.Schemas.VariantList;
+export type VariantListRow = Components.Schemas.VariantListRow;
+export type VariantTree = Components.Schemas.VariantTree;
+export type VariantTreeRequest = Components.Schemas.VariantTreeRequest;
+export type VariantTreeRow = Components.Schemas.VariantTreeRow;
+export type VariantTreeRowStatus = Components.Schemas.VariantTreeRowStatus;
 export type VariantValues = Components.Schemas.VariantValues;
 export type VariantVersion = Components.Schemas.VariantVersion;
-export type VariantWriteWarning = Components.Schemas.VariantWriteWarning;
-export type VersionWriteWarning = Components.Schemas.VersionWriteWarning;
+export type VariantVersionList = Components.Schemas.VariantVersionList;
+export type VariantVersionSnapshot = Components.Schemas.VariantVersionSnapshot;
+export type VersionMoved = Components.Schemas.VersionMoved;
+export type WriteWarning = Components.Schemas.WriteWarning;
 export type WrittenVariantVersion = Components.Schemas.WrittenVariantVersion;
