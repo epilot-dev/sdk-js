@@ -4,8 +4,13 @@ import { describe, expect, it } from 'vitest';
 
 import { CLIENTS_DIR, SRC_DIR, clientsWith } from './helpers/clients';
 import { DynamicTariffModeValues, PricingModelValues } from '../src/apis/pricing';
-import { RELATION_ATTRIBUTE_TYPES, RELATION_ATTRIBUTE_TYPE_LIST, RelationAffinityMode } from '../src/apis/entity';
-import { OVERRIDABLE_ATTRIBUTE_TYPES, OVERRIDABLE_ATTRIBUTE_TYPE_LIST } from '../src/apis/pricing';
+import {
+  OVERRIDABLE_ATTRIBUTE_TYPES,
+  OVERRIDABLE_ATTRIBUTE_TYPE_LIST,
+  RELATION_ATTRIBUTE_TYPES,
+  RELATION_ATTRIBUTE_TYPE_LIST,
+  RelationAffinityMode,
+} from '../src/apis/entity';
 
 const MODELS_DIR = resolve(SRC_DIR, 'models');
 
@@ -71,8 +76,8 @@ describe('runtime models are exposed by the SDK', () => {
     }
   });
 
-  // Both lists hold entity attribute types. The pricing one has no compile-time
-  // anchor, so this is its only drift guard.
+  // Both lists hold entity attribute types. Neither has a compile-time anchor,
+  // so this is their only drift guard.
   it('attribute-type allowlists only contain types the entity spec declares', () => {
     type Schema = { allOf?: Schema[]; properties?: { type?: { enum?: string[] } } };
 
