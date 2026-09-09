@@ -16,6 +16,16 @@ describe('client', () => {
       expect(operations.length).toBeGreaterThan(0);
     });
 
+    it('should take a revision_id on the runtime read', async () => {
+      const client = getClient();
+
+      const runtimeRead = client.api.getOperations().find(({ operationId }) => operationId === 'getJourney');
+
+      expect(runtimeRead?.parameters?.map((parameter) => 'name' in parameter && parameter.name)).toContain(
+        'revision_id',
+      );
+    });
+
     it('should have the journey versioning operations', async () => {
       const client = getClient();
 

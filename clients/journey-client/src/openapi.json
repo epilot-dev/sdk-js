@@ -3,7 +3,7 @@
   "info": {
     "title": "Journey API",
     "description": "API to configure journeys",
-    "version": "1.5.0"
+    "version": "1.6.0"
   },
   "security": [
     {
@@ -125,6 +125,16 @@
             }
           },
           {
+            "name": "revision_id",
+            "in": "query",
+            "description": "Serve the named revision instead of the published version, so a save-and-continue session can stay on the revision it started on. Only revisions that have been published at least once are served on the public and portal routes; an unpublished revision is served to `EpilotAuth` callers with the edit permission and is otherwise unknown. Cannot be combined with the legacy `version` parameter.\n",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "42"
+            }
+          },
+          {
             "name": "source",
             "in": "query",
             "description": "What source ID. Journey or Entity ID",
@@ -155,6 +165,9 @@
                     },
                     {
                       "$ref": "#/components/schemas/JourneyActivationGuarantee"
+                    },
+                    {
+                      "$ref": "#/components/schemas/JourneyServedRevision"
                     }
                   ]
                 }
@@ -2815,6 +2828,16 @@
           }
         ]
       },
+      "JourneyServedRevision": {
+        "description": "Which revision the runtime read served: the requested one, or the published version when no revision was requested. Absent while the journey has not adopted versioning and on legacy `version` reads.\n",
+        "type": "object",
+        "properties": {
+          "revision_id": {
+            "type": "string",
+            "example": "42"
+          }
+        }
+      },
       "JourneyActivationGuarantee": {
         "description": "Journeys read from the API always carry an explicit `settings.isActive`. The flag remains optional in request bodies.\n",
         "type": "object",
@@ -3553,9 +3576,6 @@
   "servers": [
     {
       "url": "https://journey-config.sls.epilot.io"
-    },
-    {
-      "url": "https://journey-config.dev.sls.epilot.io"
     }
   ]
 }
