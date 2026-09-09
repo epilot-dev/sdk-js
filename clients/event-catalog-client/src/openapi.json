@@ -52,7 +52,7 @@
       "post": {
         "operationId": "createCustomEvent",
         "summary": "createCustomEvent",
-        "description": "Reserve an org-scoped custom event name and persist its immutable v1.0 draft definition.",
+        "description": "Reserve an org-scoped custom event name and persist its immutable v1.0 draft definition. Custom events are always projected from an entity graph: entity_graph is required and, in guided mapping mode, every schema field needs a graph_source expression. Caller-supplied trigger fields are ignored for custom events.",
         "tags": [
           "Event Catalog"
         ],
@@ -156,6 +156,58 @@
           },
           "404": {
             "description": "Event not found"
+          }
+        }
+      },
+      "put": {
+        "operationId": "replaceCustomEventDraft",
+        "summary": "replaceCustomEventDraft",
+        "description": "Replace the complete v1.0 definition of an org-scoped custom event while it is still an\nunpublished draft. Drafts have no consumers, so their definition is not yet immutable;\nthe event name is the identity and cannot change. Publication remains a separate action.\n",
+        "tags": [
+          "Event Catalog"
+        ],
+        "parameters": [
+          {
+            "name": "event_name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCustomEventPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated draft event configuration",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventConfig"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Definition is invalid or the body event_name differs from the path"
+          },
+          "404": {
+            "description": "Custom event not found"
+          },
+          "409": {
+            "description": "Event is built-in or no longer an unpublished draft"
+          },
+          "422": {
+            "description": "Definition could not be stored"
           }
         }
       },
@@ -775,16 +827,19 @@
             "default": false,
             "example": true
           },
+          "api_trigger": {
+            "type": "boolean",
+            "default": true,
+            "description": "Allows explicit API-source triggering, not HTTP transport. Automation also uses HTTP. Automation-only events always disable this source."
+          },
           "automation_trigger_only": {
             "type": "boolean",
-            "readOnly": true,
             "description": "Whether explicit triggering is restricted to Automation. When true, callers must pass\n`_trigger_source_type: automation` and a stable `_trigger_source`. The trigger uses\nstrict entity readiness validation and the durable Automation outbox.\nRequires `automation_trigger: true` and cannot be combined with `entity_operation`.\n",
             "default": false,
             "example": true
           },
           "automation_trigger_seed_node": {
             "type": "string",
-            "readOnly": true,
             "description": "Required entity-graph seed node for an Automation-only trigger. When configured, an\nexplicit trigger using any other node is rejected before hydration.\n",
             "example": "ticket"
           },
@@ -840,7 +895,7 @@
       },
       "CreateCustomEventPayload": {
         "type": "object",
-        "description": "Complete immutable custom-event v1.0 definition. Publication is a separate conditional action.",
+        "description": "Complete immutable custom-event v1.0 definition projected from a required entity graph. Publication is a separate conditional action.",
         "properties": {
           "event_name": {
             "type": "string",
@@ -877,6 +932,21 @@
             "type": "boolean",
             "default": true
           },
+          "api_trigger": {
+            "type": "boolean",
+            "default": true,
+            "description": "Allows API-source triggering independently of Automation (which also uses HTTP). Must be false for Automation-only events."
+          },
+          "automation_trigger_only": {
+            "type": "boolean",
+            "default": false,
+            "description": "Restricts triggering to Automation with durable delivery and strict readiness. Requires automation_trigger true, api_trigger false, and no entity_operation."
+          },
+          "automation_trigger_seed_node": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Required cardinality-one graph seed for an Automation-only event. Inherited restrictions cannot be changed."
+          },
           "mapping": {
             "$ref": "#/components/schemas/EventMapping"
           },
@@ -891,7 +961,8 @@
         "required": [
           "event_name",
           "event_title",
-          "schema_fields"
+          "schema_fields",
+          "entity_graph"
         ]
       },
       "EventMapping": {
@@ -918,7 +989,7 @@
       },
       "CustomEventLineage": {
         "type": "object",
-        "description": "Optional catalog lineage to a separately named base event. It does not replace the base event.",
+        "description": "Optional catalog lineage to a separately named base event. Built-in inheritance is validated against this exact registered version; its trigger restrictions cannot be removed or replaced. It does not replace the base event.",
         "properties": {
           "base_event_name": {
             "type": "string"
@@ -1038,7 +1109,7 @@
           },
           "graph_source": {
             "type": "string",
-            "description": "Optional JSONata expression to extract the field value from the hydrated entity graph.\n\nThe expression has access to all hydrated graph nodes by their node ID.\nIf not specified, the field value must be provided as input when triggering the event.\n\nExamples:\n  - \"ticket.meter_reading_value\" (simple path)\n  - \"contact.email[0].email\" (nested/array access)\n  - \"ticket.reading_timestamp ?? $now()\" (with fallback)\n  - \"$number(meter_counter.reading_value)\" (type coercion)\n",
+            "description": "JSONata expression to extract the field value from the hydrated entity graph.\n\nThe expression has access to all hydrated graph nodes by their node ID.\nOptional for built-in events, where an unset value must be provided as input when\ntriggering the event. Required for custom events in guided mapping mode.\n\nExamples:\n  - \"ticket.meter_reading_value\" (simple path)\n  - \"contact.email[0].email\" (nested/array access)\n  - \"ticket.reading_timestamp ?? $now()\" (with fallback)\n  - \"$number(meter_counter.reading_value)\" (type coercion)\n",
             "example": "ticket.meter_reading_value"
           }
         },
@@ -1080,7 +1151,7 @@
         ]
       },
       "CustomSchemaField": {
-        "description": "Custom v1 fields support JSON Schema values and context entities; attachment semantics are built-in-only.",
+        "description": "Custom v1 fields support graph-projected JSON Schema values and context entities; attachment semantics are built-in-only.",
         "oneOf": [
           {
             "$ref": "#/components/schemas/PrimitiveField"
@@ -1585,7 +1656,7 @@
           },
           "attribute": {
             "type": "array",
-            "description": "Optional list of entity attributes to track for changes.\nIf specified, the event only triggers when these attributes are affected.\n- On createEntity: attribute must be defined in the entity payload\n- On updateEntity: attribute must be in diff.added, diff.updated, or diff.deleted\nIf not specified, all changes to matching entities will trigger the event.\n",
+            "description": "Optional list of entity attributes to track for changes.\nIf specified, the event only triggers when these attributes are affected.\n- On createEntity: attribute must be defined in the entity payload\n- On updateEntity: attribute must be in diff.added, diff.updated, or diff.deleted\nIf not specified, all changes to matching entities will trigger the event.\nDerived built-in triggers retain every inherited attribute; additions are OR alternatives.\nAn inherited unfiltered trigger cannot be narrowed by adding attribute filters.\n",
             "items": {
               "type": "string"
             },
@@ -1597,7 +1668,7 @@
           },
           "purpose": {
             "type": "array",
-            "description": "Optional list of purpose names to filter by.\nThe entity must have at least one matching purpose in its _purpose array.\nPurpose names are matched against the taxonomy classification names (e.g., \"Kündigung\", \"Umzug/Auszug\").\nIf not specified, the event triggers regardless of entity purpose.\n",
+            "description": "Optional list of purpose names to filter by.\nThe entity must have at least one matching purpose in its _purpose array.\nPurpose names are matched against the taxonomy classification names (e.g., \"Kündigung\", \"Umzug/Auszug\").\nFor custom events, names are allowed only when inherited unchanged from the actual\npinned built-in lineage version. New purposes must use stable purpose_filters IDs.\nNames and stable IDs are OR alternatives; operation/schema/attribute conditions still apply.\nIf neither purpose nor purpose_filters is specified, the event triggers regardless of purpose.\n",
             "items": {
               "type": "string"
             },
@@ -1608,7 +1679,7 @@
           },
           "purpose_filters": {
             "type": "array",
-            "description": "Stable purpose IDs plus immutable display-name snapshots for custom events.",
+            "description": "Stable purpose IDs plus immutable display-name snapshots for custom events. Additive to inherited purpose names (OR). Inherited unfiltered triggers cannot be narrowed.",
             "items": {
               "$ref": "#/components/schemas/PurposeFilterSnapshot"
             }
@@ -1734,7 +1805,7 @@
           },
           "fields": {
             "type": "object",
-            "description": "Input field values for the event. Keys must match the event's\nschema_fields definitions. Values are validated against each\nfield's JSON Schema.\n",
+            "description": "Input field values for built-in events. Keys must match the event's\nschema_fields definitions. Values are validated against each\nfield's JSON Schema. Ignored for custom events, whose fields are\nalways projected from the entity graph.\n",
             "additionalProperties": true
           },
           "skip_hydration": {

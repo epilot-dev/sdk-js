@@ -70,7 +70,7 @@ declare namespace Components {
             required?: boolean;
         }
         /**
-         * Complete immutable custom-event v1.0 definition. Publication is a separate conditional action.
+         * Complete immutable custom-event v1.0 definition projected from a required entity graph. Publication is a separate conditional action.
          */
         export interface CreateCustomEventPayload {
             event_name: string; // ^[A-Z][A-Za-z0-9]{2,79}$
@@ -78,9 +78,9 @@ declare namespace Components {
             event_description?: string;
             event_tags?: string[];
             schema_fields: {
-                [name: string]: /* Custom v1 fields support JSON Schema values and context entities; attachment semantics are built-in-only. */ CustomSchemaField;
+                [name: string]: /* Custom v1 fields support graph-projected JSON Schema values and context entities; attachment semantics are built-in-only. */ CustomSchemaField;
             };
-            entity_graph?: /* Entity graph definition for resolving related entities */ GraphDefinition;
+            entity_graph: /* Entity graph definition for resolving related entities */ GraphDefinition;
             entity_operation?: /**
              * Configuration for triggering an event based on entity operations.
              *
@@ -92,23 +92,35 @@ declare namespace Components {
              */
             EntityOperationTrigger;
             automation_trigger?: boolean;
+            /**
+             * Allows API-source triggering independently of Automation (which also uses HTTP). Must be false for Automation-only events.
+             */
+            api_trigger?: boolean;
+            /**
+             * Restricts triggering to Automation with durable delivery and strict readiness. Requires automation_trigger true, api_trigger false, and no entity_operation.
+             */
+            automation_trigger_only?: boolean;
+            /**
+             * Required cardinality-one graph seed for an Automation-only event. Inherited restrictions cannot be changed.
+             */
+            automation_trigger_seed_node?: string;
             mapping?: /* Guided mappings use schema_fields graph_source expressions; raw mode evaluates one JSONata object transform. */ EventMapping;
-            lineage?: /* Optional catalog lineage to a separately named base event. It does not replace the base event. */ CustomEventLineage;
+            lineage?: /* Optional catalog lineage to a separately named base event. Built-in inheritance is validated against this exact registered version; its trigger restrictions cannot be removed or replaced. It does not replace the base event. */ CustomEventLineage;
             example?: {
                 [name: string]: any;
             };
         }
         /**
-         * Optional catalog lineage to a separately named base event. It does not replace the base event.
+         * Optional catalog lineage to a separately named base event. Built-in inheritance is validated against this exact registered version; its trigger restrictions cannot be removed or replaced. It does not replace the base event.
          */
         export interface CustomEventLineage {
             base_event_name: string;
             base_event_version: string;
         }
         /**
-         * Custom v1 fields support JSON Schema values and context entities; attachment semantics are built-in-only.
+         * Custom v1 fields support graph-projected JSON Schema values and context entities; attachment semantics are built-in-only.
          */
-        export type CustomSchemaField = /* Custom v1 fields support JSON Schema values and context entities; attachment semantics are built-in-only. */ /* A primitive JSON Schema field definition */ PrimitiveField | ContextEntity;
+        export type CustomSchemaField = /* Custom v1 fields support graph-projected JSON Schema values and context entities; attachment semantics are built-in-only. */ /* A primitive JSON Schema field definition */ PrimitiveField | ContextEntity;
         /**
          * Configuration for triggering an event based on entity operations.
          *
@@ -144,6 +156,8 @@ declare namespace Components {
              * - On createEntity: attribute must be defined in the entity payload
              * - On updateEntity: attribute must be in diff.added, diff.updated, or diff.deleted
              * If not specified, all changes to matching entities will trigger the event.
+             * Derived built-in triggers retain every inherited attribute; additions are OR alternatives.
+             * An inherited unfiltered trigger cannot be narrowed by adding attribute filters.
              *
              * example:
              * [
@@ -157,7 +171,10 @@ declare namespace Components {
              * Optional list of purpose names to filter by.
              * The entity must have at least one matching purpose in its _purpose array.
              * Purpose names are matched against the taxonomy classification names (e.g., "Kündigung", "Umzug/Auszug").
-             * If not specified, the event triggers regardless of entity purpose.
+             * For custom events, names are allowed only when inherited unchanged from the actual
+             * pinned built-in lineage version. New purposes must use stable purpose_filters IDs.
+             * Names and stable IDs are OR alternatives; operation/schema/attribute conditions still apply.
+             * If neither purpose nor purpose_filters is specified, the event triggers regardless of purpose.
              *
              * example:
              * [
@@ -167,7 +184,7 @@ declare namespace Components {
              */
             purpose?: string[];
             /**
-             * Stable purpose IDs plus immutable display-name snapshots for custom events.
+             * Stable purpose IDs plus immutable display-name snapshots for custom events. Additive to inherited purpose names (OR). Inherited unfiltered triggers cannot be narrowed.
              */
             purpose_filters?: PurposeFilterSnapshot[];
         }
@@ -395,6 +412,8 @@ declare namespace Components {
                  * - On createEntity: attribute must be defined in the entity payload
                  * - On updateEntity: attribute must be in diff.added, diff.updated, or diff.deleted
                  * If not specified, all changes to matching entities will trigger the event.
+                 * Derived built-in triggers retain every inherited attribute; additions are OR alternatives.
+                 * An inherited unfiltered trigger cannot be narrowed by adding attribute filters.
                  *
                  * example:
                  * [
@@ -408,7 +427,10 @@ declare namespace Components {
                  * Optional list of purpose names to filter by.
                  * The entity must have at least one matching purpose in its _purpose array.
                  * Purpose names are matched against the taxonomy classification names (e.g., "Kündigung", "Umzug/Auszug").
-                 * If not specified, the event triggers regardless of entity purpose.
+                 * For custom events, names are allowed only when inherited unchanged from the actual
+                 * pinned built-in lineage version. New purposes must use stable purpose_filters IDs.
+                 * Names and stable IDs are OR alternatives; operation/schema/attribute conditions still apply.
+                 * If neither purpose nor purpose_filters is specified, the event triggers regardless of purpose.
                  *
                  * example:
                  * [
@@ -418,7 +440,7 @@ declare namespace Components {
                  */
                 purpose?: string[];
                 /**
-                 * Stable purpose IDs plus immutable display-name snapshots for custom events.
+                 * Stable purpose IDs plus immutable display-name snapshots for custom events. Additive to inherited purpose names (OR). Inherited unfiltered triggers cannot be narrowed.
                  */
                 purpose_filters?: PurposeFilterSnapshot[];
             };
@@ -454,6 +476,10 @@ declare namespace Components {
              */
             automation_trigger?: boolean;
             /**
+             * Allows explicit API-source triggering, not HTTP transport. Automation also uses HTTP. Automation-only events always disable this source.
+             */
+            api_trigger?: boolean;
+            /**
              * Whether explicit triggering is restricted to Automation. When true, callers must pass
              * `_trigger_source_type: automation` and a stable `_trigger_source`. The trigger uses
              * strict entity readiness validation and the durable Automation outbox.
@@ -476,7 +502,7 @@ declare namespace Components {
              */
             event_origin?: "builtin" | "custom";
             mapping?: /* Guided mappings use schema_fields graph_source expressions; raw mode evaluates one JSONata object transform. */ EventMapping;
-            lineage?: /* Optional catalog lineage to a separately named base event. It does not replace the base event. */ CustomEventLineage;
+            lineage?: /* Optional catalog lineage to a separately named base event. Built-in inheritance is validated against this exact registered version; its trigger restrictions cannot be removed or replaced. It does not replace the base event. */ CustomEventLineage;
             /**
              * Org-defined success criteria for this event: the entity attributes that an
              * organization considers must be captured for an event change request to be
@@ -608,6 +634,8 @@ declare namespace Components {
                  * - On createEntity: attribute must be defined in the entity payload
                  * - On updateEntity: attribute must be in diff.added, diff.updated, or diff.deleted
                  * If not specified, all changes to matching entities will trigger the event.
+                 * Derived built-in triggers retain every inherited attribute; additions are OR alternatives.
+                 * An inherited unfiltered trigger cannot be narrowed by adding attribute filters.
                  *
                  * example:
                  * [
@@ -621,7 +649,10 @@ declare namespace Components {
                  * Optional list of purpose names to filter by.
                  * The entity must have at least one matching purpose in its _purpose array.
                  * Purpose names are matched against the taxonomy classification names (e.g., "Kündigung", "Umzug/Auszug").
-                 * If not specified, the event triggers regardless of entity purpose.
+                 * For custom events, names are allowed only when inherited unchanged from the actual
+                 * pinned built-in lineage version. New purposes must use stable purpose_filters IDs.
+                 * Names and stable IDs are OR alternatives; operation/schema/attribute conditions still apply.
+                 * If neither purpose nor purpose_filters is specified, the event triggers regardless of purpose.
                  *
                  * example:
                  * [
@@ -631,7 +662,7 @@ declare namespace Components {
                  */
                 purpose?: string[];
                 /**
-                 * Stable purpose IDs plus immutable display-name snapshots for custom events.
+                 * Stable purpose IDs plus immutable display-name snapshots for custom events. Additive to inherited purpose names (OR). Inherited unfiltered triggers cannot be narrowed.
                  */
                 purpose_filters?: PurposeFilterSnapshot[];
             };
@@ -667,6 +698,10 @@ declare namespace Components {
              */
             automation_trigger?: boolean;
             /**
+             * Allows explicit API-source triggering, not HTTP transport. Automation also uses HTTP. Automation-only events always disable this source.
+             */
+            api_trigger?: boolean;
+            /**
              * Whether explicit triggering is restricted to Automation. When true, callers must pass
              * `_trigger_source_type: automation` and a stable `_trigger_source`. The trigger uses
              * strict entity readiness validation and the durable Automation outbox.
@@ -689,7 +724,7 @@ declare namespace Components {
              */
             event_origin?: "builtin" | "custom";
             mapping?: /* Guided mappings use schema_fields graph_source expressions; raw mode evaluates one JSONata object transform. */ EventMapping;
-            lineage?: /* Optional catalog lineage to a separately named base event. It does not replace the base event. */ CustomEventLineage;
+            lineage?: /* Optional catalog lineage to a separately named base event. Built-in inheritance is validated against this exact registered version; its trigger restrictions cannot be removed or replaced. It does not replace the base event. */ CustomEventLineage;
             /**
              * Org-defined success criteria for this event: the entity attributes that an
              * organization considers must be captured for an event change request to be
@@ -1115,10 +1150,11 @@ declare namespace Components {
              */
             required?: boolean;
             /**
-             * Optional JSONata expression to extract the field value from the hydrated entity graph.
+             * JSONata expression to extract the field value from the hydrated entity graph.
              *
              * The expression has access to all hydrated graph nodes by their node ID.
-             * If not specified, the field value must be provided as input when triggering the event.
+             * Optional for built-in events, where an unset value must be provided as input when
+             * triggering the event. Required for custom events in guided mapping mode.
              *
              * Examples:
              *   - "ticket.meter_reading_value" (simple path)
@@ -1327,9 +1363,10 @@ declare namespace Components {
                 node_id: string;
             };
             /**
-             * Input field values for the event. Keys must match the event's
+             * Input field values for built-in events. Keys must match the event's
              * schema_fields definitions. Values are validated against each
-             * field's JSON Schema.
+             * field's JSON Schema. Ignored for custom events, whose fields are
+             * always projected from the entity graph.
              *
              */
             fields?: {
@@ -1441,7 +1478,7 @@ declare namespace Components {
 }
 declare namespace Paths {
     namespace CreateCustomEvent {
-        export type RequestBody = /* Complete immutable custom-event v1.0 definition. Publication is a separate conditional action. */ Components.Schemas.CreateCustomEventPayload;
+        export type RequestBody = /* Complete immutable custom-event v1.0 definition projected from a required entity graph. Publication is a separate conditional action. */ Components.Schemas.CreateCustomEventPayload;
         namespace Responses {
             export type $201 = /* Event configuration with required fields */ Components.Schemas.EventConfig;
             export interface $409 {
@@ -1775,6 +1812,26 @@ declare namespace Paths {
             }
         }
     }
+    namespace ReplaceCustomEventDraft {
+        namespace Parameters {
+            export type EventName = string;
+        }
+        export interface PathParameters {
+            event_name: Parameters.EventName;
+        }
+        export type RequestBody = /* Complete immutable custom-event v1.0 definition projected from a required entity graph. Publication is a separate conditional action. */ Components.Schemas.CreateCustomEventPayload;
+        namespace Responses {
+            export type $200 = /* Event configuration with required fields */ Components.Schemas.EventConfig;
+            export interface $400 {
+            }
+            export interface $404 {
+            }
+            export interface $409 {
+            }
+            export interface $422 {
+            }
+        }
+    }
     namespace SearchEventHistory {
         namespace Parameters {
             export type EventName = string;
@@ -1941,7 +1998,7 @@ export interface OperationMethods {
   /**
    * createCustomEvent - createCustomEvent
    * 
-   * Reserve an org-scoped custom event name and persist its immutable v1.0 draft definition.
+   * Reserve an org-scoped custom event name and persist its immutable v1.0 draft definition. Custom events are always projected from an entity graph: entity_graph is required and, in guided mapping mode, every schema field needs a graph_source expression. Caller-supplied trigger fields are ignored for custom events.
    */
   'createCustomEvent'(
     parameters?: Parameters<UnknownParamsObject> | null,
@@ -1958,6 +2015,19 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetEvent.Responses.$200>
+  /**
+   * replaceCustomEventDraft - replaceCustomEventDraft
+   * 
+   * Replace the complete v1.0 definition of an org-scoped custom event while it is still an
+   * unpublished draft. Drafts have no consumers, so their definition is not yet immutable;
+   * the event name is the identity and cannot change. Publication remains a separate action.
+   * 
+   */
+  'replaceCustomEventDraft'(
+    parameters?: Parameters<Paths.ReplaceCustomEventDraft.PathParameters> | null,
+    data?: Paths.ReplaceCustomEventDraft.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ReplaceCustomEventDraft.Responses.$200>
   /**
    * patchEvent - patchEvent
    * 
@@ -2111,7 +2181,7 @@ export interface PathsDictionary {
     /**
      * createCustomEvent - createCustomEvent
      * 
-     * Reserve an org-scoped custom event name and persist its immutable v1.0 draft definition.
+     * Reserve an org-scoped custom event name and persist its immutable v1.0 draft definition. Custom events are always projected from an entity graph: entity_graph is required and, in guided mapping mode, every schema field needs a graph_source expression. Caller-supplied trigger fields are ignored for custom events.
      */
     'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
@@ -2140,6 +2210,19 @@ export interface PathsDictionary {
       data?: Paths.PatchEvent.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.PatchEvent.Responses.$200>
+    /**
+     * replaceCustomEventDraft - replaceCustomEventDraft
+     * 
+     * Replace the complete v1.0 definition of an org-scoped custom event while it is still an
+     * unpublished draft. Drafts have no consumers, so their definition is not yet immutable;
+     * the event name is the identity and cannot change. Publication remains a separate action.
+     * 
+     */
+    'put'(
+      parameters?: Parameters<Paths.ReplaceCustomEventDraft.PathParameters> | null,
+      data?: Paths.ReplaceCustomEventDraft.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ReplaceCustomEventDraft.Responses.$200>
     /**
      * deprecateCustomEvent - deprecateCustomEvent
      * 

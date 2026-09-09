@@ -50,6 +50,23 @@
         },
         "responses": {}
       },
+      "put": {
+        "operationId": "replaceCustomEventDraft",
+        "parameters": [
+          {
+            "name": "event_name",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
       "delete": {
         "operationId": "deprecateCustomEvent",
         "parameters": [
