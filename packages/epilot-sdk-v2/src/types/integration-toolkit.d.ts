@@ -5729,6 +5729,22 @@ export declare namespace Components {
                 ...RelationUniqueIdField[]
             ];
         }
+        /**
+         * The monitoring code taxonomy — every code the Integration Toolkit itself emits,
+         * with a fixed level (see the published code reference at
+         * https://docs.epilot.io/docs/integrations/integration-toolkit/monitoring/codes).
+         *
+         * This schema exists so consumers can import the union as a type. It is
+         * deliberately NOT applied to `MonitoringEventV2.code` or to the query filter:
+         * alongside these, the secure proxy emits an unbounded `HTTP_{status}` family for
+         * an upstream refusal, so constraining those fields to this enum would reject a
+         * legitimate value — `code` stays a plain string there on purpose.
+         *
+         * Kept in lock-step with the `MonitoringErrorCode` taxonomy in erp-utils by
+         * `monitoring-code-enum.test.ts`, which fails if the two diverge.
+         *
+         */
+        export type MonitoringCode = "ACK_CONFIRMED" | "ACK_PENDING" | "ACK_TIMEOUT" | "ATTACHMENT_NOT_FOUND" | "ATTRIBUTE_TYPE_MISMATCH" | "DEPRECATED_ENDPOINT" | "DIRECT_ENTITY_NOT_ALLOWED" | "DIRECT_PAYLOAD_INVALID" | "DIRECT_VERSION_UNSUPPORTED" | "DUPLICATE_EVENT" | "ENTITY_CREATED" | "ENTITY_DELETED" | "ENTITY_NO_OP" | "ENTITY_REFERENCE_NOT_FOUND" | "ENTITY_UPDATED" | "EVENT_NOT_CONFIGURED" | "EXTERNAL_API_ERROR" | "EXTERNAL_ERROR" | "EXTERNAL_INFO" | "EXTERNAL_SUCCESS" | "EXTERNAL_WARNING" | "FAN_OUT_EMPTY" | "FAN_OUT_INVALID_RESULT" | "FILE_EXTRACTION_FAILED" | "FILE_FETCH_FAILED" | "FILE_PROXY_OK" | "FILE_PROXY_UPLOADED" | "FILE_PROXY_UPLOAD_ENQUEUED" | "FILE_PROXY_UPLOAD_FAILED" | "FILE_PROXY_UPLOAD_RETRYING" | "FILE_TOO_LARGE" | "INTEGRATION_NOT_FOUND" | "INVALID_METER_READING_ATTRIBUTES" | "LOOKUP_UNMAPPED" | "MALFORMED_PAYLOAD" | "MAPPING_EXPRESSION_FAILED" | "METERING_API_ERROR" | "METER_READING_DELETED" | "METER_READING_GROUP_FAILED" | "METER_READING_GROUP_RETRYING" | "METER_READING_UPSERTED" | "MISSING_REQUIRED_PARAM" | "MISSING_UNIQUE_IDENTIFIERS" | "MSG_ACKED" | "MSG_DEAD_LETTERED" | "MSG_ENQUEUED" | "MSG_EXPIRED_UNPOLLED" | "MSG_HEAD_BLOCKED" | "OAUTH2_TOKEN_FAILURE" | "PAYLOAD_TOO_LARGE" | "PRUNE_SCOPE_COMPLETED" | "PRUNE_SCOPE_PARTIAL_FAILURE" | "RECURSION_DEPTH_EXCEEDED" | "RELATION_REF_ITEM_NOT_FOUND" | "RELATION_REF_VALUE_UNDEFINED" | "REQUIRED_PARAM_MISSING" | "SECURE_PROXY_DISABLED" | "SECURE_PROXY_DOMAIN_BLOCKED" | "SECURE_PROXY_DOMAIN_NOT_ALLOWED" | "SECURE_PROXY_ERROR" | "SECURE_PROXY_INVALID_CONFIG" | "SECURE_PROXY_INVALID_TYPE" | "SECURE_PROXY_INVALID_URL" | "SECURE_PROXY_IP_BLOCKED" | "SECURE_PROXY_IP_NOT_ALLOWED" | "SECURE_PROXY_NOT_FOUND" | "SECURE_PROXY_UNAVAILABLE" | "SIGNATURE_VERIFICATION_FAILED" | "SIGNATURE_VERIFICATION_UNAVAILABLE" | "SOFT_DELETED_ENTITY_MATCHED" | "STEP_DISABLED" | "TIMEOUT" | "UNIQUE_ID_MULTIPLE_MATCHES" | "UNIQUE_ID_NOT_IN_SCHEMA" | "UNKNOWN_ERROR" | "USE_CASE_DISABLED" | "USE_CASE_INVALID_TYPE" | "USE_CASE_MISSING_CONFIG" | "USE_CASE_NOT_FOUND" | "WEBHOOK_DELIVERED";
         export interface MonitoringEventV2 {
             /**
              * Unique monitoring event ID
@@ -5761,9 +5777,9 @@ export declare namespace Components {
             /**
              * Event outcome level
              */
-            level: "success" | "error" | "skipped" | "warning";
+            level: "success" | "error" | "info" | "warning";
             /**
-             * Taxonomy code (e.g. OAUTH2_TOKEN_FAILURE, HTTP_502). Empty for success.
+             * Taxonomy code (e.g. OAUTH2_TOKEN_FAILURE, HTTP_502). Empty for success. One of `MonitoringCode`, or an `HTTP_{status}` family value from the secure proxy — which is why this is a string rather than that enum.
              */
             code?: string;
             /**
@@ -5879,9 +5895,13 @@ export declare namespace Components {
              */
             warning_count: number;
             /**
-             * Number of skipped events
+             * Always 0. The v2 pipeline has no `skipped` level; v1 `skipped` is normalised to `info`. Retained for backward compatibility — use `info_count`.
              */
             skipped_count: number;
+            /**
+             * Number of info-level events (ACK lifecycle, poll-queue MSG_*, duplicate events, fan-out anchors). Info events are counted in `total_events` but are excluded from `success_rate`.
+             */
+            info_count: number;
             /**
              * Number of ACK_TIMEOUT events (acknowledgement timed out)
              */
@@ -6992,9 +7012,9 @@ export declare namespace Components {
             /**
              * Filter by event level
              */
-            level?: "success" | "error" | "skipped" | "warning";
+            level?: "success" | "error" | "info" | "warning";
             /**
-             * Filter by taxonomy code (e.g. OAUTH2_TOKEN_FAILURE, HTTP_502)
+             * Filter by taxonomy code (e.g. OAUTH2_TOKEN_FAILURE, HTTP_502). Accepts any `MonitoringCode` value, or an `HTTP_{status}` family value.
              */
             code?: string;
             /**
@@ -7817,9 +7837,13 @@ export declare namespace Components {
              */
             warning_count: number;
             /**
-             * Number of skipped events in the breakdown item
+             * Always 0. The v2 pipeline has no `skipped` level; v1 `skipped` is normalised to `info`. Retained for backward compatibility — use `info_count`.
              */
             skipped_count: number;
+            /**
+             * Number of info-level events in the breakdown item
+             */
+            info_count: number;
             /**
              * Total events in the breakdown item
              */
@@ -7868,9 +7892,13 @@ export declare namespace Components {
              */
             warning_count?: number;
             /**
-             * Number of skipped events in the bucket
+             * Always 0. The v2 pipeline has no `skipped` level; v1 `skipped` is normalised to `info`. Retained for backward compatibility — use `info_count`.
              */
             skipped_count?: number;
+            /**
+             * Number of info-level events in the bucket
+             */
+            info_count?: number;
             /**
              * Total events in the bucket
              */
@@ -11679,6 +11707,7 @@ export type MeterReadingPruneScopeConfig = Components.Schemas.MeterReadingPruneS
 export type MeterReadingPruneScopeUpdate = Components.Schemas.MeterReadingPruneScopeUpdate;
 export type MeterReadingUpdate = Components.Schemas.MeterReadingUpdate;
 export type MeterUniqueIdsConfig = Components.Schemas.MeterUniqueIdsConfig;
+export type MonitoringCode = Components.Schemas.MonitoringCode;
 export type MonitoringEventV2 = Components.Schemas.MonitoringEventV2;
 export type MonitoringStats = Components.Schemas.MonitoringStats;
 export type MonitoringStatsV2 = Components.Schemas.MonitoringStatsV2;
