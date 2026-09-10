@@ -94,7 +94,6 @@
                     "portal_id": "portal_abc123",
                     "contact_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
                     "surface_id": "website-journeys",
-                    "origin": "END_CUSTOMER_PORTAL",
                     "allowed_operations": [
                       "getContact",
                       "getContracts"
@@ -665,14 +664,6 @@
         "description": "Contact entity ID for access token type \"contact_identification\"",
         "example": "5da0a718-c822-403d-9f5d-20d4584e0528"
       },
-      "PortalOrigin": {
-        "type": "string",
-        "enum": [
-          "END_CUSTOMER_PORTAL",
-          "INSTALLER_PORTAL"
-        ],
-        "description": "Portal origin the token assumes, so the bearer is permission-masked the same way the corresponding portal role is."
-      },
       "AllowedOperations": {
         "type": "array",
         "description": "openapi operationIds the token may call. Enforced by the API that consumes the token, which must additionally deny any operation not on this list. Baked into the token at issue time so widening the consumer's own allowlist later cannot retroactively widen a token that is already in circulation.",
@@ -928,9 +919,6 @@
             "description": "Portal surface the token is issued for (see `surfaces` on the portal config in customer-portal-api). Carried as the `custom:surface_id` claim; the consuming API resolves the surface's data access from the portal config on every request.",
             "example": "website-journeys"
           },
-          "origin": {
-            "$ref": "#/components/schemas/PortalOrigin"
-          },
           "allowed_operations": {
             "$ref": "#/components/schemas/AllowedOperations"
           },
@@ -983,9 +971,6 @@
           },
           "contact_id": {
             "$ref": "#/components/schemas/ContactId"
-          },
-          "origin": {
-            "$ref": "#/components/schemas/PortalOrigin"
           },
           "allowed_operations": {
             "$ref": "#/components/schemas/AllowedOperations"

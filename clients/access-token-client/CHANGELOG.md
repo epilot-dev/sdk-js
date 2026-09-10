@@ -1,5 +1,11 @@
 # @epilot/access-token-client
 
+## 1.6.0
+
+### Minor Changes
+
+- Remove `origin` from `ContactIdentificationTokenParameters` and from the token item, along with the `PortalOrigin` type. The token carries `portal_id`, and the consuming API resolves the origin from that portal's config.
+
 ## 1.5.0
 
 ### Minor Changes
