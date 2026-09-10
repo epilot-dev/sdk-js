@@ -543,10 +543,7 @@
                   },
                   "language": {
                     "type": "string",
-                    "enum": [
-                      "de",
-                      "en"
-                    ]
+                    "example": "de"
                   }
                 }
               }
@@ -962,11 +959,12 @@
                 "PT1H",
                 "P1D",
                 "P1M",
-                "P1Y"
+                "P1Y",
+                "custom"
               ]
             },
             "required": true,
-            "description": "Interval between consumption data points (e.g., PT15M for 15 minutes, PT1H for hourly). Not all intervals have to be supported."
+            "description": "Interval between consumption data points (e.g., PT15M for 15 minutes, PT1H for hourly). Not all intervals have to be supported. `custom` is period-based retrieval for sources that advertise it in their `visualizationMetadata.intervals`: the App returns one record per period it has data for within `from`..`to`, each carrying `period`, and the portal renders every record as its own bar.\n"
           },
           {
             "in": "query",
@@ -1019,6 +1017,30 @@
                             "example": {
                               "en": "Billing period 1",
                               "de": "Abrechnungszeitraum 1"
+                            }
+                          },
+                          "period": {
+                            "type": "object",
+                            "description": "The date range this value covers. Required for period-based sources (`interval=custom`), whose records don't sit on a fixed time grid: the portal renders one bar per record, orders them by `period.from`, and — unless `label` is set — labels each bar with the formatted `from` - `to` range. Ignored for interval-based retrieval.\n",
+                            "properties": {
+                              "from": {
+                                "type": "string",
+                                "format": "date-time",
+                                "description": "Start of the covered period."
+                              },
+                              "to": {
+                                "type": "string",
+                                "format": "date-time",
+                                "description": "End of the covered period. Shown as given in the fallback label, so pass the date the period visibly ends on (consecutive periods may share this boundary).\n"
+                              }
+                            },
+                            "required": [
+                              "from",
+                              "to"
+                            ],
+                            "example": {
+                              "from": "2024-01-03T00:00:00.000Z",
+                              "to": "2025-01-05T00:00:00.000Z"
                             }
                           }
                         },
@@ -11537,6 +11559,46 @@
           }
         }
       },
+      "TooManyRequests": {
+        "description": "The upstream service rate-limited the request",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResp"
+            }
+          }
+        }
+      },
+      "BadGateway": {
+        "description": "The upstream service failed to process the request",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResp"
+            }
+          }
+        }
+      },
+      "ServiceUnavailable": {
+        "description": "The requested feature is not configured",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResp"
+            }
+          }
+        }
+      },
+      "GatewayTimeout": {
+        "description": "The upstream service timed out",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResp"
+            }
+          }
+        }
+      },
       "ConfirmUserInvalidRequest": {
         "description": "The request could not be validated",
         "content": {
@@ -12571,6 +12633,17 @@
               "new_design": {
                 "type": "boolean",
                 "description": "Enable or disable the new design for the portal"
+              },
+              "mcp_enabled": {
+                "type": "boolean",
+                "description": "Enable the MCP (AI agent) connector channel for this portal"
+              },
+              "mcp_grant_version": {
+                "type": "integer",
+                "minimum": 0,
+                "default": 0,
+                "readOnly": true,
+                "description": "Server-managed generation used to invalidate MCP grants after the connector is disabled or re-enabled"
               }
             }
           },
@@ -15959,7 +16032,7 @@
           },
           "q": {
             "type": "string",
-            "description": "Keyword search query",
+            "description": "Free-text keyword search. This is plain text, **not** a query language: punctuation separates words rather than carrying any special meaning, and every word has to match. Use `q_fields` to restrict which fields are searched, and `filters`/`targets` for structured filtering. Overly long input is trimmed, and input with no words in it is ignored — the remaining parameters still apply.",
             "example": "contract"
           },
           "q_fields": {
@@ -16597,7 +16670,7 @@
           },
           "intervals": {
             "type": "array",
-            "description": "Intervals supported for the current context. If omitted, all intervals are assumed supported.",
+            "description": "Intervals supported for the current context. If omitted, all intervals are assumed supported. `custom` marks a period-based consumption source: the portal requests the whole `data_range` once with `interval=custom` and renders one bar per returned record (see `period` on the consumption data point) instead of offering interval / date navigation or period comparison. When `custom` is present it takes precedence over any fixed intervals also listed.\n",
             "items": {
               "type": "string",
               "enum": [
@@ -16605,7 +16678,8 @@
                 "PT1H",
                 "P1D",
                 "P1M",
-                "P1Y"
+                "P1Y",
+                "custom"
               ]
             }
           },
@@ -19219,6 +19293,17 @@
               "new_design": {
                 "type": "boolean",
                 "description": "Enable or disable the new design for the portal"
+              },
+              "mcp_enabled": {
+                "type": "boolean",
+                "description": "Enable the MCP (AI agent) connector channel for this portal"
+              },
+              "mcp_grant_version": {
+                "type": "integer",
+                "minimum": 0,
+                "default": 0,
+                "readOnly": true,
+                "description": "Server-managed generation used to invalidate MCP grants after the connector is disabled or re-enabled"
               }
             }
           },
@@ -19877,6 +19962,10 @@
             "type": "boolean",
             "description": "Whether the org is in canary mode"
           },
+          "is_legacy_design": {
+            "type": "boolean",
+            "description": "Whether the portal still runs the old design (the `new_design` feature setting is off). Legacy portals are always served the frozen legacy bundle, even when the org is in canary."
+          },
           "redirect_to": {
             "type": "string",
             "description": "The URL to redirect to",
@@ -19932,6 +20021,157 @@
           "access_status": {
             "type": "boolean",
             "example": true
+          }
+        }
+      },
+      "SupportReportType": {
+        "type": "string",
+        "enum": [
+          "bug",
+          "feedback"
+        ]
+      },
+      "SupportRequestAttachment": {
+        "type": "object",
+        "required": [
+          "filename",
+          "mime_type",
+          "contents"
+        ],
+        "properties": {
+          "filename": {
+            "type": "string",
+            "maxLength": 255,
+            "example": "screenshot.png"
+          },
+          "mime_type": {
+            "type": "string",
+            "example": "image/png"
+          },
+          "contents": {
+            "type": "string",
+            "description": "Base64-encoded file, optionally as a data URL"
+          }
+        }
+      },
+      "CleverPvContext": {
+        "type": "object",
+        "properties": {
+          "screen": {
+            "type": "string",
+            "maxLength": 256,
+            "description": "Current Clever PV screen identifier"
+          },
+          "version": {
+            "type": "string",
+            "maxLength": 64,
+            "description": "Clever PV application version"
+          },
+          "connection_state": {
+            "type": "string",
+            "maxLength": 64,
+            "description": "Device connectivity at the time of the report"
+          },
+          "locale": {
+            "type": "string",
+            "maxLength": 32,
+            "description": "App locale at the time of the report"
+          },
+          "timezone": {
+            "type": "string",
+            "maxLength": 64,
+            "description": "App timezone at the time of the report"
+          },
+          "firmware_version": {
+            "type": "string",
+            "maxLength": 64,
+            "description": "Device firmware version when known"
+          },
+          "build": {
+            "type": "string",
+            "maxLength": 64,
+            "description": "App build identifier when known"
+          },
+          "trace_id": {
+            "type": "string",
+            "maxLength": 128,
+            "description": "Client-generated correlation id for the report"
+          },
+          "device": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Optional device snapshot from the portal. Attached as a JSON file on\nthe original Zendesk comment. Must include id when present. Serialized\nJSON is limited to 256 KiB.\n"
+          },
+          "vendor": {
+            "type": "object",
+            "additionalProperties": true,
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "description": "Optional onboarding vendor id and name. Included in the Zendesk\ncomment. Not a portal entity.\n"
+          }
+        }
+      },
+      "CreateSupportRequest": {
+        "type": "object",
+        "required": [
+          "report_type",
+          "description",
+          "submission_id"
+        ],
+        "properties": {
+          "report_type": {
+            "$ref": "#/components/schemas/SupportReportType"
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 8000
+          },
+          "submission_id": {
+            "type": "string",
+            "minLength": 8,
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9._-]+$",
+            "description": "Client-generated id for correlating the request"
+          },
+          "site_id": {
+            "$ref": "#/components/schemas/EntityId"
+          },
+          "device_id": {
+            "$ref": "#/components/schemas/EntityId"
+          },
+          "clever_pv": {
+            "$ref": "#/components/schemas/CleverPvContext"
+          },
+          "attachments": {
+            "type": "array",
+            "maxItems": 5,
+            "items": {
+              "$ref": "#/components/schemas/SupportRequestAttachment"
+            }
+          }
+        }
+      },
+      "SupportRequestResult": {
+        "type": "object",
+        "required": [
+          "reference",
+          "status"
+        ],
+        "properties": {
+          "reference": {
+            "type": "string",
+            "example": "12345"
+          },
+          "status": {
+            "type": "string",
+            "example": "new"
           }
         }
       }
