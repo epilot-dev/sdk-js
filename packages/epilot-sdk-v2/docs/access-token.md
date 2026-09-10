@@ -48,7 +48,6 @@ const { data } = await accessTokenClient.createAccessToken(...)
 - [`PortalId`](#portalid)
 - [`PortalUserId`](#portaluserid)
 - [`ContactId`](#contactid)
-- [`PortalOrigin`](#portalorigin)
 - [`AllowedOperations`](#allowedoperations)
 - [`TokenParameters`](#tokenparameters)
 - [`ExpiresIn`](#expiresin)
@@ -99,7 +98,6 @@ const { data } = await client.createAccessToken(
   "portal_id": "string",
   "portal_user_id": "string",
   "contact_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
-  "origin": "END_CUSTOMER_PORTAL",
   "allowed_operations": ["getContact", "getContracts"],
   "assignments": ["123:owner"],
   "read_only": true,
@@ -139,7 +137,6 @@ const { data } = await client.listAccessTokens({
     "portal_id": "string",
     "portal_user_id": "string",
     "contact_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
-    "origin": "END_CUSTOMER_PORTAL",
     "allowed_operations": ["getContact", "getContracts"],
     "assignments": ["123:owner"],
     "read_only": true,
@@ -179,7 +176,6 @@ const { data } = await client.revokeAccessToken({
   "portal_id": "string",
   "portal_user_id": "string",
   "contact_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
-  "origin": "END_CUSTOMER_PORTAL",
   "allowed_operations": ["getContact", "getContracts"],
   "assignments": ["123:owner"],
   "read_only": true,
@@ -481,14 +477,6 @@ Contact entity ID for access token type "contact_identification"
 type ContactId = string
 ```
 
-### `PortalOrigin`
-
-Portal origin the token assumes, so the bearer is permission-masked the same way the corresponding portal role is.
-
-```ts
-type PortalOrigin = "END_CUSTOMER_PORTAL" | "INSTALLER_PORTAL"
-```
-
 ### `AllowedOperations`
 
 openapi operationIds the token may call. Enforced by the API that consumes the token, which must additionally deny any operation not on this list. Baked into the token at issue time so widening the consumer's own allowlist later cannot retroactively widen a token that is already in circulation.
@@ -541,7 +529,6 @@ type TokenParameters = {
   portal_id: string
   contact_id: string
   surface_id: string
-  origin?: "END_CUSTOMER_PORTAL" | "INSTALLER_PORTAL"
   allowed_operations: string[]
   expires_in: number
   email?: string
@@ -652,7 +639,6 @@ type ContactIdentificationTokenParameters = {
   portal_id: string
   contact_id: string
   surface_id: string
-  origin?: "END_CUSTOMER_PORTAL" | "INSTALLER_PORTAL"
   allowed_operations: string[]
   expires_in: number
   email?: string
@@ -671,7 +657,6 @@ type AccessTokenItem = {
   portal_id?: string
   portal_user_id?: string
   contact_id?: string
-  origin?: "END_CUSTOMER_PORTAL" | "INSTALLER_PORTAL"
   allowed_operations?: string[]
   assignments?: string[]
   read_only?: boolean

@@ -48,7 +48,6 @@ export declare namespace Components {
              * 5da0a718-c822-403d-9f5d-20d4584e0528
              */
             ContactId;
-            origin?: /* Portal origin the token assumes, so the bearer is permission-masked the same way the corresponding portal role is. */ PortalOrigin;
             allowed_operations?: /**
              * openapi operationIds the token may call. Enforced by the API that consumes the token, which must additionally deny any operation not on this list. Baked into the token at issue time so widening the consumer's own allowlist later cannot retroactively widen a token that is already in circulation.
              * example:
@@ -222,7 +221,6 @@ export declare namespace Components {
              * website-journeys
              */
             surface_id: string;
-            origin?: /* Portal origin the token assumes, so the bearer is permission-masked the same way the corresponding portal role is. */ PortalOrigin;
             allowed_operations: /**
              * openapi operationIds the token may call. Enforced by the API that consumes the token, which must additionally deny any operation not on this list. Baked into the token at issue time so widening the consumer's own allowlist later cannot retroactively widen a token that is already in circulation.
              * example:
@@ -259,10 +257,6 @@ export declare namespace Components {
          * Portal ID for access token type "portal"
          */
         export type PortalId = string;
-        /**
-         * Portal origin the token assumes, so the bearer is permission-masked the same way the corresponding portal role is.
-         */
-        export type PortalOrigin = "END_CUSTOMER_PORTAL" | "INSTALLER_PORTAL";
         export interface PortalPreviewTokenParameters {
             name: /**
              * Human readable name for access token
@@ -342,7 +336,6 @@ export declare namespace Paths {
                  * 5da0a718-c822-403d-9f5d-20d4584e0528
                  */
                 Components.Schemas.ContactId;
-                origin?: /* Portal origin the token assumes, so the bearer is permission-masked the same way the corresponding portal role is. */ Components.Schemas.PortalOrigin;
                 allowed_operations?: /**
                  * openapi operationIds the token may call. Enforced by the API that consumes the token, which must additionally deny any operation not on this list. Baked into the token at issue time so widening the consumer's own allowlist later cannot retroactively widen a token that is already in circulation.
                  * example:
@@ -960,7 +953,6 @@ export type ContactIdentificationTokenParameters = Components.Schemas.ContactIde
 export type ExpiresIn = Components.Schemas.ExpiresIn;
 export type JourneyTokenParameters = Components.Schemas.JourneyTokenParameters;
 export type PortalId = Components.Schemas.PortalId;
-export type PortalOrigin = Components.Schemas.PortalOrigin;
 export type PortalPreviewTokenParameters = Components.Schemas.PortalPreviewTokenParameters;
 export type PortalTokenParameters = Components.Schemas.PortalTokenParameters;
 export type PortalUserId = Components.Schemas.PortalUserId;
