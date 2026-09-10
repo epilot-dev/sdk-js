@@ -34,10 +34,7 @@ const family = snapshot.families[0];
 const quote = (s) => `'${s.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'`;
 
 const entries = codes
-  .map(
-    (c) =>
-      `  ${c.code}: { level: ${quote(c.level)}, description: ${quote(c.description)} },`,
-  )
+  .map((c) => `  ${c.code}: { level: ${quote(c.level)}, description: ${quote(c.description)} },`)
   .join('\n');
 
 const out = `/* eslint-disable */
@@ -110,15 +107,11 @@ fs.writeFileSync(OUT, out);
 // Format the generated file with the repo's formatter, so `codes:local` always leaves
 // the tree lint-clean and a regeneration never shows up as a formatting diff.
 try {
-  require('node:child_process').execFileSync(
-    'npx',
-    ['biome', 'check', '--write', path.relative(process.cwd(), OUT)],
-    { stdio: 'ignore' },
-  );
+  require('node:child_process').execFileSync('npx', ['biome', 'check', '--write', path.relative(process.cwd(), OUT)], {
+    stdio: 'ignore',
+  });
 } catch {
   console.warn('biome formatting skipped (run `npm run lint` to check)');
 }
 
-console.log(
-  `Wrote ${path.relative(process.cwd(), OUT)} — ${codes.length} codes + the ${family.pattern} family`,
-);
+console.log(`Wrote ${path.relative(process.cwd(), OUT)} — ${codes.length} codes + the ${family.pattern} family`);
