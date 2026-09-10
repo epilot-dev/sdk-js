@@ -74,6 +74,18 @@
         "operationId": "getPortalPreviewTokenOIDC",
         "responses": {}
       }
+    },
+    "/v1/access-tokens/contact-identification/.well-known/jwks.json": {
+      "get": {
+        "operationId": "getContactIdentificationTokenJwks",
+        "responses": {}
+      }
+    },
+    "/v1/access-tokens/contact-identification/.well-known/openid-configuration": {
+      "get": {
+        "operationId": "getContactIdentificationTokenOIDC",
+        "responses": {}
+      }
     }
   },
   "components": {},
