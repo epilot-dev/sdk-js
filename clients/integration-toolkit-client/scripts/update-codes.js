@@ -14,6 +14,12 @@
  * `Components.Schemas.MonitoringCode` and is re-exported by src/codes.ts, so there is
  * exactly one definition of the list.
  *
+ * The file is named schema-model.ts because that is the ONE hand-written module the
+ * SDK generator copies into @epilot/sdk as real runtime values (additional-types.ts
+ * lands as a .d.ts, which would leave every value undefined). It is also in the
+ * auto-release trigger list, so the catalog reaches @epilot/sdk on merge without a
+ * separate client release. See CONTRIBUTING.md.
+ *
  * Usage: npm run codes:local
  * Assumes erp-integration-api is checked out at ../../../erp-integration-api.
  */
@@ -25,7 +31,7 @@ const SNAPSHOT = path.resolve(
   __dirname,
   '../../../../erp-integration-api/packages/erp-utils/src/monitoring/__snapshots__/monitoring-codes.json',
 );
-const OUT = path.resolve(__dirname, '../src/codes.ts');
+const OUT = path.resolve(__dirname, '../src/schema-model.ts');
 
 const snapshot = JSON.parse(fs.readFileSync(SNAPSHOT, 'utf8'));
 const codes = [...snapshot.codes].sort((a, b) => a.code.localeCompare(b.code));
