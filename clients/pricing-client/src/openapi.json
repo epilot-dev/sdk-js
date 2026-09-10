@@ -3547,6 +3547,35 @@
                         }
                       ]
                     }
+                  },
+                  "A variant carrying overrides that did not apply": {
+                    "summary": "`unit_amount_currency` reads as the entity's own value rather than the variant's, and `_inert_overrides` says why each stored override was passed over",
+                    "value": {
+                      "results": [
+                        {
+                          "_id": "price-sp26d1yo",
+                          "_variant_id": "var-46045",
+                          "_version_valid_from": "2027-01-01T00:00:00.000Z",
+                          "_conditions": {
+                            "postal_code": "46045",
+                            "default": false
+                          },
+                          "_inert_overrides": [
+                            {
+                              "attribute": "unit_amount_currency",
+                              "reason": "ATTRIBUTE_NOT_OVERRIDABLE"
+                            },
+                            {
+                              "attribute": "legacy_surcharge",
+                              "reason": "ATTRIBUTE_UNDECLARED"
+                            }
+                          ],
+                          "_schema": "price",
+                          "unit_amount": 2499,
+                          "unit_amount_currency": "EUR"
+                        }
+                      ]
+                    }
                   }
                 }
               }
@@ -3597,7 +3626,7 @@
     },
     "/v1/conditional-pricing/{slug}/entities/{entity_id}/variants": {
       "post": {
-        "description": "Creates one variant of a conditional entity, together with the first version carrying its\nvalues: a variant always has at least one version.\n\nThe body pins the situation the variant applies to. Pins are exact values only — predicates\nare a read-side concept and are rejected here — and are stored canonicalized for their\ncondition's type, so two spellings of one instant, or one town written two ways, are one\nvariant rather than two that no context can tell apart.\n\nThree write rules are worth knowing before the first call:\n\n- A variant must pin at least one condition or be marked `default`. A variant pinning nothing\n  would be a universal wildcard matching every resolve, which is a far more dangerous thing\n  than a fallback and far easier to create by accident.\n- `default` is a property of the variant, set by the `default` flag, and is never a value in\n  `conditions` — not even `false`. A `default` variant cannot pin anything else, and an entity\n  can have only one; a second is refused as `TUPLE_CONFLICT`. Any entity may have one;\n  nothing is declared in the schema to allow it.\n- Condition values are immutable afterwards. A variant's identity is the situation it applies\n  to, and orders and contracts pin it. **A condition added to a schema that already has\n  variants is effectively one-way**: every existing variant is a wildcard on the new\n  dimension, but the first variant that pins it is ambiguous against all of them, and\n  retro-pinning the others is blocked by this same rule.\n\nAttribute values are applied only for attributes currently carrying `overridable_attribute`.\nMetadata and non-overridable fields present in the body are not applied rather than rejected,\nand each one is named in the response's `warnings`, so a client working from a slightly stale\nschema snapshot still succeeds and still learns which fields did not land. The reporting half\nis published ahead of the behaviour: this operation is dispatched, so until the\n`ATTRIBUTES_NOT_APPLIED` warning starts being emitted a field that is not applied is dropped\nwith nothing in the response naming it. Applying only overridable attributes is today's\nbehaviour; being told which ones did not land is not yet.\n\n`variant_id` is always server-generated and returned, and is not accepted in the body — the\nrequest schema admits no such property. It is the durable key orders and contracts pin.\n",
+        "description": "Creates one variant of a conditional entity, together with the first version carrying its\nvalues: a variant always has at least one version.\n\nThe body pins the situation the variant applies to. Pins are exact values only — predicates\nare a read-side concept and are rejected here — and are stored canonicalized for their\ncondition's type, so two spellings of one instant, or one town written two ways, are one\nvariant rather than two that no context can tell apart.\n\nThree write rules are worth knowing before the first call:\n\n- A variant must pin at least one condition or be marked `default`. A variant pinning nothing\n  would be a universal wildcard matching every resolve, which is a far more dangerous thing\n  than a fallback and far easier to create by accident.\n- `default` is a property of the variant, set by the `default` flag, and is never a value in\n  `conditions` — not even `false`. A `default` variant cannot pin anything else, and an entity\n  can have only one; a second is refused as `TUPLE_CONFLICT`. Any entity may have one;\n  nothing is declared in the schema to allow it.\n- Condition values are immutable afterwards. A variant's identity is the situation it applies\n  to, and orders and contracts pin it. **A condition added to a schema that already has\n  variants is effectively one-way**: every existing variant is a wildcard on the new\n  dimension, but the first variant that pins it is ambiguous against all of them, and\n  retro-pinning the others is blocked by this same rule.\n\nAttribute values are applied only for attributes currently carrying `overridable_attribute`.\nMetadata and non-overridable fields present in the body are not applied rather than rejected,\nand every one but the metadata is named in the response's `warnings`, so a client working from\na slightly stale schema snapshot still succeeds and still learns which fields did not land.\nMetadata is never named, since a client echoing back a payload it read carries it in every\nbody.\n\n`variant_id` is always server-generated and returned, and is not accepted in the body — the\nrequest schema admits no such property. It is the durable key orders and contracts pin.\n",
         "operationId": "$createConditionalVariant",
         "summary": "$createConditionalVariant",
         "tags": [
@@ -3642,12 +3671,51 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/CreatedVariant"
+                },
+                "examples": {
+                  "A body naming attributes this variant may not override": {
+                    "summary": "The write succeeded and `values` holds what was stored, so the two attributes the warning names are absent from it",
+                    "value": {
+                      "variant_id": "var-46045",
+                      "entity_id": "price-sp26d1yo",
+                      "schema": "price",
+                      "conditions": {
+                        "postal_code": "46045",
+                        "default": false
+                      },
+                      "valid_from": "2027-01-01T00:00:00.000Z",
+                      "values": {
+                        "unit_amount": 2499
+                      },
+                      "_created_at": "2026-12-01T09:15:00.000Z",
+                      "_updated_at": "2026-12-01T09:15:00.000Z",
+                      "_revision": 1,
+                      "warnings": [
+                        {
+                          "code": "ATTRIBUTES_NOT_APPLIED",
+                          "message": "The values sent for 2 attributes were not applied: unit_amount_currency, legacy_surcharge",
+                          "details": {
+                            "attributes": [
+                              {
+                                "attribute": "unit_amount_currency",
+                                "reason": "ATTRIBUTE_NOT_OVERRIDABLE"
+                              },
+                              {
+                                "attribute": "legacy_surcharge",
+                                "reason": "ATTRIBUTE_UNDECLARED"
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  }
                 }
               }
             }
           },
           "400": {
-            "description": "The variant cannot be created as described: it pins nothing and is not the default\n(`VARIANT_UNPINNED`), pins a condition the schema does not declare\n(`CONDITION_UNDEFINED`), pins a `select` value outside the vocabulary the condition\ndeclares (`CONDITION_VALUE_INVALID`), carries a value malformed for its condition's type\n(`PIN_FORMAT_INVALID`), or the entity already holds every variant it may hold\n(`VARIANT_LIMIT_REACHED`).\n\nSeveral refusals on this response carry no code, and testing `code` for absence is how\nthey are told from the five above: pinning the fallback marker directly under either of\nits names (`default` or `_default`), marking a variant `default` while it also pins a\nreal condition, pinning a condition whose declared type this deploy cannot read, and a\n`valid_from` this store cannot sort by. Each is an integration mistake rather than one\nbad row in a source file.\n\nAlso refused here: an entity id belonging to another type than the slug names\n(`ENTITY_TYPE_MISMATCH`), and an entity that was never created as a conditional one\n(`ENTITY_NOT_CONDITIONAL`).\n",
+            "description": "The variant cannot be created as described: it pins nothing and is not the default\n(`VARIANT_UNPINNED`), pins a condition the schema does not declare\n(`CONDITION_UNDEFINED`), pins a `select` value the condition's vocabulary does not admit\n(`CONDITION_VALUE_INVALID`), carries a value malformed for its condition's type\n(`PIN_FORMAT_INVALID`), or the entity already holds every variant it may hold\n(`VARIANT_LIMIT_REACHED`).\n\nSeveral refusals on this response carry no code, and testing `code` for absence is how\nthey are told from the five above: pinning the fallback marker directly under either of\nits names (`default` or `_default`), marking a variant `default` while it also pins a\nreal condition, pinning a condition whose declared type this deploy cannot read, and a\n`valid_from` this store cannot sort by. Each is an integration mistake rather than one\nbad row in a source file.\n\nAlso refused here: an entity id belonging to another type than the slug names\n(`ENTITY_TYPE_MISMATCH`), and an entity that was never created as a conditional one\n(`ENTITY_NOT_CONDITIONAL`).\n",
             "content": {
               "application/json": {
                 "schema": {
@@ -5153,7 +5221,7 @@
                           "warnings": [
                             {
                               "code": "ATTRIBUTES_NOT_APPLIED",
-                              "message": "description was not applied",
+                              "message": "The value sent for description was not applied",
                               "details": {
                                 "attributes": [
                                   {
@@ -5170,7 +5238,7 @@
                           "entity_id": "price-sp26d1yo",
                           "warnings": [],
                           "error": {
-                            "message": "segment cannot be pinned to industrial",
+                            "message": "The value pinned for condition segment is not one of its declared options",
                             "code": "CONDITION_VALUE_INVALID",
                             "details": {
                               "condition_name": "segment",
@@ -5451,7 +5519,7 @@
           },
           "options": {
             "type": "array",
-            "description": "The declared vocabulary of a `select` condition. Absent for every other type.\n\nThe same shape a `select` condition's `options` has on the Entity API, item for item: an\nentry is either the value itself or an object carrying that value and an optional display\n`title`. A `title` is never pinned by a variant and never matched — two entries differing\nonly in their title are one vocabulary entry.\n\nThe vocabulary is always closed: a condition carries no flag widening it, so a pinned\nvalue outside a declared vocabulary is rejected with `CONDITION_VALUE_INVALID`. It is\n*not* enforced on resolve — a vocabulary says what may be stored, not what may be asked\nfor, so a context value outside it is a query that simply matches nothing.\n",
+            "description": "The declared vocabulary of a `select` condition. Absent for every other type.\n\nThe same shape a `select` condition's `options` has on the Entity API, item for item: an\nentry is either the value itself or an object carrying that value and an optional display\n`title`. A `title` is never pinned by a variant and never matched — two entries differing\nonly in their title are one vocabulary entry.\n\nThe vocabulary is always closed: a condition carries no flag widening it, so a pinned\nvalue outside a declared vocabulary is rejected with `CONDITION_VALUE_INVALID`. A\nvocabulary that declares nothing is closed too — while `options` is absent or empty, or\nholds nothing this deploy can read, the condition admits no pin at all and the same code\nis returned with an empty `options`. It is *not* enforced on resolve — a vocabulary says\nwhat may be stored, not what may be asked for, so a context value outside it is a query\nthat simply matches nothing.\n",
             "items": {
               "anyOf": [
                 {
@@ -5541,7 +5609,7 @@
       },
       "ConditionalPricingErrorCode": {
         "type": "string",
-        "description": "Machine-readable failure mode of a conditional-pricing operation, allowing clients\nto branch on the kind of failure instead of parsing the error message.\n\n- `SCHEMA_NOT_FOUND` (404): no conditional entity type by that slug\n- `ENTITY_NOT_FOUND` (404): the schema holds no entity with that id\n- `ENTITY_TYPE_MISMATCH` (400): that id belongs to an entity of another type than the slug named\n- `ENTITY_NOT_CONDITIONAL` (400): the entity is of the right type but was not created as a conditional one\n- `VARIANT_NOT_FOUND` (404): the entity has no such variant\n- `VERSION_NOT_FOUND` (404): the variant has no version at that `valid_from`\n- `NO_MATCHES` (404): nothing applied to the context and the entity has no `default` variant\n- `NO_ACTIVE_VERSION` (404): the variant has no version in effect at the instant asked about\n- `AMBIGUOUS_RESOLUTION` (409): several variants match the given context while a single result was requested\n- `TUPLE_CONFLICT` (409): the condition tuple is already claimed by another variant\n- `VERSION_CONFLICT` (409): a version already exists at the given `valid_from` on that variant\n- `CONDITION_UNDEFINED` (400): a resolve context, a listing filter or a variant's pins name a condition the entity's schema does not define\n- `OPERATOR_UNSUPPORTED` (400): the requested operator is not applicable to the condition's type\n- `CONTEXT_FORMAT_INVALID` (400): a resolve context or listing filter value is malformed for its condition type\n- `CONDITION_VALUE_INVALID` (400): a variant write pins a `select` value the condition's declared `options` do not contain\n- `TOO_MANY_MATCHES` (400): a multi-match resolve exceeded its result cap\n- `WRITE_CONFLICT` (409): transient write contention, retryable unlike `TUPLE_CONFLICT`\n- `OFFSET_WINDOW_EXCEEDED` (400): a listing's `from` plus `size` reaches past the offset window the search index allows\n- `CURSOR_INVALID` (400): a paging cursor cannot be read, or does not belong to the read it was sent with\n- `VARIANT_LIMIT_REACHED` (400): the entity already holds every variant it may hold\n- `PIN_FORMAT_INVALID` (400): a variant pins a value malformed for its condition's type\n- `VARIANT_UNPINNED` (400): a variant write pins no condition and is not marked `default`, or a batch delete item addresses no variant\n- `LAST_VERSION_UNDELETABLE` (400): the delete would leave the variant with no version at all\n\nIn a batch, the last four are the refusals an importer branches on: `VARIANT_LIMIT_REACHED`\nmeans stop the import, `PIN_FORMAT_INVALID` means one bad row, `LAST_VERSION_UNDELETABLE`\nmeans delete the variant instead.\n\nNot every refusal has a code. These carry a message and neither `code` nor `details`, and\neach operation's `400` names its own: a write pinning the reserved marker (`default` or\n`_default`), a variant marked `default` that also pins a real condition, a pin on a condition\nwhose declared type this deploy cannot read, an id this store cannot key by, a `valid_from`\nthis store cannot sort by, and a version write or delete with no `_revision`. Testing `code`\nfor absence is how a client tells them from the coded failures.\n\nFour of the 404s say that something the request addressed does not exist, and are fixed by\ncorrecting an id or accepting the thing is gone. The other two say the opposite: everything\naddressed exists and there is still nothing to serve — no variant applies to this situation,\nor none of a variant's versions is in effect yet. Those are ordinary business outcomes, told\napart from a wrong id by their code.\n\n`ENTITY_TYPE_MISMATCH` and `ENTITY_NOT_CONDITIONAL` are `400`s, not 404s: the entity the\nrequest addressed **was** found, and the fix is the slug beside it. A slug that names no\nconditional entity type at all is a `400` too.\n\nEach code is emitted with the HTTP status shown above, and only with that status, and each\none is pinned by a member of `ConditionalPricingError` — which is where the structured data\nthat code carries is declared.\n",
+        "description": "Machine-readable failure mode of a conditional-pricing operation, allowing clients\nto branch on the kind of failure instead of parsing the error message.\n\n- `SCHEMA_NOT_FOUND` (404): no conditional entity type by that slug\n- `ENTITY_NOT_FOUND` (404): the schema holds no entity with that id\n- `ENTITY_TYPE_MISMATCH` (400): that id belongs to an entity of another type than the slug named\n- `ENTITY_NOT_CONDITIONAL` (400): the entity is of the right type but was not created as a conditional one\n- `VARIANT_NOT_FOUND` (404): the entity has no such variant\n- `VERSION_NOT_FOUND` (404): the variant has no version at that `valid_from`\n- `NO_MATCHES` (404): nothing applied to the context and the entity has no `default` variant\n- `NO_ACTIVE_VERSION` (404): the variant has no version in effect at the instant asked about\n- `AMBIGUOUS_RESOLUTION` (409): several variants match the given context while a single result was requested\n- `TUPLE_CONFLICT` (409): the condition tuple is already claimed by another variant\n- `VERSION_CONFLICT` (409): a version already exists at the given `valid_from` on that variant\n- `CONDITION_UNDEFINED` (400): a resolve context, a listing filter or a variant's pins name a condition the entity's schema does not define\n- `OPERATOR_UNSUPPORTED` (400): the requested operator is not applicable to the condition's type\n- `CONTEXT_FORMAT_INVALID` (400): a resolve context or listing filter value is malformed for its condition type\n- `CONDITION_VALUE_INVALID` (400): a variant write pins a `select` value the condition's `options` do not admit, including every pin on a condition whose `options` are absent, empty or unreadable\n- `TOO_MANY_MATCHES` (400): a multi-match resolve exceeded its result cap\n- `WRITE_CONFLICT` (409): transient write contention, retryable unlike `TUPLE_CONFLICT`\n- `OFFSET_WINDOW_EXCEEDED` (400): a listing's `from` plus `size` reaches past the offset window the search index allows\n- `CURSOR_INVALID` (400): a paging cursor cannot be read, or does not belong to the read it was sent with\n- `VARIANT_LIMIT_REACHED` (400): the entity already holds every variant it may hold\n- `PIN_FORMAT_INVALID` (400): a variant pins a value malformed for its condition's type\n- `VARIANT_UNPINNED` (400): a variant write pins no condition and is not marked `default`, or a batch delete item addresses no variant\n- `LAST_VERSION_UNDELETABLE` (400): the delete would leave the variant with no version at all\n\nIn a batch, the last four are the refusals an importer branches on: `VARIANT_LIMIT_REACHED`\nmeans stop the import, `PIN_FORMAT_INVALID` means one bad row, `LAST_VERSION_UNDELETABLE`\nmeans delete the variant instead.\n\nNot every refusal has a code. These carry a message and neither `code` nor `details`, and\neach operation's `400` names its own: a write pinning the reserved marker (`default` or\n`_default`), a variant marked `default` that also pins a real condition, a pin on a condition\nwhose declared type this deploy cannot read, an id this store cannot key by, a `valid_from`\nthis store cannot sort by, and a version write or delete with no `_revision`. Testing `code`\nfor absence is how a client tells them from the coded failures.\n\nFour of the 404s say that something the request addressed does not exist, and are fixed by\ncorrecting an id or accepting the thing is gone. The other two say the opposite: everything\naddressed exists and there is still nothing to serve — no variant applies to this situation,\nor none of a variant's versions is in effect yet. Those are ordinary business outcomes, told\napart from a wrong id by their code.\n\n`ENTITY_TYPE_MISMATCH` and `ENTITY_NOT_CONDITIONAL` are `400`s, not 404s: the entity the\nrequest addressed **was** found, and the fix is the slug beside it. A slug that names no\nconditional entity type at all is a `400` too.\n\nEach code is emitted with the HTTP status shown above, and only with that status, and each\none is pinned by a member of `ConditionalPricingError` — which is where the structured data\nthat code carries is declared.\n",
         "enum": [
           "SCHEMA_NOT_FOUND",
           "ENTITY_NOT_FOUND",
@@ -5795,7 +5863,7 @@
       "VariantValues": {
         "type": "object",
         "additionalProperties": true,
-        "description": "The attribute values this version overrides on the base entity, keyed by attribute name.\n\nOnly attributes currently declaring `overridable_attribute` are applied. Metadata fields\n(anything underscore-prefixed), readonly attributes, hidden attributes, computed attributes\nand non-overridable attributes present here are not applied rather than rejected, and each one\nis named in the write's `warnings`, so a client working from a slightly stale schema snapshot\nstill succeeds instead of failing on fields it could not have known to drop, and still learns\nwhich of them did not land — the naming half published ahead of the behaviour, so until the\n`ATTRIBUTES_NOT_APPLIED` warning is emitted an unapplied attribute is dropped silently. An attribute's `render_condition` says when to show it and has no\nbearing on whether a variant may override it.\n\nNot applied means *not updated*, never *removed*: a value already stored for an attribute that\nis not currently overridable is preserved, so removing and restoring the flag deactivates and\nthen reactivates the same override. An append seeds the attributes the variant may not\noverride from the version in effect at its own `valid_from`, so its stored values are not a\npure function of the body that wrote it; a variant's first version, and an append dated before\nthe variant's earliest version, inherit nothing.\n\nA composite price's `price_components` is an ordinary overridable relation attribute. A\ncomposite variant's override references different component *entities*, never a variant or a\nversion of one, and holds whatever a relation attribute ordinarily holds — this API defines no\nreference shape of its own.\n",
+        "description": "The attribute values this version overrides on the base entity, keyed by attribute name.\n\nOnly attributes currently declaring `overridable_attribute` are applied. Metadata fields\n(anything underscore-prefixed), readonly attributes, hidden attributes, computed attributes,\nattributes of a type no variant may override and non-overridable attributes present here are\nnot applied rather than rejected, and every one but the metadata is named in the write's\n`warnings`, so a client working from a slightly stale schema snapshot still succeeds instead\nof failing on fields it could not have known to drop, and still learns which of them did not\nland. Metadata is never named, since a client echoing back a payload it read carries it in\nevery body. An attribute's `render_condition` says when to show it and has no\nbearing on whether a variant may override it.\n\nNot applied means *not updated*, never *removed*: a value already stored for an attribute that\nis not currently overridable is preserved, so removing and restoring the flag deactivates and\nthen reactivates the same override. An append seeds the attributes the variant may not\noverride from the version in effect at its own `valid_from`, so its stored values are not a\npure function of the body that wrote it; a variant's first version, and an append dated before\nthe variant's earliest version, inherit nothing.\n\nA composite price's `price_components` is an ordinary overridable relation attribute. A\ncomposite variant's override references different component *entities*, never a variant or a\nversion of one, and holds whatever a relation attribute ordinarily holds — this API defines no\nreference shape of its own.\n",
         "example": {
           "unit_amount": 2499,
           "unit_amount_decimal": "24.99"
@@ -7533,7 +7601,7 @@
               },
               {
                 "type": "object",
-                "description": "A variant write pins a `select` value the condition's declared `options` do not\ncontain.\n\nOne of the two codes that report the submitted value back — `PIN_FORMAT_INVALID` is\nthe other. A resolve context value is never quoted back.\n",
+                "description": "A variant write pins a `select` value the condition's `options` do not admit — either\na value a declared vocabulary does not contain, or any value at all where the\ncondition declares no vocabulary for it to be in.\n\nOne of the two codes that report the submitted value back — `PIN_FORMAT_INVALID` is\nthe other. A resolve context value is never quoted back.\n",
                 "required": [
                   "code",
                   "details"
@@ -7564,7 +7632,7 @@
                       },
                       "options": {
                         "type": "array",
-                        "description": "The vocabulary *as enforced* — after the entries this deploy cannot read have\nbeen dropped, so a tenant whose `options` holds a title-only entry is told\nwhat the API actually checked against rather than what they believe they\nwrote.\n",
+                        "description": "The vocabulary *as enforced* — after the entries this deploy cannot read have\nbeen dropped, so a tenant whose `options` holds a title-only entry is told\nwhat the API actually checked against rather than what they believe they\nwrote. Empty when the condition declares no vocabulary at all, which is\nitself the reason the pin was refused; the message says which of the two\n(unconfigured, or unreadable) applies.\n",
                         "items": {
                           "type": "string"
                         },

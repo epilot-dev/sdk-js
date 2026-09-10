@@ -2642,7 +2642,9 @@ export declare namespace Components {
                      * The vocabulary *as enforced* — after the entries this deploy cannot read have
                      * been dropped, so a tenant whose `options` holds a title-only entry is told
                      * what the API actually checked against rather than what they believe they
-                     * wrote.
+                     * wrote. Empty when the condition declares no vocabulary at all, which is
+                     * itself the reason the pin was refused; the message says which of the two
+                     * (unconfigured, or unreadable) applies.
                      *
                      * example:
                      * [
@@ -4222,12 +4224,13 @@ export declare namespace Components {
              * The attribute values this version overrides on the base entity, keyed by attribute name.
              *
              * Only attributes currently declaring `overridable_attribute` are applied. Metadata fields
-             * (anything underscore-prefixed), readonly attributes, hidden attributes, computed attributes
-             * and non-overridable attributes present here are not applied rather than rejected, and each one
-             * is named in the write's `warnings`, so a client working from a slightly stale schema snapshot
-             * still succeeds instead of failing on fields it could not have known to drop, and still learns
-             * which of them did not land — the naming half published ahead of the behaviour, so until the
-             * `ATTRIBUTES_NOT_APPLIED` warning is emitted an unapplied attribute is dropped silently. An attribute's `render_condition` says when to show it and has no
+             * (anything underscore-prefixed), readonly attributes, hidden attributes, computed attributes,
+             * attributes of a type no variant may override and non-overridable attributes present here are
+             * not applied rather than rejected, and every one but the metadata is named in the write's
+             * `warnings`, so a client working from a slightly stale schema snapshot still succeeds instead
+             * of failing on fields it could not have known to drop, and still learns which of them did not
+             * land. Metadata is never named, since a client echoing back a payload it read carries it in
+             * every body. An attribute's `render_condition` says when to show it and has no
              * bearing on whether a variant may override it.
              *
              * Not applied means *not updated*, never *removed*: a value already stored for an attribute that
@@ -5156,7 +5159,9 @@ export declare namespace Components {
                      * The vocabulary *as enforced* — after the entries this deploy cannot read have
                      * been dropped, so a tenant whose `options` holds a title-only entry is told
                      * what the API actually checked against rather than what they believe they
-                     * wrote.
+                     * wrote. Empty when the condition declares no vocabulary at all, which is
+                     * itself the reason the pin was refused; the message says which of the two
+                     * (unconfigured, or unreadable) applies.
                      *
                      * example:
                      * [
@@ -9295,9 +9300,12 @@ export declare namespace Components {
              * only in their title are one vocabulary entry.
              *
              * The vocabulary is always closed: a condition carries no flag widening it, so a pinned
-             * value outside a declared vocabulary is rejected with `CONDITION_VALUE_INVALID`. It is
-             * *not* enforced on resolve — a vocabulary says what may be stored, not what may be asked
-             * for, so a context value outside it is a query that simply matches nothing.
+             * value outside a declared vocabulary is rejected with `CONDITION_VALUE_INVALID`. A
+             * vocabulary that declares nothing is closed too — while `options` is absent or empty, or
+             * holds nothing this deploy can read, the condition admits no pin at all and the same code
+             * is returned with an empty `options`. It is *not* enforced on resolve — a vocabulary says
+             * what may be stored, not what may be asked for, so a context value outside it is a query
+             * that simply matches nothing.
              *
              * example:
              * [
@@ -10192,7 +10200,9 @@ export declare namespace Components {
                  * The vocabulary *as enforced* — after the entries this deploy cannot read have
                  * been dropped, so a tenant whose `options` holds a title-only entry is told
                  * what the API actually checked against rather than what they believe they
-                 * wrote.
+                 * wrote. Empty when the condition declares no vocabulary at all, which is
+                 * itself the reason the pin was refused; the message says which of the two
+                 * (unconfigured, or unreadable) applies.
                  *
                  * example:
                  * [
@@ -10699,7 +10709,7 @@ export declare namespace Components {
          * - `CONDITION_UNDEFINED` (400): a resolve context, a listing filter or a variant's pins name a condition the entity's schema does not define
          * - `OPERATOR_UNSUPPORTED` (400): the requested operator is not applicable to the condition's type
          * - `CONTEXT_FORMAT_INVALID` (400): a resolve context or listing filter value is malformed for its condition type
-         * - `CONDITION_VALUE_INVALID` (400): a variant write pins a `select` value the condition's declared `options` do not contain
+         * - `CONDITION_VALUE_INVALID` (400): a variant write pins a `select` value the condition's `options` do not admit, including every pin on a condition whose `options` are absent, empty or unreadable
          * - `TOO_MANY_MATCHES` (400): a multi-match resolve exceeded its result cap
          * - `WRITE_CONFLICT` (409): transient write contention, retryable unlike `TUPLE_CONFLICT`
          * - `OFFSET_WINDOW_EXCEEDED` (400): a listing's `from` plus `size` reaches past the offset window the search index allows
@@ -11129,12 +11139,13 @@ export declare namespace Components {
              * The attribute values this version overrides on the base entity, keyed by attribute name.
              *
              * Only attributes currently declaring `overridable_attribute` are applied. Metadata fields
-             * (anything underscore-prefixed), readonly attributes, hidden attributes, computed attributes
-             * and non-overridable attributes present here are not applied rather than rejected, and each one
-             * is named in the write's `warnings`, so a client working from a slightly stale schema snapshot
-             * still succeeds instead of failing on fields it could not have known to drop, and still learns
-             * which of them did not land — the naming half published ahead of the behaviour, so until the
-             * `ATTRIBUTES_NOT_APPLIED` warning is emitted an unapplied attribute is dropped silently. An attribute's `render_condition` says when to show it and has no
+             * (anything underscore-prefixed), readonly attributes, hidden attributes, computed attributes,
+             * attributes of a type no variant may override and non-overridable attributes present here are
+             * not applied rather than rejected, and every one but the metadata is named in the write's
+             * `warnings`, so a client working from a slightly stale schema snapshot still succeeds instead
+             * of failing on fields it could not have known to drop, and still learns which of them did not
+             * land. Metadata is never named, since a client echoing back a payload it read carries it in
+             * every body. An attribute's `render_condition` says when to show it and has no
              * bearing on whether a variant may override it.
              *
              * Not applied means *not updated*, never *removed*: a value already stored for an attribute that
@@ -11201,12 +11212,13 @@ export declare namespace Components {
              * The attribute values this version overrides on the base entity, keyed by attribute name.
              *
              * Only attributes currently declaring `overridable_attribute` are applied. Metadata fields
-             * (anything underscore-prefixed), readonly attributes, hidden attributes, computed attributes
-             * and non-overridable attributes present here are not applied rather than rejected, and each one
-             * is named in the write's `warnings`, so a client working from a slightly stale schema snapshot
-             * still succeeds instead of failing on fields it could not have known to drop, and still learns
-             * which of them did not land — the naming half published ahead of the behaviour, so until the
-             * `ATTRIBUTES_NOT_APPLIED` warning is emitted an unapplied attribute is dropped silently. An attribute's `render_condition` says when to show it and has no
+             * (anything underscore-prefixed), readonly attributes, hidden attributes, computed attributes,
+             * attributes of a type no variant may override and non-overridable attributes present here are
+             * not applied rather than rejected, and every one but the metadata is named in the write's
+             * `warnings`, so a client working from a slightly stale schema snapshot still succeeds instead
+             * of failing on fields it could not have known to drop, and still learns which of them did not
+             * land. Metadata is never named, since a client echoing back a payload it read carries it in
+             * every body. An attribute's `render_condition` says when to show it and has no
              * bearing on whether a variant may override it.
              *
              * Not applied means *not updated*, never *removed*: a value already stored for an attribute that
@@ -17962,12 +17974,13 @@ export declare namespace Components {
                  * The attribute values this version overrides on the base entity, keyed by attribute name.
                  *
                  * Only attributes currently declaring `overridable_attribute` are applied. Metadata fields
-                 * (anything underscore-prefixed), readonly attributes, hidden attributes, computed attributes
-                 * and non-overridable attributes present here are not applied rather than rejected, and each one
-                 * is named in the write's `warnings`, so a client working from a slightly stale schema snapshot
-                 * still succeeds instead of failing on fields it could not have known to drop, and still learns
-                 * which of them did not land — the naming half published ahead of the behaviour, so until the
-                 * `ATTRIBUTES_NOT_APPLIED` warning is emitted an unapplied attribute is dropped silently. An attribute's `render_condition` says when to show it and has no
+                 * (anything underscore-prefixed), readonly attributes, hidden attributes, computed attributes,
+                 * attributes of a type no variant may override and non-overridable attributes present here are
+                 * not applied rather than rejected, and every one but the metadata is named in the write's
+                 * `warnings`, so a client working from a slightly stale schema snapshot still succeeds instead
+                 * of failing on fields it could not have known to drop, and still learns which of them did not
+                 * land. Metadata is never named, since a client echoing back a payload it read carries it in
+                 * every body. An attribute's `render_condition` says when to show it and has no
                  * bearing on whether a variant may override it.
                  *
                  * Not applied means *not updated*, never *removed*: a value already stored for an attribute that
@@ -18016,12 +18029,13 @@ export declare namespace Components {
          * The attribute values this version overrides on the base entity, keyed by attribute name.
          *
          * Only attributes currently declaring `overridable_attribute` are applied. Metadata fields
-         * (anything underscore-prefixed), readonly attributes, hidden attributes, computed attributes
-         * and non-overridable attributes present here are not applied rather than rejected, and each one
-         * is named in the write's `warnings`, so a client working from a slightly stale schema snapshot
-         * still succeeds instead of failing on fields it could not have known to drop, and still learns
-         * which of them did not land — the naming half published ahead of the behaviour, so until the
-         * `ATTRIBUTES_NOT_APPLIED` warning is emitted an unapplied attribute is dropped silently. An attribute's `render_condition` says when to show it and has no
+         * (anything underscore-prefixed), readonly attributes, hidden attributes, computed attributes,
+         * attributes of a type no variant may override and non-overridable attributes present here are
+         * not applied rather than rejected, and every one but the metadata is named in the write's
+         * `warnings`, so a client working from a slightly stale schema snapshot still succeeds instead
+         * of failing on fields it could not have known to drop, and still learns which of them did not
+         * land. Metadata is never named, since a client echoing back a payload it read carries it in
+         * every body. An attribute's `render_condition` says when to show it and has no
          * bearing on whether a variant may override it.
          *
          * Not applied means *not updated*, never *removed*: a value already stored for an attribute that
@@ -18098,12 +18112,13 @@ export declare namespace Components {
              * The attribute values this version overrides on the base entity, keyed by attribute name.
              *
              * Only attributes currently declaring `overridable_attribute` are applied. Metadata fields
-             * (anything underscore-prefixed), readonly attributes, hidden attributes, computed attributes
-             * and non-overridable attributes present here are not applied rather than rejected, and each one
-             * is named in the write's `warnings`, so a client working from a slightly stale schema snapshot
-             * still succeeds instead of failing on fields it could not have known to drop, and still learns
-             * which of them did not land — the naming half published ahead of the behaviour, so until the
-             * `ATTRIBUTES_NOT_APPLIED` warning is emitted an unapplied attribute is dropped silently. An attribute's `render_condition` says when to show it and has no
+             * (anything underscore-prefixed), readonly attributes, hidden attributes, computed attributes,
+             * attributes of a type no variant may override and non-overridable attributes present here are
+             * not applied rather than rejected, and every one but the metadata is named in the write's
+             * `warnings`, so a client working from a slightly stale schema snapshot still succeeds instead
+             * of failing on fields it could not have known to drop, and still learns which of them did not
+             * land. Metadata is never named, since a client echoing back a payload it read carries it in
+             * every body. An attribute's `render_condition` says when to show it and has no
              * bearing on whether a variant may override it.
              *
              * Not applied means *not updated*, never *removed*: a value already stored for an attribute that
@@ -18227,12 +18242,13 @@ export declare namespace Components {
              * The attribute values this version overrides on the base entity, keyed by attribute name.
              *
              * Only attributes currently declaring `overridable_attribute` are applied. Metadata fields
-             * (anything underscore-prefixed), readonly attributes, hidden attributes, computed attributes
-             * and non-overridable attributes present here are not applied rather than rejected, and each one
-             * is named in the write's `warnings`, so a client working from a slightly stale schema snapshot
-             * still succeeds instead of failing on fields it could not have known to drop, and still learns
-             * which of them did not land — the naming half published ahead of the behaviour, so until the
-             * `ATTRIBUTES_NOT_APPLIED` warning is emitted an unapplied attribute is dropped silently. An attribute's `render_condition` says when to show it and has no
+             * (anything underscore-prefixed), readonly attributes, hidden attributes, computed attributes,
+             * attributes of a type no variant may override and non-overridable attributes present here are
+             * not applied rather than rejected, and every one but the metadata is named in the write's
+             * `warnings`, so a client working from a slightly stale schema snapshot still succeeds instead
+             * of failing on fields it could not have known to drop, and still learns which of them did not
+             * land. Metadata is never named, since a client echoing back a payload it read carries it in
+             * every body. An attribute's `render_condition` says when to show it and has no
              * bearing on whether a variant may override it.
              *
              * Not applied means *not updated*, never *removed*: a value already stored for an attribute that
@@ -18414,12 +18430,13 @@ export declare namespace Components {
              * The attribute values this version overrides on the base entity, keyed by attribute name.
              *
              * Only attributes currently declaring `overridable_attribute` are applied. Metadata fields
-             * (anything underscore-prefixed), readonly attributes, hidden attributes, computed attributes
-             * and non-overridable attributes present here are not applied rather than rejected, and each one
-             * is named in the write's `warnings`, so a client working from a slightly stale schema snapshot
-             * still succeeds instead of failing on fields it could not have known to drop, and still learns
-             * which of them did not land — the naming half published ahead of the behaviour, so until the
-             * `ATTRIBUTES_NOT_APPLIED` warning is emitted an unapplied attribute is dropped silently. An attribute's `render_condition` says when to show it and has no
+             * (anything underscore-prefixed), readonly attributes, hidden attributes, computed attributes,
+             * attributes of a type no variant may override and non-overridable attributes present here are
+             * not applied rather than rejected, and every one but the metadata is named in the write's
+             * `warnings`, so a client working from a slightly stale schema snapshot still succeeds instead
+             * of failing on fields it could not have known to drop, and still learns which of them did not
+             * land. Metadata is never named, since a client echoing back a payload it read carries it in
+             * every body. An attribute's `render_condition` says when to show it and has no
              * bearing on whether a variant may override it.
              *
              * Not applied means *not updated*, never *removed*: a value already stored for an attribute that
@@ -21606,12 +21623,10 @@ export interface OperationMethods {
    * 
    * Attribute values are applied only for attributes currently carrying `overridable_attribute`.
    * Metadata and non-overridable fields present in the body are not applied rather than rejected,
-   * and each one is named in the response's `warnings`, so a client working from a slightly stale
-   * schema snapshot still succeeds and still learns which fields did not land. The reporting half
-   * is published ahead of the behaviour: this operation is dispatched, so until the
-   * `ATTRIBUTES_NOT_APPLIED` warning starts being emitted a field that is not applied is dropped
-   * with nothing in the response naming it. Applying only overridable attributes is today's
-   * behaviour; being told which ones did not land is not yet.
+   * and every one but the metadata is named in the response's `warnings`, so a client working from
+   * a slightly stale schema snapshot still succeeds and still learns which fields did not land.
+   * Metadata is never named, since a client echoing back a payload it read carries it in every
+   * body.
    * 
    * `variant_id` is always server-generated and returned, and is not accepted in the body — the
    * request schema admits no such property. It is the durable key orders and contracts pin.
@@ -22370,12 +22385,10 @@ export interface PathsDictionary {
      * 
      * Attribute values are applied only for attributes currently carrying `overridable_attribute`.
      * Metadata and non-overridable fields present in the body are not applied rather than rejected,
-     * and each one is named in the response's `warnings`, so a client working from a slightly stale
-     * schema snapshot still succeeds and still learns which fields did not land. The reporting half
-     * is published ahead of the behaviour: this operation is dispatched, so until the
-     * `ATTRIBUTES_NOT_APPLIED` warning starts being emitted a field that is not applied is dropped
-     * with nothing in the response naming it. Applying only overridable attributes is today's
-     * behaviour; being told which ones did not land is not yet.
+     * and every one but the metadata is named in the response's `warnings`, so a client working from
+     * a slightly stale schema snapshot still succeeds and still learns which fields did not land.
+     * Metadata is never named, since a client echoing back a payload it read carries it in every
+     * body.
      * 
      * `variant_id` is always server-generated and returned, and is not accepted in the body — the
      * request schema admits no such property. It is the durable key orders and contracts pin.
