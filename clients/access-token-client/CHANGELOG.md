@@ -1,5 +1,11 @@
 # @epilot/access-token-client
 
+## 1.5.0
+
+### Minor Changes
+
+- Add the `contact_identification` token type: `ContactIdentificationTokenParameters` (`portal_id`, `contact_id`, `surface_id`, `allowed_operations`, `expires_in`) on `createAccessToken`, the matching fields on the token response, and the `getContactIdentificationTokenJwks` / `getContactIdentificationTokenOIDC` operations.
+
 ## 1.1.3
 
 ### Patch Changes
