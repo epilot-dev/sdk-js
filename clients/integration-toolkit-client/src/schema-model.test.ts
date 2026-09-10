@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { HTTP_STATUS_CODE_FAMILY, MONITORING_CODES, describeMonitoringCode } from './codes';
+import { HTTP_STATUS_CODE_FAMILY, MONITORING_CODES, describeMonitoringCode } from './schema-model';
 import openapi from './openapi.json';
 
 /**
