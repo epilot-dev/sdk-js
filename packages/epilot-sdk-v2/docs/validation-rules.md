@@ -65,6 +65,13 @@ const { data } = await validationRulesClient.getValidationRules(...)
 - [`RelativeDateValue`](#relativedatevalue)
 - [`RangeValue`](#rangevalue)
 - [`NoValue`](#novalue)
+- [`DocumentRuleType`](#documentruletype)
+- [`DocumentCheck`](#documentcheck)
+- [`DocumentCondition`](#documentcondition)
+- [`DocumentOperator`](#documentoperator)
+- [`DocumentConditionValue`](#documentconditionvalue)
+- [`FileTypesValue`](#filetypesvalue)
+- [`CriteriaValue`](#criteriavalue)
 - [`AppliesWhen`](#applieswhen)
 - [`ContextRequirement`](#contextrequirement)
 
@@ -682,6 +689,18 @@ type UpdateValidationRuleRequest = {
       applies_when?: { ... }
       allow_failure?: { ... }
     }>
+  } | {
+    input_type: "document"
+    check: {
+      level: { ... }
+    }
+    conditions: Array<{
+      id: { ... }
+      operator: { ... }
+      value: { ... }
+      error_message: { ... }
+      allow_failure?: { ... }
+    }>
   }
   contexts?: Array<{
     schema: string
@@ -735,6 +754,18 @@ type ValidationRuleBase = {
       value: { ... }
       error_message: { ... }
       applies_when?: { ... }
+      allow_failure?: { ... }
+    }>
+  } | {
+    input_type: "document"
+    check: {
+      level: { ... }
+    }
+    conditions: Array<{
+      id: { ... }
+      operator: { ... }
+      value: { ... }
+      error_message: { ... }
       allow_failure?: { ... }
     }>
   }
@@ -2258,6 +2289,261 @@ No comparison value - used by unary operators such as notInFuture / notInPast.
 ```ts
 type NoValue = {
   source: "none"
+}
+```
+
+### `DocumentRuleType`
+
+Declarative validation rule (schema version v2) for uploaded files. The rule declares how deep
+the check goes (`check.level`) and the conditions the file must satisfy. Property conditions
+(file type, size, page count, image resolution, blank and password-protected detection) are
+deterministic and av
+
+```ts
+type DocumentRuleType = {
+  input_type: "document"
+  check: {
+    level: "basic" | "standard" | "advanced"
+  }
+  conditions: Array<{
+    id: string
+    operator: "fileTypeIn" | "sizeBelow" | "pageCountBetween" | "resolutionAtLeast" | "resolutionAtMost" | "isNotBlank" | "isNotPasswordProtected" | "meetsCriteria"
+    value: {
+      source: { ... }
+      data: { ... }
+    } | {
+      source: { ... }
+      min: { ... }
+      max: { ... }
+    } | {
+      source: { ... }
+    } | {
+      source: { ... }
+      types: { ... }
+    } | {
+      source: { ... }
+      text: { ... }
+    }
+    error_message: string
+    allow_failure?: boolean
+  }>
+}
+```
+
+### `DocumentCheck`
+
+How deep the document check goes. Levels are cumulative.
+
+```ts
+type DocumentCheck = {
+  level: "basic" | "standard" | "advanced"
+}
+```
+
+### `DocumentCondition`
+
+A single check the uploaded file must satisfy.
+
+```ts
+type DocumentCondition = {
+  id: string
+  operator: "fileTypeIn" | "sizeBelow" | "pageCountBetween" | "resolutionAtLeast" | "resolutionAtMost" | "isNotBlank" | "isNotPasswordProtected" | "meetsCriteria"
+  value: {
+    source: "static"
+    data: number | string | boolean
+  } | {
+    source: "range"
+    min: {
+      source: { ... }
+      data: { ... }
+    } | {
+      source: { ... }
+      path: { ... }
+      adjust?: { ... }
+    } | {
+      source: { ... }
+      offset: { ... }
+      unit: { ... }
+      anchor?: { ... }
+    } | {
+      source: { ... }
+      key: { ... }
+      adjust?: { ... }
+    } | {
+      source: { ... }
+      app_id: { ... }
+      hook_id: { ... }
+      result_id: { ... }
+      adjust?: { ... }
+    }
+    max: {
+      source: { ... }
+      data: { ... }
+    } | {
+      source: { ... }
+      path: { ... }
+      adjust?: { ... }
+    } | {
+      source: { ... }
+      offset: { ... }
+      unit: { ... }
+      anchor?: { ... }
+    } | {
+      source: { ... }
+      key: { ... }
+      adjust?: { ... }
+    } | {
+      source: { ... }
+      app_id: { ... }
+      hook_id: { ... }
+      result_id: { ... }
+      adjust?: { ... }
+    }
+  } | {
+    source: "none"
+  } | {
+    source: "file_types"
+    types: "image" | "pdf" | "document" | "spreadsheet"[]
+  } | {
+    source: "criteria"
+    text: string
+  }
+  error_message: string
+  allow_failure?: boolean
+}
+```
+
+### `DocumentOperator`
+
+Predefined document check. Value compatibility (enforced at write time):
+- fileTypeIn: `file_types` value listing the accepted file categories.
+- sizeBelow: static integer, maximum file size in bytes.
+- pageCountBetween: `range` of static non-negative integers (inclusive).
+- resolutionAtLeast / reso
+
+```ts
+type DocumentOperator = "fileTypeIn" | "sizeBelow" | "pageCountBetween" | "resolutionAtLeast" | "resolutionAtMost" | "isNotBlank" | "isNotPasswordProtected" | "meetsCriteria"
+```
+
+### `DocumentConditionValue`
+
+The value of a document condition - a static scalar, a range, nothing, accepted file categories, or a free-text criterion.
+
+```ts
+type DocumentConditionValue = {
+  source: "static"
+  data: number | string | boolean
+} | {
+  source: "range"
+  min: {
+    source: "static"
+    data: number | string | boolean
+  } | {
+    source: "context"
+    path: string
+    adjust?: {
+      type: { ... }
+      value: { ... }
+      direction: { ... }
+      rounding?: { ... }
+    }
+  } | {
+    source: "relative_date"
+    offset: number
+    unit: "days" | "months" | "years"
+    anchor?: "today"
+  } | {
+    source: "environment"
+    key: string
+    adjust?: {
+      type: { ... }
+      value: { ... }
+      direction: { ... }
+      rounding?: { ... }
+    }
+  } | {
+    source: "external"
+    app_id: string
+    hook_id: string
+    result_id: string
+    adjust?: {
+      type: { ... }
+      value: { ... }
+      direction: { ... }
+      rounding?: { ... }
+    }
+  }
+  max: {
+    source: "static"
+    data: number | string | boolean
+  } | {
+    source: "context"
+    path: string
+    adjust?: {
+      type: { ... }
+      value: { ... }
+      direction: { ... }
+      rounding?: { ... }
+    }
+  } | {
+    source: "relative_date"
+    offset: number
+    unit: "days" | "months" | "years"
+    anchor?: "today"
+  } | {
+    source: "environment"
+    key: string
+    adjust?: {
+      type: { ... }
+      value: { ... }
+      direction: { ... }
+      rounding?: { ... }
+    }
+  } | {
+    source: "external"
+    app_id: string
+    hook_id: string
+    result_id: string
+    adjust?: {
+      type: { ... }
+      value: { ... }
+      direction: { ... }
+      rounding?: { ... }
+    }
+  }
+} | {
+  source: "none"
+} | {
+  source: "file_types"
+  types: "image" | "pdf" | "document" | "spreadsheet"[]
+} | {
+  source: "criteria"
+  text: string
+}
+```
+
+### `FileTypesValue`
+
+Accepted file categories; each category expands to a mime list at check time.
+
+```ts
+type FileTypesValue = {
+  source: "file_types"
+  types: "image" | "pdf" | "document" | "spreadsheet"[]
+}
+```
+
+### `CriteriaValue`
+
+A free-text requirement judged against the document's extracted content, e.g. "The photo shows
+an electricity meter with the meter number and the current reading fully legible." One requirement
+per condition keeps results specific and lets each requirement be graded separately.
+
+
+```ts
+type CriteriaValue = {
+  source: "criteria"
+  text: string
 }
 ```
 

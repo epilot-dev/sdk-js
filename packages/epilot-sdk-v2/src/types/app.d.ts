@@ -1391,10 +1391,6 @@ export declare namespace Components {
                  */
                 key?: string;
             };
-            /**
-             * If set, requests are sent from epilot's static egress IPs. Mutually exclusive with secure_proxy.
-             */
-            use_static_ips?: boolean;
             secure_proxy?: /* If set, requests are routed through the ERP Integration secure proxy. Mutually exclusive with use_static_ips. */ PortalExtensionSecureProxy;
         }
         /**
@@ -1472,7 +1468,7 @@ export declare namespace Components {
                 de: string;
             };
             /**
-             * JavaScript code to execute. Must declare a top-level `async function handler(input, context)`. Maximum size: 300KB (hard limit). Security restrictions: eval() and Function() constructor are not allowed.
+             * JavaScript code to execute. Must declare a top-level `async function handler(input, context)`. Maximum size: 300KB (hard limit). Security restrictions: dynamic code evaluation via `eval` or the `Function` constructor is not allowed.
              *
              */
             code: string;
@@ -2031,7 +2027,7 @@ export declare namespace Components {
              *         { "id": "ht", "label": { "en": "High tariff" }, "aggregation_group": "consumption", "statistical_method": "sum", "unit": "kWh", "color": "primary", "precision": 2 },
              *         ...
              *       ],
-             *       "intervals": ["PT15M", "PT1H", "P1D", "P1M", "P1Y"],
+             *       "intervals": ["PT15M", "PT1H", "P1D", "P1M", "P1Y", "custom"],
              *       "data_range": { "from": "2024-01-01T00:00:00Z", "to": "2026-05-01T00:00:00Z" }
              *     }
              *   Each type option carries its own `statistical_method`, which describes the method already applied to that type's data and dictates the chart shape: `sum` is rendered as a bar chart; `min`, `average`, and `max` are rendered as a line chart. A single visualization can therefore mix bar-shaped types with line-shaped types. Defaults to `sum` when omitted.
@@ -2272,9 +2268,10 @@ export declare namespace Components {
             /**
              * Deprecated. Prefer declaring a sibling `visualizationMetadata` hook on the same extension and returning `intervals` from its response — that way the supported intervals can vary per meter/contract.
              * Intervals supported by the API. If omitted, it is assumed that all intervals are supported.
+             * `custom` marks a period-based consumption source: records carry the `period` they cover instead of sitting on a fixed grid, and the portal shows the whole data range as one bar per record.
              *
              */
-            intervals?: ("PT15M" | "PT1H" | "P1D" | "P1M" | "P1Y")[];
+            intervals?: ("PT15M" | "PT1H" | "P1D" | "P1M" | "P1Y" | "custom")[];
             auth?: PortalExtensionAuthBlock;
             call: {
                 /**
@@ -2443,9 +2440,10 @@ export declare namespace Components {
             /**
              * Deprecated. Prefer declaring a sibling `visualizationMetadata` hook on the same extension and returning `intervals` from its response — that way the supported intervals can vary per meter/contract.
              * Intervals supported by the API. If omitted, it is assumed that all intervals are supported.
+             * `custom` marks a period-based consumption source: records carry the `period` they cover instead of sitting on a fixed grid, and the portal shows the whole data range as one bar per record.
              *
              */
-            intervals?: ("PT15M" | "PT1H" | "P1D" | "P1M" | "P1Y")[];
+            intervals?: ("PT15M" | "PT1H" | "P1D" | "P1M" | "P1Y" | "custom")[];
             auth?: PortalExtensionAuthBlock;
             call: {
                 /**
@@ -2774,9 +2772,10 @@ export declare namespace Components {
             /**
              * Deprecated. Prefer declaring a sibling `visualizationMetadata` hook on the same extension and returning `intervals` from its response — that way the supported intervals can vary per meter/contract.
              * Intervals supported by the API. If omitted, it is assumed that all intervals are supported.
+             * `custom` marks a period-based consumption source: records carry the `period` they cover instead of sitting on a fixed grid, and the portal shows the whole data range as one bar per record.
              *
              */
-            intervals?: ("PT15M" | "PT1H" | "P1D" | "P1M" | "P1Y")[];
+            intervals?: ("PT15M" | "PT1H" | "P1D" | "P1M" | "P1Y" | "custom")[];
             auth?: PortalExtensionAuthBlock;
             call: {
                 /**
@@ -2908,7 +2907,7 @@ export declare namespace Components {
          *         { "id": "ht", "label": { "en": "High tariff" }, "aggregation_group": "consumption", "statistical_method": "sum", "unit": "kWh", "color": "primary", "precision": 2 },
          *         ...
          *       ],
-         *       "intervals": ["PT15M", "PT1H", "P1D", "P1M", "P1Y"],
+         *       "intervals": ["PT15M", "PT1H", "P1D", "P1M", "P1Y", "custom"],
          *       "data_range": { "from": "2024-01-01T00:00:00Z", "to": "2026-05-01T00:00:00Z" }
          *     }
          *   Each type option carries its own `statistical_method`, which describes the method already applied to that type's data and dictates the chart shape: `sum` is rendered as a bar chart; `min`, `average`, and `max` are rendered as a line chart. A single visualization can therefore mix bar-shaped types with line-shaped types. Defaults to `sum` when omitted.

@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.7.0
+
+### Minor Changes
+
+- Update the journey client with journey-config spec `1.5.0` — journey revisions and publishing (ER-5411)
+
 ## 0.6.0
 
 ### Minor Changes

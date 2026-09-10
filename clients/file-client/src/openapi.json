@@ -124,6 +124,9 @@
           "401": {
             "$ref": "#/components/responses/UnauthorizedError"
           },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntityError"
+          },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
           }
@@ -281,6 +284,9 @@
           "404": {
             "$ref": "#/components/responses/NotFoundError"
           },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntityError"
+          },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
           }
@@ -366,6 +372,9 @@
           "401": {
             "$ref": "#/components/responses/UnauthorizedError"
           },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntityError"
+          },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
           }
@@ -430,6 +439,9 @@
           },
           "401": {
             "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntityError"
           },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
@@ -1297,6 +1309,73 @@
         }
       }
     },
+    "/v1/files/validations": {
+      "post": {
+        "operationId": "validateFile",
+        "summary": "validateFile",
+        "description": "Validate an uploaded file against one or more document validation rules\n(validation-rules-api rules with `input_type: document`).\n\nThe file is referenced either by its file entity id or, for an upload that has not been\nsaved as an entity yet (e.g. a journey upload in the temporary prefix), by its S3 reference.\nThe service collects an observation of the file - deterministic facts such as the sniffed\nmime type, size, page count, image resolution, blank and password-protection detection -\nand evaluates every rule against it with the shared validation rules engine.\n\nThe response carries one result per rule with a per-condition outcome (`pass`, `fail`,\n`uncertain`, `skipped`), plus the observation the results were derived from. `status` is\n`completed` for checks that finish synchronously; `pending` is reserved for check levels\nthat need asynchronous content extraction.\n",
+        "tags": [
+          "File"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FileValidationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The validation result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FileValidation"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "413": {
+            "description": "The file is too large to validate",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorObject"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The file could not be read",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorObject"
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/v1/files/{id}/preview": {
       "get": {
         "operationId": "previewFile",
@@ -2090,6 +2169,9 @@
           "400": {
             "$ref": "#/components/responses/BadRequestError"
           },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntityError"
+          },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
           }
@@ -2805,6 +2887,296 @@
           "unsupported"
         ],
         "readOnly": true
+      },
+      "FileValidationRequest": {
+        "type": "object",
+        "required": [
+          "file",
+          "rule_ids"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "file": {
+            "$ref": "#/components/schemas/FileValidationFileReference"
+          },
+          "rule_ids": {
+            "type": "array",
+            "description": "Document validation rules to evaluate. Rules of another input type are rejected.",
+            "minItems": 1,
+            "maxItems": 10,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      },
+      "FileValidationFileReference": {
+        "description": "The file to validate - a saved file entity, or an uploaded object not saved as an entity yet.",
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "entity_id"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "entity_id": {
+                "$ref": "#/components/schemas/FileEntityId"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "s3ref"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "s3ref": {
+                "$ref": "#/components/schemas/S3Ref"
+              }
+            }
+          }
+        ]
+      },
+      "FileValidation": {
+        "type": "object",
+        "required": [
+          "id",
+          "status",
+          "file",
+          "observation",
+          "results",
+          "created_at"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Identifier of this validation run."
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "completed",
+              "pending",
+              "failed"
+            ],
+            "description": "`completed` when every rule was evaluated. `pending` is reserved for check levels that\nneed asynchronous content extraction; `failed` when the observation could not be produced.\n"
+          },
+          "file": {
+            "$ref": "#/components/schemas/FileValidationFile"
+          },
+          "observation": {
+            "$ref": "#/components/schemas/FileValidationObservation"
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FileValidationRuleResult"
+            }
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "FileValidationFile": {
+        "type": "object",
+        "description": "The file that was validated, with the identity facts collected from its content.",
+        "properties": {
+          "entity_id": {
+            "$ref": "#/components/schemas/FileEntityId"
+          },
+          "s3ref": {
+            "$ref": "#/components/schemas/S3Ref"
+          },
+          "filename": {
+            "type": "string"
+          },
+          "mime_type": {
+            "type": "string",
+            "description": "Mime type detected from the file content, falling back to the declared type."
+          },
+          "size_bytes": {
+            "type": "integer"
+          }
+        }
+      },
+      "FileValidationObservation": {
+        "type": "object",
+        "description": "Everything observed about the file, as passed to the validation rules engine.",
+        "required": [
+          "facts"
+        ],
+        "properties": {
+          "facts": {
+            "$ref": "#/components/schemas/FileValidationFacts"
+          },
+          "judgements": {
+            "type": "object",
+            "description": "Content judgements keyed by condition id, produced by the document requirements\ncheck for `meetsCriteria` conditions at the `standard` and `advanced` levels.\nAbsent when no content check ran (basic level, unsupported file, or the check\ndid not finish within its budget).\n",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/FileValidationJudgement"
+            }
+          },
+          "document_type": {
+            "type": "object",
+            "description": "Document type detected by the content check, when it ran.",
+            "properties": {
+              "slug": {
+                "type": "string"
+              },
+              "confidence": {
+                "type": "number"
+              }
+            }
+          }
+        }
+      },
+      "FileValidationJudgement": {
+        "type": "object",
+        "required": [
+          "result"
+        ],
+        "properties": {
+          "result": {
+            "type": "string",
+            "enum": [
+              "pass",
+              "fail",
+              "uncertain"
+            ]
+          },
+          "confidence": {
+            "type": "number"
+          },
+          "evidence": {
+            "type": "string"
+          },
+          "explanation": {
+            "type": "string"
+          }
+        }
+      },
+      "FileValidationFacts": {
+        "type": "object",
+        "description": "Deterministic properties of the file. A property that is absent could not be determined\n(for example the resolution of an image the service cannot decode); conditions that need it\nare skipped rather than failed.\n",
+        "properties": {
+          "mime_type": {
+            "type": "string"
+          },
+          "size_bytes": {
+            "type": "integer"
+          },
+          "page_count": {
+            "type": "integer",
+            "description": "Pages of a PDF; 1 for images."
+          },
+          "longer_edge_px": {
+            "type": "integer",
+            "description": "Longer edge of an image in pixels."
+          },
+          "is_blank": {
+            "type": "boolean"
+          },
+          "is_password_protected": {
+            "type": "boolean"
+          }
+        }
+      },
+      "FileValidationRuleResult": {
+        "type": "object",
+        "required": [
+          "rule_id",
+          "level",
+          "is_valid",
+          "conditions"
+        ],
+        "properties": {
+          "rule_id": {
+            "type": "string"
+          },
+          "rule_title": {
+            "type": "string"
+          },
+          "level": {
+            "type": "string",
+            "enum": [
+              "basic",
+              "standard",
+              "advanced"
+            ],
+            "description": "The rule's check level."
+          },
+          "is_valid": {
+            "type": "boolean",
+            "description": "True when every blocking condition passed or was skipped."
+          },
+          "failed_parts": {
+            "type": "array",
+            "description": "Error messages of blocking conditions that failed.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "warnings": {
+            "type": "array",
+            "description": "Error messages of advisory conditions that failed and of uncertain judgements.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "conditions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FileValidationConditionResult"
+            }
+          }
+        }
+      },
+      "FileValidationConditionResult": {
+        "type": "object",
+        "required": [
+          "id",
+          "operator",
+          "outcome",
+          "blocking",
+          "message"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "operator": {
+            "type": "string"
+          },
+          "outcome": {
+            "type": "string",
+            "enum": [
+              "pass",
+              "fail",
+              "uncertain",
+              "skipped"
+            ]
+          },
+          "blocking": {
+            "type": "boolean",
+            "description": "True when this outcome makes the file invalid."
+          },
+          "message": {
+            "type": "string",
+            "description": "The condition's configured error message."
+          },
+          "evidence": {
+            "type": "string"
+          },
+          "explanation": {
+            "type": "string"
+          }
+        }
       },
       "FileText": {
         "type": "object",
@@ -3788,6 +4160,26 @@
                   "example": {
                     "status": 400,
                     "error": "Bad Request: filename is required"
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      "UnprocessableEntityError": {
+        "description": "The request was well-formed but the file's type or content is not acceptable",
+        "content": {
+          "application/json": {
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/ErrorObject"
+                },
+                {
+                  "example": {
+                    "status": 422,
+                    "error": "File type not allowed"
                   }
                 }
               ]

@@ -336,6 +336,18 @@
         "responses": {}
       }
     },
+    "/v1/files/validations": {
+      "post": {
+        "operationId": "validateFile",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v1/files/{id}/preview": {
       "get": {
         "operationId": "previewFile",
@@ -667,6 +679,11 @@
     },
     "responses": {
       "BadRequestError": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "UnprocessableEntityError": {
         "content": {
           "application/json": {}
         }

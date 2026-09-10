@@ -511,6 +511,7 @@
           }
         ],
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
@@ -1974,6 +1975,7 @@
         }
       },
       "InstallRequest": {
+        "required": true,
         "content": {
           "application/json": {
             "schema": {
@@ -2254,7 +2256,7 @@
           "code": {
             "type": "string",
             "maxLength": 307200,
-            "description": "JavaScript code to execute. Must declare a top-level `async function handler(input, context)`. Maximum size: 300KB (hard limit). Security restrictions: eval() and Function() constructor are not allowed.\n"
+            "description": "JavaScript code to execute. Must declare a top-level `async function handler(input, context)`. Maximum size: 300KB (hard limit). Security restrictions: dynamic code evaluation via `eval` or the `Function` constructor is not allowed.\n"
           },
           "schedule": {
             "type": "string",
@@ -3417,7 +3419,7 @@
           "intervals": {
             "type": "array",
             "deprecated": true,
-            "description": "Deprecated. Prefer declaring a sibling `visualizationMetadata` hook on the same extension and returning `intervals` from its response — that way the supported intervals can vary per meter/contract.\nIntervals supported by the API. If omitted, it is assumed that all intervals are supported.\n",
+            "description": "Deprecated. Prefer declaring a sibling `visualizationMetadata` hook on the same extension and returning `intervals` from its response — that way the supported intervals can vary per meter/contract.\nIntervals supported by the API. If omitted, it is assumed that all intervals are supported.\n`custom` marks a period-based consumption source: records carry the `period` they cover instead of sitting on a fixed grid, and the portal shows the whole data range as one bar per record.\n",
             "items": {
               "type": "string",
               "enum": [
@@ -3425,7 +3427,8 @@
                 "PT1H",
                 "P1D",
                 "P1M",
-                "P1Y"
+                "P1Y",
+                "custom"
               ]
             }
           },
@@ -3529,7 +3532,7 @@
           "intervals": {
             "type": "array",
             "deprecated": true,
-            "description": "Deprecated. Prefer declaring a sibling `visualizationMetadata` hook on the same extension and returning `intervals` from its response — that way the supported intervals can vary per meter/contract.\nIntervals supported by the API. If omitted, it is assumed that all intervals are supported.\n",
+            "description": "Deprecated. Prefer declaring a sibling `visualizationMetadata` hook on the same extension and returning `intervals` from its response — that way the supported intervals can vary per meter/contract.\nIntervals supported by the API. If omitted, it is assumed that all intervals are supported.\n`custom` marks a period-based consumption source: records carry the `period` they cover instead of sitting on a fixed grid, and the portal shows the whole data range as one bar per record.\n",
             "items": {
               "type": "string",
               "enum": [
@@ -3537,7 +3540,8 @@
                 "PT1H",
                 "P1D",
                 "P1M",
-                "P1Y"
+                "P1Y",
+                "custom"
               ]
             }
           },
@@ -3716,7 +3720,7 @@
         "additionalProperties": false
       },
       "PortalExtensionHookVisualizationMetadata": {
-        "description": "Hook that returns runtime metadata describing how a visualization (consumption / price / cost chart) should be rendered for a given portal context (meter, contract, etc). It is invoked by the portal before fetching data, with the same context the data hook would receive, so that the discovery shape can vary per meter/contract. The expected response to the call is:\n  - 200 with a JSON body of shape:\n    {\n      \"type_options\": [\n        { \"id\": \"ht\", \"label\": { \"en\": \"High tariff\" }, \"aggregation_group\": \"consumption\", \"statistical_method\": \"sum\", \"unit\": \"kWh\", \"color\": \"primary\", \"precision\": 2 },\n        ...\n      ],\n      \"intervals\": [\"PT15M\", \"PT1H\", \"P1D\", \"P1M\", \"P1Y\"],\n      \"data_range\": { \"from\": \"2024-01-01T00:00:00Z\", \"to\": \"2026-05-01T00:00:00Z\" }\n    }\n  Each type option carries its own `statistical_method`, which describes the method already applied to that type's data and dictates the chart shape: `sum` is rendered as a bar chart; `min`, `average`, and `max` are rendered as a line chart. A single visualization can therefore mix bar-shaped types with line-shaped types. Defaults to `sum` when omitted.\n  Each type option may also customize its rendering: `color` picks a Spark palette color (`primary`, `slate`, `mauve`, `orange`, `red`, `tomato`, `amber`, `green`, `blue`) used to draw the type's series; `precision` sets the number of decimal places to show for that type's values (axis labels, tooltips, summaries). Both are optional — the consumer falls back to its own defaults when they are omitted.\n  `aggregation_group` controls how types within a group are visually combined (depends on the per-type `statistical_method`):\n    - bar chart (`sum`): same-group types are stacked into a single bar (e.g. ht/nt summed into total consumption); different-group types render side-by-side.\n    - line chart (`min` / `average` / `max`): same-group types are rendered as an area chart; different-group types render as separate lines.\n  All fields are optional; the consumer falls back to its defaults for whatever the hook does not return.\nThe portal looks up this hook implicitly per extension (one `visualizationMetadata` hook per extension) — there is no need for a data-retrieval hook to reference it explicitly.\n",
+        "description": "Hook that returns runtime metadata describing how a visualization (consumption / price / cost chart) should be rendered for a given portal context (meter, contract, etc). It is invoked by the portal before fetching data, with the same context the data hook would receive, so that the discovery shape can vary per meter/contract. The expected response to the call is:\n  - 200 with a JSON body of shape:\n    {\n      \"type_options\": [\n        { \"id\": \"ht\", \"label\": { \"en\": \"High tariff\" }, \"aggregation_group\": \"consumption\", \"statistical_method\": \"sum\", \"unit\": \"kWh\", \"color\": \"primary\", \"precision\": 2 },\n        ...\n      ],\n      \"intervals\": [\"PT15M\", \"PT1H\", \"P1D\", \"P1M\", \"P1Y\", \"custom\"],\n      \"data_range\": { \"from\": \"2024-01-01T00:00:00Z\", \"to\": \"2026-05-01T00:00:00Z\" }\n    }\n  Each type option carries its own `statistical_method`, which describes the method already applied to that type's data and dictates the chart shape: `sum` is rendered as a bar chart; `min`, `average`, and `max` are rendered as a line chart. A single visualization can therefore mix bar-shaped types with line-shaped types. Defaults to `sum` when omitted.\n  Each type option may also customize its rendering: `color` picks a Spark palette color (`primary`, `slate`, `mauve`, `orange`, `red`, `tomato`, `amber`, `green`, `blue`) used to draw the type's series; `precision` sets the number of decimal places to show for that type's values (axis labels, tooltips, summaries). Both are optional — the consumer falls back to its own defaults when they are omitted.\n  `aggregation_group` controls how types within a group are visually combined (depends on the per-type `statistical_method`):\n    - bar chart (`sum`): same-group types are stacked into a single bar (e.g. ht/nt summed into total consumption); different-group types render side-by-side.\n    - line chart (`min` / `average` / `max`): same-group types are rendered as an area chart; different-group types render as separate lines.\n  All fields are optional; the consumer falls back to its defaults for whatever the hook does not return.\nThe portal looks up this hook implicitly per extension (one `visualizationMetadata` hook per extension) — there is no need for a data-retrieval hook to reference it explicitly.\n",
         "type": "object",
         "properties": {
           "id": {
@@ -3833,7 +3837,7 @@
           "intervals": {
             "type": "array",
             "deprecated": true,
-            "description": "Deprecated. Prefer declaring a sibling `visualizationMetadata` hook on the same extension and returning `intervals` from its response — that way the supported intervals can vary per meter/contract.\nIntervals supported by the API. If omitted, it is assumed that all intervals are supported.\n",
+            "description": "Deprecated. Prefer declaring a sibling `visualizationMetadata` hook on the same extension and returning `intervals` from its response — that way the supported intervals can vary per meter/contract.\nIntervals supported by the API. If omitted, it is assumed that all intervals are supported.\n`custom` marks a period-based consumption source: records carry the `period` they cover instead of sitting on a fixed grid, and the portal shows the whole data range as one bar per record.\n",
             "items": {
               "type": "string",
               "enum": [
@@ -3841,7 +3845,8 @@
                 "PT1H",
                 "P1D",
                 "P1M",
-                "P1Y"
+                "P1Y",
+                "custom"
               ]
             }
           },
@@ -5275,10 +5280,6 @@
                 "description": "Liquid template for the cache key. Defaults to a hash of org, app, hook, `Input` and `Context`."
               }
             }
-          },
-          "use_static_ips": {
-            "type": "boolean",
-            "description": "If set, requests are sent from epilot's static egress IPs. Mutually exclusive with secure_proxy."
           },
           "secure_proxy": {
             "$ref": "#/components/schemas/PortalExtensionSecureProxy"

@@ -42,6 +42,7 @@ const { data } = await fileClient.uploadFileV2(...)
 - [`getFileSummaryJob`](#getfilesummaryjob)
 - [`generateFileSummary`](#generatefilesummary)
 - [`getFileText`](#getfiletext)
+- [`validateFile`](#validatefile)
 - [`verifyCustomDownloadUrl`](#verifycustomdownloadurl)
 - [`uploadFilePublic`](#uploadfilepublic)
 
@@ -83,6 +84,15 @@ const { data } = await fileClient.uploadFileV2(...)
 - [`FileSummaryFeedbackResponse`](#filesummaryfeedbackresponse)
 - [`PutFileSummaryFeedbackRequest`](#putfilesummaryfeedbackrequest)
 - [`FileTextStatus`](#filetextstatus)
+- [`FileValidationRequest`](#filevalidationrequest)
+- [`FileValidationFileReference`](#filevalidationfilereference)
+- [`FileValidation`](#filevalidation)
+- [`FileValidationFile`](#filevalidationfile)
+- [`FileValidationObservation`](#filevalidationobservation)
+- [`FileValidationJudgement`](#filevalidationjudgement)
+- [`FileValidationFacts`](#filevalidationfacts)
+- [`FileValidationRuleResult`](#filevalidationruleresult)
+- [`FileValidationConditionResult`](#filevalidationconditionresult)
 - [`FileText`](#filetext)
 - [`FileTextReady`](#filetextready)
 - [`FileTextNotReady`](#filetextnotready)
@@ -777,6 +787,83 @@ const { data } = await client.getFileText({
 
 ---
 
+### `validateFile`
+
+Validate an uploaded file against one or more document validation rules
+(validation-rules-api rules with `input_type: document`).
+
+`POST /v1/files/validations`
+
+```ts
+const { data } = await client.validateFile(
+  null,
+  {
+    file: {
+      entity_id: 'ef7d985c-2385-44f4-9c71-ae06a52264f8'
+    },
+    rule_ids: ['string']
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "id": "string",
+  "status": "completed",
+  "file": {
+    "entity_id": "ef7d985c-2385-44f4-9c71-ae06a52264f8",
+    "s3ref": {},
+    "filename": "string",
+    "mime_type": "string",
+    "size_bytes": 0
+  },
+  "observation": {
+    "facts": {
+      "mime_type": "string",
+      "size_bytes": 0,
+      "page_count": 0,
+      "longer_edge_px": 0,
+      "is_blank": true,
+      "is_password_protected": true
+    },
+    "judgements": {},
+    "document_type": {
+      "slug": "string",
+      "confidence": 0
+    }
+  },
+  "results": [
+    {
+      "rule_id": "string",
+      "rule_title": "string",
+      "level": "basic",
+      "is_valid": true,
+      "failed_parts": ["string"],
+      "warnings": ["string"],
+      "conditions": [
+        {
+          "id": "string",
+          "operator": "string",
+          "outcome": "pass",
+          "blocking": true,
+          "message": "string",
+          "evidence": "string",
+          "explanation": "string"
+        }
+      ]
+    }
+  ],
+  "created_at": "1970-01-01T00:00:00.000Z"
+}
+```
+
+</details>
+
+---
+
 ### `previewFile`
 
 Generate a thumbnail preview for a file entity.
@@ -1406,6 +1493,191 @@ Availability of the plain-text representation for a file entity.
 
 ```ts
 type FileTextStatus = "ready" | "not_ready" | "unsupported"
+```
+
+### `FileValidationRequest`
+
+```ts
+type FileValidationRequest = {
+  file: {
+    entity_id: string | string // uuid
+  } | {
+    s3ref: unknown
+  }
+  rule_ids: string[]
+}
+```
+
+### `FileValidationFileReference`
+
+The file to validate - a saved file entity, or an uploaded object not saved as an entity yet.
+
+```ts
+type FileValidationFileReference = {
+  entity_id: string | string // uuid
+} | {
+  s3ref: unknown
+}
+```
+
+### `FileValidation`
+
+```ts
+type FileValidation = {
+  id: string
+  status: "completed" | "pending" | "failed"
+  file: {
+    entity_id?: string | string // uuid
+    s3ref?: unknown
+    filename?: string
+    mime_type?: string
+    size_bytes?: number
+  }
+  observation: {
+    facts: {
+      mime_type?: { ... }
+      size_bytes?: { ... }
+      page_count?: { ... }
+      longer_edge_px?: { ... }
+      is_blank?: { ... }
+      is_password_protected?: { ... }
+    }
+    judgements?: Record<string, {
+      result: { ... }
+      confidence?: { ... }
+      evidence?: { ... }
+      explanation?: { ... }
+    }>
+    document_type?: {
+      slug?: { ... }
+      confidence?: { ... }
+    }
+  }
+  results: Array<{
+    rule_id: string
+    rule_title?: string
+    level: "basic" | "standard" | "advanced"
+    is_valid: boolean
+    failed_parts?: string[]
+    warnings?: string[]
+    conditions: Array<{
+      id: { ... }
+      operator: { ... }
+      outcome: { ... }
+      blocking: { ... }
+      message: { ... }
+      evidence?: { ... }
+      explanation?: { ... }
+    }>
+  }>
+  created_at: string // date-time
+}
+```
+
+### `FileValidationFile`
+
+The file that was validated, with the identity facts collected from its content.
+
+```ts
+type FileValidationFile = {
+  entity_id?: string | string // uuid
+  s3ref?: unknown
+  filename?: string
+  mime_type?: string
+  size_bytes?: number
+}
+```
+
+### `FileValidationObservation`
+
+Everything observed about the file, as passed to the validation rules engine.
+
+```ts
+type FileValidationObservation = {
+  facts: {
+    mime_type?: string
+    size_bytes?: number
+    page_count?: number
+    longer_edge_px?: number
+    is_blank?: boolean
+    is_password_protected?: boolean
+  }
+  judgements?: Record<string, {
+    result: "pass" | "fail" | "uncertain"
+    confidence?: number
+    evidence?: string
+    explanation?: string
+  }>
+  document_type?: {
+    slug?: string
+    confidence?: number
+  }
+}
+```
+
+### `FileValidationJudgement`
+
+```ts
+type FileValidationJudgement = {
+  result: "pass" | "fail" | "uncertain"
+  confidence?: number
+  evidence?: string
+  explanation?: string
+}
+```
+
+### `FileValidationFacts`
+
+Deterministic properties of the file. A property that is absent could not be determined
+(for example the resolution of an image the service cannot decode); conditions that need it
+are skipped rather than failed.
+
+
+```ts
+type FileValidationFacts = {
+  mime_type?: string
+  size_bytes?: number
+  page_count?: number
+  longer_edge_px?: number
+  is_blank?: boolean
+  is_password_protected?: boolean
+}
+```
+
+### `FileValidationRuleResult`
+
+```ts
+type FileValidationRuleResult = {
+  rule_id: string
+  rule_title?: string
+  level: "basic" | "standard" | "advanced"
+  is_valid: boolean
+  failed_parts?: string[]
+  warnings?: string[]
+  conditions: Array<{
+    id: string
+    operator: string
+    outcome: "pass" | "fail" | "uncertain" | "skipped"
+    blocking: boolean
+    message: string
+    evidence?: string
+    explanation?: string
+  }>
+}
+```
+
+### `FileValidationConditionResult`
+
+```ts
+type FileValidationConditionResult = {
+  id: string
+  operator: string
+  outcome: "pass" | "fail" | "uncertain" | "skipped"
+  blocking: boolean
+  message: string
+  evidence?: string
+  explanation?: string
+}
 ```
 
 ### `FileText`

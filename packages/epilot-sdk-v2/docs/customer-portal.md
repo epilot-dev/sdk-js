@@ -355,6 +355,11 @@ const { data } = await customerPortalClient.upsertPortal(...)
 - [`SwappableConfig`](#swappableconfig)
 - [`PortalUserRegistrationStatus`](#portaluserregistrationstatus)
 - [`BusinessPartnerItem`](#businesspartneritem)
+- [`SupportReportType`](#supportreporttype)
+- [`SupportRequestAttachment`](#supportrequestattachment)
+- [`CleverPvContext`](#cleverpvcontext)
+- [`CreateSupportRequest`](#createsupportrequest)
+- [`SupportRequestResult`](#supportrequestresult)
 
 ### `upsertPortal`
 
@@ -459,7 +464,9 @@ const { data } = await client.upsertPortal(
       start_page: true,
       billing: true,
       change_due_date: true,
-      new_design: true
+      new_design: true,
+      mcp_enabled: true,
+      mcp_grant_version: 0
     },
     accessToken: 'string',
     advanced_mfa: {
@@ -696,7 +703,9 @@ const { data } = await client.upsertPortal(
     "start_page": true,
     "billing": true,
     "change_due_date": true,
-    "new_design": true
+    "new_design": true,
+    "mcp_enabled": true,
+    "mcp_grant_version": 0
   },
   "accessToken": "string",
   "advanced_mfa": {
@@ -1070,7 +1079,9 @@ const { data } = await client.getPortalConfigByDomain({
     "start_page": true,
     "billing": true,
     "change_due_date": true,
-    "new_design": true
+    "new_design": true,
+    "mcp_enabled": true,
+    "mcp_grant_version": 0
   },
   "accessToken": "string",
   "advanced_mfa": {
@@ -1347,7 +1358,9 @@ const { data } = await client.getPortalConfig({
     "start_page": true,
     "billing": true,
     "change_due_date": true,
-    "new_design": true
+    "new_design": true,
+    "mcp_enabled": true,
+    "mcp_grant_version": 0
   },
   "accessToken": "string",
   "advanced_mfa": {
@@ -2136,6 +2149,10 @@ const { data } = await client.getConsumption({
       "label": {
         "en": "Billing period 1",
         "de": "Abrechnungszeitraum 1"
+      },
+      "period": {
+        "from": "2024-01-03T00:00:00.000Z",
+        "to": "2025-01-05T00:00:00.000Z"
       }
     }
   ]
@@ -2513,7 +2530,9 @@ const { data } = await client.getPublicPortalConfig({
     "start_page": true,
     "billing": true,
     "change_due_date": true,
-    "new_design": true
+    "new_design": true,
+    "mcp_enabled": true,
+    "mcp_grant_version": 0
   },
   "accessToken": "string",
   "advanced_mfa": {
@@ -2790,7 +2809,9 @@ const { data } = await client.getOrgPortalConfig({
     "start_page": true,
     "billing": true,
     "change_due_date": true,
-    "new_design": true
+    "new_design": true,
+    "mcp_enabled": true,
+    "mcp_grant_version": 0
   },
   "accessToken": "string",
   "advanced_mfa": {
@@ -3076,7 +3097,9 @@ const { data } = await client.getPublicPortalConfigV3({
     "start_page": true,
     "billing": true,
     "change_due_date": true,
-    "new_design": true
+    "new_design": true,
+    "mcp_enabled": true,
+    "mcp_grant_version": 0
   },
   "accessToken": "string",
   "advanced_mfa": {
@@ -3353,7 +3376,9 @@ const { data } = await client.getOrgPortalConfigV3({
     "start_page": true,
     "billing": true,
     "change_due_date": true,
-    "new_design": true
+    "new_design": true,
+    "mcp_enabled": true,
+    "mcp_grant_version": 0
   },
   "accessToken": "string",
   "advanced_mfa": {
@@ -8291,7 +8316,9 @@ const { data } = await client.createPortalConfig(
       start_page: true,
       billing: true,
       change_due_date: true,
-      new_design: true
+      new_design: true,
+      mcp_enabled: true,
+      mcp_grant_version: 0
     },
     accessToken: 'string',
     advanced_mfa: {
@@ -8570,7 +8597,9 @@ const { data } = await client.createPortalConfig(
     "start_page": true,
     "billing": true,
     "change_due_date": true,
-    "new_design": true
+    "new_design": true,
+    "mcp_enabled": true,
+    "mcp_grant_version": 0
   },
   "accessToken": "string",
   "advanced_mfa": {
@@ -8884,7 +8913,9 @@ const { data } = await client.getPortalConfigV3({
     "start_page": true,
     "billing": true,
     "change_due_date": true,
-    "new_design": true
+    "new_design": true,
+    "mcp_enabled": true,
+    "mcp_grant_version": 0
   },
   "accessToken": "string",
   "advanced_mfa": {
@@ -9194,7 +9225,9 @@ const { data } = await client.putPortalConfig(
       start_page: true,
       billing: true,
       change_due_date: true,
-      new_design: true
+      new_design: true,
+      mcp_enabled: true,
+      mcp_grant_version: 0
     },
     accessToken: 'string',
     advanced_mfa: {
@@ -9494,7 +9527,9 @@ const { data } = await client.putPortalConfig(
     "start_page": true,
     "billing": true,
     "change_due_date": true,
-    "new_design": true
+    "new_design": true,
+    "mcp_enabled": true,
+    "mcp_grant_version": 0
   },
   "accessToken": "string",
   "advanced_mfa": {
@@ -9934,7 +9969,9 @@ const { data } = await client.clonePortalConfig(
     "start_page": true,
     "billing": true,
     "change_due_date": true,
-    "new_design": true
+    "new_design": true,
+    "mcp_enabled": true,
+    "mcp_grant_version": 0
   },
   "accessToken": "string",
   "advanced_mfa": {
@@ -10992,6 +11029,8 @@ type CommonConfigAttributes = {
     billing?: boolean
     change_due_date?: boolean
     new_design?: boolean
+    mcp_enabled?: boolean
+    mcp_grant_version?: number
   }
   accessToken?: string
   advanced_mfa?: {
@@ -11030,8 +11069,6 @@ type CommonConfigAttributes = {
       password_history_size?: { ... }
     }
   }
-  config?: string
-  contact_identifiers?: string[]
   // ...
 }
 ```
@@ -11217,6 +11254,8 @@ type PortalConfig = {
     billing?: boolean
     change_due_date?: boolean
     new_design?: boolean
+    mcp_enabled?: boolean
+    mcp_grant_version?: number
   }
   accessToken?: string
   advanced_mfa?: {
@@ -11255,8 +11294,6 @@ type PortalConfig = {
       password_history_size?: { ... }
     }
   }
-  config?: string
-  contact_identifiers?: string[]
   // ...
 }
 ```
@@ -13175,7 +13212,7 @@ type VisualizationMetadata = {
     color?: "primary" | "slate" | "mauve" | "orange" | "red" | "tomato" | "amber" | "green" | "blue"
     precision?: number
   }>
-  intervals?: "PT15M" | "PT1H" | "P1D" | "P1M" | "P1Y"[]
+  intervals?: "PT15M" | "PT1H" | "P1D" | "P1M" | "P1Y" | "custom"[]
   data_range?: {
     from?: string // date-time
     to?: string // date-time
@@ -14403,6 +14440,8 @@ type CommonConfigAttributesV3 = {
     billing?: boolean
     change_due_date?: boolean
     new_design?: boolean
+    mcp_enabled?: boolean
+    mcp_grant_version?: number
   }
   accessToken?: string
   advanced_mfa?: {
@@ -14441,8 +14480,6 @@ type CommonConfigAttributesV3 = {
       password_history_size?: { ... }
     }
   }
-  config?: string
-  contact_identifiers?: string[]
   // ...
 }
 ```
@@ -14693,6 +14730,7 @@ type PortalConfigV3 = {
 type JuiceSettings = {
   is_dummy?: boolean
   is_canary?: boolean
+  is_legacy_design?: boolean
   redirect_to?: string
 }
 ```
@@ -14723,5 +14761,82 @@ type BusinessPartnerItem = {
   first_name?: string
   last_name?: string
   access_status?: boolean
+}
+```
+
+### `SupportReportType`
+
+```ts
+type SupportReportType = "bug" | "feedback"
+```
+
+### `SupportRequestAttachment`
+
+```ts
+type SupportRequestAttachment = {
+  filename: string
+  mime_type: string
+  contents: string
+}
+```
+
+### `CleverPvContext`
+
+```ts
+type CleverPvContext = {
+  screen?: string
+  version?: string
+  connection_state?: string
+  locale?: string
+  timezone?: string
+  firmware_version?: string
+  build?: string
+  trace_id?: string
+  device?: Record<string, unknown>
+  vendor?: {
+    id?: string
+    name?: string
+  }
+}
+```
+
+### `CreateSupportRequest`
+
+```ts
+type CreateSupportRequest = {
+  report_type: "bug" | "feedback"
+  description: string
+  submission_id: string
+  site_id?: string // uuid
+  device_id?: string // uuid
+  clever_pv?: {
+    screen?: string
+    version?: string
+    connection_state?: string
+    locale?: string
+    timezone?: string
+    firmware_version?: string
+    build?: string
+    trace_id?: string
+    device?: Record<string, unknown>
+    vendor?: {
+      id?: { ... }
+      name?: { ... }
+    }
+  }
+  attachments?: Array<{
+    filename: string
+    mime_type: string
+    contents: string
+  }>
+}
+```
+
+### `SupportRequestResult`
+
+```ts
+type SupportRequestResult = {
+  reference: string
+  status: string
 }
 ```

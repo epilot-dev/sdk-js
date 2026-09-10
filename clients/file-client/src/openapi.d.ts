@@ -169,6 +169,28 @@ declare namespace Components {
              */
             error?: string;
         }
+        /**
+         * A generic error returned by the API
+         * example:
+         * {
+         *   "status": 422,
+         *   "error": "File type not allowed"
+         * }
+         */
+        export interface UnprocessableEntityError {
+            /**
+             * The HTTP status code of the error
+             * example:
+             * 400
+             */
+            status?: number;
+            /**
+             * The error message
+             * example:
+             * Bad Request
+             */
+            error?: string;
+        }
     }
     namespace Schemas {
         /**
@@ -2911,6 +2933,160 @@ declare namespace Components {
              */
             public_url?: string; // url
         }
+        export interface FileValidation {
+            /**
+             * Identifier of this validation run.
+             */
+            id: string;
+            /**
+             * `completed` when every rule was evaluated. `pending` is reserved for check levels that
+             * need asynchronous content extraction; `failed` when the observation could not be produced.
+             *
+             */
+            status: "completed" | "pending" | "failed";
+            file: /* The file that was validated, with the identity facts collected from its content. */ FileValidationFile;
+            observation: /* Everything observed about the file, as passed to the validation rules engine. */ FileValidationObservation;
+            results: FileValidationRuleResult[];
+            created_at: string; // date-time
+        }
+        export interface FileValidationConditionResult {
+            id: string;
+            operator: string;
+            outcome: "pass" | "fail" | "uncertain" | "skipped";
+            /**
+             * True when this outcome makes the file invalid.
+             */
+            blocking: boolean;
+            /**
+             * The condition's configured error message.
+             */
+            message: string;
+            evidence?: string;
+            explanation?: string;
+        }
+        /**
+         * Deterministic properties of the file. A property that is absent could not be determined
+         * (for example the resolution of an image the service cannot decode); conditions that need it
+         * are skipped rather than failed.
+         *
+         */
+        export interface FileValidationFacts {
+            mime_type?: string;
+            size_bytes?: number;
+            /**
+             * Pages of a PDF; 1 for images.
+             */
+            page_count?: number;
+            /**
+             * Longer edge of an image in pixels.
+             */
+            longer_edge_px?: number;
+            is_blank?: boolean;
+            is_password_protected?: boolean;
+        }
+        /**
+         * The file that was validated, with the identity facts collected from its content.
+         */
+        export interface FileValidationFile {
+            entity_id?: /**
+             * example:
+             * ef7d985c-2385-44f4-9c71-ae06a52264f8
+             */
+            FileEntityId;
+            s3ref?: S3Ref;
+            filename?: string;
+            /**
+             * Mime type detected from the file content, falling back to the declared type.
+             */
+            mime_type?: string;
+            size_bytes?: number;
+        }
+        /**
+         * The file to validate - a saved file entity, or an uploaded object not saved as an entity yet.
+         */
+        export type FileValidationFileReference = /* The file to validate - a saved file entity, or an uploaded object not saved as an entity yet. */ {
+            entity_id: /**
+             * example:
+             * ef7d985c-2385-44f4-9c71-ae06a52264f8
+             */
+            FileEntityId;
+        } | {
+            s3ref: S3Ref;
+        };
+        export interface FileValidationJudgement {
+            result: "pass" | "fail" | "uncertain";
+            confidence?: number;
+            evidence?: string;
+            explanation?: string;
+        }
+        /**
+         * Everything observed about the file, as passed to the validation rules engine.
+         */
+        export interface FileValidationObservation {
+            facts: /**
+             * Deterministic properties of the file. A property that is absent could not be determined
+             * (for example the resolution of an image the service cannot decode); conditions that need it
+             * are skipped rather than failed.
+             *
+             */
+            FileValidationFacts;
+            /**
+             * Content judgements keyed by condition id, produced by the document requirements
+             * check for `meetsCriteria` conditions at the `standard` and `advanced` levels.
+             * Absent when no content check ran (basic level, unsupported file, or the check
+             * did not finish within its budget).
+             *
+             */
+            judgements?: {
+                [name: string]: FileValidationJudgement;
+            };
+            /**
+             * Document type detected by the content check, when it ran.
+             */
+            document_type?: {
+                slug?: string;
+                confidence?: number;
+            };
+        }
+        export interface FileValidationRequest {
+            file: /* The file to validate - a saved file entity, or an uploaded object not saved as an entity yet. */ FileValidationFileReference;
+            /**
+             * Document validation rules to evaluate. Rules of another input type are rejected.
+             */
+            rule_ids: [
+                string,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?
+            ];
+        }
+        export interface FileValidationRuleResult {
+            rule_id: string;
+            rule_title?: string;
+            /**
+             * The rule's check level.
+             */
+            level: "basic" | "standard" | "advanced";
+            /**
+             * True when every blocking condition passed or was skipped.
+             */
+            is_valid: boolean;
+            /**
+             * Error messages of blocking conditions that failed.
+             */
+            failed_parts?: string[];
+            /**
+             * Error messages of advisory conditions that failed and of uncertain judgements.
+             */
+            warnings?: string[];
+            conditions: FileValidationConditionResult[];
+        }
         export interface PublicLink {
             /**
              * ID of the public link
@@ -4858,6 +5034,15 @@ declare namespace Paths {
              * }
              */
             Components.Responses.UnauthorizedError;
+            export type $422 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 422,
+             *   "error": "File type not allowed"
+             * }
+             */
+            Components.Responses.UnprocessableEntityError;
             export type $500 = /**
              * A generic error returned by the API
              * example:
@@ -4942,6 +5127,15 @@ declare namespace Paths {
              * }
              */
             Components.Responses.NotFoundError;
+            export type $422 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 422,
+             *   "error": "File type not allowed"
+             * }
+             */
+            Components.Responses.UnprocessableEntityError;
             export type $500 = /**
              * A generic error returned by the API
              * example:
@@ -5048,6 +5242,15 @@ declare namespace Paths {
              * }
              */
             Components.Responses.UnauthorizedError;
+            export type $422 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 422,
+             *   "error": "File type not allowed"
+             * }
+             */
+            Components.Responses.UnprocessableEntityError;
             export type $500 = /**
              * A generic error returned by the API
              * example:
@@ -5086,6 +5289,15 @@ declare namespace Paths {
              * }
              */
             Components.Responses.BadRequestError;
+            export type $422 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 422,
+             *   "error": "File type not allowed"
+             * }
+             */
+            Components.Responses.UnprocessableEntityError;
             export type $500 = /**
              * A generic error returned by the API
              * example:
@@ -5129,6 +5341,68 @@ declare namespace Paths {
              * }
              */
             Components.Responses.UnauthorizedError;
+            export type $422 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 422,
+             *   "error": "File type not allowed"
+             * }
+             */
+            Components.Responses.UnprocessableEntityError;
+            export type $500 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 500,
+             *   "error": "Internal Server Error"
+             * }
+             */
+            Components.Responses.InternalServerError;
+        }
+    }
+    namespace ValidateFile {
+        export type RequestBody = Components.Schemas.FileValidationRequest;
+        namespace Responses {
+            export type $200 = Components.Schemas.FileValidation;
+            export type $400 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 400,
+             *   "error": "Bad Request: filename is required"
+             * }
+             */
+            Components.Responses.BadRequestError;
+            export type $401 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 401,
+             *   "error": "Unauthorized: Invalid or expired token"
+             * }
+             */
+            Components.Responses.UnauthorizedError;
+            export type $403 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 403,
+             *   "error": "Forbidden: You do not have permission to access this file"
+             * }
+             */
+            Components.Responses.ForbiddenError;
+            export type $404 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 404,
+             *   "error": "Not Found: File entity not found"
+             * }
+             */
+            Components.Responses.NotFoundError;
+            export type $413 = /* A generic error returned by the API */ Components.Schemas.ErrorObject;
+            export type $422 = /* A generic error returned by the API */ Components.Schemas.ErrorObject;
             export type $500 = /**
              * A generic error returned by the API
              * example:
@@ -5374,23 +5648,23 @@ export interface OperationMethods {
   ): OperationResponse<Paths.GetFileSummary.Responses.$200>
   /**
    * getFileSummaryFeedback - Get file summary feedback
-   *
+   * 
    * Get the authenticated user's feedback for the current generated file summary.
    */
   'getFileSummaryFeedback'(
     parameters?: Parameters<Paths.GetFileSummaryFeedback.PathParameters> | null,
     data?: any,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetFileSummaryFeedback.Responses.$200>
   /**
    * putFileSummaryFeedback - Submit file summary feedback
-   *
+   * 
    * Upsert thumbs up/down feedback for the current generated file summary.
    */
   'putFileSummaryFeedback'(
     parameters?: Parameters<Paths.PutFileSummaryFeedback.PathParameters> | null,
     data?: Paths.PutFileSummaryFeedback.RequestBody,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.PutFileSummaryFeedback.Responses.$200>
   /**
    * createFileSummaryJob - createFileSummaryJob
@@ -5442,6 +5716,29 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetFileText.Responses.$200>
+  /**
+   * validateFile - validateFile
+   * 
+   * Validate an uploaded file against one or more document validation rules
+   * (validation-rules-api rules with `input_type: document`).
+   * 
+   * The file is referenced either by its file entity id or, for an upload that has not been
+   * saved as an entity yet (e.g. a journey upload in the temporary prefix), by its S3 reference.
+   * The service collects an observation of the file - deterministic facts such as the sniffed
+   * mime type, size, page count, image resolution, blank and password-protection detection -
+   * and evaluates every rule against it with the shared validation rules engine.
+   * 
+   * The response carries one result per rule with a per-condition outcome (`pass`, `fail`,
+   * `uncertain`, `skipped`), plus the observation the results were derived from. `status` is
+   * `completed` for checks that finish synchronously; `pending` is reserved for check levels
+   * that need asynchronous content extraction.
+   * 
+   */
+  'validateFile'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.ValidateFile.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ValidateFile.Responses.$200>
   /**
    * previewFile - previewFile
    * 
@@ -5917,23 +6214,23 @@ export interface PathsDictionary {
   ['/v1/files/{id}/summary/feedback']: {
     /**
      * getFileSummaryFeedback - Get file summary feedback
-     *
+     * 
      * Get the authenticated user's feedback for the current generated file summary.
      */
     'get'(
       parameters?: Parameters<Paths.GetFileSummaryFeedback.PathParameters> | null,
       data?: any,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetFileSummaryFeedback.Responses.$200>
     /**
      * putFileSummaryFeedback - Submit file summary feedback
-     *
+     * 
      * Upsert thumbs up/down feedback for the current generated file summary.
      */
     'put'(
       parameters?: Parameters<Paths.PutFileSummaryFeedback.PathParameters> | null,
       data?: Paths.PutFileSummaryFeedback.RequestBody,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.PutFileSummaryFeedback.Responses.$200>
   }
   ['/v1/files/{id}/summary-jobs']: {
@@ -5995,6 +6292,31 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetFileText.Responses.$200>
+  }
+  ['/v1/files/validations']: {
+    /**
+     * validateFile - validateFile
+     * 
+     * Validate an uploaded file against one or more document validation rules
+     * (validation-rules-api rules with `input_type: document`).
+     * 
+     * The file is referenced either by its file entity id or, for an upload that has not been
+     * saved as an entity yet (e.g. a journey upload in the temporary prefix), by its S3 reference.
+     * The service collects an observation of the file - deterministic facts such as the sniffed
+     * mime type, size, page count, image resolution, blank and password-protection detection -
+     * and evaluates every rule against it with the shared validation rules engine.
+     * 
+     * The response carries one result per rule with a per-condition outcome (`pass`, `fail`,
+     * `uncertain`, `skipped`), plus the observation the results were derived from. `status` is
+     * `completed` for checks that finish synchronously; `pending` is reserved for check levels
+     * that need asynchronous content extraction.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.ValidateFile.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ValidateFile.Responses.$200>
   }
   ['/v1/files/{id}/preview']: {
     /**
@@ -6317,6 +6639,15 @@ export type FileTextStatus = Components.Schemas.FileTextStatus;
 export type FileTextUnsupported = Components.Schemas.FileTextUnsupported;
 export type FileType = Components.Schemas.FileType;
 export type FileUpload = Components.Schemas.FileUpload;
+export type FileValidation = Components.Schemas.FileValidation;
+export type FileValidationConditionResult = Components.Schemas.FileValidationConditionResult;
+export type FileValidationFacts = Components.Schemas.FileValidationFacts;
+export type FileValidationFile = Components.Schemas.FileValidationFile;
+export type FileValidationFileReference = Components.Schemas.FileValidationFileReference;
+export type FileValidationJudgement = Components.Schemas.FileValidationJudgement;
+export type FileValidationObservation = Components.Schemas.FileValidationObservation;
+export type FileValidationRequest = Components.Schemas.FileValidationRequest;
+export type FileValidationRuleResult = Components.Schemas.FileValidationRuleResult;
 export type PublicLink = Components.Schemas.PublicLink;
 export type PutFileSummaryFeedbackRequest = Components.Schemas.PutFileSummaryFeedbackRequest;
 export type S3Ref = Components.Schemas.S3Ref;

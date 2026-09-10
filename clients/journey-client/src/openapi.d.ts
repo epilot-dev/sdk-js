@@ -424,7 +424,15 @@ declare namespace Components {
             createdAt: string;
             lastModifiedAt: string;
             deletedAt?: string;
+            /**
+             * Revision row number of this item. `0` is the journey record, the published version.
+             *
+             */
             version: number;
+            /**
+             * Legacy change counter of the published version, kept for compatibility: bumped whenever the published version changes and used for optimistic concurrency on `PUT`, by submissions (`journey_context.journey_revision`) and by save-and-continue. Saving a revision never changes it. Versioning metadata is only available via `publish-state`.
+             *
+             */
             revisions: number;
             featureFlags?: {
                 [name: string]: any;
@@ -446,7 +454,15 @@ declare namespace Components {
             createdAt: string;
             lastModifiedAt: string;
             deletedAt?: string;
+            /**
+             * Revision row number of this item. `0` is the journey record, the published version.
+             *
+             */
             version: number;
+            /**
+             * Legacy change counter of the published version, kept for compatibility: bumped whenever the published version changes and used for optimistic concurrency on `PUT`, by submissions (`journey_context.journey_revision`) and by save-and-continue. Saving a revision never changes it. Versioning metadata is only available via `publish-state`.
+             *
+             */
             revisions: number;
         }
         export interface JourneyCreationRequest {
@@ -1015,8 +1031,697 @@ declare namespace Components {
                 [key: string]: any;
             };
         }[];
+        export interface JourneyPublishState {
+            journey_id: string; // uuid
+            /**
+             * An explicit `null` means the journey has not adopted versioning yet: it exists, customers receive its journey record, and no revision is the published version.
+             *
+             * example:
+             * 42
+             */
+            published_revision_id: string | null;
+            published_at?: string; // date-time
+            published_by?: string;
+        }
         export interface JourneyResponse {
             createdJourney?: Journey;
+        }
+        export interface JourneyRevision {
+            /**
+             * Opaque identifier of the revision. Moves on every save.
+             * example:
+             * 42
+             */
+            revision_id: string;
+            created_at: string; // date-time
+            /**
+             * User id of the author. Absent for revisions recorded from writes without a user, e.g. blueprint installs.
+             *
+             */
+            created_by?: string;
+            /**
+             * Set at publish time only, so present if and only if this revision has been published at least once.
+             *
+             * example:
+             * Summer campaign
+             */
+            name?: string;
+            description?: string;
+            /**
+             * The last time this revision was published. Not the same question as `is_published`: a revision that was the published version yesterday still carries a `published_at`.
+             *
+             */
+            published_at?: string; // date-time
+            /**
+             * Whether this revision is the published version right now.
+             */
+            is_published: boolean;
+            /**
+             * Version of the entity-mapping config stored alongside this revision.
+             * example:
+             * 12
+             */
+            mapping_config_version?: number;
+            /**
+             * The journey configuration as it was saved in this revision, in the shape the builder holds a journey in.
+             *
+             */
+            configuration: {
+                [name: string]: any;
+                journeyId?: string;
+                organizationId: string;
+                brandId?: string;
+                name: string;
+                steps: {
+                    showStepName?: boolean | null;
+                    title?: string | null;
+                    subTitle?: string | null;
+                    showStepSubtitle?: boolean | null;
+                    showStepper?: boolean | null;
+                    showStepperLabels?: boolean | null;
+                    stepperType?: "numbers" | "progress bar";
+                    hideNextButton?: boolean | null;
+                    name: string;
+                    stepId?: string;
+                    schema: any;
+                    uischema: any;
+                    maxWidth?: "small" | "medium" | "large" | "extra large";
+                }[];
+                design?: {
+                    logoUrl?: string | null;
+                    theme?: {
+                        [name: string]: any;
+                    };
+                    designTokens?: {
+                        [key: string]: any;
+                    };
+                };
+                rules?: {
+                    type: "inject" | "injectWithKey";
+                    sourceType: "journey" | "step" | "block";
+                    source: string;
+                    target: string;
+                }[];
+                logics?: {
+                    autoGeneratedId?: string;
+                    conditions: string[];
+                    actions: string[];
+                }[];
+                logicsV4?: {
+                    [name: string]: {
+                        /**
+                         * Unique identifier for logic. Use uuidv7
+                         */
+                        id?: string; // uuid
+                        /**
+                         * If true, logic can't be manipulated by the configuring user
+                         */
+                        protected?: boolean;
+                        /**
+                         * Indicates which action to take in case logic evaluates to true
+                         */
+                        action?: string;
+                        /**
+                         * Indicates when the logic should be evaluated
+                         */
+                        triggeredOn?: string;
+                        conditions?: {
+                            /**
+                             * Operator to be applied between the fact value and the value
+                             */
+                            operator?: string;
+                            /**
+                             * If operator is a custom function, this needs to be provided
+                             */
+                            functionName?: string;
+                            fact?: {
+                                /**
+                                 * Unique identifier for a fact
+                                 */
+                                id?: string; // uuid
+                                /**
+                                 * Indicates reference type (block or context parameter)
+                                 */
+                                referenceType?: string;
+                                /**
+                                 * Id of the reference
+                                 */
+                                referenceId?: string;
+                                /**
+                                 * Path to a property. Used if only part of the value is needed
+                                 */
+                                path?: string;
+                                /**
+                                 * If path is a reference, indicates the intention of it
+                                 */
+                                meaning?: string;
+                            };
+                            value?: string | number | boolean | {
+                                [key: string]: any;
+                            } | any[];
+                            args?: {
+                                [key: string]: any;
+                            };
+                        }[][];
+                        /**
+                         * Logic specific settings. Will vary by type of logic
+                         */
+                        settings?: {
+                            [key: string]: any;
+                        };
+                    };
+                };
+                contextSchema?: {
+                    /**
+                     * Unique identifier for the context schema item
+                     */
+                    id?: string; // uuid
+                    /**
+                     * Type of the parameter. It could be either an entity slug, or a text
+                     */
+                    type: string;
+                    /**
+                     * Expected key to be received in the context
+                     */
+                    paramKey: string;
+                    /**
+                     * Indicates if a value is expected to be provided
+                     */
+                    isRequired?: boolean;
+                    /**
+                     * If type is not text, we can instruct the journey to fetch the entity id we receive as value
+                     */
+                    shouldLoadEntity?: boolean;
+                    /**
+                     * Human-readable note describing the parameter's purpose. Free text; may contain newlines.
+                     */
+                    description?: string | null;
+                }[];
+                /**
+                 * Journey Template
+                 * example:
+                 * Sales template (Premium)
+                 */
+                journey_type?: string;
+                /**
+                 * If true, journey is displayed in read-only mode
+                 */
+                protected?: boolean;
+                /**
+                 * Whitelist of paths that remain editable when the journey is protected. Supports wildcard patterns (e.g. steps/*​/blocks/**).
+                 */
+                protectedEditable?: string[];
+                settings?: {
+                    embedOptions?: {
+                        mode?: "full-screen" | "inline";
+                        /**
+                         * example:
+                         * de
+                         */
+                        lang?: string;
+                        width?: string;
+                        topBar?: boolean;
+                        scrollToTop?: boolean;
+                        button?: {
+                            text?: string | null;
+                            align?: "left" | "center" | "right";
+                        };
+                    };
+                    safeModeAutomation?: boolean;
+                    /**
+                     * DEPRECATED - This API will return hardcoded value of false. Please note that this field is internal to epilot and should not be used by external clients. If you wish to get the canary flag, please use the /v1/journey/{id}/settings API.
+                     */
+                    canary?: boolean;
+                    designId: string;
+                    templateId?: string | null;
+                    entityId?: string | null;
+                    mappingsAutomationId?: string;
+                    /**
+                     * When true, the journey is created without a mapping config or automation; mappings are managed as advanced mappings on a lazily created automation.
+                     */
+                    newMappings?: boolean;
+                    targetedCustomer?: string;
+                    description?: string | null;
+                    organizationSettings?: {
+                        [name: string]: boolean;
+                    } | null;
+                    publicToken?: string | null;
+                    runtimeEntities?: ("ORDER" | "OPPORTUNITY")[];
+                    filePurposes?: string[];
+                    entityTags?: string[];
+                    /**
+                     * @deprecated Use addressSuggestionsFileId instead
+                     */
+                    addressSuggestionsFileUrl?: string | null;
+                    addressSuggestionsFileId?: string | null;
+                    /**
+                     * Country code for address format (e.g. DE, AT, CH, LU)
+                     */
+                    addressSuggestionsCountryCode?: string | null;
+                    /**
+                     * Whether address auto-complete is enabled
+                     */
+                    addressSuggestionsEnableAutoComplete?: boolean;
+                    /**
+                     * Sources for address auto-complete (e.g. deutschePostService, customAddressesFile)
+                     */
+                    addressSuggestionsSource?: string[];
+                    /**
+                     * Whether free text input is allowed when auto-complete is on
+                     */
+                    addressSuggestionsEnableFreeText?: boolean;
+                    /**
+                     * This property is deprecated and will be removed in a future version
+                     */
+                    useNewDesign?: boolean;
+                    /**
+                     * If true, some journey input labels are in Austrian format
+                     */
+                    useAustrianLabels?: boolean;
+                    /**
+                     * If true, the journey shows an icon to toggle dark mode
+                     */
+                    enableDarkMode?: boolean;
+                    accessMode?: "PUBLIC" | "PRIVATE";
+                    /**
+                     * Steps after this step require an authenticated session (auth gate)
+                     */
+                    authGate?: {
+                        /**
+                         * The step containing the Login & Registration block
+                         */
+                        stepId: string;
+                    };
+                    isPublished?: boolean;
+                    status?: string;
+                    isActive?: boolean;
+                    savingProgress?: {
+                        mode?: "auto" | "local" | "remote" | "none";
+                        supportedRevision?: number;
+                    };
+                    /**
+                     * If false, third-party cookies are disabled to comply with GDPR regulations without asking for consent.
+                     */
+                    thirdPartyCookies?: boolean;
+                };
+                validationRules?: /**
+                 * References to validation rules organized by blocks and fields.
+                 * Maps block IDs to either one or more ordered rule IDs (for block-level rules)
+                 * or rule references (for field-level rules).
+                 *
+                 * example:
+                 * {
+                 *   "block1": "rule123",
+                 *   "block2": [
+                 *     "rule456",
+                 *     "rule789"
+                 *   ],
+                 *   "block3": {
+                 *     "field1": "rule101",
+                 *     "field2": [
+                 *       "rule102",
+                 *       "rule103"
+                 *     ]
+                 *   }
+                 * }
+                 */
+                ValidationRuleRef;
+                /**
+                 * Manifest/Blueprint ID used to create/update the entity
+                 */
+                _manifest?: string /* uuid */[];
+                createdBy?: string;
+                updatedBy?: string | null;
+                /**
+                 * If passed with value of null, the API won't modify the lastModifiedAt field on updating the journey
+                 */
+                __lastModifiedAt?: string | null;
+                createdAt: string;
+                lastModifiedAt: string;
+                deletedAt?: string;
+                /**
+                 * Revision row number of this item. `0` is the journey record, the published version.
+                 *
+                 */
+                version: number;
+                /**
+                 * Legacy change counter of the published version, kept for compatibility: bumped whenever the published version changes and used for optimistic concurrency on `PUT`, by submissions (`journey_context.journey_revision`) and by save-and-continue. Saving a revision never changes it. Versioning metadata is only available via `publish-state`.
+                 *
+                 */
+                revisions: number;
+                featureFlags?: {
+                    [name: string]: any;
+                };
+            };
+        }
+        export interface JourneyRevisionConflict {
+            /**
+             * example:
+             * The journey has been saved since your editor loaded it
+             */
+            message: string;
+            latest_revision: JourneyRevisionSummary;
+        }
+        export interface JourneyRevisionList {
+            results: JourneyRevisionSummary[];
+            /**
+             * Opaque cursor to pass back as `cursor` to fetch the next page. Absent when the client has reached the end of the history.
+             *
+             */
+            next_cursor?: string;
+        }
+        /**
+         * The complete journey configuration a revision is created from, same shape as the `PUT` body. Server-managed attributes of the journey record (`revisions`, `version`, publish metadata) are ignored.
+         *
+         */
+        export interface JourneyRevisionRequest {
+            [name: string]: any;
+            journeyId?: string;
+            organizationId: string;
+            brandId?: string;
+            name: string;
+            steps: {
+                showStepName?: boolean | null;
+                title?: string | null;
+                subTitle?: string | null;
+                showStepSubtitle?: boolean | null;
+                showStepper?: boolean | null;
+                showStepperLabels?: boolean | null;
+                stepperType?: "numbers" | "progress bar";
+                hideNextButton?: boolean | null;
+                name: string;
+                stepId?: string;
+                schema: any;
+                uischema: any;
+                maxWidth?: "small" | "medium" | "large" | "extra large";
+            }[];
+            design?: {
+                logoUrl?: string | null;
+                theme?: {
+                    [name: string]: any;
+                };
+                designTokens?: {
+                    [key: string]: any;
+                };
+            };
+            rules?: {
+                type: "inject" | "injectWithKey";
+                sourceType: "journey" | "step" | "block";
+                source: string;
+                target: string;
+            }[];
+            logics?: {
+                autoGeneratedId?: string;
+                conditions: string[];
+                actions: string[];
+            }[];
+            logicsV4?: {
+                [name: string]: {
+                    /**
+                     * Unique identifier for logic. Use uuidv7
+                     */
+                    id?: string; // uuid
+                    /**
+                     * If true, logic can't be manipulated by the configuring user
+                     */
+                    protected?: boolean;
+                    /**
+                     * Indicates which action to take in case logic evaluates to true
+                     */
+                    action?: string;
+                    /**
+                     * Indicates when the logic should be evaluated
+                     */
+                    triggeredOn?: string;
+                    conditions?: {
+                        /**
+                         * Operator to be applied between the fact value and the value
+                         */
+                        operator?: string;
+                        /**
+                         * If operator is a custom function, this needs to be provided
+                         */
+                        functionName?: string;
+                        fact?: {
+                            /**
+                             * Unique identifier for a fact
+                             */
+                            id?: string; // uuid
+                            /**
+                             * Indicates reference type (block or context parameter)
+                             */
+                            referenceType?: string;
+                            /**
+                             * Id of the reference
+                             */
+                            referenceId?: string;
+                            /**
+                             * Path to a property. Used if only part of the value is needed
+                             */
+                            path?: string;
+                            /**
+                             * If path is a reference, indicates the intention of it
+                             */
+                            meaning?: string;
+                        };
+                        value?: string | number | boolean | {
+                            [key: string]: any;
+                        } | any[];
+                        args?: {
+                            [key: string]: any;
+                        };
+                    }[][];
+                    /**
+                     * Logic specific settings. Will vary by type of logic
+                     */
+                    settings?: {
+                        [key: string]: any;
+                    };
+                };
+            };
+            contextSchema?: {
+                /**
+                 * Unique identifier for the context schema item
+                 */
+                id?: string; // uuid
+                /**
+                 * Type of the parameter. It could be either an entity slug, or a text
+                 */
+                type: string;
+                /**
+                 * Expected key to be received in the context
+                 */
+                paramKey: string;
+                /**
+                 * Indicates if a value is expected to be provided
+                 */
+                isRequired?: boolean;
+                /**
+                 * If type is not text, we can instruct the journey to fetch the entity id we receive as value
+                 */
+                shouldLoadEntity?: boolean;
+                /**
+                 * Human-readable note describing the parameter's purpose. Free text; may contain newlines.
+                 */
+                description?: string | null;
+            }[];
+            /**
+             * Journey Template
+             * example:
+             * Sales template (Premium)
+             */
+            journey_type?: string;
+            /**
+             * If true, journey is displayed in read-only mode
+             */
+            protected?: boolean;
+            /**
+             * Whitelist of paths that remain editable when the journey is protected. Supports wildcard patterns (e.g. steps/*​/blocks/**).
+             */
+            protectedEditable?: string[];
+            settings?: {
+                embedOptions?: {
+                    mode?: "full-screen" | "inline";
+                    /**
+                     * example:
+                     * de
+                     */
+                    lang?: string;
+                    width?: string;
+                    topBar?: boolean;
+                    scrollToTop?: boolean;
+                    button?: {
+                        text?: string | null;
+                        align?: "left" | "center" | "right";
+                    };
+                };
+                safeModeAutomation?: boolean;
+                /**
+                 * DEPRECATED - This API will return hardcoded value of false. Please note that this field is internal to epilot and should not be used by external clients. If you wish to get the canary flag, please use the /v1/journey/{id}/settings API.
+                 */
+                canary?: boolean;
+                designId: string;
+                templateId?: string | null;
+                entityId?: string | null;
+                mappingsAutomationId?: string;
+                /**
+                 * When true, the journey is created without a mapping config or automation; mappings are managed as advanced mappings on a lazily created automation.
+                 */
+                newMappings?: boolean;
+                targetedCustomer?: string;
+                description?: string | null;
+                organizationSettings?: {
+                    [name: string]: boolean;
+                } | null;
+                publicToken?: string | null;
+                runtimeEntities?: ("ORDER" | "OPPORTUNITY")[];
+                filePurposes?: string[];
+                entityTags?: string[];
+                /**
+                 * @deprecated Use addressSuggestionsFileId instead
+                 */
+                addressSuggestionsFileUrl?: string | null;
+                addressSuggestionsFileId?: string | null;
+                /**
+                 * Country code for address format (e.g. DE, AT, CH, LU)
+                 */
+                addressSuggestionsCountryCode?: string | null;
+                /**
+                 * Whether address auto-complete is enabled
+                 */
+                addressSuggestionsEnableAutoComplete?: boolean;
+                /**
+                 * Sources for address auto-complete (e.g. deutschePostService, customAddressesFile)
+                 */
+                addressSuggestionsSource?: string[];
+                /**
+                 * Whether free text input is allowed when auto-complete is on
+                 */
+                addressSuggestionsEnableFreeText?: boolean;
+                /**
+                 * This property is deprecated and will be removed in a future version
+                 */
+                useNewDesign?: boolean;
+                /**
+                 * If true, some journey input labels are in Austrian format
+                 */
+                useAustrianLabels?: boolean;
+                /**
+                 * If true, the journey shows an icon to toggle dark mode
+                 */
+                enableDarkMode?: boolean;
+                accessMode?: "PUBLIC" | "PRIVATE";
+                /**
+                 * Steps after this step require an authenticated session (auth gate)
+                 */
+                authGate?: {
+                    /**
+                     * The step containing the Login & Registration block
+                     */
+                    stepId: string;
+                };
+                isPublished?: boolean;
+                status?: string;
+                isActive?: boolean;
+                savingProgress?: {
+                    mode?: "auto" | "local" | "remote" | "none";
+                    supportedRevision?: number;
+                };
+                /**
+                 * If false, third-party cookies are disabled to comply with GDPR regulations without asking for consent.
+                 */
+                thirdPartyCookies?: boolean;
+            };
+            validationRules?: /**
+             * References to validation rules organized by blocks and fields.
+             * Maps block IDs to either one or more ordered rule IDs (for block-level rules)
+             * or rule references (for field-level rules).
+             *
+             * example:
+             * {
+             *   "block1": "rule123",
+             *   "block2": [
+             *     "rule456",
+             *     "rule789"
+             *   ],
+             *   "block3": {
+             *     "field1": "rule101",
+             *     "field2": [
+             *       "rule102",
+             *       "rule103"
+             *     ]
+             *   }
+             * }
+             */
+            ValidationRuleRef;
+            /**
+             * Manifest/Blueprint ID used to create/update the entity
+             */
+            _manifest?: string /* uuid */[];
+            createdBy?: string;
+            updatedBy?: string | null;
+            /**
+             * If passed with value of null, the API won't modify the lastModifiedAt field on updating the journey
+             */
+            __lastModifiedAt?: string | null;
+            /**
+             * The revision the editor started from. When present and not the latest revision the save is rejected with `409`; absent skips the check.
+             *
+             * example:
+             * 41
+             */
+            parent_revision_id?: string;
+            /**
+             * Provenance, not configuration: the revision that was loaded into the editor before this save, when it was an older one.
+             *
+             * example:
+             * 37
+             */
+            based_on_revision_id?: string;
+            /**
+             * Version of the entity-mapping config stored alongside this revision. Publishing the revision points the journey's automation at it.
+             *
+             * example:
+             * 12
+             */
+            mapping_config_version?: number;
+        }
+        export interface JourneyRevisionSummary {
+            /**
+             * Opaque identifier of the revision. Moves on every save.
+             * example:
+             * 42
+             */
+            revision_id: string;
+            created_at: string; // date-time
+            /**
+             * User id of the author. Absent for revisions recorded from writes without a user, e.g. blueprint installs.
+             *
+             */
+            created_by?: string;
+            /**
+             * Set at publish time only, so present if and only if this revision has been published at least once.
+             *
+             * example:
+             * Summer campaign
+             */
+            name?: string;
+            description?: string;
+            /**
+             * The last time this revision was published. Not the same question as `is_published`: a revision that was the published version yesterday still carries a `published_at`.
+             *
+             */
+            published_at?: string; // date-time
+            /**
+             * Whether this revision is the published version right now.
+             */
+            is_published: boolean;
+            /**
+             * Version of the entity-mapping config stored alongside this revision.
+             * example:
+             * 12
+             */
+            mapping_config_version?: number;
         }
         export interface JourneyValidationError {
             /**
@@ -1097,6 +1802,45 @@ declare namespace Components {
              * If passed with value of null, the API won't modify the lastModifiedAt field on updating the journey
              */
             __lastModifiedAt?: string | null;
+        }
+        export interface PublishResult {
+            /**
+             * example:
+             * 42
+             */
+            revision_id: string;
+            /**
+             * The name now on the revision: the one sent in the request, the one a previous publish set when this request omitted `name`, or the server-generated default.
+             *
+             * example:
+             * Summer campaign
+             */
+            name: string;
+            published_at: string; // date-time
+            published_by?: string;
+            /**
+             * Names any best-effort side effect that failed after the publish itself succeeded, e.g. the journey entity sync, so a caller can say "published, but the entity did not update".
+             *
+             */
+            post_publish_warnings: string[];
+        }
+        export interface PublishRevisionRequest {
+            /**
+             * example:
+             * 42
+             */
+            revision_id: string;
+            /**
+             * Name stamped onto the revision being published. Optional: when omitted the server generates one, so every revision that has ever been published carries a name. An omitted name never replaces a name a previous publish already set; an explicit one does.
+             *
+             * example:
+             * Summer campaign
+             */
+            name?: string;
+            /**
+             * Optional description stamped onto the revision at publish time
+             */
+            description?: string;
         }
         /**
          * Field-level rule references within a block.
@@ -1389,6 +2133,37 @@ declare namespace Paths {
         namespace Responses {
             export type $201 = Components.Schemas.Journey;
             export type $400 = Components.Schemas.JourneyValidationError;
+        }
+    }
+    namespace CreateJourneyRevision {
+        namespace Parameters {
+            /**
+             * example:
+             * 509cdffe-424f-457a-95c2-9708c304ce77
+             */
+            export type Id = string; // uuid
+        }
+        export interface PathParameters {
+            id: /**
+             * example:
+             * 509cdffe-424f-457a-95c2-9708c304ce77
+             */
+            Parameters.Id /* uuid */;
+        }
+        export type RequestBody = /**
+         * The complete journey configuration a revision is created from, same shape as the `PUT` body. Server-managed attributes of the journey record (`revisions`, `version`, publish metadata) are ignored.
+         *
+         */
+        Components.Schemas.JourneyRevisionRequest;
+        namespace Responses {
+            export type $201 = Components.Schemas.JourneyRevisionSummary;
+            export interface $400 {
+            }
+            export interface $403 {
+            }
+            export interface $404 {
+            }
+            export type $409 = Components.Schemas.JourneyRevisionConflict;
         }
     }
     namespace CreateJourneyV2 {
@@ -1767,7 +2542,15 @@ declare namespace Paths {
                 createdAt: string;
                 lastModifiedAt: string;
                 deletedAt?: string;
+                /**
+                 * Revision row number of this item. `0` is the journey record, the published version.
+                 *
+                 */
                 version: number;
+                /**
+                 * Legacy change counter of the published version, kept for compatibility: bumped whenever the published version changes and used for optimistic concurrency on `PUT`, by submissions (`journey_context.journey_revision`) and by save-and-continue. Saving a revision never changes it. Versioning metadata is only available via `publish-state`.
+                 *
+                 */
                 revisions: number;
                 featureFlags?: {
                     [name: string]: any;
@@ -1832,6 +2615,62 @@ declare namespace Paths {
         }
         namespace Responses {
             export type $200 = Components.Schemas.JourneyProductsResponse;
+        }
+    }
+    namespace GetJourneyPublishState {
+        namespace Parameters {
+            /**
+             * example:
+             * 509cdffe-424f-457a-95c2-9708c304ce77
+             */
+            export type Id = string; // uuid
+        }
+        export interface PathParameters {
+            id: /**
+             * example:
+             * 509cdffe-424f-457a-95c2-9708c304ce77
+             */
+            Parameters.Id /* uuid */;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.JourneyPublishState;
+            export interface $403 {
+            }
+            export interface $404 {
+            }
+        }
+    }
+    namespace GetJourneyRevision {
+        namespace Parameters {
+            /**
+             * example:
+             * 509cdffe-424f-457a-95c2-9708c304ce77
+             */
+            export type Id = string; // uuid
+            /**
+             * example:
+             * 42
+             */
+            export type RevisionId = string;
+        }
+        export interface PathParameters {
+            id: /**
+             * example:
+             * 509cdffe-424f-457a-95c2-9708c304ce77
+             */
+            Parameters.Id /* uuid */;
+            revision_id: /**
+             * example:
+             * 42
+             */
+            Parameters.RevisionId;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.JourneyRevision;
+            export interface $403 {
+            }
+            export interface $404 {
+            }
         }
     }
     namespace GetJourneyV2 {
@@ -2181,6 +3020,37 @@ declare namespace Paths {
             }
         }
     }
+    namespace ListJourneyRevisions {
+        namespace Parameters {
+            export type Cursor = string;
+            /**
+             * example:
+             * 509cdffe-424f-457a-95c2-9708c304ce77
+             */
+            export type Id = string; // uuid
+            export type Limit = number;
+        }
+        export interface PathParameters {
+            id: /**
+             * example:
+             * 509cdffe-424f-457a-95c2-9708c304ce77
+             */
+            Parameters.Id /* uuid */;
+        }
+        export interface QueryParameters {
+            limit?: Parameters.Limit;
+            cursor?: Parameters.Cursor;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.JourneyRevisionList;
+            export interface $400 {
+            }
+            export interface $403 {
+            }
+            export interface $404 {
+            }
+        }
+    }
     namespace PatchUpdateJourney {
         export type RequestBody = /**
          * Patch request to update a journey (journey id is required) Support for nested properties (e.g. steps[0].uischema.elements[0].products) is supported.
@@ -2214,6 +3084,34 @@ declare namespace Paths {
                  * journey not found
                  */
                 message?: string;
+            }
+        }
+    }
+    namespace PublishJourneyRevision {
+        namespace Parameters {
+            /**
+             * example:
+             * 509cdffe-424f-457a-95c2-9708c304ce77
+             */
+            export type Id = string; // uuid
+        }
+        export interface PathParameters {
+            id: /**
+             * example:
+             * 509cdffe-424f-457a-95c2-9708c304ce77
+             */
+            Parameters.Id /* uuid */;
+        }
+        export type RequestBody = Components.Schemas.PublishRevisionRequest;
+        namespace Responses {
+            export type $200 = Components.Schemas.PublishResult;
+            export interface $400 {
+            }
+            export interface $403 {
+            }
+            export interface $404 {
+            }
+            export interface $409 {
             }
         }
     }
@@ -2322,6 +3220,73 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<any>
+  /**
+   * listJourneyRevisions - listJourneyRevisions
+   * 
+   * Lists the journey's revision history, newest first. Metadata only, no configuration payload. `is_published` says whether a revision is the published version right now, which is a different question from `published_at`, which records the last time it was published.
+   * 
+   * Only available for organizations with journey versioning enabled; returns `404` otherwise.
+   * 
+   */
+  'listJourneyRevisions'(
+    parameters?: Parameters<Paths.ListJourneyRevisions.QueryParameters & Paths.ListJourneyRevisions.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ListJourneyRevisions.Responses.$200>
+  /**
+   * createJourneyRevision - createJourneyRevision
+   * 
+   * Creates a revision: an immutable copy of the complete journey configuration, identified by `revision_id`. Nothing customers receive changes; the revision only becomes the published version when it is published. The payload is complete and is not merged against the journey record or the previous revision. The entity datasource set of the revision is stored separately through the datasources API under the same `revision_id`.
+   * 
+   * Only available for organizations with journey versioning enabled; returns `404` otherwise.
+   * 
+   */
+  'createJourneyRevision'(
+    parameters?: Parameters<Paths.CreateJourneyRevision.PathParameters> | null,
+    data?: Paths.CreateJourneyRevision.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CreateJourneyRevision.Responses.$201>
+  /**
+   * getJourneyRevision - getJourneyRevision
+   * 
+   * Returns one revision with its full configuration, in the shape the builder holds a journey in, so it can be loaded straight into the editor as unsaved changes. Reading a revision changes nothing; a client persists it, if at all, by posting it back to `POST .../revisions`.
+   * 
+   * Only available for organizations with journey versioning enabled; returns `404` otherwise.
+   * 
+   */
+  'getJourneyRevision'(
+    parameters?: Parameters<Paths.GetJourneyRevision.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetJourneyRevision.Responses.$200>
+  /**
+   * publishJourneyRevision - publishJourneyRevision
+   * 
+   * Makes one revision the published version, the one customers receive, in a single transaction: the revision's configuration is copied onto the journey record, its datasource set onto the published datasources, and `name`, `description`, `published_at` and `published_by` are stamped onto the revision. Any revision can be published, old or new, so publishing an older revision is the rollback.
+   * 
+   * `name` is generated server-side when omitted, so every published revision carries one; an omitted name never replaces a name a previous publish already set. `settings.isActive` is never changed by a publish.
+   * 
+   * Only available for organizations with journey versioning enabled; returns `404` otherwise.
+   * 
+   */
+  'publishJourneyRevision'(
+    parameters?: Parameters<Paths.PublishJourneyRevision.PathParameters> | null,
+    data?: Paths.PublishJourneyRevision.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.PublishJourneyRevision.Responses.$200>
+  /**
+   * getJourneyPublishState - getJourneyPublishState
+   * 
+   * Answers which revision is the published version without paging through the history. A journey that has not adopted versioning yet returns `200` with `published_revision_id: null`, not `404`.
+   * 
+   * Only available for organizations with journey versioning enabled; returns `404` otherwise.
+   * 
+   */
+  'getJourneyPublishState'(
+    parameters?: Parameters<Paths.GetJourneyPublishState.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetJourneyPublishState.Responses.$200>
   /**
    * getJourneyEnvironment - getJourneyEnvironment
    * 
@@ -2519,6 +3484,81 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<any>
+  }
+  ['/v1/journey/configuration/{id}/revisions']: {
+    /**
+     * createJourneyRevision - createJourneyRevision
+     * 
+     * Creates a revision: an immutable copy of the complete journey configuration, identified by `revision_id`. Nothing customers receive changes; the revision only becomes the published version when it is published. The payload is complete and is not merged against the journey record or the previous revision. The entity datasource set of the revision is stored separately through the datasources API under the same `revision_id`.
+     * 
+     * Only available for organizations with journey versioning enabled; returns `404` otherwise.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.CreateJourneyRevision.PathParameters> | null,
+      data?: Paths.CreateJourneyRevision.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CreateJourneyRevision.Responses.$201>
+    /**
+     * listJourneyRevisions - listJourneyRevisions
+     * 
+     * Lists the journey's revision history, newest first. Metadata only, no configuration payload. `is_published` says whether a revision is the published version right now, which is a different question from `published_at`, which records the last time it was published.
+     * 
+     * Only available for organizations with journey versioning enabled; returns `404` otherwise.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.ListJourneyRevisions.QueryParameters & Paths.ListJourneyRevisions.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ListJourneyRevisions.Responses.$200>
+  }
+  ['/v1/journey/configuration/{id}/revisions/{revision_id}']: {
+    /**
+     * getJourneyRevision - getJourneyRevision
+     * 
+     * Returns one revision with its full configuration, in the shape the builder holds a journey in, so it can be loaded straight into the editor as unsaved changes. Reading a revision changes nothing; a client persists it, if at all, by posting it back to `POST .../revisions`.
+     * 
+     * Only available for organizations with journey versioning enabled; returns `404` otherwise.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetJourneyRevision.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetJourneyRevision.Responses.$200>
+  }
+  ['/v1/journey/configuration/{id}/publish']: {
+    /**
+     * publishJourneyRevision - publishJourneyRevision
+     * 
+     * Makes one revision the published version, the one customers receive, in a single transaction: the revision's configuration is copied onto the journey record, its datasource set onto the published datasources, and `name`, `description`, `published_at` and `published_by` are stamped onto the revision. Any revision can be published, old or new, so publishing an older revision is the rollback.
+     * 
+     * `name` is generated server-side when omitted, so every published revision carries one; an omitted name never replaces a name a previous publish already set. `settings.isActive` is never changed by a publish.
+     * 
+     * Only available for organizations with journey versioning enabled; returns `404` otherwise.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.PublishJourneyRevision.PathParameters> | null,
+      data?: Paths.PublishJourneyRevision.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.PublishJourneyRevision.Responses.$200>
+  }
+  ['/v1/journey/configuration/{id}/publish-state']: {
+    /**
+     * getJourneyPublishState - getJourneyPublishState
+     * 
+     * Answers which revision is the published version without paging through the history. A journey that has not adopted versioning yet returns `200` with `published_revision_id: null`, not `404`.
+     * 
+     * Only available for organizations with journey versioning enabled; returns `404` otherwise.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetJourneyPublishState.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetJourneyPublishState.Responses.$200>
   }
   ['/v1/journey/configuration/{id}/environment']: {
     /**
@@ -2722,10 +3762,18 @@ export type JourneyEnvironmentResponse = Components.Schemas.JourneyEnvironmentRe
 export type JourneyEnvironmentVariablesResponse = Components.Schemas.JourneyEnvironmentVariablesResponse;
 export type JourneyFeatureFlags = Components.Schemas.JourneyFeatureFlags;
 export type JourneyProductsResponse = Components.Schemas.JourneyProductsResponse;
+export type JourneyPublishState = Components.Schemas.JourneyPublishState;
 export type JourneyResponse = Components.Schemas.JourneyResponse;
+export type JourneyRevision = Components.Schemas.JourneyRevision;
+export type JourneyRevisionConflict = Components.Schemas.JourneyRevisionConflict;
+export type JourneyRevisionList = Components.Schemas.JourneyRevisionList;
+export type JourneyRevisionRequest = Components.Schemas.JourneyRevisionRequest;
+export type JourneyRevisionSummary = Components.Schemas.JourneyRevisionSummary;
 export type JourneyValidationError = Components.Schemas.JourneyValidationError;
 export type JourneyValidationResponse = Components.Schemas.JourneyValidationResponse;
 export type PatchUpdateJourneyRequest = Components.Schemas.PatchUpdateJourneyRequest;
+export type PublishResult = Components.Schemas.PublishResult;
+export type PublishRevisionRequest = Components.Schemas.PublishRevisionRequest;
 export type RuleRef = Components.Schemas.RuleRef;
 export type S3Reference = Components.Schemas.S3Reference;
 export type SearchJourneysQueryRequest = Components.Schemas.SearchJourneysQueryRequest;

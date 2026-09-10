@@ -219,7 +219,20 @@ declare namespace Components {
              * external (app-provided) comparison values.
              *
              */
-            ComparisonRuleType;
+            ComparisonRuleType | /**
+             * Declarative validation rule (schema version v2) for uploaded files. The rule declares how deep
+             * the check goes (`check.level`) and the conditions the file must satisfy. Property conditions
+             * (file type, size, page count, image resolution, blank and password-protected detection) are
+             * deterministic and available at every level; the `meetsCriteria` condition judges a free-text
+             * requirement against the document's extracted content and is available from level `standard`.
+             *
+             * Evaluation semantics for content conditions differ from scalar rules: each condition resolves to
+             * pass, fail or uncertain. A confident fail on a blocking condition fails the input; an uncertain
+             * result is always reported as advisory and never fails the input, regardless of `allow_failure`.
+             * Document rules carry no `contexts` yet.
+             *
+             */
+            DocumentRuleType;
             /**
              * Declares the dynamic context a v2 rule needs at evaluation time.
              * `context` condition values reference these sources by using the schema slug
@@ -235,6 +248,108 @@ declare namespace Components {
              *
              */
             ContextRequirement[];
+        }
+        /**
+         * A free-text requirement judged against the document's extracted content, e.g. "The photo shows
+         * an electricity meter with the meter number and the current reading fully legible." One requirement
+         * per condition keeps results specific and lets each requirement be graded separately.
+         *
+         */
+        export interface CriteriaValue {
+            source: "criteria";
+            text: string;
+        }
+        /**
+         * How deep the document check goes. Levels are cumulative.
+         */
+        export interface DocumentCheck {
+            /**
+             * - `basic`: file properties only (type, size, page count, resolution, blank, password). Instant, no extraction.
+             * - `standard`: basic checks plus a quick scan of the content. A few seconds.
+             * - `advanced`: basic checks plus a thorough reading of the fully extracted content. Roughly 5 to 10 seconds.
+             *
+             */
+            level: "basic" | "standard" | "advanced";
+        }
+        /**
+         * A single check the uploaded file must satisfy.
+         */
+        export interface DocumentCondition {
+            /**
+             * Stable identifier of the condition within the rule, used for editing and error reporting.
+             */
+            id: string;
+            operator: /**
+             * Predefined document check. Value compatibility (enforced at write time):
+             * - fileTypeIn: `file_types` value listing the accepted file categories.
+             * - sizeBelow: static integer, maximum file size in bytes.
+             * - pageCountBetween: `range` of static non-negative integers (inclusive).
+             * - resolutionAtLeast / resolutionAtMost: static positive integer, the image's longer edge in pixels.
+             * - isNotBlank / isNotPasswordProtected: `none` value (unary).
+             * - meetsCriteria: `criteria` value with the free-text requirement. Requires check level `standard` or `advanced`.
+             *
+             */
+            DocumentOperator;
+            value: /* The value of a document condition - a static scalar, a range, nothing, accepted file categories, or a free-text criterion. */ DocumentConditionValue;
+            /**
+             * Message shown to the end user when this condition fails.
+             */
+            error_message: string;
+            /**
+             * When true, the condition is advisory: a failure is reported but never takes part in the
+             * validity verdict. Recommended for `meetsCriteria` until the organisation has reviewed
+             * results on real files.
+             *
+             */
+            allow_failure?: boolean;
+        }
+        /**
+         * The value of a document condition - a static scalar, a range, nothing, accepted file categories, or a free-text criterion.
+         */
+        export type DocumentConditionValue = /* The value of a document condition - a static scalar, a range, nothing, accepted file categories, or a free-text criterion. */ /* A fixed comparison value. */ StaticValue | /* A lower and upper bound for range operators (between, dateBetween, lengthBetween). Bounds are inclusive. */ RangeValue | /* No comparison value - used by unary operators such as notInFuture / notInPast. */ NoValue | /* Accepted file categories; each category expands to a mime list at check time. */ FileTypesValue | /**
+         * A free-text requirement judged against the document's extracted content, e.g. "The photo shows
+         * an electricity meter with the meter number and the current reading fully legible." One requirement
+         * per condition keeps results specific and lets each requirement be graded separately.
+         *
+         */
+        CriteriaValue;
+        /**
+         * Predefined document check. Value compatibility (enforced at write time):
+         * - fileTypeIn: `file_types` value listing the accepted file categories.
+         * - sizeBelow: static integer, maximum file size in bytes.
+         * - pageCountBetween: `range` of static non-negative integers (inclusive).
+         * - resolutionAtLeast / resolutionAtMost: static positive integer, the image's longer edge in pixels.
+         * - isNotBlank / isNotPasswordProtected: `none` value (unary).
+         * - meetsCriteria: `criteria` value with the free-text requirement. Requires check level `standard` or `advanced`.
+         *
+         */
+        export type DocumentOperator = "fileTypeIn" | "sizeBelow" | "pageCountBetween" | "resolutionAtLeast" | "resolutionAtMost" | "isNotBlank" | "isNotPasswordProtected" | "meetsCriteria";
+        /**
+         * Declarative validation rule (schema version v2) for uploaded files. The rule declares how deep
+         * the check goes (`check.level`) and the conditions the file must satisfy. Property conditions
+         * (file type, size, page count, image resolution, blank and password-protected detection) are
+         * deterministic and available at every level; the `meetsCriteria` condition judges a free-text
+         * requirement against the document's extracted content and is available from level `standard`.
+         *
+         * Evaluation semantics for content conditions differ from scalar rules: each condition resolves to
+         * pass, fail or uncertain. A confident fail on a blocking condition fails the input; an uncertain
+         * result is always reported as advisory and never fails the input, regardless of `allow_failure`.
+         * Document rules carry no `contexts` yet.
+         *
+         */
+        export interface DocumentRuleType {
+            /**
+             * Identifies the rule as a document rule. Determines which operators are allowed.
+             */
+            input_type: "document";
+            check: /* How deep the document check goes. Levels are cumulative. */ DocumentCheck;
+            /**
+             * The checks the uploaded file must satisfy. All blocking conditions must pass for the
+             * file to be valid; `allow_failure` conditions are advisory. Must contain at least one
+             * condition (enforced at write time).
+             *
+             */
+            conditions: /* A single check the uploaded file must satisfy. */ DocumentCondition[];
         }
         /**
          * A comparison value resolved at evaluation time from an organisation environment variable
@@ -295,6 +410,16 @@ declare namespace Components {
              *
              */
             ValueAdjustment;
+        }
+        /**
+         * Accepted file categories; each category expands to a mime list at check time.
+         */
+        export interface FileTypesValue {
+            source: "file_types";
+            types: [
+                ("image" | "pdf" | "document" | "spreadsheet"),
+                ...("image" | "pdf" | "document" | "spreadsheet")[]
+            ];
         }
         /**
          * Response envelope for listing all validation rules within an organization.
@@ -768,7 +893,20 @@ declare namespace Components {
              * external (app-provided) comparison values.
              *
              */
-            ComparisonRuleType;
+            ComparisonRuleType | /**
+             * Declarative validation rule (schema version v2) for uploaded files. The rule declares how deep
+             * the check goes (`check.level`) and the conditions the file must satisfy. Property conditions
+             * (file type, size, page count, image resolution, blank and password-protected detection) are
+             * deterministic and available at every level; the `meetsCriteria` condition judges a free-text
+             * requirement against the document's extracted content and is available from level `standard`.
+             *
+             * Evaluation semantics for content conditions differ from scalar rules: each condition resolves to
+             * pass, fail or uncertain. A confident fail on a blocking condition fails the input; an uncertain
+             * result is always reported as advisory and never fails the input, regardless of `allow_failure`.
+             * Document rules carry no `contexts` yet.
+             *
+             */
+            DocumentRuleType;
             /**
              * Declares the dynamic context a v2 rule needs at evaluation time.
              * `context` condition values reference these sources by using the schema slug
@@ -843,7 +981,20 @@ declare namespace Components {
              * external (app-provided) comparison values.
              *
              */
-            ComparisonRuleType;
+            ComparisonRuleType | /**
+             * Declarative validation rule (schema version v2) for uploaded files. The rule declares how deep
+             * the check goes (`check.level`) and the conditions the file must satisfy. Property conditions
+             * (file type, size, page count, image resolution, blank and password-protected detection) are
+             * deterministic and available at every level; the `meetsCriteria` condition judges a free-text
+             * requirement against the document's extracted content and is available from level `standard`.
+             *
+             * Evaluation semantics for content conditions differ from scalar rules: each condition resolves to
+             * pass, fail or uncertain. A confident fail on a blocking condition fails the input; an uncertain
+             * result is always reported as advisory and never fails the input, regardless of `allow_failure`.
+             * Document rules carry no `contexts` yet.
+             *
+             */
+            DocumentRuleType;
             /**
              * Declares the dynamic context a v2 rule needs at evaluation time.
              * `context` condition values reference these sources by using the schema slug
@@ -915,7 +1066,20 @@ declare namespace Components {
              * external (app-provided) comparison values.
              *
              */
-            ComparisonRuleType;
+            ComparisonRuleType | /**
+             * Declarative validation rule (schema version v2) for uploaded files. The rule declares how deep
+             * the check goes (`check.level`) and the conditions the file must satisfy. Property conditions
+             * (file type, size, page count, image resolution, blank and password-protected detection) are
+             * deterministic and available at every level; the `meetsCriteria` condition judges a free-text
+             * requirement against the document's extracted content and is available from level `standard`.
+             *
+             * Evaluation semantics for content conditions differ from scalar rules: each condition resolves to
+             * pass, fail or uncertain. A confident fail on a blocking condition fails the input; an uncertain
+             * result is always reported as advisory and never fails the input, regardless of `allow_failure`.
+             * Document rules carry no `contexts` yet.
+             *
+             */
+            DocumentRuleType;
             /**
              * Declares the dynamic context a v2 rule needs at evaluation time.
              * `context` condition values reference these sources by using the schema slug
@@ -1047,7 +1211,7 @@ declare namespace Paths {
                  * Invalid request body
                  */
                 message?: string;
-                code?: "external_value_not_found" | "external_value_incompatible";
+                code?: "external_value_not_found" | "external_value_incompatible" | "environment_variable_not_found" | "environment_variable_incompatible";
             }
             export interface $401 {
                 /**
@@ -1255,7 +1419,7 @@ declare namespace Paths {
                  * Invalid request body
                  */
                 message?: string;
-                code?: "external_value_not_found" | "external_value_incompatible";
+                code?: "external_value_not_found" | "external_value_incompatible" | "environment_variable_not_found" | "environment_variable_incompatible";
             }
             export interface $401 {
                 /**
@@ -1470,8 +1634,15 @@ export type ConditionValue = Components.Schemas.ConditionValue;
 export type ContextRequirement = Components.Schemas.ContextRequirement;
 export type ContextValue = Components.Schemas.ContextValue;
 export type CreateValidationRuleRequest = Components.Schemas.CreateValidationRuleRequest;
+export type CriteriaValue = Components.Schemas.CriteriaValue;
+export type DocumentCheck = Components.Schemas.DocumentCheck;
+export type DocumentCondition = Components.Schemas.DocumentCondition;
+export type DocumentConditionValue = Components.Schemas.DocumentConditionValue;
+export type DocumentOperator = Components.Schemas.DocumentOperator;
+export type DocumentRuleType = Components.Schemas.DocumentRuleType;
 export type EnvironmentValue = Components.Schemas.EnvironmentValue;
 export type ExternalValue = Components.Schemas.ExternalValue;
+export type FileTypesValue = Components.Schemas.FileTypesValue;
 export type GetValidationRulesResponse = Components.Schemas.GetValidationRulesResponse;
 export type NoValue = Components.Schemas.NoValue;
 export type NumericCondition = Components.Schemas.NumericCondition;
