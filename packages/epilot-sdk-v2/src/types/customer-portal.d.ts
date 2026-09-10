@@ -9,6 +9,7 @@ import type {
 
 export declare namespace Components {
     namespace Responses {
+        export type BadGateway = Schemas.ErrorResp;
         export interface ConfirmUserInvalidRequest {
             /**
              * Error message
@@ -32,6 +33,7 @@ export declare namespace Components {
         }
         export type Forbidden = Schemas.ErrorResp;
         export type ForbiddenByRule = Schemas.ErrorResp | Schemas.FailedRuleErrorResp;
+        export type GatewayTimeout = Schemas.ErrorResp;
         export type InternalServerError = Schemas.ErrorResp;
         export type InvalidRequest = Schemas.ErrorResp;
         export type InvalidRequestCreateMeterReading = {
@@ -47,6 +49,8 @@ export declare namespace Components {
             message?: string;
         } | void;
         export type NotFound = Schemas.ErrorResp;
+        export type ServiceUnavailable = Schemas.ErrorResp;
+        export type TooManyRequests = Schemas.ErrorResp;
         export type Unauthorized = Schemas.ErrorResp;
     }
     namespace Schemas {
@@ -934,6 +938,59 @@ export declare namespace Components {
              */
             campaign_id?: string;
         }
+        export interface CleverPvContext {
+            /**
+             * Current Clever PV screen identifier
+             */
+            screen?: string;
+            /**
+             * Clever PV application version
+             */
+            version?: string;
+            /**
+             * Device connectivity at the time of the report
+             */
+            connection_state?: string;
+            /**
+             * App locale at the time of the report
+             */
+            locale?: string;
+            /**
+             * App timezone at the time of the report
+             */
+            timezone?: string;
+            /**
+             * Device firmware version when known
+             */
+            firmware_version?: string;
+            /**
+             * App build identifier when known
+             */
+            build?: string;
+            /**
+             * Client-generated correlation id for the report
+             */
+            trace_id?: string;
+            /**
+             * Optional device snapshot from the portal. Attached as a JSON file on
+             * the original Zendesk comment. Must include id when present. Serialized
+             * JSON is limited to 256 KiB.
+             *
+             */
+            device?: {
+                [name: string]: any;
+            };
+            /**
+             * Optional onboarding vendor id and name. Included in the Zendesk
+             * comment. Not a portal entity.
+             *
+             */
+            vendor?: {
+                [name: string]: any;
+                id?: string;
+                name?: string;
+            };
+        }
         export interface CommonConfigAttributes {
             /**
              * Mobile app configuration (top-level; moved out of the config blob).
@@ -1031,6 +1088,14 @@ export declare namespace Components {
                  * Enable or disable the new design for the portal
                  */
                 new_design?: boolean;
+                /**
+                 * Enable the MCP (AI agent) connector channel for this portal
+                 */
+                mcp_enabled?: boolean;
+                /**
+                 * Server-managed generation used to invalidate MCP grants after the connector is disabled or re-enabled
+                 */
+                mcp_grant_version?: number;
             };
             /**
              * Access token for the portal
@@ -1566,6 +1631,14 @@ export declare namespace Components {
                  * Enable or disable the new design for the portal
                  */
                 new_design?: boolean;
+                /**
+                 * Enable the MCP (AI agent) connector channel for this portal
+                 */
+                mcp_enabled?: boolean;
+                /**
+                 * Server-managed generation used to invalidate MCP grants after the connector is disabled or re-enabled
+                 */
+                mcp_grant_version?: number;
             };
             /**
              * Access token for the portal
@@ -2363,6 +2436,34 @@ export declare namespace Components {
              */
             EntitySlug;
         }
+        export interface CreateSupportRequest {
+            report_type: SupportReportType;
+            description: string;
+            /**
+             * Client-generated id for correlating the request
+             */
+            submission_id: string; // ^[A-Za-z0-9._-]+$
+            site_id?: /**
+             * Entity ID
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            EntityId /* uuid */;
+            device_id?: /**
+             * Entity ID
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            EntityId /* uuid */;
+            clever_pv?: CleverPvContext;
+            attachments?: [
+                SupportRequestAttachment?,
+                SupportRequestAttachment?,
+                SupportRequestAttachment?,
+                SupportRequestAttachment?,
+                SupportRequestAttachment?
+            ];
+        }
         export interface CreateUserRequest {
             /**
              * User's email address
@@ -3130,7 +3231,7 @@ export declare namespace Components {
                 .../* Per-slug search configuration with scoped targets and templates */ EntitySlugConfig[]
             ];
             /**
-             * Keyword search query
+             * Free-text keyword search. This is plain text, **not** a query language: punctuation separates words rather than carrying any special meaning, and every word has to match. Use `q_fields` to restrict which fields are searched, and `filters`/`targets` for structured filtering. Overly long input is trimmed, and input with no words in it is ignored — the remaining parameters still apply.
              * example:
              * contract
              */
@@ -4967,6 +5068,10 @@ export declare namespace Components {
              */
             is_canary?: boolean;
             /**
+             * Whether the portal still runs the old design (the `new_design` feature setting is off). Legacy portals are always served the frozen legacy bundle, even when the org is in canary.
+             */
+            is_legacy_design?: boolean;
+            /**
              * The URL to redirect to
              * example:
              * https://example.com
@@ -6205,6 +6310,14 @@ export declare namespace Components {
                  * Enable or disable the new design for the portal
                  */
                 new_design?: boolean;
+                /**
+                 * Enable the MCP (AI agent) connector channel for this portal
+                 */
+                mcp_enabled?: boolean;
+                /**
+                 * Server-managed generation used to invalidate MCP grants after the connector is disabled or re-enabled
+                 */
+                mcp_grant_version?: number;
             };
             /**
              * Access token for the portal
@@ -6833,6 +6946,14 @@ export declare namespace Components {
                  * Enable or disable the new design for the portal
                  */
                 new_design?: boolean;
+                /**
+                 * Enable the MCP (AI agent) connector channel for this portal
+                 */
+                mcp_enabled?: boolean;
+                /**
+                 * Server-managed generation used to invalidate MCP grants after the connector is disabled or re-enabled
+                 */
+                mcp_grant_version?: number;
             };
             /**
              * Access token for the portal
@@ -8311,6 +8432,35 @@ export declare namespace Components {
             use_case_slug: string;
         }
         export type Source = "ECP" | "ERP" | "360" | "journey-submission";
+        export type SupportReportType = "bug" | "feedback";
+        export interface SupportRequestAttachment {
+            /**
+             * example:
+             * screenshot.png
+             */
+            filename: string;
+            /**
+             * example:
+             * image/png
+             */
+            mime_type: string;
+            /**
+             * Base64-encoded file, optionally as a data URL
+             */
+            contents: string;
+        }
+        export interface SupportRequestResult {
+            /**
+             * example:
+             * 12345
+             */
+            reference: string;
+            /**
+             * example:
+             * new
+             */
+            status: string;
+        }
         /**
          * Optional configuration item that a portal swap can additionally include. The swap always transfers the pages and the functional experience config that keep the portal working. These items are opt-in on top of that and are OFF by default. Domain and access/security settings (domain, cognito_details, auth_settings) can never be swapped and are therefore not part of this enum.
          */
@@ -8613,6 +8763,14 @@ export declare namespace Components {
                  * Enable or disable the new design for the portal
                  */
                 new_design?: boolean;
+                /**
+                 * Enable the MCP (AI agent) connector channel for this portal
+                 */
+                mcp_enabled?: boolean;
+                /**
+                 * Server-managed generation used to invalidate MCP grants after the connector is disabled or re-enabled
+                 */
+                mcp_grant_version?: number;
             };
             /**
              * Access token for the portal
@@ -9209,6 +9367,14 @@ export declare namespace Components {
                  * Enable or disable the new design for the portal
                  */
                 new_design?: boolean;
+                /**
+                 * Enable the MCP (AI agent) connector channel for this portal
+                 */
+                mcp_enabled?: boolean;
+                /**
+                 * Server-managed generation used to invalidate MCP grants after the connector is disabled or re-enabled
+                 */
+                mcp_grant_version?: number;
             };
             /**
              * Access token for the portal
@@ -9701,9 +9867,10 @@ export declare namespace Components {
              */
             type_options?: VisualizationTypeOption[];
             /**
-             * Intervals supported for the current context. If omitted, all intervals are assumed supported.
+             * Intervals supported for the current context. If omitted, all intervals are assumed supported. `custom` marks a period-based consumption source: the portal requests the whole `data_range` once with `interval=custom` and renders one bar per returned record (see `period` on the consumption data point) instead of offering interval / date navigation or period comparison. When `custom` is present it takes precedence over any fixed intervals also listed.
+             *
              */
-            intervals?: ("PT15M" | "PT1H" | "P1D" | "P1M" | "P1Y")[];
+            intervals?: ("PT15M" | "PT1H" | "P1D" | "P1M" | "P1Y" | "custom")[];
             data_range?: /* Earliest / latest timestamps for which data is available in the current context. */ VisualizationDataRange;
         }
         export interface VisualizationTypeOption {
@@ -10274,7 +10441,11 @@ export declare namespace Paths {
              */
             columns: /* One column of the portal data export CSV. */ Components.Schemas.PortalDataExportColumn[];
             expand_over?: string;
-            language?: "de" | "en";
+            /**
+             * example:
+             * de
+             */
+            language?: string;
         }
         namespace Responses {
             export interface $202 {
@@ -11394,7 +11565,7 @@ export declare namespace Paths {
             export type ExtensionId = string;
             export type From = string; // date-time
             export type HookId = string;
-            export type Interval = "PT15M" | "PT1H" | "P1D" | "P1M" | "P1Y";
+            export type Interval = "PT15M" | "PT1H" | "P1D" | "P1M" | "P1Y" | "custom";
             export type MeterId = string;
             export type To = string; // date-time
         }
@@ -11442,6 +11613,26 @@ export declare namespace Paths {
                      */
                     label?: {
                         [name: string]: string;
+                    };
+                    /**
+                     * The date range this value covers. Required for period-based sources (`interval=custom`), whose records don't sit on a fixed time grid: the portal renders one bar per record, orders them by `period.from`, and — unless `label` is set — labels each bar with the formatted `from` - `to` range. Ignored for interval-based retrieval.
+                     *
+                     * example:
+                     * {
+                     *   "from": "2024-01-03T00:00:00.000Z",
+                     *   "to": "2025-01-05T00:00:00.000Z"
+                     * }
+                     */
+                    period?: {
+                        /**
+                         * Start of the covered period.
+                         */
+                        from: string; // date-time
+                        /**
+                         * End of the covered period. Shown as given in the fallback label, so pass the date the period visibly ends on (consecutive periods may share this boundary).
+                         *
+                         */
+                        to: string; // date-time
                     };
                 }[];
             }
@@ -13164,6 +13355,14 @@ export declare namespace Paths {
                      * Enable or disable the new design for the portal
                      */
                     new_design?: boolean;
+                    /**
+                     * Enable the MCP (AI agent) connector channel for this portal
+                     */
+                    mcp_enabled?: boolean;
+                    /**
+                     * Server-managed generation used to invalidate MCP grants after the connector is disabled or re-enabled
+                     */
+                    mcp_grant_version?: number;
                 };
                 /**
                  * Access token for the portal
@@ -13790,6 +13989,14 @@ export declare namespace Paths {
                      * Enable or disable the new design for the portal
                      */
                     new_design?: boolean;
+                    /**
+                     * Enable the MCP (AI agent) connector channel for this portal
+                     */
+                    mcp_enabled?: boolean;
+                    /**
+                     * Server-managed generation used to invalidate MCP grants after the connector is disabled or re-enabled
+                     */
+                    mcp_grant_version?: number;
                 };
                 /**
                  * Access token for the portal
@@ -21193,6 +21400,7 @@ export type BlockRequest = Components.Schemas.BlockRequest;
 export type BlockType = Components.Schemas.BlockType;
 export type BusinessPartnerItem = Components.Schemas.BusinessPartnerItem;
 export type CampaignWidget = Components.Schemas.CampaignWidget;
+export type CleverPvContext = Components.Schemas.CleverPvContext;
 export type CommonConfigAttributes = Components.Schemas.CommonConfigAttributes;
 export type CommonConfigAttributesV3 = Components.Schemas.CommonConfigAttributesV3;
 export type Contact = Components.Schemas.Contact;
@@ -21203,6 +21411,7 @@ export type ContextEntities = Components.Schemas.ContextEntities;
 export type ContextEntity = Components.Schemas.ContextEntity;
 export type Contract = Components.Schemas.Contract;
 export type ContractIdentifier = Components.Schemas.ContractIdentifier;
+export type CreateSupportRequest = Components.Schemas.CreateSupportRequest;
 export type CreateUserRequest = Components.Schemas.CreateUserRequest;
 export type Currency = Components.Schemas.Currency;
 export type DataRetrievalItem = Components.Schemas.DataRetrievalItem;
@@ -21324,6 +21533,9 @@ export type Schema = Components.Schemas.Schema;
 export type SearchIncludes = Components.Schemas.SearchIncludes;
 export type SecureProxyConfig = Components.Schemas.SecureProxyConfig;
 export type Source = Components.Schemas.Source;
+export type SupportReportType = Components.Schemas.SupportReportType;
+export type SupportRequestAttachment = Components.Schemas.SupportRequestAttachment;
+export type SupportRequestResult = Components.Schemas.SupportRequestResult;
 export type SwappableConfig = Components.Schemas.SwappableConfig;
 export type TariffType = Components.Schemas.TariffType;
 export type TeaserWidget = Components.Schemas.TeaserWidget;
