@@ -348,7 +348,7 @@
     "schemas": {
       "EnvironmentValueType": {
         "type": "string",
-        "description": "The structure a variable's value holds. `SecretString` is encrypted at rest and\nits value is never returned. `Text`, `Number`, `Boolean`, `Map`, `JSON`, `Link` and\n`List` may be served to browser-facing consumers; `String` and `SecretString` may not.\n",
+        "description": "The structure a variable's value holds. `SecretString` is encrypted at rest and\nits value is never returned. `Text`, `Number`, `Boolean`, `Map`, `JSON` and `Link`\nmay be served to browser-facing consumers; `String` and `SecretString` may not. A\n`List` inherits this from its element type: a `List` is served only when its\n`itemType` is itself client-safe, so a `List<String>` or `List<SecretString>` is not.\n",
         "enum": [
           "String",
           "SecretString",
@@ -508,9 +508,11 @@
         }
       },
       "ListItemType": {
-        "description": "The element type a `List` holds. `String` and `SecretString` are absent\ndeliberately: they are the two types never served to browser-facing\nconsumers, and a `List` is. `Map` is already a keyed collection, and a\nlist of lists has no consumer.\n",
+        "description": "The element type a `List` holds — every value type except the\ncontainers. `Map` is already a keyed collection and a list of lists has\nno consumer. A list is exactly as client-safe and exactly as secret as\nits element type: a list of `SecretString` is encrypted per item and its\nvalue is never returned.\n",
         "type": "string",
         "enum": [
+          "String",
+          "SecretString",
           "Text",
           "Number",
           "Boolean",
@@ -538,6 +540,54 @@
             "items": {
               "type": "string",
               "maxLength": 32768
+            }
+          }
+        }
+      },
+      "ListOfString": {
+        "type": "object",
+        "required": [
+          "itemType",
+          "items"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "itemType": {
+            "type": "string",
+            "enum": [
+              "String"
+            ]
+          },
+          "items": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ListOfSecretString": {
+        "description": "Write-only in effect: the items are encrypted per item at rest and the\nwhole value is omitted from every read response, exactly as a\n`SecretString` variable's value is. Read `item_type` to learn what a\nlist holds when its value is withheld.\n",
+        "type": "object",
+        "required": [
+          "itemType",
+          "items"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "itemType": {
+            "type": "string",
+            "enum": [
+              "SecretString"
+            ]
+          },
+          "items": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "description": "Must be at most 4096 bytes when UTF-8 encoded — the same limit KMS\nenforces on a symmetric Encrypt call. This is a byte bound, not a\ncharacter bound: a string with multi-byte characters can be well\nunder 4096 characters long and still be rejected.\n"
             }
           }
         }
@@ -658,6 +708,12 @@
           },
           {
             "$ref": "#/components/schemas/ListOfLink"
+          },
+          {
+            "$ref": "#/components/schemas/ListOfString"
+          },
+          {
+            "$ref": "#/components/schemas/ListOfSecretString"
           }
         ],
         "discriminator": {
@@ -667,7 +723,9 @@
             "Number": "#/components/schemas/ListOfNumber",
             "Boolean": "#/components/schemas/ListOfBoolean",
             "JSON": "#/components/schemas/ListOfJson",
-            "Link": "#/components/schemas/ListOfLink"
+            "Link": "#/components/schemas/ListOfLink",
+            "String": "#/components/schemas/ListOfString",
+            "SecretString": "#/components/schemas/ListOfSecretString"
           }
         }
       },
@@ -713,6 +771,14 @@
           "type": {
             "$ref": "#/components/schemas/EnvironmentValueType"
           },
+          "item_type": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ListItemType"
+              }
+            ],
+            "description": "Present only for a `List` variable that holds a value, derived from\nthat value at read time and never stored. Returned even when `value`\nitself is withheld, which is the case for a list of `SecretString` —\nit is the only way a client learns what such a list holds.\n"
+          },
           "description": {
             "type": "string"
           },
@@ -726,7 +792,7 @@
                 "$ref": "#/components/schemas/EnvironmentValue"
               }
             ],
-            "description": "Returned for non-secret types, omitted for SecretString. Also omitted when\nthe variable has been created without a value — for example by a blueprint\ninstall, which syncs a variable's key and type but never its value.\n"
+            "description": "Returned for non-secret types, omitted for SecretString and for a\nList of SecretString. Also omitted when\nthe variable has been created without a value — for example by a blueprint\ninstall, which syncs a variable's key and type but never its value.\n"
           },
           "protected": {
             "type": "boolean",
@@ -757,6 +823,14 @@
           "type": {
             "$ref": "#/components/schemas/EnvironmentValueType"
           },
+          "item_type": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ListItemType"
+              }
+            ],
+            "description": "Present only for a `List` variable that holds a value, derived from\nthat value at read time and never stored. Returned even when `value`\nitself is withheld, which is the case for a list of `SecretString` —\nit is the only way a client learns what such a list holds.\n"
+          },
           "description": {
             "type": "string"
           },
@@ -770,7 +844,7 @@
                 "$ref": "#/components/schemas/EnvironmentValue"
               }
             ],
-            "description": "Returned for non-secret types, omitted for SecretString. Also omitted when\nthe variable has been created without a value — for example by a blueprint\ninstall, which syncs a variable's key and type but never its value.\n"
+            "description": "Returned for non-secret types, omitted for SecretString and for a\nList of SecretString. Also omitted when\nthe variable has been created without a value — for example by a blueprint\ninstall, which syncs a variable's key and type but never its value.\n"
           },
           "protected": {
             "type": "boolean",

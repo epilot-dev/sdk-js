@@ -44,6 +44,8 @@ const { data } = await environmentsClient.listEnvironmentVariables(...)
 - [`LinkFields`](#linkfields)
 - [`ListItemType`](#listitemtype)
 - [`ListOfText`](#listoftext)
+- [`ListOfString`](#listofstring)
+- [`ListOfSecretString`](#listofsecretstring)
 - [`ListOfNumber`](#listofnumber)
 - [`ListOfBoolean`](#listofboolean)
 - [`ListOfJson`](#listofjson)
@@ -78,6 +80,7 @@ const { data } = await client.listEnvironmentVariables()
     {
       "key": "string",
       "type": "String",
+      "item_type": "String",
       "description": "string",
       "group": "string",
       "value": "string",
@@ -120,6 +123,7 @@ const { data } = await client.createEnvironmentVariable(
 {
   "key": "string",
   "type": "String",
+  "item_type": "String",
   "description": "string",
   "group": "string",
   "value": "string",
@@ -229,6 +233,7 @@ const { data } = await client.getEnvironmentVariable({
 {
   "key": "string",
   "type": "String",
+  "item_type": "String",
   "description": "string",
   "group": "string",
   "value": "string",
@@ -270,6 +275,7 @@ const { data } = await client.updateEnvironmentVariable(
 {
   "key": "string",
   "type": "String",
+  "item_type": "String",
   "description": "string",
   "group": "string",
   "value": "string",
@@ -302,9 +308,9 @@ const { data } = await client.deleteEnvironmentVariable({
 ### `EnvironmentValueType`
 
 The structure a variable's value holds. `SecretString` is encrypted at rest and
-its value is never returned. `Text`, `Number`, `Boolean`, `Map`, `JSON`, `Link` and
-`List` may be served to browser-facing consumers; `String` and `SecretString` may not.
-
+its value is never returned. `Text`, `Number`, `Boolean`, `Map`, `JSON` and `Link`
+may be served to browser-facing consumers; `String` and `SecretString` may not. A
+`List` inherits this from its element type: a `List` is
 
 ```ts
 type EnvironmentValueType = "String" | "SecretString" | "Text" | "Number" | "Boolean" | "Map" | "JSON" | "Link" | "List"
@@ -396,14 +402,14 @@ type LinkFields = {
 
 ### `ListItemType`
 
-The element type a `List` holds. `String` and `SecretString` are absent
-deliberately: they are the two types never served to browser-facing
-consumers, and a `List` is. `Map` is already a keyed collection, and a
-list of lists has no consumer.
-
+The element type a `List` holds — every value type except the
+containers. `Map` is already a keyed collection and a list of lists has
+no consumer. A list is exactly as client-safe and exactly as secret as
+its element type: a list of `SecretString` is encrypted per item and its
+value is never returne
 
 ```ts
-type ListItemType = "Text" | "Number" | "Boolean" | "JSON" | "Link"
+type ListItemType = "String" | "SecretString" | "Text" | "Number" | "Boolean" | "JSON" | "Link"
 ```
 
 ### `ListOfText`
@@ -411,6 +417,30 @@ type ListItemType = "Text" | "Number" | "Boolean" | "JSON" | "Link"
 ```ts
 type ListOfText = {
   itemType: "Text"
+  items: string[]
+}
+```
+
+### `ListOfString`
+
+```ts
+type ListOfString = {
+  itemType: "String"
+  items: string[]
+}
+```
+
+### `ListOfSecretString`
+
+Write-only in effect: the items are encrypted per item at rest and the
+whole value is omitted from every read response, exactly as a
+`SecretString` variable's value is. Read `item_type` to learn what a
+list holds when its value is withheld.
+
+
+```ts
+type ListOfSecretString = {
+  itemType: "SecretString"
   items: string[]
 }
 ```
@@ -491,6 +521,12 @@ type ListValue = {
     label: string | Record<string, string>
     description?: string | Record<string, string>
   }>
+} | {
+  itemType: "String"
+  items: string[]
+} | {
+  itemType: "SecretString"
+  items: string[]
 }
 ```
 
@@ -534,6 +570,12 @@ type EnvironmentValue = string | number | boolean | {
     label: string | Record<string, string>
     description?: string | Record<string, string>
   }>
+} | {
+  itemType: "String"
+  items: string[]
+} | {
+  itemType: "SecretString"
+  items: string[]
 }
 ```
 
@@ -543,6 +585,7 @@ type EnvironmentValue = string | number | boolean | {
 type EnvironmentVariable = {
   key: string
   type: "String" | "SecretString" | "Text" | "Number" | "Boolean" | "Map" | "JSON" | "Link" | "List"
+  item_type?: "String" | "SecretString" | "Text" | "Number" | "Boolean" | "JSON" | "Link"
   description?: string
   group?: string
   value?: string | number | boolean | {
@@ -576,6 +619,12 @@ type EnvironmentVariable = {
       label: { ... }
       description?: { ... }
     }>
+  } | {
+    itemType: "String"
+    items: string[]
+  } | {
+    itemType: "SecretString"
+    items: string[]
   }
   protected?: boolean
   created_at: string // date-time
@@ -589,6 +638,7 @@ type EnvironmentVariable = {
 type EnvironmentVariableListItem = {
   key: string
   type: "String" | "SecretString" | "Text" | "Number" | "Boolean" | "Map" | "JSON" | "Link" | "List"
+  item_type?: "String" | "SecretString" | "Text" | "Number" | "Boolean" | "JSON" | "Link"
   description?: string
   group?: string
   value?: string | number | boolean | {
@@ -622,6 +672,12 @@ type EnvironmentVariableListItem = {
       label: { ... }
       description?: { ... }
     }>
+  } | {
+    itemType: "String"
+    items: string[]
+  } | {
+    itemType: "SecretString"
+    items: string[]
   }
   protected?: boolean
   created_at: string // date-time
@@ -636,6 +692,7 @@ type EnvironmentVariableList = {
   items: Array<{
     key: string
     type: "String" | "SecretString" | "Text" | "Number" | "Boolean" | "Map" | "JSON" | "Link" | "List"
+    item_type?: "String" | "SecretString" | "Text" | "Number" | "Boolean" | "JSON" | "Link"
     description?: string
     group?: string
     value?: string | number | boolean | {
@@ -661,6 +718,12 @@ type EnvironmentVariableList = {
     } | {
       itemType: { ... }
       fallbackLanguage?: { ... }
+      items: { ... }
+    } | {
+      itemType: { ... }
+      items: { ... }
+    } | {
+      itemType: { ... }
       items: { ... }
     }
     protected?: boolean
@@ -709,6 +772,12 @@ type EnvironmentVariableCreateRequest = {
       label: { ... }
       description?: { ... }
     }>
+  } | {
+    itemType: "String"
+    items: string[]
+  } | {
+    itemType: "SecretString"
+    items: string[]
   }
   protected?: boolean
 }
@@ -750,6 +819,12 @@ type EnvironmentVariableUpdateRequest = {
       label: { ... }
       description?: { ... }
     }>
+  } | {
+    itemType: "String"
+    items: string[]
+  } | {
+    itemType: "SecretString"
+    items: string[]
   }
   description?: string
   group?: string
