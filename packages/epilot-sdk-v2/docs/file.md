@@ -1525,7 +1525,7 @@ type FileValidationFileReference = {
 ```ts
 type FileValidation = {
   id: string
-  status: "completed" | "pending" | "failed"
+  status: "completed" | "pending" | "failed" | "skipped"
   file: {
     entity_id?: string | string // uuid
     s3ref?: unknown
