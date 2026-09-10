@@ -2961,9 +2961,10 @@
             "enum": [
               "completed",
               "pending",
-              "failed"
+              "failed",
+              "skipped"
             ],
-            "description": "`completed` when every rule was evaluated. `pending` is reserved for check levels that\nneed asynchronous content extraction; `failed` when the observation could not be produced.\n"
+            "description": "`completed` when every rule was evaluated. `pending` is reserved for check levels that\nneed asynchronous content extraction; `failed` when the observation could not be produced;\n`skipped` when document validation is not enabled for the organisation - the file was not\nread and `results` is empty, so callers treat the file as accepted.\n"
           },
           "file": {
             "$ref": "#/components/schemas/FileValidationFile"

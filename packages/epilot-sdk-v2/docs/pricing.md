@@ -3115,8 +3115,8 @@ type PinnedConditions = Record<string, unknown>
 The attribute values this version overrides on the base entity, keyed by attribute name.
 
 Only attributes currently declaring `overridable_attribute` are applied. Metadata fields
-(anything underscore-prefixed), readonly attributes, hidden attributes, computed attributes
-and non-overridable attribute
+(anything underscore-prefixed), readonly attributes, hidden attributes, computed attributes,
+attributes of a type no vari
 
 ```ts
 type VariantValues = Record<string, unknown>
