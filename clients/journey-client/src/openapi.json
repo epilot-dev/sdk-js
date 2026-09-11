@@ -3581,9 +3581,6 @@
   "servers": [
     {
       "url": "https://journey-config.sls.epilot.io"
-    },
-    {
-      "url": "https://journey-config.dev.sls.epilot.io"
     }
   ]
 }
