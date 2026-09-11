@@ -146,8 +146,6 @@ const { data } = await automationClient.searchFlows(...)
 - [`TriggerEventEntityActivity`](#triggerevententityactivity)
 - [`TriggerEventMessaging`](#triggereventmessaging)
 - [`TriggerEventEntityOperation`](#triggerevententityoperation)
-- [`TriggerEventEventCatalog`](#triggereventeventcatalog)
-- [`TriggerEventPayloadRef`](#triggereventpayloadref)
 - [`ApiCallerContext`](#apicallercontext)
 - [`ExecutionStatus`](#executionstatus)
 - [`GetExecutionsResp`](#getexecutionsresp)
@@ -177,7 +175,6 @@ const { data } = await automationClient.searchFlows(...)
 - [`EntitySearchFilter`](#entitysearchfilter)
 - [`EntitySearchFilterValue`](#entitysearchfiltervalue)
 - [`EntityManualTrigger`](#entitymanualtrigger)
-- [`EventCatalogTrigger`](#eventcatalogtrigger)
 - [`TriggerCondition`](#triggercondition)
 - [`Comparison`](#comparison)
 - [`FilterConditionOnEvent`](#filterconditiononevent)
@@ -213,7 +210,6 @@ const { data } = await client.searchFlows({
   from: 1,
   trigger_source_id: 'example',
   target_workflow: 'example',
-  trigger_event_name: 'example',
   include_flows: true,
 })
 ```
@@ -1320,16 +1316,6 @@ type AutomationFlow = {
     configuration?: {
       journey_id?: { ... }
     }
-  } | {
-    id?: string // uuid
-    type: "event_catalog"
-    configuration: {
-      event_name: { ... }
-      event_version: { ... }
-      entity_node_id: { ... }
-      entity_schema: { ... }
-      ignore_automation_triggered?: { ... }
-    }
   }>
   trigger_conditions?: Array<{
     source: string
@@ -1350,6 +1336,16 @@ type AutomationFlow = {
     allow_failure?: boolean
     statements?: Array<{
       id?: { ... }
+      source?: { ... }
+      operation?: { ... }
+      values?: { ... }
+    }>
+  }>
+  schedules?: Array<{
+    id: string
+    scheduleApiId?: string
+    numberOfUnits?: number
+    timePeriod?: "minutes" | "hours" | "days" | "weeks" | "months"
   // ...
 }
 ```
@@ -1412,10 +1408,6 @@ type SearchAutomationsResp = {
       id?: { ... }
       type: { ... }
       configuration?: { ... }
-    } | {
-      id?: { ... }
-      type: { ... }
-      configuration: { ... }
     }>
     trigger_conditions?: Array<{
       source: { ... }
@@ -1465,6 +1457,10 @@ type SearchAutomationsResp = {
       type?: { ... }
       config?: { ... }
     } | {
+      type?: { ... }
+      config?: { ... }
+    } | {
+      type?: { ... }
   // ...
 }
 ```
@@ -1539,16 +1535,6 @@ type AnyTrigger = {
   type: "flows_trigger"
   configuration?: {
     journey_id?: string // uuid
-  }
-} | {
-  id?: string // uuid
-  type: "event_catalog"
-  configuration: {
-    event_name: string
-    event_version: string
-    entity_node_id: string
-    entity_schema: string
-    ignore_automation_triggered?: boolean
   }
 }
 ```
@@ -2295,6 +2281,7 @@ type GraphContextEntry = {
       cardinality?: { ... }
       fields?: { ... }
       filter?: { ... }
+      optional?: { ... }
     }>
     edges: Array<{
       from: { ... }
@@ -2326,6 +2313,7 @@ type GraphDefinition = {
       attribute: { ... }
       value: { ... }
     }>
+    optional?: boolean
   }>
   edges: Array<{
     from: string
@@ -2346,6 +2334,7 @@ type GraphNode = {
     attribute: string
     value: string | number | boolean
   }>
+  optional?: boolean
 }
 ```
 
@@ -2594,7 +2583,31 @@ type AssignEntityConfig = {
     email?: string
   }>
   write_mode?: "replace" | "append"
-  assignment_type?: "direct"
+  assignment_type?: "direct" | "sequential" | "even_distribution"
+  candidate_group?: {
+    type: "user" | "partner_user" | "partner_organization" | "group"
+    user_id?: string
+    group_id?: string
+    org_id?: string
+    partner_id?: string
+    display_name?: string
+    email?: string
+  }
+  reset_interval?: "daily" | "weekly" | "monthly" | "never"
+  workload_filter?: {
+    attribute?: string
+    values?: string[]
+  }
+  fallback?: "leave_unassigned" | "assign_to_fallback"
+  fallback_assignees?: Array<{
+    type: "user" | "partner_user" | "partner_organization" | "group"
+    user_id?: string
+    group_id?: string
+    org_id?: string
+    partner_id?: string
+    display_name?: string
+    email?: string
+  }>
   source?: {
     id?: string
     origin?: "trigger" | "action"
@@ -2623,7 +2636,31 @@ type AssignEntityActionConfig = {
       email?: { ... }
     }>
     write_mode?: "replace" | "append"
-    assignment_type?: "direct"
+    assignment_type?: "direct" | "sequential" | "even_distribution"
+    candidate_group?: {
+      type: { ... }
+      user_id?: { ... }
+      group_id?: { ... }
+      org_id?: { ... }
+      partner_id?: { ... }
+      display_name?: { ... }
+      email?: { ... }
+    }
+    reset_interval?: "daily" | "weekly" | "monthly" | "never"
+    workload_filter?: {
+      attribute?: { ... }
+      values?: { ... }
+    }
+    fallback?: "leave_unassigned" | "assign_to_fallback"
+    fallback_assignees?: Array<{
+      type: { ... }
+      user_id?: { ... }
+      group_id?: { ... }
+      org_id?: { ... }
+      partner_id?: { ... }
+      display_name?: { ... }
+      email?: { ... }
+    }>
     source?: {
       id?: { ... }
       origin?: { ... }
@@ -2660,7 +2697,31 @@ type AssignEntityAction = {
       email?: { ... }
     }>
     write_mode?: "replace" | "append"
-    assignment_type?: "direct"
+    assignment_type?: "direct" | "sequential" | "even_distribution"
+    candidate_group?: {
+      type: { ... }
+      user_id?: { ... }
+      group_id?: { ... }
+      org_id?: { ... }
+      partner_id?: { ... }
+      display_name?: { ... }
+      email?: { ... }
+    }
+    reset_interval?: "daily" | "weekly" | "monthly" | "never"
+    workload_filter?: {
+      attribute?: { ... }
+      values?: { ... }
+    }
+    fallback?: "leave_unassigned" | "assign_to_fallback"
+    fallback_assignees?: Array<{
+      type: { ... }
+      user_id?: { ... }
+      group_id?: { ... }
+      org_id?: { ... }
+      partner_id?: { ... }
+      display_name?: { ... }
+      email?: { ... }
+    }>
     source?: {
       id?: { ... }
       origin?: { ... }
@@ -3334,7 +3395,7 @@ type ConditionStatement = {
   source?: {
     id?: string
     origin?: "trigger" | "action"
-    originType?: "entity" | "workflow" | "journey_block" | "event"
+    originType?: "entity" | "workflow" | "journey_block"
     schema?: string
     attribute?: string
     attributeType?: "string" | "text" | "number" | "boolean" | "date" | "datetime" | "tags" | "country" | "email" | "phone" | "product" | "price" | "status" | "relation" | "multiselect" | "select" | "radio" | "relation_user" | "purpose" | "label" | "payment" | "relation_payment_method"
@@ -3653,42 +3714,6 @@ type TriggerEventEntityOperation = {
   org_id: string
   activity_id: string
   operation_type: "createEntity" | "updateEntity" | "deleteEntity" | "softDeleteEntity" | "restoreEntity" | "relationsAdded" | "relationsRemoved" | "relationsSoftDeleted" | "relationsRestored" | "relationsDeleted"
-}
-```
-
-### `TriggerEventEventCatalog`
-
-Set on executions started by an Event Catalog event (see EventCatalogTrigger). The full event payload is not stored inline (it may be up to 256 KB) but by reference in `payload_ref`; automation workers hydrate it before every action.
-
-
-```ts
-type TriggerEventEventCatalog = {
-  type: "event_catalog"
-  org_id: string
-  entity_id: string
-  entity_node_id: string
-  event_id: string
-  event_name: string
-  event_version: string
-  published_version?: string
-  event_time?: string // date-time
-  trigger_source_type?: string
-  trigger_source?: string
-  payload_ref?: {
-    bucket: string
-    key: string
-  }
-}
-```
-
-### `TriggerEventPayloadRef`
-
-S3 reference to the stored trigger event payload (`_downgrades` stripped, downgraded to the pinned version)
-
-```ts
-type TriggerEventPayloadRef = {
-  bucket: string
-  key: string
 }
 ```
 
@@ -4409,25 +4434,6 @@ type EntityManualTrigger = {
   type: "entity_manual"
   configuration: {
     schema?: string
-  }
-}
-```
-
-### `EventCatalogTrigger`
-
-Starts the flow when an Event Catalog event is published for the organization. The execution runs in the context of one entity from the event's entity graph (`entity_node_id`), and the event payload is available to conditions and actions as the `event` variable context.
-
-
-```ts
-type EventCatalogTrigger = {
-  id?: string // uuid
-  type: "event_catalog"
-  configuration: {
-    event_name: string
-    event_version: string
-    entity_node_id: string
-    entity_schema: string
-    ignore_automation_triggered?: boolean
   }
 }
 ```
