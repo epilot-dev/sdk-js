@@ -560,23 +560,7 @@ declare namespace Components {
          *       ```
          *
          */
-        EntityOperationTrigger | ActivityTrigger | EntityManualTrigger | ReceivedEmailTrigger | NewEmailThreadTrigger | FlowsTrigger | /**
-         * Starts the flow when an Event Catalog event is published for the organization. The execution runs in the context of one entity from the event's entity graph (`entity_node_id`), and the event payload is available to conditions and actions as the `event` variable context.
-         *
-         * example:
-         * {
-         *   "id": "12d4f45a-1883-4841-a94c-5928cb338a94",
-         *   "type": "event_catalog",
-         *   "configuration": {
-         *     "event_name": "CustomerRequestSubmitted",
-         *     "event_version": "1.1",
-         *     "entity_node_id": "ticket",
-         *     "entity_schema": "ticket",
-         *     "ignore_automation_triggered": true
-         *   }
-         * }
-         */
-        EventCatalogTrigger;
+        EntityOperationTrigger | ActivityTrigger | EntityManualTrigger | ReceivedEmailTrigger | NewEmailThreadTrigger | FlowsTrigger;
         export interface AnythingButCondition {
             "anything-but"?: string[];
         }
@@ -854,18 +838,107 @@ declare namespace Components {
              *   `partner_id` for partner_organization. Scoping by `org_id` keeps
              *   assignees from different organizations distinct even when their
              *   identifiers coincide.
+             * Honoured in `direct` only; `sequential` always forces `replace`.
              *
              */
             write_mode?: "replace" | "append";
             /**
-             * How assignees are resolved.
-             * - direct: assign exactly the assignees listed (default, and the only
-             *   accepted value).
-             * Reserved for a future routing strategy; widening this enum later is
-             * backwards compatible and needs no migration of existing flows.
+             * How assignees are resolved. Omitted means `direct`.
+             * - direct: assign exactly the assignees listed in `assignees`.
+             * - sequential: round-robin over the members of `candidate_group`,
+             *   selecting one user per execution. `assignees` is ignored and
+             *   `write_mode` is forced to `replace`.
+             * - even_distribution: like sequential, but the member with the fewest
+             *   matching entities wins; ties are resolved by the rotation.
+             *   `workload_filter` narrows what counts as load.
              *
              */
-            assignment_type?: "direct";
+            assignment_type?: "direct" | "sequential" | "even_distribution";
+            /**
+             * The group whose members form the rotation. Must be `type: group`;
+             * ignored in `direct`.
+             *
+             */
+            candidate_group?: {
+                /**
+                 * Which kind of principal this assignee is. Required: it selects which
+                 * of the identifier properties below applies, and forms part of the
+                 * append-mode de-duplication key.
+                 * Partner types cannot participate in a rotation; they stay valid in
+                 * `assignees` and `fallback_assignees`.
+                 *
+                 */
+                type: "user" | "partner_user" | "partner_organization" | "group";
+                /**
+                 * Set for user and partner_user assignees.
+                 */
+                user_id?: string;
+                /**
+                 * Set for group assignees.
+                 */
+                group_id?: string;
+                /**
+                 * Organization the assignee belongs to.
+                 */
+                org_id?: string;
+                /**
+                 * Set for partner_user and partner_organization assignees.
+                 */
+                partner_id?: string;
+                /**
+                 * Label snapshotted at configuration time; may go stale after a rename.
+                 */
+                display_name?: string;
+                email?: string;
+            };
+            /**
+             * When the rotation restarts at the first member instead of continuing
+             * where the last execution left off. `never` wraps around continuously.
+             * Boundaries are evaluated in UTC. Applies to `sequential` only.
+             *
+             */
+            reset_interval?: "daily" | "weekly" | "monthly" | "never";
+            /**
+             * Narrows what counts as workload for `even_distribution`: only entities
+             * whose `attribute` (a status-type attribute on the target schema) holds
+             * one of `values` are counted. Absent means every non-deleted entity
+             * holding the assignee counts. Ignored by the other assignment types.
+             *
+             */
+            workload_filter?: {
+                /**
+                 * Name of a `status`-type attribute on the target schema.
+                 */
+                attribute?: string;
+                /**
+                 * Attribute values that count as load.
+                 */
+                values?: string[];
+            };
+            /**
+             * What to do when no assignable principal resolves, e.g. an empty or
+             * fully ineligible `candidate_group`.
+             * - leave_unassigned: write nothing at all, leaving the attribute as it
+             *   was. Not the same as writing an empty array, which would clear an
+             *   existing assignment.
+             * - assign_to_fallback: write `fallback_assignees` instead.
+             *
+             */
+            fallback?: "leave_unassigned" | "assign_to_fallback";
+            /**
+             * Assignees to write when `fallback` is `assign_to_fallback`; required
+             * in that case and ignored otherwise. Any `EntityAssignee` type is
+             * allowed, partner principals included.
+             *
+             */
+            fallback_assignees?: /**
+             * A single assignee as stored in a user-relation attribute. Written through
+             * verbatim by the assign-entity worker. Note this object encoding differs
+             * deliberately from AssignThreadConfig, which stores bare id strings —
+             * each matches what its own target accepts.
+             *
+             */
+            EntityAssignee[];
             /**
              * Which entity to assign to. Omit for the triggering entity (the
              * default, and the behaviour of every flow saved before this field
@@ -974,7 +1047,8 @@ declare namespace Components {
              * - direct: assign exactly the users in `add` (default).
              * - even_distribution: treat `add` as a candidate pool (users and/or groups)
              *   and assign the least-loaded available agent.
-             * - sequential: reserved for future use.
+             * - sequential: treat `add` as a candidate pool and assign the next
+             *   user in a stable round-robin rotation.
              *
              */
             assignment_type?: "direct" | "even_distribution" | "sequential";
@@ -1294,11 +1368,7 @@ declare namespace Components {
              * 2
              */
             version?: number;
-            trigger_event?: TriggerEventManual | TriggerEventEntityActivity | TriggerEventEntityOperation | TriggerEventFlowAutomationTask | TriggerEventMessaging | /**
-             * Set on executions started by an Event Catalog event (see EventCatalogTrigger). The full event payload is not stored inline (it may be up to 256 KB) but by reference in `payload_ref`; automation workers hydrate it before every action.
-             *
-             */
-            TriggerEventEventCatalog;
+            trigger_event?: TriggerEventManual | TriggerEventEntityActivity | TriggerEventEntityOperation | TriggerEventFlowAutomationTask | TriggerEventMessaging;
             workflow_context?: WorkflowExecutionContext;
             workflow_wait_context?: /**
              * Correlation stamped when the triggering submission entity carried workflow wait claims from a journey link (AL-2521). Consumed by svc-workflows to resume a task waiting on this journey submission.
@@ -1892,11 +1962,7 @@ declare namespace Components {
                  */
                 id?: string;
                 origin?: "trigger" | "action";
-                /**
-                 * `event` reads the operand from the trigger's Event Catalog payload instead of an entity: `attribute` is then a dot path into the payload (e.g. `ticket.subject`). Only valid with `origin: trigger` on flows started by an EventCatalogTrigger.
-                 *
-                 */
-                originType?: "entity" | "workflow" | "journey_block" | "event";
+                originType?: "entity" | "workflow" | "journey_block";
                 schema?: string;
                 attribute?: string;
                 attributeType?: "string" | "text" | "number" | "boolean" | "date" | "datetime" | "tags" | "country" | "email" | "phone" | "product" | "price" | "status" | "relation" | "multiselect" | "select" | "radio" | "relation_user" | "purpose" | "label" | "payment" | "relation_payment_method";
@@ -2189,6 +2255,8 @@ declare namespace Components {
              * Which kind of principal this assignee is. Required: it selects which
              * of the identifier properties below applies, and forms part of the
              * append-mode de-duplication key.
+             * Partner types cannot participate in a rotation; they stay valid in
+             * `assignees` and `fallback_assignees`.
              *
              */
             type: "user" | "partner_user" | "partner_organization" | "group";
@@ -2655,63 +2723,6 @@ declare namespace Components {
             error_info?: {
                 [name: string]: any;
                 details?: ErrorDetail[];
-            };
-        }
-        /**
-         * Starts the flow when an Event Catalog event is published for the organization. The execution runs in the context of one entity from the event's entity graph (`entity_node_id`), and the event payload is available to conditions and actions as the `event` variable context.
-         *
-         * example:
-         * {
-         *   "id": "12d4f45a-1883-4841-a94c-5928cb338a94",
-         *   "type": "event_catalog",
-         *   "configuration": {
-         *     "event_name": "CustomerRequestSubmitted",
-         *     "event_version": "1.1",
-         *     "entity_node_id": "ticket",
-         *     "entity_schema": "ticket",
-         *     "ignore_automation_triggered": true
-         *   }
-         * }
-         */
-        export interface EventCatalogTrigger {
-            /**
-             * example:
-             * 12d4f45a-1883-4841-a94c-5928cb338a94
-             */
-            id?: string; // uuid
-            type: "event_catalog";
-            configuration: {
-                /**
-                 * Name of the Event Catalog event that starts this flow
-                 * example:
-                 * CustomerRequestSubmitted
-                 */
-                event_name: string;
-                /**
-                 * Event version (MAJOR.MINOR) this trigger is pinned to. Payloads published in a newer version are downgraded to this version before the flow runs, so field references in conditions and actions stay stable.
-                 *
-                 * example:
-                 * 1.1
-                 */
-                event_version: string;
-                /**
-                 * Id of the cardinality-one node in the event's entity graph whose entity becomes the execution's main entity (the entity actions operate on).
-                 *
-                 * example:
-                 * ticket
-                 */
-                entity_node_id: string;
-                /**
-                 * Schema of the entity behind `entity_node_id`, denormalized from the event definition at configuration time
-                 * example:
-                 * ticket
-                 */
-                entity_schema: string;
-                /**
-                 * When true (default), events that were emitted by an automation (`_trigger_source_type: automation`) do not start this flow. This prevents automation → event → automation chains unless explicitly enabled.
-                 *
-                 */
-                ignore_automation_triggered?: boolean;
             };
         }
         /**
@@ -3200,6 +3211,14 @@ declare namespace Components {
              *
              */
             filter?: /* Entities are included in this node's result only if `attribute` exactly equals the literal `value`. */ GraphNodeFilter[];
+            /**
+             * Only meaningful for a node expected to resolve to a single entity (the seed node, or
+             * "cardinality: one"). When true, finding zero matching entities is not an error - the
+             * mapping proceeds without this node's data instead of failing. Finding more than one
+             * match still fails regardless of this flag; ambiguity is never silently accepted.
+             *
+             */
+            optional?: boolean;
         }
         /**
          * Entities are included in this node's result only if `attribute` exactly equals the literal `value`.
@@ -4688,64 +4707,6 @@ declare namespace Components {
             ActivityId;
             operation_type: EntityOperation;
         }
-        /**
-         * Set on executions started by an Event Catalog event (see EventCatalogTrigger). The full event payload is not stored inline (it may be up to 256 KB) but by reference in `payload_ref`; automation workers hydrate it before every action.
-         *
-         */
-        export interface TriggerEventEventCatalog {
-            type: "event_catalog";
-            /**
-             * example:
-             * 123
-             */
-            org_id: string;
-            entity_id: /**
-             * example:
-             * e3d3ebac-baab-4395-abf4-50b5bf1f8b74
-             */
-            EntityId;
-            /**
-             * Node id of the event's entity graph that was resolved to `entity_id`
-             * example:
-             * ticket
-             */
-            entity_node_id: string;
-            /**
-             * Event Catalog event id (ULID) of the published event
-             * example:
-             * 01K3ZK8QZ7Y7Q2M8W1V3N4X5P6
-             */
-            event_id: string;
-            /**
-             * example:
-             * CustomerRequestSubmitted
-             */
-            event_name: string;
-            /**
-             * Version the payload was delivered in (the version pinned on the trigger)
-             * example:
-             * 1.1
-             */
-            event_version: string;
-            /**
-             * Version the event was originally published with, before downgrading to `event_version`
-             * example:
-             * 1.2
-             */
-            published_version?: string;
-            event_time?: string; // date-time
-            /**
-             * How the event was triggered in the catalog (api | automation | operation | portal_user)
-             * example:
-             * operation
-             */
-            trigger_source_type?: string;
-            /**
-             * Opaque source reference from the catalog (e.g. activity id, automation execution id)
-             */
-            trigger_source?: string;
-            payload_ref?: /* S3 reference to the stored trigger event payload (`_downgrades` stripped, downgraded to the pinned version) */ TriggerEventPayloadRef;
-        }
         export interface TriggerEventFlowAutomationTask {
             type?: "flow_automation_task";
             /**
@@ -4798,21 +4759,6 @@ declare namespace Components {
              * e3d3ebac-baab-4395-abf4-50b5bf1f8b74
              */
             EntityId;
-        }
-        /**
-         * S3 reference to the stored trigger event payload (`_downgrades` stripped, downgraded to the pinned version)
-         */
-        export interface TriggerEventPayloadRef {
-            /**
-             * example:
-             * automation-trigger-payloads-prod
-             */
-            bucket: string;
-            /**
-             * example:
-             * trigger-payloads/123/6c8e5d9a-7f1b-4c2e-9d3a-0b1c2d3e4f5a.json
-             */
-            key: string;
         }
         export interface TriggerShareEntityAction {
             id?: /**
@@ -5776,11 +5722,6 @@ declare namespace Paths {
             export type TargetWorkflow = string;
             /**
              * example:
-             * CustomerRequestSubmitted
-             */
-            export type TriggerEventName = string;
-            /**
-             * example:
              * 600945fe-212e-4b97-acf7-391d64648384
              */
             export type TriggerSourceId = string;
@@ -5803,11 +5744,6 @@ declare namespace Paths {
              * wfABCDEFGH
              */
             Parameters.TargetWorkflow;
-            trigger_event_name?: /**
-             * example:
-             * CustomerRequestSubmitted
-             */
-            Parameters.TriggerEventName;
             include_flows?: Parameters.IncludeFlows;
         }
         namespace Responses {
@@ -6280,7 +6216,6 @@ export type ErrorCode = Components.Schemas.ErrorCode;
 export type ErrorDetail = Components.Schemas.ErrorDetail;
 export type ErrorObject = Components.Schemas.ErrorObject;
 export type ErrorOutput = Components.Schemas.ErrorOutput;
-export type EventCatalogTrigger = Components.Schemas.EventCatalogTrigger;
 export type ExecItem = Components.Schemas.ExecItem;
 export type ExecutionChain = Components.Schemas.ExecutionChain;
 export type ExecutionStatus = Components.Schemas.ExecutionStatus;
@@ -6352,11 +6287,9 @@ export type TriggerEventActionConfig = Components.Schemas.TriggerEventActionConf
 export type TriggerEventConfig = Components.Schemas.TriggerEventConfig;
 export type TriggerEventEntityActivity = Components.Schemas.TriggerEventEntityActivity;
 export type TriggerEventEntityOperation = Components.Schemas.TriggerEventEntityOperation;
-export type TriggerEventEventCatalog = Components.Schemas.TriggerEventEventCatalog;
 export type TriggerEventFlowAutomationTask = Components.Schemas.TriggerEventFlowAutomationTask;
 export type TriggerEventManual = Components.Schemas.TriggerEventManual;
 export type TriggerEventMessaging = Components.Schemas.TriggerEventMessaging;
-export type TriggerEventPayloadRef = Components.Schemas.TriggerEventPayloadRef;
 export type TriggerShareEntityAction = Components.Schemas.TriggerShareEntityAction;
 export type TriggerShareEntityActionConfig = Components.Schemas.TriggerShareEntityActionConfig;
 export type TriggerShareEntityConfig = Components.Schemas.TriggerShareEntityConfig;

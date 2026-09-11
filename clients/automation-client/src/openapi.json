@@ -80,15 +80,6 @@
             }
           },
           {
-            "name": "trigger_event_name",
-            "in": "query",
-            "description": "Filter by Event Catalog event name. Returns only automations that have an event_catalog trigger for this event.",
-            "schema": {
-              "type": "string",
-              "example": "CustomerRequestSubmitted"
-            }
-          },
-          {
             "name": "include_flows",
             "in": "query",
             "description": "Include flow automations in the response",
@@ -1258,9 +1249,6 @@
           },
           {
             "$ref": "#/components/schemas/FlowsTrigger"
-          },
-          {
-            "$ref": "#/components/schemas/EventCatalogTrigger"
           }
         ]
       },
@@ -2021,6 +2009,10 @@
             "items": {
               "$ref": "#/components/schemas/GraphNodeFilter"
             }
+          },
+          "optional": {
+            "type": "boolean",
+            "description": "Only meaningful for a node expected to resolve to a single entity (the seed node, or\n\"cardinality: one\"). When true, finding zero matching entities is not an error - the\nmapping proceeds without this node's data instead of failing. Finding more than one\nmatch still fails regardless of this flag; ambiguity is never silently accepted.\n"
           }
         }
       },
@@ -2408,7 +2400,7 @@
           },
           "assignment_type": {
             "type": "string",
-            "description": "How assignees in `add` are resolved.\n- direct: assign exactly the users in `add` (default).\n- even_distribution: treat `add` as a candidate pool (users and/or groups)\n  and assign the least-loaded available agent.\n- sequential: reserved for future use.\n",
+            "description": "How assignees in `add` are resolved.\n- direct: assign exactly the users in `add` (default).\n- even_distribution: treat `add` as a candidate pool (users and/or groups)\n  and assign the least-loaded available agent.\n- sequential: treat `add` as a candidate pool and assign the next\n  user in a stable round-robin rotation.\n",
             "enum": [
               "direct",
               "even_distribution",
@@ -2471,7 +2463,7 @@
         "properties": {
           "type": {
             "type": "string",
-            "description": "Which kind of principal this assignee is. Required: it selects which\nof the identifier properties below applies, and forms part of the\nappend-mode de-duplication key.\n",
+            "description": "Which kind of principal this assignee is. Required: it selects which\nof the identifier properties below applies, and forms part of the\nappend-mode de-duplication key.\nPartner types cannot participate in a rotation; they stay valid in\n`assignees` and `fallback_assignees`.\n",
             "enum": [
               "user",
               "partner_user",
@@ -2523,7 +2515,7 @@
           },
           "write_mode": {
             "type": "string",
-            "description": "How `assignees` combine with the attribute's current value.\n- replace: overwrite the attribute with `assignees` (default).\n- append: union with the existing assignees, de-duplicated, existing\n  entries first. Two assignees are duplicates when their `type` and\n  `org_id` both match and the identifier for that type matches:\n  `user_id` for user and partner_user, `group_id` for group,\n  `partner_id` for partner_organization. Scoping by `org_id` keeps\n  assignees from different organizations distinct even when their\n  identifiers coincide.\n",
+            "description": "How `assignees` combine with the attribute's current value.\n- replace: overwrite the attribute with `assignees` (default).\n- append: union with the existing assignees, de-duplicated, existing\n  entries first. Two assignees are duplicates when their `type` and\n  `org_id` both match and the identifier for that type matches:\n  `user_id` for user and partner_user, `group_id` for group,\n  `partner_id` for partner_organization. Scoping by `org_id` keeps\n  assignees from different organizations distinct even when their\n  identifiers coincide.\nHonoured in `direct` only; `sequential` always forces `replace`.\n",
             "enum": [
               "replace",
               "append"
@@ -2532,11 +2524,65 @@
           },
           "assignment_type": {
             "type": "string",
-            "description": "How assignees are resolved.\n- direct: assign exactly the assignees listed (default, and the only\n  accepted value).\nReserved for a future routing strategy; widening this enum later is\nbackwards compatible and needs no migration of existing flows.\n",
+            "description": "How assignees are resolved. Omitted means `direct`.\n- direct: assign exactly the assignees listed in `assignees`.\n- sequential: round-robin over the members of `candidate_group`,\n  selecting one user per execution. `assignees` is ignored and\n  `write_mode` is forced to `replace`.\n- even_distribution: like sequential, but the member with the fewest\n  matching entities wins; ties are resolved by the rotation.\n  `workload_filter` narrows what counts as load.\n",
             "enum": [
-              "direct"
+              "direct",
+              "sequential",
+              "even_distribution"
             ],
             "default": "direct"
+          },
+          "candidate_group": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EntityAssignee"
+              }
+            ],
+            "description": "The group whose members form the rotation. Must be `type: group`;\nignored in `direct`.\n"
+          },
+          "reset_interval": {
+            "type": "string",
+            "description": "When the rotation restarts at the first member instead of continuing\nwhere the last execution left off. `never` wraps around continuously.\nBoundaries are evaluated in UTC. Applies to `sequential` only.\n",
+            "enum": [
+              "daily",
+              "weekly",
+              "monthly",
+              "never"
+            ],
+            "default": "never"
+          },
+          "workload_filter": {
+            "type": "object",
+            "description": "Narrows what counts as workload for `even_distribution`: only entities\nwhose `attribute` (a status-type attribute on the target schema) holds\none of `values` are counted. Absent means every non-deleted entity\nholding the assignee counts. Ignored by the other assignment types.\n",
+            "properties": {
+              "attribute": {
+                "type": "string",
+                "description": "Name of a `status`-type attribute on the target schema."
+              },
+              "values": {
+                "type": "array",
+                "description": "Attribute values that count as load.",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "fallback": {
+            "type": "string",
+            "description": "What to do when no assignable principal resolves, e.g. an empty or\nfully ineligible `candidate_group`.\n- leave_unassigned: write nothing at all, leaving the attribute as it\n  was. Not the same as writing an empty array, which would clear an\n  existing assignment.\n- assign_to_fallback: write `fallback_assignees` instead.\n",
+            "enum": [
+              "leave_unassigned",
+              "assign_to_fallback"
+            ],
+            "default": "leave_unassigned"
+          },
+          "fallback_assignees": {
+            "type": "array",
+            "description": "Assignees to write when `fallback` is `assign_to_fallback`; required\nin that case and ignored otherwise. Any `EntityAssignee` type is\nallowed, partner principals included.\n",
+            "items": {
+              "$ref": "#/components/schemas/EntityAssignee"
+            }
           },
           "source": {
             "type": "object",
@@ -3665,12 +3711,10 @@
               },
               "originType": {
                 "type": "string",
-                "description": "`event` reads the operand from the trigger's Event Catalog payload instead of an entity: `attribute` is then a dot path into the payload (e.g. `ticket.subject`). Only valid with `origin: trigger` on flows started by an EventCatalogTrigger.\n",
                 "enum": [
                   "entity",
                   "workflow",
-                  "journey_block",
-                  "event"
+                  "journey_block"
                 ]
               },
               "schema": {
@@ -3960,9 +4004,6 @@
               },
               {
                 "$ref": "#/components/schemas/TriggerEventMessaging"
-              },
-              {
-                "$ref": "#/components/schemas/TriggerEventEventCatalog"
               }
             ]
           },
@@ -4257,92 +4298,6 @@
           "org_id",
           "activity_id",
           "operation_type"
-        ]
-      },
-      "TriggerEventEventCatalog": {
-        "type": "object",
-        "description": "Set on executions started by an Event Catalog event (see EventCatalogTrigger). The full event payload is not stored inline (it may be up to 256 KB) but by reference in `payload_ref`; automation workers hydrate it before every action.\n",
-        "properties": {
-          "type": {
-            "type": "string",
-            "enum": [
-              "event_catalog"
-            ]
-          },
-          "org_id": {
-            "type": "string",
-            "example": "123"
-          },
-          "entity_id": {
-            "$ref": "#/components/schemas/EntityId"
-          },
-          "entity_node_id": {
-            "type": "string",
-            "description": "Node id of the event's entity graph that was resolved to `entity_id`",
-            "example": "ticket"
-          },
-          "event_id": {
-            "type": "string",
-            "description": "Event Catalog event id (ULID) of the published event",
-            "example": "01K3ZK8QZ7Y7Q2M8W1V3N4X5P6"
-          },
-          "event_name": {
-            "type": "string",
-            "example": "CustomerRequestSubmitted"
-          },
-          "event_version": {
-            "type": "string",
-            "description": "Version the payload was delivered in (the version pinned on the trigger)",
-            "example": "1.1"
-          },
-          "published_version": {
-            "type": "string",
-            "description": "Version the event was originally published with, before downgrading to `event_version`",
-            "example": "1.2"
-          },
-          "event_time": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "trigger_source_type": {
-            "type": "string",
-            "description": "How the event was triggered in the catalog (api | automation | operation | portal_user)",
-            "example": "operation"
-          },
-          "trigger_source": {
-            "type": "string",
-            "description": "Opaque source reference from the catalog (e.g. activity id, automation execution id)"
-          },
-          "payload_ref": {
-            "$ref": "#/components/schemas/TriggerEventPayloadRef"
-          }
-        },
-        "required": [
-          "type",
-          "org_id",
-          "entity_id",
-          "entity_node_id",
-          "event_id",
-          "event_name",
-          "event_version"
-        ]
-      },
-      "TriggerEventPayloadRef": {
-        "type": "object",
-        "description": "S3 reference to the stored trigger event payload (`_downgrades` stripped, downgraded to the pinned version)",
-        "properties": {
-          "bucket": {
-            "type": "string",
-            "example": "automation-trigger-payloads-prod"
-          },
-          "key": {
-            "type": "string",
-            "example": "trigger-payloads/123/6c8e5d9a-7f1b-4c2e-9d3a-0b1c2d3e4f5a.json"
-          }
-        },
-        "required": [
-          "bucket",
-          "key"
         ]
       },
       "ApiCallerContext": {
@@ -5466,76 +5421,6 @@
             ]
           }
         ]
-      },
-      "EventCatalogTrigger": {
-        "description": "Starts the flow when an Event Catalog event is published for the organization. The execution runs in the context of one entity from the event's entity graph (`entity_node_id`), and the event payload is available to conditions and actions as the `event` variable context.\n",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/AutomationTrigger"
-          },
-          {
-            "type": "object",
-            "properties": {
-              "type": {
-                "type": "string",
-                "enum": [
-                  "event_catalog"
-                ]
-              },
-              "configuration": {
-                "type": "object",
-                "properties": {
-                  "event_name": {
-                    "type": "string",
-                    "description": "Name of the Event Catalog event that starts this flow",
-                    "example": "CustomerRequestSubmitted"
-                  },
-                  "event_version": {
-                    "type": "string",
-                    "description": "Event version (MAJOR.MINOR) this trigger is pinned to. Payloads published in a newer version are downgraded to this version before the flow runs, so field references in conditions and actions stay stable.\n",
-                    "example": "1.1"
-                  },
-                  "entity_node_id": {
-                    "type": "string",
-                    "description": "Id of the cardinality-one node in the event's entity graph whose entity becomes the execution's main entity (the entity actions operate on).\n",
-                    "example": "ticket"
-                  },
-                  "entity_schema": {
-                    "type": "string",
-                    "description": "Schema of the entity behind `entity_node_id`, denormalized from the event definition at configuration time",
-                    "example": "ticket"
-                  },
-                  "ignore_automation_triggered": {
-                    "type": "boolean",
-                    "default": true,
-                    "description": "When true (default), events that were emitted by an automation (`_trigger_source_type: automation`) do not start this flow. This prevents automation → event → automation chains unless explicitly enabled.\n"
-                  }
-                },
-                "required": [
-                  "event_name",
-                  "event_version",
-                  "entity_node_id",
-                  "entity_schema"
-                ]
-              }
-            },
-            "required": [
-              "type",
-              "configuration"
-            ]
-          }
-        ],
-        "example": {
-          "id": "12d4f45a-1883-4841-a94c-5928cb338a94",
-          "type": "event_catalog",
-          "configuration": {
-            "event_name": "CustomerRequestSubmitted",
-            "event_version": "1.1",
-            "entity_node_id": "ticket",
-            "entity_schema": "ticket",
-            "ignore_automation_triggered": true
-          }
-        }
       },
       "TriggerCondition": {
         "type": "object",

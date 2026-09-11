@@ -1,5 +1,11 @@
 # @epilot/automation-client
 
+## 2.39.0
+
+### Minor Changes
+
+- Added entity assignment
+
 ## 2.38.0
 
 ### Minor Changes
