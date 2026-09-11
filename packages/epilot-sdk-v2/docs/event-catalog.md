@@ -29,6 +29,7 @@ const { data } = await eventCatalogClient.listEvents(...)
 - [`createCustomEvent`](#createcustomevent)
 - [`getEvent`](#getevent)
 - [`patchEvent`](#patchevent)
+- [`replaceCustomEventDraft`](#replacecustomeventdraft)
 - [`deprecateCustomEvent`](#deprecatecustomevent)
 - [`previewCustomEvent`](#previewcustomevent)
 - [`publishCustomEventDefinition`](#publishcustomeventdefinition)
@@ -131,6 +132,7 @@ const { data } = await client.listEvents()
       "enabled": true,
       "auto_trigger": true,
       "automation_trigger": true,
+      "api_trigger": true,
       "automation_trigger_only": true,
       "automation_trigger_seed_node": "ticket",
       "event_origin": "builtin",
@@ -163,7 +165,7 @@ const { data } = await client.listEvents()
 
 ### `createCustomEvent`
 
-Reserve an org-scoped custom event name and persist its immutable v1.0 draft definition.
+Reserve an org-scoped custom event name and persist its immutable v1.0 draft definition. Custom events are always projected from an entity graph: entity_graph is required and, in guided mapping mode, 
 
 `POST /v1/events`
 
@@ -205,6 +207,9 @@ const { data } = await client.createCustomEvent(
       ]
     },
     automation_trigger: true,
+    api_trigger: true,
+    automation_trigger_only: false,
+    automation_trigger_seed_node: 'string',
     mapping: {
       mode: 'guided',
       jsonata: 'string'
@@ -261,6 +266,7 @@ const { data } = await client.createCustomEvent(
   "enabled": true,
   "auto_trigger": true,
   "automation_trigger": true,
+  "api_trigger": true,
   "automation_trigger_only": true,
   "automation_trigger_seed_node": "ticket",
   "event_origin": "builtin",
@@ -344,6 +350,7 @@ const { data } = await client.getEvent({
   "enabled": true,
   "auto_trigger": true,
   "automation_trigger": true,
+  "api_trigger": true,
   "automation_trigger_only": true,
   "automation_trigger_seed_node": "ticket",
   "event_origin": "builtin",
@@ -439,6 +446,143 @@ const { data } = await client.patchEvent(
   "enabled": true,
   "auto_trigger": true,
   "automation_trigger": true,
+  "api_trigger": true,
+  "automation_trigger_only": true,
+  "automation_trigger_seed_node": "ticket",
+  "event_origin": "builtin",
+  "mapping": {
+    "mode": "guided",
+    "jsonata": "string"
+  },
+  "lineage": {
+    "base_event_name": "string",
+    "base_event_version": "string"
+  },
+  "success_criteria": [
+    {
+      "entity_schema": "contract",
+      "attribute": "installment_amount"
+    },
+    {
+      "entity_schema": "billing_account",
+      "attribute": "due_date"
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `replaceCustomEventDraft`
+
+Replace the complete v1.0 definition of an org-scoped custom event while it is still an
+unpublished draft. Drafts have no consumers, so their definition is not yet immutable;
+the event name is the ide
+
+`PUT /v1/events/{event_name}`
+
+```ts
+const { data } = await client.replaceCustomEventDraft(
+  {
+    event_name: 'example',
+  },
+  {
+    event_name: 'string',
+    event_title: 'string',
+    event_description: 'string',
+    event_tags: ['string'],
+    schema_fields: {},
+    entity_graph: {
+      nodes: [
+        {
+          id: 'contact',
+          schema: 'contact',
+          cardinality: 'one',
+          fields: ['_id', '_title', 'first_name', 'account', '!account.*._files', '**._product']
+        }
+      ],
+      edges: [
+        {
+          from: 'contact',
+          to: 'billing_account'
+        }
+      ]
+    },
+    entity_operation: {
+      operation: ['createEntity', 'updateEntity'],
+      schema: ['contact', 'contract', 'order'],
+      attribute: ['email', 'phone', 'status'],
+      purpose: ['Kündigung', 'Umzug/Auszug'],
+      purpose_filters: [
+        {
+          id: 'string',
+          display_name: 'string'
+        }
+      ]
+    },
+    automation_trigger: true,
+    api_trigger: true,
+    automation_trigger_only: false,
+    automation_trigger_seed_node: 'string',
+    mapping: {
+      mode: 'guided',
+      jsonata: 'string'
+    },
+    lineage: {
+      base_event_name: 'string',
+      base_event_version: 'string'
+    },
+    example: {}
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "event_name": "AddMeterReading",
+  "event_title": "Add Meter Reading",
+  "event_description": "Triggered when a new meter reading is added",
+  "event_version": "1.0",
+  "event_status": "active",
+  "event_tags": ["builtin", "metering", "erp"],
+  "schema_fields": {},
+  "entity_graph": {
+    "nodes": [
+      {
+        "id": "contact",
+        "schema": "contact",
+        "cardinality": "one",
+        "fields": ["_id", "_title", "first_name", "account", "!account.*._files", "**._product"]
+      }
+    ],
+    "edges": [
+      {
+        "from": "contact",
+        "to": "billing_account"
+      }
+    ]
+  },
+  "entity_operation": {
+    "operation": ["createEntity", "updateEntity"],
+    "schema": ["contact", "contract", "order"],
+    "attribute": ["email", "phone", "status"],
+    "purpose": ["Kündigung", "Umzug/Auszug"],
+    "purpose_filters": [
+      {
+        "id": "string",
+        "display_name": "string"
+      }
+    ]
+  },
+  "enabled": true,
+  "auto_trigger": true,
+  "automation_trigger": true,
+  "api_trigger": true,
   "automation_trigger_only": true,
   "automation_trigger_seed_node": "ticket",
   "event_origin": "builtin",
@@ -584,6 +728,7 @@ const { data } = await client.publishCustomEventDefinition(
   "enabled": true,
   "auto_trigger": true,
   "automation_trigger": true,
+  "api_trigger": true,
   "automation_trigger_only": true,
   "automation_trigger_seed_node": "ticket",
   "event_origin": "builtin",
@@ -1072,6 +1217,7 @@ type EventConfigBase = {
   enabled?: boolean
   auto_trigger?: boolean
   automation_trigger?: boolean
+  api_trigger?: boolean
   automation_trigger_only?: boolean
   automation_trigger_seed_node?: string
   event_origin?: "builtin" | "custom"
@@ -1146,6 +1292,7 @@ type EventConfig = {
   enabled?: boolean
   auto_trigger?: boolean
   automation_trigger?: boolean
+  api_trigger?: boolean
   automation_trigger_only?: boolean
   automation_trigger_seed_node?: string
   event_origin?: "builtin" | "custom"
@@ -1166,7 +1313,7 @@ type EventConfig = {
 
 ### `CreateCustomEventPayload`
 
-Complete immutable custom-event v1.0 definition. Publication is a separate conditional action.
+Complete immutable custom-event v1.0 definition projected from a required entity graph. Publication is a separate conditional action.
 
 ```ts
 type CreateCustomEventPayload = {
@@ -1182,7 +1329,7 @@ type CreateCustomEventPayload = {
     entity_schema: string
     required?: boolean
   }>
-  entity_graph?: {
+  entity_graph: {
     nodes: Array<{
       id: { ... }
       schema: { ... }
@@ -1205,6 +1352,9 @@ type CreateCustomEventPayload = {
     }>
   }
   automation_trigger?: boolean
+  api_trigger?: boolean
+  automation_trigger_only?: boolean
+  automation_trigger_seed_node?: string
   mapping?: {
     mode: "guided" | "jsonata"
     jsonata?: string
@@ -1230,7 +1380,7 @@ type EventMapping = {
 
 ### `CustomEventLineage`
 
-Optional catalog lineage to a separately named base event. It does not replace the base event.
+Optional catalog lineage to a separately named base event. Built-in inheritance is validated against this exact registered version; its trigger restrictions cannot be removed or replaced. It does not replace the base event.
 
 ```ts
 type CustomEventLineage = {
@@ -1341,7 +1491,7 @@ type AttachmentField = {
 
 ### `CustomSchemaField`
 
-Custom v1 fields support JSON Schema values and context entities; attachment semantics are built-in-only.
+Custom v1 fields support graph-projected JSON Schema values and context entities; attachment semantics are built-in-only.
 
 ```ts
 type CustomSchemaField = {

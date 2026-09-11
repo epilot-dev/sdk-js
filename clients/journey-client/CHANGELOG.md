@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.8.0
+
+### Minor Changes
+
+- Update the journey client with journey-config spec `1.6.0` — serve a published revision by id to the runtime (ER-5421), and name a revision on save (ER-5416)
+
+## 0.7.0
+
+### Minor Changes
+
+- Update the journey client with journey-config spec `1.5.0` — journey revisions and publishing (ER-5411)
+
 ## 0.6.0
 
 ### Minor Changes

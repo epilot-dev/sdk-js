@@ -2790,6 +2790,26 @@
           "application/json": {}
         }
       },
+      "TooManyRequests": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "BadGateway": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "ServiceUnavailable": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "GatewayTimeout": {
+        "content": {
+          "application/json": {}
+        }
+      },
       "ConfirmUserInvalidRequest": {
         "content": {
           "application/json": {}

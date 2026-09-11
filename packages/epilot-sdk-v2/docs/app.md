@@ -2269,7 +2269,6 @@ type ExternalValuesComponent = {
       timeout_ms?: { ... }
       on_unavailable?: { ... }
       cache?: { ... }
-      use_static_ips?: { ... }
       secure_proxy?: { ... }
     }>
   }
@@ -2791,7 +2790,7 @@ type PortalExtensionConfig = {
       de: { ... }
     }
     type: "priceDataRetrieval"
-    intervals?: "PT15M" | "PT1H" | "P1D" | "P1M" | "P1Y"[]
+    intervals?: "PT15M" | "PT1H" | "P1D" | "P1M" | "P1Y" | "custom"[]
     auth?: {
       method?: { ... }
       url: { ... }
@@ -2980,7 +2979,7 @@ type PortalExtensionHookPriceDataRetrieval = {
     de: string
   }
   type: "priceDataRetrieval"
-  intervals?: "PT15M" | "PT1H" | "P1D" | "P1M" | "P1Y"[]
+  intervals?: "PT15M" | "PT1H" | "P1D" | "P1M" | "P1Y" | "custom"[]
   auth?: {
     method?: string
     url: string
@@ -3026,7 +3025,7 @@ type PortalExtensionHookConsumptionDataRetrieval = {
     de: string
   }
   type: "consumptionDataRetrieval"
-  intervals?: "PT15M" | "PT1H" | "P1D" | "P1M" | "P1Y"[]
+  intervals?: "PT15M" | "PT1H" | "P1D" | "P1M" | "P1Y" | "custom"[]
   auth?: {
     method?: string
     url: string
@@ -3157,7 +3156,7 @@ type PortalExtensionHookCostDataRetrieval = {
     de: string
   }
   type: "costDataRetrieval"
-  intervals?: "PT15M" | "PT1H" | "P1D" | "P1M" | "P1Y"[]
+  intervals?: "PT15M" | "PT1H" | "P1D" | "P1M" | "P1Y" | "custom"[]
   auth?: {
     method?: string
     url: string
@@ -3798,7 +3797,6 @@ type ExternalValuesConfig = {
       ttl_seconds: { ... }
       key?: { ... }
     }
-    use_static_ips?: boolean
     secure_proxy?: {
       integration_id: { ... }
       use_case_slug: { ... }
@@ -3861,7 +3859,6 @@ type ExternalValuesHook = {
     ttl_seconds: number
     key?: string
   }
-  use_static_ips?: boolean
   secure_proxy?: {
     integration_id: string // uuid
     use_case_slug: string

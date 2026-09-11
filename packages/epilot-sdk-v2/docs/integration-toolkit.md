@@ -308,6 +308,7 @@ const { data } = await integrationToolkitClient.acknowledgeTracking(...)
 - [`IngestExternalMonitoringEventsRequest`](#ingestexternalmonitoringeventsrequest)
 - [`IngestExternalMonitoringEventsResponse`](#ingestexternalmonitoringeventsresponse)
 - [`MonitoringTraceResponse`](#monitoringtraceresponse)
+- [`MonitoringCode`](#monitoringcode)
 - [`MonitoringEventV2`](#monitoringeventv2)
 - [`GetMonitoringStatsV2Request`](#getmonitoringstatsv2request)
 - [`MonitoringStatsV2`](#monitoringstatsv2)
@@ -3202,6 +3203,7 @@ const { data } = await client.getMonitoringStatsV2(
   "error_count": 0,
   "warning_count": 0,
   "skipped_count": 0,
+  "info_count": 0,
   "ack_timeout_count": 0,
   "success_rate": 0,
   "last_error_at": "1970-01-01T00:00:00.000Z",
@@ -3252,6 +3254,7 @@ const { data } = await client.getMonitoringTimeSeriesV2(
       "error_count": 0,
       "warning_count": 0,
       "skipped_count": 0,
+      "info_count": 0,
       "total_count": 0,
       "breakdown": [
         {
@@ -3261,6 +3264,7 @@ const { data } = await client.getMonitoringTimeSeriesV2(
           "error_count": 0,
           "warning_count": 0,
           "skipped_count": 0,
+          "info_count": 0,
           "total_count": 0
         }
       ]
@@ -9291,7 +9295,7 @@ type InboundMonitoringEvent = {
 type QueryMonitoringEventsV2Request = {
   use_case_id?: string
   use_case_type?: "inbound" | "outbound" | "file_proxy" | "managed_call" | "secure_proxy"
-  level?: "success" | "error" | "skipped" | "warning"
+  level?: "success" | "error" | "info" | "warning"
   code?: string
   event_id?: string
   correlation_id?: string
@@ -9367,7 +9371,7 @@ type MonitoringTraceResponse = {
     correlation_id?: string
     use_case_id?: string
     use_case_type: "inbound" | "outbound" | "file_proxy" | "managed_call" | "secure_proxy" | ""
-    level: "success" | "error" | "skipped" | "warning"
+    level: "success" | "error" | "info" | "warning"
     code?: string
     message?: string
     detail?: Record<string, unknown>
@@ -9375,6 +9379,19 @@ type MonitoringTraceResponse = {
   }>
   inbound_event?: Record<string, unknown>
 }
+```
+
+### `MonitoringCode`
+
+The monitoring code taxonomy — every code the Integration Toolkit itself emits,
+with a fixed level (see the published code reference at
+https://docs.epilot.io/docs/integrations/integration-toolkit/monitoring/codes).
+
+This schema exists so consumers can import the union as a type. It is
+deliberately 
+
+```ts
+type MonitoringCode = "ACK_CONFIRMED" | "ACK_PENDING" | "ACK_TIMEOUT" | "ATTACHMENT_NOT_FOUND" | "ATTRIBUTE_TYPE_MISMATCH" | "DEPRECATED_ENDPOINT" | "DIRECT_ENTITY_NOT_ALLOWED" | "DIRECT_PAYLOAD_INVALID" | "DIRECT_VERSION_UNSUPPORTED" | "DUPLICATE_EVENT" | "ENTITY_CREATED" | "ENTITY_DELETED" | "ENTITY_NO_OP" | "ENTITY_REFERENCE_NOT_FOUND" | "ENTITY_UPDATED" | "EVENT_NOT_CONFIGURED" | "EXTERNAL_API_ERROR" | "EXTERNAL_ERROR" | "EXTERNAL_INFO" | "EXTERNAL_SUCCESS" | "EXTERNAL_WARNING" | "FAN_OUT_EMPTY" | "FAN_OUT_INVALID_RESULT" | "FILE_EXTRACTION_FAILED" | "FILE_FETCH_FAILED" | "FILE_PROXY_OK" | "FILE_PROXY_UPLOADED" | "FILE_PROXY_UPLOAD_ENQUEUED" | "FILE_PROXY_UPLOAD_FAILED" | "FILE_PROXY_UPLOAD_RETRYING" | "FILE_TOO_LARGE" | "INTEGRATION_NOT_FOUND" | "INVALID_METER_READING_ATTRIBUTES" | "LOOKUP_UNMAPPED" | "MALFORMED_PAYLOAD" | "MAPPING_EXPRESSION_FAILED" | "METERING_API_ERROR" | "METER_READING_DELETED" | "METER_READING_GROUP_FAILED" | "METER_READING_GROUP_RETRYING" | "METER_READING_UPSERTED" | "MISSING_REQUIRED_PARAM" | "MISSING_UNIQUE_IDENTIFIERS" | "MSG_ACKED" | "MSG_DEAD_LETTERED" | "MSG_ENQUEUED" | "MSG_EXPIRED_UNPOLLED" | "MSG_HEAD_BLOCKED" | "OAUTH2_TOKEN_FAILURE" | "PAYLOAD_TOO_LARGE" | "PRUNE_SCOPE_COMPLETED" | "PRUNE_SCOPE_PARTIAL_FAILURE" | "RECURSION_DEPTH_EXCEEDED" | "RELATION_REF_ITEM_NOT_FOUND" | "RELATION_REF_VALUE_UNDEFINED" | "REQUIRED_PARAM_MISSING" | "SECURE_PROXY_DISABLED" | "SECURE_PROXY_DOMAIN_BLOCKED" | "SECURE_PROXY_DOMAIN_NOT_ALLOWED" | "SECURE_PROXY_ERROR" | "SECURE_PROXY_INVALID_CONFIG" | "SECURE_PROXY_INVALID_TYPE" | "SECURE_PROXY_INVALID_URL" | "SECURE_PROXY_IP_BLOCKED" | "SECURE_PROXY_IP_NOT_ALLOWED" | "SECURE_PROXY_NOT_FOUND" | "SECURE_PROXY_UNAVAILABLE" | "SIGNATURE_VERIFICATION_FAILED" | "SIGNATURE_VERIFICATION_UNAVAILABLE" | "SOFT_DELETED_ENTITY_MATCHED" | "STEP_DISABLED" | "TIMEOUT" | "UNIQUE_ID_MULTIPLE_MATCHES" | "UNIQUE_ID_NOT_IN_SCHEMA" | "UNKNOWN_ERROR" | "USE_CASE_DISABLED" | "USE_CASE_INVALID_TYPE" | "USE_CASE_MISSING_CONFIG" | "USE_CASE_NOT_FOUND" | "WEBHOOK_DELIVERED"
 ```
 
 ### `MonitoringEventV2`
@@ -9388,7 +9405,7 @@ type MonitoringEventV2 = {
   correlation_id?: string
   use_case_id?: string
   use_case_type: "inbound" | "outbound" | "file_proxy" | "managed_call" | "secure_proxy" | ""
-  level: "success" | "error" | "skipped" | "warning"
+  level: "success" | "error" | "info" | "warning"
   code?: string
   message?: string
   detail?: Record<string, unknown>
@@ -9418,6 +9435,7 @@ type MonitoringStatsV2 = {
   error_count: number
   warning_count: number
   skipped_count: number
+  info_count: number
   ack_timeout_count?: number
   success_rate?: number
   last_error_at?: string // date-time
@@ -9447,6 +9465,7 @@ type TimeSeriesBreakdownItemV2 = {
   error_count: number
   warning_count: number
   skipped_count: number
+  info_count: number
   total_count: number
 }
 ```
@@ -9460,6 +9479,7 @@ type TimeSeriesBucketV2 = {
   error_count?: number
   warning_count?: number
   skipped_count?: number
+  info_count?: number
   total_count: number
   breakdown?: Array<{
     use_case_type?: "inbound" | "outbound" | "file_proxy" | "managed_call" | "secure_proxy"
@@ -9468,6 +9488,7 @@ type TimeSeriesBucketV2 = {
     error_count: number
     warning_count: number
     skipped_count: number
+    info_count: number
     total_count: number
   }>
 }

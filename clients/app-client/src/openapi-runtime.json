@@ -166,6 +166,7 @@
           }
         ],
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {}
           }
@@ -640,6 +641,7 @@
         }
       },
       "InstallRequest": {
+        "required": true,
         "content": {
           "application/json": {}
         }

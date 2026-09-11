@@ -3,7 +3,7 @@
   "info": {
     "title": "Validation Rules API",
     "version": "1.0.0",
-    "description": "The Validation Rules API manages reusable input validation rules for epilot journeys and entity attributes.\n\nValidation rules define constraints for user input (e.g. regex patterns, numeric ranges, character counts) that can be applied to journey blocks or entity schema attributes.\n\nKey capabilities:\n- Define validation rules using regex patterns, character patterns, or numeric constraints\n- Apply rules to journey blocks or entity schema attributes via the `used_by` association\n- Manage the lifecycle of rules (create, read, update, delete)\n- Compose complex validation logic using AND/OR/NOT condition combinators\n\n## Rule schema versions\n\nThe `rule` property holds one of two shapes, identified by the document's `_schema_version`:\n- `v1`: a json-rules-engine condition tree (regex/pattern/numeric) with static comparison values only.\n- `v2`: a declarative rule with predefined comparison operators whose comparison values may be static,\n  dynamic (a path into runtime context declared via `contexts`,\n  e.g. `contract.installment_amount`) or relative dates. v2 shapes carry an `input_type` property.\nConverting a rule between schema versions is not supported.\n"
+    "description": "The Validation Rules API manages reusable input validation rules for epilot journeys and entity attributes.\n\nValidation rules define constraints for user input (e.g. regex patterns, numeric ranges, character counts) that can be applied to journey blocks or entity schema attributes.\n\nKey capabilities:\n- Define validation rules using regex patterns, character patterns, or numeric constraints\n- Apply rules to journey blocks or entity schema attributes via the `used_by` association\n- Manage the lifecycle of rules (create, read, update, delete)\n- Compose complex validation logic using AND/OR/NOT condition combinators\n\n## Rule schema versions\n\nThe `rule` property holds one of two shapes, identified by the document's `_schema_version`:\n- `v1`: a json-rules-engine condition tree (regex/pattern/numeric) with static comparison values only.\n- `v2`: a declarative rule with predefined comparison operators whose comparison values may be static,\n  dynamic (a path into runtime context declared via `contexts`,\n  e.g. `contract.installment_amount`) or relative dates. v2 shapes carry an `input_type` property.\n  Two v2 shapes exist: `ComparisonRuleType` for number, date and text inputs, and `DocumentRuleType`\n  for uploaded files, whose conditions check file properties and, at the higher check levels,\n  the document's content.\nConverting a rule between schema versions is not supported.\n"
   },
   "tags": [
     {
@@ -208,7 +208,7 @@
             }
           },
           "400": {
-            "description": "Bad Request - Invalid request body. Invalid external comparison values additionally carry a\n`code` (`external_value_not_found` when the app is not installed or the hook / result does not\nexist, `external_value_incompatible` when the result type does not match the compared kind).\n",
+            "description": "Bad Request - Invalid request body. Invalid external or environment comparison values additionally\ncarry a `code`: `external_value_not_found` when the app is not installed or the hook / result does not\nexist, `external_value_incompatible` when the result type does not match the compared kind,\n`environment_variable_not_found` when the referenced environment variable does not exist in the\norganisation, `environment_variable_incompatible` when its type cannot be compared as required\n(`Number` for numbers, `Text` for text and dates, `Number` / `Text` / `Boolean` for `applies_when`;\n`String`, `SecretString`, `Map` and `JSON` never).\n",
             "content": {
               "application/json": {
                 "schema": {
@@ -222,7 +222,9 @@
                       "type": "string",
                       "enum": [
                         "external_value_not_found",
-                        "external_value_incompatible"
+                        "external_value_incompatible",
+                        "environment_variable_not_found",
+                        "environment_variable_incompatible"
                       ]
                     }
                   }
@@ -491,7 +493,7 @@
             }
           },
           "400": {
-            "description": "Bad Request - Invalid request body. Invalid external comparison values additionally carry a\n`code` (`external_value_not_found` when the app is not installed or the hook / result does not\nexist, `external_value_incompatible` when the result type does not match the compared kind).\n",
+            "description": "Bad Request - Invalid request body. Invalid external or environment comparison values additionally\ncarry a `code`: `external_value_not_found` when the app is not installed or the hook / result does not\nexist, `external_value_incompatible` when the result type does not match the compared kind,\n`environment_variable_not_found` when the referenced environment variable does not exist in the\norganisation, `environment_variable_incompatible` when its type cannot be compared as required\n(`Number` for numbers, `Text` for text and dates, `Number` / `Text` / `Boolean` for `applies_when`;\n`String`, `SecretString`, `Map` and `JSON` never).\n",
             "content": {
               "application/json": {
                 "schema": {
@@ -505,7 +507,9 @@
                       "type": "string",
                       "enum": [
                         "external_value_not_found",
-                        "external_value_incompatible"
+                        "external_value_incompatible",
+                        "environment_variable_not_found",
+                        "environment_variable_incompatible"
                       ]
                     }
                   }
@@ -1073,6 +1077,9 @@
                   },
                   {
                     "$ref": "#/components/schemas/ComparisonRuleType"
+                  },
+                  {
+                    "$ref": "#/components/schemas/DocumentRuleType"
                   }
                 ]
               },
@@ -2306,7 +2313,7 @@
               "up",
               "down"
             ],
-            "description": "Rounds the adjusted result to a whole number - `up` (ceiling) or `down` (floor).\nOmitted means no rounding. Used for bounds like \"round up(current × 0.9) to whole euros\".\n"
+            "description": "Rounds the adjusted result to a whole number - `up` (ceiling) or `down` (floor).\nOmitted means no rounding. Used for bounds like \"round up(current \u00d7 0.9) to whole euros\".\n"
           }
         }
       },
@@ -2386,6 +2393,177 @@
             "enum": [
               "none"
             ]
+          }
+        }
+      },
+      "DocumentRuleType": {
+        "type": "object",
+        "description": "Declarative validation rule (schema version v2) for uploaded files. The rule declares how deep\nthe check goes (`check.level`) and the conditions the file must satisfy. Property conditions\n(file type, size, page count, image resolution, blank and password-protected detection) are\ndeterministic and available at every level; the `meetsCriteria` condition judges a free-text\nrequirement against the document's extracted content and is available from level `standard`.\n\nEvaluation semantics for content conditions differ from scalar rules: each condition resolves to\npass, fail or uncertain. A confident fail on a blocking condition fails the input; an uncertain\nresult is always reported as advisory and never fails the input, regardless of `allow_failure`.\nDocument rules carry no `contexts` yet.\n",
+        "required": [
+          "input_type",
+          "check",
+          "conditions"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "input_type": {
+            "type": "string",
+            "enum": [
+              "document"
+            ],
+            "description": "Identifies the rule as a document rule. Determines which operators are allowed."
+          },
+          "check": {
+            "$ref": "#/components/schemas/DocumentCheck"
+          },
+          "conditions": {
+            "type": "array",
+            "description": "The checks the uploaded file must satisfy. All blocking conditions must pass for the\nfile to be valid; `allow_failure` conditions are advisory. Must contain at least one\ncondition (enforced at write time).\n",
+            "items": {
+              "$ref": "#/components/schemas/DocumentCondition"
+            }
+          }
+        }
+      },
+      "DocumentCheck": {
+        "type": "object",
+        "description": "How deep the document check goes. Levels are cumulative.",
+        "required": [
+          "level"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "level": {
+            "type": "string",
+            "enum": [
+              "basic",
+              "standard",
+              "advanced"
+            ],
+            "description": "- `basic`: file properties only (type, size, page count, resolution, blank, password). Instant, no extraction.\n- `standard`: basic checks plus a quick scan of the content. A few seconds.\n- `advanced`: basic checks plus a thorough reading of the fully extracted content. Roughly 5 to 10 seconds.\n"
+          }
+        }
+      },
+      "DocumentCondition": {
+        "type": "object",
+        "description": "A single check the uploaded file must satisfy.",
+        "required": [
+          "id",
+          "operator",
+          "value",
+          "error_message"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 50,
+            "description": "Stable identifier of the condition within the rule, used for editing and error reporting."
+          },
+          "operator": {
+            "$ref": "#/components/schemas/DocumentOperator"
+          },
+          "value": {
+            "$ref": "#/components/schemas/DocumentConditionValue"
+          },
+          "error_message": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200,
+            "description": "Message shown to the end user when this condition fails."
+          },
+          "allow_failure": {
+            "type": "boolean",
+            "default": false,
+            "description": "When true, the condition is advisory: a failure is reported but never takes part in the\nvalidity verdict. Recommended for `meetsCriteria` until the organisation has reviewed\nresults on real files.\n"
+          }
+        }
+      },
+      "DocumentOperator": {
+        "type": "string",
+        "description": "Predefined document check. Value compatibility (enforced at write time):\n- fileTypeIn: `file_types` value listing the accepted file categories.\n- sizeBelow: static integer, maximum file size in bytes.\n- pageCountBetween: `range` of static non-negative integers (inclusive).\n- resolutionAtLeast / resolutionAtMost: static positive integer, the image's longer edge in pixels.\n- isNotBlank / isNotPasswordProtected: `none` value (unary).\n- meetsCriteria: `criteria` value with the free-text requirement. Requires check level `standard` or `advanced`.\n",
+        "enum": [
+          "fileTypeIn",
+          "sizeBelow",
+          "pageCountBetween",
+          "resolutionAtLeast",
+          "resolutionAtMost",
+          "isNotBlank",
+          "isNotPasswordProtected",
+          "meetsCriteria"
+        ]
+      },
+      "DocumentConditionValue": {
+        "description": "The value of a document condition - a static scalar, a range, nothing, accepted file categories, or a free-text criterion.",
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/StaticValue"
+          },
+          {
+            "$ref": "#/components/schemas/RangeValue"
+          },
+          {
+            "$ref": "#/components/schemas/NoValue"
+          },
+          {
+            "$ref": "#/components/schemas/FileTypesValue"
+          },
+          {
+            "$ref": "#/components/schemas/CriteriaValue"
+          }
+        ]
+      },
+      "FileTypesValue": {
+        "type": "object",
+        "description": "Accepted file categories; each category expands to a mime list at check time.",
+        "required": [
+          "source",
+          "types"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "source": {
+            "type": "string",
+            "enum": [
+              "file_types"
+            ]
+          },
+          "types": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "enum": [
+                "image",
+                "pdf",
+                "document",
+                "spreadsheet"
+              ]
+            }
+          }
+        }
+      },
+      "CriteriaValue": {
+        "type": "object",
+        "description": "A free-text requirement judged against the document's extracted content, e.g. \"The photo shows\nan electricity meter with the meter number and the current reading fully legible.\" One requirement\nper condition keeps results specific and lets each requirement be graded separately.\n",
+        "required": [
+          "source",
+          "text"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "source": {
+            "type": "string",
+            "enum": [
+              "criteria"
+            ]
+          },
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
           }
         }
       },

@@ -1,5 +1,5 @@
 ---
-"@epilot/pricing-client": minor
+"@epilot/entity-client": minor
 "@epilot/sdk": minor
 ---
 
