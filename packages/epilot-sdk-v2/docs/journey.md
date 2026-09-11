@@ -65,6 +65,7 @@ const { data } = await journeyClient.getJourneysByOrgId(...)
 - [`SearchJourneysQueryRequest`](#searchjourneysqueryrequest)
 - [`SearchJourneysResponse`](#searchjourneysresponse)
 - [`Journey`](#journey)
+- [`JourneyServedRevision`](#journeyservedrevision)
 - [`JourneyActivationGuarantee`](#journeyactivationguarantee)
 - [`JourneyFeatureFlags`](#journeyfeatureflags)
 - [`JourneyAuditInfo`](#journeyauditinfo)
@@ -121,6 +122,7 @@ Get journey by id. Private journeys requires valid private token to be passed
 const { data } = await client.getJourney({
   id: '123e4567-e89b-12d3-a456-426614174000',
   version: 1,
+  revision_id: 'example',
   source: 'example',
   orgId: 'example',
 })
@@ -248,7 +250,8 @@ const { data } = await client.getJourney({
   "deletedAt": "string",
   "version": 0,
   "revisions": 0,
-  "featureFlags": {}
+  "featureFlags": {},
+  "revision_id": "42"
 }
 ```
 
@@ -396,7 +399,8 @@ const { data } = await client.createJourneyRevision(
     __lastModifiedAt: 'string',
     parent_revision_id: '41',
     based_on_revision_id: '37',
-    mapping_config_version: 12
+    mapping_config_version: 12,
+    revision_name: 'Changes to Steps and Logic'
   },
 )
 ```
@@ -2729,6 +2733,17 @@ type Journey = {
     status?: string
     isActive?: boolean
   // ...
+}
+```
+
+### `JourneyServedRevision`
+
+Which revision the runtime read served: the requested one, or the published version when no revision was requested. Absent while the journey has not adopted versioning and on legacy `version` reads.
+
+
+```ts
+type JourneyServedRevision = {
+  revision_id?: string
 }
 ```
 

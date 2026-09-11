@@ -1686,6 +1686,13 @@ export declare namespace Components {
              * 12
              */
             mapping_config_version?: number;
+            /**
+             * What this save changed, for the revision history to list. Distinct from `name`, which is the journey's own name. A publish replaces it with the version name.
+             *
+             * example:
+             * Changes to Steps and Logic
+             */
+            revision_name?: string;
         }
         export interface JourneyRevisionSummary {
             /**
@@ -1723,6 +1730,17 @@ export declare namespace Components {
              * 12
              */
             mapping_config_version?: number;
+        }
+        /**
+         * Which revision the runtime read served: the requested one, or the published version when no revision was requested. Absent while the journey has not adopted versioning and on legacy `version` reads.
+         *
+         */
+        export interface JourneyServedRevision {
+            /**
+             * example:
+             * 42
+             */
+            revision_id?: string;
         }
         export interface JourneyValidationError {
             /**
@@ -2247,6 +2265,11 @@ export declare namespace Paths {
              */
             export type Id = string; // uuid
             export type OrgId = string;
+            /**
+             * example:
+             * 42
+             */
+            export type RevisionId = string;
             export type Source = string;
             export type Version = number;
         }
@@ -2259,12 +2282,17 @@ export declare namespace Paths {
         }
         export interface QueryParameters {
             version?: Parameters.Version;
+            revision_id?: /**
+             * example:
+             * 42
+             */
+            Parameters.RevisionId;
             source?: Parameters.Source;
             orgId?: Parameters.OrgId;
         }
         namespace Responses {
             /**
-             * Journeys read from the API always carry an explicit `settings.isActive`. The flag remains optional in request bodies.
+             * Which revision the runtime read served: the requested one, or the published version when no revision was requested. Absent while the journey has not adopted versioning and on legacy `version` reads.
              *
              */
             export interface $200 {
@@ -2556,6 +2584,11 @@ export declare namespace Paths {
                 featureFlags?: {
                     [name: string]: any;
                 };
+                /**
+                 * example:
+                 * 42
+                 */
+                revision_id?: string;
             }
         }
     }
@@ -3770,6 +3803,7 @@ export type JourneyRevisionConflict = Components.Schemas.JourneyRevisionConflict
 export type JourneyRevisionList = Components.Schemas.JourneyRevisionList;
 export type JourneyRevisionRequest = Components.Schemas.JourneyRevisionRequest;
 export type JourneyRevisionSummary = Components.Schemas.JourneyRevisionSummary;
+export type JourneyServedRevision = Components.Schemas.JourneyServedRevision;
 export type JourneyValidationError = Components.Schemas.JourneyValidationError;
 export type JourneyValidationResponse = Components.Schemas.JourneyValidationResponse;
 export type PatchUpdateJourneyRequest = Components.Schemas.PatchUpdateJourneyRequest;

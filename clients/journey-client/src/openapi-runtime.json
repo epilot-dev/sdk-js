@@ -38,6 +38,11 @@
             "required": false
           },
           {
+            "name": "revision_id",
+            "in": "query",
+            "required": false
+          },
+          {
             "name": "source",
             "in": "query",
             "required": false
