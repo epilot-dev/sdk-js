@@ -1364,6 +1364,25 @@ declare namespace Components {
              */
             registration_identifiers?: ContractIdentifier[];
             /**
+             * Surfaces this portal's data is reached from besides the portal UI itself (public journeys on the website, chat). Configured under Security > Surfaces. Each surface defines how a caller authenticates and what data access applies on it; the portal UI is the implicit default surface (login, default scope) and is not listed here. A surface with `authentication: registration_identifiers` is what makes `identifyContact` issue tokens for this portal: without one, `identifyContact` returns 403.
+             *
+             */
+            surfaces?: /**
+             * One surface a portal's data is reached from (see `surfaces` on the portal config).
+             *
+             * A surface names how callers authenticate on it and what they may reach once they
+             * have. Data access is always a subset of the portal's own: a schema not in
+             * `allowed_portal_entities` cannot be opened up by a surface, and the portal's
+             * contact-relation rules still apply underneath the surface's own.
+             *
+             * Tokens minted for a surface (currently: contact identification tokens for
+             * `registration_identifiers` surfaces) carry the surface id. The surface's data
+             * access is resolved from the portal config on every request, not baked into the
+             * token, so tightening a surface applies to tokens already in circulation.
+             *
+             */
+            PortalSurface[];
+            /**
              * Account-mode only. Identifiers on the contact entity of the primarily
              * identified account. Used to pick an existing related contact within the
              * resolved account; if none matches, the values are written onto the new
@@ -1502,6 +1521,12 @@ declare namespace Components {
              * Whether this is a v3 portal configuration
              */
             is_v3_item?: boolean;
+            /**
+             * The revision currently live on this portal. Absent until the first publish.
+             * example:
+             * 2026-08-25T14:03:11.482Z-a7f3c1d9
+             */
+            published_revision_id?: string;
             portal_id?: /**
              * ID of the portal
              * example:
@@ -1907,6 +1932,25 @@ declare namespace Components {
              */
             registration_identifiers?: ContractIdentifier[];
             /**
+             * Surfaces this portal's data is reached from besides the portal UI itself (public journeys on the website, chat). Configured under Security > Surfaces. Each surface defines how a caller authenticates and what data access applies on it; the portal UI is the implicit default surface (login, default scope) and is not listed here. A surface with `authentication: registration_identifiers` is what makes `identifyContact` issue tokens for this portal: without one, `identifyContact` returns 403.
+             *
+             */
+            surfaces?: /**
+             * One surface a portal's data is reached from (see `surfaces` on the portal config).
+             *
+             * A surface names how callers authenticate on it and what they may reach once they
+             * have. Data access is always a subset of the portal's own: a schema not in
+             * `allowed_portal_entities` cannot be opened up by a surface, and the portal's
+             * contact-relation rules still apply underneath the surface's own.
+             *
+             * Tokens minted for a surface (currently: contact identification tokens for
+             * `registration_identifiers` surfaces) carry the surface id. The surface's data
+             * access is resolved from the portal config on every request, not baked into the
+             * token, so tightening a surface applies to tokens already in circulation.
+             *
+             */
+            PortalSurface[];
+            /**
              * Account-mode only. Identifiers on the contact entity of the primarily
              * identified account. Used to pick an existing related contact within the
              * resolved account; if none matches, the values are written onto the new
@@ -2045,6 +2089,12 @@ declare namespace Components {
              * Whether this is a v3 portal configuration
              */
             is_v3_item?: boolean;
+            /**
+             * The revision currently live on this portal. Absent until the first publish.
+             * example:
+             * 2026-08-25T14:03:11.482Z-a7f3c1d9
+             */
+            published_revision_id?: string;
             portal_id?: /**
              * ID of the portal
              * example:
@@ -2179,6 +2229,118 @@ declare namespace Components {
              *
              */
             trigger_identifiers_check?: boolean;
+        }
+        /**
+         * ContactExistsRequest plus the surface the token is requested for.
+         *
+         */
+        export interface ContactIdentifyRequest {
+            /**
+             * ID of the organization
+             * example:
+             * 728
+             */
+            org_id: string;
+            /**
+             * Identifier-value pairs per schema to identify a contact of a portal user during the resgistration
+             * example:
+             * {
+             *   "contact": {
+             *     "email": "john.doe@example.com"
+             *   },
+             *   "contract": {
+             *     "contract_number": "123456"
+             *   }
+             * }
+             */
+            registration_identifiers: {
+                [name: string]: {
+                    [name: string]: string;
+                };
+            };
+            /**
+             * Whether to (re)trigger the registration identifiers check hook, which issues a request
+             * to the connected ERP to (re)sync the contact, in addition to waiting for the entity to
+             * arrive. Defaults to true to preserve existing behaviour. Set to false on retry attempts
+             * to only poll for an already-triggered sync to land, without issuing another upstream
+             * request to the ERP.
+             *
+             */
+            trigger_identifiers_check?: boolean;
+            /**
+             * Id of the portal surface (see `surfaces` on the portal config) this token is
+             * for. The surface must exist and use `authentication: registration_identifiers`;
+             * otherwise the call returns 403. The issued token is bound to this surface and
+             * confined to its data access settings.
+             *
+             * example:
+             * website-journeys
+             */
+            surface_id: string;
+        }
+        export interface ContactIdentifyResponse {
+            /**
+             * ID of the identified contact. Present only on a match.
+             */
+            contact_id?: /**
+             * Entity ID
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            EntityId /* uuid */;
+            /**
+             * ID of the resolved account when the portal is configured for account-based
+             * registration. Present only on a match.
+             *
+             */
+            account_id?: /**
+             * Entity ID
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            EntityId /* uuid */;
+            /**
+             * One-time bearer token scoped to the identified contact, to be sent as
+             * `Authorization: Bearer <token>` against the portal APIs. Present only on a match.
+             *
+             * example:
+             * eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...
+             */
+            token?: string;
+            /**
+             * Type of the issued token, matching its own `token_type` claim and the token type in access-token-api. Present only on a match.
+             */
+            token_type?: "contact_identification";
+            /**
+             * The surface the token is bound to; echoes the request. Present only on a match.
+             * example:
+             * website-journeys
+             */
+            surface_id?: string;
+            /**
+             * When the issued token stops being accepted. Present only on a match.
+             * example:
+             * 2026-08-11T10:35:00.000Z
+             */
+            expires_at?: string; // date-time
+            /**
+             * The operationIds the issued token may call. Every other operation rejects the token
+             * with 401, including read operations. Echoed so a caller does not have to infer the
+             * surface from this specification, and so a change to the allowlist is visible at
+             * runtime. Present only on a match.
+             *
+             * example:
+             * []
+             */
+            allowed_operations?: string[];
+            /**
+             * Present only when no token was issued. NOT_FOUND means the given identifiers did not
+             * match any contact (definitive - the client should not retry). TIMEOUT means the contact
+             * was not found within the processing window but may still be ingesting; the client may
+             * retry (ideally with trigger_identifiers_check=false).
+             *
+             */
+            reason?: "TIMEOUT" | "NOT_FOUND";
         }
         export interface ContentWidget {
             id: string;
@@ -6586,6 +6748,25 @@ declare namespace Components {
              */
             registration_identifiers?: ContractIdentifier[];
             /**
+             * Surfaces this portal's data is reached from besides the portal UI itself (public journeys on the website, chat). Configured under Security > Surfaces. Each surface defines how a caller authenticates and what data access applies on it; the portal UI is the implicit default surface (login, default scope) and is not listed here. A surface with `authentication: registration_identifiers` is what makes `identifyContact` issue tokens for this portal: without one, `identifyContact` returns 403.
+             *
+             */
+            surfaces?: /**
+             * One surface a portal's data is reached from (see `surfaces` on the portal config).
+             *
+             * A surface names how callers authenticate on it and what they may reach once they
+             * have. Data access is always a subset of the portal's own: a schema not in
+             * `allowed_portal_entities` cannot be opened up by a surface, and the portal's
+             * contact-relation rules still apply underneath the surface's own.
+             *
+             * Tokens minted for a surface (currently: contact identification tokens for
+             * `registration_identifiers` surfaces) carry the surface id. The surface's data
+             * access is resolved from the portal config on every request, not baked into the
+             * token, so tightening a surface applies to tokens already in circulation.
+             *
+             */
+            PortalSurface[];
+            /**
              * Account-mode only. Identifiers on the contact entity of the primarily
              * identified account. Used to pick an existing related contact within the
              * resolved account; if none matches, the values are written onto the new
@@ -6724,6 +6905,12 @@ declare namespace Components {
              * Whether this is a v3 portal configuration
              */
             is_v3_item?: boolean;
+            /**
+             * The revision currently live on this portal. Absent until the first publish.
+             * example:
+             * 2026-08-25T14:03:11.482Z-a7f3c1d9
+             */
+            published_revision_id?: string;
             portal_id?: /**
              * ID of the portal
              * example:
@@ -7222,6 +7409,25 @@ declare namespace Components {
              */
             registration_identifiers?: ContractIdentifier[];
             /**
+             * Surfaces this portal's data is reached from besides the portal UI itself (public journeys on the website, chat). Configured under Security > Surfaces. Each surface defines how a caller authenticates and what data access applies on it; the portal UI is the implicit default surface (login, default scope) and is not listed here. A surface with `authentication: registration_identifiers` is what makes `identifyContact` issue tokens for this portal: without one, `identifyContact` returns 403.
+             *
+             */
+            surfaces?: /**
+             * One surface a portal's data is reached from (see `surfaces` on the portal config).
+             *
+             * A surface names how callers authenticate on it and what they may reach once they
+             * have. Data access is always a subset of the portal's own: a schema not in
+             * `allowed_portal_entities` cannot be opened up by a surface, and the portal's
+             * contact-relation rules still apply underneath the surface's own.
+             *
+             * Tokens minted for a surface (currently: contact identification tokens for
+             * `registration_identifiers` surfaces) carry the surface id. The surface's data
+             * access is resolved from the portal config on every request, not baked into the
+             * token, so tightening a surface applies to tokens already in circulation.
+             *
+             */
+            PortalSurface[];
+            /**
              * Account-mode only. Identifiers on the contact entity of the primarily
              * identified account. Used to pick an existing related contact within the
              * resolved account; if none matches, the values are written onto the new
@@ -7360,6 +7566,12 @@ declare namespace Components {
              * Whether this is a v3 portal configuration
              */
             is_v3_item?: boolean;
+            /**
+             * The revision currently live on this portal. Absent until the first publish.
+             * example:
+             * 2026-08-25T14:03:11.482Z-a7f3c1d9
+             */
+            published_revision_id?: string;
             portal_id?: /**
              * ID of the portal
              * example:
@@ -7534,6 +7746,891 @@ declare namespace Components {
              */
             redirect_url?: string;
         }
+        export interface PortalRevision {
+            /**
+             * example:
+             * 2026-08-25T14:03:11.482Z-a7f3c1d9
+             */
+            revision_id: string;
+            created_at: string; // date-time
+            /**
+             * May be absent — an internal-auth caller carries no user id.
+             */
+            created_by?: string;
+            /**
+             * Set at publish time only, and only when the publish request carried one. A revision can have been published and still have no name; `published_at` is the signal that a revision was live at some point, not this field.
+             *
+             * example:
+             * FAQ page launch
+             */
+            name?: string;
+            description?: string;
+            page_count: number;
+            /**
+             * The last time this revision was published. NOT the same question as `is_published`: a revision that was live yesterday still carries a `published_at`.
+             *
+             */
+            published_at?: string; // date-time
+            /**
+             * Who performed the last publish of this revision.
+             */
+            published_by?: string;
+            /**
+             * Whether this revision is the one currently live.
+             */
+            is_published: boolean;
+            /**
+             * The snapshotted portal configuration. Secret-typed extension option values are removed entirely — not masked — before the response is assembled.
+             *
+             */
+            config: {
+                [name: string]: any;
+            };
+            pages: /**
+             * A page from a revision snapshot. Same shape as a live `Page`, without the server-managed fields (`past_routes`, `_created_at`, `_updated_at`, `is_deleted`), which publish re-derives from the live portal.
+             *
+             */
+            RevisionPage[];
+            /**
+             * The SSO identity providers captured in this revision, with `client_secret` REDACTED exactly as the admin portal-config GET redacts it (no read path returns a stored secret).
+             * Publishing this revision replaces every live provider on this portal's origin, not just this portal's own, with this set. Identity providers key on `IDP#{origin}#{slug}`, a partition shared by every portal on that origin, so any other portal sharing it (an ADDITIONAL_PORTAL clone, most commonly) is affected too. A client can diff this against the live providers (by `slug`, and on `oidc_config.oidc_issuer` / `oidc_config.client_id` for a changed provider) to warn that a publish would also change SSO configuration, for this portal and any others sharing its origin.
+             * ABSENT and `[]` are different answers. `[]` means the revision has no providers and publishing it removes the live ones; absent means the revision was saved before provider versioning, carries no SSO opinion, and publishing it changes no provider.
+             *
+             */
+            identity_providers?: /**
+             * SSO identity provider configuration.
+             *
+             * Env var interpolation: only string fields under `oidc_config` and
+             * `mobile_oidc_config` (incl. their nested `metadata`) are passed through
+             * Liquid templating, so they may contain `{{ env.VAR }}` placeholders that
+             * get resolved at runtime against the organization's environment.
+             *
+             * The following fields are used as literal values and MUST NOT contain
+             * template syntax: `slug`, `display_name`, `provider_type`, all keys and
+             * values under `attribute_mappings` (used as JSONPath-like accessors into
+             * token claims), and all keys and values under `entity_matching`.
+             *
+             */
+            ProviderConfig[];
+            email_templates?: /* Email templates used for authentication and internal processes */ EmailTemplates;
+            /**
+             * The portal's email template settings as they were live when the revision was saved. Read-only: this field cannot be set through the revision request and is always captured from live.
+             *
+             */
+            email_template_settings?: {
+                [name: string]: any;
+            };
+        }
+        export interface PortalRevisionCreated {
+            /**
+             * example:
+             * 2026-08-25T14:03:11.482Z-a7f3c1d9
+             */
+            revision_id: string;
+            created_at: string; // date-time
+            /**
+             * May be absent — an internal-auth caller carries no user id.
+             */
+            created_by?: string;
+            /**
+             * Set at publish time only, and only when the publish request carried one. A revision can have been published and still have no name; `published_at` is the signal that a revision was live at some point, not this field.
+             *
+             * example:
+             * FAQ page launch
+             */
+            name?: string;
+            description?: string;
+            page_count: number;
+            /**
+             * The last time this revision was published. NOT the same question as `is_published`: a revision that was live yesterday still carries a `published_at`.
+             *
+             */
+            published_at?: string; // date-time
+            /**
+             * Who performed the last publish of this revision.
+             */
+            published_by?: string;
+            /**
+             * Whether this revision is the one currently live.
+             */
+            is_published: boolean;
+            /**
+             * The SSO identity providers just captured into this revision, with `client_secret` REDACTED exactly as the admin portal-config GET redacts it. Returned only here — not on list items or elsewhere — because the caller who just submitted providers is the one reader who needs to see what got captured, e.g. to warn that the revision was saved without a client secret.
+             *
+             */
+            identity_providers?: /**
+             * SSO identity provider configuration.
+             *
+             * Env var interpolation: only string fields under `oidc_config` and
+             * `mobile_oidc_config` (incl. their nested `metadata`) are passed through
+             * Liquid templating, so they may contain `{{ env.VAR }}` placeholders that
+             * get resolved at runtime against the organization's environment.
+             *
+             * The following fields are used as literal values and MUST NOT contain
+             * template syntax: `slug`, `display_name`, `provider_type`, all keys and
+             * values under `attribute_mappings` (used as JSONPath-like accessors into
+             * token claims), and all keys and values under `entity_matching`.
+             *
+             */
+            ProviderConfig[];
+        }
+        export interface PortalRevisionList {
+            results: PortalRevisionSummary[];
+            /**
+             * Opaque cursor to pass back as `cursor` to fetch the next page. When `next_cursor` is absent, the client has reached the end of the dataset.
+             *
+             */
+            next_cursor?: string;
+        }
+        export interface PortalRevisionRequest {
+            [name: string]: any;
+            /**
+             * Journey actions allowed on an entity by a portal user
+             */
+            entity_actions?: {
+                journey_id?: /**
+                 * Entity ID
+                 * example:
+                 * 5da0a718-c822-403d-9f5d-20d4584e0528
+                 */
+                EntityId /* uuid */;
+                slug?: /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                EntitySlug;
+                action_Label?: {
+                    en?: string;
+                    de?: string;
+                };
+            }[];
+            /**
+             * Configured Portal extensions
+             */
+            extensions?: ExtensionConfig[];
+            /**
+             * Configured Portal extensions hooks
+             */
+            extension_hooks?: {
+                [name: string]: ExtensionHookSelection;
+            };
+            /**
+             * Default 360 user to notify upon an internal notification
+             */
+            default_user_to_notify?: {
+                /**
+                 * Default admin users for pending user notification to notify
+                 */
+                onPendingUser?: AdminUser[];
+            };
+            /**
+             * SSO identity providers for the portal. When sent on a portal save (PUT/POST),
+             * the list is fully synced — incoming providers are upserted and any existing
+             * providers not in the list are deleted. Omit the field to leave SSO
+             * configuration unchanged; send an empty array to remove all providers.
+             *
+             * Secrets: a provider sent without `oidc_config.client_secret` keeps the
+             * stored secret for the same slug; an explicit empty string clears it.
+             * `getPortalConfigV3` returns providers with raw secrets redacted;
+             * `{{ env.VAR }}` references pass through.
+             *
+             */
+            identity_providers?: /**
+             * SSO identity provider configuration.
+             *
+             * Env var interpolation: only string fields under `oidc_config` and
+             * `mobile_oidc_config` (incl. their nested `metadata`) are passed through
+             * Liquid templating, so they may contain `{{ env.VAR }}` placeholders that
+             * get resolved at runtime against the organization's environment.
+             *
+             * The following fields are used as literal values and MUST NOT contain
+             * template syntax: `slug`, `display_name`, `provider_type`, all keys and
+             * values under `attribute_mappings` (used as JSONPath-like accessors into
+             * token claims), and all keys and values under `entity_matching`.
+             *
+             */
+            ProviderConfig[];
+            mobile_config?: /* Mobile app configuration for the portal. Stored inside the portal's config object. Identifiers/branding are non-secret; signing credentials live in a secure store, never here. */ MobileConfig;
+            /**
+             * Enable/Disable the portal access
+             */
+            enabled?: boolean;
+            /**
+             * A short name to identify your portal
+             * example:
+             * Installer Portal
+             */
+            name?: string;
+            /**
+             * The URL on which the portal is accessible
+             * example:
+             * abc.com
+             */
+            domain?: string;
+            /**
+             * Mark true if the domain is an Epilot domain
+             */
+            is_epilot_domain?: boolean;
+            /**
+             * The Epilot domain on which the portal is accessible
+             * example:
+             * example-portal-1.ecp.epilot.io
+             */
+            epilot_domain?: string;
+            domain_settings?: /* Domain settings for the portal */ DomainSettings;
+            design_id?: /**
+             * Entity ID
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            EntityId /* uuid */;
+            /**
+             * Allowed portal entities for the portal
+             * example:
+             * [
+             *   "contact",
+             *   "contract"
+             * ]
+             */
+            allowed_portal_entities?: string[];
+            self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY" | "BLOCK_IF_PORTAL_USER_EXISTS";
+            /**
+             * Controls behavior of self-registration when account is the registration
+             * entity. `BLOCK_IF_PORTAL_USER_EXISTS` matches an existing account and
+             * rejects the request when any portal user is already linked to that
+             * account (no creation). Blocking can also be enabled on the other
+             * non-create modes via `block_registration_if_portal_user_exists`.
+             *
+             */
+            self_registration_account_setting?: "ALLOW_WITH_CREATION" | "DENY" | "ALWAYS_CREATE" | "BLOCK_IF_PORTAL_USER_EXISTS" | "DISALLOW_COMPLETELY";
+            /**
+             * Account-mode only. Reject registration when the resolved account already
+             * has any portal user (any portal user whose mapped contact is linked to
+             * the account).
+             *
+             */
+            block_registration_if_portal_user_exists?: boolean;
+            /**
+             * Entity type used as the primary identifier for self-registration
+             */
+            self_registration_entity?: "contact" | "account";
+            /**
+             * Enable or disable user account self management
+             * example:
+             * false
+             */
+            user_account_self_management?: boolean;
+            /**
+             * Feature settings for the portal
+             */
+            feature_settings?: {
+                /**
+                 * Start page feature flag
+                 */
+                start_page?: boolean;
+                /**
+                 * Billing feature flag
+                 */
+                billing?: boolean;
+                /**
+                 * Change due date feature flag
+                 */
+                change_due_date?: boolean;
+                /**
+                 * Enable or disable the new design for the portal
+                 */
+                new_design?: boolean;
+                /**
+                 * Enable the MCP (AI agent) connector channel for this portal
+                 */
+                mcp_enabled?: boolean;
+                /**
+                 * Server-managed generation used to invalidate MCP grants after the connector is disabled or re-enabled
+                 */
+                mcp_grant_version?: number;
+            };
+            /**
+             * Access token for the portal
+             */
+            accessToken?: string;
+            advanced_mfa?: {
+                /**
+                 * Advanced MFA feature flag
+                 */
+                enabled?: boolean;
+            };
+            /**
+             * Authentication settings for the portal
+             */
+            auth_settings?: {
+                passwordless_login?: {
+                    /**
+                     * Passwordless login feature flag
+                     */
+                    enabled?: boolean;
+                };
+                entry_point?: "PASSWORD" | "SSO";
+                preferred_sso_providers?: /**
+                 * URL-friendly slug to use as organization-unique identifier for Provider
+                 * example:
+                 * office-365-login
+                 */
+                ProviderSlug /* [0-9a-z_-]+ */[];
+                /**
+                 * Decide whether to automatically redirect to the provider page during login, which would completely bypass showing the portal authentication page.
+                 */
+                auto_redirect_to_sso?: boolean;
+                /**
+                 * Opt-in. When true, suppresses responses that reveal whether a user exists for public, pre-authentication actions (the login entry-point check and self-registration), at the expense of some UX. Already-authenticated actions are unaffected. Default false.
+                 *
+                 */
+                prevent_user_enumeration?: boolean;
+            };
+            /**
+             * AWS Cognito Pool details for the portal
+             */
+            cognito_details?: {
+                /**
+                 * Cognito user pool client ID
+                 * example:
+                 * 6bsd0jkgoie74k2i8mrhc1vest
+                 */
+                cognito_user_pool_client_id?: string;
+                /**
+                 * Cognito user pool ARN
+                 * example:
+                 * arn:aws:cognito-idp:us-east-1:123412341234:userpool/us-east-1_123412341
+                 */
+                cognito_user_pool_arn?: string;
+                /**
+                 * Cognito user pool ID
+                 * example:
+                 * eu-central-1_CUEQRNbUb
+                 */
+                cognito_user_pool_id?: string;
+                /**
+                 * Timeouts for the cognito tokens
+                 */
+                timeouts?: {
+                    /**
+                     * Timeout for the refresh token
+                     * example:
+                     * 300
+                     */
+                    refresh_token?: number;
+                    /**
+                     * Timeout for the access token
+                     * example:
+                     * 300
+                     */
+                    access_token?: number;
+                    /**
+                     * Timeout for the id token
+                     * example:
+                     * 300
+                     */
+                    id_token?: number;
+                };
+                /**
+                 * Advanced authentication settings for the portal
+                 */
+                advanced_authentication?: {
+                    /**
+                     * Enables detailed logging of user authentication attempts including risk assessments, IP addresses, user agents, and device information. These logs can be used for security analysis and monitoring.
+                     * example:
+                     * true
+                     */
+                    user_activity_logging?: boolean;
+                    /**
+                     * Automatically assesses risk for every authentication session. Based on risk ratings, can block authentication or require MFA for suspicious sign-in attempts. Helps protect user accounts from potential attacks by adapting security measures in real-time.
+                     * example:
+                     * true
+                     */
+                    adaptive_authentication?: boolean;
+                    /**
+                     * Checks passwords against databases of leaked and commonly-guessed passwords during sign-up, sign-in, and password reset. Blocks or warns users when insecure passwords are detected, preventing unauthorized access from compromised credentials.
+                     * example:
+                     * true
+                     */
+                    compromised_credentials_detection?: boolean;
+                };
+                /**
+                 * Password policy for the portal
+                 */
+                password_policy?: {
+                    /**
+                     * Minimum password length
+                     * example:
+                     * 8
+                     */
+                    minimum_length?: number;
+                    /**
+                     * Maximum password length
+                     * example:
+                     * 256
+                     */
+                    maximum_length?: number;
+                    /**
+                     * Require lowercase characters
+                     * example:
+                     * true
+                     */
+                    require_lowercase?: boolean;
+                    /**
+                     * Require uppercase characters
+                     * example:
+                     * true
+                     */
+                    require_uppercase?: boolean;
+                    /**
+                     * Require numbers
+                     * example:
+                     * true
+                     */
+                    require_numbers?: boolean;
+                    /**
+                     * Require symbols
+                     * example:
+                     * true
+                     */
+                    require_symbols?: boolean;
+                    /**
+                     * Number of previous passwords a user is prevented from reusing. Set to 0 to disable reuse prevention. Maps to Cognito's PasswordHistorySize and requires the user pool to be on the Essentials or Plus feature plan.
+                     * example:
+                     * 3
+                     */
+                    password_history_size?: number;
+                };
+            };
+            /**
+             * Stringified object with configuration details
+             */
+            config?: string;
+            /**
+             * Deprecated. Use registration_identifiers instead.
+             * example:
+             * [
+             *   "email",
+             *   "last_name"
+             * ]
+             */
+            contact_identifiers?: string[];
+            /**
+             * example:
+             * {
+             *   "contact": [
+             *     "name",
+             *     "address"
+             *   ],
+             *   "contract": [
+             *     "installment_amount"
+             *   ]
+             * }
+             */
+            approval_state_attributes?: {
+                [name: string]: string[];
+            };
+            email_templates?: /* Email templates used for authentication and internal processes */ EmailTemplates;
+            /**
+             * Teaser & Banner Image web links
+             */
+            images?: {
+                /**
+                 * URL of the order left teaser image
+                 * example:
+                 * https://epilot-bucket.s3.eu-central-1.amazonaws.com/12344/6538fddb-f0e9-4f0f-af51-6e57891ff20a/order-left-teaser.jpeg
+                 */
+                orderLeftTeaser?: string | null;
+                /**
+                 * URL of the order right teaser image
+                 * example:
+                 * https://epilot-bucket.s3.eu-central-1.amazonaws.com/12344/6538fddb-f0e9-4f0f-af51-6e57891ff20a/order-right-teaser.jpeg
+                 */
+                orderRightTeaser?: string | null;
+                /**
+                 * URL of the welcome banner image
+                 * example:
+                 * https://epilot-bucket.s3.eu-central-1.amazonaws.com/12344/6538fddb-f0e9-4f0f-af51-6e57891ff20a/welcome-banner.jpeg
+                 */
+                welcomeBanner?: string | null;
+            };
+            /**
+             * Identifiers used to identify an entity by a portal user. Deprecated. Use contract_identifiers instead.
+             */
+            entity_identifiers?: {
+                type?: {
+                    /**
+                     * Enable/Disable the entity identifier
+                     */
+                    isEnabled?: boolean;
+                    /**
+                     * Attributes used to identify an entity
+                     */
+                    attributes?: string[];
+                };
+            };
+            /**
+             * Identifiers to identify a contract by a portal user.
+             * example:
+             * [
+             *   {
+             *     "name": "email",
+             *     "schema": "contact"
+             *   },
+             *   {
+             *     "name": "last_name",
+             *     "schema": "contact"
+             *   },
+             *   {
+             *     "name": "contract_number",
+             *     "schema": "contract"
+             *   }
+             * ]
+             */
+            contract_identifiers?: ContractIdentifier[];
+            /**
+             * Configuration for contract selector in the portal
+             */
+            contract_selector_config?: {
+                /**
+                 * Whether to show inactive contracts in the selector
+                 */
+                show_inactive?: boolean;
+                /**
+                 * Path to the property to use as the contract title
+                 */
+                title_path?: string;
+            };
+            /**
+             * Identifiers to identify a contact of a portal user during the registration.
+             * example:
+             * [
+             *   {
+             *     "name": "last_name",
+             *     "schema": "contact"
+             *   },
+             *   {
+             *     "name": "contract_number",
+             *     "schema": "contract"
+             *   }
+             * ]
+             */
+            registration_identifiers?: ContractIdentifier[];
+            /**
+             * Surfaces this portal's data is reached from besides the portal UI itself (public journeys on the website, chat). Configured under Security > Surfaces. Each surface defines how a caller authenticates and what data access applies on it; the portal UI is the implicit default surface (login, default scope) and is not listed here. A surface with `authentication: registration_identifiers` is what makes `identifyContact` issue tokens for this portal: without one, `identifyContact` returns 403.
+             *
+             */
+            surfaces?: /**
+             * One surface a portal's data is reached from (see `surfaces` on the portal config).
+             *
+             * A surface names how callers authenticate on it and what they may reach once they
+             * have. Data access is always a subset of the portal's own: a schema not in
+             * `allowed_portal_entities` cannot be opened up by a surface, and the portal's
+             * contact-relation rules still apply underneath the surface's own.
+             *
+             * Tokens minted for a surface (currently: contact identification tokens for
+             * `registration_identifiers` surfaces) carry the surface id. The surface's data
+             * access is resolved from the portal config on every request, not baked into the
+             * token, so tightening a surface applies to tokens already in circulation.
+             *
+             */
+            PortalSurface[];
+            /**
+             * Account-mode only. Identifiers on the contact entity of the primarily
+             * identified account. Used to pick an existing related contact within the
+             * resolved account; if none matches, the values are written onto the new
+             * contact that is created and linked to the account.
+             *
+             * example:
+             * [
+             *   {
+             *     "name": "first_name",
+             *     "schema": "contact"
+             *   },
+             *   {
+             *     "name": "last_name",
+             *     "schema": "contact"
+             *   }
+             * ]
+             */
+            contact_identifiers_for_account?: RegistrationIdentifier[];
+            /**
+             * Contact attributes collected from the user during self-registration that are
+             * written onto the newly created contact but are not used to identify an
+             * existing one.
+             *
+             * example:
+             * [
+             *   {
+             *     "name": "first_name",
+             *     "required": true
+             *   },
+             *   {
+             *     "name": "last_name",
+             *     "required": true
+             *   }
+             * ]
+             */
+            additional_contact_attributes?: /**
+             * A contact attribute that is collected from the user during self-registration
+             * and written onto the newly created contact, but is NOT used to identify
+             * an existing contact.
+             *
+             */
+            AdditionalContactAttribute[];
+            /**
+             * Journeys automatically opened on a portal user action
+             */
+            triggered_journeys?: {
+                trigger_name?: "FIRST_LOGIN" | "ACCEPT_ORDER" | "DECLINE_ORDER";
+                journey_id?: /**
+                 * Entity ID
+                 * example:
+                 * 5da0a718-c822-403d-9f5d-20d4584e0528
+                 */
+                EntityId /* uuid */;
+                /**
+                 * Context parameters forwarded to the journey when it is
+                 * auto-triggered. Values may contain handlebars templates
+                 * that reference the available context (e.g.
+                 * `{{contact._id}}`, `{{portal_user.email}}`,
+                 * `{{order._id}}`) — these are resolved at trigger time by
+                 * `GET /v2/portal/config/triggered-journeys/{trigger_name}`
+                 * using the caller's auth context plus runtime entities
+                 * supplied via the `context_entities` query param.
+                 *
+                 */
+                context_params?: {
+                    key?: string;
+                    value?: string;
+                }[];
+            }[];
+            /**
+             * Rules for editing an entity by a portal user
+             */
+            entity_edit_rules?: {
+                slug?: /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                EntitySlug;
+                /**
+                 * example:
+                 * first_name
+                 */
+                attribute?: string;
+                rule_type?: "cadence" | "relative_to_current_value" | "days_before_date" | "overdue_payments";
+                cadence_period_type?: "days" | "weeks" | "months";
+                /**
+                 * example:
+                 * 1
+                 */
+                cadence_period?: number;
+                /**
+                 * example:
+                 * 1
+                 */
+                changes_allowed?: number;
+                /**
+                 * example:
+                 * 1
+                 */
+                grace_period?: number;
+                /**
+                 * example:
+                 * 10%
+                 */
+                allowed_increment?: string;
+                /**
+                 * example:
+                 * 10%
+                 */
+                allowed_decrement?: string;
+                /**
+                 * example:
+                 * 10
+                 */
+                number_of_days_before_restriction?: number;
+            }[];
+            allowed_file_extensions?: /* Allowed file extensions for upload */ AllowedFileExtensions;
+            /**
+             * Prevent indexing by search engines
+             */
+            prevent_search_engine_indexing?: boolean;
+            /**
+             * Grace period in days for meter readings
+             */
+            meter_reading_grace_period?: number;
+            /**
+             * Number of years to look back for showing inactive contracts in the portal
+             */
+            inactive_contract_cutoff_years?: number;
+            /**
+             * Whether this is a dummy/test portal configuration
+             */
+            is_dummy?: boolean;
+            /**
+             * Whether this is a v3 portal configuration
+             */
+            is_v3_item?: boolean;
+            /**
+             * The revision currently live on this portal. Absent until the first publish.
+             * example:
+             * 2026-08-25T14:03:11.482Z-a7f3c1d9
+             */
+            published_revision_id?: string;
+            portal_id?: /**
+             * ID of the portal
+             * example:
+             * 453ad7bf-86d5-46c8-8252-bcc868df5e3c
+             */
+            PortalId;
+            /**
+             * Key of the portal config
+             * example:
+             * PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c
+             */
+            portal_sk_v3?: string;
+            origin?: /* Origin of the portal */ Origin;
+            /**
+             * Portal-level blocks shared across all pages (e.g. footer). Keyed by block id.
+             */
+            global_blocks?: {
+                [name: string]: Block;
+            };
+            based_on_revision_id?: string;
+            pages: /**
+             * A page inside a revision snapshot. `additionalProperties` is true on purpose — a page carries fields this schema does not name and they must survive into the snapshot and back onto the live page when it is published.
+             *
+             */
+            RevisionPageRequest[];
+        }
+        export interface PortalRevisionSummary {
+            /**
+             * example:
+             * 2026-08-25T14:03:11.482Z-a7f3c1d9
+             */
+            revision_id: string;
+            created_at: string; // date-time
+            /**
+             * May be absent — an internal-auth caller carries no user id.
+             */
+            created_by?: string;
+            /**
+             * Set at publish time only, and only when the publish request carried one. A revision can have been published and still have no name; `published_at` is the signal that a revision was live at some point, not this field.
+             *
+             * example:
+             * FAQ page launch
+             */
+            name?: string;
+            description?: string;
+            page_count: number;
+            /**
+             * The last time this revision was published. NOT the same question as `is_published`: a revision that was live yesterday still carries a `published_at`.
+             *
+             */
+            published_at?: string; // date-time
+            /**
+             * Who performed the last publish of this revision.
+             */
+            published_by?: string;
+            /**
+             * Whether this revision is the one currently live.
+             */
+            is_published: boolean;
+        }
+        /**
+         * One surface a portal's data is reached from (see `surfaces` on the portal config).
+         *
+         * A surface names how callers authenticate on it and what they may reach once they
+         * have. Data access is always a subset of the portal's own: a schema not in
+         * `allowed_portal_entities` cannot be opened up by a surface, and the portal's
+         * contact-relation rules still apply underneath the surface's own.
+         *
+         * Tokens minted for a surface (currently: contact identification tokens for
+         * `registration_identifiers` surfaces) carry the surface id. The surface's data
+         * access is resolved from the portal config on every request, not baked into the
+         * token, so tightening a surface applies to tokens already in circulation.
+         *
+         */
+        export interface PortalSurface {
+            /**
+             * Stable identifier, unique within the portal. Referenced by `identifyContact` and carried in issued tokens.
+             * example:
+             * website-journeys
+             */
+            id: string; // ^[a-z0-9][a-z0-9_-]*$
+            /**
+             * example:
+             * Website journeys
+             */
+            name: string;
+            /**
+             * Free text for the configuring user, e.g. where this surface is embedded.
+             */
+            description?: string;
+            /**
+             * How a caller on this surface proves who they are.
+             *
+             * - `login`: a logged-in portal user token (the portal's own authentication).
+             * - `registration_identifiers`: the caller supplies the portal's
+             *   `registration_identifiers` to `identifyContact` and receives a short-lived
+             *   contact identification token. Anyone who knows or guesses those values can
+             *   use this surface, so its data access should be as narrow as the use case allows.
+             *
+             * `anonymous` (no proof of identity at all) is planned and not accepted yet.
+             *
+             */
+            authentication: "login" | "registration_identifiers";
+            /**
+             * Lifetime of tokens minted for this surface. Only used with `registration_identifiers`.
+             */
+            token_ttl_seconds?: number; // int32
+            data_access?: /* What a caller on a surface may reach. Every property is optional; omitting all of them is the portal's default scope. */ PortalSurfaceDataAccess;
+        }
+        /**
+         * What a caller on a surface may reach. Every property is optional; omitting all of them is the portal's default scope.
+         */
+        export interface PortalSurfaceDataAccess {
+            /**
+             * Schemas reachable on this surface, each with the targets that always apply to
+             * it. Must be a subset of the portal's `allowed_portal_entities`; anything else
+             * is ignored. Empty or omitted means the surface reaches nothing - data access is
+             * opted into per schema.
+             *
+             */
+            entities?: /* One schema this surface reaches, with the targets that always apply to it. */ PortalSurfaceEntityAccess[];
+            /**
+             * 360 role whose grants apply on this surface (`<org_id>:<slug>`), giving
+             * vertical permissions - which attributes and actions are permitted. Omitted
+             * means the portal's default role.
+             *
+             * example:
+             * 728:public_journeys_readonly
+             */
+            role_id?: string;
+        }
+        /**
+         * One schema this surface reaches, with the targets that always apply to it.
+         */
+        export interface PortalSurfaceEntityAccess {
+            /**
+             * Schema slug, from the portal's `allowed_portal_entities`.
+             * example:
+             * contract
+             */
+            schema: string;
+            /**
+             * Targets (see the Targeting API) whose filters always apply to reads of this
+             * schema on this surface, giving horizontal permissions - which rows are
+             * reachable. They are applied in addition to any targets the caller passes. A
+             * target matches one schema, which is why they are configured per schema here.
+             *
+             */
+            target_ids?: string[];
+        }
         /**
          * Portal-specific (ECP / installer) display config of a workflow task
          */
@@ -7669,6 +8766,55 @@ declare namespace Components {
              * Portal-visible tasks in linear (timeline) order
              */
             tasks: /* A single portal-visible task of a linearized workflow execution */ PortalWorkflowTask[];
+            /**
+             * Customer-facing stages of the execution in strict order, each with a
+             * progress status derived by the Workflows API. Present only for V2 flow
+             * executions whose template defines stages and whose boundaries resolve
+             * cleanly; omitted otherwise, so consumers must fall back to the flat
+             * task timeline.
+             *
+             */
+            stages?: /**
+             * A customer-facing stage of a flow execution, with a progress status derived
+             * from the execution's tasks by the Workflows API. Stages form a strict total
+             * order; the array order is the stage order.
+             *
+             */
+            PortalWorkflowStage[];
+        }
+        /**
+         * A customer-facing stage of a flow execution, with a progress status derived
+         * from the execution's tasks by the Workflows API. Stages form a strict total
+         * order; the array order is the stage order.
+         *
+         */
+        export interface PortalWorkflowStage {
+            /**
+             * Stable unique identifier for the stage
+             */
+            id: string;
+            /**
+             * User-facing stage title
+             */
+            name: string;
+            /**
+             * Customer-facing description of what happens in this stage
+             */
+            description?: string;
+            /**
+             * Derived progress status:
+             * - COMPLETED: every task of the stage is done, and the flow has moved past it
+             * - IN_PROGRESS: the flow's current work is inside this stage
+             * - UPCOMING: the flow has not reached this stage yet
+             *
+             */
+            status: "COMPLETED" | "IN_PROGRESS" | "UPCOMING";
+            /**
+             * Latest completion timestamp among the stage's tasks; set only when the
+             * stage is COMPLETED and at least one of its tasks recorded one
+             *
+             */
+            completed_at?: string;
         }
         /**
          * A single portal-visible task of a linearized workflow execution
@@ -7724,6 +8870,12 @@ declare namespace Components {
              * Name of the phase the underlying task belongs to, if any (V2 only)
              */
             phase_name?: string;
+            /**
+             * Id of the stage the underlying task belongs to, when the execution
+             * carries stages (derived by the Workflows API at read time)
+             *
+             */
+            stage_id?: string;
             /**
              * Timestamp when the task was completed or skipped
              */
@@ -7926,6 +9078,38 @@ declare namespace Components {
             MoblieOIDCConfig;
         }
         /**
+         * Web-only public provider configuration served by `getPublicSSOProviderV3`.
+         * Unlike `ProviderPublicConfig` there is no `mobile_oidc_config`, and
+         * `oidc_config` never carries `client_secret` or the `metadata.test_auth_*`
+         * credentials — `oidc_config.has_client_secret` signals their presence so
+         * clients route the token exchange through the backend SSO callback.
+         *
+         */
+        export interface ProviderPublicConfigV3 {
+            slug: /**
+             * URL-friendly slug to use as organization-unique identifier for Provider
+             * example:
+             * office-365-login
+             */
+            ProviderSlug /* [0-9a-z_-]+ */;
+            display_name: /**
+             * Human-readable display name for identity provider shown in login
+             * example:
+             * Office 365 Login
+             */
+            ProviderDisplayName;
+            oidc_config?: /**
+             * OIDC provider configuration. Values are resolved at SSO invocation time
+             * (login / callback), so the fields below may reference org env vars via
+             * mustache-like templates, e.g. `{{ env.MY_PROVIDER_CLIENT_SECRET }}`.
+             *
+             * Fields used to render the SSO buttons up-front (`ProviderConfig.slug`,
+             * `ProviderConfig.display_name`) are NOT interpolated and must be literal.
+             *
+             */
+            OIDCProviderConfig;
+        }
+        /**
          * URL-friendly slug to use as organization-unique identifier for Provider
          * example:
          * office-365-login
@@ -8062,6 +9246,23 @@ declare namespace Components {
                 en: string;
             };
         }
+        /**
+         * Minimal public identity provider info — enough to render a provider login button.
+         */
+        export interface PublicIdentityProvider {
+            slug: /**
+             * URL-friendly slug to use as organization-unique identifier for Provider
+             * example:
+             * office-365-login
+             */
+            ProviderSlug /* [0-9a-z_-]+ */;
+            display_name: /**
+             * Human-readable display name for identity provider shown in login
+             * example:
+             * Office 365 Login
+             */
+            ProviderDisplayName;
+        }
         export interface PublicMeterReadingPlausibilityCheckDetails {
             /**
              * Mode for plausibility check:
@@ -8080,6 +9281,46 @@ declare namespace Components {
              * Explanation of the functionality shown to the end user.
              */
             en: string;
+        }
+        export interface PublishResult {
+            revision_id: string;
+            published_at: string; // date-time
+            published_by?: string;
+            /**
+             * The name now on the revision: the one sent in the request, or the one a previous publish set when this request omitted `name`. Absent when neither exists.
+             *
+             * example:
+             * FAQ page launch
+             */
+            name?: string;
+            /**
+             * Stable, machine-readable codes for best-effort post-publish side effects that exhausted their retries. Publishing itself succeeded; these are not error messages and not meant for display as-is. Clients map each code to their own localized text.
+             * Known codes: `allowed_entities_change` (portal entity grants and detail pages did not sync), `dns_records_clear` (the previous domain's DNS records were not cleared). New codes may be added without a client update, so treat an unrecognized code as a generic "a follow-up step did not finish" case rather than an error.
+             *
+             * example:
+             * [
+             *   "allowed_entities_change"
+             * ]
+             */
+            post_publish_warnings: string[];
+        }
+        export interface PublishRevisionRequest {
+            /**
+             * example:
+             * 2026-08-25T14:03:11.482Z-a7f3c1d9
+             */
+            revision_id: string;
+            /**
+             * Label stamped onto the revision being published, permanently and atomically with the publish itself. Optional: when omitted the revision keeps whatever name it already has, possibly none; the server never generates one. An explicit name replaces any previous one. Clients derive a display label for unnamed revisions from `published_at` / `created_at`.
+             *
+             * example:
+             * FAQ page launch
+             */
+            name?: string;
+            /**
+             * Optional description stamped onto the revision at publish time
+             */
+            description?: string;
         }
         /**
          * The person who recorded the reading
@@ -8221,6 +9462,194 @@ declare namespace Components {
              * Date on which the customer is reimbursed.
              */
             paid_date?: string; // date
+        }
+        /**
+         * A page from a revision snapshot. Same shape as a live `Page`, without the server-managed fields (`past_routes`, `_created_at`, `_updated_at`, `is_deleted`), which publish re-derives from the live portal.
+         *
+         */
+        export interface RevisionPage {
+            [name: string]: any;
+            /**
+             * The slug of the page
+             * example:
+             * dashboard
+             */
+            slug: string;
+            /**
+             * The path of the page
+             * example:
+             * /dashboard
+             */
+            path?: string;
+            schema?: string[];
+            /**
+             * The conditions that need to be met for the page to be shown
+             */
+            visibility?: {
+                [name: string]: any;
+                /**
+                 * Page is fully hidden from portal users
+                 */
+                is_hidden?: boolean;
+                /**
+                 * Page is hidden in the mobile app
+                 */
+                hidden_in_app?: boolean;
+                /**
+                 * Schedule visibility start date. If only start_date is set, page is visible from this date onwards.
+                 */
+                start_date?: string; // date-time
+                /**
+                 * Schedule visibility end date. If only end_date is set, page is visible until this date.
+                 */
+                end_date?: string; // date-time
+                /**
+                 * Target IDs that must match for the page to be visible
+                 */
+                visible_for_targets?: string[];
+                /**
+                 * Operator for visible_for_targets matching
+                 */
+                visible_for_operator?: "and" | "or";
+                /**
+                 * Target IDs that if matched will hide the page
+                 */
+                hidden_for_targets?: string[];
+                /**
+                 * Operator for hidden_for_targets matching
+                 */
+                hidden_for_operator?: "and" | "or";
+            };
+            /**
+             * The content of the page
+             */
+            content?: {
+                [name: string]: any;
+            };
+            /**
+             * The design of the page
+             */
+            design?: {
+                [name: string]: any;
+            };
+            blocks: {
+                [name: string]: Block;
+            };
+            /**
+             * The order of the block
+             * example:
+             * 1
+             */
+            order: number;
+            /**
+             * Whether the page is a system page
+             * example:
+             * false
+             */
+            is_system?: boolean;
+            /**
+             * Whether the page is a detail page
+             * example:
+             * false
+             */
+            is_detail?: boolean;
+            /**
+             * The schema of the detail page
+             * example:
+             * contact
+             */
+            detail_schema?: string;
+            /**
+             * Whether the detail page should appear in the main navigation
+             * example:
+             * false
+             */
+            show_in_navigation?: boolean;
+            /**
+             * Whether the page is public
+             * example:
+             * true
+             */
+            is_public?: boolean;
+            /**
+             * The id of the parent page
+             * example:
+             * c495fef9-eeca-4019-a989-8390dcd9825b
+             */
+            parentId?: string | null;
+            /**
+             * Whether the page is the entry route
+             * example:
+             * false
+             */
+            is_entry_route?: boolean;
+            /**
+             * Send the flag as true to delete the page
+             * example:
+             * false
+             */
+            is_deleted?: boolean;
+            /**
+             * The id of the page
+             * example:
+             * c495fef9-eeca-4019-a989-8390dcd9825b
+             */
+            id: string; // uuid
+            /**
+             * Last modified timestamp of the Page
+             * example:
+             * 2021-02-09T12:41:43.662Z
+             */
+            last_modified_at?: string; // date-time
+            /**
+             * The id of the portal
+             * example:
+             * 453ad7bf-86d5-46c8-8252-bcc868df5e3c
+             */
+            portal_id?: string;
+            /**
+             * Slugs that previously belonged to this page. The portal redirects requests for these slugs to the current slug. Managed by the server: when a page's slug changes, the old slug is appended here, and when another page claims one of these slugs it is removed from this list.
+             *
+             * example:
+             * [
+             *   "old-dashboard",
+             *   "home"
+             * ]
+             */
+            past_routes?: string[];
+            org_id?: string;
+        }
+        /**
+         * A page inside a revision snapshot. `additionalProperties` is true on purpose — a page carries fields this schema does not name and they must survive into the snapshot and back onto the live page when it is published.
+         *
+         */
+        export interface RevisionPageRequest {
+            [name: string]: any;
+            /**
+             * Stable page identity. Required because a revision diff correlates pages by id, not by slug.
+             * `format: uuid` is enforced, so a non-UUID id is rejected as a `400`.
+             *
+             * example:
+             * c495fef9-eeca-4019-a989-8390dcd9825b
+             */
+            id: string; // uuid
+            /**
+             * example:
+             * dashboard
+             */
+            slug: string;
+            /**
+             * example:
+             * 0
+             */
+            order: number;
+            /**
+             * Required on purpose. A live save preserves an omitted `blocks` from the stored page; publish replaces each live page wholesale with no such guard, so a revision snapshotted without blocks would wipe them on publish. `{}` is a valid value — the field simply has to be present.
+             *
+             */
+            blocks: {
+                [name: string]: any;
+            };
         }
         export interface Rule {
             entity?: string | null;
@@ -9039,6 +10468,25 @@ declare namespace Components {
              */
             registration_identifiers?: ContractIdentifier[];
             /**
+             * Surfaces this portal's data is reached from besides the portal UI itself (public journeys on the website, chat). Configured under Security > Surfaces. Each surface defines how a caller authenticates and what data access applies on it; the portal UI is the implicit default surface (login, default scope) and is not listed here. A surface with `authentication: registration_identifiers` is what makes `identifyContact` issue tokens for this portal: without one, `identifyContact` returns 403.
+             *
+             */
+            surfaces?: /**
+             * One surface a portal's data is reached from (see `surfaces` on the portal config).
+             *
+             * A surface names how callers authenticate on it and what they may reach once they
+             * have. Data access is always a subset of the portal's own: a schema not in
+             * `allowed_portal_entities` cannot be opened up by a surface, and the portal's
+             * contact-relation rules still apply underneath the surface's own.
+             *
+             * Tokens minted for a surface (currently: contact identification tokens for
+             * `registration_identifiers` surfaces) carry the surface id. The surface's data
+             * access is resolved from the portal config on every request, not baked into the
+             * token, so tightening a surface applies to tokens already in circulation.
+             *
+             */
+            PortalSurface[];
+            /**
              * Account-mode only. Identifiers on the contact entity of the primarily
              * identified account. Used to pick an existing related contact within the
              * resolved account; if none matches, the values are written onto the new
@@ -9177,6 +10625,12 @@ declare namespace Components {
              * Whether this is a v3 portal configuration
              */
             is_v3_item?: boolean;
+            /**
+             * The revision currently live on this portal. Absent until the first publish.
+             * example:
+             * 2026-08-25T14:03:11.482Z-a7f3c1d9
+             */
+            published_revision_id?: string;
             portal_id?: /**
              * ID of the portal
              * example:
@@ -9643,6 +11097,25 @@ declare namespace Components {
              */
             registration_identifiers?: ContractIdentifier[];
             /**
+             * Surfaces this portal's data is reached from besides the portal UI itself (public journeys on the website, chat). Configured under Security > Surfaces. Each surface defines how a caller authenticates and what data access applies on it; the portal UI is the implicit default surface (login, default scope) and is not listed here. A surface with `authentication: registration_identifiers` is what makes `identifyContact` issue tokens for this portal: without one, `identifyContact` returns 403.
+             *
+             */
+            surfaces?: /**
+             * One surface a portal's data is reached from (see `surfaces` on the portal config).
+             *
+             * A surface names how callers authenticate on it and what they may reach once they
+             * have. Data access is always a subset of the portal's own: a schema not in
+             * `allowed_portal_entities` cannot be opened up by a surface, and the portal's
+             * contact-relation rules still apply underneath the surface's own.
+             *
+             * Tokens minted for a surface (currently: contact identification tokens for
+             * `registration_identifiers` surfaces) carry the surface id. The surface's data
+             * access is resolved from the portal config on every request, not baked into the
+             * token, so tightening a surface applies to tokens already in circulation.
+             *
+             */
+            PortalSurface[];
+            /**
              * Account-mode only. Identifiers on the contact entity of the primarily
              * identified account. Used to pick an existing related contact within the
              * resolved account; if none matches, the values are written onto the new
@@ -9781,6 +11254,12 @@ declare namespace Components {
              * Whether this is a v3 portal configuration
              */
             is_v3_item?: boolean;
+            /**
+             * The revision currently live on this portal. Absent until the first publish.
+             * example:
+             * 2026-08-25T14:03:11.482Z-a7f3c1d9
+             */
+            published_revision_id?: string;
             portal_id?: /**
              * ID of the portal
              * example:
@@ -10148,6 +11627,7 @@ declare namespace Paths {
             }
             export type $400 = Components.Responses.InvalidRequest;
             export type $404 = Components.Responses.NotFound;
+            export type $429 = Components.Responses.TooManyRequests;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -10187,6 +11667,7 @@ declare namespace Paths {
             }
             export type $400 = Components.Responses.InvalidRequest;
             export type $404 = Components.Responses.NotFound;
+            export type $429 = Components.Responses.TooManyRequests;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -10242,6 +11723,7 @@ declare namespace Paths {
             }
             export type $400 = Components.Responses.InvalidRequest;
             export type $404 = Components.Responses.NotFound;
+            export type $429 = Components.Responses.TooManyRequests;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -10504,6 +11986,32 @@ declare namespace Paths {
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace CreatePortalRevision {
+        namespace Parameters {
+            /**
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            export type PortalId = string; // uuid
+        }
+        export interface PathParameters {
+            portal_id: /**
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            Parameters.PortalId /* uuid */;
+        }
+        export type RequestBody = Components.Schemas.PortalRevisionRequest;
+        namespace Responses {
+            export type $201 = Components.Schemas.PortalRevisionCreated;
+            export type $400 = Components.Responses.InvalidRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $409 = Components.Responses.Conflict;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -13631,6 +15139,25 @@ declare namespace Paths {
                  */
                 registration_identifiers?: Components.Schemas.ContractIdentifier[];
                 /**
+                 * Surfaces this portal's data is reached from besides the portal UI itself (public journeys on the website, chat). Configured under Security > Surfaces. Each surface defines how a caller authenticates and what data access applies on it; the portal UI is the implicit default surface (login, default scope) and is not listed here. A surface with `authentication: registration_identifiers` is what makes `identifyContact` issue tokens for this portal: without one, `identifyContact` returns 403.
+                 *
+                 */
+                surfaces?: /**
+                 * One surface a portal's data is reached from (see `surfaces` on the portal config).
+                 *
+                 * A surface names how callers authenticate on it and what they may reach once they
+                 * have. Data access is always a subset of the portal's own: a schema not in
+                 * `allowed_portal_entities` cannot be opened up by a surface, and the portal's
+                 * contact-relation rules still apply underneath the surface's own.
+                 *
+                 * Tokens minted for a surface (currently: contact identification tokens for
+                 * `registration_identifiers` surfaces) carry the surface id. The surface's data
+                 * access is resolved from the portal config on every request, not baked into the
+                 * token, so tightening a surface applies to tokens already in circulation.
+                 *
+                 */
+                Components.Schemas.PortalSurface[];
+                /**
                  * Account-mode only. Identifiers on the contact entity of the primarily
                  * identified account. Used to pick an existing related contact within the
                  * resolved account; if none matches, the values are written onto the new
@@ -13769,6 +15296,12 @@ declare namespace Paths {
                  * Whether this is a v3 portal configuration
                  */
                 is_v3_item?: boolean;
+                /**
+                 * The revision currently live on this portal. Absent until the first publish.
+                 * example:
+                 * 2026-08-25T14:03:11.482Z-a7f3c1d9
+                 */
+                published_revision_id?: string;
                 portal_id?: /**
                  * ID of the portal
                  * example:
@@ -14265,6 +15798,25 @@ declare namespace Paths {
                  */
                 registration_identifiers?: Components.Schemas.ContractIdentifier[];
                 /**
+                 * Surfaces this portal's data is reached from besides the portal UI itself (public journeys on the website, chat). Configured under Security > Surfaces. Each surface defines how a caller authenticates and what data access applies on it; the portal UI is the implicit default surface (login, default scope) and is not listed here. A surface with `authentication: registration_identifiers` is what makes `identifyContact` issue tokens for this portal: without one, `identifyContact` returns 403.
+                 *
+                 */
+                surfaces?: /**
+                 * One surface a portal's data is reached from (see `surfaces` on the portal config).
+                 *
+                 * A surface names how callers authenticate on it and what they may reach once they
+                 * have. Data access is always a subset of the portal's own: a schema not in
+                 * `allowed_portal_entities` cannot be opened up by a surface, and the portal's
+                 * contact-relation rules still apply underneath the surface's own.
+                 *
+                 * Tokens minted for a surface (currently: contact identification tokens for
+                 * `registration_identifiers` surfaces) carry the surface id. The surface's data
+                 * access is resolved from the portal config on every request, not baked into the
+                 * token, so tightening a surface applies to tokens already in circulation.
+                 *
+                 */
+                Components.Schemas.PortalSurface[];
+                /**
                  * Account-mode only. Identifiers on the contact entity of the primarily
                  * identified account. Used to pick an existing related contact within the
                  * resolved account; if none matches, the values are written onto the new
@@ -14403,6 +15955,12 @@ declare namespace Paths {
                  * Whether this is a v3 portal configuration
                  */
                 is_v3_item?: boolean;
+                /**
+                 * The revision currently live on this portal. Absent until the first publish.
+                 * example:
+                 * 2026-08-25T14:03:11.482Z-a7f3c1d9
+                 */
+                published_revision_id?: string;
                 portal_id?: /**
                  * ID of the portal
                  * example:
@@ -14750,6 +16308,41 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace GetPortalRevision {
+        namespace Parameters {
+            /**
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            export type PortalId = string; // uuid
+            /**
+             * example:
+             * 2026-08-25T14:03:11.482Z-a7f3c1d9
+             */
+            export type RevisionId = string;
+        }
+        export interface PathParameters {
+            portal_id: /**
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            Parameters.PortalId /* uuid */;
+            revision_id: /**
+             * example:
+             * 2026-08-25T14:03:11.482Z-a7f3c1d9
+             */
+            Parameters.RevisionId;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.PortalRevision;
+            export type $400 = Components.Responses.InvalidRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $409 = Components.Responses.Conflict;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace GetPortalUser {
         namespace Responses {
             export interface $200 {
@@ -15050,7 +16643,620 @@ declare namespace Paths {
             portal_id: Parameters.PortalId;
         }
         namespace Responses {
-            export type $200 = Components.Schemas.PortalConfig;
+            export interface $200 {
+                mobile_config?: /* Mobile app configuration for the portal. Stored inside the portal's config object. Identifiers/branding are non-secret; signing credentials live in a secure store, never here. */ Components.Schemas.MobileConfig;
+                /**
+                 * Enable/Disable the portal access
+                 */
+                enabled?: boolean;
+                /**
+                 * A short name to identify your portal
+                 * example:
+                 * Installer Portal
+                 */
+                name?: string;
+                /**
+                 * The URL on which the portal is accessible
+                 * example:
+                 * abc.com
+                 */
+                domain?: string;
+                /**
+                 * Mark true if the domain is an Epilot domain
+                 */
+                is_epilot_domain?: boolean;
+                /**
+                 * The URL on which the portal is accessible
+                 * example:
+                 * example-portal-12345.ecp.epilot.cloud
+                 */
+                epilot_domain?: string;
+                domain_settings?: /* Domain settings for the portal */ Components.Schemas.DomainSettings;
+                design_id?: /**
+                 * Entity ID
+                 * example:
+                 * 5da0a718-c822-403d-9f5d-20d4584e0528
+                 */
+                Components.Schemas.EntityId /* uuid */;
+                /**
+                 * Allowed portal entities for the portal
+                 * example:
+                 * [
+                 *   "contact",
+                 *   "contract"
+                 * ]
+                 */
+                allowed_portal_entities?: string[];
+                self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY" | "BLOCK_IF_PORTAL_USER_EXISTS";
+                /**
+                 * Controls behavior of self-registration when account is the registration
+                 * entity. `BLOCK_IF_PORTAL_USER_EXISTS` matches an existing account and
+                 * rejects the request when any portal user is already linked to that
+                 * account (no creation). Blocking can also be enabled on the other
+                 * non-create modes via `block_registration_if_portal_user_exists`.
+                 *
+                 */
+                self_registration_account_setting?: "ALLOW_WITH_CREATION" | "DENY" | "ALWAYS_CREATE" | "BLOCK_IF_PORTAL_USER_EXISTS" | "DISALLOW_COMPLETELY";
+                /**
+                 * Account-mode only. Reject registration when the resolved account already
+                 * has any portal user (any portal user whose mapped contact is linked to
+                 * the account).
+                 *
+                 */
+                block_registration_if_portal_user_exists?: boolean;
+                /**
+                 * Entity type used as the primary identifier for self-registration
+                 */
+                self_registration_entity?: "contact" | "account";
+                /**
+                 * Enable or disable user account self management
+                 * example:
+                 * false
+                 */
+                user_account_self_management?: boolean;
+                /**
+                 * Feature settings for the portal
+                 */
+                feature_settings?: {
+                    /**
+                     * Start page feature flag
+                     */
+                    start_page?: boolean;
+                    /**
+                     * Billing feature flag
+                     */
+                    billing?: boolean;
+                    /**
+                     * Change due date feature flag
+                     */
+                    change_due_date?: boolean;
+                    /**
+                     * Enable or disable the new design for the portal
+                     */
+                    new_design?: boolean;
+                    /**
+                     * Enable the MCP (AI agent) connector channel for this portal
+                     */
+                    mcp_enabled?: boolean;
+                    /**
+                     * Server-managed generation used to invalidate MCP grants after the connector is disabled or re-enabled
+                     */
+                    mcp_grant_version?: number;
+                };
+                /**
+                 * Access token for the portal
+                 */
+                accessToken?: string;
+                advanced_mfa?: {
+                    /**
+                     * Advanced MFA feature flag
+                     */
+                    enabled?: boolean;
+                };
+                /**
+                 * Authentication settings for the portal
+                 */
+                auth_settings?: {
+                    passwordless_login?: {
+                        /**
+                         * Passwordless login feature flag
+                         */
+                        enabled?: boolean;
+                    };
+                    entry_point?: "PASSWORD" | "SSO";
+                    preferred_sso_providers?: /**
+                     * URL-friendly slug to use as organization-unique identifier for Provider
+                     * example:
+                     * office-365-login
+                     */
+                    Components.Schemas.ProviderSlug /* [0-9a-z_-]+ */[];
+                    /**
+                     * Decide whether to automatically redirect to the provider page during login, which would completely bypass showing the portal authentication page.
+                     */
+                    auto_redirect_to_sso?: boolean;
+                    /**
+                     * Opt-in. When true, suppresses responses that reveal whether a user exists for public, pre-authentication actions (the login entry-point check and self-registration), at the expense of some UX. Already-authenticated actions are unaffected. Default false.
+                     *
+                     */
+                    prevent_user_enumeration?: boolean;
+                };
+                /**
+                 * AWS Cognito Pool details for the portal
+                 */
+                cognito_details?: {
+                    /**
+                     * Cognito user pool client ID
+                     * example:
+                     * 6bsd0jkgoie74k2i8mrhc1vest
+                     */
+                    cognito_user_pool_client_id?: string;
+                    /**
+                     * Cognito user pool ARN
+                     * example:
+                     * arn:aws:cognito-idp:us-east-1:123412341234:userpool/us-east-1_123412341
+                     */
+                    cognito_user_pool_arn?: string;
+                    /**
+                     * Cognito user pool ID
+                     * example:
+                     * eu-central-1_CUEQRNbUb
+                     */
+                    cognito_user_pool_id?: string;
+                    /**
+                     * Timeouts for the cognito tokens
+                     */
+                    timeouts?: {
+                        /**
+                         * Timeout for the refresh token
+                         * example:
+                         * 300
+                         */
+                        refresh_token?: number;
+                        /**
+                         * Timeout for the access token
+                         * example:
+                         * 300
+                         */
+                        access_token?: number;
+                        /**
+                         * Timeout for the id token
+                         * example:
+                         * 300
+                         */
+                        id_token?: number;
+                    };
+                    /**
+                     * Advanced authentication settings for the portal
+                     */
+                    advanced_authentication?: {
+                        /**
+                         * Enables detailed logging of user authentication attempts including risk assessments, IP addresses, user agents, and device information. These logs can be used for security analysis and monitoring.
+                         * example:
+                         * true
+                         */
+                        user_activity_logging?: boolean;
+                        /**
+                         * Automatically assesses risk for every authentication session. Based on risk ratings, can block authentication or require MFA for suspicious sign-in attempts. Helps protect user accounts from potential attacks by adapting security measures in real-time.
+                         * example:
+                         * true
+                         */
+                        adaptive_authentication?: boolean;
+                        /**
+                         * Checks passwords against databases of leaked and commonly-guessed passwords during sign-up, sign-in, and password reset. Blocks or warns users when insecure passwords are detected, preventing unauthorized access from compromised credentials.
+                         * example:
+                         * true
+                         */
+                        compromised_credentials_detection?: boolean;
+                    };
+                    /**
+                     * Password policy for the portal
+                     */
+                    password_policy?: {
+                        /**
+                         * Minimum password length
+                         * example:
+                         * 8
+                         */
+                        minimum_length?: number;
+                        /**
+                         * Maximum password length
+                         * example:
+                         * 256
+                         */
+                        maximum_length?: number;
+                        /**
+                         * Require lowercase characters
+                         * example:
+                         * true
+                         */
+                        require_lowercase?: boolean;
+                        /**
+                         * Require uppercase characters
+                         * example:
+                         * true
+                         */
+                        require_uppercase?: boolean;
+                        /**
+                         * Require numbers
+                         * example:
+                         * true
+                         */
+                        require_numbers?: boolean;
+                        /**
+                         * Require symbols
+                         * example:
+                         * true
+                         */
+                        require_symbols?: boolean;
+                        /**
+                         * Number of previous passwords a user is prevented from reusing. Set to 0 to disable reuse prevention. Maps to Cognito's PasswordHistorySize and requires the user pool to be on the Essentials or Plus feature plan.
+                         * example:
+                         * 3
+                         */
+                        password_history_size?: number;
+                    };
+                };
+                /**
+                 * Stringified object with configuration details
+                 */
+                config?: string;
+                /**
+                 * Deprecated. Use registration_identifiers instead.
+                 * example:
+                 * [
+                 *   "email",
+                 *   "last_name"
+                 * ]
+                 */
+                contact_identifiers?: string[];
+                /**
+                 * example:
+                 * {
+                 *   "contact": [
+                 *     "name",
+                 *     "address"
+                 *   ],
+                 *   "contract": [
+                 *     "installment_amount"
+                 *   ]
+                 * }
+                 */
+                approval_state_attributes?: {
+                    [name: string]: string[];
+                };
+                email_templates?: /* Email templates used for authentication and internal processes */ Components.Schemas.EmailTemplates;
+                /**
+                 * Teaser & Banner Image web links
+                 */
+                images?: {
+                    /**
+                     * URL of the order left teaser image
+                     * example:
+                     * https://epilot-bucket.s3.eu-central-1.amazonaws.com/12344/6538fddb-f0e9-4f0f-af51-6e57891ff20a/order-left-teaser.jpeg
+                     */
+                    orderLeftTeaser?: string | null;
+                    /**
+                     * URL of the order right teaser image
+                     * example:
+                     * https://epilot-bucket.s3.eu-central-1.amazonaws.com/12344/6538fddb-f0e9-4f0f-af51-6e57891ff20a/order-right-teaser.jpeg
+                     */
+                    orderRightTeaser?: string | null;
+                    /**
+                     * URL of the welcome banner image
+                     * example:
+                     * https://epilot-bucket.s3.eu-central-1.amazonaws.com/12344/6538fddb-f0e9-4f0f-af51-6e57891ff20a/welcome-banner.jpeg
+                     */
+                    welcomeBanner?: string | null;
+                };
+                /**
+                 * Identifiers used to identify an entity by a portal user. Deprecated. Use contract_identifiers instead.
+                 */
+                entity_identifiers?: {
+                    type?: {
+                        /**
+                         * Enable/Disable the entity identifier
+                         */
+                        isEnabled?: boolean;
+                        /**
+                         * Attributes used to identify an entity
+                         */
+                        attributes?: string[];
+                    };
+                };
+                /**
+                 * Identifiers to identify a contract by a portal user.
+                 * example:
+                 * [
+                 *   {
+                 *     "name": "email",
+                 *     "schema": "contact"
+                 *   },
+                 *   {
+                 *     "name": "last_name",
+                 *     "schema": "contact"
+                 *   },
+                 *   {
+                 *     "name": "contract_number",
+                 *     "schema": "contract"
+                 *   }
+                 * ]
+                 */
+                contract_identifiers?: Components.Schemas.ContractIdentifier[];
+                /**
+                 * Configuration for contract selector in the portal
+                 */
+                contract_selector_config?: {
+                    /**
+                     * Whether to show inactive contracts in the selector
+                     */
+                    show_inactive?: boolean;
+                    /**
+                     * Path to the property to use as the contract title
+                     */
+                    title_path?: string;
+                };
+                /**
+                 * Identifiers to identify a contact of a portal user during the registration.
+                 * example:
+                 * [
+                 *   {
+                 *     "name": "last_name",
+                 *     "schema": "contact"
+                 *   },
+                 *   {
+                 *     "name": "contract_number",
+                 *     "schema": "contract"
+                 *   }
+                 * ]
+                 */
+                registration_identifiers?: Components.Schemas.ContractIdentifier[];
+                /**
+                 * Surfaces this portal's data is reached from besides the portal UI itself (public journeys on the website, chat). Configured under Security > Surfaces. Each surface defines how a caller authenticates and what data access applies on it; the portal UI is the implicit default surface (login, default scope) and is not listed here. A surface with `authentication: registration_identifiers` is what makes `identifyContact` issue tokens for this portal: without one, `identifyContact` returns 403.
+                 *
+                 */
+                surfaces?: /**
+                 * One surface a portal's data is reached from (see `surfaces` on the portal config).
+                 *
+                 * A surface names how callers authenticate on it and what they may reach once they
+                 * have. Data access is always a subset of the portal's own: a schema not in
+                 * `allowed_portal_entities` cannot be opened up by a surface, and the portal's
+                 * contact-relation rules still apply underneath the surface's own.
+                 *
+                 * Tokens minted for a surface (currently: contact identification tokens for
+                 * `registration_identifiers` surfaces) carry the surface id. The surface's data
+                 * access is resolved from the portal config on every request, not baked into the
+                 * token, so tightening a surface applies to tokens already in circulation.
+                 *
+                 */
+                Components.Schemas.PortalSurface[];
+                /**
+                 * Account-mode only. Identifiers on the contact entity of the primarily
+                 * identified account. Used to pick an existing related contact within the
+                 * resolved account; if none matches, the values are written onto the new
+                 * contact that is created and linked to the account.
+                 *
+                 * example:
+                 * [
+                 *   {
+                 *     "name": "first_name",
+                 *     "schema": "contact"
+                 *   },
+                 *   {
+                 *     "name": "last_name",
+                 *     "schema": "contact"
+                 *   }
+                 * ]
+                 */
+                contact_identifiers_for_account?: Components.Schemas.RegistrationIdentifier[];
+                /**
+                 * Contact attributes collected from the user during self-registration that are
+                 * written onto the newly created contact but are not used to identify an
+                 * existing one.
+                 *
+                 * example:
+                 * [
+                 *   {
+                 *     "name": "first_name",
+                 *     "required": true
+                 *   },
+                 *   {
+                 *     "name": "last_name",
+                 *     "required": true
+                 *   }
+                 * ]
+                 */
+                additional_contact_attributes?: /**
+                 * A contact attribute that is collected from the user during self-registration
+                 * and written onto the newly created contact, but is NOT used to identify
+                 * an existing contact.
+                 *
+                 */
+                Components.Schemas.AdditionalContactAttribute[];
+                /**
+                 * Journeys automatically opened on a portal user action
+                 */
+                triggered_journeys?: {
+                    trigger_name?: "FIRST_LOGIN" | "ACCEPT_ORDER" | "DECLINE_ORDER";
+                    journey_id?: /**
+                     * Entity ID
+                     * example:
+                     * 5da0a718-c822-403d-9f5d-20d4584e0528
+                     */
+                    Components.Schemas.EntityId /* uuid */;
+                    /**
+                     * Context parameters forwarded to the journey when it is
+                     * auto-triggered. Values may contain handlebars templates
+                     * that reference the available context (e.g.
+                     * `{{contact._id}}`, `{{portal_user.email}}`,
+                     * `{{order._id}}`) — these are resolved at trigger time by
+                     * `GET /v2/portal/config/triggered-journeys/{trigger_name}`
+                     * using the caller's auth context plus runtime entities
+                     * supplied via the `context_entities` query param.
+                     *
+                     */
+                    context_params?: {
+                        key?: string;
+                        value?: string;
+                    }[];
+                }[];
+                /**
+                 * Rules for editing an entity by a portal user
+                 */
+                entity_edit_rules?: {
+                    slug?: /**
+                     * URL-friendly identifier for the entity schema
+                     * example:
+                     * contact
+                     */
+                    Components.Schemas.EntitySlug;
+                    /**
+                     * example:
+                     * first_name
+                     */
+                    attribute?: string;
+                    rule_type?: "cadence" | "relative_to_current_value" | "days_before_date" | "overdue_payments";
+                    cadence_period_type?: "days" | "weeks" | "months";
+                    /**
+                     * example:
+                     * 1
+                     */
+                    cadence_period?: number;
+                    /**
+                     * example:
+                     * 1
+                     */
+                    changes_allowed?: number;
+                    /**
+                     * example:
+                     * 1
+                     */
+                    grace_period?: number;
+                    /**
+                     * example:
+                     * 10%
+                     */
+                    allowed_increment?: string;
+                    /**
+                     * example:
+                     * 10%
+                     */
+                    allowed_decrement?: string;
+                    /**
+                     * example:
+                     * 10
+                     */
+                    number_of_days_before_restriction?: number;
+                }[];
+                allowed_file_extensions?: /* Allowed file extensions for upload */ Components.Schemas.AllowedFileExtensions;
+                /**
+                 * Prevent indexing by search engines
+                 */
+                prevent_search_engine_indexing?: boolean;
+                /**
+                 * Grace period in days for meter readings
+                 */
+                meter_reading_grace_period?: number;
+                /**
+                 * Number of years to look back for showing inactive contracts in the portal
+                 */
+                inactive_contract_cutoff_years?: number;
+                /**
+                 * Whether this is a dummy/test portal configuration
+                 */
+                is_dummy?: boolean;
+                /**
+                 * Whether this is a v3 portal configuration
+                 */
+                is_v3_item?: boolean;
+                /**
+                 * The revision currently live on this portal. Absent until the first publish.
+                 * example:
+                 * 2026-08-25T14:03:11.482Z-a7f3c1d9
+                 */
+                published_revision_id?: string;
+                portal_id?: /**
+                 * ID of the portal
+                 * example:
+                 * 453ad7bf-86d5-46c8-8252-bcc868df5e3c
+                 */
+                Components.Schemas.PortalId;
+                /**
+                 * Key of the portal config
+                 * example:
+                 * PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c
+                 */
+                portal_sk_v3?: string;
+                origin?: /* Origin of the portal */ Components.Schemas.Origin;
+                pages?: {
+                    [name: string]: Components.Schemas.Page;
+                };
+                /**
+                 * Portal-level blocks shared across all pages (e.g. footer). Keyed by block id.
+                 */
+                global_blocks?: {
+                    [name: string]: Components.Schemas.Block;
+                };
+                /**
+                 * Configures which 360 events generate an in-app notification for the portal user. Each enabled trigger renders the referenced notification template and creates a notification addressed to the portal user. Admin/builder-only — never exposed via the public portal config.
+                 */
+                notification_triggers?: Components.Schemas.NotificationTriggerConfig[];
+                /**
+                 * Master toggle for the portal's engagement center (in-app notifications including the notification triggers above). Off when absent — portal users only see the engagement center and receive trigger notifications after an admin enables it.
+                 */
+                engagement_center_enabled?: boolean;
+                /**
+                 * ID of the organization
+                 * example:
+                 * 12345
+                 */
+                id?: string;
+                /**
+                 * ID of the organization
+                 * example:
+                 * 12345
+                 */
+                organization_id?: string;
+                /**
+                 * Organization settings
+                 */
+                org_settings?: {
+                    /**
+                     * Canary feature flag
+                     */
+                    canary?: {
+                        /**
+                         * Enable/Disable the canary feature
+                         */
+                        enabled?: boolean;
+                    };
+                    /**
+                     * Disable Advanced Usage Metrics
+                     */
+                    notracking?: {
+                        /**
+                         * Disable browser-side scripts that track advanced usage metrics
+                         */
+                        enabled?: boolean;
+                    };
+                };
+                /**
+                 * Feature flags for the portal
+                 */
+                feature_flags?: {
+                    [name: string]: boolean;
+                };
+                /**
+                 * Permissions granted to a portal user while accessing entities
+                 */
+                grants?: Components.Schemas.Grant[];
+                /**
+                 * SSO identity providers configured for the portal, reduced to the
+                 * fields needed to render provider login buttons. Omitted when the
+                 * portal has no providers.
+                 *
+                 */
+                identity_providers?: /* Minimal public identity provider info — enough to render a provider login button. */ Components.Schemas.PublicIdentityProvider[];
+            }
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -15165,6 +17371,52 @@ declare namespace Paths {
             export type $200 = Components.Schemas.UpsertPortalWidget;
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace GetPublicSSOProviderV3 {
+        namespace Parameters {
+            /**
+             * example:
+             * 123
+             */
+            export type OrgId = string;
+            export type PortalId = /**
+             * ID of the portal
+             * example:
+             * 453ad7bf-86d5-46c8-8252-bcc868df5e3c
+             */
+            Components.Schemas.PortalId;
+            export type ProviderSlug = /**
+             * URL-friendly slug to use as organization-unique identifier for Provider
+             * example:
+             * office-365-login
+             */
+            Components.Schemas.ProviderSlug /* [0-9a-z_-]+ */;
+        }
+        export interface PathParameters {
+            provider_slug: Parameters.ProviderSlug;
+        }
+        export interface QueryParameters {
+            org_id: /**
+             * example:
+             * 123
+             */
+            Parameters.OrgId;
+            portal_id: Parameters.PortalId;
+        }
+        namespace Responses {
+            export type $200 = /**
+             * Web-only public provider configuration served by `getPublicSSOProviderV3`.
+             * Unlike `ProviderPublicConfig` there is no `mobile_oidc_config`, and
+             * `oidc_config` never carries `client_secret` or the `metadata.test_auth_*`
+             * credentials — `oidc_config.has_client_secret` signals their presence so
+             * clients route the token exchange through the backend SSO callback.
+             *
+             */
+            Components.Schemas.ProviderPublicConfigV3;
+            export type $400 = Components.Responses.InvalidRequest;
+            export type $404 = Components.Responses.NotFound;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -15707,6 +17959,34 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace IdentifyContact {
+        namespace Parameters {
+            export type Domain = string;
+            export type PortalId = /**
+             * ID of the portal
+             * example:
+             * 453ad7bf-86d5-46c8-8252-bcc868df5e3c
+             */
+            Components.Schemas.PortalId;
+        }
+        export interface QueryParameters {
+            portal_id?: Parameters.PortalId;
+            domain?: Parameters.Domain;
+        }
+        export type RequestBody = /**
+         * ContactExistsRequest plus the surface the token is requested for.
+         *
+         */
+        Components.Schemas.ContactIdentifyRequest;
+        namespace Responses {
+            export type $200 = Components.Schemas.ContactIdentifyResponse;
+            export type $400 = Components.Responses.InvalidRequest;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $429 = Components.Responses.TooManyRequests;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace InterpolatePortalPages {
         export interface RequestBody {
             /**
@@ -15841,6 +18121,36 @@ declare namespace Paths {
             }
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace ListPortalRevisions {
+        namespace Parameters {
+            export type Cursor = string;
+            export type Limit = number;
+            /**
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            export type PortalId = string; // uuid
+        }
+        export interface PathParameters {
+            portal_id: /**
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            Parameters.PortalId /* uuid */;
+        }
+        export interface QueryParameters {
+            limit?: Parameters.Limit;
+            cursor?: Parameters.Cursor;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.PortalRevisionList;
+            export type $400 = Components.Responses.InvalidRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -16127,6 +18437,33 @@ declare namespace Paths {
             export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
             export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace PublishPortalRevision {
+        namespace Parameters {
+            /**
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            export type PortalId = string; // uuid
+        }
+        export interface PathParameters {
+            portal_id: /**
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            Parameters.PortalId /* uuid */;
+        }
+        export type RequestBody = Components.Schemas.PublishRevisionRequest;
+        namespace Responses {
+            export type $200 = Components.Schemas.PublishResult;
+            export type $400 = Components.Responses.InvalidRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $409 = Components.Responses.Conflict;
+            export type $500 = Components.Responses.InternalServerError;
+            export type $503 = Components.Responses.ServiceUnavailable;
         }
     }
     namespace PutMobileConfig {
@@ -16575,6 +18912,10 @@ declare namespace Paths {
              * office-365-login
              */
             Components.Schemas.ProviderSlug /* [0-9a-z_-]+ */;
+            /**
+             * Authenticate existing identities only. When no portal user and no contact matches the identity, the login fails with a 400 response carrying `reason: PORTAL_ACCOUNT_NOT_FOUND` instead of registering a new portal user. A matched contact is still provisioned a portal user; contacts and accounts are never created.
+             */
+            login_only?: boolean;
         }
         namespace Responses {
             export interface $200 {
@@ -16586,6 +18927,7 @@ declare namespace Paths {
                  */
                 email?: string;
             }
+            export type $400 = Components.Responses.InvalidRequest;
         }
     }
     namespace SsoRedirect {
@@ -18080,6 +20422,24 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CheckContactExistsV3.Responses.$200>
   /**
+   * identifyContact - identifyContact
+   * 
+   * Identify a contact by the portal's configured registration identifiers and, on a match,
+   * issue a short-lived bearer token that acts as that contact.
+   * 
+   * Resolution is identical to `checkContactExistsV3`. The token does not grant a portal
+   * session; it is accepted only on the operations listed in `allowed_operations`, and
+   * expires at `expires_at`. Requires `surface_id` to name a surface of the portal whose
+   * `authentication` is `registration_identifiers`; returns 403 otherwise. The token is
+   * confined to that surface's data access. Requests may be rate limited (429).
+   * 
+   */
+  'identifyContact'(
+    parameters?: Parameters<Paths.IdentifyContact.QueryParameters> | null,
+    data?: Paths.IdentifyContact.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.IdentifyContact.Responses.$200>
+  /**
    * checkAccountExists - checkAccountExists
    * 
    * True if account with given identifiers exists.
@@ -18812,6 +21172,27 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetSSOProvider.Responses.$200>
   /**
+   * getPublicSSOProviderV3 - getPublicSSOProviderV3
+   * 
+   * Returns the public configuration of a single SSO identity provider with env var
+   * placeholders (incl. secrets) already resolved against the organization's environment.
+   * 
+   * Portal-scoped variant of getSSOProvider: the portal is identified by `org_id` +
+   * `portal_id` only, so callers without a portal domain (e.g. standalone journeys)
+   * can resolve the provider.
+   * Only the web OIDC configuration is returned: `mobile_oidc_config` is omitted
+   * entirely, and the web `client_secret` and `metadata.test_auth_*` credentials are
+   * never returned — they are used server-side by the SSO callback to exchange the
+   * authorization code for tokens. `oidc_config.has_client_secret` is set when either
+   * exists, so clients route the exchange through the callback.
+   * 
+   */
+  'getPublicSSOProviderV3'(
+    parameters?: Parameters<Paths.GetPublicSSOProviderV3.QueryParameters & Paths.GetPublicSSOProviderV3.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetPublicSSOProviderV3.Responses.$200>
+  /**
    * ssoLogin - ssoLogin
    * 
    * Initiate login using external SSO identity.
@@ -19144,6 +21525,66 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeletePortalConfig.Responses.$204>
+  /**
+   * listPortalRevisions - listPortalRevisions
+   * 
+   * Lists a portal's revision history, newest first. Metadata only — no config blob, no page bodies. `is_published` says whether that revision is the one currently live, which is a different question from `published_at`, which records the last time it was published.
+   * 
+   */
+  'listPortalRevisions'(
+    parameters?: Parameters<Paths.ListPortalRevisions.QueryParameters & Paths.ListPortalRevisions.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ListPortalRevisions.Responses.$200>
+  /**
+   * createPortalRevision - createPortalRevision
+   * 
+   * Creates a new revision — a complete, immutable snapshot of the portal's configuration, pages and email templates. Nothing about the live portal changes; the snapshot only becomes live when it is published.
+   * 
+   * The payload must be COMPLETE. This endpoint does not merge against live or against the previous revision: publishing a revision deletes every live page the revision does not contain. The server validates structure only — `pages` present, each page carrying `id`, `slug`, `order` and `blocks`, and no two pages sharing an `id` or a `slug`. Semantic completeness of the config is a promise the caller makes, and a partial payload is honoured rather than rejected.
+   * 
+   * `email_templates` is optional, and absence means "keep the portal's current templates", never "no templates". A present but partial map is taken verbatim.
+   * 
+   */
+  'createPortalRevision'(
+    parameters?: Parameters<Paths.CreatePortalRevision.PathParameters> | null,
+    data?: Paths.CreatePortalRevision.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CreatePortalRevision.Responses.$201>
+  /**
+   * getPortalRevision - getPortalRevision
+   * 
+   * Returns the full content of one revision: the snapshotted config, its pages (in the live `Page` shape), email templates and identity providers with secrets redacted.
+   * 
+   * This is a pure read. The server records nothing about it: no "loaded" marker, no audit entry, and no change to which revision is live. Revision content re-enters the system only as a new `POST .../revisions`.
+   * 
+   * Secret-typed extension option values are removed from `config` entirely, not masked.
+   * 
+   * Returns `409` when the revision exists but its stored config or email templates row cannot be read, rather than a partial snapshot. Saving again produces a complete revision.
+   * 
+   */
+  'getPortalRevision'(
+    parameters?: Parameters<Paths.GetPortalRevision.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetPortalRevision.Responses.$200>
+  /**
+   * publishPortalRevision - publishPortalRevision
+   * 
+   * Makes one revision the portal's live configuration, atomically: either everything below takes effect or nothing does. Publish is a full-snapshot replace: it writes config, every page and email templates to match the revision exactly, and deletes every live page the revision does not contain.
+   * 
+   * Accepts any valid `revision_id` for the portal, old or new. There is no separate rollback endpoint and none is needed.
+   * 
+   * The same atomic publish stamps `name`, `description` and `published_at` onto the revision being published — permanently, on that revision, and not on any later one that supersedes it as live. `name` is generated server-side when the request omits it, so every published revision carries one.
+   * 
+   * Conflict detection covers the live config only: publish is rejected with `409` when the live config changed after publish read it. Live pages, their redirect routes and the email templates are replaced outright — a concurrent edit to a live page is not detected and is overwritten. `409` is also returned when the revision's stored config or email templates cannot be read, or when two of its pages would resolve to the same slug. A domain the revision claims that another portal already owns is a `400`.
+   * 
+   */
+  'publishPortalRevision'(
+    parameters?: Parameters<Paths.PublishPortalRevision.PathParameters> | null,
+    data?: Paths.PublishPortalRevision.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.PublishPortalRevision.Responses.$200>
   /**
    * listAllPortalConfigs - listAllPortalConfigs
    * 
@@ -19976,6 +22417,26 @@ export interface PathsDictionary {
       data?: Paths.CheckContactExistsV3.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.CheckContactExistsV3.Responses.$200>
+  }
+  ['/v3/portal/public/contact/identify']: {
+    /**
+     * identifyContact - identifyContact
+     * 
+     * Identify a contact by the portal's configured registration identifiers and, on a match,
+     * issue a short-lived bearer token that acts as that contact.
+     * 
+     * Resolution is identical to `checkContactExistsV3`. The token does not grant a portal
+     * session; it is accepted only on the operations listed in `allowed_operations`, and
+     * expires at `expires_at`. Requires `surface_id` to name a surface of the portal whose
+     * `authentication` is `registration_identifiers`; returns 403 otherwise. The token is
+     * confined to that surface's data access. Requests may be rate limited (429).
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.IdentifyContact.QueryParameters> | null,
+      data?: Paths.IdentifyContact.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.IdentifyContact.Responses.$200>
   }
   ['/v3/portal/public/account/exists']: {
     /**
@@ -20831,6 +23292,29 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetSSOProvider.Responses.$200>
   }
+  ['/v3/portal/public/sso/providers/{provider_slug}']: {
+    /**
+     * getPublicSSOProviderV3 - getPublicSSOProviderV3
+     * 
+     * Returns the public configuration of a single SSO identity provider with env var
+     * placeholders (incl. secrets) already resolved against the organization's environment.
+     * 
+     * Portal-scoped variant of getSSOProvider: the portal is identified by `org_id` +
+     * `portal_id` only, so callers without a portal domain (e.g. standalone journeys)
+     * can resolve the provider.
+     * Only the web OIDC configuration is returned: `mobile_oidc_config` is omitted
+     * entirely, and the web `client_secret` and `metadata.test_auth_*` credentials are
+     * never returned — they are used server-side by the SSO callback to exchange the
+     * authorization code for tokens. `oidc_config.has_client_secret` is set when either
+     * exists, so clients route the exchange through the callback.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetPublicSSOProviderV3.QueryParameters & Paths.GetPublicSSOProviderV3.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetPublicSSOProviderV3.Responses.$200>
+  }
   ['/v2/portal/public/sso/login']: {
     /**
      * ssoLogin - ssoLogin
@@ -21210,6 +23694,72 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeletePortalConfig.Responses.$204>
   }
+  ['/v3/portal/config/{portal_id}/revisions']: {
+    /**
+     * createPortalRevision - createPortalRevision
+     * 
+     * Creates a new revision — a complete, immutable snapshot of the portal's configuration, pages and email templates. Nothing about the live portal changes; the snapshot only becomes live when it is published.
+     * 
+     * The payload must be COMPLETE. This endpoint does not merge against live or against the previous revision: publishing a revision deletes every live page the revision does not contain. The server validates structure only — `pages` present, each page carrying `id`, `slug`, `order` and `blocks`, and no two pages sharing an `id` or a `slug`. Semantic completeness of the config is a promise the caller makes, and a partial payload is honoured rather than rejected.
+     * 
+     * `email_templates` is optional, and absence means "keep the portal's current templates", never "no templates". A present but partial map is taken verbatim.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.CreatePortalRevision.PathParameters> | null,
+      data?: Paths.CreatePortalRevision.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CreatePortalRevision.Responses.$201>
+    /**
+     * listPortalRevisions - listPortalRevisions
+     * 
+     * Lists a portal's revision history, newest first. Metadata only — no config blob, no page bodies. `is_published` says whether that revision is the one currently live, which is a different question from `published_at`, which records the last time it was published.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.ListPortalRevisions.QueryParameters & Paths.ListPortalRevisions.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ListPortalRevisions.Responses.$200>
+  }
+  ['/v3/portal/config/{portal_id}/revisions/{revision_id}']: {
+    /**
+     * getPortalRevision - getPortalRevision
+     * 
+     * Returns the full content of one revision: the snapshotted config, its pages (in the live `Page` shape), email templates and identity providers with secrets redacted.
+     * 
+     * This is a pure read. The server records nothing about it: no "loaded" marker, no audit entry, and no change to which revision is live. Revision content re-enters the system only as a new `POST .../revisions`.
+     * 
+     * Secret-typed extension option values are removed from `config` entirely, not masked.
+     * 
+     * Returns `409` when the revision exists but its stored config or email templates row cannot be read, rather than a partial snapshot. Saving again produces a complete revision.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetPortalRevision.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetPortalRevision.Responses.$200>
+  }
+  ['/v3/portal/config/{portal_id}/publish']: {
+    /**
+     * publishPortalRevision - publishPortalRevision
+     * 
+     * Makes one revision the portal's live configuration, atomically: either everything below takes effect or nothing does. Publish is a full-snapshot replace: it writes config, every page and email templates to match the revision exactly, and deletes every live page the revision does not contain.
+     * 
+     * Accepts any valid `revision_id` for the portal, old or new. There is no separate rollback endpoint and none is needed.
+     * 
+     * The same atomic publish stamps `name`, `description` and `published_at` onto the revision being published — permanently, on that revision, and not on any later one that supersedes it as live. `name` is generated server-side when the request omits it, so every published revision carries one.
+     * 
+     * Conflict detection covers the live config only: publish is rejected with `409` when the live config changed after publish read it. Live pages, their redirect routes and the email templates are replaced outright — a concurrent edit to a live page is not detected and is overwritten. `409` is also returned when the revision's stored config or email templates cannot be read, or when two of its pages would resolve to the same slug. A domain the revision claims that another portal already owns is a `400`.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.PublishPortalRevision.PathParameters> | null,
+      data?: Paths.PublishPortalRevision.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.PublishPortalRevision.Responses.$200>
+  }
   ['/v3/portal/configs']: {
     /**
      * listAllPortalConfigs - listAllPortalConfigs
@@ -21405,6 +23955,8 @@ export type CommonConfigAttributesV3 = Components.Schemas.CommonConfigAttributes
 export type Contact = Components.Schemas.Contact;
 export type ContactCountRequest = Components.Schemas.ContactCountRequest;
 export type ContactExistsRequest = Components.Schemas.ContactExistsRequest;
+export type ContactIdentifyRequest = Components.Schemas.ContactIdentifyRequest;
+export type ContactIdentifyResponse = Components.Schemas.ContactIdentifyResponse;
 export type ContentWidget = Components.Schemas.ContentWidget;
 export type ContextEntities = Components.Schemas.ContextEntities;
 export type ContextEntity = Components.Schemas.ContextEntity;
@@ -21494,17 +24046,27 @@ export type PortalConfigV3 = Components.Schemas.PortalConfigV3;
 export type PortalDataExportColumn = Components.Schemas.PortalDataExportColumn;
 export type PortalId = Components.Schemas.PortalId;
 export type PortalNotification = Components.Schemas.PortalNotification;
+export type PortalRevision = Components.Schemas.PortalRevision;
+export type PortalRevisionCreated = Components.Schemas.PortalRevisionCreated;
+export type PortalRevisionList = Components.Schemas.PortalRevisionList;
+export type PortalRevisionRequest = Components.Schemas.PortalRevisionRequest;
+export type PortalRevisionSummary = Components.Schemas.PortalRevisionSummary;
+export type PortalSurface = Components.Schemas.PortalSurface;
+export type PortalSurfaceDataAccess = Components.Schemas.PortalSurfaceDataAccess;
+export type PortalSurfaceEntityAccess = Components.Schemas.PortalSurfaceEntityAccess;
 export type PortalTaskConfig = Components.Schemas.PortalTaskConfig;
 export type PortalUser = Components.Schemas.PortalUser;
 export type PortalUserRegistrationStatus = Components.Schemas.PortalUserRegistrationStatus;
 export type PortalWidget = Components.Schemas.PortalWidget;
 export type PortalWorkflow = Components.Schemas.PortalWorkflow;
+export type PortalWorkflowStage = Components.Schemas.PortalWorkflowStage;
 export type PortalWorkflowTask = Components.Schemas.PortalWorkflowTask;
 export type Product = Components.Schemas.Product;
 export type ProductRecommendationsWidget = Components.Schemas.ProductRecommendationsWidget;
 export type ProviderConfig = Components.Schemas.ProviderConfig;
 export type ProviderDisplayName = Components.Schemas.ProviderDisplayName;
 export type ProviderPublicConfig = Components.Schemas.ProviderPublicConfig;
+export type ProviderPublicConfigV3 = Components.Schemas.ProviderPublicConfigV3;
 export type ProviderSlug = Components.Schemas.ProviderSlug;
 export type PublicAppDetails = Components.Schemas.PublicAppDetails;
 export type PublicChangeEmailDetails = Components.Schemas.PublicChangeEmailDetails;
@@ -21514,13 +24076,18 @@ export type PublicDataRetrievalHookDetails = Components.Schemas.PublicDataRetrie
 export type PublicDeleteAccountDetails = Components.Schemas.PublicDeleteAccountDetails;
 export type PublicExtensionCapabilities = Components.Schemas.PublicExtensionCapabilities;
 export type PublicExtensionDetails = Components.Schemas.PublicExtensionDetails;
+export type PublicIdentityProvider = Components.Schemas.PublicIdentityProvider;
 export type PublicMeterReadingPlausibilityCheckDetails = Components.Schemas.PublicMeterReadingPlausibilityCheckDetails;
 export type PublicSelfManagementExplanation = Components.Schemas.PublicSelfManagementExplanation;
+export type PublishResult = Components.Schemas.PublishResult;
+export type PublishRevisionRequest = Components.Schemas.PublishRevisionRequest;
 export type ReadBy = Components.Schemas.ReadBy;
 export type ReadingStatus = Components.Schemas.ReadingStatus;
 export type Reason = Components.Schemas.Reason;
 export type RegistrationIdentifier = Components.Schemas.RegistrationIdentifier;
 export type ReimbursementEvent = Components.Schemas.ReimbursementEvent;
+export type RevisionPage = Components.Schemas.RevisionPage;
+export type RevisionPageRequest = Components.Schemas.RevisionPageRequest;
 export type Rule = Components.Schemas.Rule;
 export type SAMLProviderConfig = Components.Schemas.SAMLProviderConfig;
 export type SSOCallbackRequest = Components.Schemas.SSOCallbackRequest;
