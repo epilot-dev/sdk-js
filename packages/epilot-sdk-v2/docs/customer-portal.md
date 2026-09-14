@@ -72,6 +72,10 @@ const { data } = await customerPortalClient.upsertPortal(...)
 - [`getPortalConfigV3`](#getportalconfigv3)
 - [`putPortalConfig`](#putportalconfig)
 - [`deletePortalConfig`](#deleteportalconfig)
+- [`createPortalRevision`](#createportalrevision)
+- [`listPortalRevisions`](#listportalrevisions)
+- [`getPortalRevision`](#getportalrevision)
+- [`publishPortalRevision`](#publishportalrevision)
 - [`listAllPortalConfigs`](#listallportalconfigs)
 - [`swapPortalConfig`](#swapportalconfig)
 - [`clonePortalConfig`](#cloneportalconfig)
@@ -92,12 +96,14 @@ const { data } = await customerPortalClient.upsertPortal(...)
 - [`getOrganizationSettingsByDomain`](#getorganizationsettingsbydomain)
 - [`checkContactExists`](#checkcontactexists)
 - [`checkContactExistsV3`](#checkcontactexistsv3)
+- [`identifyContact`](#identifycontact)
 - [`checkAccountExists`](#checkaccountexists)
 - [`confirmUser`](#confirmuser)
 - [`confirmUserWithUserId`](#confirmuserwithuserid)
 - [`userExists`](#userexists)
 - [`userExistsV3`](#userexistsv3)
 - [`getSSOProvider`](#getssoprovider)
+- [`getPublicSSOProviderV3`](#getpublicssoproviderv3)
 - [`ssoRedirect`](#ssoredirect)
 - [`ssoCallback`](#ssocallback)
 - [`getPublicPages`](#getpublicpages)
@@ -221,6 +227,8 @@ const { data } = await customerPortalClient.upsertPortal(...)
 - [`PortalWidget`](#portalwidget)
 - [`ContactCountRequest`](#contactcountrequest)
 - [`ContactExistsRequest`](#contactexistsrequest)
+- [`ContactIdentifyRequest`](#contactidentifyrequest)
+- [`ContactIdentifyResponse`](#contactidentifyresponse)
 - [`AccountExistsRequest`](#accountexistsrequest)
 - [`UserRequest`](#userrequest)
 - [`CreateUserRequest`](#createuserrequest)
@@ -258,6 +266,9 @@ const { data } = await customerPortalClient.upsertPortal(...)
 - [`FilePreviewResult`](#filepreviewresult)
 - [`EntityFileCount`](#entityfilecount)
 - [`AdminUser`](#adminuser)
+- [`PortalSurface`](#portalsurface)
+- [`PortalSurfaceDataAccess`](#portalsurfacedataaccess)
+- [`PortalSurfaceEntityAccess`](#portalsurfaceentityaccess)
 - [`Grant`](#grant)
 - [`ActionLabel`](#actionlabel)
 - [`Rule`](#rule)
@@ -267,6 +278,7 @@ const { data } = await customerPortalClient.upsertPortal(...)
 - [`WorkflowExecution`](#workflowexecution)
 - [`WorkflowStep`](#workflowstep)
 - [`PortalWorkflow`](#portalworkflow)
+- [`PortalWorkflowStage`](#portalworkflowstage)
 - [`PortalWorkflowTask`](#portalworkflowtask)
 - [`EntityPortalWorkflows`](#entityportalworkflows)
 - [`PortalTaskConfig`](#portaltaskconfig)
@@ -331,6 +343,8 @@ const { data } = await customerPortalClient.upsertPortal(...)
 - [`ProviderDisplayName`](#providerdisplayname)
 - [`ProviderConfig`](#providerconfig)
 - [`ProviderPublicConfig`](#providerpublicconfig)
+- [`ProviderPublicConfigV3`](#providerpublicconfigv3)
+- [`PublicIdentityProvider`](#publicidentityprovider)
 - [`AttributeMappingConfig`](#attributemappingconfig)
 - [`EntityMatchingConfig`](#entitymatchingconfig)
 - [`OIDCProviderConfig`](#oidcproviderconfig)
@@ -352,6 +366,15 @@ const { data } = await customerPortalClient.upsertPortal(...)
 - [`UpsertPortalConfigV3`](#upsertportalconfigv3)
 - [`PortalConfigV3`](#portalconfigv3)
 - [`JuiceSettings`](#juicesettings)
+- [`RevisionPageRequest`](#revisionpagerequest)
+- [`PortalRevisionRequest`](#portalrevisionrequest)
+- [`PublishRevisionRequest`](#publishrevisionrequest)
+- [`PortalRevisionSummary`](#portalrevisionsummary)
+- [`PortalRevisionList`](#portalrevisionlist)
+- [`PortalRevisionCreated`](#portalrevisioncreated)
+- [`RevisionPage`](#revisionpage)
+- [`PortalRevision`](#portalrevision)
+- [`PublishResult`](#publishresult)
 - [`SwappableConfig`](#swappableconfig)
 - [`PortalUserRegistrationStatus`](#portaluserregistrationstatus)
 - [`BusinessPartnerItem`](#businesspartneritem)
@@ -564,6 +587,16 @@ const { data } = await client.upsertPortal(
         schema: 'contract'
       }
     ],
+    surfaces: [
+      {
+        id: 'website-journeys',
+        name: 'Website journeys',
+        description: 'string',
+        authentication: 'login',
+        token_ttl_seconds: 300,
+        data_access: { /* ... */ }
+      }
+    ],
     contact_identifiers_for_account: [
       {
         name: 'first_name',
@@ -622,6 +655,7 @@ const { data } = await client.upsertPortal(
     inactive_contract_cutoff_years: 0,
     is_dummy: true,
     is_v3_item: true,
+    published_revision_id: '2026-08-25T14:03:11.482Z-a7f3c1d9',
     portal_id: '453ad7bf-86d5-46c8-8252-bcc868df5e3c',
     portal_sk_v3: 'PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c',
     origin: 'string',
@@ -802,6 +836,16 @@ const { data } = await client.upsertPortal(
       "schema": "contract"
     }
   ],
+  "surfaces": [
+    {
+      "id": "website-journeys",
+      "name": "Website journeys",
+      "description": "string",
+      "authentication": "login",
+      "token_ttl_seconds": 300,
+      "data_access": {}
+    }
+  ],
   "contact_identifiers_for_account": [
     {
       "name": "first_name",
@@ -860,6 +904,7 @@ const { data } = await client.upsertPortal(
   "inactive_contract_cutoff_years": 0,
   "is_dummy": true,
   "is_v3_item": true,
+  "published_revision_id": "2026-08-25T14:03:11.482Z-a7f3c1d9",
   "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
   "portal_sk_v3": "PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c",
   "origin": "string",
@@ -1178,6 +1223,16 @@ const { data } = await client.getPortalConfigByDomain({
       "schema": "contract"
     }
   ],
+  "surfaces": [
+    {
+      "id": "website-journeys",
+      "name": "Website journeys",
+      "description": "string",
+      "authentication": "login",
+      "token_ttl_seconds": 300,
+      "data_access": {}
+    }
+  ],
   "contact_identifiers_for_account": [
     {
       "name": "first_name",
@@ -1236,6 +1291,7 @@ const { data } = await client.getPortalConfigByDomain({
   "inactive_contract_cutoff_years": 0,
   "is_dummy": true,
   "is_v3_item": true,
+  "published_revision_id": "2026-08-25T14:03:11.482Z-a7f3c1d9",
   "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
   "portal_sk_v3": "PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c",
   "origin": "string",
@@ -1457,6 +1513,16 @@ const { data } = await client.getPortalConfig({
       "schema": "contract"
     }
   ],
+  "surfaces": [
+    {
+      "id": "website-journeys",
+      "name": "Website journeys",
+      "description": "string",
+      "authentication": "login",
+      "token_ttl_seconds": 300,
+      "data_access": {}
+    }
+  ],
   "contact_identifiers_for_account": [
     {
       "name": "first_name",
@@ -1515,6 +1581,7 @@ const { data } = await client.getPortalConfig({
   "inactive_contract_cutoff_years": 0,
   "is_dummy": true,
   "is_v3_item": true,
+  "published_revision_id": "2026-08-25T14:03:11.482Z-a7f3c1d9",
   "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
   "portal_sk_v3": "PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c",
   "origin": "string",
@@ -2629,6 +2696,16 @@ const { data } = await client.getPublicPortalConfig({
       "schema": "contract"
     }
   ],
+  "surfaces": [
+    {
+      "id": "website-journeys",
+      "name": "Website journeys",
+      "description": "string",
+      "authentication": "login",
+      "token_ttl_seconds": 300,
+      "data_access": {}
+    }
+  ],
   "contact_identifiers_for_account": [
     {
       "name": "first_name",
@@ -2687,6 +2764,7 @@ const { data } = await client.getPublicPortalConfig({
   "inactive_contract_cutoff_years": 0,
   "is_dummy": true,
   "is_v3_item": true,
+  "published_revision_id": "2026-08-25T14:03:11.482Z-a7f3c1d9",
   "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
   "portal_sk_v3": "PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c",
   "origin": "string",
@@ -2908,6 +2986,16 @@ const { data } = await client.getOrgPortalConfig({
       "schema": "contract"
     }
   ],
+  "surfaces": [
+    {
+      "id": "website-journeys",
+      "name": "Website journeys",
+      "description": "string",
+      "authentication": "login",
+      "token_ttl_seconds": 300,
+      "data_access": {}
+    }
+  ],
   "contact_identifiers_for_account": [
     {
       "name": "first_name",
@@ -2966,6 +3054,7 @@ const { data } = await client.getOrgPortalConfig({
   "inactive_contract_cutoff_years": 0,
   "is_dummy": true,
   "is_v3_item": true,
+  "published_revision_id": "2026-08-25T14:03:11.482Z-a7f3c1d9",
   "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
   "portal_sk_v3": "PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c",
   "origin": "string",
@@ -3196,6 +3285,16 @@ const { data } = await client.getPublicPortalConfigV3({
       "schema": "contract"
     }
   ],
+  "surfaces": [
+    {
+      "id": "website-journeys",
+      "name": "Website journeys",
+      "description": "string",
+      "authentication": "login",
+      "token_ttl_seconds": 300,
+      "data_access": {}
+    }
+  ],
   "contact_identifiers_for_account": [
     {
       "name": "first_name",
@@ -3254,6 +3353,7 @@ const { data } = await client.getPublicPortalConfigV3({
   "inactive_contract_cutoff_years": 0,
   "is_dummy": true,
   "is_v3_item": true,
+  "published_revision_id": "2026-08-25T14:03:11.482Z-a7f3c1d9",
   "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
   "portal_sk_v3": "PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c",
   "origin": "string",
@@ -3475,6 +3575,16 @@ const { data } = await client.getOrgPortalConfigV3({
       "schema": "contract"
     }
   ],
+  "surfaces": [
+    {
+      "id": "website-journeys",
+      "name": "Website journeys",
+      "description": "string",
+      "authentication": "login",
+      "token_ttl_seconds": 300,
+      "data_access": {}
+    }
+  ],
   "contact_identifiers_for_account": [
     {
       "name": "first_name",
@@ -3533,6 +3643,7 @@ const { data } = await client.getOrgPortalConfigV3({
   "inactive_contract_cutoff_years": 0,
   "is_dummy": true,
   "is_v3_item": true,
+  "published_revision_id": "2026-08-25T14:03:11.482Z-a7f3c1d9",
   "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
   "portal_sk_v3": "PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c",
   "origin": "string",
@@ -3633,6 +3744,7 @@ const { data } = await client.getAllPortalConfigs()
       "contract_identifiers": [],
       "contract_selector_config": {},
       "registration_identifiers": [],
+      "surfaces": [],
       "contact_identifiers_for_account": [],
       "additional_contact_attributes": [],
       "triggered_journeys": [],
@@ -3643,6 +3755,7 @@ const { data } = await client.getAllPortalConfigs()
       "inactive_contract_cutoff_years": 0,
       "is_dummy": true,
       "is_v3_item": true,
+      "published_revision_id": "2026-08-25T14:03:11.482Z-a7f3c1d9",
       "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
       "portal_sk_v3": "PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c",
       "origin": "string",
@@ -4760,6 +4873,55 @@ const { data } = await client.checkContactExistsV3(
   "exists": true,
   "contactId": "5da0a718-c822-403d-9f5d-20d4584e0528",
   "accountId": "5da0a718-c822-403d-9f5d-20d4584e0528",
+  "reason": "TIMEOUT"
+}
+```
+
+</details>
+
+---
+
+### `identifyContact`
+
+Identify a contact by the portal's configured registration identifiers and, on a match,
+issue a short-lived bearer token that acts as that contact.
+
+`POST /v3/portal/public/contact/identify`
+
+```ts
+const { data } = await client.identifyContact(
+  {
+    portal_id: 'example',
+    domain: 'example',
+  },
+  {
+    org_id: 728,
+    registration_identifiers: {
+      contact: {
+        email: 'john.doe@example.com'
+      },
+      contract: {
+        contract_number: '123456'
+      }
+    },
+    trigger_identifiers_check: true,
+    surface_id: 'website-journeys'
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "contact_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+  "account_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+  "token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "token_type": "contact_identification",
+  "surface_id": "website-journeys",
+  "expires_at": "2026-08-11T10:35:00.000Z",
+  "allowed_operations": [],
   "reason": "TIMEOUT"
 }
 ```
@@ -6722,8 +6884,18 @@ const { data } = await client.getEntityPortalWorkflows({
           "assigned_to": ["string"],
           "phase_id": "string",
           "phase_name": "string",
+          "stage_id": "string",
           "completed_at": "string",
           "updated_at": "string"
+        }
+      ],
+      "stages": [
+        {
+          "id": "string",
+          "name": "string",
+          "description": "string",
+          "status": "COMPLETED",
+          "completed_at": "string"
         }
       ]
     }
@@ -6823,8 +6995,18 @@ const { data } = await client.getEntityPortalWorkflowsBatch(
               "assigned_to": ["string"],
               "phase_id": "string",
               "phase_name": "string",
+              "stage_id": "string",
               "completed_at": "string",
               "updated_at": "string"
+            }
+          ],
+          "stages": [
+            {
+              "id": "string",
+              "name": "string",
+              "description": "string",
+              "status": "COMPLETED",
+              "completed_at": "string"
             }
           ]
         }
@@ -7079,6 +7261,57 @@ const { data } = await client.getSSOProvider({
 
 ---
 
+### `getPublicSSOProviderV3`
+
+Returns the public configuration of a single SSO identity provider with env var
+placeholders (incl. secrets) already resolved against the organization's environment.
+
+`GET /v3/portal/public/sso/providers/{provider_slug}`
+
+```ts
+const { data } = await client.getPublicSSOProviderV3({
+  provider_slug: 'example',
+  org_id: 'example',
+  portal_id: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "slug": "office-365-login",
+  "display_name": "Office 365 Login",
+  "oidc_config": {
+    "type": "implicit",
+    "oidc_issuer": "https://login.microsoftonline.com/33d4f3e5-3df2-421e-b92e-a63cfa680a88/v2.0",
+    "redirect_uri": "https://customer-portal.com/login",
+    "client_id": "ab81daf8-8b1f-42d6-94ca-c51621054c75",
+    "client_secret": "7BIUnn~6shh.7fNtXb..3k1Mp3s6k6WK3B",
+    "has_client_secret": true,
+    "scope": "openid email",
+    "metadata": {
+      "response_modes_supported": ["form_post"],
+      "authorization_endpoint": "https://www.facebook.com/v12.0/dialog/oauth",
+      "token_endpoint": "https://graph.facebook.com/v12.0/oauth/access_token",
+      "userinfo_endpoint": "https://graph.facebook.com/me",
+      "logout_uri": "https://login.microsoftonline.com/common/oauth2/v2.0/logout",
+      "logout_redirect_uri": "https://customer-portal.com/login",
+      "skip_login_as_logout": false,
+      "mobile_redirect_uri": "msauth.io.epilot.ecp://auth",
+      "test_auth_username": "test@epilot.io",
+      "test_auth_password": "string"
+    },
+    "prompt": "login"
+  }
+}
+```
+
+</details>
+
+---
+
 ### `ssoLogin`
 
 Initiate login using external SSO identity.
@@ -7127,7 +7360,8 @@ const { data } = await client.ssoLoginV3(
     contact_id: 'example',
   },
   {
-    provider_slug: 'office-365-login'
+    provider_slug: 'office-365-login',
+    login_only: false
   },
 )
 ```
@@ -8416,6 +8650,16 @@ const { data } = await client.createPortalConfig(
         schema: 'contract'
       }
     ],
+    surfaces: [
+      {
+        id: 'website-journeys',
+        name: 'Website journeys',
+        description: 'string',
+        authentication: 'login',
+        token_ttl_seconds: 300,
+        data_access: { /* ... */ }
+      }
+    ],
     contact_identifiers_for_account: [
       {
         name: 'first_name',
@@ -8474,6 +8718,7 @@ const { data } = await client.createPortalConfig(
     inactive_contract_cutoff_years: 0,
     is_dummy: true,
     is_v3_item: true,
+    published_revision_id: '2026-08-25T14:03:11.482Z-a7f3c1d9',
     portal_id: '453ad7bf-86d5-46c8-8252-bcc868df5e3c',
     portal_sk_v3: 'PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c',
     origin: 'string',
@@ -8696,6 +8941,16 @@ const { data } = await client.createPortalConfig(
       "schema": "contract"
     }
   ],
+  "surfaces": [
+    {
+      "id": "website-journeys",
+      "name": "Website journeys",
+      "description": "string",
+      "authentication": "login",
+      "token_ttl_seconds": 300,
+      "data_access": {}
+    }
+  ],
   "contact_identifiers_for_account": [
     {
       "name": "first_name",
@@ -8754,6 +9009,7 @@ const { data } = await client.createPortalConfig(
   "inactive_contract_cutoff_years": 0,
   "is_dummy": true,
   "is_v3_item": true,
+  "published_revision_id": "2026-08-25T14:03:11.482Z-a7f3c1d9",
   "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
   "portal_sk_v3": "PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c",
   "origin": "string",
@@ -9012,6 +9268,16 @@ const { data } = await client.getPortalConfigV3({
       "schema": "contract"
     }
   ],
+  "surfaces": [
+    {
+      "id": "website-journeys",
+      "name": "Website journeys",
+      "description": "string",
+      "authentication": "login",
+      "token_ttl_seconds": 300,
+      "data_access": {}
+    }
+  ],
   "contact_identifiers_for_account": [
     {
       "name": "first_name",
@@ -9070,6 +9336,7 @@ const { data } = await client.getPortalConfigV3({
   "inactive_contract_cutoff_years": 0,
   "is_dummy": true,
   "is_v3_item": true,
+  "published_revision_id": "2026-08-25T14:03:11.482Z-a7f3c1d9",
   "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
   "portal_sk_v3": "PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c",
   "origin": "string",
@@ -9325,6 +9592,16 @@ const { data } = await client.putPortalConfig(
         schema: 'contract'
       }
     ],
+    surfaces: [
+      {
+        id: 'website-journeys',
+        name: 'Website journeys',
+        description: 'string',
+        authentication: 'login',
+        token_ttl_seconds: 300,
+        data_access: { /* ... */ }
+      }
+    ],
     contact_identifiers_for_account: [
       {
         name: 'first_name',
@@ -9383,6 +9660,7 @@ const { data } = await client.putPortalConfig(
     inactive_contract_cutoff_years: 0,
     is_dummy: true,
     is_v3_item: true,
+    published_revision_id: '2026-08-25T14:03:11.482Z-a7f3c1d9',
     portal_id: '453ad7bf-86d5-46c8-8252-bcc868df5e3c',
     portal_sk_v3: 'PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c',
     origin: 'string',
@@ -9626,6 +9904,16 @@ const { data } = await client.putPortalConfig(
       "schema": "contract"
     }
   ],
+  "surfaces": [
+    {
+      "id": "website-journeys",
+      "name": "Website journeys",
+      "description": "string",
+      "authentication": "login",
+      "token_ttl_seconds": 300,
+      "data_access": {}
+    }
+  ],
   "contact_identifiers_for_account": [
     {
       "name": "first_name",
@@ -9684,6 +9972,7 @@ const { data } = await client.putPortalConfig(
   "inactive_contract_cutoff_years": 0,
   "is_dummy": true,
   "is_v3_item": true,
+  "published_revision_id": "2026-08-25T14:03:11.482Z-a7f3c1d9",
   "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
   "portal_sk_v3": "PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c",
   "origin": "string",
@@ -9750,6 +10039,552 @@ const { data } = await client.deletePortalConfig({
 
 ---
 
+### `createPortalRevision`
+
+Creates a new revision — a complete, immutable snapshot of the portal's configuration, pages and email templates. Nothing about the live portal changes; the snapshot only becomes live when it is publi
+
+`POST /v3/portal/config/{portal_id}/revisions`
+
+```ts
+const { data } = await client.createPortalRevision(
+  {
+    portal_id: 'example',
+  },
+  {
+    entity_actions: [
+      {
+        journey_id: '5da0a718-c822-403d-9f5d-20d4584e0528',
+        slug: 'contact',
+        action_Label: { /* ... */ }
+      }
+    ],
+    extensions: [
+      {
+        id: 'string',
+        status: 'installed',
+        options: {}
+      }
+    ],
+    extension_hooks: {},
+    default_user_to_notify: {
+      onPendingUser: [
+        { /* ... */ }
+      ]
+    },
+    identity_providers: [
+      {
+        slug: 'office-365-login',
+        display_name: 'Office 365 Login',
+        provider_type: 'OIDC',
+        attribute_mappings: { /* ... */ },
+        entity_matching: { /* ... */ },
+        oidc_config: { /* ... */ },
+        mobile_oidc_config: { /* ... */ },
+        expose_client_secret: false
+      }
+    ],
+    mobile_config: {
+      portal_id: 'string',
+      enabled: true,
+      display_name: 'string',
+      app_host: 'string',
+      environment: 'prod',
+      branding: {
+        app_icon: 'string',
+        splash: 'string',
+        splash_dark: 'string',
+        icon_background_color: 'string',
+        splash_background_color: 'string',
+        splash_background_color_dark: 'string'
+      },
+      ios: {
+        bundle_id: 'string',
+        team_id: 'string',
+        credentials_status: 'not_configured',
+        app_store_id: 'string',
+        store_url: 'string',
+        last_build: { /* ... */ }
+      },
+      android: {
+        package_name: 'string',
+        credentials_status: 'not_configured',
+        upload_key_status: 'not_configured',
+        store_url: 'string',
+        last_build: { /* ... */ }
+      },
+      ota: {
+        enabled: true,
+        channel: 'canary',
+        auto_update: true,
+        update_strategy: 'next-launch',
+        min_native_version: 'string'
+      }
+    },
+    enabled: true,
+    name: 'Installer Portal',
+    domain: 'abc.com',
+    is_epilot_domain: true,
+    epilot_domain: 'example-portal-1.ecp.epilot.io',
+    domain_settings: {
+      is_custom_domain_enabled: true,
+      is_epilot_domain_enabled: true,
+      is_redirection_enabled: true
+    },
+    design_id: '5da0a718-c822-403d-9f5d-20d4584e0528',
+    allowed_portal_entities: ['contact', 'contract'],
+    self_registration_setting: 'ALLOW_WITH_CONTACT_CREATION',
+    self_registration_account_setting: 'ALLOW_WITH_CREATION',
+    block_registration_if_portal_user_exists: true,
+    self_registration_entity: 'contact',
+    user_account_self_management: false,
+    feature_settings: {
+      start_page: true,
+      billing: true,
+      change_due_date: true,
+      new_design: true,
+      mcp_enabled: true,
+      mcp_grant_version: 0
+    },
+    accessToken: 'string',
+    advanced_mfa: {
+      enabled: true
+    },
+    auth_settings: {
+      passwordless_login: {
+        enabled: true
+      },
+      entry_point: 'PASSWORD',
+      preferred_sso_providers: ['office-365-login'],
+      auto_redirect_to_sso: true,
+      prevent_user_enumeration: true
+    },
+    cognito_details: {
+      cognito_user_pool_client_id: '6bsd0jkgoie74k2i8mrhc1vest',
+      cognito_user_pool_arn: 'arn:aws:cognito-idp:us-east-1:123412341234:userpool/us-east-1_123412341',
+      cognito_user_pool_id: 'eu-central-1_CUEQRNbUb',
+      timeouts: {
+        refresh_token: 300,
+        access_token: 300,
+        id_token: 300
+      },
+      advanced_authentication: {
+        user_activity_logging: true,
+        adaptive_authentication: true,
+        compromised_credentials_detection: true
+      },
+      password_policy: {
+        minimum_length: 8,
+        maximum_length: 256,
+        require_lowercase: true,
+        require_uppercase: true,
+        require_numbers: true,
+        require_symbols: true,
+        password_history_size: 3
+      }
+    },
+    config: 'string',
+    contact_identifiers: ['email', 'last_name'],
+    approval_state_attributes: {
+      contact: ['name', 'address'],
+      contract: ['installment_amount']
+    },
+    email_templates: {
+      confirmAccount: '5da0a718-c822-403d-9f5d-20d4584e0528',
+      advancedAuth: '5da0a718-c822-403d-9f5d-20d4584e0528',
+      advancedMFA: '5da0a718-c822-403d-9f5d-20d4584e0528',
+      journeySignUp: '5da0a718-c822-403d-9f5d-20d4584e0528',
+      journeySignInOneTimePassword: '5da0a718-c822-403d-9f5d-20d4584e0528',
+      journeyLoginOTP: '5da0a718-c822-403d-9f5d-20d4584e0528',
+      forgotPassword: '5da0a718-c822-403d-9f5d-20d4584e0528',
+      invitation: '5da0a718-c822-403d-9f5d-20d4584e0528',
+      partnerInvitation: '5da0a718-c822-403d-9f5d-20d4584e0528',
+      onNewQuote: '5da0a718-c822-403d-9f5d-20d4584e0528',
+      onMapAPendingUser: '5da0a718-c822-403d-9f5d-20d4584e0528',
+      onDocUpload: '5da0a718-c822-403d-9f5d-20d4584e0528',
+      onWorkflowStepAssigned: '5da0a718-c822-403d-9f5d-20d4584e0528',
+      confirmEmailUpdate: '5da0a718-c822-403d-9f5d-20d4584e0528',
+      verifyCodeToSetPassword: '5da0a718-c822-403d-9f5d-20d4584e0528'
+    },
+    images: {
+      orderLeftTeaser: 'https://epilot-bucket.s3.eu-central-1.amazonaws.com/12344/6538fddb-f0e9-4f0f-af51-6e57891ff20a/order-left-teaser.jpeg',
+      orderRightTeaser: 'https://epilot-bucket.s3.eu-central-1.amazonaws.com/12344/6538fddb-f0e9-4f0f-af51-6e57891ff20a/order-right-teaser.jpeg',
+      welcomeBanner: 'https://epilot-bucket.s3.eu-central-1.amazonaws.com/12344/6538fddb-f0e9-4f0f-af51-6e57891ff20a/welcome-banner.jpeg'
+    },
+    entity_identifiers: {
+      type: {
+        isEnabled: true,
+        attributes: ['contract_number']
+      }
+    },
+    contract_identifiers: [
+      {
+        name: 'email',
+        schema: 'contact'
+      },
+      {
+        name: 'last_name',
+        schema: 'contact'
+      },
+      /* ... 1 more */
+    ],
+    contract_selector_config: {
+      show_inactive: true,
+      title_path: 'string'
+    },
+    registration_identifiers: [
+      {
+        name: 'last_name',
+        schema: 'contact'
+      },
+      {
+        name: 'contract_number',
+        schema: 'contract'
+      }
+    ],
+    surfaces: [
+      {
+        id: 'website-journeys',
+        name: 'Website journeys',
+        description: 'string',
+        authentication: 'login',
+        token_ttl_seconds: 300,
+        data_access: { /* ... */ }
+      }
+    ],
+    contact_identifiers_for_account: [
+      {
+        name: 'first_name',
+        schema: 'contact'
+      },
+      {
+        name: 'last_name',
+        schema: 'contact'
+      }
+    ],
+    additional_contact_attributes: [
+      {
+        name: 'first_name',
+        required: true
+      },
+      {
+        name: 'last_name',
+        required: true
+      }
+    ],
+    triggered_journeys: [
+      {
+        trigger_name: 'FIRST_LOGIN',
+        journey_id: '5da0a718-c822-403d-9f5d-20d4584e0528',
+        context_params: [ /* ... */ ]
+      }
+    ],
+    entity_edit_rules: [
+      {
+        slug: 'contact',
+        attribute: 'first_name',
+        rule_type: 'cadence',
+        cadence_period_type: 'days',
+        cadence_period: 1,
+        changes_allowed: 1,
+        grace_period: 1,
+        allowed_increment: '10%',
+        allowed_decrement: '10%',
+        number_of_days_before_restriction: 10
+      }
+    ],
+    allowed_file_extensions: {
+      document: ['pdf'],
+      image: ['jpg'],
+      spreadsheet: ['xls'],
+      presentation: ['ppt'],
+      audioVideo: ['mp4'],
+      email: ['eml'],
+      archive: ['zip'],
+      cad: ['cad'],
+      calendar: ['ics'],
+      other: ['txt']
+    },
+    prevent_search_engine_indexing: true,
+    meter_reading_grace_period: 0,
+    inactive_contract_cutoff_years: 0,
+    is_dummy: true,
+    is_v3_item: true,
+    published_revision_id: '2026-08-25T14:03:11.482Z-a7f3c1d9',
+    portal_id: '453ad7bf-86d5-46c8-8252-bcc868df5e3c',
+    portal_sk_v3: 'PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c',
+    origin: 'string',
+    global_blocks: {},
+    based_on_revision_id: 'string',
+    pages: [
+      {
+        id: 'c495fef9-eeca-4019-a989-8390dcd9825b',
+        slug: 'dashboard',
+        order: 0,
+        blocks: {}
+      }
+    ]
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "revision_id": "2026-08-25T14:03:11.482Z-a7f3c1d9",
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "created_by": "string",
+  "name": "FAQ page launch",
+  "description": "string",
+  "page_count": 0,
+  "published_at": "1970-01-01T00:00:00.000Z",
+  "published_by": "string",
+  "is_published": true,
+  "identity_providers": [
+    {
+      "slug": "office-365-login",
+      "display_name": "Office 365 Login",
+      "provider_type": "OIDC",
+      "attribute_mappings": {
+        "contact": {
+          "email": "email",
+          "first_name": "first_name",
+          "last_name": "last_name",
+          "phone": "tel",
+          "preferred_language": "language",
+          "concession": "GPE",
+          "installer_number": 123456
+        },
+        "account": {
+          "name": "company_name",
+          "street": "street_name",
+          "house_number": "house_number",
+          "postal_code": "postal_code",
+          "city": "city"
+        },
+        "portal_user": {
+          "access_status": "access_status",
+          "expires_at": "expires_at"
+        },
+        "concession_attributes": {
+          "water": "water",
+          "energy": "energy",
+          "gas": "gas"
+        }
+      },
+      "entity_matching": {
+        "portal_user": {
+          "external_id": "sub"
+        },
+        "contact": {
+          "customer_number": "customer_id",
+          "external_id": "sub"
+        },
+        "auto_create_cognito_user": true
+      },
+      "oidc_config": {
+        "type": "implicit",
+        "oidc_issuer": "https://login.microsoftonline.com/33d4f3e5-3df2-421e-b92e-a63cfa680a88/v2.0",
+        "redirect_uri": "https://customer-portal.com/login",
+        "client_id": "ab81daf8-8b1f-42d6-94ca-c51621054c75",
+        "client_secret": "7BIUnn~6shh.7fNtXb..3k1Mp3s6k6WK3B",
+        "has_client_secret": true,
+        "scope": "openid email",
+        "metadata": {
+          "response_modes_supported": ["form_post"],
+          "authorization_endpoint": "https://www.facebook.com/v12.0/dialog/oauth",
+          "token_endpoint": "https://graph.facebook.com/v12.0/oauth/access_token",
+          "userinfo_endpoint": "https://graph.facebook.com/me",
+          "logout_uri": "https://login.microsoftonline.com/common/oauth2/v2.0/logout",
+          "logout_redirect_uri": "https://customer-portal.com/login",
+          "skip_login_as_logout": false,
+          "mobile_redirect_uri": "msauth.io.epilot.ecp://auth",
+          "test_auth_username": "test@epilot.io",
+          "test_auth_password": "string"
+        },
+        "prompt": "login"
+      },
+      "mobile_oidc_config": {
+        "client_id": 123456,
+        "client_secret": 123456
+      },
+      "expose_client_secret": false
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `listPortalRevisions`
+
+Lists a portal's revision history, newest first. Metadata only — no config blob, no page bodies. `is_published` says whether that revision is the one currently live, which is a different question from
+
+`GET /v3/portal/config/{portal_id}/revisions`
+
+```ts
+const { data } = await client.listPortalRevisions({
+  portal_id: 'example',
+  limit: 1,
+  cursor: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "results": [
+    {
+      "revision_id": "2026-08-25T14:03:11.482Z-a7f3c1d9",
+      "created_at": "1970-01-01T00:00:00.000Z",
+      "created_by": "string",
+      "name": "FAQ page launch",
+      "description": "string",
+      "page_count": 0,
+      "published_at": "1970-01-01T00:00:00.000Z",
+      "published_by": "string",
+      "is_published": true
+    }
+  ],
+  "next_cursor": "string"
+}
+```
+
+</details>
+
+---
+
+### `getPortalRevision`
+
+Returns the full content of one revision: the snapshotted config, its pages (in the live `Page` shape), email templates and identity providers with secrets redacted.
+
+`GET /v3/portal/config/{portal_id}/revisions/{revision_id}`
+
+```ts
+const { data } = await client.getPortalRevision({
+  portal_id: 'example',
+  revision_id: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "revision_id": "2026-08-25T14:03:11.482Z-a7f3c1d9",
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "created_by": "string",
+  "name": "FAQ page launch",
+  "description": "string",
+  "page_count": 0,
+  "published_at": "1970-01-01T00:00:00.000Z",
+  "published_by": "string",
+  "is_published": true,
+  "config": {},
+  "pages": [
+    {
+      "slug": "dashboard",
+      "path": "/dashboard",
+      "schema": ["string"],
+      "visibility": {},
+      "content": {},
+      "design": {},
+      "blocks": {},
+      "order": 1,
+      "is_system": false,
+      "is_detail": false,
+      "detail_schema": "contact",
+      "show_in_navigation": false,
+      "is_public": true,
+      "parentId": "c495fef9-eeca-4019-a989-8390dcd9825b",
+      "is_entry_route": false,
+      "is_deleted": false,
+      "id": "c495fef9-eeca-4019-a989-8390dcd9825b",
+      "last_modified_at": "2021-02-09T12:41:43.662Z",
+      "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
+      "past_routes": ["old-dashboard", "home"],
+      "org_id": "string"
+    }
+  ],
+  "identity_providers": [
+    {
+      "slug": "office-365-login",
+      "display_name": "Office 365 Login",
+      "provider_type": "OIDC",
+      "attribute_mappings": {},
+      "entity_matching": {},
+      "oidc_config": {},
+      "mobile_oidc_config": {},
+      "expose_client_secret": false
+    }
+  ],
+  "email_templates": {
+    "confirmAccount": "5da0a718-c822-403d-9f5d-20d4584e0528",
+    "advancedAuth": "5da0a718-c822-403d-9f5d-20d4584e0528",
+    "advancedMFA": "5da0a718-c822-403d-9f5d-20d4584e0528",
+    "journeySignUp": "5da0a718-c822-403d-9f5d-20d4584e0528",
+    "journeySignInOneTimePassword": "5da0a718-c822-403d-9f5d-20d4584e0528",
+    "journeyLoginOTP": "5da0a718-c822-403d-9f5d-20d4584e0528",
+    "forgotPassword": "5da0a718-c822-403d-9f5d-20d4584e0528",
+    "invitation": "5da0a718-c822-403d-9f5d-20d4584e0528",
+    "partnerInvitation": "5da0a718-c822-403d-9f5d-20d4584e0528",
+    "onNewQuote": "5da0a718-c822-403d-9f5d-20d4584e0528",
+    "onMapAPendingUser": "5da0a718-c822-403d-9f5d-20d4584e0528",
+    "onDocUpload": "5da0a718-c822-403d-9f5d-20d4584e0528",
+    "onWorkflowStepAssigned": "5da0a718-c822-403d-9f5d-20d4584e0528",
+    "confirmEmailUpdate": "5da0a718-c822-403d-9f5d-20d4584e0528",
+    "verifyCodeToSetPassword": "5da0a718-c822-403d-9f5d-20d4584e0528"
+  },
+  "email_template_settings": {}
+}
+```
+
+</details>
+
+---
+
+### `publishPortalRevision`
+
+Makes one revision the portal's live configuration, atomically: either everything below takes effect or nothing does. Publish is a full-snapshot replace: it writes config, every page and email templat
+
+`POST /v3/portal/config/{portal_id}/publish`
+
+```ts
+const { data } = await client.publishPortalRevision(
+  {
+    portal_id: 'example',
+  },
+  {
+    revision_id: '2026-08-25T14:03:11.482Z-a7f3c1d9',
+    name: 'FAQ page launch',
+    description: 'string'
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "revision_id": "string",
+  "published_at": "1970-01-01T00:00:00.000Z",
+  "published_by": "string",
+  "name": "FAQ page launch",
+  "post_publish_warnings": ["allowed_entities_change"]
+}
+```
+
+</details>
+
+---
+
 ### `listAllPortalConfigs`
 
 Retrieves all portal configurations.
@@ -9800,6 +10635,7 @@ const { data } = await client.listAllPortalConfigs()
       "contract_identifiers": [],
       "contract_selector_config": {},
       "registration_identifiers": [],
+      "surfaces": [],
       "contact_identifiers_for_account": [],
       "additional_contact_attributes": [],
       "triggered_journeys": [],
@@ -9810,6 +10646,7 @@ const { data } = await client.listAllPortalConfigs()
       "inactive_contract_cutoff_years": 0,
       "is_dummy": true,
       "is_v3_item": true,
+      "published_revision_id": "2026-08-25T14:03:11.482Z-a7f3c1d9",
       "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
       "portal_sk_v3": "PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c",
       "origin": "string",
@@ -10068,6 +10905,16 @@ const { data } = await client.clonePortalConfig(
       "schema": "contract"
     }
   ],
+  "surfaces": [
+    {
+      "id": "website-journeys",
+      "name": "Website journeys",
+      "description": "string",
+      "authentication": "login",
+      "token_ttl_seconds": 300,
+      "data_access": {}
+    }
+  ],
   "contact_identifiers_for_account": [
     {
       "name": "first_name",
@@ -10126,6 +10973,7 @@ const { data } = await client.clonePortalConfig(
   "inactive_contract_cutoff_years": 0,
   "is_dummy": true,
   "is_v3_item": true,
+  "published_revision_id": "2026-08-25T14:03:11.482Z-a7f3c1d9",
   "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
   "portal_sk_v3": "PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c",
   "origin": "string",
@@ -11766,6 +12614,35 @@ type ContactExistsRequest = {
 }
 ```
 
+### `ContactIdentifyRequest`
+
+ContactExistsRequest plus the surface the token is requested for.
+
+
+```ts
+type ContactIdentifyRequest = {
+  org_id: string
+  registration_identifiers: Record<string, Record<string, string>>
+  trigger_identifiers_check?: boolean
+  surface_id: string
+}
+```
+
+### `ContactIdentifyResponse`
+
+```ts
+type ContactIdentifyResponse = {
+  contact_id?: string // uuid
+  account_id?: string // uuid
+  token?: string
+  token_type?: "contact_identification"
+  surface_id?: string
+  expires_at?: string // date-time
+  allowed_operations?: string[]
+  reason?: "TIMEOUT" | "NOT_FOUND"
+}
+```
+
 ### `AccountExistsRequest`
 
 ```ts
@@ -12438,6 +13315,56 @@ type AdminUser = {
 }
 ```
 
+### `PortalSurface`
+
+One surface a portal's data is reached from (see `surfaces` on the portal config).
+
+A surface names how callers authenticate on it and what they may reach once they
+have. Data access is always a subset of the portal's own: a schema not in
+`allowed_portal_entities` cannot be opened up by a surface, a
+
+```ts
+type PortalSurface = {
+  id: string
+  name: string
+  description?: string
+  authentication: "login" | "registration_identifiers"
+  token_ttl_seconds?: number
+  data_access?: {
+    entities?: Array<{
+      schema: { ... }
+      target_ids?: { ... }
+    }>
+    role_id?: string
+  }
+}
+```
+
+### `PortalSurfaceDataAccess`
+
+What a caller on a surface may reach. Every property is optional; omitting all of them is the portal's default scope.
+
+```ts
+type PortalSurfaceDataAccess = {
+  entities?: Array<{
+    schema: string
+    target_ids?: string[]
+  }>
+  role_id?: string
+}
+```
+
+### `PortalSurfaceEntityAccess`
+
+One schema this surface reaches, with the targets that always apply to it.
+
+```ts
+type PortalSurfaceEntityAccess = {
+  schema: string
+  target_ids?: string[]
+}
+```
+
 ### `Grant`
 
 ```ts
@@ -12586,9 +13513,34 @@ type PortalWorkflow = {
     assigned_to?: string[]
     phase_id?: string
     phase_name?: string
+    stage_id?: string
     completed_at?: string
     updated_at?: string
   }>
+  stages?: Array<{
+    id: string
+    name: string
+    description?: string
+    status: "COMPLETED" | "IN_PROGRESS" | "UPCOMING"
+    completed_at?: string
+  }>
+}
+```
+
+### `PortalWorkflowStage`
+
+A customer-facing stage of a flow execution, with a progress status derived
+from the execution's tasks by the Workflows API. Stages form a strict total
+order; the array order is the stage order.
+
+
+```ts
+type PortalWorkflowStage = {
+  id: string
+  name: string
+  description?: string
+  status: "COMPLETED" | "IN_PROGRESS" | "UPCOMING"
+  completed_at?: string
 }
 ```
 
@@ -12634,6 +13586,7 @@ type PortalWorkflowTask = {
   assigned_to?: string[]
   phase_id?: string
   phase_name?: string
+  stage_id?: string
   completed_at?: string
   updated_at?: string
 }
@@ -12675,8 +13628,16 @@ type EntityPortalWorkflows = {
       assigned_to?: { ... }
       phase_id?: { ... }
       phase_name?: { ... }
+      stage_id?: { ... }
       completed_at?: { ... }
       updated_at?: { ... }
+    }>
+    stages?: Array<{
+      id: { ... }
+      name: { ... }
+      description?: { ... }
+      status: { ... }
+      completed_at?: { ... }
     }>
   }>
 }
@@ -14055,6 +15016,54 @@ type ProviderPublicConfig = {
 }
 ```
 
+### `ProviderPublicConfigV3`
+
+Web-only public provider configuration served by `getPublicSSOProviderV3`.
+Unlike `ProviderPublicConfig` there is no `mobile_oidc_config`, and
+`oidc_config` never carries `client_secret` or the `metadata.test_auth_*`
+credentials — `oidc_config.has_client_secret` signals their presence so
+clients rou
+
+```ts
+type ProviderPublicConfigV3 = {
+  slug: string
+  display_name: string
+  oidc_config?: {
+    type?: "authorization_code" | "implicit"
+    oidc_issuer: string
+    redirect_uri?: string
+    client_id: string
+    client_secret?: string
+    has_client_secret?: boolean
+    scope: string
+    metadata?: {
+      response_modes_supported?: { ... }
+      authorization_endpoint?: { ... }
+      token_endpoint?: { ... }
+      userinfo_endpoint?: { ... }
+      logout_uri?: { ... }
+      logout_redirect_uri?: { ... }
+      skip_login_as_logout?: { ... }
+      mobile_redirect_uri?: { ... }
+      test_auth_username?: { ... }
+      test_auth_password?: { ... }
+    }
+    prompt?: "login" | "select_account" | "consent" | "signup"
+  }
+}
+```
+
+### `PublicIdentityProvider`
+
+Minimal public identity provider info — enough to render a provider login button.
+
+```ts
+type PublicIdentityProvider = {
+  slug: string
+  display_name: string
+}
+```
+
 ### `AttributeMappingConfig`
 
 Dictionary of epilot user attributes to claims
@@ -14732,6 +15741,313 @@ type JuiceSettings = {
   is_canary?: boolean
   is_legacy_design?: boolean
   redirect_to?: string
+}
+```
+
+### `RevisionPageRequest`
+
+A page inside a revision snapshot. `additionalProperties` is true on purpose — a page carries fields this schema does not name and they must survive into the snapshot and back onto the live page when it is published.
+
+
+```ts
+type RevisionPageRequest = {
+  id: string // uuid
+  slug: string
+  order: number
+  blocks: Record<string, unknown>
+}
+```
+
+### `PortalRevisionRequest`
+
+```ts
+type PortalRevisionRequest = {
+  entity_actions?: Array<{
+    journey_id?: string // uuid
+    slug?: string
+    action_Label?: {
+      en?: { ... }
+      de?: { ... }
+    }
+  }>
+  extensions?: Array<{
+    id: string
+    status: "installed" | "enabled"
+    options?: Record<string, string>
+  }>
+  extension_hooks?: Record<string, {
+    app_id: string
+    extension_id: string
+    hook_id: string
+  }>
+  default_user_to_notify?: {
+    onPendingUser?: Array<{
+      type?: { ... }
+      user_id?: { ... }
+      display_name?: { ... }
+      image_uri?: { ... }
+      org_id?: { ... }
+      email?: { ... }
+      phone?: { ... }
+    }>
+  }
+  identity_providers?: Array<{
+    slug?: string
+    display_name: string
+    provider_type: "OIDC"
+    attribute_mappings?: {
+      contact: { ... }
+      account?: { ... }
+      portal_user?: { ... }
+      concession_attributes?: { ... }
+    }
+    entity_matching?: {
+      portal_user?: { ... }
+      contact?: { ... }
+      auto_create_cognito_user?: { ... }
+    }
+    oidc_config?: {
+      type?: { ... }
+      oidc_issuer: { ... }
+      redirect_uri?: { ... }
+      client_id: { ... }
+      client_secret?: { ... }
+      has_client_secret?: { ... }
+      scope: { ... }
+      metadata?: { ... }
+      prompt?: { ... }
+    }
+    mobile_oidc_config?: {
+      client_id?: { ... }
+      client_secret?: { ... }
+    }
+    expose_client_secret?: boolean
+  }>
+  mobile_config?: {
+    portal_id?: string
+    enabled?: boolean
+    display_name?: string
+    app_host?: string
+    environment?: "prod" | "staging" | "dev"
+    branding?: {
+      app_icon?: { ... }
+      splash?: { ... }
+      splash_dark?: { ... }
+      icon_background_color?: { ... }
+      splash_background_color?: { ... }
+      splash_background_color_dark?: { ... }
+    }
+    ios?: {
+      bundle_id?: { ... }
+      team_id?: { ... }
+      credentials_status?: { ... }
+      app_store_id?: { ... }
+      store_url?: { ... }
+      last_build?: { ... }
+    }
+    android?: {
+      package_name?: { ... }
+      credentials_status?: { ... }
+      upload_key_status?: { ... }
+      store_url?: { ... }
+      last_build?: { ... }
+    }
+    ota?: {
+      enabled?: { ... }
+      channel?: { ... }
+      auto_update?: { ... }
+      update_strategy?: { ... }
+      min_native_version?: { ... }
+    }
+  }
+  enabled?: boolean
+  // ...
+}
+```
+
+### `PublishRevisionRequest`
+
+```ts
+type PublishRevisionRequest = {
+  revision_id: string
+  name?: string
+  description?: string
+}
+```
+
+### `PortalRevisionSummary`
+
+```ts
+type PortalRevisionSummary = {
+  revision_id: string
+  created_at: string // date-time
+  created_by?: string
+  name?: string
+  description?: string
+  page_count: number
+  published_at?: string // date-time
+  published_by?: string
+  is_published: boolean
+}
+```
+
+### `PortalRevisionList`
+
+```ts
+type PortalRevisionList = {
+  results: Array<{
+    revision_id: string
+    created_at: string // date-time
+    created_by?: string
+    name?: string
+    description?: string
+    page_count: number
+    published_at?: string // date-time
+    published_by?: string
+    is_published: boolean
+  }>
+  next_cursor?: string
+}
+```
+
+### `PortalRevisionCreated`
+
+```ts
+type PortalRevisionCreated = {
+  revision_id: string
+  created_at: string // date-time
+  created_by?: string
+  name?: string
+  description?: string
+  page_count: number
+  published_at?: string // date-time
+  published_by?: string
+  is_published: boolean
+  identity_providers?: Array<{
+    slug?: string
+    display_name: string
+    provider_type: "OIDC"
+    attribute_mappings?: {
+      contact: { ... }
+      account?: { ... }
+      portal_user?: { ... }
+      concession_attributes?: { ... }
+    }
+    entity_matching?: {
+      portal_user?: { ... }
+      contact?: { ... }
+      auto_create_cognito_user?: { ... }
+    }
+    oidc_config?: {
+      type?: { ... }
+      oidc_issuer: { ... }
+      redirect_uri?: { ... }
+      client_id: { ... }
+      client_secret?: { ... }
+      has_client_secret?: { ... }
+      scope: { ... }
+      metadata?: { ... }
+      prompt?: { ... }
+    }
+    mobile_oidc_config?: {
+      client_id?: { ... }
+      client_secret?: { ... }
+    }
+    expose_client_secret?: boolean
+  }>
+}
+```
+
+### `RevisionPage`
+
+A page from a revision snapshot. Same shape as a live `Page`, without the server-managed fields (`past_routes`, `_created_at`, `_updated_at`, `is_deleted`), which publish re-derives from the live portal.
+
+
+```ts
+type RevisionPage = {
+  org_id?: string
+}
+```
+
+### `PortalRevision`
+
+```ts
+type PortalRevision = {
+  revision_id: string
+  created_at: string // date-time
+  created_by?: string
+  name?: string
+  description?: string
+  page_count: number
+  published_at?: string // date-time
+  published_by?: string
+  is_published: boolean
+  config: Record<string, unknown>
+  pages: Array<{
+    org_id?: string
+  }>
+  identity_providers?: Array<{
+    slug?: string
+    display_name: string
+    provider_type: "OIDC"
+    attribute_mappings?: {
+      contact: { ... }
+      account?: { ... }
+      portal_user?: { ... }
+      concession_attributes?: { ... }
+    }
+    entity_matching?: {
+      portal_user?: { ... }
+      contact?: { ... }
+      auto_create_cognito_user?: { ... }
+    }
+    oidc_config?: {
+      type?: { ... }
+      oidc_issuer: { ... }
+      redirect_uri?: { ... }
+      client_id: { ... }
+      client_secret?: { ... }
+      has_client_secret?: { ... }
+      scope: { ... }
+      metadata?: { ... }
+      prompt?: { ... }
+    }
+    mobile_oidc_config?: {
+      client_id?: { ... }
+      client_secret?: { ... }
+    }
+    expose_client_secret?: boolean
+  }>
+  email_templates?: {
+    confirmAccount?: string // uuid
+    advancedAuth?: string // uuid
+    advancedMFA?: string // uuid
+    journeySignUp?: string // uuid
+    journeySignInOneTimePassword?: string // uuid
+    journeyLoginOTP?: string // uuid
+    forgotPassword?: string // uuid
+    invitation?: string // uuid
+    partnerInvitation?: string // uuid
+    onNewQuote?: string // uuid
+    onMapAPendingUser?: string // uuid
+    onDocUpload?: string // uuid
+    onWorkflowStepAssigned?: string // uuid
+    confirmEmailUpdate?: string // uuid
+    verifyCodeToSetPassword?: string // uuid
+  }
+  email_template_settings?: Record<string, unknown>
+}
+```
+
+### `PublishResult`
+
+```ts
+type PublishResult = {
+  revision_id: string
+  published_at: string // date-time
+  published_by?: string
+  name?: string
+  post_publish_warnings: string[]
 }
 ```
 
