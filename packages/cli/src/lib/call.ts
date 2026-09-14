@@ -12,6 +12,7 @@ import { getResolvedProfile, getStage } from './profiles.js';
 import { collectParams, getOperationParams, getMissingRequired } from './param-collector.js';
 import { resolveBody, getRequestBodyInfo } from './body-handler.js';
 import { formatResponse } from './response-formatter.js';
+import { CLI_USER_AGENT } from './user-agent.js';
 import { isInteractive, pickOperation, formatOperationsTable, promptParam } from './interactive.js';
 import { BOLD, RESET, DIM, RED, YELLOW, GREEN, methodColor, pager, highlightJson } from './utils.js';
 import type { OperationChoice } from './interactive.js';
@@ -530,6 +531,9 @@ export const callApi = async (apiName: string, args: CallArgs): Promise<void> =>
 
   // Set auth
   client.defaults.headers.common.authorization = `Bearer ${token}`;
+
+  // Identify the CLI to the backend; -H 'User-Agent: ...' still overrides below
+  client.defaults.headers.common['User-Agent'] = CLI_USER_AGENT;
 
   // Set custom headers
   for (const [key, value] of Object.entries(customHeaders)) {

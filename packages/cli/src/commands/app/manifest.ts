@@ -4,6 +4,7 @@ import { execSync } from 'node:child_process';
 import { resolveToken, loadCredentials } from '../../lib/auth-store.js';
 import { validateScheduleExpression } from './schedule.js';
 import { getResolvedProfile } from '../../lib/profiles.js';
+import { CLI_USER_AGENT } from '../../lib/user-agent.js';
 import { BOLD, RESET, GREEN, RED, YELLOW, DIM } from '../../lib/utils.js';
 
 export interface AppManifest {
@@ -245,6 +246,7 @@ async function request(baseUrl: string, token: string, method: string, path: str
   const headers: Record<string, string> = {
     Authorization: `Bearer ${token}`,
     'Content-Type': 'application/json',
+    'User-Agent': CLI_USER_AGENT,
   };
 
   const response = await fetch(url, {
