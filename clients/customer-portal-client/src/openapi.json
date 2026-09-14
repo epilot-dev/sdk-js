@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Portal API",
-    "description": "Backend for epilot portals - End Customer Portal & Installer Portal",
+    "description": "Backend for epilot portals - End Customer Portal & Installer Portal\n",
     "version": "1.0.0"
   },
   "tags": [
@@ -281,6 +281,7 @@
             "PortalAuth": []
           }
         ],
+        "x-contact-identification-token": true,
         "responses": {
           "204": {
             "description": "Tokens is valid for the given organization."
@@ -2152,7 +2153,23 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PortalConfig"
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/PortalConfig"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "identity_providers": {
+                          "type": "array",
+                          "description": "SSO identity providers configured for the portal, reduced to the\nfields needed to render provider login buttons. Omitted when the\nportal has no providers.\n",
+                          "items": {
+                            "$ref": "#/components/schemas/PublicIdentityProvider"
+                          }
+                        }
+                      }
+                    }
+                  ]
                 }
               }
             }
@@ -3315,6 +3332,7 @@
         "operationId": "getSchemas",
         "summary": "getSchemas",
         "description": "Retrieves the schemas. Only schemas usable in the private part of the portal are returned.",
+        "x-contact-identification-token": true,
         "tags": [
           "ECP"
         ],
@@ -3685,6 +3703,7 @@
         "operationId": "getContact",
         "summary": "getContact",
         "description": "Retrieves the contact of the logged in user.",
+        "x-contact-identification-token": true,
         "tags": [
           "ECP"
         ],
@@ -3915,6 +3934,9 @@
           "404": {
             "$ref": "#/components/responses/NotFound"
           },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
           }
@@ -4001,6 +4023,78 @@
           "404": {
             "$ref": "#/components/responses/NotFound"
           },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v3/portal/public/contact/identify": {
+      "post": {
+        "operationId": "identifyContact",
+        "summary": "identifyContact",
+        "description": "Identify a contact by the portal's configured registration identifiers and, on a match,\nissue a short-lived bearer token that acts as that contact.\n\nResolution is identical to `checkContactExistsV3`. The token does not grant a portal\nsession; it is accepted only on the operations listed in `allowed_operations`, and\nexpires at `expires_at`. Requires `surface_id` to name a surface of the portal whose\n`authentication` is `registration_identifiers`; returns 403 otherwise. The token is\nconfined to that surface's data access. Requests may be rate limited (429).\n",
+        "security": [],
+        "tags": [
+          "Public"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "portal_id",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/PortalId"
+            },
+            "description": "PortalId of the portal (required if domain is not provided)"
+          },
+          {
+            "in": "query",
+            "name": "domain",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Portal domain for identification (alternative to portal_id)"
+          }
+        ],
+        "requestBody": {
+          "description": "Request payload",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ContactIdentifyRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The identification result. On a match, `contact_id` and `token` are present. When no\ncontact matched, only `reason` is present - the response is deliberately shaped the same\nway for every negative outcome so it cannot be used to enumerate contacts.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContactIdentifyResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
           }
@@ -4074,6 +4168,9 @@
           },
           "404": {
             "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
           },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
@@ -7588,6 +7685,7 @@
             "PortalAuth": []
           }
         ],
+        "x-contact-identification-token": true,
         "requestBody": {
           "content": {
             "application/json": {
@@ -7628,6 +7726,7 @@
         "operationId": "searchPortalUserEntities",
         "summary": "searchPortalUserEntities",
         "description": "Search all entities of a portal user",
+        "x-contact-identification-token": true,
         "tags": [
           "ECP"
         ],
@@ -8507,6 +8606,7 @@
       "post": {
         "operationId": "getMeterReadings",
         "summary": "getMeterReadings",
+        "x-contact-identification-token": true,
         "description": "Fetches meter readings for a counter and optionally resolves Handlebars\ntemplate strings against each reading object using @epilot/variables.\n",
         "tags": [
           "ECP"
@@ -8711,6 +8811,68 @@
         }
       }
     },
+    "/v3/portal/public/sso/providers/{provider_slug}": {
+      "get": {
+        "operationId": "getPublicSSOProviderV3",
+        "summary": "getPublicSSOProviderV3",
+        "description": "Returns the public configuration of a single SSO identity provider with env var\nplaceholders (incl. secrets) already resolved against the organization's environment.\n\nPortal-scoped variant of getSSOProvider: the portal is identified by `org_id` +\n`portal_id` only, so callers without a portal domain (e.g. standalone journeys)\ncan resolve the provider.\nOnly the web OIDC configuration is returned: `mobile_oidc_config` is omitted\nentirely, and the web `client_secret` and `metadata.test_auth_*` credentials are\nnever returned — they are used server-side by the SSO callback to exchange the\nauthorization code for tokens. `oidc_config.has_client_secret` is set when either\nexists, so clients route the exchange through the callback.\n",
+        "security": [],
+        "tags": [
+          "Public"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "provider_slug",
+            "required": true,
+            "description": "Provider slug (organization-unique)",
+            "schema": {
+              "$ref": "#/components/schemas/ProviderSlug"
+            }
+          },
+          {
+            "in": "query",
+            "name": "org_id",
+            "required": true,
+            "description": "epilot organization id",
+            "schema": {
+              "type": "string",
+              "example": 123
+            }
+          },
+          {
+            "in": "query",
+            "name": "portal_id",
+            "required": true,
+            "description": "ID of the Portal",
+            "schema": {
+              "$ref": "#/components/schemas/PortalId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Resolved public SSO provider configuration, reduced to the web OIDC flow. `mobile_oidc_config` is omitted; `oidc_config.client_secret` and the `metadata.test_auth_*` credentials are stripped (kept server-side for the token exchange).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProviderPublicConfigV3"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/v2/portal/public/sso/login": {
       "post": {
         "operationId": "ssoLogin",
@@ -8856,6 +9018,11 @@
                 "properties": {
                   "provider_slug": {
                     "$ref": "#/components/schemas/ProviderSlug"
+                  },
+                  "login_only": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Authenticate existing identities only. When no portal user and no contact matches the identity, the login fails with a 400 response carrying `reason: PORTAL_ACCOUNT_NOT_FOUND` instead of registering a new portal user. A matched contact is still provisioned a portal user; contacts and accounts are never created."
                   }
                 }
               }
@@ -8882,6 +9049,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
           }
         }
       }
@@ -9153,6 +9323,7 @@
             "EitherAuth": []
           }
         ],
+        "x-contact-identification-token": true,
         "parameters": [
           {
             "in": "query",
@@ -10613,6 +10784,289 @@
           },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v3/portal/config/{portal_id}/revisions": {
+      "post": {
+        "operationId": "createPortalRevision",
+        "summary": "createPortalRevision",
+        "description": "Creates a new revision — a complete, immutable snapshot of the portal's configuration, pages and email templates. Nothing about the live portal changes; the snapshot only becomes live when it is published.\n\nThe payload must be COMPLETE. This endpoint does not merge against live or against the previous revision: publishing a revision deletes every live page the revision does not contain. The server validates structure only — `pages` present, each page carrying `id`, `slug`, `order` and `blocks`, and no two pages sharing an `id` or a `slug`. Semantic completeness of the config is a promise the caller makes, and a partial payload is honoured rather than rejected.\n\n`email_templates` is optional, and absence means \"keep the portal's current templates\", never \"no templates\". A present but partial map is taken verbatim.\n",
+        "tags": [
+          "ECP Admin"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "portal_id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "5da0a718-c822-403d-9f5d-20d4584e0528"
+            },
+            "description": "Portal ID (readonly UUID generated on portal creation)"
+          }
+        ],
+        "requestBody": {
+          "description": "Complete portal configuration snapshot",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PortalRevisionRequest"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Revision created successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortalRevisionCreated"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "get": {
+        "operationId": "listPortalRevisions",
+        "summary": "listPortalRevisions",
+        "description": "Lists a portal's revision history, newest first. Metadata only — no config blob, no page bodies. `is_published` says whether that revision is the one currently live, which is a different question from `published_at`, which records the last time it was published.\n",
+        "tags": [
+          "ECP Admin"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "portal_id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "5da0a718-c822-403d-9f5d-20d4584e0528"
+            },
+            "description": "Portal ID (readonly UUID generated on portal creation)"
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 25
+            },
+            "description": "Maximum number of revisions to return"
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Opaque pagination cursor, taken from a previous response's `next_cursor`"
+          }
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Revision history retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortalRevisionList"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v3/portal/config/{portal_id}/revisions/{revision_id}": {
+      "get": {
+        "operationId": "getPortalRevision",
+        "summary": "getPortalRevision",
+        "description": "Returns the full content of one revision: the snapshotted config, its pages (in the live `Page` shape), email templates and identity providers with secrets redacted.\n\nThis is a pure read. The server records nothing about it: no \"loaded\" marker, no audit entry, and no change to which revision is live. Revision content re-enters the system only as a new `POST .../revisions`.\n\nSecret-typed extension option values are removed from `config` entirely, not masked.\n\nReturns `409` when the revision exists but its stored config or email templates row cannot be read, rather than a partial snapshot. Saving again produces a complete revision.\n",
+        "tags": [
+          "ECP Admin"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "portal_id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "5da0a718-c822-403d-9f5d-20d4584e0528"
+            },
+            "description": "Portal ID (readonly UUID generated on portal creation)"
+          },
+          {
+            "in": "path",
+            "name": "revision_id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "2026-08-25T14:03:11.482Z-a7f3c1d9"
+            },
+            "description": "Revision ID. Contains `:` characters — percent-encode it."
+          }
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Revision retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortalRevision"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v3/portal/config/{portal_id}/publish": {
+      "post": {
+        "operationId": "publishPortalRevision",
+        "summary": "publishPortalRevision",
+        "description": "Makes one revision the portal's live configuration, atomically: either everything below takes effect or nothing does. Publish is a full-snapshot replace: it writes config, every page and email templates to match the revision exactly, and deletes every live page the revision does not contain.\n\nAccepts any valid `revision_id` for the portal, old or new. There is no separate rollback endpoint and none is needed.\n\nThe same atomic publish stamps `name`, `description` and `published_at` onto the revision being published — permanently, on that revision, and not on any later one that supersedes it as live. `name` is generated server-side when the request omits it, so every published revision carries one.\n\nConflict detection covers the live config only: publish is rejected with `409` when the live config changed after publish read it. Live pages, their redirect routes and the email templates are replaced outright — a concurrent edit to a live page is not detected and is overwritten. `409` is also returned when the revision's stored config or email templates cannot be read, or when two of its pages would resolve to the same slug. A domain the revision claims that another portal already owns is a `400`.\n",
+        "tags": [
+          "ECP Admin"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "portal_id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "5da0a718-c822-403d-9f5d-20d4584e0528"
+            },
+            "description": "Portal ID (readonly UUID generated on portal creation)"
+          }
+        ],
+        "requestBody": {
+          "description": "The revision to publish",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PublishRevisionRequest"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Revision published successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublishResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
           }
         }
       }
@@ -12939,6 +13393,13 @@
               }
             ]
           },
+          "surfaces": {
+            "type": "array",
+            "description": "Surfaces this portal's data is reached from besides the portal UI itself (public journeys on the website, chat). Configured under Security > Surfaces. Each surface defines how a caller authenticates and what data access applies on it; the portal UI is the implicit default surface (login, default scope) and is not listed here. A surface with `authentication: registration_identifiers` is what makes `identifyContact` issue tokens for this portal: without one, `identifyContact` returns 403.\n",
+            "items": {
+              "$ref": "#/components/schemas/PortalSurface"
+            }
+          },
           "contact_identifiers_for_account": {
             "type": "array",
             "description": "Account-mode only. Identifiers on the contact entity of the primarily\nidentified account. Used to pick an existing related contact within the\nresolved account; if none matches, the values are written onto the new\ncontact that is created and linked to the account.\n",
@@ -13087,6 +13548,12 @@
           "is_v3_item": {
             "type": "boolean",
             "description": "Whether this is a v3 portal configuration"
+          },
+          "published_revision_id": {
+            "type": "string",
+            "readOnly": true,
+            "description": "The revision currently live on this portal. Absent until the first publish.",
+            "example": "2026-08-25T14:03:11.482Z-a7f3c1d9"
           },
           "portal_id": {
             "$ref": "#/components/schemas/PortalId"
@@ -13633,6 +14100,79 @@
             "type": "boolean",
             "default": true,
             "description": "Whether to (re)trigger the registration identifiers check hook, which issues a request\nto the connected ERP to (re)sync the contact, in addition to waiting for the entity to\narrive. Defaults to true to preserve existing behaviour. Set to false on retry attempts\nto only poll for an already-triggered sync to land, without issuing another upstream\nrequest to the ERP.\n"
+          }
+        }
+      },
+      "ContactIdentifyRequest": {
+        "description": "ContactExistsRequest plus the surface the token is requested for.\n",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ContactExistsRequest"
+          },
+          {
+            "type": "object",
+            "required": [
+              "surface_id"
+            ],
+            "properties": {
+              "surface_id": {
+                "type": "string",
+                "description": "Id of the portal surface (see `surfaces` on the portal config) this token is\nfor. The surface must exist and use `authentication: registration_identifiers`;\notherwise the call returns 403. The issued token is bound to this surface and\nconfined to its data access settings.\n",
+                "example": "website-journeys"
+              }
+            }
+          }
+        ]
+      },
+      "ContactIdentifyResponse": {
+        "type": "object",
+        "properties": {
+          "contact_id": {
+            "$ref": "#/components/schemas/EntityId",
+            "description": "ID of the identified contact. Present only on a match."
+          },
+          "account_id": {
+            "$ref": "#/components/schemas/EntityId",
+            "description": "ID of the resolved account when the portal is configured for account-based\nregistration. Present only on a match.\n"
+          },
+          "token": {
+            "type": "string",
+            "description": "One-time bearer token scoped to the identified contact, to be sent as\n`Authorization: Bearer <token>` against the portal APIs. Present only on a match.\n",
+            "example": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..."
+          },
+          "token_type": {
+            "type": "string",
+            "enum": [
+              "contact_identification"
+            ],
+            "description": "Type of the issued token, matching its own `token_type` claim and the token type in access-token-api. Present only on a match."
+          },
+          "surface_id": {
+            "type": "string",
+            "description": "The surface the token is bound to; echoes the request. Present only on a match.",
+            "example": "website-journeys"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the issued token stops being accepted. Present only on a match.",
+            "example": "2026-08-11T10:35:00.000Z"
+          },
+          "allowed_operations": {
+            "type": "array",
+            "description": "The operationIds the issued token may call. Every other operation rejects the token\nwith 401, including read operations. Echoed so a caller does not have to infer the\nsurface from this specification, and so a change to the allowlist is visible at\nruntime. Present only on a match.\n",
+            "items": {
+              "type": "string"
+            },
+            "example": []
+          },
+          "reason": {
+            "type": "string",
+            "enum": [
+              "TIMEOUT",
+              "NOT_FOUND"
+            ],
+            "description": "Present only when no token was issued. NOT_FOUND means the given identifiers did not\nmatch any contact (definitive - the client should not retry). TIMEOUT means the contact\nwas not found within the processing window but may still be ingesting; the client may\nretry (ideally with trigger_identifiers_check=false).\n"
           }
         }
       },
@@ -15121,6 +15661,94 @@
           }
         }
       },
+      "PortalSurface": {
+        "type": "object",
+        "description": "One surface a portal's data is reached from (see `surfaces` on the portal config).\n\nA surface names how callers authenticate on it and what they may reach once they\nhave. Data access is always a subset of the portal's own: a schema not in\n`allowed_portal_entities` cannot be opened up by a surface, and the portal's\ncontact-relation rules still apply underneath the surface's own.\n\nTokens minted for a surface (currently: contact identification tokens for\n`registration_identifiers` surfaces) carry the surface id. The surface's data\naccess is resolved from the portal config on every request, not baked into the\ntoken, so tightening a surface applies to tokens already in circulation.\n",
+        "required": [
+          "id",
+          "name",
+          "authentication"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64,
+            "pattern": "^[a-z0-9][a-z0-9_-]*$",
+            "description": "Stable identifier, unique within the portal. Referenced by `identifyContact` and carried in issued tokens.",
+            "example": "website-journeys"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "example": "Website journeys"
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 500,
+            "description": "Free text for the configuring user, e.g. where this surface is embedded."
+          },
+          "authentication": {
+            "type": "string",
+            "enum": [
+              "login",
+              "registration_identifiers"
+            ],
+            "description": "How a caller on this surface proves who they are.\n\n- `login`: a logged-in portal user token (the portal's own authentication).\n- `registration_identifiers`: the caller supplies the portal's\n  `registration_identifiers` to `identifyContact` and receives a short-lived\n  contact identification token. Anyone who knows or guesses those values can\n  use this surface, so its data access should be as narrow as the use case allows.\n\n`anonymous` (no proof of identity at all) is planned and not accepted yet.\n"
+          },
+          "token_ttl_seconds": {
+            "type": "integer",
+            "format": "int32",
+            "default": 300,
+            "minimum": 60,
+            "maximum": 900,
+            "description": "Lifetime of tokens minted for this surface. Only used with `registration_identifiers`."
+          },
+          "data_access": {
+            "$ref": "#/components/schemas/PortalSurfaceDataAccess"
+          }
+        }
+      },
+      "PortalSurfaceDataAccess": {
+        "type": "object",
+        "description": "What a caller on a surface may reach. Every property is optional; omitting all of them is the portal's default scope.",
+        "properties": {
+          "entities": {
+            "type": "array",
+            "description": "Schemas reachable on this surface, each with the targets that always apply to\nit. Must be a subset of the portal's `allowed_portal_entities`; anything else\nis ignored. Empty or omitted means the surface reaches nothing - data access is\nopted into per schema.\n",
+            "items": {
+              "$ref": "#/components/schemas/PortalSurfaceEntityAccess"
+            }
+          },
+          "role_id": {
+            "type": "string",
+            "description": "360 role whose grants apply on this surface (`<org_id>:<slug>`), giving\nvertical permissions - which attributes and actions are permitted. Omitted\nmeans the portal's default role.\n",
+            "example": "728:public_journeys_readonly"
+          }
+        }
+      },
+      "PortalSurfaceEntityAccess": {
+        "type": "object",
+        "description": "One schema this surface reaches, with the targets that always apply to it.",
+        "properties": {
+          "schema": {
+            "type": "string",
+            "description": "Schema slug, from the portal's `allowed_portal_entities`.",
+            "example": "contract"
+          },
+          "target_ids": {
+            "type": "array",
+            "description": "Targets (see the Targeting API) whose filters always apply to reads of this\nschema on this surface, giving horizontal permissions - which rows are\nreachable. They are applied in addition to any targets the caller passes. A\ntarget matches one schema, which is why they are configured per schema here.\n",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "schema"
+        ]
+      },
       "Grant": {
         "type": "object",
         "properties": {
@@ -15487,6 +16115,13 @@
             "items": {
               "$ref": "#/components/schemas/PortalWorkflowTask"
             }
+          },
+          "stages": {
+            "type": "array",
+            "description": "Customer-facing stages of the execution in strict order, each with a\nprogress status derived by the Workflows API. Present only for V2 flow\nexecutions whose template defines stages and whose boundaries resolve\ncleanly; omitted otherwise, so consumers must fall back to the flat\ntask timeline.\n",
+            "items": {
+              "$ref": "#/components/schemas/PortalWorkflowStage"
+            }
           }
         },
         "required": [
@@ -15496,6 +16131,42 @@
           "version",
           "is_path_complete",
           "tasks"
+        ]
+      },
+      "PortalWorkflowStage": {
+        "type": "object",
+        "description": "A customer-facing stage of a flow execution, with a progress status derived\nfrom the execution's tasks by the Workflows API. Stages form a strict total\norder; the array order is the stage order.\n",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Stable unique identifier for the stage"
+          },
+          "name": {
+            "type": "string",
+            "description": "User-facing stage title"
+          },
+          "description": {
+            "type": "string",
+            "description": "Customer-facing description of what happens in this stage"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "COMPLETED",
+              "IN_PROGRESS",
+              "UPCOMING"
+            ],
+            "description": "Derived progress status:\n- COMPLETED: every task of the stage is done, and the flow has moved past it\n- IN_PROGRESS: the flow's current work is inside this stage\n- UPCOMING: the flow has not reached this stage yet\n"
+          },
+          "completed_at": {
+            "type": "string",
+            "description": "Latest completion timestamp among the stage's tasks; set only when the\nstage is COMPLETED and at least one of its tasks recorded one\n"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "status"
         ]
       },
       "PortalWorkflowTask": {
@@ -15566,6 +16237,10 @@
           "phase_name": {
             "type": "string",
             "description": "Name of the phase the underlying task belongs to, if any (V2 only)"
+          },
+          "stage_id": {
+            "type": "string",
+            "description": "Id of the stage the underlying task belongs to, when the execution\ncarries stages (derived by the Workflows API at read time)\n"
           },
           "completed_at": {
             "type": "string",
@@ -18500,6 +19175,41 @@
           "display_name"
         ]
       },
+      "ProviderPublicConfigV3": {
+        "type": "object",
+        "description": "Web-only public provider configuration served by `getPublicSSOProviderV3`.\nUnlike `ProviderPublicConfig` there is no `mobile_oidc_config`, and\n`oidc_config` never carries `client_secret` or the `metadata.test_auth_*`\ncredentials — `oidc_config.has_client_secret` signals their presence so\nclients route the token exchange through the backend SSO callback.\n",
+        "properties": {
+          "slug": {
+            "$ref": "#/components/schemas/ProviderSlug"
+          },
+          "display_name": {
+            "$ref": "#/components/schemas/ProviderDisplayName"
+          },
+          "oidc_config": {
+            "$ref": "#/components/schemas/OIDCProviderConfig"
+          }
+        },
+        "required": [
+          "slug",
+          "display_name"
+        ]
+      },
+      "PublicIdentityProvider": {
+        "type": "object",
+        "description": "Minimal public identity provider info — enough to render a provider login button.",
+        "properties": {
+          "slug": {
+            "$ref": "#/components/schemas/ProviderSlug"
+          },
+          "display_name": {
+            "$ref": "#/components/schemas/ProviderDisplayName"
+          }
+        },
+        "required": [
+          "slug",
+          "display_name"
+        ]
+      },
       "AttributeMappingConfig": {
         "type": "object",
         "description": "Dictionary of epilot user attributes to claims",
@@ -19599,6 +20309,13 @@
               }
             ]
           },
+          "surfaces": {
+            "type": "array",
+            "description": "Surfaces this portal's data is reached from besides the portal UI itself (public journeys on the website, chat). Configured under Security > Surfaces. Each surface defines how a caller authenticates and what data access applies on it; the portal UI is the implicit default surface (login, default scope) and is not listed here. A surface with `authentication: registration_identifiers` is what makes `identifyContact` issue tokens for this portal: without one, `identifyContact` returns 403.\n",
+            "items": {
+              "$ref": "#/components/schemas/PortalSurface"
+            }
+          },
           "contact_identifiers_for_account": {
             "type": "array",
             "description": "Account-mode only. Identifiers on the contact entity of the primarily\nidentified account. Used to pick an existing related contact within the\nresolved account; if none matches, the values are written onto the new\ncontact that is created and linked to the account.\n",
@@ -19747,6 +20464,12 @@
           "is_v3_item": {
             "type": "boolean",
             "description": "Whether this is a v3 portal configuration"
+          },
+          "published_revision_id": {
+            "type": "string",
+            "readOnly": true,
+            "description": "The revision currently live on this portal. Absent until the first publish.",
+            "example": "2026-08-25T14:03:11.482Z-a7f3c1d9"
           },
           "portal_id": {
             "$ref": "#/components/schemas/PortalId"
@@ -19970,6 +20693,279 @@
             "type": "string",
             "description": "The URL to redirect to",
             "example": "https://example.com"
+          }
+        }
+      },
+      "RevisionPageRequest": {
+        "type": "object",
+        "additionalProperties": true,
+        "description": "A page inside a revision snapshot. `additionalProperties` is true on purpose — a page carries fields this schema does not name and they must survive into the snapshot and back onto the live page when it is published.\n",
+        "required": [
+          "id",
+          "slug",
+          "order",
+          "blocks"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Stable page identity. Required because a revision diff correlates pages by id, not by slug.\n`format: uuid` is enforced, so a non-UUID id is rejected as a `400`.\n",
+            "example": "c495fef9-eeca-4019-a989-8390dcd9825b"
+          },
+          "slug": {
+            "type": "string",
+            "example": "dashboard"
+          },
+          "order": {
+            "type": "number",
+            "example": 0
+          },
+          "blocks": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Required on purpose. A live save preserves an omitted `blocks` from the stored page; publish replaces each live page wholesale with no such guard, so a revision snapshotted without blocks would wipe them on publish. `{}` is a valid value — the field simply has to be present.\n"
+          }
+        }
+      },
+      "PortalRevisionRequest": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/UpdateOnlyPortalConfigAttributes"
+          },
+          {
+            "$ref": "#/components/schemas/CommonConfigAttributesV3"
+          },
+          {
+            "type": "object",
+            "additionalProperties": true,
+            "required": [
+              "pages"
+            ],
+            "properties": {
+              "email_templates": {
+                "$ref": "#/components/schemas/EmailTemplates"
+              },
+              "identity_providers": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/ProviderConfig"
+                }
+              },
+              "based_on_revision_id": {
+                "type": "string"
+              },
+              "pages": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/RevisionPageRequest"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "PublishRevisionRequest": {
+        "type": "object",
+        "required": [
+          "revision_id"
+        ],
+        "properties": {
+          "revision_id": {
+            "type": "string",
+            "example": "2026-08-25T14:03:11.482Z-a7f3c1d9"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 255,
+            "description": "Label stamped onto the revision being published, permanently and atomically with the publish itself. Optional: when omitted the revision keeps whatever name it already has, possibly none; the server never generates one. An explicit name replaces any previous one. Clients derive a display label for unnamed revisions from `published_at` / `created_at`.\n",
+            "example": "FAQ page launch"
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 8000,
+            "description": "Optional description stamped onto the revision at publish time"
+          }
+        }
+      },
+      "PortalRevisionSummary": {
+        "type": "object",
+        "required": [
+          "revision_id",
+          "created_at",
+          "page_count",
+          "is_published"
+        ],
+        "properties": {
+          "revision_id": {
+            "type": "string",
+            "example": "2026-08-25T14:03:11.482Z-a7f3c1d9"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "created_by": {
+            "type": "string",
+            "description": "May be absent — an internal-auth caller carries no user id."
+          },
+          "name": {
+            "type": "string",
+            "description": "Set at publish time only, and only when the publish request carried one. A revision can have been published and still have no name; `published_at` is the signal that a revision was live at some point, not this field.\n",
+            "example": "FAQ page launch"
+          },
+          "description": {
+            "type": "string"
+          },
+          "page_count": {
+            "type": "number"
+          },
+          "published_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The last time this revision was published. NOT the same question as `is_published`: a revision that was live yesterday still carries a `published_at`.\n"
+          },
+          "published_by": {
+            "type": "string",
+            "description": "Who performed the last publish of this revision."
+          },
+          "is_published": {
+            "type": "boolean",
+            "description": "Whether this revision is the one currently live."
+          }
+        }
+      },
+      "PortalRevisionList": {
+        "type": "object",
+        "required": [
+          "results"
+        ],
+        "properties": {
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PortalRevisionSummary"
+            }
+          },
+          "next_cursor": {
+            "type": "string",
+            "description": "Opaque cursor to pass back as `cursor` to fetch the next page. When `next_cursor` is absent, the client has reached the end of the dataset.\n"
+          }
+        }
+      },
+      "PortalRevisionCreated": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/PortalRevisionSummary"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "identity_providers": {
+                "type": "array",
+                "description": "The SSO identity providers just captured into this revision, with `client_secret` REDACTED exactly as the admin portal-config GET redacts it. Returned only here — not on list items or elsewhere — because the caller who just submitted providers is the one reader who needs to see what got captured, e.g. to warn that the revision was saved without a client secret.\n",
+                "items": {
+                  "$ref": "#/components/schemas/ProviderConfig"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "RevisionPage": {
+        "description": "A page from a revision snapshot. Same shape as a live `Page`, without the server-managed fields (`past_routes`, `_created_at`, `_updated_at`, `is_deleted`), which publish re-derives from the live portal.\n",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Page"
+          },
+          {
+            "type": "object",
+            "required": [
+              "id",
+              "blocks"
+            ],
+            "properties": {
+              "org_id": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "PortalRevision": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/PortalRevisionSummary"
+          },
+          {
+            "type": "object",
+            "required": [
+              "config",
+              "pages"
+            ],
+            "properties": {
+              "config": {
+                "type": "object",
+                "additionalProperties": true,
+                "description": "The snapshotted portal configuration. Secret-typed extension option values are removed entirely — not masked — before the response is assembled.\n"
+              },
+              "pages": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/RevisionPage"
+                }
+              },
+              "identity_providers": {
+                "type": "array",
+                "description": "The SSO identity providers captured in this revision, with `client_secret` REDACTED exactly as the admin portal-config GET redacts it (no read path returns a stored secret).\nPublishing this revision replaces every live provider on this portal's origin, not just this portal's own, with this set. Identity providers key on `IDP#{origin}#{slug}`, a partition shared by every portal on that origin, so any other portal sharing it (an ADDITIONAL_PORTAL clone, most commonly) is affected too. A client can diff this against the live providers (by `slug`, and on `oidc_config.oidc_issuer` / `oidc_config.client_id` for a changed provider) to warn that a publish would also change SSO configuration, for this portal and any others sharing its origin.\nABSENT and `[]` are different answers. `[]` means the revision has no providers and publishing it removes the live ones; absent means the revision was saved before provider versioning, carries no SSO opinion, and publishing it changes no provider.\n",
+                "items": {
+                  "$ref": "#/components/schemas/ProviderConfig"
+                }
+              },
+              "email_templates": {
+                "$ref": "#/components/schemas/EmailTemplates"
+              },
+              "email_template_settings": {
+                "type": "object",
+                "additionalProperties": true,
+                "description": "The portal's email template settings as they were live when the revision was saved. Read-only: this field cannot be set through the revision request and is always captured from live.\n"
+              }
+            }
+          }
+        ]
+      },
+      "PublishResult": {
+        "type": "object",
+        "required": [
+          "revision_id",
+          "published_at",
+          "post_publish_warnings"
+        ],
+        "properties": {
+          "revision_id": {
+            "type": "string"
+          },
+          "published_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "published_by": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string",
+            "description": "The name now on the revision: the one sent in the request, or the one a previous publish set when this request omitted `name`. Absent when neither exists.\n",
+            "example": "FAQ page launch"
+          },
+          "post_publish_warnings": {
+            "type": "array",
+            "description": "Stable, machine-readable codes for best-effort post-publish side effects that exhausted their retries. Publishing itself succeeded; these are not error messages and not meant for display as-is. Clients map each code to their own localized text.\nKnown codes: `allowed_entities_change` (portal entity grants and detail pages did not sync), `dns_records_clear` (the previous domain's DNS records were not cleared). New codes may be added without a client update, so treat an unrecognized code as a generic \"a follow-up step did not finish\" case rather than an error.\n",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "allowed_entities_change"
+            ]
           }
         }
       },
