@@ -560,7 +560,23 @@ declare namespace Components {
          *       ```
          *
          */
-        EntityOperationTrigger | ActivityTrigger | EntityManualTrigger | ReceivedEmailTrigger | NewEmailThreadTrigger | FlowsTrigger;
+        EntityOperationTrigger | ActivityTrigger | EntityManualTrigger | ReceivedEmailTrigger | NewEmailThreadTrigger | FlowsTrigger | /**
+         * Starts the flow when an Event Catalog event is published for the organization. The execution runs in the context of one entity from the event's entity graph (`entity_node_id`), and the event payload is available to conditions and actions as the `event` variable context.
+         *
+         * example:
+         * {
+         *   "id": "12d4f45a-1883-4841-a94c-5928cb338a94",
+         *   "type": "event_catalog",
+         *   "configuration": {
+         *     "event_name": "CustomerRequestSubmitted",
+         *     "event_version": "1.1",
+         *     "entity_node_id": "ticket",
+         *     "entity_schema": "ticket",
+         *     "ignore_automation_triggered": true
+         *   }
+         * }
+         */
+        EventCatalogTrigger;
         export interface AnythingButCondition {
             "anything-but"?: string[];
         }
@@ -915,6 +931,38 @@ declare namespace Components {
                  */
                 values?: string[];
             };
+            /**
+             * Candidate condition for `sequential` and `even_distribution`: when true,
+             * only assign to users whose skills (tags) match a label on the entity
+             * being assigned. Opt-in; defaults to false. An entity carrying no
+             * namespaced label matches nobody, so the fallback applies.
+             *
+             */
+            match_user_skills?: boolean;
+            /**
+             * Candidate condition (with match_user_skills): label families
+             * (taxonomy slugs) that must match. Only categories the entity actually
+             * carries a label in are scored: a user qualifies if it shares a label with
+             * the entity within each of those. A required category the entity has no
+             * label in is a free pass and gates nobody — so when the entity has no label
+             * in any required category, every candidate passes this filter. Note this
+             * is the opposite of an entity carrying no namespaced label at all, which
+             * matches nobody — see `match_user_skills`. Leave empty to match on any
+             * label (flat OR across all categories).
+             *
+             */
+            required_skill_categories?: string[];
+            /**
+             * How strictly required skill categories are matched (applies with
+             * match_user_skills and required skill categories set).
+             * - require_all: hard match (default) — a user must match every required
+             *   category the entity has a label in.
+             * - prefer: soft match — prefer the best-matching users, relaxing to
+             *   fewer categories only when no better match exists; a user matching
+             *   no category is never eligible (the fallback then applies).
+             *
+             */
+            skill_match_mode?: "require_all" | "prefer";
             /**
              * What to do when no assignable principal resolves, e.g. an empty or
              * fully ineligible `candidate_group`.
@@ -1368,7 +1416,11 @@ declare namespace Components {
              * 2
              */
             version?: number;
-            trigger_event?: TriggerEventManual | TriggerEventEntityActivity | TriggerEventEntityOperation | TriggerEventFlowAutomationTask | TriggerEventMessaging;
+            trigger_event?: TriggerEventManual | TriggerEventEntityActivity | TriggerEventEntityOperation | TriggerEventFlowAutomationTask | TriggerEventMessaging | /**
+             * Set on executions started by an Event Catalog event (see EventCatalogTrigger). The full event payload is not stored inline (it may be up to 256 KB) but by reference in `payload_ref`; automation workers hydrate it before every action.
+             *
+             */
+            TriggerEventEventCatalog;
             workflow_context?: WorkflowExecutionContext;
             workflow_wait_context?: /**
              * Correlation stamped when the triggering submission entity carried workflow wait claims from a journey link (AL-2521). Consumed by svc-workflows to resume a task waiting on this journey submission.
@@ -1540,10 +1592,19 @@ declare namespace Components {
              */
             source_path: string;
             /**
-             * How source_path is interpreted. 'journey-multi-select' is the v1 source type (journey card block with multi-select). Future source types (e.g. 'previous-action-outputs', 'entity-relation') will be added here.
+             * How source_path is interpreted. 'journey-multi-select' is the v1 source type (journey card block with multi-select). 'journey-file-upload' iterates the files uploaded in a journey file upload block: source_path points at the submission's `_files.$relation` array, `filter_tags` narrows it down to the block's files and every item is treated as a `file` entity reference. Future source types (e.g. 'previous-action-outputs', 'entity-relation') will be added here.
              *
              */
-            source_type?: "journey-multi-select" | "previous-action-outputs" | "entity-relation";
+            source_type?: "journey-multi-select" | "journey-file-upload" | "previous-action-outputs" | "entity-relation";
+            /**
+             * Only iterate items of the resolved array whose `_tags` contain every listed tag. Meant for relation arrays such as `submission._files.$relation`, where the journey tags each file relation with the upload block it came from.
+             *
+             * example:
+             * [
+             *   "_hidden_ 2a4b1c3d-0000-4000-8000-000000000000 - Dokumente"
+             * ]
+             */
+            filter_tags?: string[];
             /**
              * Maximum number of iterations. 0 / omitted = iterate the full resolved array.
              *
@@ -1962,7 +2023,11 @@ declare namespace Components {
                  */
                 id?: string;
                 origin?: "trigger" | "action";
-                originType?: "entity" | "workflow" | "journey_block";
+                /**
+                 * `event` reads the operand from the trigger's Event Catalog payload instead of an entity: `attribute` is then a dot path into the payload (e.g. `ticket.subject`). Only valid with `origin: trigger` on flows started by an EventCatalogTrigger.
+                 *
+                 */
+                originType?: "entity" | "workflow" | "journey_block" | "event";
                 schema?: string;
                 attribute?: string;
                 attributeType?: "string" | "text" | "number" | "boolean" | "date" | "datetime" | "tags" | "country" | "email" | "phone" | "product" | "price" | "status" | "relation" | "multiselect" | "select" | "radio" | "relation_user" | "purpose" | "label" | "payment" | "relation_payment_method";
@@ -2723,6 +2788,63 @@ declare namespace Components {
             error_info?: {
                 [name: string]: any;
                 details?: ErrorDetail[];
+            };
+        }
+        /**
+         * Starts the flow when an Event Catalog event is published for the organization. The execution runs in the context of one entity from the event's entity graph (`entity_node_id`), and the event payload is available to conditions and actions as the `event` variable context.
+         *
+         * example:
+         * {
+         *   "id": "12d4f45a-1883-4841-a94c-5928cb338a94",
+         *   "type": "event_catalog",
+         *   "configuration": {
+         *     "event_name": "CustomerRequestSubmitted",
+         *     "event_version": "1.1",
+         *     "entity_node_id": "ticket",
+         *     "entity_schema": "ticket",
+         *     "ignore_automation_triggered": true
+         *   }
+         * }
+         */
+        export interface EventCatalogTrigger {
+            /**
+             * example:
+             * 12d4f45a-1883-4841-a94c-5928cb338a94
+             */
+            id?: string; // uuid
+            type: "event_catalog";
+            configuration: {
+                /**
+                 * Name of the Event Catalog event that starts this flow
+                 * example:
+                 * CustomerRequestSubmitted
+                 */
+                event_name: string;
+                /**
+                 * Event version (MAJOR.MINOR) this trigger is pinned to. Payloads published in a newer version are downgraded to this version before the flow runs, so field references in conditions and actions stay stable.
+                 *
+                 * example:
+                 * 1.1
+                 */
+                event_version: string;
+                /**
+                 * Id of the cardinality-one node in the event's entity graph whose entity becomes the execution's main entity (the entity actions operate on).
+                 *
+                 * example:
+                 * ticket
+                 */
+                entity_node_id: string;
+                /**
+                 * Schema of the entity behind `entity_node_id`, denormalized from the event definition at configuration time
+                 * example:
+                 * ticket
+                 */
+                entity_schema: string;
+                /**
+                 * When true (default), events that were emitted by an automation (`_trigger_source_type: automation`) do not start this flow. This prevents automation → event → automation chains unless explicitly enabled.
+                 *
+                 */
+                ignore_automation_triggered?: boolean;
             };
         }
         /**
@@ -4707,6 +4829,64 @@ declare namespace Components {
             ActivityId;
             operation_type: EntityOperation;
         }
+        /**
+         * Set on executions started by an Event Catalog event (see EventCatalogTrigger). The full event payload is not stored inline (it may be up to 256 KB) but by reference in `payload_ref`; automation workers hydrate it before every action.
+         *
+         */
+        export interface TriggerEventEventCatalog {
+            type: "event_catalog";
+            /**
+             * example:
+             * 123
+             */
+            org_id: string;
+            entity_id: /**
+             * example:
+             * e3d3ebac-baab-4395-abf4-50b5bf1f8b74
+             */
+            EntityId;
+            /**
+             * Node id of the event's entity graph that was resolved to `entity_id`
+             * example:
+             * ticket
+             */
+            entity_node_id: string;
+            /**
+             * Event Catalog event id (ULID) of the published event
+             * example:
+             * 01K3ZK8QZ7Y7Q2M8W1V3N4X5P6
+             */
+            event_id: string;
+            /**
+             * example:
+             * CustomerRequestSubmitted
+             */
+            event_name: string;
+            /**
+             * Version the payload was delivered in (the version pinned on the trigger)
+             * example:
+             * 1.1
+             */
+            event_version: string;
+            /**
+             * Version the event was originally published with, before downgrading to `event_version`
+             * example:
+             * 1.2
+             */
+            published_version?: string;
+            event_time?: string; // date-time
+            /**
+             * How the event was triggered in the catalog (api | automation | operation | portal_user)
+             * example:
+             * operation
+             */
+            trigger_source_type?: string;
+            /**
+             * Opaque source reference from the catalog (e.g. activity id, automation execution id)
+             */
+            trigger_source?: string;
+            payload_ref?: /* S3 reference to the stored trigger event payload (`_downgrades` stripped, downgraded to the pinned version) */ TriggerEventPayloadRef;
+        }
         export interface TriggerEventFlowAutomationTask {
             type?: "flow_automation_task";
             /**
@@ -4759,6 +4939,21 @@ declare namespace Components {
              * e3d3ebac-baab-4395-abf4-50b5bf1f8b74
              */
             EntityId;
+        }
+        /**
+         * S3 reference to the stored trigger event payload (`_downgrades` stripped, downgraded to the pinned version)
+         */
+        export interface TriggerEventPayloadRef {
+            /**
+             * example:
+             * automation-trigger-payloads-prod
+             */
+            bucket: string;
+            /**
+             * example:
+             * trigger-payloads/123/6c8e5d9a-7f1b-4c2e-9d3a-0b1c2d3e4f5a.json
+             */
+            key: string;
         }
         export interface TriggerShareEntityAction {
             id?: /**
@@ -5722,6 +5917,11 @@ declare namespace Paths {
             export type TargetWorkflow = string;
             /**
              * example:
+             * CustomerRequestSubmitted
+             */
+            export type TriggerEventName = string;
+            /**
+             * example:
              * 600945fe-212e-4b97-acf7-391d64648384
              */
             export type TriggerSourceId = string;
@@ -5744,6 +5944,11 @@ declare namespace Paths {
              * wfABCDEFGH
              */
             Parameters.TargetWorkflow;
+            trigger_event_name?: /**
+             * example:
+             * CustomerRequestSubmitted
+             */
+            Parameters.TriggerEventName;
             include_flows?: Parameters.IncludeFlows;
         }
         namespace Responses {
@@ -6216,6 +6421,7 @@ export type ErrorCode = Components.Schemas.ErrorCode;
 export type ErrorDetail = Components.Schemas.ErrorDetail;
 export type ErrorObject = Components.Schemas.ErrorObject;
 export type ErrorOutput = Components.Schemas.ErrorOutput;
+export type EventCatalogTrigger = Components.Schemas.EventCatalogTrigger;
 export type ExecItem = Components.Schemas.ExecItem;
 export type ExecutionChain = Components.Schemas.ExecutionChain;
 export type ExecutionStatus = Components.Schemas.ExecutionStatus;
@@ -6287,9 +6493,11 @@ export type TriggerEventActionConfig = Components.Schemas.TriggerEventActionConf
 export type TriggerEventConfig = Components.Schemas.TriggerEventConfig;
 export type TriggerEventEntityActivity = Components.Schemas.TriggerEventEntityActivity;
 export type TriggerEventEntityOperation = Components.Schemas.TriggerEventEntityOperation;
+export type TriggerEventEventCatalog = Components.Schemas.TriggerEventEventCatalog;
 export type TriggerEventFlowAutomationTask = Components.Schemas.TriggerEventFlowAutomationTask;
 export type TriggerEventManual = Components.Schemas.TriggerEventManual;
 export type TriggerEventMessaging = Components.Schemas.TriggerEventMessaging;
+export type TriggerEventPayloadRef = Components.Schemas.TriggerEventPayloadRef;
 export type TriggerShareEntityAction = Components.Schemas.TriggerShareEntityAction;
 export type TriggerShareEntityActionConfig = Components.Schemas.TriggerShareEntityActionConfig;
 export type TriggerShareEntityConfig = Components.Schemas.TriggerShareEntityConfig;

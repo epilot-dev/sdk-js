@@ -80,6 +80,15 @@
             }
           },
           {
+            "name": "trigger_event_name",
+            "in": "query",
+            "description": "Filter by Event Catalog event name. Returns only automations that have an event_catalog trigger for this event.",
+            "schema": {
+              "type": "string",
+              "example": "CustomerRequestSubmitted"
+            }
+          },
+          {
             "name": "include_flows",
             "in": "query",
             "description": "Include flow automations in the response",
@@ -1249,6 +1258,9 @@
           },
           {
             "$ref": "#/components/schemas/FlowsTrigger"
+          },
+          {
+            "$ref": "#/components/schemas/EventCatalogTrigger"
           }
         ]
       },
@@ -1426,13 +1438,24 @@
           },
           "source_type": {
             "type": "string",
-            "description": "How source_path is interpreted. 'journey-multi-select' is the v1 source type (journey card block with multi-select). Future source types (e.g. 'previous-action-outputs', 'entity-relation') will be added here.\n",
+            "description": "How source_path is interpreted. 'journey-multi-select' is the v1 source type (journey card block with multi-select). 'journey-file-upload' iterates the files uploaded in a journey file upload block: source_path points at the submission's `_files.$relation` array, `filter_tags` narrows it down to the block's files and every item is treated as a `file` entity reference. Future source types (e.g. 'previous-action-outputs', 'entity-relation') will be added here.\n",
             "enum": [
               "journey-multi-select",
+              "journey-file-upload",
               "previous-action-outputs",
               "entity-relation"
             ],
             "default": "journey-multi-select"
+          },
+          "filter_tags": {
+            "type": "array",
+            "description": "Only iterate items of the resolved array whose `_tags` contain every listed tag. Meant for relation arrays such as `submission._files.$relation`, where the journey tags each file relation with the upload block it came from.\n",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "_hidden_ 2a4b1c3d-0000-4000-8000-000000000000 - Dokumente"
+            ]
           },
           "length": {
             "type": "integer",
@@ -2567,6 +2590,27 @@
                 }
               }
             }
+          },
+          "match_user_skills": {
+            "type": "boolean",
+            "description": "Candidate condition for `sequential` and `even_distribution`: when true,\nonly assign to users whose skills (tags) match a label on the entity\nbeing assigned. Opt-in; defaults to false. An entity carrying no\nnamespaced label matches nobody, so the fallback applies.\n",
+            "default": false
+          },
+          "required_skill_categories": {
+            "type": "array",
+            "description": "Candidate condition (with match_user_skills): label families\n(taxonomy slugs) that must match. Only categories the entity actually\ncarries a label in are scored: a user qualifies if it shares a label with\nthe entity within each of those. A required category the entity has no\nlabel in is a free pass and gates nobody — so when the entity has no label\nin any required category, every candidate passes this filter. Note this\nis the opposite of an entity carrying no namespaced label at all, which\nmatches nobody — see `match_user_skills`. Leave empty to match on any\nlabel (flat OR across all categories).\n",
+            "items": {
+              "type": "string"
+            }
+          },
+          "skill_match_mode": {
+            "type": "string",
+            "description": "How strictly required skill categories are matched (applies with\nmatch_user_skills and required skill categories set).\n- require_all: hard match (default) — a user must match every required\n  category the entity has a label in.\n- prefer: soft match — prefer the best-matching users, relaxing to\n  fewer categories only when no better match exists; a user matching\n  no category is never eligible (the fallback then applies).\n",
+            "enum": [
+              "require_all",
+              "prefer"
+            ],
+            "default": "require_all"
           },
           "fallback": {
             "type": "string",
@@ -3711,10 +3755,12 @@
               },
               "originType": {
                 "type": "string",
+                "description": "`event` reads the operand from the trigger's Event Catalog payload instead of an entity: `attribute` is then a dot path into the payload (e.g. `ticket.subject`). Only valid with `origin: trigger` on flows started by an EventCatalogTrigger.\n",
                 "enum": [
                   "entity",
                   "workflow",
-                  "journey_block"
+                  "journey_block",
+                  "event"
                 ]
               },
               "schema": {
@@ -4004,6 +4050,9 @@
               },
               {
                 "$ref": "#/components/schemas/TriggerEventMessaging"
+              },
+              {
+                "$ref": "#/components/schemas/TriggerEventEventCatalog"
               }
             ]
           },
@@ -4298,6 +4347,92 @@
           "org_id",
           "activity_id",
           "operation_type"
+        ]
+      },
+      "TriggerEventEventCatalog": {
+        "type": "object",
+        "description": "Set on executions started by an Event Catalog event (see EventCatalogTrigger). The full event payload is not stored inline (it may be up to 256 KB) but by reference in `payload_ref`; automation workers hydrate it before every action.\n",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "event_catalog"
+            ]
+          },
+          "org_id": {
+            "type": "string",
+            "example": "123"
+          },
+          "entity_id": {
+            "$ref": "#/components/schemas/EntityId"
+          },
+          "entity_node_id": {
+            "type": "string",
+            "description": "Node id of the event's entity graph that was resolved to `entity_id`",
+            "example": "ticket"
+          },
+          "event_id": {
+            "type": "string",
+            "description": "Event Catalog event id (ULID) of the published event",
+            "example": "01K3ZK8QZ7Y7Q2M8W1V3N4X5P6"
+          },
+          "event_name": {
+            "type": "string",
+            "example": "CustomerRequestSubmitted"
+          },
+          "event_version": {
+            "type": "string",
+            "description": "Version the payload was delivered in (the version pinned on the trigger)",
+            "example": "1.1"
+          },
+          "published_version": {
+            "type": "string",
+            "description": "Version the event was originally published with, before downgrading to `event_version`",
+            "example": "1.2"
+          },
+          "event_time": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "trigger_source_type": {
+            "type": "string",
+            "description": "How the event was triggered in the catalog (api | automation | operation | portal_user)",
+            "example": "operation"
+          },
+          "trigger_source": {
+            "type": "string",
+            "description": "Opaque source reference from the catalog (e.g. activity id, automation execution id)"
+          },
+          "payload_ref": {
+            "$ref": "#/components/schemas/TriggerEventPayloadRef"
+          }
+        },
+        "required": [
+          "type",
+          "org_id",
+          "entity_id",
+          "entity_node_id",
+          "event_id",
+          "event_name",
+          "event_version"
+        ]
+      },
+      "TriggerEventPayloadRef": {
+        "type": "object",
+        "description": "S3 reference to the stored trigger event payload (`_downgrades` stripped, downgraded to the pinned version)",
+        "properties": {
+          "bucket": {
+            "type": "string",
+            "example": "automation-trigger-payloads-prod"
+          },
+          "key": {
+            "type": "string",
+            "example": "trigger-payloads/123/6c8e5d9a-7f1b-4c2e-9d3a-0b1c2d3e4f5a.json"
+          }
+        },
+        "required": [
+          "bucket",
+          "key"
         ]
       },
       "ApiCallerContext": {
@@ -5421,6 +5556,76 @@
             ]
           }
         ]
+      },
+      "EventCatalogTrigger": {
+        "description": "Starts the flow when an Event Catalog event is published for the organization. The execution runs in the context of one entity from the event's entity graph (`entity_node_id`), and the event payload is available to conditions and actions as the `event` variable context.\n",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AutomationTrigger"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "event_catalog"
+                ]
+              },
+              "configuration": {
+                "type": "object",
+                "properties": {
+                  "event_name": {
+                    "type": "string",
+                    "description": "Name of the Event Catalog event that starts this flow",
+                    "example": "CustomerRequestSubmitted"
+                  },
+                  "event_version": {
+                    "type": "string",
+                    "description": "Event version (MAJOR.MINOR) this trigger is pinned to. Payloads published in a newer version are downgraded to this version before the flow runs, so field references in conditions and actions stay stable.\n",
+                    "example": "1.1"
+                  },
+                  "entity_node_id": {
+                    "type": "string",
+                    "description": "Id of the cardinality-one node in the event's entity graph whose entity becomes the execution's main entity (the entity actions operate on).\n",
+                    "example": "ticket"
+                  },
+                  "entity_schema": {
+                    "type": "string",
+                    "description": "Schema of the entity behind `entity_node_id`, denormalized from the event definition at configuration time",
+                    "example": "ticket"
+                  },
+                  "ignore_automation_triggered": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "When true (default), events that were emitted by an automation (`_trigger_source_type: automation`) do not start this flow. This prevents automation → event → automation chains unless explicitly enabled.\n"
+                  }
+                },
+                "required": [
+                  "event_name",
+                  "event_version",
+                  "entity_node_id",
+                  "entity_schema"
+                ]
+              }
+            },
+            "required": [
+              "type",
+              "configuration"
+            ]
+          }
+        ],
+        "example": {
+          "id": "12d4f45a-1883-4841-a94c-5928cb338a94",
+          "type": "event_catalog",
+          "configuration": {
+            "event_name": "CustomerRequestSubmitted",
+            "event_version": "1.1",
+            "entity_node_id": "ticket",
+            "entity_schema": "ticket",
+            "ignore_automation_triggered": true
+          }
+        }
       },
       "TriggerCondition": {
         "type": "object",
