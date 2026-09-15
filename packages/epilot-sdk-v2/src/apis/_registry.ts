@@ -62,6 +62,11 @@ export const registerBuiltinApis = (registry: Map<string, ApiEntry>) => {
   });
   registerApi({
     registry,
+    name: 'chat',
+    loader: () => expandDef(require('../definitions/chat-runtime.json')),
+  });
+  registerApi({
+    registry,
     name: 'configurationHub',
     loader: () => expandDef(require('../definitions/configuration-hub-runtime.json')),
   });

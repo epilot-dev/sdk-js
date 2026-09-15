@@ -1,6 +1,6 @@
 {
   "name": "@epilot/sdk",
-  "version": "2.20.21",
+  "version": "2.20.22",
   "description": "JavaScript/TypeScript SDK for epilot APIs",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -75,6 +75,12 @@
       "require": "./dist/apis/calendar.cjs"
     },
     "./calendar/openapi.json": "./definitions/calendar.json",
+    "./chat": {
+      "types": "./dist/apis/chat.d.ts",
+      "import": "./dist/apis/chat.js",
+      "require": "./dist/apis/chat.cjs"
+    },
+    "./chat/openapi.json": "./definitions/chat.json",
     "./configuration-hub": {
       "types": "./dist/apis/configuration-hub.d.ts",
       "import": "./dist/apis/configuration-hub.js",
@@ -400,6 +406,9 @@
       ],
       "calendar": [
         "./dist/apis/calendar.d.ts"
+      ],
+      "chat": [
+        "./dist/apis/chat.d.ts"
       ],
       "configuration-hub": [
         "./dist/apis/configuration-hub.d.ts"

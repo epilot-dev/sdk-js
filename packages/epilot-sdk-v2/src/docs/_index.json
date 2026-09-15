@@ -9,6 +9,7 @@
   "billing": "billing",
   "blueprintManifest": "blueprint-manifest",
   "calendar": "calendar",
+  "chat": "chat",
   "configurationHub": "configuration-hub",
   "consent": "consent",
   "customerPortal": "customer-portal",
