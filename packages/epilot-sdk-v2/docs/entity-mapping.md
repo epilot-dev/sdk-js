@@ -1029,6 +1029,8 @@ type MappingConfigs = Array<{
     use_uniqueness_criteria?: boolean
     loop_config?: {
       source_path?: { ... }
+      source_type?: { ... }
+      filter_tags?: { ... }
       length?: { ... }
     }
     conditionMode?: "oneOf" | "anyOf" | "allOf"
@@ -1115,6 +1117,8 @@ type MappingConfig = {
     use_uniqueness_criteria?: boolean
     loop_config?: {
       source_path?: { ... }
+      source_type?: { ... }
+      filter_tags?: { ... }
       length?: { ... }
     }
     conditionMode?: "oneOf" | "anyOf" | "allOf"
@@ -1201,6 +1205,8 @@ type MappingConfigV2 = {
     use_uniqueness_criteria?: boolean
     loop_config?: {
       source_path?: { ... }
+      source_type?: { ... }
+      filter_tags?: { ... }
       length?: { ... }
     }
     conditionMode?: "oneOf" | "anyOf" | "allOf"
@@ -1287,6 +1293,8 @@ type MappingConfigCommonFields = {
     use_uniqueness_criteria?: boolean
     loop_config?: {
       source_path?: { ... }
+      source_type?: { ... }
+      filter_tags?: { ... }
       length?: { ... }
     }
     conditionMode?: "oneOf" | "anyOf" | "allOf"
@@ -1452,6 +1460,8 @@ type ExecuteMappingReq = {
     use_uniqueness_criteria?: boolean
     loop_config?: {
       source_path?: { ... }
+      source_type?: { ... }
+      filter_tags?: { ... }
       length?: { ... }
     }
     conditionMode?: "oneOf" | "anyOf" | "allOf"
@@ -1558,6 +1568,8 @@ type MappingFailure = {
     use_uniqueness_criteria?: boolean
     loop_config?: {
       source_path?: { ... }
+      source_type?: { ... }
+      filter_tags?: { ... }
       length?: { ... }
     }
     conditionMode?: "oneOf" | "anyOf" | "allOf"
@@ -1687,6 +1699,8 @@ type TargetConfig = {
   use_uniqueness_criteria?: boolean
   loop_config?: {
     source_path?: string
+    source_type?: "journey-multi-select" | "journey-file-upload"
+    filter_tags?: string[]
     length?: number
   }
   conditionMode?: "oneOf" | "anyOf" | "allOf"
@@ -1847,6 +1861,7 @@ type GraphContextEntry = {
       cardinality?: { ... }
       fields?: { ... }
       filter?: { ... }
+      optional?: { ... }
     }>
     edges: Array<{
       from: { ... }
@@ -1882,6 +1897,7 @@ type GraphDefinition = {
       attribute: { ... }
       value: { ... }
     }>
+    optional?: boolean
   }>
   edges: Array<{
     from: string
@@ -1904,6 +1920,7 @@ type GraphNode = {
     attribute: string
     value: string | number | boolean
   }>
+  optional?: boolean
 }
 ```
 
@@ -2249,6 +2266,8 @@ type MappingHistoryEntry = {
     use_uniqueness_criteria?: boolean
     loop_config?: {
       source_path?: { ... }
+      source_type?: { ... }
+      filter_tags?: { ... }
       length?: { ... }
     }
     conditionMode?: "oneOf" | "anyOf" | "allOf"
