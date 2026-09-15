@@ -1,0 +1,128 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "",
+    "version": ""
+  },
+  "servers": [
+    {
+      "url": "https://chat.sls.epilot.io"
+    }
+  ],
+  "paths": {
+    "/v1/widgets": {
+      "get": {
+        "operationId": "listChatWidgets",
+        "responses": {},
+        "parameters": [
+          {
+            "in": "query",
+            "name": "cursor"
+          }
+        ]
+      },
+      "post": {
+        "operationId": "createChatWidget",
+        "responses": {},
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        }
+      }
+    },
+    "/v1/widgets/{widget_id}": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "widget_id",
+          "required": true
+        }
+      ],
+      "get": {
+        "operationId": "getChatWidget",
+        "responses": {}
+      },
+      "put": {
+        "operationId": "updateChatWidget",
+        "responses": {},
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteChatWidget",
+        "responses": {},
+        "parameters": [
+          {
+            "in": "query",
+            "name": "version",
+            "required": true
+          }
+        ]
+      }
+    },
+    "/v1/widgets/{widget_id}/configuration": {
+      "get": {
+        "operationId": "getPublicChatWidget",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "widget_id",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/bootstrap": {
+      "post": {
+        "operationId": "createPublicChatGrant",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/sessions": {
+      "post": {
+        "operationId": "createAnonymousChatSession",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/messages": {
+      "post": {
+        "operationId": "sendAnonymousChatMessage",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    }
+  },
+  "components": {
+    "responses": {
+      "Error": {
+        "content": {
+          "application/json": {}
+        }
+      }
+    }
+  }
+}
