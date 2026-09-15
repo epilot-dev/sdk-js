@@ -225,6 +225,14 @@ declare namespace Components {
              *
              */
             filter?: /* Mirrors entity-api's GraphNodeFilter (see entity-api openapi.yml). */ GraphNodeFilter[];
+            /**
+             * Only meaningful for a node expected to resolve to a single entity (the seed node, or
+             * "cardinality: one"). When true, finding zero matching entities is not an error - the
+             * mapping proceeds without this node's data instead of failing. Finding more than one
+             * match still fails regardless of this flag; ambiguity is never silently accepted.
+             *
+             */
+            optional?: boolean;
         }
         /**
          * Mirrors entity-api's GraphNodeFilter (see entity-api openapi.yml).
@@ -687,6 +695,20 @@ declare namespace Components {
                  * path to the array from the entity payload
                  */
                 source_path?: string;
+                /**
+                 * Kind of journey block the loop iterates. 'journey-multi-select' (default) is a cards block with multi selection. 'journey-file-upload' is a file upload block: source_path points at the submission's `_files.$relation` array and `filter_tags` narrows it down to the block's files. Forwarded to the flow-level loop by the Automation Hub.
+                 *
+                 */
+                source_type?: "journey-multi-select" | "journey-file-upload";
+                /**
+                 * Only iterate items of the array whose `_tags` contain every listed tag. Meant for relation arrays such as `submission._files.$relation`, where the journey tags each file relation with the upload block it came from. `##LOOP_INDEX##` keeps referring to the item's index in the unfiltered array.
+                 *
+                 * example:
+                 * [
+                 *   "_hidden_ 2a4b1c3d-0000-4000-8000-000000000000 - Dokumente"
+                 * ]
+                 */
+                filter_tags?: string[];
                 /**
                  * a hard limit of how many times the loop is allowed to run.
                  */
