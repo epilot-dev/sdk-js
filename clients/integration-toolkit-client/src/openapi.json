@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Integration Toolkit API",
-    "version": "1.31.0",
+    "version": "1.33.0",
     "description": "API for integrating with external systems in a standardised way."
   },
   "tags": [
@@ -2814,9 +2814,10 @@
     },
     "/v1/integrations/{integrationId}/monitoring/inbound-events": {
       "post": {
+        "deprecated": true,
         "operationId": "queryInboundMonitoringEvents",
         "summary": "queryInboundMonitoringEvents",
-        "description": "Query inbound monitoring events for a specific integration.\nReturns detailed information about inbound sync events from ERP systems,\nincluding success rates, error breakdowns, and processing metrics.\n",
+        "description": "**Deprecated and no longer implemented.** The `erp_monitoring` table this\nendpoint read has been retired in favour of the unified `erp_monitoring_v2`\ntable. The endpoint is kept only so existing clients do not 404; it always\nresponds `200` with an empty result and never reads any data.\n\nUse `POST /v2/integrations/{integrationId}/monitoring/events` instead,\nfiltered to `use_case_type: inbound`.\n",
         "tags": [
           "monitoring",
           "integrations"
@@ -2864,9 +2865,10 @@
     },
     "/v1/integrations/{integrationId}/monitoring/stats": {
       "post": {
+        "deprecated": true,
         "operationId": "getMonitoringStats",
         "summary": "getMonitoringStats",
-        "description": "Get aggregated statistics for both inbound and outbound monitoring events for a specific integration.\nReturns summary metrics for inbound (ERP sync) and outbound (webhook delivery) events,\nincluding success/error counts and optional breakdowns.\n",
+        "description": "**Deprecated and no longer implemented.** The `erp_monitoring` and\n`webhook_events` tables this endpoint aggregated have been retired in favour\nof the unified `erp_monitoring_v2` table. The endpoint is kept only so\nexisting clients do not 404; it always responds `200` with zeroed counters\nand never reads any data.\n\nUse `POST /v2/integrations/{integrationId}/monitoring/stats` instead.\n",
         "tags": [
           "monitoring",
           "integrations"
@@ -2914,9 +2916,10 @@
     },
     "/v1/integrations/{integrationId}/monitoring/timeseries": {
       "post": {
+        "deprecated": true,
         "operationId": "getMonitoringTimeSeries",
         "summary": "getMonitoringTimeSeries",
-        "description": "Get time-series aggregated event counts for monitoring charts.\nReturns pre-bucketed counts at configurable intervals for both inbound and outbound events.\nMaximum of 200 buckets per request. Returns 400 if the time range and interval would exceed this limit.\n",
+        "description": "**Deprecated and no longer implemented.** The `erp_monitoring` and\n`webhook_events` tables this endpoint bucketed have been retired in favour\nof the unified `erp_monitoring_v2` table. The endpoint is kept only so\nexisting clients do not 404; it always responds `200` with an empty bucket\nlist and never reads any data.\n\nUse `POST /v2/integrations/{integrationId}/monitoring/time-series` instead.\n",
         "tags": [
           "monitoring",
           "integrations"
@@ -3441,9 +3444,10 @@
     },
     "/v1/integrations/{integrationId}/monitoring/outbound-events": {
       "post": {
+        "deprecated": true,
         "operationId": "queryOutboundMonitoringEvents",
         "summary": "queryOutboundMonitoringEvents",
-        "description": "Query outbound monitoring events for a specific integration.\nReturns detailed information about outbound event deliveries,\nfiltered by event_name (event_catalog_event) linked to the integration's outbound use cases.\n",
+        "description": "**Deprecated and no longer implemented.** The `webhook_events` table this\nendpoint read has been retired in favour of the unified `erp_monitoring_v2`\ntable. The endpoint is kept only so existing clients do not 404; it always\nresponds `200` with an empty result and never reads any data.\n\nUse `POST /v2/integrations/{integrationId}/monitoring/events` instead,\nfiltered to `use_case_type: outbound`.\n",
         "tags": [
           "monitoring",
           "integrations"
@@ -5294,6 +5298,38 @@
             "format": "date-time",
             "nullable": true,
             "description": "ISO instant the rule last cleared back to OK."
+          },
+          "last_evaluation": {
+            "type": "object",
+            "nullable": true,
+            "description": "The most recent evaluation of this rule, or null when it has never been evaluated. Answers \"why isn't this rule firing?\" for a rule that neither fires nor transitions — which otherwise leaves no trace at all.",
+            "required": [
+              "evaluated_at",
+              "observed"
+            ],
+            "properties": {
+              "evaluated_at": {
+                "type": "string",
+                "format": "date-time",
+                "description": "ISO instant of the evaluation. Updates on every sweep tick."
+              },
+              "observed": {
+                "type": "number",
+                "description": "The measure seen (error/warning count, success rate, or event total)."
+              },
+              "threshold": {
+                "type": "number",
+                "nullable": true,
+                "description": "What it was compared against; null for a rule type with no threshold."
+              },
+              "suppressed_reason": {
+                "type": "string",
+                "enum": [
+                  "sample_size"
+                ],
+                "description": "Present ONLY when the rule could not be evaluated. `sample_size` means the success-rate minimum-sample guard was not met, so the rule is neither healthy nor alerting — it is not evaluating at all. Absent when the evaluation ran normally."
+              }
+            }
           },
           "baseline": {
             "nullable": true,
@@ -11817,9 +11853,10 @@
               "success",
               "error",
               "info",
-              "warning"
+              "warning",
+              "skipped"
             ],
-            "description": "Filter by event level"
+            "description": "Filter by event level. `skipped` is accepted but can never match: the v2 pipeline normalises it to `info`, and the table's enum has no such member. It is retained here — and ONLY here, not on `MonitoringEventV2` — so that a client with a saved `level=skipped` filter keeps getting an empty 200 rather than a 400 from request validation. Use `info` instead."
           },
           "code": {
             "type": "string",

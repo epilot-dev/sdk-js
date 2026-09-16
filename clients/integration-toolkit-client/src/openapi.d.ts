@@ -6128,6 +6128,27 @@ declare namespace Components {
              */
             last_cleared_at?: string | null; // date-time
             /**
+             * The most recent evaluation of this rule, or null when it has never been evaluated. Answers "why isn't this rule firing?" for a rule that neither fires nor transitions — which otherwise leaves no trace at all.
+             */
+            last_evaluation?: {
+                /**
+                 * ISO instant of the evaluation. Updates on every sweep tick.
+                 */
+                evaluated_at: string; // date-time
+                /**
+                 * The measure seen (error/warning count, success rate, or event total).
+                 */
+                observed: number;
+                /**
+                 * What it was compared against; null for a rule type with no threshold.
+                 */
+                threshold?: number | null;
+                /**
+                 * Present ONLY when the rule could not be evaluated. `sample_size` means the success-rate minimum-sample guard was not met, so the rule is neither healthy nor alerting — it is not evaluating at all. Absent when the evaluation ran normally.
+                 */
+                suppressed_reason?: "sample_size";
+            } | null;
+            /**
              * Present only for enabled 'auto'-threshold rules; null otherwise.
              */
             baseline?: {
@@ -7009,9 +7030,9 @@ declare namespace Components {
              */
             use_case_type?: "inbound" | "outbound" | "file_proxy" | "managed_call" | "secure_proxy";
             /**
-             * Filter by event level
+             * Filter by event level. `skipped` is accepted but can never match: the v2 pipeline normalises it to `info`, and the table's enum has no such member. It is retained here — and ONLY here, not on `MonitoringEventV2` — so that a client with a saved `level=skipped` filter keeps getting an empty 200 rather than a 400 from request validation. Use `info` instead.
              */
-            level?: "success" | "error" | "info" | "warning";
+            level?: "success" | "error" | "info" | "warning" | "skipped";
             /**
              * Filter by taxonomy code (e.g. OAUTH2_TOKEN_FAILURE, HTTP_502). Accepts any `MonitoringCode` value, or an `HTTP_{status}` family value.
              */
@@ -10119,9 +10140,13 @@ export interface OperationMethods {
   /**
    * queryInboundMonitoringEvents - queryInboundMonitoringEvents
    * 
-   * Query inbound monitoring events for a specific integration.
-   * Returns detailed information about inbound sync events from ERP systems,
-   * including success rates, error breakdowns, and processing metrics.
+   * **Deprecated and no longer implemented.** The `erp_monitoring` table this
+   * endpoint read has been retired in favour of the unified `erp_monitoring_v2`
+   * table. The endpoint is kept only so existing clients do not 404; it always
+   * responds `200` with an empty result and never reads any data.
+   * 
+   * Use `POST /v2/integrations/{integrationId}/monitoring/events` instead,
+   * filtered to `use_case_type: inbound`.
    * 
    */
   'queryInboundMonitoringEvents'(
@@ -10132,9 +10157,13 @@ export interface OperationMethods {
   /**
    * getMonitoringStats - getMonitoringStats
    * 
-   * Get aggregated statistics for both inbound and outbound monitoring events for a specific integration.
-   * Returns summary metrics for inbound (ERP sync) and outbound (webhook delivery) events,
-   * including success/error counts and optional breakdowns.
+   * **Deprecated and no longer implemented.** The `erp_monitoring` and
+   * `webhook_events` tables this endpoint aggregated have been retired in favour
+   * of the unified `erp_monitoring_v2` table. The endpoint is kept only so
+   * existing clients do not 404; it always responds `200` with zeroed counters
+   * and never reads any data.
+   * 
+   * Use `POST /v2/integrations/{integrationId}/monitoring/stats` instead.
    * 
    */
   'getMonitoringStats'(
@@ -10145,9 +10174,13 @@ export interface OperationMethods {
   /**
    * getMonitoringTimeSeries - getMonitoringTimeSeries
    * 
-   * Get time-series aggregated event counts for monitoring charts.
-   * Returns pre-bucketed counts at configurable intervals for both inbound and outbound events.
-   * Maximum of 200 buckets per request. Returns 400 if the time range and interval would exceed this limit.
+   * **Deprecated and no longer implemented.** The `erp_monitoring` and
+   * `webhook_events` tables this endpoint bucketed have been retired in favour
+   * of the unified `erp_monitoring_v2` table. The endpoint is kept only so
+   * existing clients do not 404; it always responds `200` with an empty bucket
+   * list and never reads any data.
+   * 
+   * Use `POST /v2/integrations/{integrationId}/monitoring/time-series` instead.
    * 
    */
   'getMonitoringTimeSeries'(
@@ -10291,9 +10324,13 @@ export interface OperationMethods {
   /**
    * queryOutboundMonitoringEvents - queryOutboundMonitoringEvents
    * 
-   * Query outbound monitoring events for a specific integration.
-   * Returns detailed information about outbound event deliveries,
-   * filtered by event_name (event_catalog_event) linked to the integration's outbound use cases.
+   * **Deprecated and no longer implemented.** The `webhook_events` table this
+   * endpoint read has been retired in favour of the unified `erp_monitoring_v2`
+   * table. The endpoint is kept only so existing clients do not 404; it always
+   * responds `200` with an empty result and never reads any data.
+   * 
+   * Use `POST /v2/integrations/{integrationId}/monitoring/events` instead,
+   * filtered to `use_case_type: outbound`.
    * 
    */
   'queryOutboundMonitoringEvents'(
@@ -11084,9 +11121,13 @@ export interface PathsDictionary {
     /**
      * queryInboundMonitoringEvents - queryInboundMonitoringEvents
      * 
-     * Query inbound monitoring events for a specific integration.
-     * Returns detailed information about inbound sync events from ERP systems,
-     * including success rates, error breakdowns, and processing metrics.
+     * **Deprecated and no longer implemented.** The `erp_monitoring` table this
+     * endpoint read has been retired in favour of the unified `erp_monitoring_v2`
+     * table. The endpoint is kept only so existing clients do not 404; it always
+     * responds `200` with an empty result and never reads any data.
+     * 
+     * Use `POST /v2/integrations/{integrationId}/monitoring/events` instead,
+     * filtered to `use_case_type: inbound`.
      * 
      */
     'post'(
@@ -11099,9 +11140,13 @@ export interface PathsDictionary {
     /**
      * getMonitoringStats - getMonitoringStats
      * 
-     * Get aggregated statistics for both inbound and outbound monitoring events for a specific integration.
-     * Returns summary metrics for inbound (ERP sync) and outbound (webhook delivery) events,
-     * including success/error counts and optional breakdowns.
+     * **Deprecated and no longer implemented.** The `erp_monitoring` and
+     * `webhook_events` tables this endpoint aggregated have been retired in favour
+     * of the unified `erp_monitoring_v2` table. The endpoint is kept only so
+     * existing clients do not 404; it always responds `200` with zeroed counters
+     * and never reads any data.
+     * 
+     * Use `POST /v2/integrations/{integrationId}/monitoring/stats` instead.
      * 
      */
     'post'(
@@ -11114,9 +11159,13 @@ export interface PathsDictionary {
     /**
      * getMonitoringTimeSeries - getMonitoringTimeSeries
      * 
-     * Get time-series aggregated event counts for monitoring charts.
-     * Returns pre-bucketed counts at configurable intervals for both inbound and outbound events.
-     * Maximum of 200 buckets per request. Returns 400 if the time range and interval would exceed this limit.
+     * **Deprecated and no longer implemented.** The `erp_monitoring` and
+     * `webhook_events` tables this endpoint bucketed have been retired in favour
+     * of the unified `erp_monitoring_v2` table. The endpoint is kept only so
+     * existing clients do not 404; it always responds `200` with an empty bucket
+     * list and never reads any data.
+     * 
+     * Use `POST /v2/integrations/{integrationId}/monitoring/time-series` instead.
      * 
      */
     'post'(
@@ -11278,9 +11327,13 @@ export interface PathsDictionary {
     /**
      * queryOutboundMonitoringEvents - queryOutboundMonitoringEvents
      * 
-     * Query outbound monitoring events for a specific integration.
-     * Returns detailed information about outbound event deliveries,
-     * filtered by event_name (event_catalog_event) linked to the integration's outbound use cases.
+     * **Deprecated and no longer implemented.** The `webhook_events` table this
+     * endpoint read has been retired in favour of the unified `erp_monitoring_v2`
+     * table. The endpoint is kept only so existing clients do not 404; it always
+     * responds `200` with an empty result and never reads any data.
+     * 
+     * Use `POST /v2/integrations/{integrationId}/monitoring/events` instead,
+     * filtered to `use_case_type: outbound`.
      * 
      */
     'post'(
