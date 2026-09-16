@@ -76,11 +76,7 @@ const { data } = await integrationToolkitClient.acknowledgeTracking(...)
 - [`commitTypes`](#committypes)
 
 **monitoring**
-- [`queryInboundMonitoringEvents`](#queryinboundmonitoringevents)
-- [`getMonitoringStats`](#getmonitoringstats)
-- [`getMonitoringTimeSeries`](#getmonitoringtimeseries)
 - [`queryAccessLogs`](#queryaccesslogs)
-- [`queryOutboundMonitoringEvents`](#queryoutboundmonitoringevents)
 - [`queryMonitoringEventsV2`](#querymonitoringeventsv2)
 - [`getMonitoringStatsV2`](#getmonitoringstatsv2)
 - [`getMonitoringTimeSeriesV2`](#getmonitoringtimeseriesv2)
@@ -2279,6 +2275,12 @@ const { data } = await client.getNotificationStatus({
       "state": "ok",
       "last_fired_at": "1970-01-01T00:00:00.000Z",
       "last_cleared_at": "1970-01-01T00:00:00.000Z",
+      "last_evaluation": {
+        "evaluated_at": "1970-01-01T00:00:00.000Z",
+        "observed": 0,
+        "threshold": 0,
+        "suppressed_reason": "sample_size"
+      },
       "baseline": {
         "is_mature": true,
         "computed_at": "1970-01-01T00:00:00.000Z",
@@ -2476,189 +2478,6 @@ const { data } = await client.deleteIntegrationAppMapping(
 ```json
 {
   "message": "string"
-}
-```
-
-</details>
-
----
-
-### `queryInboundMonitoringEvents`
-
-Query inbound monitoring events for a specific integration.
-Returns detailed information about inbound sync events from ERP systems,
-including success rates, error breakdowns, and processing metrics.
-
-`POST /v1/integrations/{integrationId}/monitoring/inbound-events`
-
-```ts
-const { data } = await client.queryInboundMonitoringEvents(
-  {
-    integrationId: 'example',
-  },
-  {
-    use_case_id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
-    event_type: 'CREATE',
-    sync_type: 'entity',
-    status: 'success',
-    error_category: 'validation',
-    correlation_id: 'string',
-    object_type: 'string',
-    event_name: 'string',
-    event_id: 'string',
-    from_date: '2025-01-01T00:00:00Z',
-    to_date: '2025-01-31T23:59:59Z',
-    limit: 50,
-    cursor: {
-      completed_at: '1970-01-01T00:00:00.000Z',
-      event_id: 'string'
-    }
-  },
-)
-```
-
-<details>
-<summary>Response</summary>
-
-```json
-{
-  "data": [
-    {
-      "org_id": "string",
-      "event_id": "string",
-      "correlation_id": "string",
-      "integration_id": "string",
-      "use_case_id": "string",
-      "event_type": "CREATE",
-      "object_type": "string",
-      "sync_type": "entity",
-      "status": "success",
-      "error_code": "string",
-      "error_message": "string",
-      "error_category": "validation",
-      "processing_duration_ms": 0,
-      "received_at": "1970-01-01T00:00:00.000Z",
-      "completed_at": "1970-01-01T00:00:00.000Z"
-    }
-  ],
-  "next_cursor": {
-    "completed_at": "1970-01-01T00:00:00.000Z",
-    "event_id": "string"
-  },
-  "has_more": true
-}
-```
-
-</details>
-
----
-
-### `getMonitoringStats`
-
-Get aggregated statistics for both inbound and outbound monitoring events for a specific integration.
-Returns summary metrics for inbound (ERP sync) and outbound (webhook delivery) events,
-including s
-
-`POST /v1/integrations/{integrationId}/monitoring/stats`
-
-```ts
-const { data } = await client.getMonitoringStats(
-  {
-    integrationId: 'example',
-  },
-  {
-    from_date: '2025-01-01T00:00:00Z',
-    to_date: '2025-01-31T23:59:59Z',
-    inbound_group_by: ['use_case_id', 'status'],
-    outbound_group_by: ['event_name', 'status']
-  },
-)
-```
-
-<details>
-<summary>Response</summary>
-
-```json
-{
-  "inbound": {
-    "total_events": 0,
-    "total_correlations": 0,
-    "success_count": 0,
-    "error_count": 0,
-    "skipped_count": 0,
-    "warning_count": 0,
-    "success_rate": 0,
-    "last_error_at": "1970-01-01T00:00:00.000Z",
-    "breakdown": [
-      {}
-    ]
-  },
-  "outbound": {
-    "total_events": 0,
-    "success_count": 0,
-    "error_count": 0,
-    "pending_count": 0,
-    "success_rate": 0,
-    "last_error_at": "1970-01-01T00:00:00.000Z",
-    "breakdown": [
-      {}
-    ]
-  }
-}
-```
-
-</details>
-
----
-
-### `getMonitoringTimeSeries`
-
-Get time-series aggregated event counts for monitoring charts.
-Returns pre-bucketed counts at configurable intervals for both inbound and outbound events.
-Maximum of 200 buckets per request. Returns 4
-
-`POST /v1/integrations/{integrationId}/monitoring/timeseries`
-
-```ts
-const { data } = await client.getMonitoringTimeSeries(
-  {
-    integrationId: 'example',
-  },
-  {
-    from_date: '2025-01-01T00:00:00Z',
-    to_date: '2025-01-31T23:59:59Z',
-    interval: '1h',
-    direction: 'both'
-  },
-)
-```
-
-<details>
-<summary>Response</summary>
-
-```json
-{
-  "interval": "5m",
-  "from_date": "1970-01-01T00:00:00.000Z",
-  "to_date": "1970-01-01T00:00:00.000Z",
-  "buckets": [
-    {
-      "timestamp": "1970-01-01T00:00:00.000Z",
-      "inbound": {
-        "success_count": 0,
-        "error_count": 0,
-        "warning_count": 0,
-        "skipped_count": 0,
-        "total_count": 0
-      },
-      "outbound": {
-        "success_count": 0,
-        "error_count": 0,
-        "pending_count": 0,
-        "total_count": 0
-      }
-    }
-  ]
 }
 ```
 
@@ -3035,68 +2854,6 @@ const { data } = await client.queryAccessLogs(
   "next_cursor": {
     "timestamp": "1970-01-01T00:00:00.000Z",
     "request_id": "string"
-  },
-  "has_more": true
-}
-```
-
-</details>
-
----
-
-### `queryOutboundMonitoringEvents`
-
-Query outbound monitoring events for a specific integration.
-Returns detailed information about outbound event deliveries,
-filtered by event_name (event_catalog_event) linked to the integration's outb
-
-`POST /v1/integrations/{integrationId}/monitoring/outbound-events`
-
-```ts
-const { data } = await client.queryOutboundMonitoringEvents(
-  {
-    integrationId: 'example',
-  },
-  {
-    event_name: 'automation_flow_target',
-    status: 'succeeded',
-    webhook_config_id: 'string',
-    from_date: '2025-01-01T00:00:00Z',
-    to_date: '2025-01-31T23:59:59Z',
-    limit: 50,
-    cursor: {
-      created_at: '1970-01-01T00:00:00.000Z',
-      event_id: 'string'
-    }
-  },
-)
-```
-
-<details>
-<summary>Response</summary>
-
-```json
-{
-  "data": [
-    {
-      "org_id": "string",
-      "event_id": "string",
-      "event_name": "string",
-      "status": "succeeded",
-      "url": "string",
-      "http_method": "string",
-      "http_response": {},
-      "webhook_config_id": "string",
-      "metadata": {},
-      "execution_context": {},
-      "payload": {},
-      "created_at": "1970-01-01T00:00:00.000Z",
-      "updated_at": "1970-01-01T00:00:00.000Z"
-    }
-  ],
-  "next_cursor": {
-    "created_at": "1970-01-01T00:00:00.000Z",
-    "event_id": "string"
   },
   "has_more": true
 }
@@ -4348,6 +4105,12 @@ type NotificationStatusResponse = {
     state: "ok" | "alerting" | "recovered"
     last_fired_at?: string // date-time
     last_cleared_at?: string // date-time
+    last_evaluation?: {
+      evaluated_at: { ... }
+      observed: { ... }
+      threshold?: { ... }
+      suppressed_reason?: { ... }
+    }
     baseline?: {
       is_mature: { ... }
       computed_at?: { ... }
@@ -4368,6 +4131,12 @@ type NotificationRuleStatus = {
   state: "ok" | "alerting" | "recovered"
   last_fired_at?: string // date-time
   last_cleared_at?: string // date-time
+  last_evaluation?: {
+    evaluated_at: string // date-time
+    observed: number
+    threshold?: number
+    suppressed_reason?: "sample_size"
+  }
   baseline?: {
     is_mature: boolean
     computed_at?: string // date-time
@@ -9295,7 +9064,7 @@ type InboundMonitoringEvent = {
 type QueryMonitoringEventsV2Request = {
   use_case_id?: string
   use_case_type?: "inbound" | "outbound" | "file_proxy" | "managed_call" | "secure_proxy"
-  level?: "success" | "error" | "info" | "warning"
+  level?: "success" | "error" | "info" | "warning" | "skipped"
   code?: string
   event_id?: string
   correlation_id?: string
