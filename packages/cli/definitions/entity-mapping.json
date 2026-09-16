@@ -763,6 +763,10 @@
             "$ref": "#/components/schemas/EntityRef",
             "description": "A reference (id and schema) to the entity to be used as source."
           },
+          "loop_ref": {
+            "$ref": "#/components/schemas/EntityRef",
+            "description": "Reference to the current iteration's entity when running inside a flow loop.\nWhen set, its fields and relations are merged into the source context;\non schema conflicts the loop entity wins, so paths like `<schema>._id` resolve\nto the iteration entity rather than to a same-schema relation of the source.\n"
+          },
           "targets": {
             "type": "array",
             "items": {
@@ -960,6 +964,11 @@
               "type": "string"
             }
           },
+          "use_uniqueness_criteria": {
+            "type": "boolean",
+            "default": false,
+            "description": "Execution wire flag set per automation by automation-workers: resolve the target entity via the organization's global uniqueness criteria (deduplication-api) instead of target_unique. Never persisted in stored mapping configs.\n"
+          },
           "loop_config": {
             "type": "object",
             "description": "contains config in case of running in loop mode",
@@ -970,8 +979,7 @@
               },
               "length": {
                 "type": "number",
-                "description": "a hard limit of how many times the loop is allowed to run.",
-                "default": "the length of the array"
+                "description": "a hard limit of how many times the loop is allowed to run."
               }
             }
           },
@@ -1022,6 +1030,13 @@
             "description": "Relation tags (labels) to include in main entity linkback relation attribute",
             "items": {
               "type": "string"
+            }
+          },
+          "graph_context": {
+            "type": "array",
+            "description": "Multi-hop entity graph lookups resolved before any mapping_attribute is evaluated. Each\nentry queries entity-api's `POST /v1/entity:graph` and merges every node's result into\nsourceContext under its own `graph.nodes[].id`, so mapping_attributes can `_copy`/`_template`\nfrom `<node id>.<field>`. A graph node's value overwrites any existing sourceContext key of\nthe same name (a source entity field, a 1-hop relation, or another graph node).\n",
+            "items": {
+              "$ref": "#/components/schemas/GraphContextEntry"
             }
           }
         },
@@ -1093,6 +1108,13 @@
             "description": "Include all relation tags (labels) present on the main entity relation",
             "default": false
           },
+          "target_entity_tags": {
+            "type": "array",
+            "description": "Tags to add to the matched target entity's _tags array during mapping. Useful for assigning file collections to file entities.",
+            "items": {
+              "type": "string"
+            }
+          },
           "override_with_source_filter": {
             "type": "boolean",
             "description": "Whether to override the relation source_filter with the specified one",
@@ -1150,6 +1172,157 @@
         "required": [
           "target",
           "mode"
+        ]
+      },
+      "GraphContextEntry": {
+        "type": "object",
+        "description": "One multi-hop graph lookup against entity-api's `POST /v1/entity:graph`, resolved during\ngraph_context enrichment (before mapping_attributes are evaluated). Every node in `graph.nodes`\nis merged into sourceContext under its own `id`, so listing several nodes here costs one\nentity-api call, not one per node.\n\nIf a node's `cardinality` is \"one\" (or it is the seed node), exactly one entity must be found\nfor it: zero or multiple matches fail the mapping execution instead of silently mapping\nmissing/wrong data. If \"many\" (the default), it resolves to an array - possibly empty - with no\nsuch failure. Each node's cardinality is validated independently.\n\n`seed.entity_id` and any `graph.nodes[].filter[].value` may contain `{{handlebars}}` placeholders\n(e.g. `{{contract._id}}`, `{{contract.origin_order}}`), resolved against the in-progress\nsourceContext (the source entity, its 1-hop relations, and any custom variables already\nresolved) before the graph query is sent.\n",
+        "properties": {
+          "seed": {
+            "$ref": "#/components/schemas/GraphSeed"
+          },
+          "graph": {
+            "$ref": "#/components/schemas/GraphDefinition"
+          }
+        },
+        "required": [
+          "seed",
+          "graph"
+        ]
+      },
+      "GraphSeed": {
+        "description": "Mirrors entity-api's GraphSeed (see entity-api openapi.yml) - the entity the graph traversal starts from.",
+        "type": "object",
+        "properties": {
+          "entity_id": {
+            "type": "string",
+            "description": "The id of the seed entity. Supports `{{handlebars}}` placeholders resolved against sourceContext.",
+            "example": "{{contract._id}}"
+          },
+          "node_id": {
+            "type": "string",
+            "description": "The node ID in `graph.nodes` that corresponds to the seed entity.",
+            "example": "contact"
+          }
+        },
+        "required": [
+          "entity_id",
+          "node_id"
+        ]
+      },
+      "GraphDefinition": {
+        "description": "Mirrors entity-api's GraphDefinition (see entity-api openapi.yml) - the shape of the graph to traverse.",
+        "type": "object",
+        "properties": {
+          "nodes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GraphNode"
+            }
+          },
+          "edges": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GraphEdge"
+            }
+          }
+        },
+        "required": [
+          "nodes",
+          "edges"
+        ]
+      },
+      "GraphNode": {
+        "description": "Mirrors entity-api's GraphNode (see entity-api openapi.yml).",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for this node in the graph definition.",
+            "example": "contact"
+          },
+          "schema": {
+            "type": "string",
+            "description": "Entity schema slug for this node.",
+            "example": "contact"
+          },
+          "cardinality": {
+            "type": "string",
+            "enum": [
+              "one",
+              "many"
+            ],
+            "description": "\"one\": this node resolves to a single entity. \"many\" (default if unset): this node\nresolves to an array of entities.\n"
+          },
+          "fields": {
+            "type": "array",
+            "description": "Optional entity fields to include in the hydrated response for this node.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "filter": {
+            "type": "array",
+            "description": "Narrows this node's traversal results to entities matching every filter (AND semantics).\nUseful for disambiguating among multiple entities reachable via the same graph edge.\n",
+            "items": {
+              "$ref": "#/components/schemas/GraphNodeFilter"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "schema"
+        ]
+      },
+      "GraphNodeFilter": {
+        "description": "Mirrors entity-api's GraphNodeFilter (see entity-api openapi.yml).",
+        "type": "object",
+        "properties": {
+          "attribute": {
+            "type": "string",
+            "description": "Entity attribute name to match against.",
+            "example": "order_number"
+          },
+          "value": {
+            "description": "Literal value the attribute must exactly equal. Supports `{{handlebars}}` placeholders\nresolved against sourceContext when given as a string.\n",
+            "oneOf": [
+              {
+                "type": "string",
+                "nullable": true
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "boolean"
+              }
+            ],
+            "example": "{{contract.origin_order}}"
+          }
+        },
+        "required": [
+          "attribute",
+          "value"
+        ]
+      },
+      "GraphEdge": {
+        "description": "Mirrors entity-api's GraphEdge (see entity-api openapi.yml).",
+        "type": "object",
+        "properties": {
+          "from": {
+            "type": "string",
+            "description": "Source node ID.",
+            "example": "contact"
+          },
+          "to": {
+            "type": "string",
+            "description": "Target node ID.",
+            "example": "order"
+          }
+        },
+        "required": [
+          "from",
+          "to"
         ]
       },
       "MappingAttributeV2": {
@@ -1256,6 +1429,20 @@
           "_random": {
             "description": "Generate random ids / numbers",
             "$ref": "#/components/schemas/RandomOperation"
+          },
+          "_each": {
+            "description": "Iterate over a source array. Use with _as and _map.\nThe value is a path to resolve from the source entity context.\nExample: \"submission.meterReadings\"\n",
+            "type": "string",
+            "example": "submission.meterReadings"
+          },
+          "_as": {
+            "description": "Name for the current iteration item in _each.\nAccessed as $<name> in _copy paths within _map.\nExample: \"reading\" (accessed as $reading)\n",
+            "type": "string",
+            "example": "reading"
+          },
+          "_map": {
+            "description": "Operation to evaluate per _each iteration item.\nCan be any OperationNode, typically an object with _copy\nreferences to the $<_as name> alias.\n",
+            "$ref": "#/components/schemas/OperationNode"
           }
         },
         "additionalProperties": true

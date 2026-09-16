@@ -1,6 +1,4 @@
 /* Auto-copied from sandbox-client */
-/* eslint-disable */
-
 import type {
   OpenAPIClient,
   Parameters,

@@ -1,6 +1,4 @@
 /* Auto-copied from address-suggestions-client */
-/* eslint-disable */
-
 import type {
   OpenAPIClient,
   Parameters,

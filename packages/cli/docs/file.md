@@ -45,7 +45,14 @@ epilot file uploadFileV2
 - [`downloadFiles`](#downloadfiles) — Bulk generate pre-signed download URLs for multiple files in a single request.
 - [`createZipJob`](#createzipjob) — Create a background job to ZIP multiple files and send a download link via email.
 - [`getZipJob`](#getzipjob) — Get the status of a ZIP job
-- [`generateFileSummary`](#generatefilesummary) — Request AI generation of preview and short summaries for a file entity.
+- [`getFileSummary`](#getfilesummary) — Get summary text for a file entity together with the current summary job status when available.
+- [`getFileSummaryFeedback`](#getfilesummaryfeedback) — Get the authenticated user's feedback for the current generated file summary.
+- [`putFileSummaryFeedback`](#putfilesummaryfeedback) — Upsert thumbs up/down feedback for the current generated file summary.
+- [`createFileSummaryJob`](#createfilesummaryjob) — Create or return the current AI summary job for a file entity.
+- [`getCurrentFileSummaryJob`](#getcurrentfilesummaryjob) — Get the latest AI summary job for the file entity's current source.
+- [`getFileSummaryJob`](#getfilesummaryjob) — Get an AI summary job by id.
+- [`generateFileSummary`](#generatefilesummary) — Compatibility alias for creating or returning the current AI summary job for a file entity.
+- [`getFileText`](#getfiletext) — Get the plain-text representation of a file entity. Returns status `not_ready` while text is being prepared and `unsuppo
 - [`verifyCustomDownloadUrl`](#verifycustomdownloadurl) — Verify that a custom download URL is valid and has not expired.
 - [`uploadFilePublic`](#uploadfilepublic) — Create a pre-signed S3 URL for uploading a file without authentication.
 
@@ -178,14 +185,16 @@ epilot file saveFileV2 \
   "mime_type": "application/pdf",
   "size_bytes": 1234,
   "readable_size": "1.2 MB",
+  "etag": "9bb58f26192e4ba00f01e2e7b136bbd8",
   "access_control": "private",
   "public_url": "https://epilot-prod-user-content.s3.eu-central-1.amazonaws.com/123/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf",
   "custom_download_url": "https://some-api-url.com/download?file_id=123",
+  "custom_download_url_auth": "token",
   "preview_summary_de": "string",
   "short_summary_de": "string",
   "preview_summary_en": "string",
   "short_summary_en": "string",
-  "summary_status": "processing",
+  "file_summary_execution_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
   "s3ref": {}
 }'
 ```
@@ -219,14 +228,16 @@ epilot file saveFileV2 --jsonata '$'
   "mime_type": "application/pdf",
   "size_bytes": 1234,
   "readable_size": "1.2 MB",
+  "etag": "9bb58f26192e4ba00f01e2e7b136bbd8",
   "access_control": "private",
   "public_url": "https://epilot-prod-user-content.s3.eu-central-1.amazonaws.com/123/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf",
   "custom_download_url": "https://some-api-url.com/download?file_id=123",
+  "custom_download_url_auth": "token",
   "preview_summary_de": "string",
   "short_summary_de": "string",
   "preview_summary_en": "string",
   "short_summary_en": "string",
-  "summary_status": "processing",
+  "file_summary_execution_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
   "source_url": "https://productengineer-content.s3.eu-west-1.amazonaws.com/product-engineer-checklist.pdf",
   "s3ref": {},
   "versions": [
@@ -235,7 +246,8 @@ epilot file saveFileV2 --jsonata '$'
       "filename": "document.pdf",
       "size_bytes": 1234,
       "readable_size": "1.2 MB",
-      "mime_type": "image/jpeg"
+      "mime_type": "image/jpeg",
+      "etag": "9bb58f26192e4ba00f01e2e7b136bbd8"
     }
   ],
   "_updated_at": "1970-01-01T00:00:00.000Z",
@@ -310,14 +322,16 @@ epilot file getFile -p id=ef7d985c-2385-44f4-9c71-ae06a52264f8 --jsonata '$'
   "mime_type": "application/pdf",
   "size_bytes": 1234,
   "readable_size": "1.2 MB",
+  "etag": "9bb58f26192e4ba00f01e2e7b136bbd8",
   "access_control": "private",
   "public_url": "https://epilot-prod-user-content.s3.eu-central-1.amazonaws.com/123/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf",
   "custom_download_url": "https://some-api-url.com/download?file_id=123",
+  "custom_download_url_auth": "token",
   "preview_summary_de": "string",
   "short_summary_de": "string",
   "preview_summary_en": "string",
   "short_summary_en": "string",
-  "summary_status": "processing",
+  "file_summary_execution_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
   "source_url": "https://productengineer-content.s3.eu-west-1.amazonaws.com/product-engineer-checklist.pdf",
   "s3ref": {},
   "versions": [
@@ -326,7 +340,8 @@ epilot file getFile -p id=ef7d985c-2385-44f4-9c71-ae06a52264f8 --jsonata '$'
       "filename": "document.pdf",
       "size_bytes": 1234,
       "readable_size": "1.2 MB",
-      "mime_type": "image/jpeg"
+      "mime_type": "image/jpeg",
+      "etag": "9bb58f26192e4ba00f01e2e7b136bbd8"
     }
   ],
   "_updated_at": "1970-01-01T00:00:00.000Z",
@@ -401,14 +416,16 @@ epilot file deleteFile -p id=ef7d985c-2385-44f4-9c71-ae06a52264f8 --jsonata '$'
   "mime_type": "application/pdf",
   "size_bytes": 1234,
   "readable_size": "1.2 MB",
+  "etag": "9bb58f26192e4ba00f01e2e7b136bbd8",
   "access_control": "private",
   "public_url": "https://epilot-prod-user-content.s3.eu-central-1.amazonaws.com/123/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf",
   "custom_download_url": "https://some-api-url.com/download?file_id=123",
+  "custom_download_url_auth": "token",
   "preview_summary_de": "string",
   "short_summary_de": "string",
   "preview_summary_en": "string",
   "short_summary_en": "string",
-  "summary_status": "processing",
+  "file_summary_execution_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
   "source_url": "https://productengineer-content.s3.eu-west-1.amazonaws.com/product-engineer-checklist.pdf",
   "s3ref": {},
   "versions": [
@@ -417,7 +434,8 @@ epilot file deleteFile -p id=ef7d985c-2385-44f4-9c71-ae06a52264f8 --jsonata '$'
       "filename": "document.pdf",
       "size_bytes": 1234,
       "readable_size": "1.2 MB",
-      "mime_type": "image/jpeg"
+      "mime_type": "image/jpeg",
+      "etag": "9bb58f26192e4ba00f01e2e7b136bbd8"
     }
   ],
   "_updated_at": "1970-01-01T00:00:00.000Z",
@@ -454,6 +472,9 @@ Generate a pre-signed download URL for a file.
 | `id` | path | string \| string (uuid) | Yes | The UUID of the file entity |
 | `version` | query | number | No | Index of the file version to download (0 = latest) |
 | `attachment` | query | boolean | No | Controls the Content-Disposition header. Set to `true` to trigger browser download dialog, `false` to display inline. |
+| `x-track` | query | object | No | Download-attribution channel. Provide any number of query parameters whose names
+start with `x-track-` (e.g. `x-track-portal-id`, `x-track-contact-id`); each is signed
+into the pre-signed URL verbatim |
 
 **Sample Call**
 
@@ -497,7 +518,10 @@ Generate a pre-signed download URL for a file using its S3 reference.
 
 | Name | In | Type | Required | Description |
 | ---- | -- | ---- | -------- | ----------- |
-| `s3_key` | query | string | Yes | The S3 object key |
+| `s3_key` | query | string | Yes | The S3 object key, as returned in `s3ref.key` of the file entity.
+
+Note: object keys store the filename segment percent-encoded. For example, a file named
+`Straße 1.pdf` is stored under the key `.../S |
 | `s3_bucket` | query | string | Yes | The S3 bucket name |
 | `attachment` | query | boolean | No | Controls the Content-Disposition header. Set to `true` to trigger browser download dialog, `false` to display inline. |
 
@@ -505,14 +529,14 @@ Generate a pre-signed download URL for a file using its S3 reference.
 
 ```bash
 epilot file downloadS3File \
-  -p s3_key=123/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf \
+  -p s3_key=123/4d689aeb-1497-4410-a9fe-b36ca9ac4389/Stra%C3%9Fe%201.pdf \
   -p s3_bucket=epilot-prod-user-content
 ```
 
 With JSONata filter:
 
 ```bash
-epilot file downloadS3File -p s3_key=123/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf -p s3_bucket=epilot-prod-user-content --jsonata 'download_url'
+epilot file downloadS3File -p s3_key=123/4d689aeb-1497-4410-a9fe-b36ca9ac4389/Stra%C3%9Fe%201.pdf -p s3_bucket=epilot-prod-user-content --jsonata 'download_url'
 ```
 
 <details>
@@ -661,9 +685,301 @@ epilot file getZipJob -p job_id=123e4567-e89b-12d3-a456-426614174000 --jsonata '
 
 ---
 
+### `getFileSummary`
+
+Get summary text for a file entity together with the current summary job status when available.
+
+`GET /v1/files/{id}/summary`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `id` | path | string \| string (uuid) | Yes | The UUID of the file entity |
+
+**Sample Call**
+
+```bash
+epilot file getFileSummary \
+  -p id=ef7d985c-2385-44f4-9c71-ae06a52264f8
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot file getFileSummary ef7d985c-2385-44f4-9c71-ae06a52264f8
+```
+
+With JSONata filter:
+
+```bash
+epilot file getFileSummary -p id=ef7d985c-2385-44f4-9c71-ae06a52264f8 --jsonata 'status'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "status": "queued",
+  "job_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "feedback_available": true,
+  "preview_summary_de": "string",
+  "short_summary_de": "string",
+  "preview_summary_en": "string",
+  "short_summary_en": "string"
+}
+```
+
+</details>
+
+---
+
+### `getFileSummaryFeedback`
+
+Get the authenticated user's feedback for the current generated file summary.
+
+`GET /v1/files/{id}/summary/feedback`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `id` | path | string \| string (uuid) | Yes | The UUID of the file entity |
+
+**Sample Call**
+
+```bash
+epilot file getFileSummaryFeedback \
+  -p id=ef7d985c-2385-44f4-9c71-ae06a52264f8
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot file getFileSummaryFeedback ef7d985c-2385-44f4-9c71-ae06a52264f8
+```
+
+With JSONata filter:
+
+```bash
+epilot file getFileSummaryFeedback -p id=ef7d985c-2385-44f4-9c71-ae06a52264f8 --jsonata 'feedback'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "feedback": {
+    "rating": "up",
+    "comment": "string",
+    "user_id": "string",
+    "submitted_at": "1970-01-01T00:00:00.000Z"
+  }
+}
+```
+
+</details>
+
+---
+
+### `putFileSummaryFeedback`
+
+Upsert thumbs up/down feedback for the current generated file summary.
+
+`PUT /v1/files/{id}/summary/feedback`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `id` | path | string \| string (uuid) | Yes | The UUID of the file entity |
+
+**Request Body** (required)
+
+**Sample Call**
+
+```bash
+epilot file putFileSummaryFeedback \
+  -p id=ef7d985c-2385-44f4-9c71-ae06a52264f8 \
+  -d '{"rating":"up","comment":"string"}'
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot file putFileSummaryFeedback ef7d985c-2385-44f4-9c71-ae06a52264f8
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot file putFileSummaryFeedback -p id=ef7d985c-2385-44f4-9c71-ae06a52264f8
+```
+
+With JSONata filter:
+
+```bash
+epilot file putFileSummaryFeedback -p id=ef7d985c-2385-44f4-9c71-ae06a52264f8 --jsonata 'feedback'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "feedback": {
+    "rating": "up",
+    "comment": "string",
+    "user_id": "string",
+    "submitted_at": "1970-01-01T00:00:00.000Z"
+  }
+}
+```
+
+</details>
+
+---
+
+### `createFileSummaryJob`
+
+Create or return the current AI summary job for a file entity.
+
+`POST /v1/files/{id}/summary-jobs`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `id` | path | string \| string (uuid) | Yes | The UUID of the file entity |
+
+**Sample Call**
+
+```bash
+epilot file createFileSummaryJob \
+  -p id=ef7d985c-2385-44f4-9c71-ae06a52264f8
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot file createFileSummaryJob ef7d985c-2385-44f4-9c71-ae06a52264f8
+```
+
+With JSONata filter:
+
+```bash
+epilot file createFileSummaryJob -p id=ef7d985c-2385-44f4-9c71-ae06a52264f8 --jsonata '$'
+```
+
+---
+
+### `getCurrentFileSummaryJob`
+
+Get the latest AI summary job for the file entity's current source.
+
+`GET /v1/files/{id}/summary-jobs/current`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `id` | path | string \| string (uuid) | Yes | The UUID of the file entity |
+
+**Sample Call**
+
+```bash
+epilot file getCurrentFileSummaryJob \
+  -p id=ef7d985c-2385-44f4-9c71-ae06a52264f8
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot file getCurrentFileSummaryJob ef7d985c-2385-44f4-9c71-ae06a52264f8
+```
+
+With JSONata filter:
+
+```bash
+epilot file getCurrentFileSummaryJob -p id=ef7d985c-2385-44f4-9c71-ae06a52264f8 --jsonata 'job_id'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "job_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "file_id": "ef7d985c-2385-44f4-9c71-ae06a52264f8",
+  "status": "queued",
+  "error": "string",
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "updated_at": "1970-01-01T00:00:00.000Z",
+  "completed_at": "1970-01-01T00:00:00.000Z"
+}
+```
+
+</details>
+
+---
+
+### `getFileSummaryJob`
+
+Get an AI summary job by id.
+
+`GET /v1/files/{id}/summary-jobs/{job_id}`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `id` | path | string \| string (uuid) | Yes | The UUID of the file entity |
+| `job_id` | path | string (uuid) | Yes | The UUID of the summary job |
+
+**Sample Call**
+
+```bash
+epilot file getFileSummaryJob \
+  -p id=ef7d985c-2385-44f4-9c71-ae06a52264f8 \
+  -p job_id=123e4567-e89b-12d3-a456-426614174000
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot file getFileSummaryJob ef7d985c-2385-44f4-9c71-ae06a52264f8 123e4567-e89b-12d3-a456-426614174000
+```
+
+With JSONata filter:
+
+```bash
+epilot file getFileSummaryJob -p id=ef7d985c-2385-44f4-9c71-ae06a52264f8 -p job_id=123e4567-e89b-12d3-a456-426614174000 --jsonata 'job_id'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "job_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "file_id": "ef7d985c-2385-44f4-9c71-ae06a52264f8",
+  "status": "queued",
+  "error": "string",
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "updated_at": "1970-01-01T00:00:00.000Z",
+  "completed_at": "1970-01-01T00:00:00.000Z"
+}
+```
+
+</details>
+
+---
+
 ### `generateFileSummary`
 
-Request AI generation of preview and short summaries for a file entity.
+Compatibility alias for creating or returning the current AI summary job for a file entity.
 
 `POST /v1/files/{id}/summary:generate`
 
@@ -691,6 +1007,53 @@ With JSONata filter:
 ```bash
 epilot file generateFileSummary -p id=ef7d985c-2385-44f4-9c71-ae06a52264f8 --jsonata '$'
 ```
+
+---
+
+### `getFileText`
+
+Get the plain-text representation of a file entity. Returns status `not_ready` while text is being prepared and `unsuppo
+
+`GET /v1/files/{id}/text`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `id` | path | string \| string (uuid) | Yes | The UUID of the file entity |
+
+**Sample Call**
+
+```bash
+epilot file getFileText \
+  -p id=ef7d985c-2385-44f4-9c71-ae06a52264f8
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot file getFileText ef7d985c-2385-44f4-9c71-ae06a52264f8
+```
+
+With JSONata filter:
+
+```bash
+epilot file getFileText -p id=ef7d985c-2385-44f4-9c71-ae06a52264f8 --jsonata 'status'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "status": "ready",
+  "text": "string",
+  "truncated": true,
+  "total_chars": 0
+}
+```
+
+</details>
 
 ---
 
@@ -1387,14 +1750,16 @@ epilot file getFilesInCollection -p id=ef7d985c-2385-44f4-9c71-ae06a52264f8 -p c
     "mime_type": "application/pdf",
     "size_bytes": 1234,
     "readable_size": "1.2 MB",
+    "etag": "9bb58f26192e4ba00f01e2e7b136bbd8",
     "access_control": "private",
     "public_url": "https://epilot-prod-user-content.s3.eu-central-1.amazonaws.com/123/4d689aeb-1497-4410-a9fe-b36ca9ac4389/document.pdf",
     "custom_download_url": "https://some-api-url.com/download?file_id=123",
+    "custom_download_url_auth": "token",
     "preview_summary_de": "string",
     "short_summary_de": "string",
     "preview_summary_en": "string",
     "short_summary_en": "string",
-    "summary_status": "processing",
+    "file_summary_execution_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
     "source_url": "https://productengineer-content.s3.eu-west-1.amazonaws.com/product-engineer-checklist.pdf",
     "s3ref": {},
     "versions": [
@@ -1403,7 +1768,8 @@ epilot file getFilesInCollection -p id=ef7d985c-2385-44f4-9c71-ae06a52264f8 -p c
         "filename": "document.pdf",
         "size_bytes": 1234,
         "readable_size": "1.2 MB",
-        "mime_type": "image/jpeg"
+        "mime_type": "image/jpeg",
+        "etag": "9bb58f26192e4ba00f01e2e7b136bbd8"
       }
     ],
     "_updated_at": "1970-01-01T00:00:00.000Z",

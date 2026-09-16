@@ -1,6 +1,4 @@
 /* Auto-copied from purpose-client */
-/* eslint-disable */
-
 import type {
   OpenAPIClient,
   Parameters,

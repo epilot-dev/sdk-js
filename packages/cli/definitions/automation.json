@@ -80,6 +80,15 @@
             }
           },
           {
+            "name": "trigger_event_name",
+            "in": "query",
+            "description": "Filter by Event Catalog event name. Returns only automations that have an event_catalog trigger for this event.",
+            "schema": {
+              "type": "string",
+              "example": "CustomerRequestSubmitted"
+            }
+          },
+          {
             "name": "include_flows",
             "in": "query",
             "description": "Include flow automations in the response",
@@ -611,6 +620,42 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/AutomationExecution"
+                }
+              }
+            }
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          }
+        }
+      }
+    },
+    "/v1/automation/executions:search": {
+      "post": {
+        "operationId": "searchExecutions",
+        "summary": "searchExecutions",
+        "description": "Search automation executions of an entity with cursor-based pagination.\nReturns pages of up to 100 executions, newest first.\nPrefer this over GET /v1/automation/executions, which returns the full\nexecution history in a single response.\n",
+        "tags": [
+          "executions"
+        ],
+        "requestBody": {
+          "description": "Search parameters",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchExecutionsReq"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "A page of automation executions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchExecutionsResp"
                 }
               }
             }
@@ -1213,6 +1258,9 @@
           },
           {
             "$ref": "#/components/schemas/FlowsTrigger"
+          },
+          {
+            "$ref": "#/components/schemas/EventCatalogTrigger"
           }
         ]
       },
@@ -1259,6 +1307,9 @@
           },
           {
             "$ref": "#/components/schemas/ReplyEmailAction"
+          },
+          {
+            "$ref": "#/components/schemas/AssignEntityAction"
           }
         ]
       },
@@ -1305,6 +1356,9 @@
           },
           {
             "$ref": "#/components/schemas/ReplyEmailActionConfig"
+          },
+          {
+            "$ref": "#/components/schemas/AssignEntityActionConfig"
           }
         ]
       },
@@ -1815,6 +1869,10 @@
             "type": "string",
             "description": "Schema of target entity"
           },
+          "use_uniqueness_criteria": {
+            "type": "boolean",
+            "description": "Resolve this action's target (contact/account) via the organization's global uniqueness criteria instead of per-action identifiers (target_unique / Unique switches). Forwarded to entity mapping by automation-workers.\n"
+          },
           "target_unique": {
             "type": "array",
             "description": "Unique key for target entity (see upsertEntity of Entity API)",
@@ -1854,11 +1912,167 @@
             "items": {
               "type": "string"
             }
+          },
+          "graph_context": {
+            "type": "array",
+            "description": "Multi-hop graph queries (executed via entity-api's `POST /v1/entity:graph`), each\nmerging every traversed node into the mapping's source context under its own node id,\nso `mapping_attributes` (e.g. `_copy` / `_template`) can reference it alongside the\nmain entity, e.g. `{ \"_copy\": \"order.line_items\" }`.\n\n`seed.entity_id` and any node `filter[].value` may contain `{{handlebars}}`\nplaceholders (e.g. `{{trigger.entity._id}}`) that are resolved at execution time\nagainst the mapping's source context. Resolution and graph execution happen in\nentity-mapping-api; this API only accepts, validates and passes through this field.\n",
+            "items": {
+              "$ref": "#/components/schemas/GraphContextEntry"
+            }
           }
         },
         "required": [
           "target_schema"
         ]
+      },
+      "GraphContextEntry": {
+        "type": "object",
+        "description": "One multi-hop graph query to run against entity-api's `POST /v1/entity:graph`. Every node\nin `graph.nodes` is merged into the mapping's source context under its own `id`, so\nlisting multiple nodes here costs one entity-api call, not one per node. A node's value\noverwrites any existing source-context key of the same name (the source entity, a 1-hop\nrelation, or another graph node).\n",
+        "required": [
+          "seed",
+          "graph"
+        ],
+        "properties": {
+          "seed": {
+            "$ref": "#/components/schemas/GraphSeed"
+          },
+          "graph": {
+            "$ref": "#/components/schemas/GraphDefinition"
+          }
+        }
+      },
+      "GraphSeed": {
+        "type": "object",
+        "required": [
+          "entity_id",
+          "node_id"
+        ],
+        "properties": {
+          "entity_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "node_id": {
+            "type": "string",
+            "description": "The node ID in the graph definition that corresponds to the seed entity",
+            "example": "contact"
+          }
+        }
+      },
+      "GraphDefinition": {
+        "type": "object",
+        "required": [
+          "nodes",
+          "edges"
+        ],
+        "properties": {
+          "nodes": {
+            "type": "array",
+            "description": "List of node definitions in the graph",
+            "items": {
+              "$ref": "#/components/schemas/GraphNode"
+            }
+          },
+          "edges": {
+            "type": "array",
+            "description": "List of edge definitions connecting nodes",
+            "items": {
+              "$ref": "#/components/schemas/GraphEdge"
+            }
+          }
+        }
+      },
+      "GraphNode": {
+        "type": "object",
+        "required": [
+          "id",
+          "schema"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for this node in the graph definition",
+            "example": "contact"
+          },
+          "schema": {
+            "type": "string",
+            "description": "Entity schema slug for this node",
+            "example": "contact"
+          },
+          "cardinality": {
+            "type": "string",
+            "enum": [
+              "one",
+              "many"
+            ],
+            "description": "\"one\": this node resolves to a single entity. \"many\" (default if unset): this node\nresolves to an array of entities. The seed node always returns a single entity\nregardless of this setting.\n",
+            "example": "one"
+          },
+          "fields": {
+            "type": "array",
+            "description": "Optional entity fields to include in the hydrated response for this node.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "filter": {
+            "type": "array",
+            "description": "Narrows this node's traversal results to entities matching every filter (AND\nsemantics). Useful for disambiguating among multiple entities reachable via the same\ngraph edge.\n",
+            "items": {
+              "$ref": "#/components/schemas/GraphNodeFilter"
+            }
+          }
+        }
+      },
+      "GraphNodeFilter": {
+        "type": "object",
+        "description": "Entities are included in this node's result only if `attribute` exactly equals the literal `value`.",
+        "required": [
+          "attribute",
+          "value"
+        ],
+        "properties": {
+          "attribute": {
+            "type": "string",
+            "description": "Entity attribute name to match against.",
+            "example": "order_number"
+          },
+          "value": {
+            "description": "Literal value the attribute must exactly equal for the entity to be included in this node's result. Supports `{{handlebars}}` placeholders resolved against sourceContext when given as a string.",
+            "oneOf": [
+              {
+                "type": "string",
+                "nullable": true
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "boolean"
+              }
+            ],
+            "example": "OR-113"
+          }
+        }
+      },
+      "GraphEdge": {
+        "type": "object",
+        "required": [
+          "from",
+          "to"
+        ],
+        "properties": {
+          "from": {
+            "type": "string",
+            "description": "Source node ID",
+            "example": "contact"
+          },
+          "to": {
+            "type": "string",
+            "description": "Target node ID",
+            "example": "billing_account"
+          }
+        }
       },
       "MappingConfigRef": {
         "type": "object",
@@ -2187,12 +2401,224 @@
           },
           "add": {
             "type": "array",
-            "description": "Assignees to add to the thread",
+            "description": "Assignees to add to the thread. For even_distribution this may contain group IDs (prefixed \"group_\") whose members are candidates.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "assignment_type": {
+            "type": "string",
+            "description": "How assignees in `add` are resolved.\n- direct: assign exactly the users in `add` (default).\n- even_distribution: treat `add` as a candidate pool (users and/or groups)\n  and assign the least-loaded available agent.\n- sequential: reserved for future use.\n",
+            "enum": [
+              "direct",
+              "even_distribution",
+              "sequential"
+            ],
+            "default": "direct"
+          },
+          "only_available_users": {
+            "type": "boolean",
+            "description": "Candidate condition for even_distribution: when true, skip users who\nare currently absent (out-of-office). Opt-in; defaults to false.\n",
+            "default": false
+          },
+          "hold_until_available": {
+            "type": "boolean",
+            "description": "Sub-option of only_available_users: when a day off (weekend / whole\nday off with a known return) is what empties the candidate pool, hold\nthe thread and retry when the soonest candidate is back — bounded to\n7 retries over 7 days — before applying the fallback. Defaults to\ntrue; set false to skip the hold and fall straight through to the\nfallback. Out-of-office / vacation and non-availability reasons never\nhold regardless.\n",
+            "default": true
+          },
+          "match_user_skills": {
+            "type": "boolean",
+            "description": "Candidate condition for even_distribution: when true, only assign to\nusers whose skills (tags) match a label on the message. Opt-in;\ndefaults to false.\n",
+            "default": false
+          },
+          "required_skill_categories": {
+            "type": "array",
+            "description": "Candidate condition (with match_user_skills): label families\n(taxonomy slugs) that must match. A user qualifies only if it shares\na label with the message within each of these categories. Leave empty\nto match on any label (flat OR across all categories).\n",
+            "items": {
+              "type": "string"
+            }
+          },
+          "skill_match_mode": {
+            "type": "string",
+            "description": "How strictly required skill categories are matched (applies with\nmatch_user_skills and required skill categories set).\n- require_all: hard match (default) — a user must match every required\n  category the message has a label in.\n- prefer: soft match — prefer the best-matching users, relaxing to\n  fewer categories only when no better match exists; a user matching\n  no category is never eligible (the fallback then applies).\n",
+            "enum": [
+              "require_all",
+              "prefer"
+            ],
+            "default": "require_all"
+          },
+          "fallback": {
+            "type": "string",
+            "description": "What to do when smart assignment resolves no assignable candidate.\nApplies to even_distribution.\n- leave_unassigned: leave the thread unassigned (default).\n- assign_to_fallback: route to the users/groups in `fallback_assignees`.\n",
+            "enum": [
+              "leave_unassigned",
+              "assign_to_fallback"
+            ],
+            "default": "leave_unassigned"
+          },
+          "fallback_assignees": {
+            "type": "array",
+            "description": "Target user/group IDs (group IDs prefixed \"group_\") to assign when\n`fallback` is \"assign_to_fallback\".\n",
             "items": {
               "type": "string"
             }
           }
         }
+      },
+      "EntityAssignee": {
+        "type": "object",
+        "description": "A single assignee as stored in a user-relation attribute. Written through\nverbatim by the assign-entity worker. Note this object encoding differs\ndeliberately from AssignThreadConfig, which stores bare id strings —\neach matches what its own target accepts.\n",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "Which kind of principal this assignee is. Required: it selects which\nof the identifier properties below applies, and forms part of the\nappend-mode de-duplication key.\n",
+            "enum": [
+              "user",
+              "partner_user",
+              "partner_organization",
+              "group"
+            ]
+          },
+          "user_id": {
+            "type": "string",
+            "description": "Set for user and partner_user assignees."
+          },
+          "group_id": {
+            "type": "string",
+            "description": "Set for group assignees."
+          },
+          "org_id": {
+            "type": "string",
+            "description": "Organization the assignee belongs to."
+          },
+          "partner_id": {
+            "type": "string",
+            "description": "Set for partner_user and partner_organization assignees."
+          },
+          "display_name": {
+            "type": "string",
+            "description": "Label snapshotted at configuration time; may go stale after a rename."
+          },
+          "email": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "AssignEntityConfig": {
+        "type": "object",
+        "properties": {
+          "attribute": {
+            "type": "string",
+            "description": "Slug of the user-relation attribute on the triggering entity to write to."
+          },
+          "assignees": {
+            "type": "array",
+            "description": "Assignees to write into `attribute`, in the order given.",
+            "items": {
+              "$ref": "#/components/schemas/EntityAssignee"
+            }
+          },
+          "write_mode": {
+            "type": "string",
+            "description": "How `assignees` combine with the attribute's current value.\n- replace: overwrite the attribute with `assignees` (default).\n- append: union with the existing assignees, de-duplicated, existing\n  entries first. Two assignees are duplicates when their `type` and\n  `org_id` both match and the identifier for that type matches:\n  `user_id` for user and partner_user, `group_id` for group,\n  `partner_id` for partner_organization. Scoping by `org_id` keeps\n  assignees from different organizations distinct even when their\n  identifiers coincide.\n",
+            "enum": [
+              "replace",
+              "append"
+            ],
+            "default": "replace"
+          },
+          "assignment_type": {
+            "type": "string",
+            "description": "How assignees are resolved.\n- direct: assign exactly the assignees listed (default, and the only\n  accepted value).\nReserved for a future routing strategy; widening this enum later is\nbackwards compatible and needs no migration of existing flows.\n",
+            "enum": [
+              "direct"
+            ],
+            "default": "direct"
+          },
+          "source": {
+            "type": "object",
+            "description": "Which entity to assign to. Omit for the triggering entity (the\ndefault, and the behaviour of every flow saved before this field\nexisted).\n- trigger: the entity that started the flow.\n- action: the entity produced by an earlier action, identified by\n  that action's `flow_action_id`.\n",
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "The producing action's `flow_action_id` when origin is `action`, or the trigger id when origin is `trigger`. Note this is `flow_action_id` (stable across executions), not `id`.\n"
+              },
+              "origin": {
+                "type": "string",
+                "enum": [
+                  "trigger",
+                  "action"
+                ]
+              },
+              "schema": {
+                "type": "string",
+                "description": "Entity schema recorded when the source was chosen, for display. The worker uses the schema on the resolved entity itself, since this value goes stale if the producing action's target changes.\n"
+              }
+            }
+          }
+        }
+      },
+      "AssignEntityActionConfig": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AutomationActionConfig"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "enum": [
+                  "assign-entity"
+                ]
+              },
+              "config": {
+                "$ref": "#/components/schemas/AssignEntityConfig"
+              }
+            }
+          }
+        ],
+        "example": {
+          "id": "25jga0-gkasl26-0asg-908sgaj2",
+          "name": "Assign Entity",
+          "type": "assign-entity",
+          "config": {
+            "attribute": "assigned_to",
+            "write_mode": "replace",
+            "assignment_type": "direct",
+            "assignees": [
+              {
+                "type": "user",
+                "user_id": "90503",
+                "org_id": "66",
+                "display_name": "Jane Doe",
+                "email": "jane.doe@example.com"
+              }
+            ]
+          }
+        }
+      },
+      "AssignEntityAction": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AutomationAction"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "enum": [
+                  "assign-entity"
+                ]
+              },
+              "config": {
+                "$ref": "#/components/schemas/AssignEntityConfig"
+              }
+            }
+          }
+        ]
       },
       "SendEmailActionConfig": {
         "allOf": [
@@ -2405,10 +2831,7 @@
           "language_code": {
             "type": "string",
             "description": "Language code for the email template",
-            "enum": [
-              "de",
-              "en"
-            ]
+            "example": "de"
           },
           "reply_mode": {
             "type": "string",
@@ -2439,10 +2862,7 @@
           },
           "language_code": {
             "type": "string",
-            "enum": [
-              "de",
-              "en"
-            ]
+            "example": "de"
           },
           "notify_portal_user_only": {
             "type": "boolean",
@@ -2458,6 +2878,15 @@
             "type": "boolean",
             "description": "Pause automation execution after sending email to wait for a confirmation link to be clicked.\n\nThe email template should contain a confirmation link using the variable `{{confirmation_url}}`\n",
             "default": false
+          },
+          "wait_for_journey_submission": {
+            "type": "boolean",
+            "description": "Only relevant when this action runs from a workflow automation task. After the email is sent,\nthe workflow task waits for the journey referenced in the email template to be submitted and\nits submission automation to complete (AL-2521).\n\nThe email template should contain a journey link created with the generateJourneyLink variable.\n",
+            "default": false
+          },
+          "journey_id": {
+            "type": "string",
+            "description": "Snapshot of the journey referenced by the selected email template's journey link; set by the\nbuilder UI. Display/validation only — correlation does not depend on it.\n"
           },
           "reply_to_sender": {
             "type": "boolean",
@@ -3236,10 +3665,12 @@
               },
               "originType": {
                 "type": "string",
+                "description": "`event` reads the operand from the trigger's Event Catalog payload instead of an entity: `attribute` is then a dot path into the payload (e.g. `ticket.subject`). Only valid with `origin: trigger` on flows started by an EventCatalogTrigger.\n",
                 "enum": [
                   "entity",
                   "workflow",
-                  "journey_block"
+                  "journey_block",
+                  "event"
                 ]
               },
               "schema": {
@@ -3345,12 +3776,24 @@
             "type": "string",
             "description": "Schedule Id which indicates the schedule of the actions inside the condition"
           },
+          "evaluation_order": {
+            "type": "string",
+            "enum": [
+              "AFTER_SCHEDULE",
+              "BEFORE_SCHEDULE"
+            ],
+            "description": "Determines how the condition and its schedule combine in time, when the condition block also has a schedule.\n\n- `AFTER_SCHEDULE` (default): the schedule is created first and the condition is evaluated when the schedule fires, against the data at that moment (\"wait, then check\").\n- `BEFORE_SCHEDULE`: the condition is evaluated at trigger time against the current data; only when it passes is the schedule created, and it is not re-evaluated when it fires (\"check now, then wait\"). A failing condition skips the block immediately.\n\nAn absent value is treated as `AFTER_SCHEDULE` for backwards compatibility."
+          },
           "evaluationResult": {
             "type": "boolean",
             "description": "Result of the condition evaluation"
           },
           "error_output": {
             "$ref": "#/components/schemas/ErrorOutput"
+          },
+          "allow_failure": {
+            "description": "Whether the execution should continue when processing the condition\nblock itself fails (e.g. its schedule cannot be computed). When true,\nthe block's actions are cancelled and the execution moves on to the\nnext action instead of stopping in a failed state.\n",
+            "type": "boolean"
           },
           "statements": {
             "type": "array",
@@ -3517,11 +3960,17 @@
               },
               {
                 "$ref": "#/components/schemas/TriggerEventMessaging"
+              },
+              {
+                "$ref": "#/components/schemas/TriggerEventEventCatalog"
               }
             ]
           },
           "workflow_context": {
             "$ref": "#/components/schemas/WorkflowExecutionContext"
+          },
+          "workflow_wait_context": {
+            "$ref": "#/components/schemas/WorkflowWaitContext"
           },
           "loops": {
             "type": "array",
@@ -3535,6 +3984,13 @@
             "description": "Runtime iteration state, keyed by loop_id. Tracks the current_index and total for each active loop scope. Entries are removed once a loop exits.\n",
             "additionalProperties": {
               "$ref": "#/components/schemas/AutomationLoopState"
+            }
+          },
+          "chain": {
+            "type": "array",
+            "description": "Ordered automation flow ids in this execution's trigger chain (multi-automation loop prevention).",
+            "items": {
+              "type": "string"
             }
           }
         },
@@ -3583,6 +4039,13 @@
           "_execution_chain": {
             "$ref": "#/components/schemas/ExecutionChain"
           },
+          "_automation_chain": {
+            "type": "array",
+            "description": "[Internal] Ordered automation flow ids that led to the parent flow being started. The started execution appends its own flow id, so entity writes it performs carry the full chain and a loop running through a workflow can be detected. This is an internal property and should not be used by external consumers.\n",
+            "items": {
+              "type": "string"
+            }
+          },
           "entity_contexts": {
             "type": "array",
             "description": "Additional entity contexts from the parent flow execution. Used when an automation is triggered from a workflow task to carry all flow contexts into the automation, not just the primary entity.\n",
@@ -3600,6 +4063,31 @@
                 }
               }
             }
+          },
+          "trigger_user_id": {
+            "type": "string",
+            "description": "Id of the user on whose behalf the workflow task triggered this automation — the caller of a user-initiated run, or the user whose task completion advanced the flow to the automation task. Action workers resolve it as the acting user for template variable resolution (user.*) and email thread assignment, matching the attribution of manually triggered executions. Absent when no human action led to the trigger (scheduler fires, journey-triggered flows).\n",
+            "example": "10006129"
+          }
+        }
+      },
+      "WorkflowWaitContext": {
+        "type": "object",
+        "description": "Correlation stamped when the triggering submission entity carried workflow wait claims from a journey link (AL-2521). Consumed by svc-workflows to resume a task waiting on this journey submission.\n",
+        "required": [
+          "workflow_execution_id",
+          "workflow_task_id"
+        ],
+        "properties": {
+          "workflow_execution_id": {
+            "type": "string"
+          },
+          "workflow_task_id": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string",
+            "example": "journey_submission"
           }
         }
       },
@@ -3771,6 +4259,92 @@
           "operation_type"
         ]
       },
+      "TriggerEventEventCatalog": {
+        "type": "object",
+        "description": "Set on executions started by an Event Catalog event (see EventCatalogTrigger). The full event payload is not stored inline (it may be up to 256 KB) but by reference in `payload_ref`; automation workers hydrate it before every action.\n",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "event_catalog"
+            ]
+          },
+          "org_id": {
+            "type": "string",
+            "example": "123"
+          },
+          "entity_id": {
+            "$ref": "#/components/schemas/EntityId"
+          },
+          "entity_node_id": {
+            "type": "string",
+            "description": "Node id of the event's entity graph that was resolved to `entity_id`",
+            "example": "ticket"
+          },
+          "event_id": {
+            "type": "string",
+            "description": "Event Catalog event id (ULID) of the published event",
+            "example": "01K3ZK8QZ7Y7Q2M8W1V3N4X5P6"
+          },
+          "event_name": {
+            "type": "string",
+            "example": "CustomerRequestSubmitted"
+          },
+          "event_version": {
+            "type": "string",
+            "description": "Version the payload was delivered in (the version pinned on the trigger)",
+            "example": "1.1"
+          },
+          "published_version": {
+            "type": "string",
+            "description": "Version the event was originally published with, before downgrading to `event_version`",
+            "example": "1.2"
+          },
+          "event_time": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "trigger_source_type": {
+            "type": "string",
+            "description": "How the event was triggered in the catalog (api | automation | operation | portal_user)",
+            "example": "operation"
+          },
+          "trigger_source": {
+            "type": "string",
+            "description": "Opaque source reference from the catalog (e.g. activity id, automation execution id)"
+          },
+          "payload_ref": {
+            "$ref": "#/components/schemas/TriggerEventPayloadRef"
+          }
+        },
+        "required": [
+          "type",
+          "org_id",
+          "entity_id",
+          "entity_node_id",
+          "event_id",
+          "event_name",
+          "event_version"
+        ]
+      },
+      "TriggerEventPayloadRef": {
+        "type": "object",
+        "description": "S3 reference to the stored trigger event payload (`_downgrades` stripped, downgraded to the pinned version)",
+        "properties": {
+          "bucket": {
+            "type": "string",
+            "example": "automation-trigger-payloads-prod"
+          },
+          "key": {
+            "type": "string",
+            "example": "trigger-payloads/123/6c8e5d9a-7f1b-4c2e-9d3a-0b1c2d3e4f5a.json"
+          }
+        },
+        "required": [
+          "bucket",
+          "key"
+        ]
+      },
       "ApiCallerContext": {
         "type": "object",
         "additionalProperties": true,
@@ -3859,6 +4433,56 @@
             "items": {
               "$ref": "#/components/schemas/AutomationExecution"
             }
+          }
+        },
+        "required": [
+          "total",
+          "results"
+        ]
+      },
+      "SearchExecutionsReq": {
+        "type": "object",
+        "properties": {
+          "entity_id": {
+            "$ref": "#/components/schemas/EntityId"
+          },
+          "include_flows": {
+            "description": "Include flow automations in the response",
+            "type": "boolean",
+            "default": false
+          },
+          "size": {
+            "description": "Max number of executions to return per page",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100,
+            "default": 25
+          },
+          "cursor": {
+            "description": "Opaque cursor returned as next_cursor by a previous page.\nPass it to fetch the next page of results.\n",
+            "type": "string"
+          }
+        },
+        "required": [
+          "entity_id"
+        ]
+      },
+      "SearchExecutionsResp": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "description": "Number of executions in this page",
+            "type": "number"
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AutomationExecution"
+            }
+          },
+          "next_cursor": {
+            "description": "Opaque cursor to fetch the next page of results.\nOnly present when more results are available.\n",
+            "type": "string"
           }
         },
         "required": [
@@ -4632,7 +5256,12 @@
           "updateEntity",
           "deleteEntity",
           "softDeleteEntity",
-          "restoreEntity"
+          "restoreEntity",
+          "relationsAdded",
+          "relationsRemoved",
+          "relationsSoftDeleted",
+          "relationsRestored",
+          "relationsDeleted"
         ]
       },
       "EntitySearchFilter": {
@@ -4837,6 +5466,76 @@
             ]
           }
         ]
+      },
+      "EventCatalogTrigger": {
+        "description": "Starts the flow when an Event Catalog event is published for the organization. The execution runs in the context of one entity from the event's entity graph (`entity_node_id`), and the event payload is available to conditions and actions as the `event` variable context.\n",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AutomationTrigger"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "event_catalog"
+                ]
+              },
+              "configuration": {
+                "type": "object",
+                "properties": {
+                  "event_name": {
+                    "type": "string",
+                    "description": "Name of the Event Catalog event that starts this flow",
+                    "example": "CustomerRequestSubmitted"
+                  },
+                  "event_version": {
+                    "type": "string",
+                    "description": "Event version (MAJOR.MINOR) this trigger is pinned to. Payloads published in a newer version are downgraded to this version before the flow runs, so field references in conditions and actions stay stable.\n",
+                    "example": "1.1"
+                  },
+                  "entity_node_id": {
+                    "type": "string",
+                    "description": "Id of the cardinality-one node in the event's entity graph whose entity becomes the execution's main entity (the entity actions operate on).\n",
+                    "example": "ticket"
+                  },
+                  "entity_schema": {
+                    "type": "string",
+                    "description": "Schema of the entity behind `entity_node_id`, denormalized from the event definition at configuration time",
+                    "example": "ticket"
+                  },
+                  "ignore_automation_triggered": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "When true (default), events that were emitted by an automation (`_trigger_source_type: automation`) do not start this flow. This prevents automation → event → automation chains unless explicitly enabled.\n"
+                  }
+                },
+                "required": [
+                  "event_name",
+                  "event_version",
+                  "entity_node_id",
+                  "entity_schema"
+                ]
+              }
+            },
+            "required": [
+              "type",
+              "configuration"
+            ]
+          }
+        ],
+        "example": {
+          "id": "12d4f45a-1883-4841-a94c-5928cb338a94",
+          "type": "event_catalog",
+          "configuration": {
+            "event_name": "CustomerRequestSubmitted",
+            "event_version": "1.1",
+            "entity_node_id": "ticket",
+            "entity_schema": "ticket",
+            "ignore_automation_triggered": true
+          }
+        }
       },
       "TriggerCondition": {
         "type": "object",

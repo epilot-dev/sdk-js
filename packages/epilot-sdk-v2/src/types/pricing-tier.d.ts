@@ -1,6 +1,4 @@
 /* Auto-copied from pricing-tier-client */
-/* eslint-disable */
-
 import type {
   OpenAPIClient,
   Parameters,

@@ -87,6 +87,7 @@ epilot access-token listAccessTokens --jsonata '$'
     "portal_user_id": "string",
     "assignments": ["123:owner"],
     "read_only": true,
+    "anonymize": true,
     "last_used": "2026-02-24"
   }
 ]
@@ -107,8 +108,21 @@ epilot access-token listAccessTokens --jsonata '$'
 **Sample Call**
 
 ```bash
+epilot access-token createAccessToken
+```
+
+With request body:
+
+```bash
 epilot access-token createAccessToken \
-  -d '{"name":"Postman Access Token","token_type":"api","assignments":["123:owner"],"expires_in":3600,"read_only":true}'
+  -d '{
+  "name": "Postman Access Token",
+  "token_type": "api",
+  "assignments": ["123:owner"],
+  "expires_in": 3600,
+  "read_only": true,
+  "anonymize": true
+}'
 ```
 
 Using stdin pipe:
@@ -138,6 +152,7 @@ epilot access-token createAccessToken --jsonata '$'
   "portal_user_id": "string",
   "assignments": ["123:owner"],
   "read_only": true,
+  "anonymize": true,
   "last_used": "2026-02-24"
 }
 ```
@@ -191,6 +206,7 @@ epilot access-token revokeAccessToken -p id=api_5ZugdRXasLfWBypHi93Fk --jsonata 
   "portal_user_id": "string",
   "assignments": ["123:owner"],
   "read_only": true,
+  "anonymize": true,
   "last_used": "2026-02-24"
 }
 ```

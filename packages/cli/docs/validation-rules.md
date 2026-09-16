@@ -3,6 +3,8 @@
 - **Base URL:** `https://validation-rules.sls.epilot.io`
 - **API Docs:** [https://docs.epilot.io/api/validation-rules](https://docs.epilot.io/api/validation-rules)
 
+The Validation Rules API manages reusable input validation rules for epilot journeys and entity attributes.
+
 ## Quick Start
 
 ```bash
@@ -34,17 +36,17 @@ epilot validation-rules getValidationRules
 ## Operations
 
 **Validation Rules**
-- [`getValidationRules`](#getvalidationrules) — Gets all validation rules by organization Id
-- [`createValidationRule`](#createvalidationrule) — Creates a new validation rule
-- [`getValidationRuleById`](#getvalidationrulebyid) — Retrieves a specific validation rule by its ID
-- [`updateValidationRule`](#updatevalidationrule) — Updates an existing validation rule partially by ID
-- [`deleteValidationRule`](#deletevalidationrule) — Deletes a validation rule by ID
-- [`addUsedByReference`](#addusedbyreference) — Adds a single reference to the usedBy array of a validation rule
-- [`removeUsedByReference`](#removeusedbyreference) — Removes a specific reference from the usedBy array of a validation rule
+- [`getValidationRules`](#getvalidationrules) — Returns all validation rules belonging to the authenticated user's organization.
+- [`createValidationRule`](#createvalidationrule) — Creates a new validation rule for the authenticated organization.
+- [`getValidationRuleById`](#getvalidationrulebyid) — Retrieves a specific validation rule by its unique ID.
+- [`updateValidationRule`](#updatevalidationrule) — Partially updates an existing validation rule by ID. Only the fields provided in the request body are updated.
+- [`deleteValidationRule`](#deletevalidationrule) — Permanently deletes a validation rule by ID. Any journeys or entity attributes referencing this rule should be updated b
+- [`addUsedByReference`](#addusedbyreference) — Adds a single `used_by` reference to an existing validation rule.
+- [`removeUsedByReference`](#removeusedbyreference) — Removes a specific `used_by` reference from an existing validation rule.
 
 ### `getValidationRules`
 
-Gets all validation rules by organization Id
+Returns all validation rules belonging to the authenticated user's organization.
 
 `GET /v1/validation-rules`
 
@@ -72,8 +74,7 @@ epilot validation-rules getValidationRules --jsonata 'results[0]'
       "used_by": [
         {
           "type": "journey",
-          "schema_slug": "string",
-          "source_id": "string"
+          "source_id": "journey-xyz789"
         }
       ],
       "rule": {
@@ -103,6 +104,11 @@ epilot validation-rules getValidationRules --jsonata 'results[0]'
           ]
         }
       },
+      "contexts": [
+        {
+          "schema": "contract"
+        }
+      ],
       "_schema_version": "string",
       "_id": "string",
       "_organization_id": "string",
@@ -121,11 +127,11 @@ epilot validation-rules getValidationRules --jsonata 'results[0]'
 
 ### `createValidationRule`
 
-Creates a new validation rule
+Creates a new validation rule for the authenticated organization.
 
 `POST /v1/validation-rules`
 
-**Request Body**
+**Request Body** (required)
 
 **Sample Call**
 
@@ -143,8 +149,7 @@ epilot validation-rules createValidationRule \
   "used_by": [
     {
       "type": "journey",
-      "schema_slug": "string",
-      "source_id": "string"
+      "source_id": "journey-xyz789"
     }
   ],
   "rule": {
@@ -173,7 +178,12 @@ epilot validation-rules createValidationRule \
         }
       ]
     }
-  }
+  },
+  "contexts": [
+    {
+      "schema": "contract"
+    }
+  ]
 }'
 ```
 
@@ -199,8 +209,7 @@ epilot validation-rules createValidationRule --jsonata '$'
   "used_by": [
     {
       "type": "journey",
-      "schema_slug": "string",
-      "source_id": "string"
+      "source_id": "journey-xyz789"
     }
   ],
   "rule": {
@@ -230,6 +239,11 @@ epilot validation-rules createValidationRule --jsonata '$'
       ]
     }
   },
+  "contexts": [
+    {
+      "schema": "contract"
+    }
+  ],
   "_schema_version": "string",
   "_id": "string",
   "_organization_id": "string",
@@ -246,7 +260,7 @@ epilot validation-rules createValidationRule --jsonata '$'
 
 ### `getValidationRuleById`
 
-Retrieves a specific validation rule by its ID
+Retrieves a specific validation rule by its unique ID.
 
 `GET /v1/validation-rules/{ruleId}`
 
@@ -260,19 +274,19 @@ Retrieves a specific validation rule by its ID
 
 ```bash
 epilot validation-rules getValidationRuleById \
-  -p ruleId=123e4567-e89b-12d3-a456-426614174000
+  -p ruleId=rule-abc123
 ```
 
 Using positional args for path parameters:
 
 ```bash
-epilot validation-rules getValidationRuleById 123e4567-e89b-12d3-a456-426614174000
+epilot validation-rules getValidationRuleById rule-abc123
 ```
 
 With JSONata filter:
 
 ```bash
-epilot validation-rules getValidationRuleById -p ruleId=123e4567-e89b-12d3-a456-426614174000 --jsonata '$'
+epilot validation-rules getValidationRuleById -p ruleId=rule-abc123 --jsonata '$'
 ```
 
 <details>
@@ -285,8 +299,7 @@ epilot validation-rules getValidationRuleById -p ruleId=123e4567-e89b-12d3-a456-
   "used_by": [
     {
       "type": "journey",
-      "schema_slug": "string",
-      "source_id": "string"
+      "source_id": "journey-xyz789"
     }
   ],
   "rule": {
@@ -316,6 +329,11 @@ epilot validation-rules getValidationRuleById -p ruleId=123e4567-e89b-12d3-a456-
       ]
     }
   },
+  "contexts": [
+    {
+      "schema": "contract"
+    }
+  ],
   "_schema_version": "string",
   "_id": "string",
   "_organization_id": "string",
@@ -332,7 +350,7 @@ epilot validation-rules getValidationRuleById -p ruleId=123e4567-e89b-12d3-a456-
 
 ### `updateValidationRule`
 
-Updates an existing validation rule partially by ID
+Partially updates an existing validation rule by ID. Only the fields provided in the request body are updated.
 
 `PATCH /v1/validation-rules/{ruleId}`
 
@@ -348,84 +366,21 @@ Updates an existing validation rule partially by ID
 
 ```bash
 epilot validation-rules updateValidationRule \
-  -p ruleId=123e4567-e89b-12d3-a456-426614174000
+  -p ruleId=rule-abc123
 ```
 
 With request body:
 
 ```bash
 epilot validation-rules updateValidationRule \
-  -p ruleId=123e4567-e89b-12d3-a456-426614174000 \
+  -p ruleId=rule-abc123 \
   -d '{
   "title": "string",
   "placeholder": "string",
   "used_by": [
     {
       "type": "journey",
-      "schema_slug": "string",
-      "source_id": "string"
-    }
-  ],
-  "rule": {
-    "type": "regex",
-    "conditions": {
-      "all": [
-        {
-          "fact": "inputValue",
-          "operator": "regexMatch",
-          "value": "string",
-          "params": {
-            "errorMessage": "string"
-          }
-        },
-        {
-          "all": [
-            {
-              "fact": "inputValue",
-              "operator": "regexMatch",
-              "value": "string",
-              "params": {
-                "errorMessage": "string"
-              }
-            }
-          ]
-        }
-      ]
-    }
-  }
-}'
-```
-
-Using positional args for path parameters:
-
-```bash
-epilot validation-rules updateValidationRule 123e4567-e89b-12d3-a456-426614174000
-```
-
-Using stdin pipe:
-
-```bash
-cat body.json | epilot validation-rules updateValidationRule -p ruleId=123e4567-e89b-12d3-a456-426614174000
-```
-
-With JSONata filter:
-
-```bash
-epilot validation-rules updateValidationRule -p ruleId=123e4567-e89b-12d3-a456-426614174000 --jsonata '$'
-```
-
-<details>
-<summary>Sample Response</summary>
-
-```json
-{
-  "title": "string",
-  "placeholder": "string",
-  "used_by": [
-    {
-      "type": "journey",
-      "schema_slug": "string",
-      "source_id": "string"
+      "source_id": "journey-xyz789"
     }
   ],
   "rule": {
@@ -455,6 +410,77 @@ epilot validation-rules updateValidationRule -p ruleId=123e4567-e89b-12d3-a456-4
       ]
     }
   },
+  "contexts": [
+    {
+      "schema": "contract"
+    }
+  ]
+}'
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot validation-rules updateValidationRule rule-abc123
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot validation-rules updateValidationRule -p ruleId=rule-abc123
+```
+
+With JSONata filter:
+
+```bash
+epilot validation-rules updateValidationRule -p ruleId=rule-abc123 --jsonata '$'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "title": "string",
+  "placeholder": "string",
+  "used_by": [
+    {
+      "type": "journey",
+      "source_id": "journey-xyz789"
+    }
+  ],
+  "rule": {
+    "type": "regex",
+    "conditions": {
+      "all": [
+        {
+          "fact": "inputValue",
+          "operator": "regexMatch",
+          "value": "string",
+          "params": {
+            "errorMessage": "string"
+          }
+        },
+        {
+          "all": [
+            {
+              "fact": "inputValue",
+              "operator": "regexMatch",
+              "value": "string",
+              "params": {
+                "errorMessage": "string"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "contexts": [
+    {
+      "schema": "contract"
+    }
+  ],
   "_schema_version": "string",
   "_id": "string",
   "_organization_id": "string",
@@ -471,7 +497,7 @@ epilot validation-rules updateValidationRule -p ruleId=123e4567-e89b-12d3-a456-4
 
 ### `deleteValidationRule`
 
-Deletes a validation rule by ID
+Permanently deletes a validation rule by ID. Any journeys or entity attributes referencing this rule should be updated b
 
 `DELETE /v1/validation-rules/{ruleId}`
 
@@ -485,26 +511,26 @@ Deletes a validation rule by ID
 
 ```bash
 epilot validation-rules deleteValidationRule \
-  -p ruleId=123e4567-e89b-12d3-a456-426614174000
+  -p ruleId=rule-abc123
 ```
 
 Using positional args for path parameters:
 
 ```bash
-epilot validation-rules deleteValidationRule 123e4567-e89b-12d3-a456-426614174000
+epilot validation-rules deleteValidationRule rule-abc123
 ```
 
 With JSONata filter:
 
 ```bash
-epilot validation-rules deleteValidationRule -p ruleId=123e4567-e89b-12d3-a456-426614174000 --jsonata '$'
+epilot validation-rules deleteValidationRule -p ruleId=rule-abc123 --jsonata '$'
 ```
 
 ---
 
 ### `addUsedByReference`
 
-Adds a single reference to the usedBy array of a validation rule
+Adds a single `used_by` reference to an existing validation rule.
 
 `POST /v1/validation-rules/{ruleId}/used-by`
 
@@ -520,26 +546,26 @@ Adds a single reference to the usedBy array of a validation rule
 
 ```bash
 epilot validation-rules addUsedByReference \
-  -p ruleId=123e4567-e89b-12d3-a456-426614174000 \
-  -d '{"type":"journey","schema_slug":"string","source_id":"string"}'
+  -p ruleId=rule-abc123 \
+  -d '{"type":"journey","source_id":"journey-xyz789"}'
 ```
 
 Using positional args for path parameters:
 
 ```bash
-epilot validation-rules addUsedByReference 123e4567-e89b-12d3-a456-426614174000
+epilot validation-rules addUsedByReference rule-abc123
 ```
 
 Using stdin pipe:
 
 ```bash
-cat body.json | epilot validation-rules addUsedByReference -p ruleId=123e4567-e89b-12d3-a456-426614174000
+cat body.json | epilot validation-rules addUsedByReference -p ruleId=rule-abc123
 ```
 
 With JSONata filter:
 
 ```bash
-epilot validation-rules addUsedByReference -p ruleId=123e4567-e89b-12d3-a456-426614174000 --jsonata '$'
+epilot validation-rules addUsedByReference -p ruleId=rule-abc123 --jsonata '$'
 ```
 
 <details>
@@ -552,8 +578,7 @@ epilot validation-rules addUsedByReference -p ruleId=123e4567-e89b-12d3-a456-426
   "used_by": [
     {
       "type": "journey",
-      "schema_slug": "string",
-      "source_id": "string"
+      "source_id": "journey-xyz789"
     }
   ],
   "rule": {
@@ -583,6 +608,11 @@ epilot validation-rules addUsedByReference -p ruleId=123e4567-e89b-12d3-a456-426
       ]
     }
   },
+  "contexts": [
+    {
+      "schema": "contract"
+    }
+  ],
   "_schema_version": "string",
   "_id": "string",
   "_organization_id": "string",
@@ -599,7 +629,7 @@ epilot validation-rules addUsedByReference -p ruleId=123e4567-e89b-12d3-a456-426
 
 ### `removeUsedByReference`
 
-Removes a specific reference from the usedBy array of a validation rule
+Removes a specific `used_by` reference from an existing validation rule.
 
 `DELETE /v1/validation-rules/{ruleId}/used-by`
 
@@ -615,26 +645,26 @@ Removes a specific reference from the usedBy array of a validation rule
 
 ```bash
 epilot validation-rules removeUsedByReference \
-  -p ruleId=123e4567-e89b-12d3-a456-426614174000 \
-  -d '{"type":"journey","schema_slug":"string","source_id":"string"}'
+  -p ruleId=rule-abc123 \
+  -d '{"type":"journey","source_id":"journey-xyz789"}'
 ```
 
 Using positional args for path parameters:
 
 ```bash
-epilot validation-rules removeUsedByReference 123e4567-e89b-12d3-a456-426614174000
+epilot validation-rules removeUsedByReference rule-abc123
 ```
 
 Using stdin pipe:
 
 ```bash
-cat body.json | epilot validation-rules removeUsedByReference -p ruleId=123e4567-e89b-12d3-a456-426614174000
+cat body.json | epilot validation-rules removeUsedByReference -p ruleId=rule-abc123
 ```
 
 With JSONata filter:
 
 ```bash
-epilot validation-rules removeUsedByReference -p ruleId=123e4567-e89b-12d3-a456-426614174000 --jsonata '$'
+epilot validation-rules removeUsedByReference -p ruleId=rule-abc123 --jsonata '$'
 ```
 
 <details>
@@ -647,8 +677,7 @@ epilot validation-rules removeUsedByReference -p ruleId=123e4567-e89b-12d3-a456-
   "used_by": [
     {
       "type": "journey",
-      "schema_slug": "string",
-      "source_id": "string"
+      "source_id": "journey-xyz789"
     }
   ],
   "rule": {
@@ -678,6 +707,11 @@ epilot validation-rules removeUsedByReference -p ruleId=123e4567-e89b-12d3-a456-
       ]
     }
   },
+  "contexts": [
+    {
+      "schema": "contract"
+    }
+  ],
   "_schema_version": "string",
   "_id": "string",
   "_organization_id": "string",

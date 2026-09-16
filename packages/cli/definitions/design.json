@@ -302,6 +302,71 @@
         }
       }
     },
+    "/v1/designs/{designId}/duplicate": {
+      "post": {
+        "operationId": "duplicateDesign",
+        "summary": "duplicateDesign",
+        "description": "Duplicate an existing design owned by the user organization. The copy carries over the style, custom CSS and name (marked as a copy) but does NOT carry over journey/portal relations, so the new design starts with 0 consumers, exactly like a freshly created design.",
+        "tags": [
+          "design-builder"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "designId",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/DesignId"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Success - design duplicated with success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddDesignRes"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No design found"
+          },
+          "500": {
+            "description": "Other errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/designs/{designId}/parse": {
       "get": {
         "operationId": "getThemeFromDesign",

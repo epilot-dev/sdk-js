@@ -3,7 +3,9 @@
 - **Base URL:** `https://workflows-definition.sls.epilot.io`
 - **API Docs:** [https://docs.epilot.io/api/workflow-definition](https://docs.epilot.io/api/workflow-definition)
 
-Service for Workflow Definitions for different processes inside of an Organization
+The Workflows Definitions API enables you to create, manage, and configure reusable workflow templates
+within your organization. Workflow definitions serve as blueprints that define the structure and behavior
+of business processes, which can then be instantiated as workflow executions.
 
 ## Quick Start
 
@@ -37,8 +39,8 @@ epilot workflow-definition getMaxAllowedLimit
 
 **Workflows**
 - [`getMaxAllowedLimit`](#getmaxallowedlimit) — Get limits and number of created executions for an Organization.
-- [`getDefinitions`](#getdefinitions) — Retrieve all Workflow Definitions from an Organization
-- [`createDefinition`](#createdefinition) — Create a Workflow Definition.
+- [`getDefinitions`](#getdefinitions) — Retrieve all V1 workflow definitions belonging to the authenticated organization.
+- [`createDefinition`](#createdefinition) — Create a new V1 workflow definition. The definition consists of sections and steps
 - [`getDefinition`](#getdefinition) — Get specific Definition by id from the Organization.
 - [`updateDefinition`](#updatedefinition) — Update Workflow Definition.
 - [`deleteDefinition`](#deletedefinition) — Delete Workflow Definition.
@@ -47,12 +49,12 @@ epilot workflow-definition getMaxAllowedLimit
 
 **Flows V2**
 - [`listFlowTemplates`](#listflowtemplates) — List all Flow Templates for a customer. Optionally, you can filter flow templates by trigger values.
-- [`createFlowTemplate`](#createflowtemplate) — Create a new Flow Template.
+- [`createFlowTemplate`](#createflowtemplate) — Create a new Flow Template (V2 workflow definition).
 - [`searchFlowTemplates`](#searchflowtemplates) — Search for flow templates by name, trigger type, enabled status, and more.
-- [`getFlowTemplate`](#getflowtemplate) — Get specific FLow template for a customer
+- [`getFlowTemplate`](#getflowtemplate) — Retrieve a specific flow template by its unique identifier.
 - [`updateFlowTemplate`](#updateflowtemplate) — Update Flow Template.
 - [`deleteFlowTemplate`](#deleteflowtemplate) — Delete Flow Template.
-- [`duplicateFlowTemplate`](#duplicateflowtemplate) — Duplicate a Flow Template from an existing workflow.
+- [`duplicateFlowTemplate`](#duplicateflowtemplate) — Create a copy of an existing flow template. The duplicated template will have a new
 
 **Closing Reason**
 - [`getAllClosingReasons`](#getallclosingreasons) — Get all Closing Reasons defined in the organization by default all Active.
@@ -96,7 +98,7 @@ epilot workflow-definition getMaxAllowedLimit --jsonata 'currentNoOfWorkflows'
 
 ### `getDefinitions`
 
-Retrieve all Workflow Definitions from an Organization
+Retrieve all V1 workflow definitions belonging to the authenticated organization.
 
 `GET /v1/workflows/definitions`
 
@@ -158,7 +160,7 @@ epilot workflow-definition getDefinitions --jsonata '$'
 
 ### `createDefinition`
 
-Create a Workflow Definition.
+Create a new V1 workflow definition. The definition consists of sections and steps
 
 `POST /v1/workflows/definitions`
 
@@ -385,7 +387,9 @@ epilot workflow-definition listFlowTemplates --jsonata 'results[0]'
       "entity_sync": [],
       "taxonomies": ["string"],
       "singleClosingReasonSelection": true,
-      "_manifest": ["string"]
+      "_manifest": ["string"],
+      "linear": true,
+      "limit_warnings": []
     }
   ]
 }
@@ -397,9 +401,15 @@ epilot workflow-definition listFlowTemplates --jsonata 'results[0]'
 
 ### `createFlowTemplate`
 
-Create a new Flow Template.
+Create a new Flow Template (V2 workflow definition).
 
 `POST /v2/flows/templates`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `enforce_limits` | query | boolean | No | When true, size/count limit violations (max incoming edges per task, max branches, max entity-sync rules, ...) are enforced as 400 errors. Used by the flow-builder UI for interactive authoring. On upd |
 
 **Request Body** (required)
 
@@ -525,7 +535,21 @@ epilot workflow-definition createFlowTemplate \
   ],
   "taxonomies": ["string"],
   "singleClosingReasonSelection": true,
-  "_manifest": ["string"]
+  "_manifest": ["string"],
+  "linear": true,
+  "limit_warnings": [
+    {
+      "i18nKey": "string",
+      "message": "string",
+      "max": 0,
+      "current": 0,
+      "node_id": "string",
+      "task_name": "string",
+      "branch_name": "string",
+      "param_name": "string",
+      "path": []
+    }
+  ]
 }'
 ```
 
@@ -657,7 +681,21 @@ epilot workflow-definition createFlowTemplate --jsonata '$'
   ],
   "taxonomies": ["string"],
   "singleClosingReasonSelection": true,
-  "_manifest": ["string"]
+  "_manifest": ["string"],
+  "linear": true,
+  "limit_warnings": [
+    {
+      "i18nKey": "string",
+      "message": "string",
+      "max": 0,
+      "current": 0,
+      "node_id": "string",
+      "task_name": "string",
+      "branch_name": "string",
+      "param_name": "string",
+      "path": []
+    }
+  ]
 }
 ```
 
@@ -736,7 +774,9 @@ epilot workflow-definition searchFlowTemplates --jsonata 'results[0]'
       "entity_sync": [],
       "taxonomies": ["string"],
       "singleClosingReasonSelection": true,
-      "_manifest": ["string"]
+      "_manifest": ["string"],
+      "linear": true,
+      "limit_warnings": []
     }
   ]
 }
@@ -748,7 +788,7 @@ epilot workflow-definition searchFlowTemplates --jsonata 'results[0]'
 
 ### `getFlowTemplate`
 
-Get specific FLow template for a customer
+Retrieve a specific flow template by its unique identifier.
 
 `GET /v2/flows/templates/{flowId}`
 
@@ -756,7 +796,7 @@ Get specific FLow template for a customer
 
 | Name | In | Type | Required | Description |
 | ---- | -- | ---- | -------- | ----------- |
-| `flowId` | path | string | Yes |  |
+| `flowId` | path | string | Yes | Unique identifier of the flow template to retrieve. |
 
 **Sample Call**
 
@@ -893,7 +933,21 @@ epilot workflow-definition getFlowTemplate -p flowId=7hj28akg --jsonata '$'
   ],
   "taxonomies": ["string"],
   "singleClosingReasonSelection": true,
-  "_manifest": ["string"]
+  "_manifest": ["string"],
+  "linear": true,
+  "limit_warnings": [
+    {
+      "i18nKey": "string",
+      "message": "string",
+      "max": 0,
+      "current": 0,
+      "node_id": "string",
+      "task_name": "string",
+      "branch_name": "string",
+      "param_name": "string",
+      "path": []
+    }
+  ]
 }
 ```
 
@@ -911,7 +965,8 @@ Update Flow Template.
 
 | Name | In | Type | Required | Description |
 | ---- | -- | ---- | -------- | ----------- |
-| `flowId` | path | string | Yes |  |
+| `flowId` | path | string | Yes | Unique identifier of the flow template to update. |
+| `enforce_limits` | query | boolean | No | When true, size/count limit violations (max incoming edges per task, max branches, max entity-sync rules, ...) are enforced as 400 errors. Used by the flow-builder UI for interactive authoring. On upd |
 
 **Request Body** (required)
 
@@ -1039,7 +1094,21 @@ epilot workflow-definition updateFlowTemplate \
   ],
   "taxonomies": ["string"],
   "singleClosingReasonSelection": true,
-  "_manifest": ["string"]
+  "_manifest": ["string"],
+  "linear": true,
+  "limit_warnings": [
+    {
+      "i18nKey": "string",
+      "message": "string",
+      "max": 0,
+      "current": 0,
+      "node_id": "string",
+      "task_name": "string",
+      "branch_name": "string",
+      "param_name": "string",
+      "path": []
+    }
+  ]
 }'
 ```
 
@@ -1177,7 +1246,21 @@ epilot workflow-definition updateFlowTemplate -p flowId=7hj28akg --jsonata '$'
   ],
   "taxonomies": ["string"],
   "singleClosingReasonSelection": true,
-  "_manifest": ["string"]
+  "_manifest": ["string"],
+  "linear": true,
+  "limit_warnings": [
+    {
+      "i18nKey": "string",
+      "message": "string",
+      "max": 0,
+      "current": 0,
+      "node_id": "string",
+      "task_name": "string",
+      "branch_name": "string",
+      "param_name": "string",
+      "path": []
+    }
+  ]
 }
 ```
 
@@ -1195,7 +1278,7 @@ Delete Flow Template.
 
 | Name | In | Type | Required | Description |
 | ---- | -- | ---- | -------- | ----------- |
-| `flowId` | path | string | Yes | Id of the flow template to de deleted. |
+| `flowId` | path | string | Yes | Unique identifier of the flow template to be deleted. |
 
 **Sample Call**
 
@@ -1220,7 +1303,7 @@ epilot workflow-definition deleteFlowTemplate -p flowId=7hj28akg --jsonata '$'
 
 ### `duplicateFlowTemplate`
 
-Duplicate a Flow Template from an existing workflow.
+Create a copy of an existing flow template. The duplicated template will have a new
 
 `POST /v2/flows/templates/{flowId}/duplicate`
 
@@ -1228,7 +1311,7 @@ Duplicate a Flow Template from an existing workflow.
 
 | Name | In | Type | Required | Description |
 | ---- | -- | ---- | -------- | ----------- |
-| `flowId` | path | string | Yes |  |
+| `flowId` | path | string | Yes | Unique identifier of the flow template to duplicate. |
 
 **Sample Call**
 
@@ -1365,7 +1448,21 @@ epilot workflow-definition duplicateFlowTemplate -p flowId=7hj28akg --jsonata '$
   ],
   "taxonomies": ["string"],
   "singleClosingReasonSelection": true,
-  "_manifest": ["string"]
+  "_manifest": ["string"],
+  "linear": true,
+  "limit_warnings": [
+    {
+      "i18nKey": "string",
+      "message": "string",
+      "max": 0,
+      "current": 0,
+      "node_id": "string",
+      "task_name": "string",
+      "branch_name": "string",
+      "param_name": "string",
+      "path": []
+    }
+  ]
 }
 ```
 
@@ -1675,7 +1772,7 @@ Delete Workflow Definition.
 
 | Name | In | Type | Required | Description |
 | ---- | -- | ---- | -------- | ----------- |
-| `definitionId` | path | string | Yes | Id of the definition to de deleted. |
+| `definitionId` | path | string | Yes | Unique identifier of the workflow definition to be deleted. |
 
 **Sample Call**
 
@@ -1708,7 +1805,7 @@ Get all Closing Reasons defined in the organization by default all Active.
 
 | Name | In | Type | Required | Description |
 | ---- | -- | ---- | -------- | ----------- |
-| `includeInactive` | query | boolean | No | Filter Closing Reasons by status like active inactiv |
+| `includeInactive` | query | boolean | No | When set to true, includes inactive closing reasons in the response. By default, only active closing reasons are returned. |
 
 **Sample Call**
 
