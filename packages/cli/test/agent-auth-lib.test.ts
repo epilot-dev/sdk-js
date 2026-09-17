@@ -135,10 +135,12 @@ describe('issuer resolution', () => {
   it('uses the env override, else the stage default', () => {
     expect(resolveAgentAuthIssuer('dev')).toBe(ISSUER);
     delete process.env.EPILOT_AGENT_AUTH_ISSUER;
-    expect(resolveAgentAuthIssuer('dev')).toBe('https://access-token.dev.sls.epilot.io/v1/agent-auth');
-    expect(resolveAgentAuthIssuer()).toBe('https://access-token.sls.epilot.io/v1/agent-auth');
+    expect(resolveAgentAuthIssuer('dev')).toBe('https://access-token.dev.sls.epilot.io/v1/access-tokens/agent-auth');
+    expect(resolveAgentAuthIssuer()).toBe('https://access-token.sls.epilot.io/v1/access-tokens/agent-auth');
     expect(getAgentAuthClient('https://custom.example/aap').baseUrl).toBe('https://custom.example/aap');
-    expect(getAgentAuthClient('staging').baseUrl).toBe('https://access-token.staging.sls.epilot.io/v1/agent-auth');
+    expect(getAgentAuthClient('staging').baseUrl).toBe(
+      'https://access-token.staging.sls.epilot.io/v1/access-tokens/agent-auth',
+    );
   });
 });
 

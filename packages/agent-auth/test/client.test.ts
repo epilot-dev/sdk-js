@@ -13,7 +13,7 @@ import {
   organizationGrants,
 } from '../src/index.js';
 
-const ISSUER = 'https://aap.example/v1/agent-auth';
+const ISSUER = 'https://aap.example/v1/access-tokens/agent-auth';
 
 const config: AgentConfiguration = {
   version: '1.0-draft',
@@ -67,7 +67,7 @@ const fakeServer = (routes: Record<string, (call: Call) => Response | Promise<Re
   return { calls, fetch: fetchImpl as unknown as typeof fetch };
 };
 
-const discoveryRoute = { '/v1/agent-auth/.well-known/agent-configuration': () => json(200, config) };
+const discoveryRoute = { '/v1/access-tokens/agent-auth/.well-known/agent-configuration': () => json(200, config) };
 
 const bearerOf = (call: Call) => call.headers.authorization?.replace(/^Bearer /, '') ?? '';
 
@@ -98,7 +98,7 @@ describe('AgentAuthClient', () => {
   it('registers an agent with a host JWT carrying the agent public key', async () => {
     const server = fakeServer({
       ...discoveryRoute,
-      '/v1/agent-auth/agent/register': () =>
+      '/v1/access-tokens/agent-auth/agent/register': () =>
         json(201, {
           agent_id: 'agent_1',
           host_id: 'host_1',
@@ -144,7 +144,7 @@ describe('AgentAuthClient', () => {
   it('requests a capability with an agent JWT (aud = issuer)', async () => {
     const server = fakeServer({
       ...discoveryRoute,
-      '/v1/agent-auth/agent/request-capability': () =>
+      '/v1/access-tokens/agent-auth/agent/request-capability': () =>
         json(200, {
           agent_id: 'agent_1',
           agent_capability_grants: [
@@ -181,7 +181,7 @@ describe('AgentAuthClient', () => {
   it('fetches agent status with agent_id as query parameter and a host JWT', async () => {
     const server = fakeServer({
       ...discoveryRoute,
-      '/v1/agent-auth/agent/status': (call) =>
+      '/v1/access-tokens/agent-auth/agent/status': (call) =>
         json(200, {
           agent_id: new URL(call.url).searchParams.get('agent_id'),
           host_id: 'host_1',
@@ -205,7 +205,7 @@ describe('AgentAuthClient', () => {
   it('executes a capability with aud = default_location and a capabilities claim, unwrapping {data}', async () => {
     const server = fakeServer({
       ...discoveryRoute,
-      '/v1/agent-auth/capability/execute': (call) => {
+      '/v1/access-tokens/agent-auth/capability/execute': (call) => {
         const body = call.body as { capability: string; arguments?: Record<string, unknown> };
         if (body.capability === EPILOT_CAPABILITIES.organizationsList) {
           return json(200, {
@@ -262,7 +262,7 @@ describe('AgentAuthClient', () => {
   it('maps HTTP errors to AgentAuthError with code, message and details', async () => {
     const server = fakeServer({
       ...discoveryRoute,
-      '/v1/agent-auth/capability/execute': () =>
+      '/v1/access-tokens/agent-auth/capability/execute': () =>
         json(403, { error: 'constraint_violated', message: 'read_only must be true', field: 'read_only' }),
     });
     const client = new AgentAuthClient({ baseUrl: ISSUER, fetch: server.fetch });
@@ -277,7 +277,7 @@ describe('AgentAuthClient', () => {
   it('maps non-JSON errors and network failures', async () => {
     const server = fakeServer({
       ...discoveryRoute,
-      '/v1/agent-auth/agent/revoke': () => new Response('gateway timeout', { status: 504 }),
+      '/v1/access-tokens/agent-auth/agent/revoke': () => new Response('gateway timeout', { status: 504 }),
     });
     const client = new AgentAuthClient({ baseUrl: ISSUER, fetch: server.fetch });
     const error = (await client.revokeAgent(hostKey, 'agent_1').catch((e) => e)) as AgentAuthError;
@@ -297,10 +297,10 @@ describe('AgentAuthClient', () => {
     const newAgentKey = generateKeyPair();
     const server = fakeServer({
       ...discoveryRoute,
-      '/v1/agent-auth/agent/revoke': () => json(200, { agent_id: 'agent_1', status: 'revoked' }),
-      '/v1/agent-auth/agent/reactivate': () => json(200, { agent_id: 'agent_1', status: 'active' }),
-      '/v1/agent-auth/agent/rotate-key': () => json(200, { agent_id: 'agent_1', status: 'active' }),
-      '/v1/agent-auth/agent/introspect': () => json(200, { active: true, agent_id: 'agent_1' }),
+      '/v1/access-tokens/agent-auth/agent/revoke': () => json(200, { agent_id: 'agent_1', status: 'revoked' }),
+      '/v1/access-tokens/agent-auth/agent/reactivate': () => json(200, { agent_id: 'agent_1', status: 'active' }),
+      '/v1/access-tokens/agent-auth/agent/rotate-key': () => json(200, { agent_id: 'agent_1', status: 'active' }),
+      '/v1/access-tokens/agent-auth/agent/introspect': () => json(200, { active: true, agent_id: 'agent_1' }),
     });
     const client = new AgentAuthClient({ baseUrl: ISSUER, fetch: server.fetch });
     expect(await client.revokeAgent(hostKey, 'agent_1')).toEqual({ agent_id: 'agent_1', status: 'revoked' });
@@ -330,7 +330,7 @@ describe('AgentAuthClient', () => {
         polls: () => polls,
         server: fakeServer({
           ...discoveryRoute,
-          '/v1/agent-auth/agent/status': () => {
+          '/v1/access-tokens/agent-auth/agent/status': () => {
             const status = statuses[Math.min(polls, statuses.length - 1)];
             polls++;
             return json(200, {
@@ -435,8 +435,10 @@ describe('epilot helpers', () => {
   });
 
   it('derives the issuer per stage', () => {
-    expect(epilotAgentAuthIssuer()).toBe('https://access-token.sls.epilot.io/v1/agent-auth');
-    expect(epilotAgentAuthIssuer('dev')).toBe('https://access-token.dev.sls.epilot.io/v1/agent-auth');
-    expect(epilotAgentAuthIssuer('staging')).toBe('https://access-token.staging.sls.epilot.io/v1/agent-auth');
+    expect(epilotAgentAuthIssuer()).toBe('https://access-token.sls.epilot.io/v1/access-tokens/agent-auth');
+    expect(epilotAgentAuthIssuer('dev')).toBe('https://access-token.dev.sls.epilot.io/v1/access-tokens/agent-auth');
+    expect(epilotAgentAuthIssuer('staging')).toBe(
+      'https://access-token.staging.sls.epilot.io/v1/access-tokens/agent-auth',
+    );
   });
 });

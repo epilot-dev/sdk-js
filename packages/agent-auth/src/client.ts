@@ -19,7 +19,7 @@ import {
 } from './types.js';
 
 export interface AgentAuthClientOptions {
-  /** Server base URL, e.g. https://access-token.sls.epilot.io/v1/agent-auth. */
+  /** Server base URL, e.g. https://access-token.sls.epilot.io/v1/access-tokens/agent-auth. */
   baseUrl: string;
   fetch?: typeof fetch;
   /** Discovery cache TTL; the spec default is one hour. */

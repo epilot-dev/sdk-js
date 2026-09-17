@@ -107,5 +107,5 @@ export type EpilotStage = 'production' | 'staging' | 'dev';
 /** Default epilot Agent Auth issuer per environment. */
 export const epilotAgentAuthIssuer = (stage: EpilotStage = 'production') =>
   stage === 'production'
-    ? 'https://access-token.sls.epilot.io/v1/agent-auth'
-    : `https://access-token.${stage}.sls.epilot.io/v1/agent-auth`;
+    ? 'https://access-token.sls.epilot.io/v1/access-tokens/agent-auth'
+    : `https://access-token.${stage}.sls.epilot.io/v1/access-tokens/agent-auth`;

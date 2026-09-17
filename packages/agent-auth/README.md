@@ -20,7 +20,7 @@ AAP makes agents first-class principals instead of anonymous holders of a user's
 - **Approval** is RFC 8628 style device authorization: the server returns a `verification_uri_complete` and a
   `user_code`; the user approves in the browser; the client polls `/agent/status`.
 
-epilot's AAP server lives under `https://access-token.sls.epilot.io/v1/agent-auth` and offers two capabilities:
+epilot's AAP server lives under `https://access-token.sls.epilot.io/v1/access-tokens/agent-auth` and offers two capabilities:
 
 | Capability | Arguments | Result |
 | --- | --- | --- |

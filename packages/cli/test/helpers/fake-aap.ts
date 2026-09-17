@@ -9,7 +9,7 @@ import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-export const ISSUER = 'https://aap.test/v1/agent-auth';
+export const ISSUER = 'https://aap.test/v1/access-tokens/agent-auth';
 
 export type FakeGrant = {
   id: string;
