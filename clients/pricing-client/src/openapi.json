@@ -14057,6 +14057,17 @@
             "items": {
               "$ref": "#/components/schemas/ProductRecommendation"
             }
+          },
+          "source_contract_item": {
+            "description": "The first line item of the contract used as source for the recommendation.\nCarries the amounts the customer currently pays; only present when searching by contract_id.\n",
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PriceItem"
+              },
+              {
+                "$ref": "#/components/schemas/CompositePriceItem"
+              }
+            ]
           }
         },
         "required": [
