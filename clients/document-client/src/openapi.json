@@ -26,6 +26,7 @@
           "Documents"
         ],
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
@@ -102,6 +103,7 @@
                 "partial_generation",
                 "full_generation"
               ],
+              "description": "- partial_generation: Generates a partial document for user validation before final generation\n- full_generation: Completes the entire document generation process in one step\n",
               "default": "full_generation"
             }
           },
@@ -115,6 +117,7 @@
                 "open",
                 "download"
               ],
+              "description": "- open: Preview URL opens the file directly in browser\n- download: Preview URL triggers a download of the file\n",
               "default": "open"
             }
           }
@@ -123,6 +126,7 @@
           "Documents"
         ],
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
@@ -154,6 +158,7 @@
           "Documents"
         ],
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
@@ -169,6 +174,68 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ConvertDocumentResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/templates:validate": {
+      "post": {
+        "operationId": "validateTemplate",
+        "summary": "validateTemplate",
+        "description": "Validates a document template's variable syntax and, optionally, proposes a hotfixed copy of it.\n\nThe endpoint compiles the template with docxtemplater's core parser (the xlsx module for\nspreadsheets), so a delimiter or tag error reported here is one generation would fail on.\nFailures specific to the image or HTML modules are not covered. Every problem it can repair\nunambiguously — a missing brace, an extra brace, a smart quote or a non-breaking space that\nWord substituted inside a tag — is applied to a **copy** of the template, which is uploaded\nand returned as `fixed_document`.\n\nThe original template is never modified. Accepting the fix is an explicit, separate step:\nthe caller shows the user `issues` (each with its `before`/`after`), lets them download\n`fixed_document.preview_url`, and only then replaces the template.\n\nSupported input document types:\n- .docx, .docm, .dotx\n- .xlsx, .xlsm\n- .pptx\n",
+        "tags": [
+          "Documents"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TemplateValidationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Validation result, with the hotfixed template when one could be produced",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TemplateValidationResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOutput"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Template larger than the validator accepts (25 MB)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOutput"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Unsupported media type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOutput"
                 }
               }
             }
@@ -330,14 +397,161 @@
         }
       },
       "ErrorCode": {
-        "description": "Error codes for document generation:\n- PARSE_ERROR - Error while parsing the document. Normally related with a bad template using the wrong DocxTemplater syntax.\n- DOC_TO_PDF_CONVERT_ERROR - Error while converting the document to PDF. Normally related with a ConvertAPI failure.\n- INTERNAL_ERROR - Internal error. Please contact support.\n- INVALID_TEMPLATE_FORMAT - Invalid template format (only .docx is supported). This can happen due to a bad word file or an unsupported file extension.\n",
+        "description": "Error codes for document generation:\n- PARSE_ERROR - Error while parsing the document. Normally related with a bad template using the wrong DocxTemplater syntax.\n- DOC_TO_PDF_CONVERT_ERROR - Error while converting the document to PDF. Normally related with a ConvertAPI failure.\n- INTERNAL_ERROR - Internal error. Please contact support.\n- INVALID_TEMPLATE_FORMAT - Invalid template format (only .docx is supported). This can happen due to a bad word file or an unsupported file extension.\n- TEMPLATE_NOT_FOUND - Template file was not found in S3. This indicates the template was likely deleted.\n",
         "type": "string",
         "enum": [
           "PARSE_ERROR",
           "DOC_TO_PDF_CONVERT_ERROR",
           "INTERNAL_ERROR",
-          "INVALID_TEMPLATE_FORMAT"
+          "INVALID_TEMPLATE_FORMAT",
+          "TEMPLATE_NOT_FOUND"
         ]
+      },
+      "TemplateValidationRequest": {
+        "type": "object",
+        "required": [
+          "template_document"
+        ],
+        "properties": {
+          "template_document": {
+            "description": "Input template document",
+            "type": "object",
+            "required": [
+              "s3ref"
+            ],
+            "properties": {
+              "filename": {
+                "type": "string",
+                "description": "Document original filename, used to name the fixed copy",
+                "example": "Umzugsmeldung.xlsx"
+              },
+              "s3ref": {
+                "$ref": "#/components/schemas/S3Reference"
+              }
+            }
+          },
+          "fix": {
+            "description": "Attempt to produce a hotfixed copy of the template. When false, the template is only\ninspected and no file is written.\n",
+            "type": "boolean",
+            "default": true
+          },
+          "fix_level": {
+            "description": "How far the hotfix may go:\n- safe - only repairs where the author's intent is unambiguous from the syntax\n  (unbalanced or duplicated braces, editor-substituted characters inside a tag).\n- aggressive - additionally promotes single-brace placeholders such as `{contact.name}`\n  to `{{contact.name}}`. These are common in customer templates but indistinguishable\n  from prose that uses braces, so they are reported with `confidence: low`.\n",
+            "type": "string",
+            "enum": [
+              "safe",
+              "aggressive"
+            ],
+            "default": "safe"
+          }
+        }
+      },
+      "TemplateValidationResponse": {
+        "type": "object",
+        "properties": {
+          "valid": {
+            "description": "Whether the template compiled cleanly before any repair was attempted",
+            "type": "boolean",
+            "example": false
+          },
+          "fixed": {
+            "description": "Whether a corrected copy of the template could be produced",
+            "type": "boolean",
+            "example": true
+          },
+          "issues": {
+            "description": "Everything found in the template, whether or not it could be repaired",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TemplateIssue"
+            }
+          },
+          "unresolved_errors": {
+            "description": "Parser errors that remain after the hotfix (or the original errors when nothing was\nfixed). Empty when the template is valid.\n",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DocxTemplaterErrorDetail"
+            }
+          },
+          "fixed_document": {
+            "description": "The corrected copy, for the user to review and accept. Absent when no repair was\napplied. The original template is left untouched.\n",
+            "type": "object",
+            "properties": {
+              "s3ref": {
+                "$ref": "#/components/schemas/S3Reference"
+              },
+              "filename": {
+                "type": "string",
+                "example": "Umzugsmeldung (fixed).xlsx"
+              },
+              "preview_url": {
+                "description": "Short-lived download link for the corrected copy",
+                "type": "string",
+                "format": "uri"
+              }
+            }
+          }
+        }
+      },
+      "TemplateIssue": {
+        "type": "object",
+        "description": "A single template syntax problem, and the repair proposed for it",
+        "properties": {
+          "id": {
+            "description": "Problem kind. Reuses docxtemplater's error vocabulary where one exists\n(`unopened_tag`, `unclosed_tag`, `duplicate_open_tag`, `duplicate_close_tag`), plus\n`malformed_tag` for single-brace placeholders and `typographic_characters` for\neditor-substituted characters inside an otherwise valid tag.\n",
+            "type": "string",
+            "example": "unopened_tag"
+          },
+          "file": {
+            "description": "Zip part the problem was found in",
+            "type": "string",
+            "example": "xl/sharedStrings.xml"
+          },
+          "location": {
+            "description": "Where the user can find it — a cell reference for spreadsheets, a part label\n(`Document body`, `Header 1`, `Slide 3`) otherwise.\n",
+            "type": "string",
+            "example": "Tabelle1!N4"
+          },
+          "context": {
+            "description": "The offending text with surrounding context",
+            "type": "string",
+            "example": "…Datum: {system.date}} Unterschrift…"
+          },
+          "explanation": {
+            "description": "Why the template parser rejects it",
+            "type": "string",
+            "example": "The tag is missing an opening brace."
+          },
+          "fixable": {
+            "description": "Whether the proposed repair was applied to the fixed copy",
+            "type": "boolean",
+            "example": true
+          },
+          "confidence": {
+            "description": "How sure we are that the repair is what the author meant",
+            "type": "string",
+            "enum": [
+              "high",
+              "medium",
+              "low"
+            ]
+          },
+          "rule": {
+            "description": "The repair rule that produced `after`",
+            "type": "string",
+            "example": "balance_opening_delimiter"
+          },
+          "before": {
+            "description": "The text as it is in the template",
+            "type": "string",
+            "example": "{system.date}}"
+          },
+          "after": {
+            "description": "The text as it would be in the fixed copy",
+            "type": "string",
+            "example": "{{system.date}}"
+          }
+        }
       },
       "TemplateSettings": {
         "type": "object",
@@ -404,7 +618,7 @@
             "description": "The file entity id, used when persisting a new template version with updated settings",
             "type": "string",
             "format": "uuid",
-            "example": "1a2b3c4d-5e6f-7g8h-9i0j-1k2l3m4n5o6p"
+            "example": "123e4567-e89b-12d3-a456-426614174000"
           }
         }
       },
@@ -510,7 +724,7 @@
           "user_id": {
             "type": "string",
             "description": "User Id for variable context",
-            "example": 100321
+            "example": "100321"
           },
           "language": {
             "type": "string",
