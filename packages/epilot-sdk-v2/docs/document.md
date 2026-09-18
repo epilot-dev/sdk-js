@@ -28,6 +28,7 @@ const { data } = await documentClient.getTemplateMeta(...)
 - [`getTemplateMeta`](#gettemplatemeta)
 - [`generateDocumentV2`](#generatedocumentv2)
 - [`convertDocument`](#convertdocument)
+- [`validateTemplate`](#validatetemplate)
 
 **Schemas**
 - [`S3Reference`](#s3reference)
@@ -39,6 +40,9 @@ const { data } = await documentClient.getTemplateMeta(...)
 - [`DocxTemplaterErrorDetails`](#docxtemplatererrordetails)
 - [`DocxTemplaterErrorDetail`](#docxtemplatererrordetail)
 - [`ErrorCode`](#errorcode)
+- [`TemplateValidationRequest`](#templatevalidationrequest)
+- [`TemplateValidationResponse`](#templatevalidationresponse)
+- [`TemplateIssue`](#templateissue)
 - [`TemplateSettings`](#templatesettings)
 - [`DocumentMetaRequest`](#documentmetarequest)
 - [`DocumentMetaResponse`](#documentmetaresponse)
@@ -110,7 +114,7 @@ const { data } = await client.generateDocumentV2(
       }
     },
     context_entity_id: 'bcd0aab9-b544-42b0-8bfb-6d449d02eacc',
-    user_id: 100321,
+    user_id: '100321',
     language: 'de',
     variable_payload: {
       additionalProperties: 'string'
@@ -132,7 +136,7 @@ const { data } = await client.generateDocumentV2(
       template_with_datatable: false,
       enabled_template_settings_persistence: false,
       misconfigured_margins: false,
-      file_entity_id: '1a2b3c4d-5e6f-7g8h-9i0j-1k2l3m4n5o6p'
+      file_entity_id: '123e4567-e89b-12d3-a456-426614174000'
     }
   },
 )
@@ -215,7 +219,7 @@ const { data } = await client.generateDocumentV2(
     "template_with_datatable": false,
     "enabled_template_settings_persistence": false,
     "misconfigured_margins": false,
-    "file_entity_id": "1a2b3c4d-5e6f-7g8h-9i0j-1k2l3m4n5o6p"
+    "file_entity_id": "123e4567-e89b-12d3-a456-426614174000"
   }
 }
 ```
@@ -266,6 +270,72 @@ const { data } = await client.convertDocument(
 
 ---
 
+### `validateTemplate`
+
+Validates a document template's variable syntax and, optionally, proposes a hotfixed copy of it.
+
+`POST /v2/templates:validate`
+
+```ts
+const { data } = await client.validateTemplate(
+  null,
+  {
+    template_document: {
+      filename: 'Umzugsmeldung.xlsx',
+      s3ref: {
+        bucket: 'document-api-prod',
+        key: 'uploads/my-template.pdf'
+      }
+    },
+    fix: true,
+    fix_level: 'safe'
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "valid": false,
+  "fixed": true,
+  "issues": [
+    {
+      "id": "unopened_tag",
+      "file": "xl/sharedStrings.xml",
+      "location": "Tabelle1!N4",
+      "context": "…Datum: {system.date}} Unterschrift…",
+      "explanation": "The tag is missing an opening brace.",
+      "fixable": true,
+      "confidence": "high",
+      "rule": "balance_opening_delimiter",
+      "before": "{system.date}}",
+      "after": "{{system.date}}"
+    }
+  ],
+  "unresolved_errors": [
+    {
+      "id": "string",
+      "context": "string",
+      "explanation": "string"
+    }
+  ],
+  "fixed_document": {
+    "s3ref": {
+      "bucket": "document-api-prod",
+      "key": "uploads/my-template.pdf"
+    },
+    "filename": "Umzugsmeldung (fixed).xlsx",
+    "preview_url": "https://example.com/path"
+  }
+}
+```
+
+</details>
+
+---
+
 ## Schemas
 
 ### `S3Reference`
@@ -282,7 +352,7 @@ type S3Reference = {
 ```ts
 type ErrorOutput = {
   error_message?: string
-  error_code?: "PARSE_ERROR" | "DOC_TO_PDF_CONVERT_ERROR" | "INTERNAL_ERROR" | "INVALID_TEMPLATE_FORMAT"
+  error_code?: "PARSE_ERROR" | "DOC_TO_PDF_CONVERT_ERROR" | "INTERNAL_ERROR" | "INVALID_TEMPLATE_FORMAT" | "TEMPLATE_NOT_FOUND"
   error_details?: Array<{
     explanation?: string
     context?: {
@@ -395,7 +465,76 @@ Error codes for document generation:
 - INTERNAL_ERROR - In
 
 ```ts
-type ErrorCode = "PARSE_ERROR" | "DOC_TO_PDF_CONVERT_ERROR" | "INTERNAL_ERROR" | "INVALID_TEMPLATE_FORMAT"
+type ErrorCode = "PARSE_ERROR" | "DOC_TO_PDF_CONVERT_ERROR" | "INTERNAL_ERROR" | "INVALID_TEMPLATE_FORMAT" | "TEMPLATE_NOT_FOUND"
+```
+
+### `TemplateValidationRequest`
+
+```ts
+type TemplateValidationRequest = {
+  template_document: {
+    filename?: string
+    s3ref: {
+      bucket: { ... }
+      key: { ... }
+    }
+  }
+  fix?: boolean
+  fix_level?: "safe" | "aggressive"
+}
+```
+
+### `TemplateValidationResponse`
+
+```ts
+type TemplateValidationResponse = {
+  valid?: boolean
+  fixed?: boolean
+  issues?: Array<{
+    id?: string
+    file?: string
+    location?: string
+    context?: string
+    explanation?: string
+    fixable?: boolean
+    confidence?: "high" | "medium" | "low"
+    rule?: string
+    before?: string
+    after?: string
+  }>
+  unresolved_errors?: Array<{
+    id?: string
+    context?: string
+    explanation?: string
+  }>
+  fixed_document?: {
+    s3ref?: {
+      bucket: { ... }
+      key: { ... }
+    }
+    filename?: string
+    preview_url?: string // uri
+  }
+}
+```
+
+### `TemplateIssue`
+
+A single template syntax problem, and the repair proposed for it
+
+```ts
+type TemplateIssue = {
+  id?: string
+  file?: string
+  location?: string
+  context?: string
+  explanation?: string
+  fixable?: boolean
+  confidence?: "high" | "medium" | "low"
+  rule?: string
+  before?: string
+  after?: string
+}
 ```
 
 ### `TemplateSettings`
@@ -525,7 +664,7 @@ type DocumentGenerationV2Response = {
   }
   error_output?: {
     error_message?: string
-    error_code?: "PARSE_ERROR" | "DOC_TO_PDF_CONVERT_ERROR" | "INTERNAL_ERROR" | "INVALID_TEMPLATE_FORMAT"
+    error_code?: "PARSE_ERROR" | "DOC_TO_PDF_CONVERT_ERROR" | "INTERNAL_ERROR" | "INVALID_TEMPLATE_FORMAT" | "TEMPLATE_NOT_FOUND"
     error_details?: Array<{
       explanation?: { ... }
       context?: { ... }

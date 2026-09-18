@@ -1,5 +1,3 @@
-/* eslint-disable */
-
 import type {
   OpenAPIClient,
   Parameters,
@@ -306,9 +304,10 @@ declare namespace Components {
          * - DOC_TO_PDF_CONVERT_ERROR - Error while converting the document to PDF. Normally related with a ConvertAPI failure.
          * - INTERNAL_ERROR - Internal error. Please contact support.
          * - INVALID_TEMPLATE_FORMAT - Invalid template format (only .docx is supported). This can happen due to a bad word file or an unsupported file extension.
+         * - TEMPLATE_NOT_FOUND - Template file was not found in S3. This indicates the template was likely deleted.
          *
          */
-        export type ErrorCode = "PARSE_ERROR" | "DOC_TO_PDF_CONVERT_ERROR" | "INTERNAL_ERROR" | "INVALID_TEMPLATE_FORMAT";
+        export type ErrorCode = "PARSE_ERROR" | "DOC_TO_PDF_CONVERT_ERROR" | "INTERNAL_ERROR" | "INVALID_TEMPLATE_FORMAT" | "TEMPLATE_NOT_FOUND";
         export interface ErrorOutput {
             /**
              * Error message
@@ -320,6 +319,7 @@ declare namespace Components {
              * - DOC_TO_PDF_CONVERT_ERROR - Error while converting the document to PDF. Normally related with a ConvertAPI failure.
              * - INTERNAL_ERROR - Internal error. Please contact support.
              * - INVALID_TEMPLATE_FORMAT - Invalid template format (only .docx is supported). This can happen due to a bad word file or an unsupported file extension.
+             * - TEMPLATE_NOT_FOUND - Template file was not found in S3. This indicates the template was likely deleted.
              *
              */
             ErrorCode;
@@ -399,6 +399,75 @@ declare namespace Components {
             key: string;
         }
         /**
+         * A single template syntax problem, and the repair proposed for it
+         */
+        export interface TemplateIssue {
+            /**
+             * Problem kind. Reuses docxtemplater's error vocabulary where one exists
+             * (`unopened_tag`, `unclosed_tag`, `duplicate_open_tag`, `duplicate_close_tag`), plus
+             * `malformed_tag` for single-brace placeholders and `typographic_characters` for
+             * editor-substituted characters inside an otherwise valid tag.
+             *
+             * example:
+             * unopened_tag
+             */
+            id?: string;
+            /**
+             * Zip part the problem was found in
+             * example:
+             * xl/sharedStrings.xml
+             */
+            file?: string;
+            /**
+             * Where the user can find it — a cell reference for spreadsheets, a part label
+             * (`Document body`, `Header 1`, `Slide 3`) otherwise.
+             *
+             * example:
+             * Tabelle1!N4
+             */
+            location?: string;
+            /**
+             * The offending text with surrounding context
+             * example:
+             * …Datum: {system.date}} Unterschrift…
+             */
+            context?: string;
+            /**
+             * Why the template parser rejects it
+             * example:
+             * The tag is missing an opening brace.
+             */
+            explanation?: string;
+            /**
+             * Whether the proposed repair was applied to the fixed copy
+             * example:
+             * true
+             */
+            fixable?: boolean;
+            /**
+             * How sure we are that the repair is what the author meant
+             */
+            confidence?: "high" | "medium" | "low";
+            /**
+             * The repair rule that produced `after`
+             * example:
+             * balance_opening_delimiter
+             */
+            rule?: string;
+            /**
+             * The text as it is in the template
+             * example:
+             * {system.date}}
+             */
+            before?: string;
+            /**
+             * The text as it would be in the fixed copy
+             * example:
+             * {{system.date}}
+             */
+            after?: string;
+        }
+        /**
          * Template Settings for document generation
          */
         export interface TemplateSettings {
@@ -469,9 +538,80 @@ declare namespace Components {
             /**
              * The file entity id, used when persisting a new template version with updated settings
              * example:
-             * 1a2b3c4d-5e6f-7g8h-9i0j-1k2l3m4n5o6p
+             * 123e4567-e89b-12d3-a456-426614174000
              */
             file_entity_id?: string; // uuid
+        }
+        export interface TemplateValidationRequest {
+            /**
+             * Input template document
+             */
+            template_document: {
+                /**
+                 * Document original filename, used to name the fixed copy
+                 * example:
+                 * Umzugsmeldung.xlsx
+                 */
+                filename?: string;
+                s3ref: S3Reference;
+            };
+            /**
+             * Attempt to produce a hotfixed copy of the template. When false, the template is only
+             * inspected and no file is written.
+             *
+             */
+            fix?: boolean;
+            /**
+             * How far the hotfix may go:
+             * - safe - only repairs where the author's intent is unambiguous from the syntax
+             *   (unbalanced or duplicated braces, editor-substituted characters inside a tag).
+             * - aggressive - additionally promotes single-brace placeholders such as `{contact.name}`
+             *   to `{{contact.name}}`. These are common in customer templates but indistinguishable
+             *   from prose that uses braces, so they are reported with `confidence: low`.
+             *
+             */
+            fix_level?: "safe" | "aggressive";
+        }
+        export interface TemplateValidationResponse {
+            /**
+             * Whether the template compiled cleanly before any repair was attempted
+             * example:
+             * false
+             */
+            valid?: boolean;
+            /**
+             * Whether a corrected copy of the template could be produced
+             * example:
+             * true
+             */
+            fixed?: boolean;
+            /**
+             * Everything found in the template, whether or not it could be repaired
+             */
+            issues?: /* A single template syntax problem, and the repair proposed for it */ TemplateIssue[];
+            /**
+             * Parser errors that remain after the hotfix (or the original errors when nothing was
+             * fixed). Empty when the template is valid.
+             *
+             */
+            unresolved_errors?: /* DocxTemplater error detail */ DocxTemplaterErrorDetail[];
+            /**
+             * The corrected copy, for the user to review and accept. Absent when no repair was
+             * applied. The original template is left untouched.
+             *
+             */
+            fixed_document?: {
+                s3ref?: S3Reference;
+                /**
+                 * example:
+                 * Umzugsmeldung (fixed).xlsx
+                 */
+                filename?: string;
+                /**
+                 * Short-lived download link for the corrected copy
+                 */
+                preview_url?: string; // uri
+            };
         }
     }
 }
@@ -485,13 +625,33 @@ declare namespace Paths {
     namespace GenerateDocumentV2 {
         namespace Parameters {
             export type JobId = string;
+            /**
+             * - partial_generation: Generates a partial document for user validation before final generation
+             * - full_generation: Completes the entire document generation process in one step
+             *
+             */
             export type Mode = "partial_generation" | "full_generation";
+            /**
+             * - open: Preview URL opens the file directly in browser
+             * - download: Preview URL triggers a download of the file
+             *
+             */
             export type PreviewMode = "open" | "download";
         }
         export interface QueryParameters {
             job_id?: Parameters.JobId;
-            mode?: Parameters.Mode;
-            preview_mode?: Parameters.PreviewMode;
+            mode?: /**
+             * - partial_generation: Generates a partial document for user validation before final generation
+             * - full_generation: Completes the entire document generation process in one step
+             *
+             */
+            Parameters.Mode;
+            preview_mode?: /**
+             * - open: Preview URL opens the file directly in browser
+             * - download: Preview URL triggers a download of the file
+             *
+             */
+            Parameters.PreviewMode;
         }
         export type RequestBody = Components.Schemas.DocumentGenerationV2Request;
         namespace Responses {
@@ -504,6 +664,15 @@ declare namespace Paths {
             export type $200 = Components.Schemas.DocumentMetaResponse;
             export type $400 = Components.Schemas.ErrorOutput;
             export type $403 = Components.Schemas.ErrorOutput;
+            export type $415 = Components.Schemas.ErrorOutput;
+        }
+    }
+    namespace ValidateTemplate {
+        export type RequestBody = Components.Schemas.TemplateValidationRequest;
+        namespace Responses {
+            export type $200 = Components.Schemas.TemplateValidationResponse;
+            export type $403 = Components.Schemas.ErrorOutput;
+            export type $413 = Components.Schemas.ErrorOutput;
             export type $415 = Components.Schemas.ErrorOutput;
         }
     }
@@ -564,6 +733,33 @@ export interface OperationMethods {
     data?: Paths.ConvertDocument.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ConvertDocument.Responses.$200>
+  /**
+   * validateTemplate - validateTemplate
+   * 
+   * Validates a document template's variable syntax and, optionally, proposes a hotfixed copy of it.
+   * 
+   * The endpoint compiles the template with docxtemplater's core parser (the xlsx module for
+   * spreadsheets), so a delimiter or tag error reported here is one generation would fail on.
+   * Failures specific to the image or HTML modules are not covered. Every problem it can repair
+   * unambiguously — a missing brace, an extra brace, a smart quote or a non-breaking space that
+   * Word substituted inside a tag — is applied to a **copy** of the template, which is uploaded
+   * and returned as `fixed_document`.
+   * 
+   * The original template is never modified. Accepting the fix is an explicit, separate step:
+   * the caller shows the user `issues` (each with its `before`/`after`), lets them download
+   * `fixed_document.preview_url`, and only then replaces the template.
+   * 
+   * Supported input document types:
+   * - .docx, .docm, .dotx
+   * - .xlsx, .xlsm
+   * - .pptx
+   * 
+   */
+  'validateTemplate'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.ValidateTemplate.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ValidateTemplate.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -626,6 +822,35 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ConvertDocument.Responses.$200>
   }
+  ['/v2/templates:validate']: {
+    /**
+     * validateTemplate - validateTemplate
+     * 
+     * Validates a document template's variable syntax and, optionally, proposes a hotfixed copy of it.
+     * 
+     * The endpoint compiles the template with docxtemplater's core parser (the xlsx module for
+     * spreadsheets), so a delimiter or tag error reported here is one generation would fail on.
+     * Failures specific to the image or HTML modules are not covered. Every problem it can repair
+     * unambiguously — a missing brace, an extra brace, a smart quote or a non-breaking space that
+     * Word substituted inside a tag — is applied to a **copy** of the template, which is uploaded
+     * and returned as `fixed_document`.
+     * 
+     * The original template is never modified. Accepting the fix is an explicit, separate step:
+     * the caller shows the user `issues` (each with its `before`/`after`), lets them download
+     * `fixed_document.preview_url`, and only then replaces the template.
+     * 
+     * Supported input document types:
+     * - .docx, .docm, .dotx
+     * - .xlsx, .xlsm
+     * - .pptx
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.ValidateTemplate.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ValidateTemplate.Responses.$200>
+  }
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
@@ -646,4 +871,7 @@ export type InternalErrorDetails = Components.Schemas.InternalErrorDetails;
 export type InvalidCustomVariableErrorDetail = Components.Schemas.InvalidCustomVariableErrorDetail;
 export type InvalidCustomVariableErrorDetails = Components.Schemas.InvalidCustomVariableErrorDetails;
 export type S3Reference = Components.Schemas.S3Reference;
+export type TemplateIssue = Components.Schemas.TemplateIssue;
 export type TemplateSettings = Components.Schemas.TemplateSettings;
+export type TemplateValidationRequest = Components.Schemas.TemplateValidationRequest;
+export type TemplateValidationResponse = Components.Schemas.TemplateValidationResponse;

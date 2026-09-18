@@ -39,6 +39,7 @@ epilot document getTemplateMeta
 - [`getTemplateMeta`](#gettemplatemeta) — Get metadata for a document template
 - [`generateDocumentV2`](#generatedocumentv2) — Generates documents from templates with variables.
 - [`convertDocument`](#convertdocument) — Converts a document to a different format.
+- [`validateTemplate`](#validatetemplate) — Validates a document template's variable syntax and, optionally, proposes a hotfixed copy of it.
 
 ### `getTemplateMeta`
 
@@ -46,7 +47,7 @@ Get metadata for a document template
 
 `POST /v2/documents:meta`
 
-**Request Body**
+**Request Body** (required)
 
 **Sample Call**
 
@@ -107,7 +108,7 @@ Generates documents from templates with variables.
 - download - preview_url provides a link to download the file
  |
 
-**Request Body**
+**Request Body** (required)
 
 **Sample Call**
 
@@ -128,7 +129,7 @@ epilot document generateDocumentV2 \
     }
   },
   "context_entity_id": "bcd0aab9-b544-42b0-8bfb-6d449d02eacc",
-  "user_id": 100321,
+  "user_id": "100321",
   "language": "de",
   "variable_payload": {
     "additionalProperties": "string"
@@ -150,7 +151,7 @@ epilot document generateDocumentV2 \
     "template_with_datatable": false,
     "enabled_template_settings_persistence": false,
     "misconfigured_margins": false,
-    "file_entity_id": "1a2b3c4d-5e6f-7g8h-9i0j-1k2l3m4n5o6p"
+    "file_entity_id": "123e4567-e89b-12d3-a456-426614174000"
   }
 }'
 ```
@@ -244,7 +245,7 @@ epilot document generateDocumentV2 --jsonata 'job_id'
     "template_with_datatable": false,
     "enabled_template_settings_persistence": false,
     "misconfigured_margins": false,
-    "file_entity_id": "1a2b3c4d-5e6f-7g8h-9i0j-1k2l3m4n5o6p"
+    "file_entity_id": "123e4567-e89b-12d3-a456-426614174000"
   }
 }
 ```
@@ -259,7 +260,7 @@ Converts a document to a different format.
 
 `POST /v2/documents:convert`
 
-**Request Body**
+**Request Body** (required)
 
 **Sample Call**
 
@@ -307,6 +308,92 @@ epilot document convertDocument --jsonata 'output_document'
       "bucket": "document-api-prod",
       "key": "uploads/my-template.pdf"
     }
+  }
+}
+```
+
+</details>
+
+---
+
+### `validateTemplate`
+
+Validates a document template's variable syntax and, optionally, proposes a hotfixed copy of it.
+
+`POST /v2/templates:validate`
+
+**Request Body** (required)
+
+**Sample Call**
+
+```bash
+epilot document validateTemplate
+```
+
+With request body:
+
+```bash
+epilot document validateTemplate \
+  -d '{
+  "template_document": {
+    "filename": "Umzugsmeldung.xlsx",
+    "s3ref": {
+      "bucket": "document-api-prod",
+      "key": "uploads/my-template.pdf"
+    }
+  },
+  "fix": true,
+  "fix_level": "safe"
+}'
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot document validateTemplate
+```
+
+With JSONata filter:
+
+```bash
+epilot document validateTemplate --jsonata 'valid'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "valid": false,
+  "fixed": true,
+  "issues": [
+    {
+      "id": "unopened_tag",
+      "file": "xl/sharedStrings.xml",
+      "location": "Tabelle1!N4",
+      "context": "…Datum: {system.date}} Unterschrift…",
+      "explanation": "The tag is missing an opening brace.",
+      "fixable": true,
+      "confidence": "high",
+      "rule": "balance_opening_delimiter",
+      "before": "{system.date}}",
+      "after": "{{system.date}}"
+    }
+  ],
+  "unresolved_errors": [
+    {
+      "id": "string",
+      "context": "string",
+      "explanation": "string"
+    }
+  ],
+  "fixed_document": {
+    "s3ref": {
+      "bucket": "document-api-prod",
+      "key": "uploads/my-template.pdf"
+    },
+    "filename": "Umzugsmeldung (fixed).xlsx",
+    "preview_url": "https://example.com/path"
   }
 }
 ```

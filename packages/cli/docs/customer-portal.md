@@ -48,6 +48,8 @@ epilot customer-portal upsertPortal -p origin=example
 - [`getAllPortalConfigs`](#getallportalconfigs) — Retrieves all portal configurations.
 - [`getEmailTemplates`](#getemailtemplates) — Retrieves the email templates of a portal
 - [`upsertEmailTemplates`](#upsertemailtemplates) — Upserts the email templates of a portal
+- [`migrateEmailTemplateReferences`](#migrateemailtemplatereferences) — Walk every email-template config row in the caller's org and re-point any
+- [`listEmailTemplateReferences`](#listemailtemplatereferences) — Read-only sibling of migrateEmailTemplateReferences. Lists every portal in
 - [`getEmailTemplatesByPortalId`](#getemailtemplatesbyportalid) — Retrieves the email templates of a portal by portal ID
 - [`upsertEmailTemplatesByPortalId`](#upsertemailtemplatesbyportalid) — Upserts the email templates of a portal by portal ID
 - [`getPortalWidgetsV3`](#getportalwidgetsv3) — Retrieves the widgets of a portal by portal_id.
@@ -81,10 +83,16 @@ epilot customer-portal upsertPortal -p origin=example
 - [`getPortalConfigV3`](#getportalconfigv3) — Retrieves a specific portal configuration by ID.
 - [`putPortalConfig`](#putportalconfig) — Updates a specific portal configuration by ID.
 - [`deletePortalConfig`](#deleteportalconfig) — Deletes a specific portal configuration by ID.
+- [`listPortalRevisions`](#listportalrevisions) — Lists a portal's revision history, newest first. Metadata only — no config blob, no page bodies. `is_published` says whe
+- [`createPortalRevision`](#createportalrevision) — Creates a new revision — a complete, immutable snapshot of the portal's configuration, pages and email templates. Nothin
+- [`getPortalRevision`](#getportalrevision) — Returns the full content of one revision: the snapshotted config, its pages (in the live `Page` shape), email templates 
+- [`publishPortalRevision`](#publishportalrevision) — Makes one revision the portal's live configuration, atomically: either everything below takes effect or nothing does. Pu
 - [`listAllPortalConfigs`](#listallportalconfigs) — Retrieves all portal configurations.
 - [`swapPortalConfig`](#swapportalconfig) — Swaps the portal configuration of two portals.
 - [`clonePortalConfig`](#cloneportalconfig) — Creates a new portal by cloning configuration and pages from an existing portal. The new portal gets its own domain, use
 - [`verifyDns`](#verifydns) — Manually triggers DNS verification for a portal's domain setup. Runs the same verification logic as the scheduled proces
+- [`getMobileConfig`](#getmobileconfig) — Returns the portal's mobile app configuration. By default the response is build-ready (resolved): base info (display_nam
+- [`putMobileConfig`](#putmobileconfig) — Merges the provided fields into the portal's mobile app configuration
 
 **Public**
 - [`createUserV3`](#createuserv3) — Registers a portal user.
@@ -99,12 +107,14 @@ epilot customer-portal upsertPortal -p origin=example
 - [`getOrganizationSettingsByDomain`](#getorganizationsettingsbydomain) — Retrieves organization settings by domain. Only public organization settings are returned.
 - [`checkContactExists`](#checkcontactexists) — True if contact with given identifiers exists.
 - [`checkContactExistsV3`](#checkcontactexistsv3) — True if contact with given identifiers exists.
+- [`identifyContact`](#identifycontact) — Identify a contact by the portal's configured registration identifiers and, on a match,
 - [`checkAccountExists`](#checkaccountexists) — True if account with given identifiers exists.
 - [`confirmUser`](#confirmuser) — Confirm a portal user
 - [`confirmUserWithUserId`](#confirmuserwithuserid) — Confirm a portal user
 - [`userExists`](#userexists) — Checks whether a user exists in the portal
 - [`userExistsV3`](#userexistsv3) — Checks whether a user exists in the portal.
 - [`getSSOProvider`](#getssoprovider) — Returns the public configuration of a single SSO identity provider with env var
+- [`getPublicSSOProviderV3`](#getpublicssoproviderv3) — Returns the public configuration of a single SSO identity provider with env var
 - [`ssoRedirect`](#ssoredirect) — Handles the redirect from the external SSO provider. Validates the authorization `code` and `state` received from the pr
 - [`ssoCallback`](#ssocallback) — Handles the callback from the external SSO provider, validates the authorization `code`
 - [`getPublicPages`](#getpublicpages) — Fetch all public portal pages
@@ -115,6 +125,8 @@ epilot customer-portal upsertPortal -p origin=example
 **ECP**
 - [`validateToken`](#validatetoken) — Validates Portal Token is valid. Pass the token via Authorization Header.
 - [`revokeToken`](#revoketoken) — Revokes all of the access tokens for the given Refresh Token.
+- [`createExport`](#createexport) — Request an asynchronous CSV export of the portal user's entities for one schema. Columns come from the request Returns a
+- [`getExport`](#getexport) — Get the status of an export job, including the download URL once ready.
 - [`getConsumption`](#getconsumption) — Get energy consumption data between a given time period.
 - [`prepareVisualizationExport`](#preparevisualizationexport) — Asks an installed App to prepare a downloadable export of a visualization (consumption chart, dynamic tariff chart, etc.
 - [`getVisualizationMetadata`](#getvisualizationmetadata) — Returns runtime metadata describing how a visualization (consumption / price / cost chart) should be rendered for a give
@@ -127,13 +139,16 @@ epilot customer-portal upsertPortal -p origin=example
 - [`updatePortalUser`](#updateportaluser) — Update the portal user details
 - [`deletePortalUser`](#deleteportaluser) — Delete the portal user
 - [`updatePortalUserEmail`](#updateportaluseremail) — Update portal user email
+- [`changePortalUserPassword`](#changeportaluserpassword) — Hand over a password change to the third-party system configured via the `changePassword` portal extension hook.
 - [`postOrderAcceptance`](#postorderacceptance) — Accept/decline an offer by id
+- [`getContractWithTemplates`](#getcontractwithtemplates) — Resolve Handlebars templates against a contract's related meters and return the contract with templates_output populated
 - [`addContractByIdentifiers`](#addcontractbyidentifiers) — Self-assign contract(s) by pre-configured identifiers.
 - [`validateCadenceEntityEditRules`](#validatecadenceentityeditrules) — Validate if cadence rule is valid for an entity
 - [`searchPaymentRelationsInEntities`](#searchpaymentrelationsinentities) — Search for entities that have the payment relation with the given payment id
 - [`createCustomEntityActivity`](#createcustomentityactivity) — Create a custom activity that can be displayed in activity feed of an entity.
 - [`saveEntityFile`](#saveentityfile) — Add files to an entity
 - [`deleteEntityFile`](#deleteentityfile) — Delete files from an entity
+- [`getFilePreview`](#getfilepreview) — resolves an in-portal preview for a file. Returns a Content-Disposition: inline URL for directly-previewable files (PDF,
 - [`trackFileDownloaded`](#trackfiledownloaded) — Track that user has downloaded a file
 - [`getBillingEvents`](#getbillingevents) — Fetch billing events for a portal user
 - [`triggerEntityAccessEvent`](#triggerentityaccessevent) — Trigger entity access event for a portal user
@@ -143,6 +158,9 @@ epilot customer-portal upsertPortal -p origin=example
 - [`getAutomationContext`](#getautomationcontext) — Retrieves the automation context.
 - [`updateWorkflowStepAsDone`](#updateworkflowstepasdone) — Update a workflow step as done
 - [`getEntityWorkflows`](#getentityworkflows) — Get all workflows associated with an entity (requires access to the entity)
+- [`getOutstandingTasks`](#getoutstandingtasks) — Returns all outstanding workflow journey tasks for the authenticated portal user, across their opportunity, order and co
+- [`getEntityPortalWorkflows`](#getentityportalworkflows) — Get all portal-relevant workflows associated with an entity (requires access to the entity),
+- [`getEntityPortalWorkflowsBatch`](#getentityportalworkflowsbatch) — Batch variant of `getEntityPortalWorkflows`: returns portal-relevant workflows for
 - [`uploadMeterReadingPhoto`](#uploadmeterreadingphoto) — Uploads a Meter Reading photo and - if enabled - gives back data extracted from the photo.
 - [`createMeterReading`](#createmeterreading) — Inserts a new meter reading.
 - [`getAllowedMeterReadingRange`](#getallowedmeterreadingrange) — Get allowed reading range for all counters of a meter from the configured
@@ -153,6 +171,10 @@ epilot customer-portal upsertPortal -p origin=example
 - [`getPortalPageBlocks`](#getportalpageblocks) — Fetch all portal page blocks
 - [`getPortalPageBlock`](#getportalpageblock) — Fetch a portal page block by id
 - [`updateCampaignPortalBlockStatus`](#updatecampaignportalblockstatus) — Updates the status of a campaign portal block for multiple recipients.
+- [`listPortalNotifications`](#listportalnotifications) — Lists the 360 notifications addressed to the authenticated portal user, newest first. The organization and the portal us
+- [`getPortalNotificationsUnreadCount`](#getportalnotificationsunreadcount) — Returns the number of unread notifications for the authenticated portal user.
+- [`markAllPortalNotificationsRead`](#markallportalnotificationsread) — Marks all notifications of the authenticated portal user as read.
+- [`markPortalNotificationRead`](#markportalnotificationread) — Marks a single notification of the authenticated portal user as read.
 - [`updateNotificationsStatus`](#updatenotificationsstatus) — Updates the statuses of multiple notifications at once.
 - [`invitePartner`](#invitepartner) — Invites a partner to a portal
 - [`listBusinessPartners`](#listbusinesspartners) — Lists all business partners linked to the businessaccount
@@ -231,9 +253,47 @@ epilot customer-portal upsertPortal \
       "attribute_mappings": {},
       "entity_matching": {},
       "oidc_config": {},
-      "mobile_oidc_config": {}
+      "mobile_oidc_config": {},
+      "expose_client_secret": false
     }
   ],
+  "mobile_config": {
+    "portal_id": "string",
+    "enabled": true,
+    "display_name": "string",
+    "app_host": "string",
+    "environment": "prod",
+    "branding": {
+      "app_icon": "string",
+      "splash": "string",
+      "splash_dark": "string",
+      "icon_background_color": "string",
+      "splash_background_color": "string",
+      "splash_background_color_dark": "string"
+    },
+    "ios": {
+      "bundle_id": "string",
+      "team_id": "string",
+      "credentials_status": "not_configured",
+      "app_store_id": "string",
+      "store_url": "string",
+      "last_build": {}
+    },
+    "android": {
+      "package_name": "string",
+      "credentials_status": "not_configured",
+      "upload_key_status": "not_configured",
+      "store_url": "string",
+      "last_build": {}
+    },
+    "ota": {
+      "enabled": true,
+      "channel": "canary",
+      "auto_update": true,
+      "update_strategy": "next-launch",
+      "min_native_version": "string"
+    }
+  },
   "enabled": true,
   "name": "Installer Portal",
   "domain": "abc.com",
@@ -255,7 +315,9 @@ epilot customer-portal upsertPortal \
     "start_page": true,
     "billing": true,
     "change_due_date": true,
-    "new_design": true
+    "new_design": true,
+    "mcp_enabled": true,
+    "mcp_grant_version": 0
   },
   "accessToken": "string",
   "advanced_mfa": {
@@ -267,7 +329,8 @@ epilot customer-portal upsertPortal \
     },
     "entry_point": "PASSWORD",
     "preferred_sso_providers": ["office-365-login"],
-    "auto_redirect_to_sso": true
+    "auto_redirect_to_sso": true,
+    "prevent_user_enumeration": true
   },
   "cognito_details": {
     "cognito_user_pool_client_id": "6bsd0jkgoie74k2i8mrhc1vest",
@@ -289,7 +352,8 @@ epilot customer-portal upsertPortal \
       "require_lowercase": true,
       "require_uppercase": true,
       "require_numbers": true,
-      "require_symbols": true
+      "require_symbols": true,
+      "password_history_size": 3
     }
   },
   "config": "string",
@@ -350,6 +414,16 @@ epilot customer-portal upsertPortal \
       "schema": "contract"
     }
   ],
+  "surfaces": [
+    {
+      "id": "website-journeys",
+      "name": "Website journeys",
+      "description": "string",
+      "authentication": "login",
+      "token_ttl_seconds": 300,
+      "data_access": {}
+    }
+  ],
   "contact_identifiers_for_account": [
     {
       "name": "first_name",
@@ -408,11 +482,21 @@ epilot customer-portal upsertPortal \
   "inactive_contract_cutoff_years": 0,
   "is_dummy": true,
   "is_v3_item": true,
+  "published_revision_id": "2026-08-25T14:03:11.482Z-a7f3c1d9",
   "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
   "portal_sk_v3": "PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c",
   "origin": "string",
   "pages": {},
-  "global_blocks": {}
+  "global_blocks": {},
+  "notification_triggers": [
+    {
+      "trigger_type": "entity_created",
+      "entity_schema": "opportunity",
+      "enabled": true,
+      "template_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+    }
+  ],
+  "engagement_center_enabled": true
 }'
 ```
 
@@ -433,6 +517,43 @@ epilot customer-portal upsertPortal -p origin=example --jsonata '$'
 
 ```json
 {
+  "mobile_config": {
+    "portal_id": "string",
+    "enabled": true,
+    "display_name": "string",
+    "app_host": "string",
+    "environment": "prod",
+    "branding": {
+      "app_icon": "string",
+      "splash": "string",
+      "splash_dark": "string",
+      "icon_background_color": "string",
+      "splash_background_color": "string",
+      "splash_background_color_dark": "string"
+    },
+    "ios": {
+      "bundle_id": "string",
+      "team_id": "string",
+      "credentials_status": "not_configured",
+      "app_store_id": "string",
+      "store_url": "string",
+      "last_build": {}
+    },
+    "android": {
+      "package_name": "string",
+      "credentials_status": "not_configured",
+      "upload_key_status": "not_configured",
+      "store_url": "string",
+      "last_build": {}
+    },
+    "ota": {
+      "enabled": true,
+      "channel": "canary",
+      "auto_update": true,
+      "update_strategy": "next-launch",
+      "min_native_version": "string"
+    }
+  },
   "enabled": true,
   "name": "Installer Portal",
   "domain": "abc.com",
@@ -454,7 +575,9 @@ epilot customer-portal upsertPortal -p origin=example --jsonata '$'
     "start_page": true,
     "billing": true,
     "change_due_date": true,
-    "new_design": true
+    "new_design": true,
+    "mcp_enabled": true,
+    "mcp_grant_version": 0
   },
   "accessToken": "string",
   "advanced_mfa": {
@@ -466,7 +589,8 @@ epilot customer-portal upsertPortal -p origin=example --jsonata '$'
     },
     "entry_point": "PASSWORD",
     "preferred_sso_providers": ["office-365-login"],
-    "auto_redirect_to_sso": true
+    "auto_redirect_to_sso": true,
+    "prevent_user_enumeration": true
   },
   "cognito_details": {
     "cognito_user_pool_client_id": "6bsd0jkgoie74k2i8mrhc1vest",
@@ -488,7 +612,8 @@ epilot customer-portal upsertPortal -p origin=example --jsonata '$'
       "require_lowercase": true,
       "require_uppercase": true,
       "require_numbers": true,
-      "require_symbols": true
+      "require_symbols": true,
+      "password_history_size": 3
     }
   },
   "config": "string",
@@ -549,6 +674,16 @@ epilot customer-portal upsertPortal -p origin=example --jsonata '$'
       "schema": "contract"
     }
   ],
+  "surfaces": [
+    {
+      "id": "website-journeys",
+      "name": "Website journeys",
+      "description": "string",
+      "authentication": "login",
+      "token_ttl_seconds": 300,
+      "data_access": {}
+    }
+  ],
   "contact_identifiers_for_account": [
     {
       "name": "first_name",
@@ -607,11 +742,21 @@ epilot customer-portal upsertPortal -p origin=example --jsonata '$'
   "inactive_contract_cutoff_years": 0,
   "is_dummy": true,
   "is_v3_item": true,
+  "published_revision_id": "2026-08-25T14:03:11.482Z-a7f3c1d9",
   "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
   "portal_sk_v3": "PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c",
   "origin": "string",
   "pages": {},
   "global_blocks": {},
+  "notification_triggers": [
+    {
+      "trigger_type": "entity_created",
+      "entity_schema": "opportunity",
+      "enabled": true,
+      "template_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+    }
+  ],
+  "engagement_center_enabled": true,
   "id": 12345,
   "organization_id": 12345,
   "org_settings": {
@@ -821,6 +966,43 @@ epilot customer-portal getPortalConfigByDomain -p domain=example.com --jsonata '
 
 ```json
 {
+  "mobile_config": {
+    "portal_id": "string",
+    "enabled": true,
+    "display_name": "string",
+    "app_host": "string",
+    "environment": "prod",
+    "branding": {
+      "app_icon": "string",
+      "splash": "string",
+      "splash_dark": "string",
+      "icon_background_color": "string",
+      "splash_background_color": "string",
+      "splash_background_color_dark": "string"
+    },
+    "ios": {
+      "bundle_id": "string",
+      "team_id": "string",
+      "credentials_status": "not_configured",
+      "app_store_id": "string",
+      "store_url": "string",
+      "last_build": {}
+    },
+    "android": {
+      "package_name": "string",
+      "credentials_status": "not_configured",
+      "upload_key_status": "not_configured",
+      "store_url": "string",
+      "last_build": {}
+    },
+    "ota": {
+      "enabled": true,
+      "channel": "canary",
+      "auto_update": true,
+      "update_strategy": "next-launch",
+      "min_native_version": "string"
+    }
+  },
   "enabled": true,
   "name": "Installer Portal",
   "domain": "abc.com",
@@ -842,7 +1024,9 @@ epilot customer-portal getPortalConfigByDomain -p domain=example.com --jsonata '
     "start_page": true,
     "billing": true,
     "change_due_date": true,
-    "new_design": true
+    "new_design": true,
+    "mcp_enabled": true,
+    "mcp_grant_version": 0
   },
   "accessToken": "string",
   "advanced_mfa": {
@@ -854,7 +1038,8 @@ epilot customer-portal getPortalConfigByDomain -p domain=example.com --jsonata '
     },
     "entry_point": "PASSWORD",
     "preferred_sso_providers": ["office-365-login"],
-    "auto_redirect_to_sso": true
+    "auto_redirect_to_sso": true,
+    "prevent_user_enumeration": true
   },
   "cognito_details": {
     "cognito_user_pool_client_id": "6bsd0jkgoie74k2i8mrhc1vest",
@@ -876,7 +1061,8 @@ epilot customer-portal getPortalConfigByDomain -p domain=example.com --jsonata '
       "require_lowercase": true,
       "require_uppercase": true,
       "require_numbers": true,
-      "require_symbols": true
+      "require_symbols": true,
+      "password_history_size": 3
     }
   },
   "config": "string",
@@ -937,6 +1123,16 @@ epilot customer-portal getPortalConfigByDomain -p domain=example.com --jsonata '
       "schema": "contract"
     }
   ],
+  "surfaces": [
+    {
+      "id": "website-journeys",
+      "name": "Website journeys",
+      "description": "string",
+      "authentication": "login",
+      "token_ttl_seconds": 300,
+      "data_access": {}
+    }
+  ],
   "contact_identifiers_for_account": [
     {
       "name": "first_name",
@@ -995,11 +1191,21 @@ epilot customer-portal getPortalConfigByDomain -p domain=example.com --jsonata '
   "inactive_contract_cutoff_years": 0,
   "is_dummy": true,
   "is_v3_item": true,
+  "published_revision_id": "2026-08-25T14:03:11.482Z-a7f3c1d9",
   "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
   "portal_sk_v3": "PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c",
   "origin": "string",
   "pages": {},
   "global_blocks": {},
+  "notification_triggers": [
+    {
+      "trigger_type": "entity_created",
+      "entity_schema": "opportunity",
+      "enabled": true,
+      "template_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+    }
+  ],
+  "engagement_center_enabled": true,
   "id": 12345,
   "organization_id": 12345,
   "org_settings": {
@@ -1062,6 +1268,43 @@ epilot customer-portal getPortalConfig --jsonata '$'
 
 ```json
 {
+  "mobile_config": {
+    "portal_id": "string",
+    "enabled": true,
+    "display_name": "string",
+    "app_host": "string",
+    "environment": "prod",
+    "branding": {
+      "app_icon": "string",
+      "splash": "string",
+      "splash_dark": "string",
+      "icon_background_color": "string",
+      "splash_background_color": "string",
+      "splash_background_color_dark": "string"
+    },
+    "ios": {
+      "bundle_id": "string",
+      "team_id": "string",
+      "credentials_status": "not_configured",
+      "app_store_id": "string",
+      "store_url": "string",
+      "last_build": {}
+    },
+    "android": {
+      "package_name": "string",
+      "credentials_status": "not_configured",
+      "upload_key_status": "not_configured",
+      "store_url": "string",
+      "last_build": {}
+    },
+    "ota": {
+      "enabled": true,
+      "channel": "canary",
+      "auto_update": true,
+      "update_strategy": "next-launch",
+      "min_native_version": "string"
+    }
+  },
   "enabled": true,
   "name": "Installer Portal",
   "domain": "abc.com",
@@ -1083,7 +1326,9 @@ epilot customer-portal getPortalConfig --jsonata '$'
     "start_page": true,
     "billing": true,
     "change_due_date": true,
-    "new_design": true
+    "new_design": true,
+    "mcp_enabled": true,
+    "mcp_grant_version": 0
   },
   "accessToken": "string",
   "advanced_mfa": {
@@ -1095,7 +1340,8 @@ epilot customer-portal getPortalConfig --jsonata '$'
     },
     "entry_point": "PASSWORD",
     "preferred_sso_providers": ["office-365-login"],
-    "auto_redirect_to_sso": true
+    "auto_redirect_to_sso": true,
+    "prevent_user_enumeration": true
   },
   "cognito_details": {
     "cognito_user_pool_client_id": "6bsd0jkgoie74k2i8mrhc1vest",
@@ -1117,7 +1363,8 @@ epilot customer-portal getPortalConfig --jsonata '$'
       "require_lowercase": true,
       "require_uppercase": true,
       "require_numbers": true,
-      "require_symbols": true
+      "require_symbols": true,
+      "password_history_size": 3
     }
   },
   "config": "string",
@@ -1178,6 +1425,16 @@ epilot customer-portal getPortalConfig --jsonata '$'
       "schema": "contract"
     }
   ],
+  "surfaces": [
+    {
+      "id": "website-journeys",
+      "name": "Website journeys",
+      "description": "string",
+      "authentication": "login",
+      "token_ttl_seconds": 300,
+      "data_access": {}
+    }
+  ],
   "contact_identifiers_for_account": [
     {
       "name": "first_name",
@@ -1236,11 +1493,21 @@ epilot customer-portal getPortalConfig --jsonata '$'
   "inactive_contract_cutoff_years": 0,
   "is_dummy": true,
   "is_v3_item": true,
+  "published_revision_id": "2026-08-25T14:03:11.482Z-a7f3c1d9",
   "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
   "portal_sk_v3": "PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c",
   "origin": "string",
   "pages": {},
   "global_blocks": {},
+  "notification_triggers": [
+    {
+      "trigger_type": "entity_created",
+      "entity_schema": "opportunity",
+      "enabled": true,
+      "template_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+    }
+  ],
+  "engagement_center_enabled": true,
   "id": 12345,
   "organization_id": 12345,
   "org_settings": {
@@ -1298,6 +1565,119 @@ With JSONata filter:
 ```bash
 epilot customer-portal deletePortal -p origin=example --jsonata '$'
 ```
+
+---
+
+### `createExport`
+
+Request an asynchronous CSV export of the portal user's entities for one schema. Columns come from the request Returns a
+
+`POST /v1/portal/exports`
+
+**Request Body** (required)
+
+**Sample Call**
+
+```bash
+epilot customer-portal createExport
+```
+
+With request body:
+
+```bash
+epilot customer-portal createExport \
+  -d '{
+  "schema": "string",
+  "search": {
+    "q": "string",
+    "q_fields": ["string"],
+    "filters": [
+      {}
+    ],
+    "filters_context": [
+      {}
+    ],
+    "sort": {}
+  },
+  "columns": [
+    {
+      "key": "vertragsnummer",
+      "header": {
+        "de": "Vertragsnummer",
+        "en": "Contract number"
+      },
+      "source": {
+        "path": ["customer"],
+        "attribute": "customer_number",
+        "address_field": "full"
+      },
+      "formatter": "text",
+      "enum_labels": {}
+    }
+  ],
+  "expand_over": "string",
+  "language": "de"
+}'
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot customer-portal createExport
+```
+
+With JSONata filter:
+
+```bash
+epilot customer-portal createExport --jsonata '$'
+```
+
+---
+
+### `getExport`
+
+Get the status of an export job, including the download URL once ready.
+
+`GET /v1/portal/exports/{jobId}`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `jobId` | path | string | Yes | The export job id returned by createExport. |
+
+**Sample Call**
+
+```bash
+epilot customer-portal getExport \
+  -p jobId=123e4567-e89b-12d3-a456-426614174000
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot customer-portal getExport 123e4567-e89b-12d3-a456-426614174000
+```
+
+With JSONata filter:
+
+```bash
+epilot customer-portal getExport -p jobId=123e4567-e89b-12d3-a456-426614174000 --jsonata 'jobId'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "jobId": "string",
+  "status": "queued",
+  "downloadUrl": "string",
+  "error": "string"
+}
+```
+
+</details>
 
 ---
 
@@ -1438,6 +1818,51 @@ epilot customer-portal getPublicPortalExtensionDetails -p org_id=12324 -p origin
     },
     "hook": {
       "plausibility_mode": "check"
+    }
+  },
+  "changeEmail": {
+    "app": {
+      "app_id": "string",
+      "name": {}
+    },
+    "extension": {
+      "id": "string",
+      "name": {}
+    },
+    "hook": {
+      "id": "string",
+      "change_mode": "asynchronous",
+      "require_password_confirmation": true,
+      "explanation": {}
+    }
+  },
+  "changePassword": {
+    "app": {
+      "app_id": "string",
+      "name": {}
+    },
+    "extension": {
+      "id": "string",
+      "name": {}
+    },
+    "hook": {
+      "id": "string",
+      "require_new_password": false,
+      "explanation": {}
+    }
+  },
+  "deleteAccount": {
+    "app": {
+      "app_id": "string",
+      "name": {}
+    },
+    "extension": {
+      "id": "string",
+      "name": {}
+    },
+    "hook": {
+      "id": "string",
+      "explanation": {}
     }
   }
 }
@@ -1585,6 +2010,51 @@ epilot customer-portal getPublicPortalExtensionDetailsV3 --jsonata 'consumptionD
     "hook": {
       "plausibility_mode": "check"
     }
+  },
+  "changeEmail": {
+    "app": {
+      "app_id": "string",
+      "name": {}
+    },
+    "extension": {
+      "id": "string",
+      "name": {}
+    },
+    "hook": {
+      "id": "string",
+      "change_mode": "asynchronous",
+      "require_password_confirmation": true,
+      "explanation": {}
+    }
+  },
+  "changePassword": {
+    "app": {
+      "app_id": "string",
+      "name": {}
+    },
+    "extension": {
+      "id": "string",
+      "name": {}
+    },
+    "hook": {
+      "id": "string",
+      "require_new_password": false,
+      "explanation": {}
+    }
+  },
+  "deleteAccount": {
+    "app": {
+      "app_id": "string",
+      "name": {}
+    },
+    "extension": {
+      "id": "string",
+      "name": {}
+    },
+    "hook": {
+      "id": "string",
+      "explanation": {}
+    }
   }
 }
 ```
@@ -1609,7 +2079,7 @@ Get energy consumption data between a given time period.
 | `meter_id` | query | string | No | Meter ID for consumption data. Deprecated - use context_entities instead. |
 | `from` | query | string (date-time) | Yes | Start date for consumption data (ISO 8601 format). |
 | `to` | query | string (date-time) | Yes | End date for consumption data (ISO 8601 format). |
-| `interval` | query | "PT15M" \| "PT1H" \| "P1D" \| "P1M" | Yes | Interval between consumption data points (e.g., PT15M for 15 minutes, PT1H for hourly). Not all intervals have to be supported. |
+| `interval` | query | "PT15M" \| "PT1H" \| "P1D" \| "P1M" \| "P1Y" \| "custom" | Yes | Interval between consumption data points (e.g., PT15M for 15 minutes, PT1H for hourly). Not all intervals have to be supported. `custom` is period-based retrieval for sources that advertise it in thei |
 | `context_entities` | query | object[] | No | Additional entities to include in the context for variable interpolation in the hook. |
 
 **Sample Call**
@@ -1638,7 +2108,15 @@ epilot customer-portal getConsumption -p extensionId=123e4567-e89b-12d3-a456-426
       "timestamp": "1970-01-01T00:00:00.000Z",
       "value": 0,
       "type": "nt",
-      "unit": "kWh"
+      "unit": "kWh",
+      "label": {
+        "en": "Billing period 1",
+        "de": "Abrechnungszeitraum 1"
+      },
+      "period": {
+        "from": "2024-01-03T00:00:00.000Z",
+        "to": "2025-01-05T00:00:00.000Z"
+      }
     }
   ]
 }
@@ -1781,7 +2259,7 @@ Get energy cost data between a given time period.
 | `meter_id` | query | string | No | Meter ID for cost data. Deprecated - use context_entities instead. |
 | `from` | query | string (date-time) | Yes | Start date for cost data (ISO 8601 format). |
 | `to` | query | string (date-time) | Yes | End date for cost data (ISO 8601 format). |
-| `interval` | query | "PT15M" \| "PT1H" \| "P1D" \| "P1M" | Yes | Interval between cost data points (e.g., PT15M for 15 minutes, PT1H for hourly). Not all intervals have to be supported. |
+| `interval` | query | "PT15M" \| "PT1H" \| "P1D" \| "P1M" \| "P1Y" | Yes | Interval between cost data points (e.g., PT15M for 15 minutes, PT1H for hourly). Not all intervals have to be supported. |
 | `context_entities` | query | object[] | No | Additional entities to include in the context for variable interpolation in the hook. |
 
 **Sample Call**
@@ -1838,7 +2316,7 @@ Get energy prices data between a given time period.
 | `meter_id` | query | string | No | Meter ID for price data. Deprecated - use context_entities instead. |
 | `from` | query | string (date-time) | Yes | Start date for price data (ISO 8601 format). |
 | `to` | query | string (date-time) | Yes | End date for price data (ISO 8601 format). |
-| `interval` | query | "PT15M" \| "PT1H" \| "P1D" \| "P1M" | Yes | Interval between price data points (e.g., PT15M for 15 minutes, PT1H for hourly). Not all intervals have to be supported. |
+| `interval` | query | "PT15M" \| "PT1H" \| "P1D" \| "P1M" \| "P1Y" | Yes | Interval between price data points (e.g., PT15M for 15 minutes, PT1H for hourly). Not all intervals have to be supported. |
 | `context_entities` | query | object[] | No | Additional entities to include in the context for variable interpolation in the hook. |
 
 **Sample Call**
@@ -2075,6 +2553,43 @@ epilot customer-portal getPublicPortalConfig -p org_id=12324 -p origin=example -
 
 ```json
 {
+  "mobile_config": {
+    "portal_id": "string",
+    "enabled": true,
+    "display_name": "string",
+    "app_host": "string",
+    "environment": "prod",
+    "branding": {
+      "app_icon": "string",
+      "splash": "string",
+      "splash_dark": "string",
+      "icon_background_color": "string",
+      "splash_background_color": "string",
+      "splash_background_color_dark": "string"
+    },
+    "ios": {
+      "bundle_id": "string",
+      "team_id": "string",
+      "credentials_status": "not_configured",
+      "app_store_id": "string",
+      "store_url": "string",
+      "last_build": {}
+    },
+    "android": {
+      "package_name": "string",
+      "credentials_status": "not_configured",
+      "upload_key_status": "not_configured",
+      "store_url": "string",
+      "last_build": {}
+    },
+    "ota": {
+      "enabled": true,
+      "channel": "canary",
+      "auto_update": true,
+      "update_strategy": "next-launch",
+      "min_native_version": "string"
+    }
+  },
   "enabled": true,
   "name": "Installer Portal",
   "domain": "abc.com",
@@ -2096,7 +2611,9 @@ epilot customer-portal getPublicPortalConfig -p org_id=12324 -p origin=example -
     "start_page": true,
     "billing": true,
     "change_due_date": true,
-    "new_design": true
+    "new_design": true,
+    "mcp_enabled": true,
+    "mcp_grant_version": 0
   },
   "accessToken": "string",
   "advanced_mfa": {
@@ -2108,7 +2625,8 @@ epilot customer-portal getPublicPortalConfig -p org_id=12324 -p origin=example -
     },
     "entry_point": "PASSWORD",
     "preferred_sso_providers": ["office-365-login"],
-    "auto_redirect_to_sso": true
+    "auto_redirect_to_sso": true,
+    "prevent_user_enumeration": true
   },
   "cognito_details": {
     "cognito_user_pool_client_id": "6bsd0jkgoie74k2i8mrhc1vest",
@@ -2130,7 +2648,8 @@ epilot customer-portal getPublicPortalConfig -p org_id=12324 -p origin=example -
       "require_lowercase": true,
       "require_uppercase": true,
       "require_numbers": true,
-      "require_symbols": true
+      "require_symbols": true,
+      "password_history_size": 3
     }
   },
   "config": "string",
@@ -2191,6 +2710,16 @@ epilot customer-portal getPublicPortalConfig -p org_id=12324 -p origin=example -
       "schema": "contract"
     }
   ],
+  "surfaces": [
+    {
+      "id": "website-journeys",
+      "name": "Website journeys",
+      "description": "string",
+      "authentication": "login",
+      "token_ttl_seconds": 300,
+      "data_access": {}
+    }
+  ],
   "contact_identifiers_for_account": [
     {
       "name": "first_name",
@@ -2249,11 +2778,21 @@ epilot customer-portal getPublicPortalConfig -p org_id=12324 -p origin=example -
   "inactive_contract_cutoff_years": 0,
   "is_dummy": true,
   "is_v3_item": true,
+  "published_revision_id": "2026-08-25T14:03:11.482Z-a7f3c1d9",
   "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
   "portal_sk_v3": "PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c",
   "origin": "string",
   "pages": {},
   "global_blocks": {},
+  "notification_triggers": [
+    {
+      "trigger_type": "entity_created",
+      "entity_schema": "opportunity",
+      "enabled": true,
+      "template_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+    }
+  ],
+  "engagement_center_enabled": true,
   "id": 12345,
   "organization_id": 12345,
   "org_settings": {
@@ -2317,6 +2856,43 @@ epilot customer-portal getOrgPortalConfig -p origin=example --jsonata '$'
 
 ```json
 {
+  "mobile_config": {
+    "portal_id": "string",
+    "enabled": true,
+    "display_name": "string",
+    "app_host": "string",
+    "environment": "prod",
+    "branding": {
+      "app_icon": "string",
+      "splash": "string",
+      "splash_dark": "string",
+      "icon_background_color": "string",
+      "splash_background_color": "string",
+      "splash_background_color_dark": "string"
+    },
+    "ios": {
+      "bundle_id": "string",
+      "team_id": "string",
+      "credentials_status": "not_configured",
+      "app_store_id": "string",
+      "store_url": "string",
+      "last_build": {}
+    },
+    "android": {
+      "package_name": "string",
+      "credentials_status": "not_configured",
+      "upload_key_status": "not_configured",
+      "store_url": "string",
+      "last_build": {}
+    },
+    "ota": {
+      "enabled": true,
+      "channel": "canary",
+      "auto_update": true,
+      "update_strategy": "next-launch",
+      "min_native_version": "string"
+    }
+  },
   "enabled": true,
   "name": "Installer Portal",
   "domain": "abc.com",
@@ -2338,7 +2914,9 @@ epilot customer-portal getOrgPortalConfig -p origin=example --jsonata '$'
     "start_page": true,
     "billing": true,
     "change_due_date": true,
-    "new_design": true
+    "new_design": true,
+    "mcp_enabled": true,
+    "mcp_grant_version": 0
   },
   "accessToken": "string",
   "advanced_mfa": {
@@ -2350,7 +2928,8 @@ epilot customer-portal getOrgPortalConfig -p origin=example --jsonata '$'
     },
     "entry_point": "PASSWORD",
     "preferred_sso_providers": ["office-365-login"],
-    "auto_redirect_to_sso": true
+    "auto_redirect_to_sso": true,
+    "prevent_user_enumeration": true
   },
   "cognito_details": {
     "cognito_user_pool_client_id": "6bsd0jkgoie74k2i8mrhc1vest",
@@ -2372,7 +2951,8 @@ epilot customer-portal getOrgPortalConfig -p origin=example --jsonata '$'
       "require_lowercase": true,
       "require_uppercase": true,
       "require_numbers": true,
-      "require_symbols": true
+      "require_symbols": true,
+      "password_history_size": 3
     }
   },
   "config": "string",
@@ -2433,6 +3013,16 @@ epilot customer-portal getOrgPortalConfig -p origin=example --jsonata '$'
       "schema": "contract"
     }
   ],
+  "surfaces": [
+    {
+      "id": "website-journeys",
+      "name": "Website journeys",
+      "description": "string",
+      "authentication": "login",
+      "token_ttl_seconds": 300,
+      "data_access": {}
+    }
+  ],
   "contact_identifiers_for_account": [
     {
       "name": "first_name",
@@ -2491,11 +3081,21 @@ epilot customer-portal getOrgPortalConfig -p origin=example --jsonata '$'
   "inactive_contract_cutoff_years": 0,
   "is_dummy": true,
   "is_v3_item": true,
+  "published_revision_id": "2026-08-25T14:03:11.482Z-a7f3c1d9",
   "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
   "portal_sk_v3": "PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c",
   "origin": "string",
   "pages": {},
   "global_blocks": {},
+  "notification_triggers": [
+    {
+      "trigger_type": "entity_created",
+      "entity_schema": "opportunity",
+      "enabled": true,
+      "template_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+    }
+  ],
+  "engagement_center_enabled": true,
   "id": 12345,
   "organization_id": 12345,
   "org_settings": {
@@ -2522,7 +3122,8 @@ epilot customer-portal getOrgPortalConfig -p origin=example --jsonata '$'
       "mobile_oidc_config": {},
       "provider_type": "OIDC",
       "attribute_mappings": {},
-      "entity_matching": {}
+      "entity_matching": {},
+      "expose_client_secret": false
     }
   ],
   "certificate_details": {
@@ -2568,6 +3169,43 @@ epilot customer-portal getPublicPortalConfigV3 -p org_id=12324 -p portal_id=453a
 
 ```json
 {
+  "mobile_config": {
+    "portal_id": "string",
+    "enabled": true,
+    "display_name": "string",
+    "app_host": "string",
+    "environment": "prod",
+    "branding": {
+      "app_icon": "string",
+      "splash": "string",
+      "splash_dark": "string",
+      "icon_background_color": "string",
+      "splash_background_color": "string",
+      "splash_background_color_dark": "string"
+    },
+    "ios": {
+      "bundle_id": "string",
+      "team_id": "string",
+      "credentials_status": "not_configured",
+      "app_store_id": "string",
+      "store_url": "string",
+      "last_build": {}
+    },
+    "android": {
+      "package_name": "string",
+      "credentials_status": "not_configured",
+      "upload_key_status": "not_configured",
+      "store_url": "string",
+      "last_build": {}
+    },
+    "ota": {
+      "enabled": true,
+      "channel": "canary",
+      "auto_update": true,
+      "update_strategy": "next-launch",
+      "min_native_version": "string"
+    }
+  },
   "enabled": true,
   "name": "Installer Portal",
   "domain": "abc.com",
@@ -2589,7 +3227,9 @@ epilot customer-portal getPublicPortalConfigV3 -p org_id=12324 -p portal_id=453a
     "start_page": true,
     "billing": true,
     "change_due_date": true,
-    "new_design": true
+    "new_design": true,
+    "mcp_enabled": true,
+    "mcp_grant_version": 0
   },
   "accessToken": "string",
   "advanced_mfa": {
@@ -2601,7 +3241,8 @@ epilot customer-portal getPublicPortalConfigV3 -p org_id=12324 -p portal_id=453a
     },
     "entry_point": "PASSWORD",
     "preferred_sso_providers": ["office-365-login"],
-    "auto_redirect_to_sso": true
+    "auto_redirect_to_sso": true,
+    "prevent_user_enumeration": true
   },
   "cognito_details": {
     "cognito_user_pool_client_id": "6bsd0jkgoie74k2i8mrhc1vest",
@@ -2623,7 +3264,8 @@ epilot customer-portal getPublicPortalConfigV3 -p org_id=12324 -p portal_id=453a
       "require_lowercase": true,
       "require_uppercase": true,
       "require_numbers": true,
-      "require_symbols": true
+      "require_symbols": true,
+      "password_history_size": 3
     }
   },
   "config": "string",
@@ -2684,6 +3326,16 @@ epilot customer-portal getPublicPortalConfigV3 -p org_id=12324 -p portal_id=453a
       "schema": "contract"
     }
   ],
+  "surfaces": [
+    {
+      "id": "website-journeys",
+      "name": "Website journeys",
+      "description": "string",
+      "authentication": "login",
+      "token_ttl_seconds": 300,
+      "data_access": {}
+    }
+  ],
   "contact_identifiers_for_account": [
     {
       "name": "first_name",
@@ -2742,11 +3394,21 @@ epilot customer-portal getPublicPortalConfigV3 -p org_id=12324 -p portal_id=453a
   "inactive_contract_cutoff_years": 0,
   "is_dummy": true,
   "is_v3_item": true,
+  "published_revision_id": "2026-08-25T14:03:11.482Z-a7f3c1d9",
   "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
   "portal_sk_v3": "PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c",
   "origin": "string",
   "pages": {},
   "global_blocks": {},
+  "notification_triggers": [
+    {
+      "trigger_type": "entity_created",
+      "entity_schema": "opportunity",
+      "enabled": true,
+      "template_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+    }
+  ],
+  "engagement_center_enabled": true,
   "id": 12345,
   "organization_id": 12345,
   "org_settings": {
@@ -2810,6 +3472,43 @@ epilot customer-portal getOrgPortalConfigV3 -p portal_id=453ad7bf-86d5-46c8-8252
 
 ```json
 {
+  "mobile_config": {
+    "portal_id": "string",
+    "enabled": true,
+    "display_name": "string",
+    "app_host": "string",
+    "environment": "prod",
+    "branding": {
+      "app_icon": "string",
+      "splash": "string",
+      "splash_dark": "string",
+      "icon_background_color": "string",
+      "splash_background_color": "string",
+      "splash_background_color_dark": "string"
+    },
+    "ios": {
+      "bundle_id": "string",
+      "team_id": "string",
+      "credentials_status": "not_configured",
+      "app_store_id": "string",
+      "store_url": "string",
+      "last_build": {}
+    },
+    "android": {
+      "package_name": "string",
+      "credentials_status": "not_configured",
+      "upload_key_status": "not_configured",
+      "store_url": "string",
+      "last_build": {}
+    },
+    "ota": {
+      "enabled": true,
+      "channel": "canary",
+      "auto_update": true,
+      "update_strategy": "next-launch",
+      "min_native_version": "string"
+    }
+  },
   "enabled": true,
   "name": "Installer Portal",
   "domain": "abc.com",
@@ -2831,7 +3530,9 @@ epilot customer-portal getOrgPortalConfigV3 -p portal_id=453ad7bf-86d5-46c8-8252
     "start_page": true,
     "billing": true,
     "change_due_date": true,
-    "new_design": true
+    "new_design": true,
+    "mcp_enabled": true,
+    "mcp_grant_version": 0
   },
   "accessToken": "string",
   "advanced_mfa": {
@@ -2843,7 +3544,8 @@ epilot customer-portal getOrgPortalConfigV3 -p portal_id=453ad7bf-86d5-46c8-8252
     },
     "entry_point": "PASSWORD",
     "preferred_sso_providers": ["office-365-login"],
-    "auto_redirect_to_sso": true
+    "auto_redirect_to_sso": true,
+    "prevent_user_enumeration": true
   },
   "cognito_details": {
     "cognito_user_pool_client_id": "6bsd0jkgoie74k2i8mrhc1vest",
@@ -2865,7 +3567,8 @@ epilot customer-portal getOrgPortalConfigV3 -p portal_id=453ad7bf-86d5-46c8-8252
       "require_lowercase": true,
       "require_uppercase": true,
       "require_numbers": true,
-      "require_symbols": true
+      "require_symbols": true,
+      "password_history_size": 3
     }
   },
   "config": "string",
@@ -2926,6 +3629,16 @@ epilot customer-portal getOrgPortalConfigV3 -p portal_id=453ad7bf-86d5-46c8-8252
       "schema": "contract"
     }
   ],
+  "surfaces": [
+    {
+      "id": "website-journeys",
+      "name": "Website journeys",
+      "description": "string",
+      "authentication": "login",
+      "token_ttl_seconds": 300,
+      "data_access": {}
+    }
+  ],
   "contact_identifiers_for_account": [
     {
       "name": "first_name",
@@ -2984,11 +3697,21 @@ epilot customer-portal getOrgPortalConfigV3 -p portal_id=453ad7bf-86d5-46c8-8252
   "inactive_contract_cutoff_years": 0,
   "is_dummy": true,
   "is_v3_item": true,
+  "published_revision_id": "2026-08-25T14:03:11.482Z-a7f3c1d9",
   "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
   "portal_sk_v3": "PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c",
   "origin": "string",
   "pages": {},
   "global_blocks": {},
+  "notification_triggers": [
+    {
+      "trigger_type": "entity_created",
+      "entity_schema": "opportunity",
+      "enabled": true,
+      "template_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+    }
+  ],
+  "engagement_center_enabled": true,
   "id": 12345,
   "organization_id": 12345,
   "org_settings": {
@@ -3015,7 +3738,8 @@ epilot customer-portal getOrgPortalConfigV3 -p portal_id=453ad7bf-86d5-46c8-8252
       "mobile_oidc_config": {},
       "provider_type": "OIDC",
       "attribute_mappings": {},
-      "entity_matching": {}
+      "entity_matching": {},
+      "expose_client_secret": false
     }
   ],
   "certificate_details": {
@@ -3054,6 +3778,7 @@ epilot customer-portal getAllPortalConfigs --jsonata 'data'
 {
   "data": [
     {
+      "mobile_config": {},
       "enabled": true,
       "name": "Installer Portal",
       "domain": "abc.com",
@@ -3081,6 +3806,7 @@ epilot customer-portal getAllPortalConfigs --jsonata 'data'
       "contract_identifiers": [],
       "contract_selector_config": {},
       "registration_identifiers": [],
+      "surfaces": [],
       "contact_identifiers_for_account": [],
       "additional_contact_attributes": [],
       "triggered_journeys": [],
@@ -3091,11 +3817,14 @@ epilot customer-portal getAllPortalConfigs --jsonata 'data'
       "inactive_contract_cutoff_years": 0,
       "is_dummy": true,
       "is_v3_item": true,
+      "published_revision_id": "2026-08-25T14:03:11.482Z-a7f3c1d9",
       "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
       "portal_sk_v3": "PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c",
       "origin": "string",
       "pages": {},
       "global_blocks": {},
+      "notification_triggers": [],
+      "engagement_center_enabled": true,
       "id": 12345,
       "organization_id": 12345,
       "org_settings": {},
@@ -3243,6 +3972,93 @@ epilot customer-portal upsertEmailTemplates -p origin=example --jsonata 'message
     "confirmEmailUpdate": "5da0a718-c822-403d-9f5d-20d4584e0528",
     "verifyCodeToSetPassword": "5da0a718-c822-403d-9f5d-20d4584e0528"
   }
+}
+```
+
+</details>
+
+---
+
+### `migrateEmailTemplateReferences`
+
+Walk every email-template config row in the caller's org and re-point any
+
+`POST /v3/portal/email-templates:migrate-references`
+
+**Request Body** (required)
+
+**Sample Call**
+
+```bash
+epilot customer-portal migrateEmailTemplateReferences \
+  -d '{"source_template_id":"string","destination_template_id":"string"}'
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot customer-portal migrateEmailTemplateReferences
+```
+
+With JSONata filter:
+
+```bash
+epilot customer-portal migrateEmailTemplateReferences --jsonata 'migrated_portal_count'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "migrated_portal_count": 2,
+  "migrated_portal_ids": ["string"],
+  "failed_portal_ids": ["string"]
+}
+```
+
+</details>
+
+---
+
+### `listEmailTemplateReferences`
+
+Read-only sibling of migrateEmailTemplateReferences. Lists every portal in
+
+`POST /v3/portal/email-templates:list-references`
+
+**Request Body** (required)
+
+**Sample Call**
+
+```bash
+epilot customer-portal listEmailTemplateReferences \
+  -d '{"template_id":"string"}'
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot customer-portal listEmailTemplateReferences
+```
+
+With JSONata filter:
+
+```bash
+epilot customer-portal listEmailTemplateReferences --jsonata 'portals'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "portals": [
+    {
+      "id": "string",
+      "name": "string"
+    }
+  ]
 }
 ```
 
@@ -4366,7 +5182,8 @@ epilot customer-portal checkContactExists \
     "contract": {
       "contract_number": "123456"
     }
-  }
+  },
+  "trigger_identifiers_check": true
 }'
 ```
 
@@ -4388,7 +5205,8 @@ epilot customer-portal checkContactExists -p origin=example --jsonata 'exists'
 ```json
 {
   "exists": true,
-  "contactId": "5da0a718-c822-403d-9f5d-20d4584e0528"
+  "contactId": "5da0a718-c822-403d-9f5d-20d4584e0528",
+  "reason": "TIMEOUT"
 }
 ```
 
@@ -4430,7 +5248,8 @@ epilot customer-portal checkContactExistsV3 \
     "contract": {
       "contract_number": "123456"
     }
-  }
+  },
+  "trigger_identifiers_check": true
 }'
 ```
 
@@ -4453,7 +5272,80 @@ epilot customer-portal checkContactExistsV3 --jsonata 'exists'
 {
   "exists": true,
   "contactId": "5da0a718-c822-403d-9f5d-20d4584e0528",
-  "accountId": "5da0a718-c822-403d-9f5d-20d4584e0528"
+  "accountId": "5da0a718-c822-403d-9f5d-20d4584e0528",
+  "reason": "TIMEOUT"
+}
+```
+
+</details>
+
+---
+
+### `identifyContact`
+
+Identify a contact by the portal's configured registration identifiers and, on a match,
+
+`POST /v3/portal/public/contact/identify`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `portal_id` | query | string | No | PortalId of the portal (required if domain is not provided) |
+| `domain` | query | string | No | Portal domain for identification (alternative to portal_id) |
+
+**Request Body** (required)
+
+**Sample Call**
+
+```bash
+epilot customer-portal identifyContact
+```
+
+With request body:
+
+```bash
+epilot customer-portal identifyContact \
+  -d '{
+  "org_id": 728,
+  "registration_identifiers": {
+    "contact": {
+      "email": "john.doe@example.com"
+    },
+    "contract": {
+      "contract_number": "123456"
+    }
+  },
+  "trigger_identifiers_check": true,
+  "surface_id": "website-journeys"
+}'
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot customer-portal identifyContact
+```
+
+With JSONata filter:
+
+```bash
+epilot customer-portal identifyContact --jsonata 'contact_id'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "contact_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+  "account_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+  "token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "token_type": "contact_identification",
+  "surface_id": "website-journeys",
+  "expires_at": "2026-08-11T10:35:00.000Z",
+  "allowed_operations": [],
+  "reason": "TIMEOUT"
 }
 ```
 
@@ -4727,6 +5619,46 @@ epilot customer-portal updatePortalUserEmail --jsonata 'message'
 ```json
 {
   "message": "You will receive a confirmation mail soon on your updated email address."
+}
+```
+
+</details>
+
+---
+
+### `changePortalUserPassword`
+
+Hand over a password change to the third-party system configured via the `changePassword` portal extension hook.
+
+`PUT /v2/portal/user/change/password`
+
+**Request Body**
+
+**Sample Call**
+
+```bash
+epilot customer-portal changePortalUserPassword \
+  -d '{"new_password":"string"}'
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot customer-portal changePortalUserPassword
+```
+
+With JSONata filter:
+
+```bash
+epilot customer-portal changePortalUserPassword --jsonata 'message'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "message": "string"
 }
 ```
 
@@ -5187,6 +6119,182 @@ epilot customer-portal postOrderAcceptance -p id=5da0a718-c822-403d-9f5d-20d4584
     ],
     "_schema": "order"
   }
+}
+```
+
+</details>
+
+---
+
+### `getContractWithTemplates`
+
+Resolve Handlebars templates against a contract's related meters and return the contract with templates_output populated
+
+`POST /v2/portal/contract/{id}/resolve-templates`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `id` | path | string (uuid) | Yes | The ID of the contract |
+
+**Request Body**
+
+**Sample Call**
+
+```bash
+epilot customer-portal getContractWithTemplates \
+  -p id=5da0a718-c822-403d-9f5d-20d4584e0528
+```
+
+With request body:
+
+```bash
+epilot customer-portal getContractWithTemplates \
+  -p id=5da0a718-c822-403d-9f5d-20d4584e0528 \
+  -d '{
+  "templates": {},
+  "templates_ref": {
+    "page_id": "string",
+    "block_id": "string",
+    "config_id": "string",
+    "global_search_config_id": "string"
+  }
+}'
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot customer-portal getContractWithTemplates 5da0a718-c822-403d-9f5d-20d4584e0528
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot customer-portal getContractWithTemplates -p id=5da0a718-c822-403d-9f5d-20d4584e0528
+```
+
+With JSONata filter:
+
+```bash
+epilot customer-portal getContractWithTemplates -p id=5da0a718-c822-403d-9f5d-20d4584e0528 --jsonata 'entity._title'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "entity": {
+    "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+    "_title": "Example Entity",
+    "_org": "123",
+    "_tags": ["example", "mock"],
+    "_created_at": "2021-02-09T12:41:43.662Z",
+    "_updated_at": "2021-02-09T12:41:43.662Z",
+    "templates_output_highlighted": {},
+    "search_snippets": [
+      {}
+    ],
+    "contract_name": "Grid Contract",
+    "contract_number": "12345",
+    "status": "approved",
+    "description": "This contract is for the supply of widgets.",
+    "account_number": "67890",
+    "branch": "power",
+    "billing_address": "123 Main St, Anytown",
+    "delivery_address": "456 Elm St, Anytown",
+    "additional_addresses": "789 Oak St, Anytown",
+    "termination_date": "2022-01-01",
+    "termination_reason": "Non-payment",
+    "billing_period": "monthly",
+    "billing_duration_amount": 30,
+    "renewal_duration_amount": 365,
+    "renewal_duration_unit": "years",
+    "notice_time_amount": 30,
+    "notice_time_unit": "months",
+    "start_date": "2021-01-01",
+    "billing_due_day": 2,
+    "installment_amount": 10050,
+    "balance": 8990,
+    "balance_currency": "EUR"
+  },
+  "orders": [
+    {
+      "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+      "_title": "Example Entity",
+      "_org": "123",
+      "_tags": ["example", "mock"],
+      "_created_at": "2021-02-09T12:41:43.662Z",
+      "_updated_at": "2021-02-09T12:41:43.662Z",
+      "templates_output_highlighted": {},
+      "search_snippets": [],
+      "_schema": "order"
+    }
+  ],
+  "meters": [
+    {
+      "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+      "_title": "Example Entity",
+      "_org": "123",
+      "_tags": ["example", "mock"],
+      "_created_at": "2021-02-09T12:41:43.662Z",
+      "_updated_at": "2021-02-09T12:41:43.662Z",
+      "templates_output_highlighted": {},
+      "search_snippets": [],
+      "_schema": "meter",
+      "templates_output": {}
+    }
+  ],
+  "files": [
+    {
+      "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+      "_title": "Example Entity",
+      "_org": "123",
+      "_tags": ["example", "mock"],
+      "_created_at": "2021-02-09T12:41:43.662Z",
+      "_updated_at": "2021-02-09T12:41:43.662Z",
+      "templates_output_highlighted": {},
+      "search_snippets": [],
+      "_schema": "file"
+    }
+  ],
+  "relations": [
+    {
+      "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+      "_title": "Example Entity",
+      "_org": "123",
+      "_tags": ["example", "mock"],
+      "_created_at": "2021-02-09T12:41:43.662Z",
+      "_updated_at": "2021-02-09T12:41:43.662Z",
+      "templates_output_highlighted": {},
+      "search_snippets": [],
+      "templates_output": {},
+      "_schema": "contact"
+    }
+  ],
+  "workflow": [
+    {
+      "id": "8gja72h6kas6h",
+      "name": "Lead Qualification",
+      "trigger": "MANUAL",
+      "status": "STARTED",
+      "creationTime": "2021-04-27T12:01:13.000Z",
+      "lastUpdateTime": "2021-04-27T12:01:13.000Z",
+      "dueDate": "2021-04-27T12:01:13.000Z",
+      "assignedTo": ["252", "29052"],
+      "flow": []
+    }
+  ],
+  "journey_actions": [
+    {
+      "journey_id": "string",
+      "action_label": {},
+      "slug": "string",
+      "rules": []
+    }
+  ]
 }
 ```
 
@@ -5800,6 +6908,53 @@ epilot customer-portal getRegistrationIdentifiers --jsonata 'data'
 
 ---
 
+### `getFilePreview`
+
+resolves an in-portal preview for a file. Returns a Content-Disposition: inline URL for directly-previewable files (PDF,
+
+`GET /v2/portal/user/file/{id}/preview`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `id` | path | string (uuid) | Yes | The Id of a file |
+
+**Sample Call**
+
+```bash
+epilot customer-portal getFilePreview \
+  -p id=5da0a718-c822-403d-9f5d-20d4584e0528
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot customer-portal getFilePreview 5da0a718-c822-403d-9f5d-20d4584e0528
+```
+
+With JSONata filter:
+
+```bash
+epilot customer-portal getFilePreview -p id=5da0a718-c822-403d-9f5d-20d4584e0528 --jsonata 'kind'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "kind": "pdf",
+  "url": "https://example.com/path",
+  "requires_auth": true,
+  "download_url": "https://example.com/path"
+}
+```
+
+</details>
+
+---
+
 ### `trackFileDownloaded`
 
 Track that user has downloaded a file
@@ -5864,7 +7019,8 @@ epilot customer-portal trackFileDownloaded -p id=5da0a718-c822-403d-9f5d-20d4584
         "_title": "Opportunity ABC"
       }
     ],
-    "is_new": true
+    "is_new": true,
+    "custom_download_url_auth": "token"
   }
 }
 ```
@@ -6252,6 +7408,12 @@ epilot customer-portal getPortalUserEntity \
       "subtitle": "{{contract.contract_number}}"
     }
   },
+  "templates_ref": {
+    "page_id": "string",
+    "block_id": "string",
+    "config_id": "string",
+    "global_search_config_id": "string"
+  },
   "filters": [
     {
       "term": {
@@ -6363,6 +7525,12 @@ epilot customer-portal searchPortalUserEntities \
     "content_top_name": "Customer #{{contract.customer_number}}",
     "main_content_name": "{{contract.contract_name}} ({{contract.contract_number}})",
     "content_bottom_name": "{{custom_contract_delivery_address}}"
+  },
+  "templates_ref": {
+    "page_id": "string",
+    "block_id": "string",
+    "config_id": "string",
+    "global_search_config_id": "string"
   },
   "filters": [
     {
@@ -6700,6 +7868,214 @@ epilot customer-portal getEntityWorkflows -p slug=contact -p id=abc123 --jsonata
 
 ---
 
+### `getOutstandingTasks`
+
+Returns all outstanding workflow journey tasks for the authenticated portal user, across their opportunity, order and co
+
+`GET /v2/portal/engagement/tasks`
+
+**Sample Call**
+
+```bash
+epilot customer-portal getOutstandingTasks
+```
+
+With JSONata filter:
+
+```bash
+epilot customer-portal getOutstandingTasks --jsonata 'tasks'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "tasks": [
+    {
+      "entity_id": "string",
+      "entity_schema": "string",
+      "entity_title": "string",
+      "workflow_id": "string",
+      "workflow_name": "string",
+      "step_id": "string",
+      "step_name": "string",
+      "journey_id": "string",
+      "complete_task_automatically": true
+    }
+  ],
+  "total": 0
+}
+```
+
+</details>
+
+---
+
+### `getEntityPortalWorkflows`
+
+Get all portal-relevant workflows associated with an entity (requires access to the entity),
+
+`GET /v2/portal/entity/{slug}/{id}/workflows/linearized`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `slug` | path | string | Yes |  |
+| `id` | path | string | Yes |  |
+
+**Sample Call**
+
+```bash
+epilot customer-portal getEntityPortalWorkflows \
+  -p slug=opportunity \
+  -p id=abc123
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot customer-portal getEntityPortalWorkflows opportunity abc123
+```
+
+With JSONata filter:
+
+```bash
+epilot customer-portal getEntityPortalWorkflows -p slug=opportunity -p id=abc123 --jsonata 'portal_workflows'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "portal_workflows": [
+    {
+      "id": "string",
+      "definition_id": "string",
+      "name": "string",
+      "status": "STARTED",
+      "version": 2,
+      "created_at": "string",
+      "updated_at": "string",
+      "completed_at": "string",
+      "due_date": "string",
+      "assigned_to": ["string"],
+      "contexts": [
+        {
+          "entity_id": "string",
+          "entity_schema": "string",
+          "is_primary": true
+        }
+      ],
+      "is_path_complete": true,
+      "tasks": [
+        {
+          "id": "string",
+          "name": "string",
+          "order": 0,
+          "status": "COMPLETED",
+          "is_active": true,
+          "ecp": {
+            "enabled": true,
+            "label": "string",
+            "description": "string",
+            "journey": {
+              "id": "string",
+              "journeyId": "string",
+              "name": "string",
+              "complete_task_automatically": true
+            }
+          },
+          "installer": {
+            "enabled": true,
+            "label": "string",
+            "description": "string",
+            "journey": {
+              "id": "string",
+              "journeyId": "string",
+              "name": "string",
+              "complete_task_automatically": true
+            }
+          },
+          "journey": {
+            "id": "string",
+            "journeyId": "string",
+            "name": "string",
+            "complete_task_automatically": true
+          },
+          "assigned_to": ["string"],
+          "phase_id": "string",
+          "phase_name": "string",
+          "stage_id": "string",
+          "completed_at": "string",
+          "updated_at": "string"
+        }
+      ],
+      "stages": [
+        {
+          "id": "string",
+          "name": "string",
+          "description": "string",
+          "status": "COMPLETED",
+          "completed_at": "string"
+        }
+      ]
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `getEntityPortalWorkflowsBatch`
+
+Batch variant of `getEntityPortalWorkflows`: returns portal-relevant workflows for
+
+`POST /v2/portal/entities/workflows/linearized/batch`
+
+**Request Body** (required)
+
+**Sample Call**
+
+```bash
+epilot customer-portal getEntityPortalWorkflowsBatch \
+  -d '{"entities":[{"id":"string","slug":"order"}]}'
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot customer-portal getEntityPortalWorkflowsBatch
+```
+
+With JSONata filter:
+
+```bash
+epilot customer-portal getEntityPortalWorkflowsBatch --jsonata 'results[0]'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "results": [
+    {
+      "entity_id": "string",
+      "portal_workflows": []
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
 ### `uploadMeterReadingPhoto`
 
 Uploads a Meter Reading photo and - if enabled - gives back data extracted from the photo.
@@ -6909,8 +8285,28 @@ Fetches meter readings for a counter and optionally resolves Handlebars
 **Sample Call**
 
 ```bash
+epilot customer-portal getMeterReadings
+```
+
+With request body:
+
+```bash
 epilot customer-portal getMeterReadings \
-  -d '{"meter_id":"string","counter_id":"string","sort":"desc","from":0,"size":10,"templates":{},"counter_templates":{}}'
+  -d '{
+  "meter_id": "string",
+  "counter_id": "string",
+  "sort": "desc",
+  "from": 0,
+  "size": 10,
+  "templates": {},
+  "counter_templates": {},
+  "templates_ref": {
+    "page_id": "string",
+    "block_id": "string",
+    "config_id": "string",
+    "global_search_config_id": "string"
+  }
+}'
 ```
 
 Using stdin pipe:
@@ -7019,6 +8415,77 @@ epilot customer-portal getSSOProvider -p provider_slug=office-365-login --jsonat
 
 ---
 
+### `getPublicSSOProviderV3`
+
+Returns the public configuration of a single SSO identity provider with env var
+
+`GET /v3/portal/public/sso/providers/{provider_slug}`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `provider_slug` | path | string | Yes | Provider slug (organization-unique) |
+| `org_id` | query | string | Yes | epilot organization id |
+| `portal_id` | query | string | Yes | ID of the Portal |
+
+**Sample Call**
+
+```bash
+epilot customer-portal getPublicSSOProviderV3 \
+  -p provider_slug=office-365-login \
+  -p org_id=123 \
+  -p portal_id=453ad7bf-86d5-46c8-8252-bcc868df5e3c
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot customer-portal getPublicSSOProviderV3 office-365-login
+```
+
+With JSONata filter:
+
+```bash
+epilot customer-portal getPublicSSOProviderV3 -p provider_slug=office-365-login -p org_id=123 -p portal_id=453ad7bf-86d5-46c8-8252-bcc868df5e3c --jsonata 'slug'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "slug": "office-365-login",
+  "display_name": "Office 365 Login",
+  "oidc_config": {
+    "type": "implicit",
+    "oidc_issuer": "https://login.microsoftonline.com/33d4f3e5-3df2-421e-b92e-a63cfa680a88/v2.0",
+    "redirect_uri": "https://customer-portal.com/login",
+    "client_id": "ab81daf8-8b1f-42d6-94ca-c51621054c75",
+    "client_secret": "7BIUnn~6shh.7fNtXb..3k1Mp3s6k6WK3B",
+    "has_client_secret": true,
+    "scope": "openid email",
+    "metadata": {
+      "response_modes_supported": ["form_post"],
+      "authorization_endpoint": "https://www.facebook.com/v12.0/dialog/oauth",
+      "token_endpoint": "https://graph.facebook.com/v12.0/oauth/access_token",
+      "userinfo_endpoint": "https://graph.facebook.com/me",
+      "logout_uri": "https://login.microsoftonline.com/common/oauth2/v2.0/logout",
+      "logout_redirect_uri": "https://customer-portal.com/login",
+      "skip_login_as_logout": false,
+      "mobile_redirect_uri": "msauth.io.epilot.ecp://auth",
+      "test_auth_username": "test@epilot.io",
+      "test_auth_password": "string"
+    },
+    "prompt": "login"
+  }
+}
+```
+
+</details>
+
+---
+
 ### `ssoLogin`
 
 Initiate login using external SSO identity.
@@ -7091,7 +8558,7 @@ Initiate login using external SSO identity.
 
 ```bash
 epilot customer-portal ssoLoginV3 \
-  -d '{"provider_slug":"office-365-login"}'
+  -d '{"provider_slug":"office-365-login","login_only":false}'
 ```
 
 Using stdin pipe:
@@ -7176,7 +8643,7 @@ epilot customer-portal ssoCallback \
   "token_endpoint": "https://www.facebook.com/v12.0/dialog/oauth",
   "grant_type": "authorization_code",
   "code": "123456",
-  "redirect_uri": "https://customer-portal.com/login",
+  "redirect_uri": "https://customer-portal.com/sso",
   "client_id": "123456",
   "code_verifier": "123456"
 }'
@@ -8376,6 +9843,147 @@ epilot customer-portal updateCampaignPortalBlockStatus -p campaign_id=123e4567-e
 
 ---
 
+### `listPortalNotifications`
+
+Lists the 360 notifications addressed to the authenticated portal user, newest first. The organization and the portal us
+
+`GET /v2/portal/notifications`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `cursor` | query | string | No | Base64 encoded cursor returned by a previous call, used for pagination. |
+| `limit` | query | number | No | The maximum number of notifications to return. |
+
+**Sample Call**
+
+```bash
+epilot customer-portal listPortalNotifications
+```
+
+With JSONata filter:
+
+```bash
+epilot customer-portal listPortalNotifications --jsonata 'results[0]'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "cursor": "string",
+  "total_unread": 0,
+  "results": [
+    {
+      "id": "1234567890",
+      "notification_id": 1234567890,
+      "type": "workflow_step_overdue",
+      "title": {
+        "en": "string",
+        "de": "string"
+      },
+      "message": {
+        "en": "string",
+        "de": "string"
+      },
+      "created_at": "1970-01-01T00:00:00.000Z",
+      "read": false,
+      "redirect_url": "string"
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `getPortalNotificationsUnreadCount`
+
+Returns the number of unread notifications for the authenticated portal user.
+
+`GET /v2/portal/notifications/unread-count`
+
+**Sample Call**
+
+```bash
+epilot customer-portal getPortalNotificationsUnreadCount
+```
+
+With JSONata filter:
+
+```bash
+epilot customer-portal getPortalNotificationsUnreadCount --jsonata 'count'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "count": 3
+}
+```
+
+</details>
+
+---
+
+### `markAllPortalNotificationsRead`
+
+Marks all notifications of the authenticated portal user as read.
+
+`PUT /v2/portal/notifications/read-all`
+
+**Sample Call**
+
+```bash
+epilot customer-portal markAllPortalNotificationsRead
+```
+
+With JSONata filter:
+
+```bash
+epilot customer-portal markAllPortalNotificationsRead --jsonata '$'
+```
+
+---
+
+### `markPortalNotificationRead`
+
+Marks a single notification of the authenticated portal user as read.
+
+`PUT /v2/portal/notifications/{id}/read`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `id` | path | number | Yes | Numeric id of the notification to mark as read. |
+
+**Sample Call**
+
+```bash
+epilot customer-portal markPortalNotificationRead \
+  -p id=1
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot customer-portal markPortalNotificationRead 1
+```
+
+With JSONata filter:
+
+```bash
+epilot customer-portal markPortalNotificationRead -p id=1 --jsonata '$'
+```
+
+---
+
 ### `updateNotificationsStatus`
 
 Updates the statuses of multiple notifications at once.
@@ -8561,9 +10169,47 @@ epilot customer-portal createPortalConfig \
       "attribute_mappings": {},
       "entity_matching": {},
       "oidc_config": {},
-      "mobile_oidc_config": {}
+      "mobile_oidc_config": {},
+      "expose_client_secret": false
     }
   ],
+  "mobile_config": {
+    "portal_id": "string",
+    "enabled": true,
+    "display_name": "string",
+    "app_host": "string",
+    "environment": "prod",
+    "branding": {
+      "app_icon": "string",
+      "splash": "string",
+      "splash_dark": "string",
+      "icon_background_color": "string",
+      "splash_background_color": "string",
+      "splash_background_color_dark": "string"
+    },
+    "ios": {
+      "bundle_id": "string",
+      "team_id": "string",
+      "credentials_status": "not_configured",
+      "app_store_id": "string",
+      "store_url": "string",
+      "last_build": {}
+    },
+    "android": {
+      "package_name": "string",
+      "credentials_status": "not_configured",
+      "upload_key_status": "not_configured",
+      "store_url": "string",
+      "last_build": {}
+    },
+    "ota": {
+      "enabled": true,
+      "channel": "canary",
+      "auto_update": true,
+      "update_strategy": "next-launch",
+      "min_native_version": "string"
+    }
+  },
   "enabled": true,
   "name": "Installer Portal",
   "domain": "abc.com",
@@ -8585,7 +10231,9 @@ epilot customer-portal createPortalConfig \
     "start_page": true,
     "billing": true,
     "change_due_date": true,
-    "new_design": true
+    "new_design": true,
+    "mcp_enabled": true,
+    "mcp_grant_version": 0
   },
   "accessToken": "string",
   "advanced_mfa": {
@@ -8597,7 +10245,8 @@ epilot customer-portal createPortalConfig \
     },
     "entry_point": "PASSWORD",
     "preferred_sso_providers": ["office-365-login"],
-    "auto_redirect_to_sso": true
+    "auto_redirect_to_sso": true,
+    "prevent_user_enumeration": true
   },
   "cognito_details": {
     "cognito_user_pool_client_id": "6bsd0jkgoie74k2i8mrhc1vest",
@@ -8619,7 +10268,8 @@ epilot customer-portal createPortalConfig \
       "require_lowercase": true,
       "require_uppercase": true,
       "require_numbers": true,
-      "require_symbols": true
+      "require_symbols": true,
+      "password_history_size": 3
     }
   },
   "config": "string",
@@ -8680,6 +10330,16 @@ epilot customer-portal createPortalConfig \
       "schema": "contract"
     }
   ],
+  "surfaces": [
+    {
+      "id": "website-journeys",
+      "name": "Website journeys",
+      "description": "string",
+      "authentication": "login",
+      "token_ttl_seconds": 300,
+      "data_access": {}
+    }
+  ],
   "contact_identifiers_for_account": [
     {
       "name": "first_name",
@@ -8738,6 +10398,7 @@ epilot customer-portal createPortalConfig \
   "inactive_contract_cutoff_years": 0,
   "is_dummy": true,
   "is_v3_item": true,
+  "published_revision_id": "2026-08-25T14:03:11.482Z-a7f3c1d9",
   "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
   "portal_sk_v3": "PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c",
   "origin": "string",
@@ -8810,9 +10471,47 @@ epilot customer-portal createPortalConfig --jsonata '$'
       "attribute_mappings": {},
       "entity_matching": {},
       "oidc_config": {},
-      "mobile_oidc_config": {}
+      "mobile_oidc_config": {},
+      "expose_client_secret": false
     }
   ],
+  "mobile_config": {
+    "portal_id": "string",
+    "enabled": true,
+    "display_name": "string",
+    "app_host": "string",
+    "environment": "prod",
+    "branding": {
+      "app_icon": "string",
+      "splash": "string",
+      "splash_dark": "string",
+      "icon_background_color": "string",
+      "splash_background_color": "string",
+      "splash_background_color_dark": "string"
+    },
+    "ios": {
+      "bundle_id": "string",
+      "team_id": "string",
+      "credentials_status": "not_configured",
+      "app_store_id": "string",
+      "store_url": "string",
+      "last_build": {}
+    },
+    "android": {
+      "package_name": "string",
+      "credentials_status": "not_configured",
+      "upload_key_status": "not_configured",
+      "store_url": "string",
+      "last_build": {}
+    },
+    "ota": {
+      "enabled": true,
+      "channel": "canary",
+      "auto_update": true,
+      "update_strategy": "next-launch",
+      "min_native_version": "string"
+    }
+  },
   "enabled": true,
   "name": "Installer Portal",
   "domain": "abc.com",
@@ -8834,7 +10533,9 @@ epilot customer-portal createPortalConfig --jsonata '$'
     "start_page": true,
     "billing": true,
     "change_due_date": true,
-    "new_design": true
+    "new_design": true,
+    "mcp_enabled": true,
+    "mcp_grant_version": 0
   },
   "accessToken": "string",
   "advanced_mfa": {
@@ -8846,7 +10547,8 @@ epilot customer-portal createPortalConfig --jsonata '$'
     },
     "entry_point": "PASSWORD",
     "preferred_sso_providers": ["office-365-login"],
-    "auto_redirect_to_sso": true
+    "auto_redirect_to_sso": true,
+    "prevent_user_enumeration": true
   },
   "cognito_details": {
     "cognito_user_pool_client_id": "6bsd0jkgoie74k2i8mrhc1vest",
@@ -8868,7 +10570,8 @@ epilot customer-portal createPortalConfig --jsonata '$'
       "require_lowercase": true,
       "require_uppercase": true,
       "require_numbers": true,
-      "require_symbols": true
+      "require_symbols": true,
+      "password_history_size": 3
     }
   },
   "config": "string",
@@ -8929,6 +10632,16 @@ epilot customer-portal createPortalConfig --jsonata '$'
       "schema": "contract"
     }
   ],
+  "surfaces": [
+    {
+      "id": "website-journeys",
+      "name": "Website journeys",
+      "description": "string",
+      "authentication": "login",
+      "token_ttl_seconds": 300,
+      "data_access": {}
+    }
+  ],
   "contact_identifiers_for_account": [
     {
       "name": "first_name",
@@ -8987,6 +10700,7 @@ epilot customer-portal createPortalConfig --jsonata '$'
   "inactive_contract_cutoff_years": 0,
   "is_dummy": true,
   "is_v3_item": true,
+  "published_revision_id": "2026-08-25T14:03:11.482Z-a7f3c1d9",
   "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
   "portal_sk_v3": "PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c",
   "origin": "string",
@@ -9103,9 +10817,47 @@ epilot customer-portal getPortalConfigV3 -p portal_id=5da0a718-c822-403d-9f5d-20
       "attribute_mappings": {},
       "entity_matching": {},
       "oidc_config": {},
-      "mobile_oidc_config": {}
+      "mobile_oidc_config": {},
+      "expose_client_secret": false
     }
   ],
+  "mobile_config": {
+    "portal_id": "string",
+    "enabled": true,
+    "display_name": "string",
+    "app_host": "string",
+    "environment": "prod",
+    "branding": {
+      "app_icon": "string",
+      "splash": "string",
+      "splash_dark": "string",
+      "icon_background_color": "string",
+      "splash_background_color": "string",
+      "splash_background_color_dark": "string"
+    },
+    "ios": {
+      "bundle_id": "string",
+      "team_id": "string",
+      "credentials_status": "not_configured",
+      "app_store_id": "string",
+      "store_url": "string",
+      "last_build": {}
+    },
+    "android": {
+      "package_name": "string",
+      "credentials_status": "not_configured",
+      "upload_key_status": "not_configured",
+      "store_url": "string",
+      "last_build": {}
+    },
+    "ota": {
+      "enabled": true,
+      "channel": "canary",
+      "auto_update": true,
+      "update_strategy": "next-launch",
+      "min_native_version": "string"
+    }
+  },
   "enabled": true,
   "name": "Installer Portal",
   "domain": "abc.com",
@@ -9127,7 +10879,9 @@ epilot customer-portal getPortalConfigV3 -p portal_id=5da0a718-c822-403d-9f5d-20
     "start_page": true,
     "billing": true,
     "change_due_date": true,
-    "new_design": true
+    "new_design": true,
+    "mcp_enabled": true,
+    "mcp_grant_version": 0
   },
   "accessToken": "string",
   "advanced_mfa": {
@@ -9139,7 +10893,8 @@ epilot customer-portal getPortalConfigV3 -p portal_id=5da0a718-c822-403d-9f5d-20
     },
     "entry_point": "PASSWORD",
     "preferred_sso_providers": ["office-365-login"],
-    "auto_redirect_to_sso": true
+    "auto_redirect_to_sso": true,
+    "prevent_user_enumeration": true
   },
   "cognito_details": {
     "cognito_user_pool_client_id": "6bsd0jkgoie74k2i8mrhc1vest",
@@ -9161,7 +10916,8 @@ epilot customer-portal getPortalConfigV3 -p portal_id=5da0a718-c822-403d-9f5d-20
       "require_lowercase": true,
       "require_uppercase": true,
       "require_numbers": true,
-      "require_symbols": true
+      "require_symbols": true,
+      "password_history_size": 3
     }
   },
   "config": "string",
@@ -9222,6 +10978,16 @@ epilot customer-portal getPortalConfigV3 -p portal_id=5da0a718-c822-403d-9f5d-20
       "schema": "contract"
     }
   ],
+  "surfaces": [
+    {
+      "id": "website-journeys",
+      "name": "Website journeys",
+      "description": "string",
+      "authentication": "login",
+      "token_ttl_seconds": 300,
+      "data_access": {}
+    }
+  ],
   "contact_identifiers_for_account": [
     {
       "name": "first_name",
@@ -9280,6 +11046,7 @@ epilot customer-portal getPortalConfigV3 -p portal_id=5da0a718-c822-403d-9f5d-20
   "inactive_contract_cutoff_years": 0,
   "is_dummy": true,
   "is_v3_item": true,
+  "published_revision_id": "2026-08-25T14:03:11.482Z-a7f3c1d9",
   "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
   "portal_sk_v3": "PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c",
   "origin": "string",
@@ -9343,6 +11110,9 @@ Updates a specific portal configuration by ID.
 | Name | In | Type | Required | Description |
 | ---- | -- | ---- | -------- | ----------- |
 | `portal_id` | path | string (uuid) | Yes | Portal ID (readonly UUID generated on portal creation) |
+| `page_upsert_mode` | query | "id" \| "slug" | No | Determines how pages are matched for upsert operations:
+- `id` (default): Match pages by their ID. Use this when page IDs are stable and known upfront.
+- `slug`: Match pages by their slug. When a requ |
 
 **Request Body** (required)
 
@@ -9387,9 +11157,47 @@ epilot customer-portal putPortalConfig \
       "attribute_mappings": {},
       "entity_matching": {},
       "oidc_config": {},
-      "mobile_oidc_config": {}
+      "mobile_oidc_config": {},
+      "expose_client_secret": false
     }
   ],
+  "mobile_config": {
+    "portal_id": "string",
+    "enabled": true,
+    "display_name": "string",
+    "app_host": "string",
+    "environment": "prod",
+    "branding": {
+      "app_icon": "string",
+      "splash": "string",
+      "splash_dark": "string",
+      "icon_background_color": "string",
+      "splash_background_color": "string",
+      "splash_background_color_dark": "string"
+    },
+    "ios": {
+      "bundle_id": "string",
+      "team_id": "string",
+      "credentials_status": "not_configured",
+      "app_store_id": "string",
+      "store_url": "string",
+      "last_build": {}
+    },
+    "android": {
+      "package_name": "string",
+      "credentials_status": "not_configured",
+      "upload_key_status": "not_configured",
+      "store_url": "string",
+      "last_build": {}
+    },
+    "ota": {
+      "enabled": true,
+      "channel": "canary",
+      "auto_update": true,
+      "update_strategy": "next-launch",
+      "min_native_version": "string"
+    }
+  },
   "enabled": true,
   "name": "Installer Portal",
   "domain": "abc.com",
@@ -9411,7 +11219,9 @@ epilot customer-portal putPortalConfig \
     "start_page": true,
     "billing": true,
     "change_due_date": true,
-    "new_design": true
+    "new_design": true,
+    "mcp_enabled": true,
+    "mcp_grant_version": 0
   },
   "accessToken": "string",
   "advanced_mfa": {
@@ -9423,7 +11233,8 @@ epilot customer-portal putPortalConfig \
     },
     "entry_point": "PASSWORD",
     "preferred_sso_providers": ["office-365-login"],
-    "auto_redirect_to_sso": true
+    "auto_redirect_to_sso": true,
+    "prevent_user_enumeration": true
   },
   "cognito_details": {
     "cognito_user_pool_client_id": "6bsd0jkgoie74k2i8mrhc1vest",
@@ -9445,7 +11256,8 @@ epilot customer-portal putPortalConfig \
       "require_lowercase": true,
       "require_uppercase": true,
       "require_numbers": true,
-      "require_symbols": true
+      "require_symbols": true,
+      "password_history_size": 3
     }
   },
   "config": "string",
@@ -9506,6 +11318,16 @@ epilot customer-portal putPortalConfig \
       "schema": "contract"
     }
   ],
+  "surfaces": [
+    {
+      "id": "website-journeys",
+      "name": "Website journeys",
+      "description": "string",
+      "authentication": "login",
+      "token_ttl_seconds": 300,
+      "data_access": {}
+    }
+  ],
   "contact_identifiers_for_account": [
     {
       "name": "first_name",
@@ -9564,6 +11386,7 @@ epilot customer-portal putPortalConfig \
   "inactive_contract_cutoff_years": 0,
   "is_dummy": true,
   "is_v3_item": true,
+  "published_revision_id": "2026-08-25T14:03:11.482Z-a7f3c1d9",
   "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
   "portal_sk_v3": "PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c",
   "origin": "string",
@@ -9663,9 +11486,47 @@ epilot customer-portal putPortalConfig -p portal_id=5da0a718-c822-403d-9f5d-20d4
       "attribute_mappings": {},
       "entity_matching": {},
       "oidc_config": {},
-      "mobile_oidc_config": {}
+      "mobile_oidc_config": {},
+      "expose_client_secret": false
     }
   ],
+  "mobile_config": {
+    "portal_id": "string",
+    "enabled": true,
+    "display_name": "string",
+    "app_host": "string",
+    "environment": "prod",
+    "branding": {
+      "app_icon": "string",
+      "splash": "string",
+      "splash_dark": "string",
+      "icon_background_color": "string",
+      "splash_background_color": "string",
+      "splash_background_color_dark": "string"
+    },
+    "ios": {
+      "bundle_id": "string",
+      "team_id": "string",
+      "credentials_status": "not_configured",
+      "app_store_id": "string",
+      "store_url": "string",
+      "last_build": {}
+    },
+    "android": {
+      "package_name": "string",
+      "credentials_status": "not_configured",
+      "upload_key_status": "not_configured",
+      "store_url": "string",
+      "last_build": {}
+    },
+    "ota": {
+      "enabled": true,
+      "channel": "canary",
+      "auto_update": true,
+      "update_strategy": "next-launch",
+      "min_native_version": "string"
+    }
+  },
   "enabled": true,
   "name": "Installer Portal",
   "domain": "abc.com",
@@ -9687,7 +11548,9 @@ epilot customer-portal putPortalConfig -p portal_id=5da0a718-c822-403d-9f5d-20d4
     "start_page": true,
     "billing": true,
     "change_due_date": true,
-    "new_design": true
+    "new_design": true,
+    "mcp_enabled": true,
+    "mcp_grant_version": 0
   },
   "accessToken": "string",
   "advanced_mfa": {
@@ -9699,7 +11562,8 @@ epilot customer-portal putPortalConfig -p portal_id=5da0a718-c822-403d-9f5d-20d4
     },
     "entry_point": "PASSWORD",
     "preferred_sso_providers": ["office-365-login"],
-    "auto_redirect_to_sso": true
+    "auto_redirect_to_sso": true,
+    "prevent_user_enumeration": true
   },
   "cognito_details": {
     "cognito_user_pool_client_id": "6bsd0jkgoie74k2i8mrhc1vest",
@@ -9721,7 +11585,8 @@ epilot customer-portal putPortalConfig -p portal_id=5da0a718-c822-403d-9f5d-20d4
       "require_lowercase": true,
       "require_uppercase": true,
       "require_numbers": true,
-      "require_symbols": true
+      "require_symbols": true,
+      "password_history_size": 3
     }
   },
   "config": "string",
@@ -9782,6 +11647,16 @@ epilot customer-portal putPortalConfig -p portal_id=5da0a718-c822-403d-9f5d-20d4
       "schema": "contract"
     }
   ],
+  "surfaces": [
+    {
+      "id": "website-journeys",
+      "name": "Website journeys",
+      "description": "string",
+      "authentication": "login",
+      "token_ttl_seconds": 300,
+      "data_access": {}
+    }
+  ],
   "contact_identifiers_for_account": [
     {
       "name": "first_name",
@@ -9840,6 +11715,7 @@ epilot customer-portal putPortalConfig -p portal_id=5da0a718-c822-403d-9f5d-20d4
   "inactive_contract_cutoff_years": 0,
   "is_dummy": true,
   "is_v3_item": true,
+  "published_revision_id": "2026-08-25T14:03:11.482Z-a7f3c1d9",
   "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
   "portal_sk_v3": "PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c",
   "origin": "string",
@@ -9925,6 +11801,584 @@ epilot customer-portal deletePortalConfig -p portal_id=5da0a718-c822-403d-9f5d-2
 
 ---
 
+### `listPortalRevisions`
+
+Lists a portal's revision history, newest first. Metadata only — no config blob, no page bodies. `is_published` says whe
+
+`GET /v3/portal/config/{portal_id}/revisions`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `portal_id` | path | string (uuid) | Yes | Portal ID (readonly UUID generated on portal creation) |
+| `limit` | query | number | No | Maximum number of revisions to return |
+| `cursor` | query | string | No | Opaque pagination cursor, taken from a previous response's `next_cursor` |
+
+**Sample Call**
+
+```bash
+epilot customer-portal listPortalRevisions \
+  -p portal_id=5da0a718-c822-403d-9f5d-20d4584e0528
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot customer-portal listPortalRevisions 5da0a718-c822-403d-9f5d-20d4584e0528
+```
+
+With JSONata filter:
+
+```bash
+epilot customer-portal listPortalRevisions -p portal_id=5da0a718-c822-403d-9f5d-20d4584e0528 --jsonata 'results[0]'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "results": [
+    {
+      "revision_id": "2026-08-25T14:03:11.482Z-a7f3c1d9",
+      "created_at": "1970-01-01T00:00:00.000Z",
+      "created_by": "string",
+      "name": "FAQ page launch",
+      "description": "string",
+      "page_count": 0,
+      "published_at": "1970-01-01T00:00:00.000Z",
+      "published_by": "string",
+      "is_published": true
+    }
+  ],
+  "next_cursor": "string"
+}
+```
+
+</details>
+
+---
+
+### `createPortalRevision`
+
+Creates a new revision — a complete, immutable snapshot of the portal's configuration, pages and email templates. Nothin
+
+`POST /v3/portal/config/{portal_id}/revisions`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `portal_id` | path | string (uuid) | Yes | Portal ID (readonly UUID generated on portal creation) |
+
+**Request Body** (required)
+
+**Sample Call**
+
+```bash
+epilot customer-portal createPortalRevision \
+  -p portal_id=5da0a718-c822-403d-9f5d-20d4584e0528
+```
+
+With request body:
+
+```bash
+epilot customer-portal createPortalRevision \
+  -p portal_id=5da0a718-c822-403d-9f5d-20d4584e0528 \
+  -d '{
+  "entity_actions": [
+    {
+      "journey_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+      "slug": "contact",
+      "action_Label": {}
+    }
+  ],
+  "extensions": [
+    {
+      "id": "string",
+      "status": "installed",
+      "options": {}
+    }
+  ],
+  "extension_hooks": {},
+  "default_user_to_notify": {
+    "onPendingUser": [
+      {}
+    ]
+  },
+  "identity_providers": [
+    {
+      "slug": "office-365-login",
+      "display_name": "Office 365 Login",
+      "provider_type": "OIDC",
+      "attribute_mappings": {},
+      "entity_matching": {},
+      "oidc_config": {},
+      "mobile_oidc_config": {},
+      "expose_client_secret": false
+    }
+  ],
+  "mobile_config": {
+    "portal_id": "string",
+    "enabled": true,
+    "display_name": "string",
+    "app_host": "string",
+    "environment": "prod",
+    "branding": {
+      "app_icon": "string",
+      "splash": "string",
+      "splash_dark": "string",
+      "icon_background_color": "string",
+      "splash_background_color": "string",
+      "splash_background_color_dark": "string"
+    },
+    "ios": {
+      "bundle_id": "string",
+      "team_id": "string",
+      "credentials_status": "not_configured",
+      "app_store_id": "string",
+      "store_url": "string",
+      "last_build": {}
+    },
+    "android": {
+      "package_name": "string",
+      "credentials_status": "not_configured",
+      "upload_key_status": "not_configured",
+      "store_url": "string",
+      "last_build": {}
+    },
+    "ota": {
+      "enabled": true,
+      "channel": "canary",
+      "auto_update": true,
+      "update_strategy": "next-launch",
+      "min_native_version": "string"
+    }
+  },
+  "enabled": true,
+  "name": "Installer Portal",
+  "domain": "abc.com",
+  "is_epilot_domain": true,
+  "epilot_domain": "example-portal-1.ecp.epilot.io",
+  "domain_settings": {
+    "is_custom_domain_enabled": true,
+    "is_epilot_domain_enabled": true,
+    "is_redirection_enabled": true
+  },
+  "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+  "allowed_portal_entities": ["contact", "contract"],
+  "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
+  "self_registration_account_setting": "ALLOW_WITH_CREATION",
+  "block_registration_if_portal_user_exists": true,
+  "self_registration_entity": "contact",
+  "user_account_self_management": false,
+  "feature_settings": {
+    "start_page": true,
+    "billing": true,
+    "change_due_date": true,
+    "new_design": true,
+    "mcp_enabled": true,
+    "mcp_grant_version": 0
+  },
+  "accessToken": "string",
+  "advanced_mfa": {
+    "enabled": true
+  },
+  "auth_settings": {
+    "passwordless_login": {
+      "enabled": true
+    },
+    "entry_point": "PASSWORD",
+    "preferred_sso_providers": ["office-365-login"],
+    "auto_redirect_to_sso": true,
+    "prevent_user_enumeration": true
+  },
+  "cognito_details": {
+    "cognito_user_pool_client_id": "6bsd0jkgoie74k2i8mrhc1vest",
+    "cognito_user_pool_arn": "arn:aws:cognito-idp:us-east-1:123412341234:userpool/us-east-1_123412341",
+    "cognito_user_pool_id": "eu-central-1_CUEQRNbUb",
+    "timeouts": {
+      "refresh_token": 300,
+      "access_token": 300,
+      "id_token": 300
+    },
+    "advanced_authentication": {
+      "user_activity_logging": true,
+      "adaptive_authentication": true,
+      "compromised_credentials_detection": true
+    },
+    "password_policy": {
+      "minimum_length": 8,
+      "maximum_length": 256,
+      "require_lowercase": true,
+      "require_uppercase": true,
+      "require_numbers": true,
+      "require_symbols": true,
+      "password_history_size": 3
+    }
+  },
+  "config": "string",
+  "contact_identifiers": ["email", "last_name"],
+  "approval_state_attributes": {
+    "contact": ["name", "address"],
+    "contract": ["installment_amount"]
+  },
+  "email_templates": {
+    "confirmAccount": "5da0a718-c822-403d-9f5d-20d4584e0528",
+    "advancedAuth": "5da0a718-c822-403d-9f5d-20d4584e0528",
+    "advancedMFA": "5da0a718-c822-403d-9f5d-20d4584e0528",
+    "journeySignUp": "5da0a718-c822-403d-9f5d-20d4584e0528",
+    "journeySignInOneTimePassword": "5da0a718-c822-403d-9f5d-20d4584e0528",
+    "journeyLoginOTP": "5da0a718-c822-403d-9f5d-20d4584e0528",
+    "forgotPassword": "5da0a718-c822-403d-9f5d-20d4584e0528",
+    "invitation": "5da0a718-c822-403d-9f5d-20d4584e0528",
+    "partnerInvitation": "5da0a718-c822-403d-9f5d-20d4584e0528",
+    "onNewQuote": "5da0a718-c822-403d-9f5d-20d4584e0528",
+    "onMapAPendingUser": "5da0a718-c822-403d-9f5d-20d4584e0528",
+    "onDocUpload": "5da0a718-c822-403d-9f5d-20d4584e0528",
+    "onWorkflowStepAssigned": "5da0a718-c822-403d-9f5d-20d4584e0528",
+    "confirmEmailUpdate": "5da0a718-c822-403d-9f5d-20d4584e0528",
+    "verifyCodeToSetPassword": "5da0a718-c822-403d-9f5d-20d4584e0528"
+  },
+  "images": {
+    "orderLeftTeaser": "https://epilot-bucket.s3.eu-central-1.amazonaws.com/12344/6538fddb-f0e9-4f0f-af51-6e57891ff20a/order-left-teaser.jpeg",
+    "orderRightTeaser": "https://epilot-bucket.s3.eu-central-1.amazonaws.com/12344/6538fddb-f0e9-4f0f-af51-6e57891ff20a/order-right-teaser.jpeg",
+    "welcomeBanner": "https://epilot-bucket.s3.eu-central-1.amazonaws.com/12344/6538fddb-f0e9-4f0f-af51-6e57891ff20a/welcome-banner.jpeg"
+  },
+  "entity_identifiers": {
+    "type": {
+      "isEnabled": true,
+      "attributes": ["contract_number"]
+    }
+  },
+  "contract_identifiers": [
+    {
+      "name": "email",
+      "schema": "contact"
+    },
+    {
+      "name": "last_name",
+      "schema": "contact"
+    }
+  ],
+  "contract_selector_config": {
+    "show_inactive": true,
+    "title_path": "string"
+  },
+  "registration_identifiers": [
+    {
+      "name": "last_name",
+      "schema": "contact"
+    },
+    {
+      "name": "contract_number",
+      "schema": "contract"
+    }
+  ],
+  "surfaces": [
+    {
+      "id": "website-journeys",
+      "name": "Website journeys",
+      "description": "string",
+      "authentication": "login",
+      "token_ttl_seconds": 300,
+      "data_access": {}
+    }
+  ],
+  "contact_identifiers_for_account": [
+    {
+      "name": "first_name",
+      "schema": "contact"
+    },
+    {
+      "name": "last_name",
+      "schema": "contact"
+    }
+  ],
+  "additional_contact_attributes": [
+    {
+      "name": "first_name",
+      "required": true
+    },
+    {
+      "name": "last_name",
+      "required": true
+    }
+  ],
+  "triggered_journeys": [
+    {
+      "trigger_name": "FIRST_LOGIN",
+      "journey_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+      "context_params": []
+    }
+  ],
+  "entity_edit_rules": [
+    {
+      "slug": "contact",
+      "attribute": "first_name",
+      "rule_type": "cadence",
+      "cadence_period_type": "days",
+      "cadence_period": 1,
+      "changes_allowed": 1,
+      "grace_period": 1,
+      "allowed_increment": "10%",
+      "allowed_decrement": "10%",
+      "number_of_days_before_restriction": 10
+    }
+  ],
+  "allowed_file_extensions": {
+    "document": ["pdf"],
+    "image": ["jpg"],
+    "spreadsheet": ["xls"],
+    "presentation": ["ppt"],
+    "audioVideo": ["mp4"],
+    "email": ["eml"],
+    "archive": ["zip"],
+    "cad": ["cad"],
+    "calendar": ["ics"],
+    "other": ["txt"]
+  },
+  "prevent_search_engine_indexing": true,
+  "meter_reading_grace_period": 0,
+  "inactive_contract_cutoff_years": 0,
+  "is_dummy": true,
+  "is_v3_item": true,
+  "published_revision_id": "2026-08-25T14:03:11.482Z-a7f3c1d9",
+  "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
+  "portal_sk_v3": "PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c",
+  "origin": "string",
+  "global_blocks": {},
+  "based_on_revision_id": "string",
+  "pages": [
+    {
+      "id": "c495fef9-eeca-4019-a989-8390dcd9825b",
+      "slug": "dashboard",
+      "order": 0,
+      "blocks": {}
+    }
+  ]
+}'
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot customer-portal createPortalRevision 5da0a718-c822-403d-9f5d-20d4584e0528
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot customer-portal createPortalRevision -p portal_id=5da0a718-c822-403d-9f5d-20d4584e0528
+```
+
+With JSONata filter:
+
+```bash
+epilot customer-portal createPortalRevision -p portal_id=5da0a718-c822-403d-9f5d-20d4584e0528 --jsonata '$'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "revision_id": "2026-08-25T14:03:11.482Z-a7f3c1d9",
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "created_by": "string",
+  "name": "FAQ page launch",
+  "description": "string",
+  "page_count": 0,
+  "published_at": "1970-01-01T00:00:00.000Z",
+  "published_by": "string",
+  "is_published": true,
+  "identity_providers": [
+    {
+      "slug": "office-365-login",
+      "display_name": "Office 365 Login",
+      "provider_type": "OIDC",
+      "attribute_mappings": {},
+      "entity_matching": {},
+      "oidc_config": {},
+      "mobile_oidc_config": {},
+      "expose_client_secret": false
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `getPortalRevision`
+
+Returns the full content of one revision: the snapshotted config, its pages (in the live `Page` shape), email templates 
+
+`GET /v3/portal/config/{portal_id}/revisions/{revision_id}`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `portal_id` | path | string (uuid) | Yes | Portal ID (readonly UUID generated on portal creation) |
+| `revision_id` | path | string | Yes | Revision ID. Contains `:` characters — percent-encode it. |
+
+**Sample Call**
+
+```bash
+epilot customer-portal getPortalRevision \
+  -p portal_id=5da0a718-c822-403d-9f5d-20d4584e0528 \
+  -p revision_id=2026-08-25T14:03:11.482Z-a7f3c1d9
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot customer-portal getPortalRevision 5da0a718-c822-403d-9f5d-20d4584e0528 2026-08-25T14:03:11.482Z-a7f3c1d9
+```
+
+With JSONata filter:
+
+```bash
+epilot customer-portal getPortalRevision -p portal_id=5da0a718-c822-403d-9f5d-20d4584e0528 -p revision_id=2026-08-25T14:03:11.482Z-a7f3c1d9 --jsonata '$'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "revision_id": "2026-08-25T14:03:11.482Z-a7f3c1d9",
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "created_by": "string",
+  "name": "FAQ page launch",
+  "description": "string",
+  "page_count": 0,
+  "published_at": "1970-01-01T00:00:00.000Z",
+  "published_by": "string",
+  "is_published": true,
+  "config": {},
+  "pages": [
+    {
+      "slug": "dashboard",
+      "path": "/dashboard",
+      "schema": ["string"],
+      "visibility": {},
+      "content": {},
+      "design": {},
+      "blocks": {},
+      "order": 1,
+      "is_system": false,
+      "is_detail": false,
+      "detail_schema": "contact",
+      "show_in_navigation": false,
+      "is_public": true,
+      "parentId": "c495fef9-eeca-4019-a989-8390dcd9825b",
+      "is_entry_route": false,
+      "is_deleted": false,
+      "id": "c495fef9-eeca-4019-a989-8390dcd9825b",
+      "last_modified_at": "2021-02-09T12:41:43.662Z",
+      "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
+      "past_routes": ["old-dashboard", "home"],
+      "org_id": "string"
+    }
+  ],
+  "identity_providers": [
+    {
+      "slug": "office-365-login",
+      "display_name": "Office 365 Login",
+      "provider_type": "OIDC",
+      "attribute_mappings": {},
+      "entity_matching": {},
+      "oidc_config": {},
+      "mobile_oidc_config": {},
+      "expose_client_secret": false
+    }
+  ],
+  "email_templates": {
+    "confirmAccount": "5da0a718-c822-403d-9f5d-20d4584e0528",
+    "advancedAuth": "5da0a718-c822-403d-9f5d-20d4584e0528",
+    "advancedMFA": "5da0a718-c822-403d-9f5d-20d4584e0528",
+    "journeySignUp": "5da0a718-c822-403d-9f5d-20d4584e0528",
+    "journeySignInOneTimePassword": "5da0a718-c822-403d-9f5d-20d4584e0528",
+    "journeyLoginOTP": "5da0a718-c822-403d-9f5d-20d4584e0528",
+    "forgotPassword": "5da0a718-c822-403d-9f5d-20d4584e0528",
+    "invitation": "5da0a718-c822-403d-9f5d-20d4584e0528",
+    "partnerInvitation": "5da0a718-c822-403d-9f5d-20d4584e0528",
+    "onNewQuote": "5da0a718-c822-403d-9f5d-20d4584e0528",
+    "onMapAPendingUser": "5da0a718-c822-403d-9f5d-20d4584e0528",
+    "onDocUpload": "5da0a718-c822-403d-9f5d-20d4584e0528",
+    "onWorkflowStepAssigned": "5da0a718-c822-403d-9f5d-20d4584e0528",
+    "confirmEmailUpdate": "5da0a718-c822-403d-9f5d-20d4584e0528",
+    "verifyCodeToSetPassword": "5da0a718-c822-403d-9f5d-20d4584e0528"
+  },
+  "email_template_settings": {}
+}
+```
+
+</details>
+
+---
+
+### `publishPortalRevision`
+
+Makes one revision the portal's live configuration, atomically: either everything below takes effect or nothing does. Pu
+
+`POST /v3/portal/config/{portal_id}/publish`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `portal_id` | path | string (uuid) | Yes | Portal ID (readonly UUID generated on portal creation) |
+
+**Request Body** (required)
+
+**Sample Call**
+
+```bash
+epilot customer-portal publishPortalRevision \
+  -p portal_id=5da0a718-c822-403d-9f5d-20d4584e0528 \
+  -d '{"revision_id":"2026-08-25T14:03:11.482Z-a7f3c1d9","name":"FAQ page launch","description":"string"}'
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot customer-portal publishPortalRevision 5da0a718-c822-403d-9f5d-20d4584e0528
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot customer-portal publishPortalRevision -p portal_id=5da0a718-c822-403d-9f5d-20d4584e0528
+```
+
+With JSONata filter:
+
+```bash
+epilot customer-portal publishPortalRevision -p portal_id=5da0a718-c822-403d-9f5d-20d4584e0528 --jsonata 'revision_id'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "revision_id": "string",
+  "published_at": "1970-01-01T00:00:00.000Z",
+  "published_by": "string",
+  "name": "FAQ page launch",
+  "post_publish_warnings": ["allowed_entities_change"]
+}
+```
+
+</details>
+
+---
+
 ### `listAllPortalConfigs`
 
 Retrieves all portal configurations.
@@ -9955,6 +12409,7 @@ epilot customer-portal listAllPortalConfigs --jsonata 'data'
       "extension_hooks": {},
       "default_user_to_notify": {},
       "identity_providers": [],
+      "mobile_config": {},
       "enabled": true,
       "name": "Installer Portal",
       "domain": "abc.com",
@@ -9982,6 +12437,7 @@ epilot customer-portal listAllPortalConfigs --jsonata 'data'
       "contract_identifiers": [],
       "contract_selector_config": {},
       "registration_identifiers": [],
+      "surfaces": [],
       "contact_identifiers_for_account": [],
       "additional_contact_attributes": [],
       "triggered_journeys": [],
@@ -9992,6 +12448,7 @@ epilot customer-portal listAllPortalConfigs --jsonata 'data'
       "inactive_contract_cutoff_years": 0,
       "is_dummy": true,
       "is_v3_item": true,
+      "published_revision_id": "2026-08-25T14:03:11.482Z-a7f3c1d9",
       "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
       "portal_sk_v3": "PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c",
       "origin": "string",
@@ -10031,7 +12488,7 @@ epilot customer-portal swapPortalConfig \
   -d '{
   "source_portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
   "target_portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
-  "items_to_swap": ["all"]
+  "items_to_swap": ["email_templates"]
 }'
 ```
 
@@ -10120,9 +12577,47 @@ epilot customer-portal clonePortalConfig --jsonata '$'
       "attribute_mappings": {},
       "entity_matching": {},
       "oidc_config": {},
-      "mobile_oidc_config": {}
+      "mobile_oidc_config": {},
+      "expose_client_secret": false
     }
   ],
+  "mobile_config": {
+    "portal_id": "string",
+    "enabled": true,
+    "display_name": "string",
+    "app_host": "string",
+    "environment": "prod",
+    "branding": {
+      "app_icon": "string",
+      "splash": "string",
+      "splash_dark": "string",
+      "icon_background_color": "string",
+      "splash_background_color": "string",
+      "splash_background_color_dark": "string"
+    },
+    "ios": {
+      "bundle_id": "string",
+      "team_id": "string",
+      "credentials_status": "not_configured",
+      "app_store_id": "string",
+      "store_url": "string",
+      "last_build": {}
+    },
+    "android": {
+      "package_name": "string",
+      "credentials_status": "not_configured",
+      "upload_key_status": "not_configured",
+      "store_url": "string",
+      "last_build": {}
+    },
+    "ota": {
+      "enabled": true,
+      "channel": "canary",
+      "auto_update": true,
+      "update_strategy": "next-launch",
+      "min_native_version": "string"
+    }
+  },
   "enabled": true,
   "name": "Installer Portal",
   "domain": "abc.com",
@@ -10144,7 +12639,9 @@ epilot customer-portal clonePortalConfig --jsonata '$'
     "start_page": true,
     "billing": true,
     "change_due_date": true,
-    "new_design": true
+    "new_design": true,
+    "mcp_enabled": true,
+    "mcp_grant_version": 0
   },
   "accessToken": "string",
   "advanced_mfa": {
@@ -10156,7 +12653,8 @@ epilot customer-portal clonePortalConfig --jsonata '$'
     },
     "entry_point": "PASSWORD",
     "preferred_sso_providers": ["office-365-login"],
-    "auto_redirect_to_sso": true
+    "auto_redirect_to_sso": true,
+    "prevent_user_enumeration": true
   },
   "cognito_details": {
     "cognito_user_pool_client_id": "6bsd0jkgoie74k2i8mrhc1vest",
@@ -10178,7 +12676,8 @@ epilot customer-portal clonePortalConfig --jsonata '$'
       "require_lowercase": true,
       "require_uppercase": true,
       "require_numbers": true,
-      "require_symbols": true
+      "require_symbols": true,
+      "password_history_size": 3
     }
   },
   "config": "string",
@@ -10239,6 +12738,16 @@ epilot customer-portal clonePortalConfig --jsonata '$'
       "schema": "contract"
     }
   ],
+  "surfaces": [
+    {
+      "id": "website-journeys",
+      "name": "Website journeys",
+      "description": "string",
+      "authentication": "login",
+      "token_ttl_seconds": 300,
+      "data_access": {}
+    }
+  ],
   "contact_identifiers_for_account": [
     {
       "name": "first_name",
@@ -10297,6 +12806,7 @@ epilot customer-portal clonePortalConfig --jsonata '$'
   "inactive_contract_cutoff_years": 0,
   "is_dummy": true,
   "is_v3_item": true,
+  "published_revision_id": "2026-08-25T14:03:11.482Z-a7f3c1d9",
   "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
   "portal_sk_v3": "PORTAL_CONFIG#453ad7bf-86d5-46c8-8252-bcc868df5e3c",
   "origin": "string",
@@ -10360,19 +12870,8 @@ Invites a partner to a portal
 **Sample Call**
 
 ```bash
-epilot customer-portal invitePartner
-```
-
-With request body:
-
-```bash
 epilot customer-portal invitePartner \
-  -d '{
-  "email": "string",
-  "represents_contact_list": ["5da0a718-c822-403d-9f5d-20d4584e0528"],
-  "contact_data": {},
-  "portal_user_data": {}
-}'
+  -d '{"email":"string","contact_data":{},"portal_user_data":{}}'
 ```
 
 Using stdin pipe:
@@ -10691,6 +13190,222 @@ epilot customer-portal portalProxyExecute --jsonata 'data'
 {
   "success": true,
   "data": {}
+}
+```
+
+</details>
+
+---
+
+### `getMobileConfig`
+
+Returns the portal's mobile app configuration. By default the response is build-ready (resolved): base info (display_nam
+
+`GET /v1/portal/mobile-config`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `portal_id` | query | string | Yes | Portal ID |
+| `raw` | query | boolean | No | Return only the stored mobile_config without resolving base info/branding. |
+
+**Sample Call**
+
+```bash
+epilot customer-portal getMobileConfig \
+  -p portal_id=123e4567-e89b-12d3-a456-426614174000
+```
+
+With JSONata filter:
+
+```bash
+epilot customer-portal getMobileConfig -p portal_id=123e4567-e89b-12d3-a456-426614174000 --jsonata 'portal_id'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "portal_id": "string",
+  "enabled": true,
+  "display_name": "string",
+  "app_host": "string",
+  "environment": "prod",
+  "branding": {
+    "app_icon": "string",
+    "splash": "string",
+    "splash_dark": "string",
+    "icon_background_color": "string",
+    "splash_background_color": "string",
+    "splash_background_color_dark": "string"
+  },
+  "ios": {
+    "bundle_id": "string",
+    "team_id": "string",
+    "credentials_status": "not_configured",
+    "app_store_id": "string",
+    "store_url": "string",
+    "last_build": {
+      "version": "string",
+      "build_number": 0,
+      "track": "string",
+      "status": "building",
+      "updated_at": "1970-01-01T00:00:00.000Z",
+      "error": "string"
+    }
+  },
+  "android": {
+    "package_name": "string",
+    "credentials_status": "not_configured",
+    "upload_key_status": "not_configured",
+    "store_url": "string",
+    "last_build": {
+      "version": "string",
+      "build_number": 0,
+      "track": "string",
+      "status": "building",
+      "updated_at": "1970-01-01T00:00:00.000Z",
+      "error": "string"
+    }
+  },
+  "ota": {
+    "enabled": true,
+    "channel": "canary",
+    "auto_update": true,
+    "update_strategy": "next-launch",
+    "min_native_version": "string"
+  }
+}
+```
+
+</details>
+
+---
+
+### `putMobileConfig`
+
+Merges the provided fields into the portal's mobile app configuration
+
+`PUT /v1/portal/mobile-config`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `portal_id` | query | string | Yes | Portal ID |
+
+**Request Body** (required)
+
+**Sample Call**
+
+```bash
+epilot customer-portal putMobileConfig \
+  -p portal_id=123e4567-e89b-12d3-a456-426614174000
+```
+
+With request body:
+
+```bash
+epilot customer-portal putMobileConfig \
+  -p portal_id=123e4567-e89b-12d3-a456-426614174000 \
+  -d '{
+  "enabled": true,
+  "ios": {
+    "bundle_id": "string",
+    "team_id": "string",
+    "store_url": "string",
+    "app_store_id": "string"
+  },
+  "android": {
+    "package_name": "string",
+    "store_url": "string"
+  },
+  "branding": {
+    "app_icon": "string",
+    "splash": "string",
+    "splash_dark": "string",
+    "icon_background_color": "string",
+    "splash_background_color": "string",
+    "splash_background_color_dark": "string"
+  },
+  "ota": {
+    "enabled": true,
+    "channel": "canary",
+    "auto_update": true,
+    "update_strategy": "next-launch",
+    "min_native_version": "string"
+  }
+}'
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot customer-portal putMobileConfig -p portal_id=123e4567-e89b-12d3-a456-426614174000
+```
+
+With JSONata filter:
+
+```bash
+epilot customer-portal putMobileConfig -p portal_id=123e4567-e89b-12d3-a456-426614174000 --jsonata 'portal_id'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "portal_id": "string",
+  "enabled": true,
+  "display_name": "string",
+  "app_host": "string",
+  "environment": "prod",
+  "branding": {
+    "app_icon": "string",
+    "splash": "string",
+    "splash_dark": "string",
+    "icon_background_color": "string",
+    "splash_background_color": "string",
+    "splash_background_color_dark": "string"
+  },
+  "ios": {
+    "bundle_id": "string",
+    "team_id": "string",
+    "credentials_status": "not_configured",
+    "app_store_id": "string",
+    "store_url": "string",
+    "last_build": {
+      "version": "string",
+      "build_number": 0,
+      "track": "string",
+      "status": "building",
+      "updated_at": "1970-01-01T00:00:00.000Z",
+      "error": "string"
+    }
+  },
+  "android": {
+    "package_name": "string",
+    "credentials_status": "not_configured",
+    "upload_key_status": "not_configured",
+    "store_url": "string",
+    "last_build": {
+      "version": "string",
+      "build_number": 0,
+      "track": "string",
+      "status": "building",
+      "updated_at": "1970-01-01T00:00:00.000Z",
+      "error": "string"
+    }
+  },
+  "ota": {
+    "enabled": true,
+    "channel": "canary",
+    "auto_update": true,
+    "update_strategy": "next-launch",
+    "min_native_version": "string"
+  }
 }
 ```
 

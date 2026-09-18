@@ -1365,7 +1365,7 @@ export interface OperationMethods {
   'listChatWidgets'(
     parameters?: Parameters<Paths.ListChatWidgets.QueryParameters> | null,
     data?: any,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ListChatWidgets.Responses.$200>
   /**
    * createChatWidget
@@ -1373,7 +1373,7 @@ export interface OperationMethods {
   'createChatWidget'(
     parameters?: Parameters<UnknownParamsObject> | null,
     data?: Paths.CreateChatWidget.RequestBody,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CreateChatWidget.Responses.$201>
   /**
    * getChatWidget
@@ -1381,7 +1381,7 @@ export interface OperationMethods {
   'getChatWidget'(
     parameters?: Parameters<Paths.V1Widgets$WidgetId.PathParameters> | null,
     data?: any,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetChatWidget.Responses.$200>
   /**
    * updateChatWidget
@@ -1389,7 +1389,7 @@ export interface OperationMethods {
   'updateChatWidget'(
     parameters?: Parameters<Paths.V1Widgets$WidgetId.PathParameters> | null,
     data?: Paths.UpdateChatWidget.RequestBody,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UpdateChatWidget.Responses.$200>
   /**
    * deleteChatWidget
@@ -1397,7 +1397,7 @@ export interface OperationMethods {
   'deleteChatWidget'(
     parameters?: Parameters<Paths.DeleteChatWidget.QueryParameters & Paths.V1Widgets$WidgetId.PathParameters> | null,
     data?: any,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteChatWidget.Responses.$204>
   /**
    * getPublicChatWidget - Resolve visitor-facing configuration for an independent widget and its current agent assignment. The widget ID is not an organisation ID or a destination such as website or portal.
@@ -1405,7 +1405,7 @@ export interface OperationMethods {
   'getPublicChatWidget'(
     parameters?: Parameters<Paths.GetPublicChatWidget.PathParameters> | null,
     data?: any,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetPublicChatWidget.Responses.$200 | Paths.GetPublicChatWidget.Responses.Default>
   /**
    * createPublicChatGrant - Called by the host website with its widget_key. Checks the saved website origin allowlist and issues a single-use grant for the iframe to exchange at POST /v1/sessions within 60 seconds. This deadline does not limit the resulting session.
@@ -1413,7 +1413,7 @@ export interface OperationMethods {
   'createPublicChatGrant'(
     parameters?: Parameters<UnknownParamsObject> | null,
     data?: Paths.CreatePublicChatGrant.RequestBody,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CreatePublicChatGrant.Responses.$201 | Paths.CreatePublicChatGrant.Responses.Default>
   /**
    * createAnonymousChatSession - Exchanges an unexpired grant once for an independent 30-minute session. Expired or previously used grants return 401 INVALID_GRANT; the host must bootstrap again.
@@ -1421,7 +1421,7 @@ export interface OperationMethods {
   'createAnonymousChatSession'(
     parameters?: Parameters<UnknownParamsObject> | null,
     data?: Paths.CreateAnonymousChatSession.RequestBody,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CreateAnonymousChatSession.Responses.$201 | Paths.CreateAnonymousChatSession.Responses.Default>
   /**
    * sendAnonymousChatMessage - Creates a turn or replays its persisted result. Reuse request_id and the exact
@@ -1429,12 +1429,12 @@ export interface OperationMethods {
    * TEMPORARILY_UNAVAILABLE means the request outcome could not be checked; retry the same request ID and payload.
    * A running request returns 409 IN_PROGRESS; a changed payload returns 409 REQUEST_CONFLICT.
    * A failed admitted request never starts another model execution when retried.
-   *
+   * 
    */
   'sendAnonymousChatMessage'(
     parameters?: Parameters<UnknownParamsObject> | null,
     data?: Paths.SendAnonymousChatMessage.RequestBody,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.SendAnonymousChatMessage.Responses.$200 | Paths.SendAnonymousChatMessage.Responses.Default>
 }
 
@@ -1446,7 +1446,7 @@ export interface PathsDictionary {
     'get'(
       parameters?: Parameters<Paths.ListChatWidgets.QueryParameters> | null,
       data?: any,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ListChatWidgets.Responses.$200>
     /**
      * createChatWidget
@@ -1454,7 +1454,7 @@ export interface PathsDictionary {
     'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
       data?: Paths.CreateChatWidget.RequestBody,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.CreateChatWidget.Responses.$201>
   }
   ['/v1/widgets/{widget_id}']: {
@@ -1464,7 +1464,7 @@ export interface PathsDictionary {
     'get'(
       parameters?: Parameters<Paths.V1Widgets$WidgetId.PathParameters> | null,
       data?: any,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetChatWidget.Responses.$200>
     /**
      * updateChatWidget
@@ -1472,7 +1472,7 @@ export interface PathsDictionary {
     'put'(
       parameters?: Parameters<Paths.V1Widgets$WidgetId.PathParameters> | null,
       data?: Paths.UpdateChatWidget.RequestBody,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.UpdateChatWidget.Responses.$200>
     /**
      * deleteChatWidget
@@ -1480,7 +1480,7 @@ export interface PathsDictionary {
     'delete'(
       parameters?: Parameters<Paths.DeleteChatWidget.QueryParameters & Paths.V1Widgets$WidgetId.PathParameters> | null,
       data?: any,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteChatWidget.Responses.$204>
   }
   ['/v1/widgets/{widget_id}/configuration']: {
@@ -1490,7 +1490,7 @@ export interface PathsDictionary {
     'get'(
       parameters?: Parameters<Paths.GetPublicChatWidget.PathParameters> | null,
       data?: any,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetPublicChatWidget.Responses.$200 | Paths.GetPublicChatWidget.Responses.Default>
   }
   ['/v1/bootstrap']: {
@@ -1500,7 +1500,7 @@ export interface PathsDictionary {
     'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
       data?: Paths.CreatePublicChatGrant.RequestBody,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.CreatePublicChatGrant.Responses.$201 | Paths.CreatePublicChatGrant.Responses.Default>
   }
   ['/v1/sessions']: {
@@ -1510,7 +1510,7 @@ export interface PathsDictionary {
     'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
       data?: Paths.CreateAnonymousChatSession.RequestBody,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.CreateAnonymousChatSession.Responses.$201 | Paths.CreateAnonymousChatSession.Responses.Default>
   }
   ['/v1/messages']: {
@@ -1520,12 +1520,12 @@ export interface PathsDictionary {
      * TEMPORARILY_UNAVAILABLE means the request outcome could not be checked; retry the same request ID and payload.
      * A running request returns 409 IN_PROGRESS; a changed payload returns 409 REQUEST_CONFLICT.
      * A failed admitted request never starts another model execution when retried.
-     *
+     * 
      */
     'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
       data?: Paths.SendAnonymousChatMessage.RequestBody,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.SendAnonymousChatMessage.Responses.$200 | Paths.SendAnonymousChatMessage.Responses.Default>
   }
 }

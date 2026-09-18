@@ -3,7 +3,7 @@
   "info": {
     "title": "Journey API",
     "description": "API to configure journeys",
-    "version": "1.4.2"
+    "version": "1.6.0"
   },
   "security": [
     {
@@ -117,11 +117,21 @@
           {
             "name": "version",
             "in": "query",
-            "description": "DynamoDB version to fetch. `0` (default) is the live row; positive integers are historical snapshots created on each save. Note: this is distinct from the `revisions` counter on the row body.\n",
+            "description": "Revision row to read. `0` (default) is the journey record, the published version every customer receives; a positive integer `n` reads revision row `n` (used by config-engine for history reads). Distinct from the `revisions` counter on the body, which is the legacy change counter of the published version. Versioning metadata is only available via `publish-state`.\n",
             "required": false,
             "schema": {
               "type": "integer",
               "default": 0
+            }
+          },
+          {
+            "name": "revision_id",
+            "in": "query",
+            "description": "Serve the named revision instead of the published version, so a save-and-continue session can stay on the revision it started on. Only revisions that have been published at least once are served on the public and portal routes; an unpublished revision is served to `EpilotAuth` callers with the edit permission and is otherwise unknown. Cannot be combined with the legacy `version` parameter.\n",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "42"
             }
           },
           {
@@ -149,7 +159,17 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Journey"
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/Journey"
+                    },
+                    {
+                      "$ref": "#/components/schemas/JourneyActivationGuarantee"
+                    },
+                    {
+                      "$ref": "#/components/schemas/JourneyServedRevision"
+                    }
+                  ]
                 }
               }
             }
@@ -196,6 +216,409 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/v1/journey/configuration/{id}/revisions": {
+      "post": {
+        "operationId": "createJourneyRevision",
+        "summary": "createJourneyRevision",
+        "description": "Creates a revision: an immutable copy of the complete journey configuration, identified by `revision_id`. Nothing customers receive changes; the revision only becomes the published version when it is published. The payload is complete and is not merged against the journey record or the previous revision. The entity datasource set of the revision is stored separately through the datasources API under the same `revision_id`.\n\nOnly available for organizations with journey versioning enabled; returns `404` otherwise.\n",
+        "tags": [
+          "Journeys"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Journey ID",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "509cdffe-424f-457a-95c2-9708c304ce77"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Complete journey configuration for the revision",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/JourneyRevisionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Revision created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JourneyRevisionSummary"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid payload"
+          },
+          "403": {
+            "description": "No permission to edit the journey"
+          },
+          "404": {
+            "description": "Journey versioning not enabled for the organization, or journey not found"
+          },
+          "409": {
+            "description": "`parent_revision_id` is not the latest revision: the journey was saved since the editor loaded it. The body carries the current latest revision.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JourneyRevisionConflict"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "operationId": "listJourneyRevisions",
+        "summary": "listJourneyRevisions",
+        "description": "Lists the journey's revision history, newest first. Metadata only, no configuration payload. `is_published` says whether a revision is the published version right now, which is a different question from `published_at`, which records the last time it was published.\n\nOnly available for organizations with journey versioning enabled; returns `404` otherwise.\n",
+        "tags": [
+          "Journeys"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Journey ID",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "509cdffe-424f-457a-95c2-9708c304ce77"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of revisions to return",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 25
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "description": "Opaque pagination cursor, taken from a previous response's `next_cursor`",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Revision history",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JourneyRevisionList"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid query parameters"
+          },
+          "403": {
+            "description": "No permission to edit the journey"
+          },
+          "404": {
+            "description": "Journey versioning not enabled for the organization, or journey not found"
+          }
+        }
+      }
+    },
+    "/v1/journey/configuration/{id}/revisions/{revision_id}": {
+      "get": {
+        "operationId": "getJourneyRevision",
+        "summary": "getJourneyRevision",
+        "description": "Returns one revision with its full configuration, in the shape the builder holds a journey in, so it can be loaded straight into the editor as unsaved changes. Reading a revision changes nothing; a client persists it, if at all, by posting it back to `POST .../revisions`.\n\nOnly available for organizations with journey versioning enabled; returns `404` otherwise.\n",
+        "tags": [
+          "Journeys"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Journey ID",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "509cdffe-424f-457a-95c2-9708c304ce77"
+            }
+          },
+          {
+            "name": "revision_id",
+            "in": "path",
+            "description": "Revision ID, as returned in a revision summary",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "42"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The revision with its configuration",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JourneyRevision"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "No permission to edit the journey"
+          },
+          "404": {
+            "description": "Journey versioning not enabled for the organization, or journey or revision not found"
+          }
+        }
+      }
+    },
+    "/v1/journey/configuration/{id}/publish": {
+      "post": {
+        "operationId": "publishJourneyRevision",
+        "summary": "publishJourneyRevision",
+        "description": "Makes one revision the published version, the one customers receive, in a single transaction: the revision's configuration is copied onto the journey record, its datasource set onto the published datasources, and `name`, `description`, `published_at` and `published_by` are stamped onto the revision. Any revision can be published, old or new, so publishing an older revision is the rollback.\n\n`name` is generated server-side when omitted, so every published revision carries one; an omitted name never replaces a name a previous publish already set. `settings.isActive` is never changed by a publish.\n\nOnly available for organizations with journey versioning enabled; returns `404` otherwise.\n",
+        "tags": [
+          "Journeys"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Journey ID",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "509cdffe-424f-457a-95c2-9708c304ce77"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "The revision to publish",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PublishRevisionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Revision published",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublishResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid payload"
+          },
+          "403": {
+            "description": "No permission to edit the journey"
+          },
+          "404": {
+            "description": "Journey versioning not enabled for the organization, or journey or revision not found"
+          },
+          "409": {
+            "description": "The journey record changed between read and publish, please try again"
+          }
+        }
+      }
+    },
+    "/v1/journey/configuration/{id}/publish-state": {
+      "get": {
+        "operationId": "getJourneyPublishState",
+        "summary": "getJourneyPublishState",
+        "description": "Answers which revision is the published version without paging through the history. A journey that has not adopted versioning yet returns `200` with `published_revision_id: null`, not `404`.\n\nOnly available for organizations with journey versioning enabled; returns `404` otherwise.\n",
+        "tags": [
+          "Journeys"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Journey ID",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "509cdffe-424f-457a-95c2-9708c304ce77"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Publish state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JourneyPublishState"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "No permission to edit the journey"
+          },
+          "404": {
+            "description": "Journey versioning not enabled for the organization, or journey not found"
+          }
+        }
+      }
+    },
+    "/v1/journey/configuration/{id}/environment": {
+      "get": {
+        "operationId": "getJourneyEnvironment",
+        "summary": "getJourneyEnvironment",
+        "description": "Resolve the environment variables referenced by this journey. Only browser-safe value types are returned.",
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "tags": [
+          "Journeys"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Journey ID bound to the supplied journey access token",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Resolved environment-backed datasources",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Always private, no-store"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JourneyEnvironmentResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Journey access token missing"
+          },
+          "403": {
+            "description": "Journey access token does not match the journey"
+          },
+          "502": {
+            "description": "Environment resolver unavailable"
+          }
+        }
+      }
+    },
+    "/v1/journey/environment-variables": {
+      "get": {
+        "operationId": "getJourneyEnvironmentVariables",
+        "summary": "getJourneyEnvironmentVariables",
+        "description": "List the organization's environment variables that a journey block may use as an options source. Only Map variables that currently hold a valid value are returned. Intended for the journey builder's authoring UI; requires a journey authoring token, not an environments token.",
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "tags": [
+          "Journeys"
+        ],
+        "responses": {
+          "200": {
+            "description": "Map environment variables available as an options source",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Always private, no-store"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JourneyEnvironmentVariablesResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authorization token missing"
+          },
+          "403": {
+            "description": "Not permitted to read this organization's journeys"
+          },
+          "502": {
+            "description": "Environment resolver unavailable"
           }
         }
       }
@@ -722,7 +1145,7 @@
           {
             "name": "version",
             "in": "query",
-            "description": "DynamoDB version to fetch. `0` (default) is the live row; positive integers are historical snapshots created on each save. Note: this is distinct from the `revisions` counter on the row body.\n",
+            "description": "Revision row to read. `0` (default) is the journey record, the published version every customer receives; a positive integer `n` reads revision row `n` (used by config-engine for history reads). Distinct from the `revisions` counter on the body, which is the legacy change counter of the published version. Versioning metadata is only available via `publish-state`.\n",
             "required": false,
             "schema": {
               "type": "integer",
@@ -736,7 +1159,14 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/JourneyCreationRequestV2"
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/JourneyCreationRequestV2"
+                    },
+                    {
+                      "$ref": "#/components/schemas/JourneyActivationGuarantee"
+                    }
+                  ]
                 }
               }
             }
@@ -938,6 +1368,237 @@
   },
   "components": {
     "schemas": {
+      "EnvironmentMapEntry": {
+        "type": "object",
+        "required": [
+          "key",
+          "value"
+        ],
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "value": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              }
+            ]
+          }
+        }
+      },
+      "EnvironmentMap": {
+        "type": "object",
+        "required": [
+          "options"
+        ],
+        "properties": {
+          "fallbackLanguage": {
+            "type": "string",
+            "default": "de"
+          },
+          "options": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EnvironmentMapEntry"
+            }
+          }
+        }
+      },
+      "EnvironmentLink": {
+        "description": "One link a customer clicks. `label` and `description` are each either a\nplain string or one string per language, deciding that independently.\nMirrors environments-api's `LinkFields`.\n",
+        "type": "object",
+        "required": [
+          "url",
+          "label"
+        ],
+        "properties": {
+          "url": {
+            "type": "string"
+          },
+          "label": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              }
+            ]
+          },
+          "description": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              }
+            ]
+          }
+        }
+      },
+      "EnvironmentLinkList": {
+        "description": "A list of links, served under this service's own `List<Link>` type\ntoken. environments-api types the variable `List` and declares the\nelement type inside the value; journey-api composes the two so a\nconsumer needs only one discriminant.\n",
+        "type": "object",
+        "required": [
+          "itemType",
+          "items"
+        ],
+        "properties": {
+          "itemType": {
+            "type": "string",
+            "enum": [
+              "Link"
+            ]
+          },
+          "fallbackLanguage": {
+            "type": "string",
+            "default": "de"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EnvironmentLink"
+            }
+          }
+        }
+      },
+      "JourneyEnvironmentResponse": {
+        "type": "object",
+        "required": [
+          "items",
+          "errors"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "datasourceId",
+                "type",
+                "value"
+              ],
+              "properties": {
+                "datasourceId": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "Text",
+                    "Number",
+                    "Boolean",
+                    "Map",
+                    "List<Link>"
+                  ]
+                },
+                "value": {
+                  "oneOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "boolean"
+                    },
+                    {
+                      "$ref": "#/components/schemas/EnvironmentMap"
+                    },
+                    {
+                      "$ref": "#/components/schemas/EnvironmentLinkList"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "datasourceId",
+                "code"
+              ],
+              "properties": {
+                "datasourceId": {
+                  "type": "string"
+                },
+                "code": {
+                  "type": "string",
+                  "enum": [
+                    "not_found",
+                    "unsupported_type",
+                    "not_set",
+                    "invalid_value",
+                    "incompatible_consumer"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "JourneyEnvironmentVariablesResponse": {
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "key",
+                "type",
+                "value"
+              ],
+              "properties": {
+                "key": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "Map",
+                    "List<Link>"
+                  ]
+                },
+                "value": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/EnvironmentMap"
+                    },
+                    {
+                      "$ref": "#/components/schemas/EnvironmentLinkList"
+                    }
+                  ]
+                },
+                "description": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
       "GetJourneysResponse": {
         "type": "object"
       },
@@ -1064,6 +1725,13 @@
                   "type": "boolean",
                   "nullable": true
                 },
+                "stepperType": {
+                  "type": "string",
+                  "enum": [
+                    "numbers",
+                    "progress bar"
+                  ]
+                },
                 "hideNextButton": {
                   "type": "boolean",
                   "nullable": true
@@ -1296,6 +1964,12 @@
                 "shouldLoadEntity": {
                   "type": "boolean",
                   "description": "If type is not text, we can instruct the journey to fetch the entity id we receive as value"
+                },
+                "description": {
+                  "type": "string",
+                  "nullable": true,
+                  "maxLength": 500,
+                  "description": "Human-readable note describing the parameter's purpose. Free text; may contain newlines."
                 }
               },
               "required": [
@@ -1336,11 +2010,7 @@
                   },
                   "lang": {
                     "type": "string",
-                    "enum": [
-                      "de",
-                      "en",
-                      "fr"
-                    ]
+                    "example": "de"
                   },
                   "width": {
                     "type": "string"
@@ -1382,7 +2052,8 @@
                 "type": "string"
               },
               "templateId": {
-                "type": "string"
+                "type": "string",
+                "nullable": true
               },
               "entityId": {
                 "type": "string",
@@ -1390,6 +2061,10 @@
               },
               "mappingsAutomationId": {
                 "type": "string"
+              },
+              "newMappings": {
+                "description": "When true, the journey is created without a mapping config or automation; mappings are managed as advanced mappings on a lazily created automation.",
+                "type": "boolean"
               },
               "targetedCustomer": {
                 "type": "string"
@@ -1481,6 +2156,19 @@
                   "PRIVATE"
                 ]
               },
+              "authGate": {
+                "type": "object",
+                "description": "Steps after this step require an authenticated session (auth gate)",
+                "required": [
+                  "stepId"
+                ],
+                "properties": {
+                  "stepId": {
+                    "type": "string",
+                    "description": "The step containing the Login & Registration block"
+                  }
+                }
+              },
               "isPublished": {
                 "type": "boolean"
               },
@@ -1493,7 +2181,7 @@
               "savingProgress": {
                 "type": "object",
                 "properties": {
-                  "savingMode": {
+                  "mode": {
                     "type": "string",
                     "enum": [
                       "auto",
@@ -1502,7 +2190,7 @@
                       "none"
                     ]
                   },
-                  "supportedVersion": {
+                  "supportedRevision": {
                     "type": "number"
                   }
                 }
@@ -1590,6 +2278,13 @@
                 "showStepperLabels": {
                   "type": "boolean",
                   "nullable": true
+                },
+                "stepperType": {
+                  "type": "string",
+                  "enum": [
+                    "numbers",
+                    "progress bar"
+                  ]
                 },
                 "hideNextButton": {
                   "type": "boolean",
@@ -1823,6 +2518,12 @@
                 "shouldLoadEntity": {
                   "type": "boolean",
                   "description": "If type is not text, we can instruct the journey to fetch the entity id we receive as value"
+                },
+                "description": {
+                  "type": "string",
+                  "nullable": true,
+                  "maxLength": 500,
+                  "description": "Human-readable note describing the parameter's purpose. Free text; may contain newlines."
                 }
               },
               "required": [
@@ -1863,11 +2564,7 @@
                   },
                   "lang": {
                     "type": "string",
-                    "enum": [
-                      "de",
-                      "en",
-                      "fr"
-                    ]
+                    "example": "de"
                   },
                   "width": {
                     "type": "string"
@@ -1910,8 +2607,13 @@
               "mappingsAutomationId": {
                 "type": "string"
               },
+              "newMappings": {
+                "description": "When true, the journey is created without a mapping config or automation; mappings are managed as advanced mappings on a lazily created automation.",
+                "type": "boolean"
+              },
               "templateId": {
-                "type": "string"
+                "type": "string",
+                "nullable": true
               },
               "targetedCustomer": {
                 "type": "string"
@@ -1992,12 +2694,46 @@
                   "PRIVATE"
                 ]
               },
+              "authGate": {
+                "type": "object",
+                "description": "Steps after this step require an authenticated session (auth gate)",
+                "required": [
+                  "stepId"
+                ],
+                "properties": {
+                  "stepId": {
+                    "type": "string",
+                    "description": "The step containing the Login & Registration block"
+                  }
+                }
+              },
               "enableDarkMode": {
                 "type": "boolean",
                 "description": "If true, the journey shows an icon to toggle dark mode"
               },
+              "useAustrianLabels": {
+                "type": "boolean",
+                "description": "If true, some journey input labels are in Austrian format"
+              },
               "isActive": {
                 "type": "boolean"
+              },
+              "savingProgress": {
+                "type": "object",
+                "properties": {
+                  "mode": {
+                    "type": "string",
+                    "enum": [
+                      "auto",
+                      "local",
+                      "remote",
+                      "none"
+                    ]
+                  },
+                  "supportedRevision": {
+                    "type": "number"
+                  }
+                }
               }
             },
             "additionalProperties": false
@@ -2169,6 +2905,37 @@
           }
         ]
       },
+      "JourneyServedRevision": {
+        "description": "Which revision the runtime read served: the requested one, or the published version when no revision was requested. Absent while the journey has not adopted versioning and on legacy `version` reads.\n",
+        "type": "object",
+        "properties": {
+          "revision_id": {
+            "type": "string",
+            "example": "42"
+          }
+        }
+      },
+      "JourneyActivationGuarantee": {
+        "description": "Journeys read from the API always carry an explicit `settings.isActive`. The flag remains optional in request bodies.\n",
+        "type": "object",
+        "required": [
+          "settings"
+        ],
+        "properties": {
+          "settings": {
+            "type": "object",
+            "required": [
+              "isActive"
+            ],
+            "properties": {
+              "isActive": {
+                "type": "boolean",
+                "description": "Whether the journey is active (accessible to end customers)"
+              }
+            }
+          }
+        }
+      },
       "JourneyFeatureFlags": {
         "type": "object",
         "properties": {
@@ -2191,10 +2958,12 @@
             "type": "string"
           },
           "version": {
-            "type": "number"
+            "type": "number",
+            "description": "Revision row number of this item. `0` is the journey record, the published version.\n"
           },
           "revisions": {
-            "type": "number"
+            "type": "number",
+            "description": "Legacy change counter of the published version, kept for compatibility: bumped whenever the published version changes and used for optimistic concurrency on `PUT`, by submissions (`journey_context.journey_revision`) and by save-and-continue. Saving a revision never changes it. Versioning metadata is only available via `publish-state`.\n"
           }
         },
         "required": [
@@ -2203,6 +2972,224 @@
           "version",
           "revisions"
         ]
+      },
+      "JourneyRevisionRequest": {
+        "description": "The complete journey configuration a revision is created from, same shape as the `PUT` body. Server-managed attributes of the journey record (`revisions`, `version`, publish metadata) are ignored.\n",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/JourneyCreationRequest"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "parent_revision_id": {
+                "type": "string",
+                "description": "The revision the editor started from. When present and not the latest revision the save is rejected with `409`; absent skips the check.\n",
+                "example": "41"
+              },
+              "based_on_revision_id": {
+                "type": "string",
+                "description": "Provenance, not configuration: the revision that was loaded into the editor before this save, when it was an older one.\n",
+                "example": "37"
+              },
+              "mapping_config_version": {
+                "type": "number",
+                "description": "Version of the entity-mapping config stored alongside this revision. Publishing the revision points the journey's automation at it.\n",
+                "example": 12
+              },
+              "revision_name": {
+                "type": "string",
+                "description": "What this save changed, for the revision history to list. Distinct from `name`, which is the journey's own name. A publish replaces it with the version name.\n",
+                "example": "Changes to Steps and Logic"
+              }
+            }
+          }
+        ]
+      },
+      "PublishRevisionRequest": {
+        "type": "object",
+        "required": [
+          "revision_id"
+        ],
+        "properties": {
+          "revision_id": {
+            "type": "string",
+            "example": "42"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 255,
+            "description": "Name stamped onto the revision being published. Optional: when omitted the server generates one, so every revision that has ever been published carries a name. An omitted name never replaces a name a previous publish already set; an explicit one does.\n",
+            "example": "Summer campaign"
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 8000,
+            "description": "Optional description stamped onto the revision at publish time"
+          }
+        }
+      },
+      "JourneyRevisionSummary": {
+        "type": "object",
+        "required": [
+          "revision_id",
+          "created_at",
+          "is_published"
+        ],
+        "properties": {
+          "revision_id": {
+            "type": "string",
+            "description": "Opaque identifier of the revision. Moves on every save.",
+            "example": "42"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "created_by": {
+            "type": "string",
+            "description": "User id of the author. Absent for revisions recorded from writes without a user, e.g. blueprint installs.\n"
+          },
+          "name": {
+            "type": "string",
+            "description": "Set at publish time only, so present if and only if this revision has been published at least once.\n",
+            "example": "Summer campaign"
+          },
+          "description": {
+            "type": "string"
+          },
+          "published_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The last time this revision was published. Not the same question as `is_published`: a revision that was the published version yesterday still carries a `published_at`.\n"
+          },
+          "is_published": {
+            "type": "boolean",
+            "description": "Whether this revision is the published version right now."
+          },
+          "mapping_config_version": {
+            "type": "number",
+            "description": "Version of the entity-mapping config stored alongside this revision.",
+            "example": 12
+          }
+        }
+      },
+      "JourneyRevisionList": {
+        "type": "object",
+        "required": [
+          "results"
+        ],
+        "properties": {
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/JourneyRevisionSummary"
+            }
+          },
+          "next_cursor": {
+            "type": "string",
+            "description": "Opaque cursor to pass back as `cursor` to fetch the next page. Absent when the client has reached the end of the history.\n"
+          }
+        }
+      },
+      "JourneyRevision": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/JourneyRevisionSummary"
+          },
+          {
+            "type": "object",
+            "required": [
+              "configuration"
+            ],
+            "properties": {
+              "configuration": {
+                "description": "The journey configuration as it was saved in this revision, in the shape the builder holds a journey in.\n",
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/Journey"
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "JourneyRevisionConflict": {
+        "type": "object",
+        "required": [
+          "message",
+          "latest_revision"
+        ],
+        "properties": {
+          "message": {
+            "type": "string",
+            "example": "The journey has been saved since your editor loaded it"
+          },
+          "latest_revision": {
+            "$ref": "#/components/schemas/JourneyRevisionSummary"
+          }
+        }
+      },
+      "JourneyPublishState": {
+        "type": "object",
+        "required": [
+          "journey_id",
+          "published_revision_id"
+        ],
+        "properties": {
+          "journey_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "published_revision_id": {
+            "type": "string",
+            "nullable": true,
+            "description": "An explicit `null` means the journey has not adopted versioning yet: it exists, customers receive its journey record, and no revision is the published version.\n",
+            "example": "42"
+          },
+          "published_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "published_by": {
+            "type": "string"
+          }
+        }
+      },
+      "PublishResult": {
+        "type": "object",
+        "required": [
+          "revision_id",
+          "name",
+          "published_at",
+          "post_publish_warnings"
+        ],
+        "properties": {
+          "revision_id": {
+            "type": "string",
+            "example": "42"
+          },
+          "name": {
+            "type": "string",
+            "description": "The name now on the revision: the one sent in the request, the one a previous publish set when this request omitted `name`, or the server-generated default.\n",
+            "example": "Summer campaign"
+          },
+          "published_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "published_by": {
+            "type": "string"
+          },
+          "post_publish_warnings": {
+            "type": "array",
+            "description": "Names any best-effort side effect that failed after the publish itself succeeded, e.g. the journey entity sync, so a caller can say \"published, but the entity did not update\".\n",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
       },
       "JourneyValidationResponse": {
         "type": "object",
@@ -2534,6 +3521,11 @@
               }
             }
           },
+          "context_entity_id": {
+            "description": "Entity id used to resolve entity and relational template variables",
+            "type": "string",
+            "format": "uuid"
+          },
           "language": {
             "description": "Language code for the document",
             "type": "string",
@@ -2583,12 +3575,21 @@
       },
       "ValidationRuleRef": {
         "type": "object",
-        "description": "References to validation rules organized by blocks and fields.\nMaps block IDs to either rule IDs (for block-level rules) or rule references (for field-level rules).\n",
+        "description": "References to validation rules organized by blocks and fields.\nMaps block IDs to either one or more ordered rule IDs (for block-level rules)\nor rule references (for field-level rules).\n",
         "additionalProperties": {
           "oneOf": [
             {
               "type": "string",
               "description": "Rule ID for block-level validation"
+            },
+            {
+              "type": "array",
+              "description": "Ordered rule IDs for block-level validation",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": {
+                "type": "string"
+              }
             },
             {
               "$ref": "#/components/schemas/RuleRef"
@@ -2597,23 +3598,45 @@
         },
         "example": {
           "block1": "rule123",
-          "block2": {
-            "field1": "rule456",
-            "field2": "rule789"
+          "block2": [
+            "rule456",
+            "rule789"
+          ],
+          "block3": {
+            "field1": "rule101",
+            "field2": [
+              "rule102",
+              "rule103"
+            ]
           }
         }
       },
       "RuleRef": {
         "type": "object",
-        "description": "Field-level rule references within a block.\nMaps field names to rule IDs.\n",
+        "description": "Field-level rule references within a block.\nMaps field names to one or more ordered rule IDs.\n",
         "additionalProperties": {
-          "type": "string",
-          "description": "Rule ID for field-level validation"
+          "oneOf": [
+            {
+              "type": "string",
+              "description": "Rule ID for field-level validation"
+            },
+            {
+              "type": "array",
+              "description": "Ordered rule IDs for field-level validation",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": {
+                "type": "string"
+              }
+            }
+          ]
         },
         "example": {
           "firstName": "rule123",
-          "lastName": "rule456",
-          "email": "rule789"
+          "lastName": [
+            "rule456",
+            "rule789"
+          ]
         }
       }
     },

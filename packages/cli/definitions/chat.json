@@ -1,0 +1,2909 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "epilot Chat API",
+    "version": "0.1.0",
+    "description": "Widget management and anonymous browser chat."
+  },
+  "servers": [
+    {
+      "url": "https://chat.sls.epilot.io"
+    }
+  ],
+  "security": [
+    {
+      "EpilotAuth": []
+    }
+  ],
+  "paths": {
+    "/v1/widgets": {
+      "get": {
+        "tags": [
+          "Chat widgets"
+        ],
+        "operationId": "listChatWidgets",
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Widget response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "widgets"
+                  ],
+                  "properties": {
+                    "widgets": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "widget_id",
+                          "org_id",
+                          "agent_id",
+                          "binding_id",
+                          "version",
+                          "name",
+                          "website_chat",
+                          "website_chat_embed",
+                          "created_at",
+                          "updated_at"
+                        ],
+                        "properties": {
+                          "name": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 100
+                          },
+                          "agent_id": {
+                            "type": "string",
+                            "format": "uuid",
+                            "nullable": true
+                          },
+                          "website_chat": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "required": [
+                              "allowed_origins",
+                              "organisation_name",
+                              "default_locale"
+                            ],
+                            "properties": {
+                              "allowed_origins": {
+                                "type": "array",
+                                "maxItems": 50,
+                                "uniqueItems": true,
+                                "description": "Exact HTTPS origins. Empty means the widget cannot start sessions.",
+                                "items": {
+                                  "type": "string",
+                                  "maxLength": 2048
+                                }
+                              },
+                              "organisation_name": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 100
+                              },
+                              "default_locale": {
+                                "type": "string",
+                                "enum": [
+                                  "en",
+                                  "de"
+                                ]
+                              },
+                              "design_id": {
+                                "type": "string",
+                                "format": "uuid",
+                                "nullable": true,
+                                "description": "Design Builder configuration for the widget only."
+                              },
+                              "authentication": {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                  "email_code": {
+                                    "type": "object",
+                                    "additionalProperties": false,
+                                    "properties": {
+                                      "email_template_id": {
+                                        "type": "string",
+                                        "format": "uuid",
+                                        "nullable": true
+                                      }
+                                    }
+                                  }
+                                },
+                                "nullable": true,
+                                "description": "Email Builder template selection. Does not enable verification by itself.",
+                                "required": [
+                                  "email_code"
+                                ]
+                              }
+                            }
+                          },
+                          "widget_id": {
+                            "type": "string",
+                            "format": "uuid",
+                            "readOnly": true,
+                            "description": "Stable public embed identifier, independent of the assigned agent. Not a credential."
+                          },
+                          "org_id": {
+                            "type": "string",
+                            "readOnly": true
+                          },
+                          "binding_id": {
+                            "type": "string",
+                            "format": "uuid",
+                            "readOnly": true,
+                            "description": "Server-owned session binding; changes on reassignment or allowed-origin changes."
+                          },
+                          "version": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "readOnly": true
+                          },
+                          "created_at": {
+                            "type": "string",
+                            "format": "date-time",
+                            "readOnly": true
+                          },
+                          "updated_at": {
+                            "type": "string",
+                            "format": "date-time",
+                            "readOnly": true
+                          },
+                          "website_chat_embed": {
+                            "type": "object",
+                            "readOnly": true,
+                            "required": [
+                              "script_url",
+                              "chat_api_origin",
+                              "demo_url"
+                            ],
+                            "properties": {
+                              "script_url": {
+                                "type": "string",
+                                "format": "uri"
+                              },
+                              "chat_api_origin": {
+                                "type": "string",
+                                "format": "uri"
+                              },
+                              "demo_url": {
+                                "type": "string",
+                                "format": "uri"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "next_cursor": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid widget settings",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "details": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Widget not found in this organisation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "details": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Widget or assigned agent changed; reload before retrying",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "details": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "in": "query",
+            "name": "cursor",
+            "schema": {
+              "type": "string",
+              "maxLength": 1024
+            }
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "Chat widgets"
+        ],
+        "operationId": "createChatWidget",
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Widget response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "widget_id",
+                    "org_id",
+                    "agent_id",
+                    "binding_id",
+                    "version",
+                    "name",
+                    "website_chat",
+                    "website_chat_embed",
+                    "created_at",
+                    "updated_at"
+                  ],
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100
+                    },
+                    "agent_id": {
+                      "type": "string",
+                      "format": "uuid",
+                      "nullable": true
+                    },
+                    "website_chat": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "allowed_origins",
+                        "organisation_name",
+                        "default_locale"
+                      ],
+                      "properties": {
+                        "allowed_origins": {
+                          "type": "array",
+                          "maxItems": 50,
+                          "uniqueItems": true,
+                          "description": "Exact HTTPS origins. Empty means the widget cannot start sessions.",
+                          "items": {
+                            "type": "string",
+                            "maxLength": 2048
+                          }
+                        },
+                        "organisation_name": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 100
+                        },
+                        "default_locale": {
+                          "type": "string",
+                          "enum": [
+                            "en",
+                            "de"
+                          ]
+                        },
+                        "design_id": {
+                          "type": "string",
+                          "format": "uuid",
+                          "nullable": true,
+                          "description": "Design Builder configuration for the widget only."
+                        },
+                        "authentication": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "properties": {
+                            "email_code": {
+                              "type": "object",
+                              "additionalProperties": false,
+                              "properties": {
+                                "email_template_id": {
+                                  "type": "string",
+                                  "format": "uuid",
+                                  "nullable": true
+                                }
+                              }
+                            }
+                          },
+                          "nullable": true,
+                          "description": "Email Builder template selection. Does not enable verification by itself.",
+                          "required": [
+                            "email_code"
+                          ]
+                        }
+                      }
+                    },
+                    "widget_id": {
+                      "type": "string",
+                      "format": "uuid",
+                      "readOnly": true,
+                      "description": "Stable public embed identifier, independent of the assigned agent. Not a credential."
+                    },
+                    "org_id": {
+                      "type": "string",
+                      "readOnly": true
+                    },
+                    "binding_id": {
+                      "type": "string",
+                      "format": "uuid",
+                      "readOnly": true,
+                      "description": "Server-owned session binding; changes on reassignment or allowed-origin changes."
+                    },
+                    "version": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "readOnly": true
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "readOnly": true
+                    },
+                    "updated_at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "readOnly": true
+                    },
+                    "website_chat_embed": {
+                      "type": "object",
+                      "readOnly": true,
+                      "required": [
+                        "script_url",
+                        "chat_api_origin",
+                        "demo_url"
+                      ],
+                      "properties": {
+                        "script_url": {
+                          "type": "string",
+                          "format": "uri"
+                        },
+                        "chat_api_origin": {
+                          "type": "string",
+                          "format": "uri"
+                        },
+                        "demo_url": {
+                          "type": "string",
+                          "format": "uri"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid widget settings",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "details": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Widget not found in this organisation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "details": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Widget or assigned agent changed; reload before retrying",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "details": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "name",
+                  "agent_id",
+                  "website_chat"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  },
+                  "agent_id": {
+                    "type": "string",
+                    "format": "uuid",
+                    "nullable": true
+                  },
+                  "website_chat": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "allowed_origins",
+                      "organisation_name",
+                      "default_locale"
+                    ],
+                    "properties": {
+                      "allowed_origins": {
+                        "type": "array",
+                        "maxItems": 50,
+                        "uniqueItems": true,
+                        "description": "Exact HTTPS origins. Empty means the widget cannot start sessions.",
+                        "items": {
+                          "type": "string",
+                          "maxLength": 2048
+                        }
+                      },
+                      "organisation_name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                      },
+                      "default_locale": {
+                        "type": "string",
+                        "enum": [
+                          "en",
+                          "de"
+                        ]
+                      },
+                      "design_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true,
+                        "description": "Design Builder configuration for the widget only."
+                      },
+                      "authentication": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "email_code": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                              "email_template_id": {
+                                "type": "string",
+                                "format": "uuid",
+                                "nullable": true
+                              }
+                            }
+                          }
+                        },
+                        "nullable": true,
+                        "description": "Email Builder template selection. Does not enable verification by itself.",
+                        "required": [
+                          "email_code"
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/widgets/{widget_id}": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "widget_id",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "get": {
+        "tags": [
+          "Chat widgets"
+        ],
+        "operationId": "getChatWidget",
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Widget response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "widget_id",
+                    "org_id",
+                    "agent_id",
+                    "binding_id",
+                    "version",
+                    "name",
+                    "website_chat",
+                    "website_chat_embed",
+                    "created_at",
+                    "updated_at"
+                  ],
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100
+                    },
+                    "agent_id": {
+                      "type": "string",
+                      "format": "uuid",
+                      "nullable": true
+                    },
+                    "website_chat": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "allowed_origins",
+                        "organisation_name",
+                        "default_locale"
+                      ],
+                      "properties": {
+                        "allowed_origins": {
+                          "type": "array",
+                          "maxItems": 50,
+                          "uniqueItems": true,
+                          "description": "Exact HTTPS origins. Empty means the widget cannot start sessions.",
+                          "items": {
+                            "type": "string",
+                            "maxLength": 2048
+                          }
+                        },
+                        "organisation_name": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 100
+                        },
+                        "default_locale": {
+                          "type": "string",
+                          "enum": [
+                            "en",
+                            "de"
+                          ]
+                        },
+                        "design_id": {
+                          "type": "string",
+                          "format": "uuid",
+                          "nullable": true,
+                          "description": "Design Builder configuration for the widget only."
+                        },
+                        "authentication": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "properties": {
+                            "email_code": {
+                              "type": "object",
+                              "additionalProperties": false,
+                              "properties": {
+                                "email_template_id": {
+                                  "type": "string",
+                                  "format": "uuid",
+                                  "nullable": true
+                                }
+                              }
+                            }
+                          },
+                          "nullable": true,
+                          "description": "Email Builder template selection. Does not enable verification by itself.",
+                          "required": [
+                            "email_code"
+                          ]
+                        }
+                      }
+                    },
+                    "widget_id": {
+                      "type": "string",
+                      "format": "uuid",
+                      "readOnly": true,
+                      "description": "Stable public embed identifier, independent of the assigned agent. Not a credential."
+                    },
+                    "org_id": {
+                      "type": "string",
+                      "readOnly": true
+                    },
+                    "binding_id": {
+                      "type": "string",
+                      "format": "uuid",
+                      "readOnly": true,
+                      "description": "Server-owned session binding; changes on reassignment or allowed-origin changes."
+                    },
+                    "version": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "readOnly": true
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "readOnly": true
+                    },
+                    "updated_at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "readOnly": true
+                    },
+                    "website_chat_embed": {
+                      "type": "object",
+                      "readOnly": true,
+                      "required": [
+                        "script_url",
+                        "chat_api_origin",
+                        "demo_url"
+                      ],
+                      "properties": {
+                        "script_url": {
+                          "type": "string",
+                          "format": "uri"
+                        },
+                        "chat_api_origin": {
+                          "type": "string",
+                          "format": "uri"
+                        },
+                        "demo_url": {
+                          "type": "string",
+                          "format": "uri"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid widget settings",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "details": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Widget not found in this organisation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "details": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Widget or assigned agent changed; reload before retrying",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "details": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Chat widgets"
+        ],
+        "operationId": "updateChatWidget",
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Widget response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "widget_id",
+                    "org_id",
+                    "agent_id",
+                    "binding_id",
+                    "version",
+                    "name",
+                    "website_chat",
+                    "website_chat_embed",
+                    "created_at",
+                    "updated_at"
+                  ],
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100
+                    },
+                    "agent_id": {
+                      "type": "string",
+                      "format": "uuid",
+                      "nullable": true
+                    },
+                    "website_chat": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "allowed_origins",
+                        "organisation_name",
+                        "default_locale"
+                      ],
+                      "properties": {
+                        "allowed_origins": {
+                          "type": "array",
+                          "maxItems": 50,
+                          "uniqueItems": true,
+                          "description": "Exact HTTPS origins. Empty means the widget cannot start sessions.",
+                          "items": {
+                            "type": "string",
+                            "maxLength": 2048
+                          }
+                        },
+                        "organisation_name": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 100
+                        },
+                        "default_locale": {
+                          "type": "string",
+                          "enum": [
+                            "en",
+                            "de"
+                          ]
+                        },
+                        "design_id": {
+                          "type": "string",
+                          "format": "uuid",
+                          "nullable": true,
+                          "description": "Design Builder configuration for the widget only."
+                        },
+                        "authentication": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "properties": {
+                            "email_code": {
+                              "type": "object",
+                              "additionalProperties": false,
+                              "properties": {
+                                "email_template_id": {
+                                  "type": "string",
+                                  "format": "uuid",
+                                  "nullable": true
+                                }
+                              }
+                            }
+                          },
+                          "nullable": true,
+                          "description": "Email Builder template selection. Does not enable verification by itself.",
+                          "required": [
+                            "email_code"
+                          ]
+                        }
+                      }
+                    },
+                    "widget_id": {
+                      "type": "string",
+                      "format": "uuid",
+                      "readOnly": true,
+                      "description": "Stable public embed identifier, independent of the assigned agent. Not a credential."
+                    },
+                    "org_id": {
+                      "type": "string",
+                      "readOnly": true
+                    },
+                    "binding_id": {
+                      "type": "string",
+                      "format": "uuid",
+                      "readOnly": true,
+                      "description": "Server-owned session binding; changes on reassignment or allowed-origin changes."
+                    },
+                    "version": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "readOnly": true
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "readOnly": true
+                    },
+                    "updated_at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "readOnly": true
+                    },
+                    "website_chat_embed": {
+                      "type": "object",
+                      "readOnly": true,
+                      "required": [
+                        "script_url",
+                        "chat_api_origin",
+                        "demo_url"
+                      ],
+                      "properties": {
+                        "script_url": {
+                          "type": "string",
+                          "format": "uri"
+                        },
+                        "chat_api_origin": {
+                          "type": "string",
+                          "format": "uri"
+                        },
+                        "demo_url": {
+                          "type": "string",
+                          "format": "uri"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid widget settings",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "details": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Widget not found in this organisation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "details": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Widget or assigned agent changed; reload before retrying",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "details": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "version"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  },
+                  "agent_id": {
+                    "type": "string",
+                    "format": "uuid",
+                    "nullable": true
+                  },
+                  "website_chat": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "allowed_origins",
+                      "organisation_name",
+                      "default_locale"
+                    ],
+                    "properties": {
+                      "allowed_origins": {
+                        "type": "array",
+                        "maxItems": 50,
+                        "uniqueItems": true,
+                        "description": "Exact HTTPS origins. Empty means the widget cannot start sessions.",
+                        "items": {
+                          "type": "string",
+                          "maxLength": 2048
+                        }
+                      },
+                      "organisation_name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                      },
+                      "default_locale": {
+                        "type": "string",
+                        "enum": [
+                          "en",
+                          "de"
+                        ]
+                      },
+                      "design_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true,
+                        "description": "Design Builder configuration for the widget only."
+                      },
+                      "authentication": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "email_code": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                              "email_template_id": {
+                                "type": "string",
+                                "format": "uuid",
+                                "nullable": true
+                              }
+                            }
+                          }
+                        },
+                        "nullable": true,
+                        "description": "Email Builder template selection. Does not enable verification by itself.",
+                        "required": [
+                          "email_code"
+                        ]
+                      }
+                    }
+                  },
+                  "version": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "description": "Version read by the editor; stale writes return 409."
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Chat widgets"
+        ],
+        "operationId": "deleteChatWidget",
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Widget deleted"
+          },
+          "400": {
+            "description": "Invalid widget settings",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "details": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Widget not found in this organisation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "details": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Widget or assigned agent changed; reload before retrying",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "details": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "in": "query",
+            "name": "version",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ]
+      }
+    },
+    "/v1/widgets/{widget_id}/configuration": {
+      "get": {
+        "operationId": "getPublicChatWidget",
+        "description": "Resolve visitor-facing configuration for an independent widget and its current agent assignment. The widget ID is not an organisation ID or a destination such as website or portal.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "widget_id",
+            "description": "Public widget ID, also used as widget_key in bootstrap and data-epilot-chat in the embed.",
+            "example": "550e8400-e29b-41d4-a716-446655440000",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-zA-Z0-9_-]{1,100}$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Public presentation only",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "key",
+                    "organisationName",
+                    "assistantName",
+                    "defaultLocale",
+                    "locales"
+                  ],
+                  "properties": {
+                    "key": {
+                      "type": "string"
+                    },
+                    "organisationName": {
+                      "type": "string"
+                    },
+                    "assistantName": {
+                      "type": "string"
+                    },
+                    "defaultLocale": {
+                      "type": "string",
+                      "enum": [
+                        "en",
+                        "de"
+                      ]
+                    },
+                    "design": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "last_modified_at": {
+                          "type": "string",
+                          "maxLength": 200
+                        },
+                        "style": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "properties": {
+                            "palette": {
+                              "type": "object",
+                              "additionalProperties": false,
+                              "properties": {
+                                "primary": {
+                                  "type": "string",
+                                  "maxLength": 200
+                                },
+                                "background": {
+                                  "type": "string",
+                                  "maxLength": 200
+                                }
+                              }
+                            },
+                            "typography": {
+                              "type": "object",
+                              "additionalProperties": false,
+                              "properties": {
+                                "font": {
+                                  "type": "object",
+                                  "additionalProperties": false,
+                                  "properties": {
+                                    "font_family": {
+                                      "type": "string",
+                                      "maxLength": 200
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "shape": {
+                              "type": "object",
+                              "additionalProperties": false,
+                              "properties": {
+                                "border_radius": {
+                                  "type": "number",
+                                  "minimum": 0,
+                                  "maximum": 100
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "spark_theme": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "properties": {
+                            "accentColor": {
+                              "type": "string",
+                              "maxLength": 200
+                            },
+                            "backgroundColor": {
+                              "type": "string",
+                              "maxLength": 200
+                            },
+                            "fontBody": {
+                              "type": "string",
+                              "maxLength": 200
+                            },
+                            "fontHeading": {
+                              "type": "string",
+                              "maxLength": 200
+                            },
+                            "radius": {
+                              "type": "string",
+                              "maxLength": 200
+                            },
+                            "scaling": {
+                              "type": "string",
+                              "maxLength": 200
+                            },
+                            "spacing": {
+                              "type": "string",
+                              "maxLength": 200
+                            },
+                            "appearance": {
+                              "type": "string",
+                              "maxLength": 200
+                            },
+                            "neutralColor": {
+                              "type": "string",
+                              "maxLength": 200
+                            },
+                            "styleVariant": {
+                              "type": "string",
+                              "maxLength": 200
+                            },
+                            "labelPosition": {
+                              "type": "string",
+                              "maxLength": 200
+                            },
+                            "inputStyle": {
+                              "type": "string",
+                              "maxLength": 200
+                            },
+                            "inputColor": {
+                              "type": "string",
+                              "maxLength": 200
+                            },
+                            "cardVariant": {
+                              "type": "string",
+                              "maxLength": 200
+                            },
+                            "cardColor": {
+                              "type": "string",
+                              "maxLength": 200
+                            },
+                            "highContrast": {
+                              "type": "boolean"
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "id"
+                      ]
+                    },
+                    "locales": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "enum": [
+                          "en",
+                          "de"
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "400 invalid input, 401 expired capability, 403 origin denied, 404 unpublished widget, 409 conflict, 413 too large, 429 rate limit, or 503 unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "code"
+                  ],
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "INVALID_REQUEST",
+                        "ORIGIN_DENIED",
+                        "NOT_FOUND",
+                        "INVALID_GRANT",
+                        "SESSION_EXPIRED",
+                        "RATE_LIMITED",
+                        "SESSION_LIMIT",
+                        "USAGE_LIMIT",
+                        "REQUEST_CONFLICT",
+                        "IN_PROGRESS",
+                        "UNAVAILABLE",
+                        "TEMPORARILY_UNAVAILABLE"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/v1/bootstrap": {
+      "post": {
+        "operationId": "createPublicChatGrant",
+        "description": "Called by the host website with its widget_key. Checks the saved website origin allowlist and issues a single-use grant for the iframe to exchange at POST /v1/sessions within 60 seconds. This deadline does not limit the resulting session.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "widget_key"
+                ],
+                "properties": {
+                  "widget_key": {
+                    "type": "string",
+                    "pattern": "^[a-zA-Z0-9_-]{1,100}$"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Single-use handoff grant, valid for 60 seconds. If unused at expiry, request a fresh grant. Contains no account identity.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "grant",
+                    "expires_in",
+                    "widget_origin"
+                  ],
+                  "properties": {
+                    "grant": {
+                      "type": "string"
+                    },
+                    "expires_in": {
+                      "type": "integer",
+                      "example": 60
+                    },
+                    "widget_origin": {
+                      "type": "string",
+                      "format": "uri"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "400 invalid input, 401 expired capability, 403 origin denied, 404 unpublished widget, 409 conflict, 413 too large, 429 rate limit, or 503 unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "code"
+                  ],
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "INVALID_REQUEST",
+                        "ORIGIN_DENIED",
+                        "NOT_FOUND",
+                        "INVALID_GRANT",
+                        "SESSION_EXPIRED",
+                        "RATE_LIMITED",
+                        "SESSION_LIMIT",
+                        "USAGE_LIMIT",
+                        "REQUEST_CONFLICT",
+                        "IN_PROGRESS",
+                        "UNAVAILABLE",
+                        "TEMPORARILY_UNAVAILABLE"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/v1/sessions": {
+      "post": {
+        "operationId": "createAnonymousChatSession",
+        "description": "Exchanges an unexpired grant once for an independent 30-minute session. Expired or previously used grants return 401 INVALID_GRANT; the host must bootstrap again.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "grant"
+                ],
+                "properties": {
+                  "grant": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9_-]{43}$"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "An isolated anonymous conversation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "token",
+                    "conversation_id",
+                    "expires_at",
+                    "widget"
+                  ],
+                  "properties": {
+                    "token": {
+                      "type": "string"
+                    },
+                    "conversation_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "expires_at": {
+                      "type": "integer",
+                      "description": "Unix seconds"
+                    },
+                    "widget": {
+                      "type": "object",
+                      "required": [
+                        "key",
+                        "organisationName",
+                        "assistantName",
+                        "defaultLocale",
+                        "locales"
+                      ],
+                      "properties": {
+                        "key": {
+                          "type": "string"
+                        },
+                        "organisationName": {
+                          "type": "string"
+                        },
+                        "assistantName": {
+                          "type": "string"
+                        },
+                        "defaultLocale": {
+                          "type": "string",
+                          "enum": [
+                            "en",
+                            "de"
+                          ]
+                        },
+                        "design": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "format": "uuid"
+                            },
+                            "last_modified_at": {
+                              "type": "string",
+                              "maxLength": 200
+                            },
+                            "style": {
+                              "type": "object",
+                              "additionalProperties": false,
+                              "properties": {
+                                "palette": {
+                                  "type": "object",
+                                  "additionalProperties": false,
+                                  "properties": {
+                                    "primary": {
+                                      "type": "string",
+                                      "maxLength": 200
+                                    },
+                                    "background": {
+                                      "type": "string",
+                                      "maxLength": 200
+                                    }
+                                  }
+                                },
+                                "typography": {
+                                  "type": "object",
+                                  "additionalProperties": false,
+                                  "properties": {
+                                    "font": {
+                                      "type": "object",
+                                      "additionalProperties": false,
+                                      "properties": {
+                                        "font_family": {
+                                          "type": "string",
+                                          "maxLength": 200
+                                        }
+                                      }
+                                    }
+                                  }
+                                },
+                                "shape": {
+                                  "type": "object",
+                                  "additionalProperties": false,
+                                  "properties": {
+                                    "border_radius": {
+                                      "type": "number",
+                                      "minimum": 0,
+                                      "maximum": 100
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "spark_theme": {
+                              "type": "object",
+                              "additionalProperties": false,
+                              "properties": {
+                                "accentColor": {
+                                  "type": "string",
+                                  "maxLength": 200
+                                },
+                                "backgroundColor": {
+                                  "type": "string",
+                                  "maxLength": 200
+                                },
+                                "fontBody": {
+                                  "type": "string",
+                                  "maxLength": 200
+                                },
+                                "fontHeading": {
+                                  "type": "string",
+                                  "maxLength": 200
+                                },
+                                "radius": {
+                                  "type": "string",
+                                  "maxLength": 200
+                                },
+                                "scaling": {
+                                  "type": "string",
+                                  "maxLength": 200
+                                },
+                                "spacing": {
+                                  "type": "string",
+                                  "maxLength": 200
+                                },
+                                "appearance": {
+                                  "type": "string",
+                                  "maxLength": 200
+                                },
+                                "neutralColor": {
+                                  "type": "string",
+                                  "maxLength": 200
+                                },
+                                "styleVariant": {
+                                  "type": "string",
+                                  "maxLength": 200
+                                },
+                                "labelPosition": {
+                                  "type": "string",
+                                  "maxLength": 200
+                                },
+                                "inputStyle": {
+                                  "type": "string",
+                                  "maxLength": 200
+                                },
+                                "inputColor": {
+                                  "type": "string",
+                                  "maxLength": 200
+                                },
+                                "cardVariant": {
+                                  "type": "string",
+                                  "maxLength": 200
+                                },
+                                "cardColor": {
+                                  "type": "string",
+                                  "maxLength": 200
+                                },
+                                "highContrast": {
+                                  "type": "boolean"
+                                }
+                              }
+                            }
+                          },
+                          "required": [
+                            "id"
+                          ]
+                        },
+                        "locales": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "enum": [
+                              "en",
+                              "de"
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "400 invalid input, 401 expired capability, 403 origin denied, 404 unpublished widget, 409 conflict, 413 too large, 429 rate limit, or 503 unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "code"
+                  ],
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "INVALID_REQUEST",
+                        "ORIGIN_DENIED",
+                        "NOT_FOUND",
+                        "INVALID_GRANT",
+                        "SESSION_EXPIRED",
+                        "RATE_LIMITED",
+                        "SESSION_LIMIT",
+                        "USAGE_LIMIT",
+                        "REQUEST_CONFLICT",
+                        "IN_PROGRESS",
+                        "UNAVAILABLE",
+                        "TEMPORARILY_UNAVAILABLE"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/v1/messages": {
+      "post": {
+        "operationId": "sendAnonymousChatMessage",
+        "security": [
+          {
+            "AnonymousSession": []
+          }
+        ],
+        "description": "Creates a turn or replays its persisted result. Reuse request_id and the exact\npayload for a retry. History, org, agent, tools and account identity cannot be supplied.\nTEMPORARILY_UNAVAILABLE means the request outcome could not be checked; retry the same request ID and payload.\nA running request returns 409 IN_PROGRESS; a changed payload returns 409 REQUEST_CONFLICT.\nA failed admitted request never starts another model execution when retried.\n",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "request_id",
+                  "message",
+                  "locale",
+                  "simple_language"
+                ],
+                "properties": {
+                  "request_id": {
+                    "type": "string",
+                    "format": "uuid",
+                    "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+                  },
+                  "message": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4000,
+                    "pattern": "\\S"
+                  },
+                  "locale": {
+                    "type": "string",
+                    "enum": [
+                      "en",
+                      "de"
+                    ]
+                  },
+                  "simple_language": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "SSE data frames whose JSON payload follows the PublicEvent component schema.\nOnly delta, complete and error events are public. Completion follows persistence.\n",
+            "content": {
+              "text/event-stream": {
+                "schema": {
+                  "type": "string"
+                },
+                "example": "data: {\"type\":\"delta\",\"text\":\"Hello\",\"request_id\":\"bd73e89b-01a5-4e8c-b12b-2b1a743e2ae0\"}\n\ndata: {\"type\":\"complete\",\"text\":\"Hello\",\"request_id\":\"bd73e89b-01a5-4e8c-b12b-2b1a743e2ae0\"}\n\n"
+              }
+            }
+          },
+          "default": {
+            "description": "400 invalid input, 401 expired capability, 403 origin denied, 404 unpublished widget, 409 conflict, 413 too large, 429 rate limit, or 503 unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "code"
+                  ],
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "INVALID_REQUEST",
+                        "ORIGIN_DENIED",
+                        "NOT_FOUND",
+                        "INVALID_GRANT",
+                        "SESSION_EXPIRED",
+                        "RATE_LIMITED",
+                        "SESSION_LIMIT",
+                        "USAGE_LIMIT",
+                        "REQUEST_CONFLICT",
+                        "IN_PROGRESS",
+                        "UNAVAILABLE",
+                        "TEMPORARILY_UNAVAILABLE"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "EpilotAuth": {
+        "type": "http",
+        "scheme": "bearer"
+      },
+      "AnonymousSession": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Opaque, expiring anonymous session token; never an epilot user access token."
+      }
+    },
+    "schemas": {
+      "ListChatWidgetsResponse": {
+        "type": "object",
+        "required": [
+          "widgets"
+        ],
+        "properties": {
+          "widgets": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "widget_id",
+                "org_id",
+                "agent_id",
+                "binding_id",
+                "version",
+                "name",
+                "website_chat",
+                "website_chat_embed",
+                "created_at",
+                "updated_at"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                },
+                "agent_id": {
+                  "type": "string",
+                  "format": "uuid",
+                  "nullable": true
+                },
+                "website_chat": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "allowed_origins",
+                    "organisation_name",
+                    "default_locale"
+                  ],
+                  "properties": {
+                    "allowed_origins": {
+                      "type": "array",
+                      "maxItems": 50,
+                      "uniqueItems": true,
+                      "description": "Exact HTTPS origins. Empty means the widget cannot start sessions.",
+                      "items": {
+                        "type": "string",
+                        "maxLength": 2048
+                      }
+                    },
+                    "organisation_name": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100
+                    },
+                    "default_locale": {
+                      "type": "string",
+                      "enum": [
+                        "en",
+                        "de"
+                      ]
+                    },
+                    "design_id": {
+                      "type": "string",
+                      "format": "uuid",
+                      "nullable": true,
+                      "description": "Design Builder configuration for the widget only."
+                    },
+                    "authentication": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "email_code": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "properties": {
+                            "email_template_id": {
+                              "type": "string",
+                              "format": "uuid",
+                              "nullable": true
+                            }
+                          }
+                        }
+                      },
+                      "nullable": true,
+                      "description": "Email Builder template selection. Does not enable verification by itself.",
+                      "required": [
+                        "email_code"
+                      ]
+                    }
+                  }
+                },
+                "widget_id": {
+                  "type": "string",
+                  "format": "uuid",
+                  "readOnly": true,
+                  "description": "Stable public embed identifier, independent of the assigned agent. Not a credential."
+                },
+                "org_id": {
+                  "type": "string",
+                  "readOnly": true
+                },
+                "binding_id": {
+                  "type": "string",
+                  "format": "uuid",
+                  "readOnly": true,
+                  "description": "Server-owned session binding; changes on reassignment or allowed-origin changes."
+                },
+                "version": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "readOnly": true
+                },
+                "created_at": {
+                  "type": "string",
+                  "format": "date-time",
+                  "readOnly": true
+                },
+                "updated_at": {
+                  "type": "string",
+                  "format": "date-time",
+                  "readOnly": true
+                },
+                "website_chat_embed": {
+                  "type": "object",
+                  "readOnly": true,
+                  "required": [
+                    "script_url",
+                    "chat_api_origin",
+                    "demo_url"
+                  ],
+                  "properties": {
+                    "script_url": {
+                      "type": "string",
+                      "format": "uri"
+                    },
+                    "chat_api_origin": {
+                      "type": "string",
+                      "format": "uri"
+                    },
+                    "demo_url": {
+                      "type": "string",
+                      "format": "uri"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "next_cursor": {
+            "type": "string"
+          }
+        }
+      },
+      "ChatWidget": {
+        "type": "object",
+        "required": [
+          "widget_id",
+          "org_id",
+          "agent_id",
+          "binding_id",
+          "version",
+          "name",
+          "website_chat",
+          "website_chat_embed",
+          "created_at",
+          "updated_at"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "agent_id": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "website_chat": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "allowed_origins",
+              "organisation_name",
+              "default_locale"
+            ],
+            "properties": {
+              "allowed_origins": {
+                "type": "array",
+                "maxItems": 50,
+                "uniqueItems": true,
+                "description": "Exact HTTPS origins. Empty means the widget cannot start sessions.",
+                "items": {
+                  "type": "string",
+                  "maxLength": 2048
+                }
+              },
+              "organisation_name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              },
+              "default_locale": {
+                "type": "string",
+                "enum": [
+                  "en",
+                  "de"
+                ]
+              },
+              "design_id": {
+                "type": "string",
+                "format": "uuid",
+                "nullable": true,
+                "description": "Design Builder configuration for the widget only."
+              },
+              "authentication": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "email_code": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "email_template_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                      }
+                    }
+                  }
+                },
+                "nullable": true,
+                "description": "Email Builder template selection. Does not enable verification by itself.",
+                "required": [
+                  "email_code"
+                ]
+              }
+            }
+          },
+          "widget_id": {
+            "type": "string",
+            "format": "uuid",
+            "readOnly": true,
+            "description": "Stable public embed identifier, independent of the assigned agent. Not a credential."
+          },
+          "org_id": {
+            "type": "string",
+            "readOnly": true
+          },
+          "binding_id": {
+            "type": "string",
+            "format": "uuid",
+            "readOnly": true,
+            "description": "Server-owned session binding; changes on reassignment or allowed-origin changes."
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1,
+            "readOnly": true
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "website_chat_embed": {
+            "type": "object",
+            "readOnly": true,
+            "required": [
+              "script_url",
+              "chat_api_origin",
+              "demo_url"
+            ],
+            "properties": {
+              "script_url": {
+                "type": "string",
+                "format": "uri"
+              },
+              "chat_api_origin": {
+                "type": "string",
+                "format": "uri"
+              },
+              "demo_url": {
+                "type": "string",
+                "format": "uri"
+              }
+            }
+          }
+        }
+      },
+      "WebsiteChatSettings": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "allowed_origins",
+          "organisation_name",
+          "default_locale"
+        ],
+        "properties": {
+          "allowed_origins": {
+            "type": "array",
+            "maxItems": 50,
+            "uniqueItems": true,
+            "description": "Exact HTTPS origins. Empty means the widget cannot start sessions.",
+            "items": {
+              "type": "string",
+              "maxLength": 2048
+            }
+          },
+          "organisation_name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "default_locale": {
+            "type": "string",
+            "enum": [
+              "en",
+              "de"
+            ]
+          },
+          "design_id": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true,
+            "description": "Design Builder configuration for the widget only."
+          },
+          "authentication": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "email_code": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "email_template_id": {
+                    "type": "string",
+                    "format": "uuid",
+                    "nullable": true
+                  }
+                }
+              }
+            },
+            "nullable": true,
+            "description": "Email Builder template selection. Does not enable verification by itself.",
+            "required": [
+              "email_code"
+            ]
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "details": {
+            "type": "object"
+          }
+        }
+      },
+      "CreateChatWidgetRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "agent_id",
+          "website_chat"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "agent_id": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "website_chat": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "allowed_origins",
+              "organisation_name",
+              "default_locale"
+            ],
+            "properties": {
+              "allowed_origins": {
+                "type": "array",
+                "maxItems": 50,
+                "uniqueItems": true,
+                "description": "Exact HTTPS origins. Empty means the widget cannot start sessions.",
+                "items": {
+                  "type": "string",
+                  "maxLength": 2048
+                }
+              },
+              "organisation_name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              },
+              "default_locale": {
+                "type": "string",
+                "enum": [
+                  "en",
+                  "de"
+                ]
+              },
+              "design_id": {
+                "type": "string",
+                "format": "uuid",
+                "nullable": true,
+                "description": "Design Builder configuration for the widget only."
+              },
+              "authentication": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "email_code": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "email_template_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                      }
+                    }
+                  }
+                },
+                "nullable": true,
+                "description": "Email Builder template selection. Does not enable verification by itself.",
+                "required": [
+                  "email_code"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "UpdateChatWidgetRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "version"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "agent_id": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "website_chat": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "allowed_origins",
+              "organisation_name",
+              "default_locale"
+            ],
+            "properties": {
+              "allowed_origins": {
+                "type": "array",
+                "maxItems": 50,
+                "uniqueItems": true,
+                "description": "Exact HTTPS origins. Empty means the widget cannot start sessions.",
+                "items": {
+                  "type": "string",
+                  "maxLength": 2048
+                }
+              },
+              "organisation_name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              },
+              "default_locale": {
+                "type": "string",
+                "enum": [
+                  "en",
+                  "de"
+                ]
+              },
+              "design_id": {
+                "type": "string",
+                "format": "uuid",
+                "nullable": true,
+                "description": "Design Builder configuration for the widget only."
+              },
+              "authentication": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "email_code": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "email_template_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                      }
+                    }
+                  }
+                },
+                "nullable": true,
+                "description": "Email Builder template selection. Does not enable verification by itself.",
+                "required": [
+                  "email_code"
+                ]
+              }
+            }
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Version read by the editor; stale writes return 409."
+          }
+        }
+      },
+      "Widget": {
+        "type": "object",
+        "required": [
+          "key",
+          "organisationName",
+          "assistantName",
+          "defaultLocale",
+          "locales"
+        ],
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "organisationName": {
+            "type": "string"
+          },
+          "assistantName": {
+            "type": "string"
+          },
+          "defaultLocale": {
+            "type": "string",
+            "enum": [
+              "en",
+              "de"
+            ]
+          },
+          "design": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "last_modified_at": {
+                "type": "string",
+                "maxLength": 200
+              },
+              "style": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "palette": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "primary": {
+                        "type": "string",
+                        "maxLength": 200
+                      },
+                      "background": {
+                        "type": "string",
+                        "maxLength": 200
+                      }
+                    }
+                  },
+                  "typography": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "font": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "font_family": {
+                            "type": "string",
+                            "maxLength": 200
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "shape": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "border_radius": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 100
+                      }
+                    }
+                  }
+                }
+              },
+              "spark_theme": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "accentColor": {
+                    "type": "string",
+                    "maxLength": 200
+                  },
+                  "backgroundColor": {
+                    "type": "string",
+                    "maxLength": 200
+                  },
+                  "fontBody": {
+                    "type": "string",
+                    "maxLength": 200
+                  },
+                  "fontHeading": {
+                    "type": "string",
+                    "maxLength": 200
+                  },
+                  "radius": {
+                    "type": "string",
+                    "maxLength": 200
+                  },
+                  "scaling": {
+                    "type": "string",
+                    "maxLength": 200
+                  },
+                  "spacing": {
+                    "type": "string",
+                    "maxLength": 200
+                  },
+                  "appearance": {
+                    "type": "string",
+                    "maxLength": 200
+                  },
+                  "neutralColor": {
+                    "type": "string",
+                    "maxLength": 200
+                  },
+                  "styleVariant": {
+                    "type": "string",
+                    "maxLength": 200
+                  },
+                  "labelPosition": {
+                    "type": "string",
+                    "maxLength": 200
+                  },
+                  "inputStyle": {
+                    "type": "string",
+                    "maxLength": 200
+                  },
+                  "inputColor": {
+                    "type": "string",
+                    "maxLength": 200
+                  },
+                  "cardVariant": {
+                    "type": "string",
+                    "maxLength": 200
+                  },
+                  "cardColor": {
+                    "type": "string",
+                    "maxLength": 200
+                  },
+                  "highContrast": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            },
+            "required": [
+              "id"
+            ]
+          },
+          "locales": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "en",
+                "de"
+              ]
+            }
+          }
+        }
+      },
+      "WidgetDesign": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "last_modified_at": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "style": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "palette": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "primary": {
+                    "type": "string",
+                    "maxLength": 200
+                  },
+                  "background": {
+                    "type": "string",
+                    "maxLength": 200
+                  }
+                }
+              },
+              "typography": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "font": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "font_family": {
+                        "type": "string",
+                        "maxLength": 200
+                      }
+                    }
+                  }
+                }
+              },
+              "shape": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "border_radius": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 100
+                  }
+                }
+              }
+            }
+          },
+          "spark_theme": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "accentColor": {
+                "type": "string",
+                "maxLength": 200
+              },
+              "backgroundColor": {
+                "type": "string",
+                "maxLength": 200
+              },
+              "fontBody": {
+                "type": "string",
+                "maxLength": 200
+              },
+              "fontHeading": {
+                "type": "string",
+                "maxLength": 200
+              },
+              "radius": {
+                "type": "string",
+                "maxLength": 200
+              },
+              "scaling": {
+                "type": "string",
+                "maxLength": 200
+              },
+              "spacing": {
+                "type": "string",
+                "maxLength": 200
+              },
+              "appearance": {
+                "type": "string",
+                "maxLength": 200
+              },
+              "neutralColor": {
+                "type": "string",
+                "maxLength": 200
+              },
+              "styleVariant": {
+                "type": "string",
+                "maxLength": 200
+              },
+              "labelPosition": {
+                "type": "string",
+                "maxLength": 200
+              },
+              "inputStyle": {
+                "type": "string",
+                "maxLength": 200
+              },
+              "inputColor": {
+                "type": "string",
+                "maxLength": 200
+              },
+              "cardVariant": {
+                "type": "string",
+                "maxLength": 200
+              },
+              "cardColor": {
+                "type": "string",
+                "maxLength": 200
+              },
+              "highContrast": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "PublicEvent": {
+        "description": "JSON payload of one SSE data frame from sendAnonymousChatMessage.",
+        "oneOf": [
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "type",
+              "text",
+              "request_id"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "delta"
+                ]
+              },
+              "text": {
+                "type": "string",
+                "maxLength": 12000
+              },
+              "request_id": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "type",
+              "text",
+              "request_id"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "complete"
+                ]
+              },
+              "text": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 12000
+              },
+              "request_id": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "type",
+              "code",
+              "request_id"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "error"
+                ]
+              },
+              "code": {
+                "type": "string",
+                "enum": [
+                  "UNAVAILABLE"
+                ]
+              },
+              "request_id": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          }
+        ]
+      },
+      "PublicChatError": {
+        "type": "object",
+        "required": [
+          "code"
+        ],
+        "properties": {
+          "code": {
+            "type": "string",
+            "enum": [
+              "INVALID_REQUEST",
+              "ORIGIN_DENIED",
+              "NOT_FOUND",
+              "INVALID_GRANT",
+              "SESSION_EXPIRED",
+              "RATE_LIMITED",
+              "SESSION_LIMIT",
+              "USAGE_LIMIT",
+              "REQUEST_CONFLICT",
+              "IN_PROGRESS",
+              "UNAVAILABLE",
+              "TEMPORARILY_UNAVAILABLE"
+            ]
+          }
+        }
+      }
+    },
+    "responses": {
+      "Error": {
+        "description": "400 invalid input, 401 expired capability, 403 origin denied, 404 unpublished widget, 409 conflict, 413 too large, 429 rate limit, or 503 unavailable.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "code"
+              ],
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "enum": [
+                    "INVALID_REQUEST",
+                    "ORIGIN_DENIED",
+                    "NOT_FOUND",
+                    "INVALID_GRANT",
+                    "SESSION_EXPIRED",
+                    "RATE_LIMITED",
+                    "SESSION_LIMIT",
+                    "USAGE_LIMIT",
+                    "REQUEST_CONFLICT",
+                    "IN_PROGRESS",
+                    "UNAVAILABLE",
+                    "TEMPORARILY_UNAVAILABLE"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

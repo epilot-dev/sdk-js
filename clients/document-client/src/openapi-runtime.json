@@ -9,6 +9,7 @@
       "post": {
         "operationId": "getTemplateMeta",
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {}
           }
@@ -34,6 +35,7 @@
           }
         ],
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {}
           }
@@ -45,6 +47,19 @@
       "post": {
         "operationId": "convertDocument",
         "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/templates:validate": {
+      "post": {
+        "operationId": "validateTemplate",
+        "requestBody": {
+          "required": true,
           "content": {
             "application/json": {}
           }

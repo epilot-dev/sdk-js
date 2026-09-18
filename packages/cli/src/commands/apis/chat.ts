@@ -3,7 +3,7 @@ import { defineCommand } from 'citty';
 import { callApi } from '../../lib/call.js';
 
 export default defineCommand({
-  meta: { name: 'ai-agents', description: 'AI Agents API' },
+  meta: { name: 'chat', description: 'epilot Chat API' },
   args: {
     operation: { type: 'positional', description: 'operationId to call', required: false },
     param: { type: 'string', alias: 'p', description: 'Parameter key=value' },
@@ -38,7 +38,7 @@ export default defineCommand({
       }
     }
 
-    return callApi('ai-agents', {
+    return callApi('chat', {
       ...args,
       help: !!(args as Record<string, unknown>)._ophelp,
       _apihelp: !!(args as Record<string, unknown>)._apihelp,

@@ -20,7 +20,7 @@
     "/v1/environments": {
       "get": {
         "operationId": "listEnvironmentVariables",
-        "summary": "List environment variables",
+        "summary": "listEnvironmentVariables",
         "description": "List all environment variables for the organization. Returns metadata only, no secret values.",
         "tags": [
           "environments"
@@ -49,8 +49,8 @@
       },
       "post": {
         "operationId": "createEnvironmentVariable",
-        "summary": "Create environment variable",
-        "description": "Create a new environment variable or secret for the organization.",
+        "summary": "createEnvironmentVariable",
+        "description": "Create a new environment variable or secret for the organization. If `group` is provided and the group does not yet exist, it is created automatically.",
         "tags": [
           "environments"
         ],
@@ -96,7 +96,7 @@
     "/v1/environments/groups": {
       "get": {
         "operationId": "listEnvironmentGroups",
-        "summary": "List environment groups",
+        "summary": "listEnvironmentGroups",
         "description": "List all environment groups for the organization.",
         "tags": [
           "environments"
@@ -138,6 +138,7 @@
       "put": {
         "operationId": "putEnvironmentGroup",
         "summary": "putEnvironmentGroup",
+        "description": "Create or update an environment group by name. Acts as an upsert — creates the group if it does not exist.",
         "tags": [
           "environments"
         ],
@@ -185,7 +186,7 @@
       },
       "delete": {
         "operationId": "deleteEnvironmentGroup",
-        "summary": "Delete an environment group",
+        "summary": "deleteEnvironmentGroup",
         "description": "Deletes a group. Variables assigned to this group become ungrouped.",
         "tags": [
           "environments"
@@ -224,8 +225,8 @@
       ],
       "get": {
         "operationId": "getEnvironmentVariable",
-        "summary": "Get environment variable",
-        "description": "Get an environment variable by key. Returns value only for String type, omitted for SecretString.",
+        "summary": "getEnvironmentVariable",
+        "description": "Get an environment variable by key. Returns value for non-secret types, omitted for SecretString.",
         "tags": [
           "environments"
         ],
@@ -256,8 +257,8 @@
       },
       "put": {
         "operationId": "updateEnvironmentVariable",
-        "summary": "Update environment variable",
-        "description": "Create or update an environment variable. Acts as an upsert — creates the variable if it does not exist.",
+        "summary": "updateEnvironmentVariable",
+        "description": "Create or update an environment variable. Acts as an upsert — creates the variable if it does not exist. If `group` is provided and the group does not yet exist, it is created automatically.",
         "tags": [
           "environments"
         ],
@@ -301,6 +302,9 @@
           "403": {
             "description": "Forbidden"
           },
+          "409": {
+            "description": "Cannot change the type of a variable that currently holds a value"
+          },
           "500": {
             "description": "Internal server error"
           }
@@ -308,7 +312,7 @@
       },
       "delete": {
         "operationId": "deleteEnvironmentVariable",
-        "summary": "Delete environment variable",
+        "summary": "deleteEnvironmentVariable",
         "description": "Delete an environment variable by key.",
         "tags": [
           "environments"
@@ -344,9 +348,414 @@
     "schemas": {
       "EnvironmentValueType": {
         "type": "string",
+        "description": "The structure a variable's value holds. `SecretString` is encrypted at rest and\nits value is never returned. `Text`, `Number`, `Boolean`, `Map`, `JSON` and `Link`\nmay be served to browser-facing consumers; `String` and `SecretString` may not. A\n`List` inherits this from its element type: a `List` is served only when its\n`itemType` is itself client-safe, so a `List<String>` or `List<SecretString>` is not.\n",
         "enum": [
           "String",
-          "SecretString"
+          "SecretString",
+          "Text",
+          "Number",
+          "Boolean",
+          "Map",
+          "JSON",
+          "Link",
+          "List"
+        ]
+      },
+      "StringTranslations": {
+        "description": "A string translated per language. Keys are language codes (e.g. `de`,\n`en-US`), matching the hyphen-only BCP-47 form epilot's i18n stack uses\neverywhere else: `^[a-z]{2,3}(-[A-Za-z0-9]+)*$`. The server enforces\nthat with LANGUAGE_KEY_PATTERN in src/core/value-types.ts — the two are\nnot otherwise linked. The pattern is documented rather than declared\nbecause `propertyNames` is JSON Schema / OAS 3.1 and this document is\n3.0.3, where it fails `spectral lint` (oas3-schema).\n",
+        "type": "object",
+        "minProperties": 1,
+        "additionalProperties": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "MapEntry": {
+        "description": "One entry of a Map. `key` is the token a journey submits; `value` is\nwhat the customer reads — either one string, or one string per\nlanguage. Every entry of a Map must agree on which of the two it uses.\n",
+        "type": "object",
+        "required": [
+          "key",
+          "value"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "key": {
+            "type": "string",
+            "minLength": 1
+          },
+          "value": {
+            "oneOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "$ref": "#/components/schemas/StringTranslations"
+              }
+            ]
+          }
+        }
+      },
+      "MapValue": {
+        "type": "object",
+        "required": [
+          "options"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "fallbackLanguage": {
+            "type": "string",
+            "minLength": 2,
+            "default": "de"
+          },
+          "options": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "$ref": "#/components/schemas/MapEntry"
+            }
+          }
+        }
+      },
+      "JsonValue": {
+        "description": "Arbitrary JSON object, e.g. a flat key/value map used by integrations for\nenum translation: {\"Mr.\": 1, \"Ms. / Mrs.\": 2}. Max 32 KB serialised.\n",
+        "type": "object",
+        "additionalProperties": true
+      },
+      "LinkValue": {
+        "description": "One URL with a label and description a customer reads. `label` and\n`description` are each either a plain string or one string per language;\nthe two fields decide that independently — a plain string means \"the\nsame in every language\". A translated field must carry the fallback\nlanguage.\n\nThe URL must be absolute and `http`/`https` only. This value is served\nto browser-facing consumers, so `javascript:` and `data:` URLs are\nrejected at write time.\n\nWritten flat rather than composed from a shared field set: `allOf` plus\n`additionalProperties: false` is rejected by most validators, because\neach branch sees the sibling's properties as unknown. The composition\nlives in zod (LinkFieldsSchema) — see src/core/value-types.ts.\n\nEach translated value of `label` and `description` is also limited to\nthe same maximum as the plain-string form above — 255 characters for\n`label`, 1024 for `description`. The limit is enforced by the server\neven though the shared `StringTranslations` schema referenced below\ndoes not itself declare it.\n",
+        "type": "object",
+        "required": [
+          "url",
+          "label"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "url": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048
+          },
+          "label": {
+            "oneOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 255
+              },
+              {
+                "$ref": "#/components/schemas/StringTranslations"
+              }
+            ]
+          },
+          "description": {
+            "oneOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1024
+              },
+              {
+                "$ref": "#/components/schemas/StringTranslations"
+              }
+            ]
+          },
+          "fallbackLanguage": {
+            "type": "string",
+            "minLength": 2,
+            "default": "de"
+          }
+        }
+      },
+      "LinkFields": {
+        "description": "The fields of a link, without a fallback language — the shape a `List`\nitem carries. Inside a list the fallback belongs to the wrapper, which\nowns the language tabs for every row.\n\nRestated rather than composed with `LinkValue`: `allOf` plus\n`additionalProperties: false` is rejected by most validators, because\neach branch sees the sibling's properties as unknown. zod composes\nproperly — see LinkFieldsSchema in src/core/value-types.ts.\n",
+        "type": "object",
+        "required": [
+          "url",
+          "label"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "url": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048
+          },
+          "label": {
+            "oneOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 255
+              },
+              {
+                "$ref": "#/components/schemas/StringTranslations"
+              }
+            ]
+          },
+          "description": {
+            "oneOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1024
+              },
+              {
+                "$ref": "#/components/schemas/StringTranslations"
+              }
+            ]
+          }
+        }
+      },
+      "ListItemType": {
+        "description": "The element type a `List` holds — every value type except the\ncontainers. `Map` is already a keyed collection and a list of lists has\nno consumer. A list is exactly as client-safe and exactly as secret as\nits element type: a list of `SecretString` is encrypted per item and its\nvalue is never returned.\n",
+        "type": "string",
+        "enum": [
+          "String",
+          "SecretString",
+          "Text",
+          "Number",
+          "Boolean",
+          "JSON",
+          "Link"
+        ]
+      },
+      "ListOfText": {
+        "type": "object",
+        "required": [
+          "itemType",
+          "items"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "itemType": {
+            "type": "string",
+            "enum": [
+              "Text"
+            ]
+          },
+          "items": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 32768
+            }
+          }
+        }
+      },
+      "ListOfString": {
+        "type": "object",
+        "required": [
+          "itemType",
+          "items"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "itemType": {
+            "type": "string",
+            "enum": [
+              "String"
+            ]
+          },
+          "items": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      },
+      "ListOfSecretString": {
+        "description": "Write-only in effect: the items are encrypted per item at rest and the\nwhole value is omitted from every read response, exactly as a\n`SecretString` variable's value is. Read `item_type` to learn what a\nlist holds when its value is withheld.\n",
+        "type": "object",
+        "required": [
+          "itemType",
+          "items"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "itemType": {
+            "type": "string",
+            "enum": [
+              "SecretString"
+            ]
+          },
+          "items": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Must be at most 4096 bytes when UTF-8 encoded — the same limit KMS\nenforces on a symmetric Encrypt call. This is a byte bound, not a\ncharacter bound: a string with multi-byte characters can be well\nunder 4096 characters long and still be rejected.\n"
+            }
+          }
+        }
+      },
+      "ListOfNumber": {
+        "type": "object",
+        "required": [
+          "itemType",
+          "items"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "itemType": {
+            "type": "string",
+            "enum": [
+              "Number"
+            ]
+          },
+          "items": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "number"
+            }
+          }
+        }
+      },
+      "ListOfBoolean": {
+        "type": "object",
+        "required": [
+          "itemType",
+          "items"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "itemType": {
+            "type": "string",
+            "enum": [
+              "Boolean"
+            ]
+          },
+          "items": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "boolean"
+            }
+          }
+        }
+      },
+      "ListOfJson": {
+        "type": "object",
+        "required": [
+          "itemType",
+          "items"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "itemType": {
+            "type": "string",
+            "enum": [
+              "JSON"
+            ]
+          },
+          "items": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      },
+      "ListOfLink": {
+        "description": "A list of links. `fallbackLanguage` applies to every item's translated\n`label` and `description`; items may mix plain and translated fields\nfreely, since a plain string is a complete answer for any language.\n",
+        "type": "object",
+        "required": [
+          "itemType",
+          "items"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "itemType": {
+            "type": "string",
+            "enum": [
+              "Link"
+            ]
+          },
+          "fallbackLanguage": {
+            "type": "string",
+            "minLength": 2,
+            "default": "de"
+          },
+          "items": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "$ref": "#/components/schemas/LinkFields"
+            }
+          }
+        }
+      },
+      "ListValue": {
+        "description": "An ordered collection of one declared element type. Items round-trip in\nthe order written; nothing sorts them. Holds at most 100 items.\n\nThe whole value is limited to 32768 characters when serialised — the\nserver enforces this, and it is not expressible per-property here.\n",
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/ListOfText"
+          },
+          {
+            "$ref": "#/components/schemas/ListOfNumber"
+          },
+          {
+            "$ref": "#/components/schemas/ListOfBoolean"
+          },
+          {
+            "$ref": "#/components/schemas/ListOfJson"
+          },
+          {
+            "$ref": "#/components/schemas/ListOfLink"
+          },
+          {
+            "$ref": "#/components/schemas/ListOfString"
+          },
+          {
+            "$ref": "#/components/schemas/ListOfSecretString"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "itemType",
+          "mapping": {
+            "Text": "#/components/schemas/ListOfText",
+            "Number": "#/components/schemas/ListOfNumber",
+            "Boolean": "#/components/schemas/ListOfBoolean",
+            "JSON": "#/components/schemas/ListOfJson",
+            "Link": "#/components/schemas/ListOfLink",
+            "String": "#/components/schemas/ListOfString",
+            "SecretString": "#/components/schemas/ListOfSecretString"
+          }
+        }
+      },
+      "EnvironmentValue": {
+        "description": "A variable's value. The JSON type corresponds to the variable's `type`:\n`String`, `SecretString` and `Text` are strings, `Number` is a number,\n`Boolean` is a boolean, and `Map`, `JSON`, `Link` and `List` are objects.\nNumbers are IEEE 754 doubles; integers above 2^53 may lose precision on\nround-trip.\n",
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "number"
+          },
+          {
+            "type": "boolean"
+          },
+          {
+            "$ref": "#/components/schemas/MapValue"
+          },
+          {
+            "$ref": "#/components/schemas/JsonValue"
+          },
+          {
+            "$ref": "#/components/schemas/LinkValue"
+          },
+          {
+            "$ref": "#/components/schemas/ListValue"
+          }
         ]
       },
       "EnvironmentVariable": {
@@ -365,6 +774,14 @@
           "type": {
             "$ref": "#/components/schemas/EnvironmentValueType"
           },
+          "item_type": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ListItemType"
+              }
+            ],
+            "description": "Present only for a `List` variable that holds a value, derived from\nthat value at read time and never stored. Returned even when `value`\nitself is withheld, which is the case for a list of `SecretString` —\nit is the only way a client learns what such a list holds.\n"
+          },
           "description": {
             "type": "string"
           },
@@ -373,8 +790,16 @@
             "description": "Optional group name for organising variables in the UI"
           },
           "value": {
-            "type": "string",
-            "description": "Value is returned for String type, omitted for SecretString"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EnvironmentValue"
+              }
+            ],
+            "description": "Returned for non-secret types, omitted for SecretString and for a\nList of SecretString. Also omitted when\nthe variable has been created without a value — for example by a blueprint\ninstall, which syncs a variable's key and type but never its value.\n"
+          },
+          "protected": {
+            "type": "boolean",
+            "description": "Whether the variable is protected from editing"
           },
           "created_at": {
             "type": "string",
@@ -401,6 +826,14 @@
           "type": {
             "$ref": "#/components/schemas/EnvironmentValueType"
           },
+          "item_type": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ListItemType"
+              }
+            ],
+            "description": "Present only for a `List` variable that holds a value, derived from\nthat value at read time and never stored. Returned even when `value`\nitself is withheld, which is the case for a list of `SecretString` —\nit is the only way a client learns what such a list holds.\n"
+          },
           "description": {
             "type": "string"
           },
@@ -409,8 +842,16 @@
             "description": "Optional group name for organising variables in the UI"
           },
           "value": {
-            "type": "string",
-            "description": "Value is returned for String type, omitted for SecretString"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EnvironmentValue"
+              }
+            ],
+            "description": "Returned for non-secret types, omitted for SecretString and for a\nList of SecretString. Also omitted when\nthe variable has been created without a value — for example by a blueprint\ninstall, which syncs a variable's key and type but never its value.\n"
+          },
+          "protected": {
+            "type": "boolean",
+            "description": "Whether the variable is protected from editing"
           },
           "created_at": {
             "type": "string",
@@ -457,7 +898,11 @@
             "type": "string"
           },
           "value": {
-            "type": "string"
+            "$ref": "#/components/schemas/EnvironmentValue"
+          },
+          "protected": {
+            "type": "boolean",
+            "description": "Whether the variable is protected from editing"
           }
         }
       },
@@ -473,13 +918,17 @@
             ]
           },
           "value": {
-            "type": "string"
+            "$ref": "#/components/schemas/EnvironmentValue"
           },
           "description": {
             "type": "string"
           },
           "group": {
             "type": "string"
+          },
+          "protected": {
+            "type": "boolean",
+            "description": "Whether the variable is protected from editing"
           }
         }
       },
