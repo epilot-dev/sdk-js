@@ -54,6 +54,8 @@ const { data } = await journeyClient.getJourneysByOrgId(...)
 **Schemas**
 - [`EnvironmentMapEntry`](#environmentmapentry)
 - [`EnvironmentMap`](#environmentmap)
+- [`EnvironmentLink`](#environmentlink)
+- [`EnvironmentLinkList`](#environmentlinklist)
 - [`JourneyEnvironmentResponse`](#journeyenvironmentresponse)
 - [`JourneyEnvironmentVariablesResponse`](#journeyenvironmentvariablesresponse)
 - [`GetJourneysResponse`](#getjourneysresponse)
@@ -2198,16 +2200,55 @@ type EnvironmentMap = {
 }
 ```
 
+### `EnvironmentLink`
+
+One link a customer clicks. `label` and `description` are each either a
+plain string or one string per language, deciding that independently.
+Mirrors environments-api's `LinkFields`.
+
+
+```ts
+type EnvironmentLink = {
+  url: string
+  label: string | Record<string, string>
+  description?: string | Record<string, string>
+}
+```
+
+### `EnvironmentLinkList`
+
+A list of links, served under this service's own `List`<Link>`` type
+token. environments-api types the variable `List` and declares the
+element type inside the value; journey-api composes the two so a
+consumer needs only one discriminant.
+
+
+```ts
+type EnvironmentLinkList = {
+  itemType: "Link"
+  fallbackLanguage?: string
+  items: Array<{
+    url: string
+    label: string | Record<string, string>
+    description?: string | Record<string, string>
+  }>
+}
+```
+
 ### `JourneyEnvironmentResponse`
 
 ```ts
 type JourneyEnvironmentResponse = {
   items: Array<{
     datasourceId: string
-    type: "Text" | "Number" | "Boolean" | "Map"
+    type: "Text" | "Number" | "Boolean" | "Map" | "List<Link>"
     value: string | number | boolean | {
       fallbackLanguage?: { ... }
       options: { ... }
+    } | {
+      itemType: { ... }
+      fallbackLanguage?: { ... }
+      items: { ... }
     }
   }>
   errors: Array<{
@@ -2223,10 +2264,14 @@ type JourneyEnvironmentResponse = {
 type JourneyEnvironmentVariablesResponse = {
   items: Array<{
     key: string
-    type: "Map"
+    type: "Map" | "List<Link>"
     value: {
       fallbackLanguage?: { ... }
       options: { ... }
+    } | {
+      itemType: { ... }
+      fallbackLanguage?: { ... }
+      items: { ... }
     }
     description?: string
   }>

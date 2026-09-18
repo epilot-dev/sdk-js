@@ -26,6 +26,39 @@ export declare namespace Components {
              */
             label?: string;
         }
+        /**
+         * One link a customer clicks. `label` and `description` are each either a
+         * plain string or one string per language, deciding that independently.
+         * Mirrors environments-api's `LinkFields`.
+         *
+         */
+        export interface EnvironmentLink {
+            url: string;
+            label: string | {
+                [name: string]: string;
+            };
+            description?: string | {
+                [name: string]: string;
+            };
+        }
+        /**
+         * A list of links, served under this service's own `List<Link>` type
+         * token. environments-api types the variable `List` and declares the
+         * element type inside the value; journey-api composes the two so a
+         * consumer needs only one discriminant.
+         *
+         */
+        export interface EnvironmentLinkList {
+            itemType: "Link";
+            fallbackLanguage?: string;
+            items: /**
+             * One link a customer clicks. `label` and `description` are each either a
+             * plain string or one string per language, deciding that independently.
+             * Mirrors environments-api's `LinkFields`.
+             *
+             */
+            EnvironmentLink[];
+        }
         export interface EnvironmentMap {
             fallbackLanguage?: string;
             options: EnvironmentMapEntry[];
@@ -994,8 +1027,15 @@ export declare namespace Components {
         export interface JourneyEnvironmentResponse {
             items: {
                 datasourceId: string;
-                type: "Text" | "Number" | "Boolean" | "Map";
-                value: string | number | boolean | EnvironmentMap;
+                type: "Text" | "Number" | "Boolean" | "Map" | "List<Link>";
+                value: string | number | boolean | EnvironmentMap | /**
+                 * A list of links, served under this service's own `List<Link>` type
+                 * token. environments-api types the variable `List` and declares the
+                 * element type inside the value; journey-api composes the two so a
+                 * consumer needs only one discriminant.
+                 *
+                 */
+                EnvironmentLinkList;
             }[];
             errors: {
                 datasourceId: string;
@@ -1005,8 +1045,15 @@ export declare namespace Components {
         export interface JourneyEnvironmentVariablesResponse {
             items: {
                 key: string;
-                type: "Map";
-                value: EnvironmentMap;
+                type: "Map" | "List<Link>";
+                value: EnvironmentMap | /**
+                 * A list of links, served under this service's own `List<Link>` type
+                 * token. environments-api types the variable `List` and declares the
+                 * element type inside the value; journey-api composes the two so a
+                 * consumer needs only one discriminant.
+                 *
+                 */
+                EnvironmentLinkList;
                 description?: string;
             }[];
         }
@@ -3781,6 +3828,8 @@ export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
 
 export type ButtonOption = Components.Schemas.ButtonOption;
+export type EnvironmentLink = Components.Schemas.EnvironmentLink;
+export type EnvironmentLinkList = Components.Schemas.EnvironmentLinkList;
 export type EnvironmentMap = Components.Schemas.EnvironmentMap;
 export type EnvironmentMapEntry = Components.Schemas.EnvironmentMapEntry;
 export type GenerateDocumentRequest = Components.Schemas.GenerateDocumentRequest;
