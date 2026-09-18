@@ -1411,6 +1411,71 @@
           }
         }
       },
+      "EnvironmentLink": {
+        "description": "One link a customer clicks. `label` and `description` are each either a\nplain string or one string per language, deciding that independently.\nMirrors environments-api's `LinkFields`.\n",
+        "type": "object",
+        "required": [
+          "url",
+          "label"
+        ],
+        "properties": {
+          "url": {
+            "type": "string"
+          },
+          "label": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              }
+            ]
+          },
+          "description": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              }
+            ]
+          }
+        }
+      },
+      "EnvironmentLinkList": {
+        "description": "A list of links, served under this service's own `List<Link>` type\ntoken. environments-api types the variable `List` and declares the\nelement type inside the value; journey-api composes the two so a\nconsumer needs only one discriminant.\n",
+        "type": "object",
+        "required": [
+          "itemType",
+          "items"
+        ],
+        "properties": {
+          "itemType": {
+            "type": "string",
+            "enum": [
+              "Link"
+            ]
+          },
+          "fallbackLanguage": {
+            "type": "string",
+            "default": "de"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EnvironmentLink"
+            }
+          }
+        }
+      },
       "JourneyEnvironmentResponse": {
         "type": "object",
         "required": [
@@ -1437,7 +1502,8 @@
                     "Text",
                     "Number",
                     "Boolean",
-                    "Map"
+                    "Map",
+                    "List<Link>"
                   ]
                 },
                 "value": {
@@ -1453,6 +1519,9 @@
                     },
                     {
                       "$ref": "#/components/schemas/EnvironmentMap"
+                    },
+                    {
+                      "$ref": "#/components/schemas/EnvironmentLinkList"
                     }
                   ]
                 }
@@ -1508,11 +1577,19 @@
                 "type": {
                   "type": "string",
                   "enum": [
-                    "Map"
+                    "Map",
+                    "List<Link>"
                   ]
                 },
                 "value": {
-                  "$ref": "#/components/schemas/EnvironmentMap"
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/EnvironmentMap"
+                    },
+                    {
+                      "$ref": "#/components/schemas/EnvironmentLinkList"
+                    }
+                  ]
                 },
                 "description": {
                   "type": "string"

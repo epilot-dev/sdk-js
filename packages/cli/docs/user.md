@@ -53,6 +53,7 @@ epilot user signUpUser
 - [`getGroupsForUser`](#getgroupsforuser) — Get groups of a user
 - [`verifyEmailWithToken`](#verifyemailwithtoken) — Update new email using an verification token
 - [`requestPasswordReset`](#requestpasswordreset) — Request a password reset email for the given email address. Always
+- [`resetPassword`](#resetpassword) — Set a new password using a reset token from the password reset email.
 - [`checkInviteToken`](#checkinvitetoken) — Check an invite token
 - [`activateUser`](#activateuser) — Activate user using an invite token
 - [`rejectInvite`](#rejectinvite) — Reject an invite
@@ -230,6 +231,8 @@ epilot user getMeV2 --jsonata 'id'
   "email": "user@example.com",
   "draft_email": "user@example.com",
   "draft_email_expires_at": "1970-01-01T00:00:00.000Z",
+  "password_reset_token_hash": "string",
+  "password_reset_token_expires_at": "1970-01-01T00:00:00.000Z",
   "department": "Sales",
   "phone": 1234567890,
   "secondary_phone": 1234567890,
@@ -271,12 +274,19 @@ epilot user getMeV2 --jsonata 'id'
     "created_opportunity_auto": true,
     "deleted_opportunity": true
   },
+  "in_app_notification_setting": {
+    "integration_critical_error": true,
+    "integration_error_threshold": true,
+    "assigned_opportunity": true,
+    "assigned_task": true
+  },
   "properties": [
     {
       "name": "profileImageName",
       "value": "avatar.png"
     }
-  ]
+  ],
+  "tags": ["non-billable"]
 }
 ```
 
@@ -555,6 +565,8 @@ epilot user listUsersV2 --jsonata 'results[0]'
       "email": "user@example.com",
       "draft_email": "user@example.com",
       "draft_email_expires_at": "1970-01-01T00:00:00.000Z",
+      "password_reset_token_hash": "string",
+      "password_reset_token_expires_at": "1970-01-01T00:00:00.000Z",
       "department": "Sales",
       "phone": 1234567890,
       "secondary_phone": 1234567890,
@@ -596,12 +608,19 @@ epilot user listUsersV2 --jsonata 'results[0]'
         "created_opportunity_auto": true,
         "deleted_opportunity": true
       },
+      "in_app_notification_setting": {
+        "integration_critical_error": true,
+        "integration_error_threshold": true,
+        "assigned_opportunity": true,
+        "assigned_task": true
+      },
       "properties": [
         {
           "name": "profileImageName",
           "value": "avatar.png"
         }
-      ]
+      ],
+      "tags": ["non-billable"]
     }
   ]
 }
@@ -656,6 +675,8 @@ epilot user getUserV2 -p id=123e4567-e89b-12d3-a456-426614174000 --jsonata 'id'
   "email": "user@example.com",
   "draft_email": "user@example.com",
   "draft_email_expires_at": "1970-01-01T00:00:00.000Z",
+  "password_reset_token_hash": "string",
+  "password_reset_token_expires_at": "1970-01-01T00:00:00.000Z",
   "department": "Sales",
   "phone": 1234567890,
   "secondary_phone": 1234567890,
@@ -697,12 +718,19 @@ epilot user getUserV2 -p id=123e4567-e89b-12d3-a456-426614174000 --jsonata 'id'
     "created_opportunity_auto": true,
     "deleted_opportunity": true
   },
+  "in_app_notification_setting": {
+    "integration_critical_error": true,
+    "integration_error_threshold": true,
+    "assigned_opportunity": true,
+    "assigned_task": true
+  },
   "properties": [
     {
       "name": "profileImageName",
       "value": "avatar.png"
     }
-  ]
+  ],
+  "tags": ["non-billable"]
 }
 ```
 
@@ -746,6 +774,8 @@ epilot user updateUserV2 \
   "email": "user@example.com",
   "draft_email": "user@example.com",
   "draft_email_expires_at": "1970-01-01T00:00:00.000Z",
+  "password_reset_token_hash": "string",
+  "password_reset_token_expires_at": "1970-01-01T00:00:00.000Z",
   "department": "Sales",
   "phone": 1234567890,
   "secondary_phone": 1234567890,
@@ -787,12 +817,19 @@ epilot user updateUserV2 \
     "created_opportunity_auto": true,
     "deleted_opportunity": true
   },
+  "in_app_notification_setting": {
+    "integration_critical_error": true,
+    "integration_error_threshold": true,
+    "assigned_opportunity": true,
+    "assigned_task": true
+  },
   "properties": [
     {
       "name": "profileImageName",
       "value": "avatar.png"
     }
-  ]
+  ],
+  "tags": ["non-billable"]
 }'
 ```
 
@@ -828,6 +865,8 @@ epilot user updateUserV2 -p id=123e4567-e89b-12d3-a456-426614174000 --jsonata 'i
   "email": "user@example.com",
   "draft_email": "user@example.com",
   "draft_email_expires_at": "1970-01-01T00:00:00.000Z",
+  "password_reset_token_hash": "string",
+  "password_reset_token_expires_at": "1970-01-01T00:00:00.000Z",
   "department": "Sales",
   "phone": 1234567890,
   "secondary_phone": 1234567890,
@@ -869,12 +908,19 @@ epilot user updateUserV2 -p id=123e4567-e89b-12d3-a456-426614174000 --jsonata 'i
     "created_opportunity_auto": true,
     "deleted_opportunity": true
   },
+  "in_app_notification_setting": {
+    "integration_critical_error": true,
+    "integration_error_threshold": true,
+    "assigned_opportunity": true,
+    "assigned_task": true
+  },
   "properties": [
     {
       "name": "profileImageName",
       "value": "avatar.png"
     }
-  ]
+  ],
+  "tags": ["non-billable"]
 }
 ```
 
@@ -985,6 +1031,8 @@ epilot user inviteUser --jsonata 'id'
   "email": "user@example.com",
   "draft_email": "user@example.com",
   "draft_email_expires_at": "1970-01-01T00:00:00.000Z",
+  "password_reset_token_hash": "string",
+  "password_reset_token_expires_at": "1970-01-01T00:00:00.000Z",
   "department": "Sales",
   "phone": 1234567890,
   "secondary_phone": 1234567890,
@@ -1026,12 +1074,19 @@ epilot user inviteUser --jsonata 'id'
     "created_opportunity_auto": true,
     "deleted_opportunity": true
   },
+  "in_app_notification_setting": {
+    "integration_critical_error": true,
+    "integration_error_threshold": true,
+    "assigned_opportunity": true,
+    "assigned_task": true
+  },
   "properties": [
     {
       "name": "profileImageName",
       "value": "avatar.png"
     }
-  ]
+  ],
+  "tags": ["non-billable"]
 }
 ```
 
@@ -1080,6 +1135,8 @@ epilot user resendUserInvitation --jsonata 'id'
   "email": "user@example.com",
   "draft_email": "user@example.com",
   "draft_email_expires_at": "1970-01-01T00:00:00.000Z",
+  "password_reset_token_hash": "string",
+  "password_reset_token_expires_at": "1970-01-01T00:00:00.000Z",
   "department": "Sales",
   "phone": 1234567890,
   "secondary_phone": 1234567890,
@@ -1121,12 +1178,19 @@ epilot user resendUserInvitation --jsonata 'id'
     "created_opportunity_auto": true,
     "deleted_opportunity": true
   },
+  "in_app_notification_setting": {
+    "integration_critical_error": true,
+    "integration_error_threshold": true,
+    "assigned_opportunity": true,
+    "assigned_task": true
+  },
   "properties": [
     {
       "name": "profileImageName",
       "value": "avatar.png"
     }
-  ]
+  ],
+  "tags": ["non-billable"]
 }
 ```
 
@@ -1227,6 +1291,8 @@ epilot user getGroupsForUser -p id=123e4567-e89b-12d3-a456-426614174000 --jsonat
       "email": "user@example.com",
       "draft_email": "user@example.com",
       "draft_email_expires_at": "1970-01-01T00:00:00.000Z",
+      "password_reset_token_hash": "string",
+      "password_reset_token_expires_at": "1970-01-01T00:00:00.000Z",
       "department": "Sales",
       "phone": 1234567890,
       "secondary_phone": 1234567890,
@@ -1244,7 +1310,9 @@ epilot user getGroupsForUser -p id=123e4567-e89b-12d3-a456-426614174000 --jsonat
       "image_uri": {},
       "favorites": {},
       "email_notification_setting": {},
+      "in_app_notification_setting": {},
       "properties": [],
+      "tags": ["non-billable"],
       "crt_index": 3
     },
     "users": [
@@ -1364,6 +1432,8 @@ epilot user createGroup --jsonata 'id'
     "email": "user@example.com",
     "draft_email": "user@example.com",
     "draft_email_expires_at": "1970-01-01T00:00:00.000Z",
+    "password_reset_token_hash": "string",
+    "password_reset_token_expires_at": "1970-01-01T00:00:00.000Z",
     "department": "Sales",
     "phone": 1234567890,
     "secondary_phone": 1234567890,
@@ -1402,9 +1472,16 @@ epilot user createGroup --jsonata 'id'
       "created_opportunity_auto": true,
       "deleted_opportunity": true
     },
+    "in_app_notification_setting": {
+      "integration_critical_error": true,
+      "integration_error_threshold": true,
+      "assigned_opportunity": true,
+      "assigned_task": true
+    },
     "properties": [
       {}
     ],
+    "tags": ["non-billable"],
     "crt_index": 3
   },
   "users": [
@@ -1418,6 +1495,8 @@ epilot user createGroup --jsonata 'id'
       "email": "user@example.com",
       "draft_email": "user@example.com",
       "draft_email_expires_at": "1970-01-01T00:00:00.000Z",
+      "password_reset_token_hash": "string",
+      "password_reset_token_expires_at": "1970-01-01T00:00:00.000Z",
       "department": "Sales",
       "phone": 1234567890,
       "secondary_phone": 1234567890,
@@ -1435,7 +1514,9 @@ epilot user createGroup --jsonata 'id'
       "image_uri": {},
       "favorites": {},
       "email_notification_setting": {},
-      "properties": []
+      "in_app_notification_setting": {},
+      "properties": [],
+      "tags": ["non-billable"]
     }
   ],
   "image_uri": {
@@ -1502,6 +1583,8 @@ epilot user getGroup -p id=123e4567-e89b-12d3-a456-426614174000 --jsonata 'id'
     "email": "user@example.com",
     "draft_email": "user@example.com",
     "draft_email_expires_at": "1970-01-01T00:00:00.000Z",
+    "password_reset_token_hash": "string",
+    "password_reset_token_expires_at": "1970-01-01T00:00:00.000Z",
     "department": "Sales",
     "phone": 1234567890,
     "secondary_phone": 1234567890,
@@ -1540,9 +1623,16 @@ epilot user getGroup -p id=123e4567-e89b-12d3-a456-426614174000 --jsonata 'id'
       "created_opportunity_auto": true,
       "deleted_opportunity": true
     },
+    "in_app_notification_setting": {
+      "integration_critical_error": true,
+      "integration_error_threshold": true,
+      "assigned_opportunity": true,
+      "assigned_task": true
+    },
     "properties": [
       {}
     ],
+    "tags": ["non-billable"],
     "crt_index": 3
   },
   "users": [
@@ -1556,6 +1646,8 @@ epilot user getGroup -p id=123e4567-e89b-12d3-a456-426614174000 --jsonata 'id'
       "email": "user@example.com",
       "draft_email": "user@example.com",
       "draft_email_expires_at": "1970-01-01T00:00:00.000Z",
+      "password_reset_token_hash": "string",
+      "password_reset_token_expires_at": "1970-01-01T00:00:00.000Z",
       "department": "Sales",
       "phone": 1234567890,
       "secondary_phone": 1234567890,
@@ -1573,7 +1665,9 @@ epilot user getGroup -p id=123e4567-e89b-12d3-a456-426614174000 --jsonata 'id'
       "image_uri": {},
       "favorites": {},
       "email_notification_setting": {},
-      "properties": []
+      "in_app_notification_setting": {},
+      "properties": [],
+      "tags": ["non-billable"]
     }
   ],
   "image_uri": {
@@ -1648,6 +1742,8 @@ epilot user updateGroup -p id=123e4567-e89b-12d3-a456-426614174000 --jsonata 'id
     "email": "user@example.com",
     "draft_email": "user@example.com",
     "draft_email_expires_at": "1970-01-01T00:00:00.000Z",
+    "password_reset_token_hash": "string",
+    "password_reset_token_expires_at": "1970-01-01T00:00:00.000Z",
     "department": "Sales",
     "phone": 1234567890,
     "secondary_phone": 1234567890,
@@ -1686,9 +1782,16 @@ epilot user updateGroup -p id=123e4567-e89b-12d3-a456-426614174000 --jsonata 'id
       "created_opportunity_auto": true,
       "deleted_opportunity": true
     },
+    "in_app_notification_setting": {
+      "integration_critical_error": true,
+      "integration_error_threshold": true,
+      "assigned_opportunity": true,
+      "assigned_task": true
+    },
     "properties": [
       {}
     ],
+    "tags": ["non-billable"],
     "crt_index": 3
   },
   "users": [
@@ -1702,6 +1805,8 @@ epilot user updateGroup -p id=123e4567-e89b-12d3-a456-426614174000 --jsonata 'id
       "email": "user@example.com",
       "draft_email": "user@example.com",
       "draft_email_expires_at": "1970-01-01T00:00:00.000Z",
+      "password_reset_token_hash": "string",
+      "password_reset_token_expires_at": "1970-01-01T00:00:00.000Z",
       "department": "Sales",
       "phone": 1234567890,
       "secondary_phone": 1234567890,
@@ -1719,7 +1824,9 @@ epilot user updateGroup -p id=123e4567-e89b-12d3-a456-426614174000 --jsonata 'id
       "image_uri": {},
       "favorites": {},
       "email_notification_setting": {},
-      "properties": []
+      "in_app_notification_setting": {},
+      "properties": [],
+      "tags": ["non-billable"]
     }
   ],
   "image_uri": {
@@ -1818,6 +1925,8 @@ epilot user advanceUserAssignment -p id=123e4567-e89b-12d3-a456-426614174000 --j
     "email": "user@example.com",
     "draft_email": "user@example.com",
     "draft_email_expires_at": "1970-01-01T00:00:00.000Z",
+    "password_reset_token_hash": "string",
+    "password_reset_token_expires_at": "1970-01-01T00:00:00.000Z",
     "department": "Sales",
     "phone": 1234567890,
     "secondary_phone": 1234567890,
@@ -1856,9 +1965,16 @@ epilot user advanceUserAssignment -p id=123e4567-e89b-12d3-a456-426614174000 --j
       "created_opportunity_auto": true,
       "deleted_opportunity": true
     },
+    "in_app_notification_setting": {
+      "integration_critical_error": true,
+      "integration_error_threshold": true,
+      "assigned_opportunity": true,
+      "assigned_task": true
+    },
     "properties": [
       {}
     ],
+    "tags": ["non-billable"],
     "crt_index": 3
   },
   "users": [
@@ -1872,6 +1988,8 @@ epilot user advanceUserAssignment -p id=123e4567-e89b-12d3-a456-426614174000 --j
       "email": "user@example.com",
       "draft_email": "user@example.com",
       "draft_email_expires_at": "1970-01-01T00:00:00.000Z",
+      "password_reset_token_hash": "string",
+      "password_reset_token_expires_at": "1970-01-01T00:00:00.000Z",
       "department": "Sales",
       "phone": 1234567890,
       "secondary_phone": 1234567890,
@@ -1889,7 +2007,9 @@ epilot user advanceUserAssignment -p id=123e4567-e89b-12d3-a456-426614174000 --j
       "image_uri": {},
       "favorites": {},
       "email_notification_setting": {},
-      "properties": []
+      "in_app_notification_setting": {},
+      "properties": [],
+      "tags": ["non-billable"]
     }
   ],
   "image_uri": {
@@ -2151,6 +2271,46 @@ epilot user requestPasswordReset --jsonata 'message'
 
 ---
 
+### `resetPassword`
+
+Set a new password using a reset token from the password reset email.
+
+`POST /v2/users/public/resetPassword`
+
+**Request Body** (required)
+
+**Sample Call**
+
+```bash
+epilot user resetPassword \
+  -d '{"email":"test@example.com","token":"string","password":"string"}'
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot user resetPassword
+```
+
+With JSONata filter:
+
+```bash
+epilot user resetPassword --jsonata 'success'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "success": true
+}
+```
+
+</details>
+
+---
+
 ### `checkInviteToken`
 
 Check an invite token
@@ -2316,7 +2476,8 @@ epilot user getUserLoginParametersV2 -p username=example --jsonata 'login_parame
       "cognito_oauth_domain": "epilot-org-123",
       "cognito_oauth_scopes": ["openid"],
       "oauth_response_type": "code",
-      "passkey_enabled": true
+      "passkey_enabled": true,
+      "passkeys_registered": true
     }
   ]
 }
@@ -2446,7 +2607,8 @@ epilot user resolveDiscoverableCredential --jsonata 'email'
       "cognito_oauth_domain": "epilot-org-123",
       "cognito_oauth_scopes": ["openid"],
       "oauth_response_type": "code",
-      "passkey_enabled": true
+      "passkey_enabled": true,
+      "passkeys_registered": true
     }
   ]
 }
@@ -2874,7 +3036,8 @@ epilot user getUserLoginParameters -p username=example --jsonata 'login_paramete
       "cognito_oauth_domain": "epilot-org-123",
       "cognito_oauth_scopes": ["openid"],
       "oauth_response_type": "code",
-      "passkey_enabled": true
+      "passkey_enabled": true,
+      "passkeys_registered": true
     }
   ]
 }

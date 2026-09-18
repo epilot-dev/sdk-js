@@ -27,6 +27,10 @@
     {
       "name": "Snapshots",
       "description": "Snapshot CRUD and restore operations"
+    },
+    {
+      "name": "ScheduledSnapshots",
+      "description": "Enrollment and configuration for scheduled org snapshots"
     }
   ],
   "paths": {
@@ -103,6 +107,20 @@
                 "pattern": "^[^:]+:.+$"
               }
             }
+          },
+          {
+            "in": "query",
+            "name": "trigger",
+            "description": "Filter to snapshots with a specific trigger. Uses the `byTrigger` GSI\nfor an efficient indexed query — no table scan. Only snapshots created\nafter the GSI was added carry this index entry; pre-existing rows will\nnot appear in trigger-filtered results.\n",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "manual",
+                "sync",
+                "blueprint_install",
+                "scheduled"
+              ]
+            }
           }
         ],
         "responses": {
@@ -146,7 +164,7 @@
       "post": {
         "operationId": "captureOrgSnapshot",
         "summary": "captureOrgSnapshot",
-        "description": "Snapshot the caller's whole organization now. Fetches a fresh inventory\nof the org's configuration resources from configuration-hub-api, persists\nit as an inventory artifact, and starts a `scope: \"org\"` chunked capture.\nAsync — returns immediately with a snapshot ID; client polls `getSnapshot`\nand watches `capture_summary` fill in until `create.status` moves from\n`in_progress` to `completed` or `failed`.\n\nSensitive types (`access_token`, `environment_variable`), types with no\nengine adapter, and any `excluded_types` are dropped from the capture and\nrecorded in the snapshot's coverage report.\n",
+        "description": "Snapshot the caller's whole organization now. Creates a `scope: \"org\"`\nsnapshot row and starts a chunked capture Step Function, then returns\nimmediately. The capture asynchronously fetches a fresh inventory of the\norg's configuration resources from configuration-hub-api, persists it as\nan inventory artifact, and captures each resource. Client polls\n`getSnapshot` and watches `capture_summary` fill in until `create.status`\nmoves from `in_progress` to `completed` or `failed`. An org with no\ncapturable resources finalizes as a completed 0-resource snapshot.\n\nSensitive types (`access_token`, `environment_variable`), types with no\nengine adapter, and any `excluded_types` are dropped from the capture and\nrecorded in the snapshot's coverage report.\n",
         "tags": [
           "Snapshots"
         ],
@@ -173,9 +191,6 @@
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
-          },
-          "422": {
-            "$ref": "#/components/responses/UnprocessableEntity"
           }
         }
       }
@@ -369,6 +384,89 @@
         }
       }
     },
+    "/v1/org-snapshot-schedule": {
+      "get": {
+        "operationId": "getOrgSnapshotSchedule",
+        "summary": "getOrgSnapshotSchedule",
+        "description": "Return the scheduled-snapshot enrollment config for the caller's org.\nReturns 404 when the org has not yet enrolled.\n",
+        "tags": [
+          "ScheduledSnapshots"
+        ],
+        "responses": {
+          "200": {
+            "description": "Org snapshot schedule config",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrgSnapshotSchedule"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      },
+      "put": {
+        "operationId": "putOrgSnapshotSchedule",
+        "summary": "putOrgSnapshotSchedule",
+        "description": "Create or update the scheduled-snapshot enrollment config for the\ncaller's org (upsert). The cron expression and retention window are\nvalidated server-side; invalid values are rejected with 400.\n\nDefaults applied when a field is omitted on first create:\n  - `cron_expression`: `cron(0 2 * * ? *)` (daily at 02:00)\n  - `timezone`: `Europe/Berlin`\n  - `retention`: `{ value: 90, unit: \"days\" }`\n  - `enabled`: `true`\n\n**Note:** this call persists the row only. EventBridge schedule\nmaterialization is performed by a subsequent reconcile step (Task 6).\nThe row is the authoritative source of truth for the UI.\n",
+        "tags": [
+          "ScheduledSnapshots"
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PutOrgSnapshotScheduleRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Stored config (after upsert)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrgSnapshotSchedule"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteOrgSnapshotSchedule",
+        "summary": "deleteOrgSnapshotSchedule",
+        "description": "Remove the scheduled-snapshot enrollment for the caller's org.\nReturns 404 when no schedule exists.\nThe corresponding EventBridge schedule is removed by a reconcile\nstep (Task 6).\n",
+        "tags": [
+          "ScheduledSnapshots"
+        ],
+        "responses": {
+          "204": {
+            "description": "Deleted"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
     "/v1/snapshots:list-dependencies": {
       "post": {
         "operationId": "listDependencies",
@@ -475,16 +573,6 @@
             }
           }
         }
-      },
-      "UnprocessableEntity": {
-        "description": "Unprocessable entity",
-        "content": {
-          "application/json": {
-            "schema": {
-              "$ref": "#/components/schemas/EmptyInventoryError"
-            }
-          }
-        }
       }
     },
     "schemas": {
@@ -500,38 +588,6 @@
           },
           "error": {
             "type": "string"
-          }
-        }
-      },
-      "EmptyInventoryError": {
-        "type": "object",
-        "required": [
-          "message",
-          "skipped_types"
-        ],
-        "description": "Returned (422) when the org inventory contains no capturable resources\nafter filtering out sensitive, unsupported, and excluded types. The\n`skipped_types` array explains why every type was dropped.\n",
-        "properties": {
-          "message": {
-            "type": "string",
-            "example": "No capturable resources in the org inventory"
-          },
-          "skipped_types": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "required": [
-                "type",
-                "reason"
-              ],
-              "properties": {
-                "type": {
-                  "type": "string"
-                },
-                "reason": {
-                  "type": "string"
-                }
-              }
-            }
           }
         }
       },
@@ -562,7 +618,8 @@
         "properties": {
           "lineage_id": {
             "type": "string",
-            "description": "Cross-service correlation key — matches the lineage row id in\nblueprint-manifest-api's lineage table for `blueprint_install`\nsnapshots. Same as `target_id` for snapshots whose capture\ndoesn't distinguish source vs destination identifiers.\n"
+            "deprecated": true,
+            "description": "Deprecated alias of `target_id`. Always equals `target_id` (the\nimplementation never distinguished them). Use `target_id`.\n"
           },
           "target_id": {
             "type": "string",
@@ -727,17 +784,14 @@
       },
       "RestoreSnapshotRequest": {
         "type": "object",
-        "description": "Both flags default to `false`, which restores every captured resource —\nConfig Hub's manual-restore semantics. blueprint-manifest-api sets\nboth `true` when reverting a blueprint install so user edits and\ncross-blueprint contributions survive. Each flag is independent so a\ncaller can preserve edits without preserving co-ownership (or vice\nversa). Skipped resources surface under `Operation.skipped`.\n",
+        "description": "Apply a captured snapshot to its source org. snapshot-api applies the\nmanifest verbatim minus any target ids the caller pre-decided to skip.\nDrift detection (skip modified-since-install) is the caller's\nresponsibility — blueprint-manifest-api owns that logic for blueprint\nrestores; Config Hub's manual restore just omits the field.\n",
         "properties": {
-          "preserve_modified": {
-            "type": "boolean",
-            "default": false,
-            "description": "When `true`, skip captured resources whose live destination payload\nhas diverged from the install-time fingerprint stored on lineage.\nSurfaces under `Operation.skipped` with `reason: 'modified'`.\n"
-          },
-          "preserve_co_owned": {
-            "type": "boolean",
-            "default": false,
-            "description": "When `true`, skip captured resources whose lineage row carries\nanother blueprint instance's id (co-ownership ≥2). Surfaces under\n`Operation.skipped` with `reason: 'co_owned'`.\n"
+          "exclude_target_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Target ids the caller has decided not to restore. snapshot-api\napplies the manifest minus these ids. Drops are silent — the\ncaller supplied the list and already knows.\n"
           }
         }
       },
@@ -891,40 +945,13 @@
               "partial",
               "failed"
             ],
-            "description": "`partial` indicates the operation completed but skipped at least\none resource — see `skipped`. Only populated by restores triggered\nwith `mode: 'preserve_edits'`.\n"
+            "description": "`partial` indicates `engine.apply` reported a partial success\n(one or more resources failed individually) but the operation\nas a whole did not fail.\n"
           },
           "error": {
             "type": "string"
           },
           "triggered_by": {
             "$ref": "#/components/schemas/CallerIdentity"
-          },
-          "skipped": {
-            "type": "array",
-            "description": "Per-resource skips, populated only for restores triggered with\n`mode: 'preserve_edits'`. Empty / absent for Config Hub's\ndefault overwrite-mode restores.\n",
-            "items": {
-              "$ref": "#/components/schemas/SkippedResource"
-            }
-          }
-        }
-      },
-      "SkippedResource": {
-        "type": "object",
-        "required": [
-          "lineage_id",
-          "reason"
-        ],
-        "properties": {
-          "lineage_id": {
-            "type": "string"
-          },
-          "reason": {
-            "type": "string",
-            "enum": [
-              "modified",
-              "co_owned"
-            ],
-            "description": "- `modified` — current destination payload's fingerprint differs\n  from the install-time fingerprint on the lineage row.\n- `co_owned` — lineage row has ≥2 distinct\n  `blueprint_instance_ids`; restoring would unilaterally affect\n  another blueprint instance's contribution.\n"
           }
         }
       },
@@ -942,6 +969,132 @@
           },
           "token_id": {
             "type": "string"
+          }
+        }
+      },
+      "RetentionConfig": {
+        "type": "object",
+        "required": [
+          "value",
+          "unit"
+        ],
+        "description": "Flat retention window for a scheduled snapshot.\nConverted to a `ttl` epoch at capture time. Capped at ~24 months.\n",
+        "properties": {
+          "value": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Numeric quantity of retention (e.g. 90 for \"90 days\")."
+          },
+          "unit": {
+            "type": "string",
+            "enum": [
+              "days",
+              "weeks",
+              "months"
+            ]
+          }
+        }
+      },
+      "PutOrgSnapshotScheduleRequest": {
+        "type": "object",
+        "description": "Body for `putOrgSnapshotSchedule`. All fields optional; unset fields\nreceive defaults on first create and are left unchanged on updates\n(except `updated_at`).\n",
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "default": true,
+            "description": "Whether the schedule is active."
+          },
+          "cron_expression": {
+            "type": "string",
+            "description": "6-field EventBridge cron expression, e.g. `cron(0 2 * * ? *)`.\nValidated server-side: minute + hour must be concrete single integers\n(no `*`, lists, ranges, or steps) to cap cadence at ≤ once/day.\nExactly one of day-of-month / day-of-week must be `?`.\n",
+            "example": "cron(0 2 * * ? *)"
+          },
+          "timezone": {
+            "type": "string",
+            "description": "IANA timezone string passed to EventBridge `ScheduleExpressionTimezone`,\ne.g. `Europe/Berlin`. AWS handles DST natively.\n",
+            "example": "Europe/Berlin"
+          },
+          "retention": {
+            "$ref": "#/components/schemas/RetentionConfig"
+          },
+          "excluded_types": {
+            "type": "array",
+            "description": "Resource types to exclude from the scheduled capture, in addition\nto the always-excluded sensitive types (`access_token`,\n`environment_variable`).\n",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "OrgSnapshotSchedule": {
+        "type": "object",
+        "required": [
+          "org_id",
+          "enabled",
+          "cron_expression",
+          "timezone",
+          "retention",
+          "schedule_name",
+          "created_by",
+          "created_at",
+          "updated_at"
+        ],
+        "description": "Enrollment record for a scheduled org snapshot. One row per org.\nThis table — not EventBridge — is the source of truth; the EventBridge\nschedule entry is the materialization of this row (reconciled on write\nby Task 6).\n",
+        "properties": {
+          "org_id": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "cron_expression": {
+            "type": "string",
+            "description": "Validated 6-field EventBridge cron. Default `cron(0 2 * * ? *)`.",
+            "example": "cron(0 2 * * ? *)"
+          },
+          "timezone": {
+            "type": "string",
+            "description": "IANA timezone. Default `Europe/Berlin`."
+          },
+          "retention": {
+            "$ref": "#/components/schemas/RetentionConfig"
+          },
+          "excluded_types": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "schedule_name": {
+            "type": "string",
+            "description": "Name of the EventBridge Scheduler entry this row owns.\nSet at enrollment time as `org-snapshot-{orgId}`.\n"
+          },
+          "last_started_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "last_completed_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "last_status": {
+            "type": "string",
+            "enum": [
+              "completed",
+              "partial",
+              "failed"
+            ]
+          },
+          "created_by": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       }

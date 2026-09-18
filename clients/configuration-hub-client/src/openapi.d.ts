@@ -1247,307 +1247,307 @@ declare namespace Paths {
 export interface OperationMethods {
   /**
    * listConfigTypes - listConfigTypes
-   *
+   * 
    * Returns the static list of available configuration types with display metadata.
    * This is a cheap call — no fan-out to downstream APIs. Returns all known types
    * with labels and icons. The frontend should then call `listConfigs` separately
    * for each type it wants to load.
-   *
+   * 
    */
   'listConfigTypes'(
     parameters?: Parameters<UnknownParamsObject> | null,
     data?: any,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ListConfigTypes.Responses.$200>
   /**
    * listConfigs - listConfigs
-   *
+   * 
    * List configs of a given type with pagination. Returns summary metadata only
    * (not full payloads). The frontend calls this per type folder when expanding.
-   *
+   * 
    * Supports offset-based pagination via `from` and `size` parameters.
-   *
+   * 
    */
   'listConfigs'(
     parameters?: Parameters<Paths.ListConfigs.QueryParameters & Paths.ListConfigs.PathParameters> | null,
     data?: any,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ListConfigs.Responses.$200>
   /**
    * getConfigDependencies - getConfigDependencies
-   *
+   * 
    * Get configs that are referenced by the given config.
    * Used to render children when expanding a config node in the tree.
-   *
+   * 
    * Resolves dependencies by fetching the config payload server-side and scanning
    * for references (UUIDs, source IDs, slug-based references).
-   *
+   * 
    */
   'getConfigDependencies'(
     parameters?: Parameters<Paths.GetConfigDependencies.QueryParameters & Paths.GetConfigDependencies.PathParameters> | null,
     data?: any,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetConfigDependencies.Responses.$200>
   /**
    * getConfigUsedBy - getConfigUsedBy
-   *
+   * 
    * Get configs that reference the given config (reverse dependencies).
    * Scans the indexed config items for references to this config's ID or aliases.
-   *
+   * 
    */
   'getConfigUsedBy'(
     parameters?: Parameters<Paths.GetConfigUsedBy.PathParameters> | null,
     data?: any,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetConfigUsedBy.Responses.$200>
   /**
    * getIndex - getIndex
-   *
+   * 
    * Return the current index build state for the caller's organization.
    * Clients poll this to decide whether to show a "building" indicator
    * and when to refetch data.
-   *
+   * 
    */
   'getIndex'(
     parameters?: Parameters<UnknownParamsObject> | null,
     data?: any,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetIndex.Responses.$200>
   /**
    * compareConfigs - compareConfigs
-   *
+   * 
    * Compare the caller org's configs of a single type against another
    * (source) org, side by side. Rows are paired via the lineage registry in
    * both sync directions (caller imported from source, or source imported
    * from caller); configs without a counterpart come back as `only_current`
    * or `only_source`.
-   *
+   * 
    * `source_auth_token` must be a valid token for `source_org_id` — the
    * frontend mints one via the pipeline pairing, mirroring `createSyncJob`'s
    * `target_auth_token`. The token is verified against `source_org_id`
    * before any source-org data is read.
-   *
+   * 
    * POST because the request carries a token; the operation reads only.
-   *
+   * 
    */
   'compareConfigs'(
     parameters?: Parameters<UnknownParamsObject> | null,
     data?: Paths.CompareConfigs.RequestBody,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CompareConfigs.Responses.$200>
   /**
    * suggestMatches - suggestMatches
-   *
+   * 
    * Run the sync-grade heuristic match (`lookupByHeuristic` — name / slug /
    * unique key) for a batch of source-org configs that have no lineage
    * entry, and return candidate counterparts in the caller's org.
-   *
+   * 
    * Suggestions are ephemeral — nothing is persisted. The client offers
    * each candidate to the user, and a confirmed pair is written via
    * `confirmLineage`. Batches are capped at 25 ids; the client pages
    * through unmatched rows across successive calls.
-   *
+   * 
    */
   'suggestMatches'(
     parameters?: Parameters<UnknownParamsObject> | null,
     data?: Paths.SuggestMatches.RequestBody,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.SuggestMatches.Responses.$200>
   /**
    * confirmLineage - confirmLineage
-   *
+   * 
    * Persist a lineage entry pairing a source-org config with a config in
    * the caller's org — used to confirm a heuristic suggestion from the
    * Compare view. Writes to the caller org's lineage partition (caller as
    * sync target), so subsequent syncs PATCH the confirmed target instead of
    * creating a duplicate. Conflicts (an existing entry pointing at a
    * different target) return 409 so the client can refresh.
-   *
+   * 
    */
   'confirmLineage'(
     parameters?: Parameters<UnknownParamsObject> | null,
     data?: Paths.ConfirmLineage.RequestBody,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ConfirmLineage.Responses.$201>
   /**
    * breakLineage - breakLineage
-   *
+   * 
    * Delete a lineage entry from the caller org's partition (caller as sync
    * target), identified by `type` + `source_id`. Used to break a wrong or
    * stale match from the Compare view. Note: a future sync can re-match the
    * same pair heuristically — the entry is deleted, not blocklisted. To
    * break a match recorded in the OTHER direction, call this operation
    * authenticated as the other org (pipeline token).
-   *
+   * 
    */
   'breakLineage'(
     parameters?: Parameters<Paths.BreakLineage.QueryParameters> | null,
     data?: any,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.BreakLineage.Responses.$200>
   /**
    * listSyncJobs - listSyncJobs
-   *
+   * 
    * List sync jobs scoped to the caller's organization, paginated with an opaque
    * cursor. Defaults to most-recent first.
-   *
+   * 
    */
   'listSyncJobs'(
     parameters?: Parameters<Paths.ListSyncJobs.QueryParameters> | null,
     data?: any,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ListSyncJobs.Responses.$200>
   /**
    * createSyncJob - createSyncJob
-   *
+   * 
    * Create a new cross-org sync job. The job is enqueued for asynchronous execution
    * by the worker Lambda; the response returns the persisted job header with status
    * `pending`.
-   *
+   * 
    * See `docs/sync/INTERFACES.md` for the locked request/response contract.
-   *
+   * 
    */
   'createSyncJob'(
     parameters?: Parameters<UnknownParamsObject> | null,
     data?: Paths.CreateSyncJob.RequestBody,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CreateSyncJob.Responses.$201>
   /**
    * getSyncJob - getSyncJob
-   *
+   * 
    * Fetch a single sync job by ID. Returns the job header, counts summary,
    * current phase pointer, and the latest activity events. Frontend polls this
    * endpoint with a ramping interval.
-   *
+   * 
    */
   'getSyncJob'(
     parameters?: Parameters<Paths.GetSyncJob.PathParameters> | null,
     data?: any,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetSyncJob.Responses.$200>
   /**
    * retrySyncJob - retrySyncJob
-   *
+   * 
    * Retry the unresolved resources from a prior sync job: `failed` rows, plus
    * rows the original run left at `pending`/`in_progress` because it stopped
    * early. Creates a new job whose scope is that `(type, source_id)` set and
    * enqueues it for execution. Optionally accepts inline payload overrides.
-   *
+   * 
    */
   'retrySyncJob'(
     parameters?: Parameters<Paths.RetrySyncJob.PathParameters> | null,
     data?: Paths.RetrySyncJob.RequestBody,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.RetrySyncJob.Responses.$201>
   /**
    * cancelSyncJob - cancelSyncJob
-   *
+   * 
    * Cancel a running sync job. Marks the job `cancelled` with a `finished_at`
    * so it stops being reported as in-flight, and the worker stops at its next
    * batch boundary — phases re-read the job status and abort rather than
    * overwrite a cancellation with their own outcome.
-   *
+   * 
    * Resources already written to the target are NOT rolled back; cancelling
    * stops further work. Jobs already in a terminal state are rejected with
    * 409.
-   *
+   * 
    */
   'cancelSyncJob'(
     parameters?: Parameters<Paths.CancelSyncJob.PathParameters> | null,
     data?: any,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CancelSyncJob.Responses.$200>
   /**
    * listSyncJobResources - listSyncJobResources
-   *
+   * 
    * List the per-resource rows for a sync job. Supports filtering by status
    * (e.g. `failed`) and cursor pagination. Used by the failures table and the
    * dry-run plan view in the frontend.
-   *
+   * 
    */
   'listSyncJobResources'(
     parameters?: Parameters<Paths.ListSyncJobResources.QueryParameters & Paths.ListSyncJobResources.PathParameters> | null,
     data?: any,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ListSyncJobResources.Responses.$200>
   /**
    * listDeleteJobs - listDeleteJobs
-   *
+   * 
    * List bulk-delete jobs scoped to the caller's organization, paginated
    * with an opaque cursor. Most-recent first.
-   *
+   * 
    */
   'listDeleteJobs'(
     parameters?: Parameters<Paths.ListDeleteJobs.QueryParameters> | null,
     data?: any,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ListDeleteJobs.Responses.$200>
   /**
    * createDeleteJob - createDeleteJob
-   *
+   * 
    * Create a bulk-delete job for the caller's organization. The selected
    * resources are deleted asynchronously by a worker Lambda; the response
    * returns the persisted job header with status `pending`.
-   *
+   * 
    * Raw delete — no dependency checks are performed. On completion the
    * worker auto-triggers an index rebuild so the config list reflects the
    * deletions.
-   *
+   * 
    */
   'createDeleteJob'(
     parameters?: Parameters<UnknownParamsObject> | null,
     data?: Paths.CreateDeleteJob.RequestBody,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CreateDeleteJob.Responses.$201>
   /**
    * getDeleteJob - getDeleteJob
-   *
+   * 
    * Fetch a single bulk-delete job by ID. Returns the job header and counts
    * summary. Frontend polls this endpoint while the job runs.
-   *
+   * 
    */
   'getDeleteJob'(
     parameters?: Parameters<Paths.GetDeleteJob.PathParameters> | null,
     data?: any,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetDeleteJob.Responses.$200>
   /**
    * listDeleteJobResources - listDeleteJobResources
-   *
+   * 
    * List the per-resource rows for a delete job, cursor-paginated. Used by
    * the failures view in the frontend.
-   *
+   * 
    */
   'listDeleteJobResources'(
     parameters?: Parameters<Paths.ListDeleteJobResources.QueryParameters & Paths.ListDeleteJobResources.PathParameters> | null,
     data?: any,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ListDeleteJobResources.Responses.$200>
   /**
    * rebuildIndex - rebuildIndex
-   *
+   * 
    * Rebuild the configuration index for the caller's organization.
    * Fire-and-forget: invokes the async worker and returns immediately.
    * A new rebuild will cancel any in-flight build (see `build_token`).
-   *
+   * 
    */
   'rebuildIndex'(
     parameters?: Parameters<UnknownParamsObject> | null,
     data?: any,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.RebuildIndex.Responses.$200>
   /**
    * getConfigInventory - getConfigInventory
-   *
+   * 
    * Returns a fresh inventory of an org's configuration resources — `{ type, id }` identities only,
    * no full payloads. Calls every adapter's `list()` live (bypasses the 7-day DynamoDB index).
    * Intended for snapshot-api to consume when taking a full-org snapshot.
-   *
+   * 
    */
   'getConfigInventory'(
     parameters?: Parameters<Paths.GetConfigInventory.QueryParameters> | null,
     data?: any,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetConfigInventory.Responses.$200>
 }
 
@@ -1555,341 +1555,341 @@ export interface PathsDictionary {
   ['/v1/configs/types']: {
     /**
      * listConfigTypes - listConfigTypes
-     *
+     * 
      * Returns the static list of available configuration types with display metadata.
      * This is a cheap call — no fan-out to downstream APIs. Returns all known types
      * with labels and icons. The frontend should then call `listConfigs` separately
      * for each type it wants to load.
-     *
+     * 
      */
     'get'(
       parameters?: Parameters<UnknownParamsObject> | null,
       data?: any,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ListConfigTypes.Responses.$200>
   }
   ['/v1/configs/{type}']: {
     /**
      * listConfigs - listConfigs
-     *
+     * 
      * List configs of a given type with pagination. Returns summary metadata only
      * (not full payloads). The frontend calls this per type folder when expanding.
-     *
+     * 
      * Supports offset-based pagination via `from` and `size` parameters.
-     *
+     * 
      */
     'get'(
       parameters?: Parameters<Paths.ListConfigs.QueryParameters & Paths.ListConfigs.PathParameters> | null,
       data?: any,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ListConfigs.Responses.$200>
   }
   ['/v1/configs/{type}/{id}/dependencies']: {
     /**
      * getConfigDependencies - getConfigDependencies
-     *
+     * 
      * Get configs that are referenced by the given config.
      * Used to render children when expanding a config node in the tree.
-     *
+     * 
      * Resolves dependencies by fetching the config payload server-side and scanning
      * for references (UUIDs, source IDs, slug-based references).
-     *
+     * 
      */
     'get'(
       parameters?: Parameters<Paths.GetConfigDependencies.QueryParameters & Paths.GetConfigDependencies.PathParameters> | null,
       data?: any,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetConfigDependencies.Responses.$200>
   }
   ['/v1/configs/{type}/{id}/used_by']: {
     /**
      * getConfigUsedBy - getConfigUsedBy
-     *
+     * 
      * Get configs that reference the given config (reverse dependencies).
      * Scans the indexed config items for references to this config's ID or aliases.
-     *
+     * 
      */
     'get'(
       parameters?: Parameters<Paths.GetConfigUsedBy.PathParameters> | null,
       data?: any,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetConfigUsedBy.Responses.$200>
   }
   ['/v1/configs/index']: {
     /**
      * getIndex - getIndex
-     *
+     * 
      * Return the current index build state for the caller's organization.
      * Clients poll this to decide whether to show a "building" indicator
      * and when to refetch data.
-     *
+     * 
      */
     'get'(
       parameters?: Parameters<UnknownParamsObject> | null,
       data?: any,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetIndex.Responses.$200>
   }
   ['/v1/configs/compare']: {
     /**
      * compareConfigs - compareConfigs
-     *
+     * 
      * Compare the caller org's configs of a single type against another
      * (source) org, side by side. Rows are paired via the lineage registry in
      * both sync directions (caller imported from source, or source imported
      * from caller); configs without a counterpart come back as `only_current`
      * or `only_source`.
-     *
+     * 
      * `source_auth_token` must be a valid token for `source_org_id` — the
      * frontend mints one via the pipeline pairing, mirroring `createSyncJob`'s
      * `target_auth_token`. The token is verified against `source_org_id`
      * before any source-org data is read.
-     *
+     * 
      * POST because the request carries a token; the operation reads only.
-     *
+     * 
      */
     'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
       data?: Paths.CompareConfigs.RequestBody,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.CompareConfigs.Responses.$200>
   }
   ['/v1/configs/compare/suggestions']: {
     /**
      * suggestMatches - suggestMatches
-     *
+     * 
      * Run the sync-grade heuristic match (`lookupByHeuristic` — name / slug /
      * unique key) for a batch of source-org configs that have no lineage
      * entry, and return candidate counterparts in the caller's org.
-     *
+     * 
      * Suggestions are ephemeral — nothing is persisted. The client offers
      * each candidate to the user, and a confirmed pair is written via
      * `confirmLineage`. Batches are capped at 25 ids; the client pages
      * through unmatched rows across successive calls.
-     *
+     * 
      */
     'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
       data?: Paths.SuggestMatches.RequestBody,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.SuggestMatches.Responses.$200>
   }
   ['/v1/configs/lineage']: {
     /**
      * confirmLineage - confirmLineage
-     *
+     * 
      * Persist a lineage entry pairing a source-org config with a config in
      * the caller's org — used to confirm a heuristic suggestion from the
      * Compare view. Writes to the caller org's lineage partition (caller as
      * sync target), so subsequent syncs PATCH the confirmed target instead of
      * creating a duplicate. Conflicts (an existing entry pointing at a
      * different target) return 409 so the client can refresh.
-     *
+     * 
      */
     'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
       data?: Paths.ConfirmLineage.RequestBody,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ConfirmLineage.Responses.$201>
     /**
      * breakLineage - breakLineage
-     *
+     * 
      * Delete a lineage entry from the caller org's partition (caller as sync
      * target), identified by `type` + `source_id`. Used to break a wrong or
      * stale match from the Compare view. Note: a future sync can re-match the
      * same pair heuristically — the entry is deleted, not blocklisted. To
      * break a match recorded in the OTHER direction, call this operation
      * authenticated as the other org (pipeline token).
-     *
+     * 
      */
     'delete'(
       parameters?: Parameters<Paths.BreakLineage.QueryParameters> | null,
       data?: any,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.BreakLineage.Responses.$200>
   }
   ['/v1/configs/sync-jobs']: {
     /**
      * createSyncJob - createSyncJob
-     *
+     * 
      * Create a new cross-org sync job. The job is enqueued for asynchronous execution
      * by the worker Lambda; the response returns the persisted job header with status
      * `pending`.
-     *
+     * 
      * See `docs/sync/INTERFACES.md` for the locked request/response contract.
-     *
+     * 
      */
     'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
       data?: Paths.CreateSyncJob.RequestBody,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.CreateSyncJob.Responses.$201>
     /**
      * listSyncJobs - listSyncJobs
-     *
+     * 
      * List sync jobs scoped to the caller's organization, paginated with an opaque
      * cursor. Defaults to most-recent first.
-     *
+     * 
      */
     'get'(
       parameters?: Parameters<Paths.ListSyncJobs.QueryParameters> | null,
       data?: any,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ListSyncJobs.Responses.$200>
   }
   ['/v1/configs/sync-jobs/{id}']: {
     /**
      * getSyncJob - getSyncJob
-     *
+     * 
      * Fetch a single sync job by ID. Returns the job header, counts summary,
      * current phase pointer, and the latest activity events. Frontend polls this
      * endpoint with a ramping interval.
-     *
+     * 
      */
     'get'(
       parameters?: Parameters<Paths.GetSyncJob.PathParameters> | null,
       data?: any,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetSyncJob.Responses.$200>
   }
   ['/v1/configs/sync-jobs/{id}/retry']: {
     /**
      * retrySyncJob - retrySyncJob
-     *
+     * 
      * Retry the unresolved resources from a prior sync job: `failed` rows, plus
      * rows the original run left at `pending`/`in_progress` because it stopped
      * early. Creates a new job whose scope is that `(type, source_id)` set and
      * enqueues it for execution. Optionally accepts inline payload overrides.
-     *
+     * 
      */
     'post'(
       parameters?: Parameters<Paths.RetrySyncJob.PathParameters> | null,
       data?: Paths.RetrySyncJob.RequestBody,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.RetrySyncJob.Responses.$201>
   }
   ['/v1/configs/sync-jobs/{id}/cancel']: {
     /**
      * cancelSyncJob - cancelSyncJob
-     *
+     * 
      * Cancel a running sync job. Marks the job `cancelled` with a `finished_at`
      * so it stops being reported as in-flight, and the worker stops at its next
      * batch boundary — phases re-read the job status and abort rather than
      * overwrite a cancellation with their own outcome.
-     *
+     * 
      * Resources already written to the target are NOT rolled back; cancelling
      * stops further work. Jobs already in a terminal state are rejected with
      * 409.
-     *
+     * 
      */
     'post'(
       parameters?: Parameters<Paths.CancelSyncJob.PathParameters> | null,
       data?: any,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.CancelSyncJob.Responses.$200>
   }
   ['/v1/configs/sync-jobs/{id}/resources']: {
     /**
      * listSyncJobResources - listSyncJobResources
-     *
+     * 
      * List the per-resource rows for a sync job. Supports filtering by status
      * (e.g. `failed`) and cursor pagination. Used by the failures table and the
      * dry-run plan view in the frontend.
-     *
+     * 
      */
     'get'(
       parameters?: Parameters<Paths.ListSyncJobResources.QueryParameters & Paths.ListSyncJobResources.PathParameters> | null,
       data?: any,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ListSyncJobResources.Responses.$200>
   }
   ['/v1/configs/delete-jobs']: {
     /**
      * createDeleteJob - createDeleteJob
-     *
+     * 
      * Create a bulk-delete job for the caller's organization. The selected
      * resources are deleted asynchronously by a worker Lambda; the response
      * returns the persisted job header with status `pending`.
-     *
+     * 
      * Raw delete — no dependency checks are performed. On completion the
      * worker auto-triggers an index rebuild so the config list reflects the
      * deletions.
-     *
+     * 
      */
     'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
       data?: Paths.CreateDeleteJob.RequestBody,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.CreateDeleteJob.Responses.$201>
     /**
      * listDeleteJobs - listDeleteJobs
-     *
+     * 
      * List bulk-delete jobs scoped to the caller's organization, paginated
      * with an opaque cursor. Most-recent first.
-     *
+     * 
      */
     'get'(
       parameters?: Parameters<Paths.ListDeleteJobs.QueryParameters> | null,
       data?: any,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ListDeleteJobs.Responses.$200>
   }
   ['/v1/configs/delete-jobs/{id}']: {
     /**
      * getDeleteJob - getDeleteJob
-     *
+     * 
      * Fetch a single bulk-delete job by ID. Returns the job header and counts
      * summary. Frontend polls this endpoint while the job runs.
-     *
+     * 
      */
     'get'(
       parameters?: Parameters<Paths.GetDeleteJob.PathParameters> | null,
       data?: any,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetDeleteJob.Responses.$200>
   }
   ['/v1/configs/delete-jobs/{id}/resources']: {
     /**
      * listDeleteJobResources - listDeleteJobResources
-     *
+     * 
      * List the per-resource rows for a delete job, cursor-paginated. Used by
      * the failures view in the frontend.
-     *
+     * 
      */
     'get'(
       parameters?: Parameters<Paths.ListDeleteJobResources.QueryParameters & Paths.ListDeleteJobResources.PathParameters> | null,
       data?: any,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ListDeleteJobResources.Responses.$200>
   }
   ['/v1/configs/index:rebuild']: {
     /**
      * rebuildIndex - rebuildIndex
-     *
+     * 
      * Rebuild the configuration index for the caller's organization.
      * Fire-and-forget: invokes the async worker and returns immediately.
      * A new rebuild will cancel any in-flight build (see `build_token`).
-     *
+     * 
      */
     'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
       data?: any,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.RebuildIndex.Responses.$200>
   }
   ['/v1/configs/inventory']: {
     /**
      * getConfigInventory - getConfigInventory
-     *
+     * 
      * Returns a fresh inventory of an org's configuration resources — `{ type, id }` identities only,
      * no full payloads. Calls every adapter's `list()` live (bypasses the 7-day DynamoDB index).
      * Intended for snapshot-api to consume when taking a full-org snapshot.
-     *
+     * 
      */
     'get'(
       parameters?: Parameters<Paths.GetConfigInventory.QueryParameters> | null,
       data?: any,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetConfigInventory.Responses.$200>
   }
 }
