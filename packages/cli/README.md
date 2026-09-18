@@ -29,7 +29,7 @@ npm install -g @epilot/cli
 
 <!-- usage-help -->
 ```
-epilot v0.1.167 — CLI for epilot APIs
+epilot v0.1.168 — CLI for epilot APIs
 
 USAGE
   epilot <api> <operationId> [params...] [flags]
