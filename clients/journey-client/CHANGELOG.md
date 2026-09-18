@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.9.0
+
+### Minor Changes
+
+- Serve `List<Link>` environment variables to a journey (ER-5443). `EnvironmentLink` and `EnvironmentLinkList` describe a list of links carrying translatable labels, and the environment datasource picker and resolver both accept the new type alongside `Map`.
+
 ## 0.8.0
 
 ### Minor Changes
