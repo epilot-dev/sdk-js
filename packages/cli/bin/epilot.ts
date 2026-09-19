@@ -115,10 +115,15 @@ function printRootHelp() {
   w(`  ${GREEN}-i, --include${R}            Include response headers in output\n`);
   w(`\n`);
   w(`${BOLD}COMMANDS${R}\n`);
-  w(`  ${CYAN}auth login${R}              Authenticate with epilot (browser)\n`);
+  w(`  ${CYAN}auth login${R}              Authenticate with epilot (approve the CLI in your browser)\n`);
+  w(`  ${CYAN}auth login --org${R} <id>   Log in and request access to a specific organization\n`);
   w(`  ${CYAN}auth token${R}              Store an API token directly\n`);
-  w(`  ${CYAN}auth status${R}             Show authentication status\n`);
-  w(`  ${CYAN}auth logout${R}             Remove stored credentials\n`);
+  w(`  ${CYAN}auth status${R}             Show authentication status, agent and grants\n`);
+  w(`  ${CYAN}auth logout${R}             Revoke the agent and remove stored credentials\n`);
+  w(`  ${CYAN}org list${R}                List your organizations and this CLI's access\n`);
+  w(`  ${CYAN}org use${R} <id>            Switch the active organization\n`);
+  w(`  ${CYAN}org request${R} <id>        Request access to an organization ${DIM}(--write, --full-pii)${R}\n`);
+  w(`  ${CYAN}org current${R}             Show the active organization\n`);
   w(`  ${CYAN}profile${R}                 Manage named profiles\n`);
   w(`  ${CYAN}config${R}                  Manage CLI configuration\n`);
   w(`  ${CYAN}completion${R}              Generate shell completion scripts\n`);
@@ -136,6 +141,7 @@ function printRootHelp() {
   w(`\n`);
   w(`${BOLD}EXAMPLES${R}\n`);
   w(`  ${YELLOW}$${R} epilot auth login\n`);
+  w(`  ${YELLOW}$${R} epilot org use 739224 ${DIM}# switch organization${R}\n`);
   w(`  ${YELLOW}$${R} epilot user getMeV2\n`);
   w(`  ${YELLOW}$${R} epilot entity getEntity contact abc123\n`);
   w(`  ${YELLOW}$${R} epilot entity searchEntities -d '{"q":"*"}'\n`);
