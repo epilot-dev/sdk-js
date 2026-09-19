@@ -16320,6 +16320,174 @@ declare namespace Components {
                 $relation?: EntityRelation[];
             };
             /**
+             * The first line item of the contract used as source for the recommendation.
+             * Carries the amounts the customer currently pays; only present when searching by contract_id.
+             *
+             */
+            source_contract_item?: /**
+             * The first line item of the contract used as source for the recommendation.
+             * Carries the amounts the customer currently pays; only present when searching by contract_id.
+             *
+             */
+            /**
+             * Represents a price item
+             * example:
+             * {
+             *   "amount_subtotal": 10000,
+             *   "amount_total": 10600,
+             *   "currency": "EUR",
+             *   "description": "Annual internet service",
+             *   "price_id": "7e24ff5d-d580-4136-a32f-19191eed039a",
+             *   "product_id": "6241487f-b7fd-428b-ab92-24ee0b37fd84",
+             *   "taxes": [
+             *     {
+             *       "amount": 600,
+             *       "tax": {
+             *         "active": true,
+             *         "description": "Without Behaviour",
+             *         "rate": 6,
+             *         "region": "DE",
+             *         "type": "VAT",
+             *         "_created_at": "2022-02-07T14:49:08.831Z",
+             *         "_id": "18bbbc2e-2c37-4f91-924a-07ae60d830e4",
+             *         "_org": "739224",
+             *         "_schema": "tax",
+             *         "_title": "Tax Without Behaviour",
+             *         "_updated_at": "2022-02-07T14:49:08.831Z"
+             *       }
+             *     },
+             *     {
+             *       "amount": 600,
+             *       "tax": {
+             *         "active": true,
+             *         "description": "Without Behaviour",
+             *         "rate": 6,
+             *         "region": "DE",
+             *         "type": "VAT",
+             *         "_created_at": "2022-02-07T14:49:08.831Z",
+             *         "_id": "18bbbc2e-2c37-4f91-924a-07ae60d830e4",
+             *         "_org": "739224",
+             *         "_schema": "tax",
+             *         "_title": "Tax Without Behaviour",
+             *         "_updated_at": "2022-02-07T14:49:08.831Z"
+             *       }
+             *     }
+             *   ],
+             *   "unit_amount": 10000,
+             *   "unit_amount_net": 10000,
+             *   "pricing_model": "per_unit",
+             *   "_price": {
+             *     "unit_amount": 10000,
+             *     "unit_amount_currency": "EUR",
+             *     "unit_amount_decimal": "100.00",
+             *     "sales_tax": "standard",
+             *     "is_tax_inclusive": false,
+             *     "price_display_in_journeys": "show_price",
+             *     "type": "one_time",
+             *     "billing_period": "weekly",
+             *     "billing_duration_unit": "months",
+             *     "notice_time_unit": "months",
+             *     "termination_time_unit": "months",
+             *     "renewal_duration_unit": "months",
+             *     "_schema": "price",
+             *     "_title": "Solar Panel Module",
+             *     "description": "Solar Panel Module",
+             *     "active": true,
+             *     "tax": {
+             *       "$relation": [
+             *         {
+             *           "entity_id": "24641e82-0690-4135-8b43-ef12a9b1c5dc"
+             *         },
+             *         {
+             *           "entity_id": "24641e82-0690-4135-8b43-ef12a9b1c5dc"
+             *         }
+             *       ]
+             *     },
+             *     "_id": "7e24ff5d-d580-4136-a32f-19191eed039a",
+             *     "_org": "728",
+             *     "_created_at": "2022-06-03T16:04:10.369Z",
+             *     "_updated_at": "2022-06-03T16:04:10.369Z",
+             *     "pricing_model": "per_unit"
+             *   },
+             *   "_product": {
+             *     "name": "Cool box",
+             *     "type": "product",
+             *     "_id": "73f857a4-0fbc-4aa6-983f-87c0d6d410a6",
+             *     "_title": "Cool box"
+             *   }
+             * }
+             */
+            PriceItem | /**
+             * Represents a composite price input to the pricing library.
+             * example:
+             * {
+             *   "amount_subtotal": 10000,
+             *   "amount_total": 10600,
+             *   "currency": "EUR",
+             *   "description": "Annual internet service",
+             *   "price_id": "7e24ff5d-d580-4136-a32f-19191eed039a",
+             *   "product_id": "6241487f-b7fd-428b-ab92-24ee0b37fd84",
+             *   "taxes": [
+             *     {
+             *       "amount": 600,
+             *       "tax": {
+             *         "active": true,
+             *         "description": "Without Behaviour",
+             *         "rate": 6,
+             *         "region": "DE",
+             *         "type": "VAT",
+             *         "_created_at": "2022-02-07T14:49:08.831Z",
+             *         "_id": "18bbbc2e-2c37-4f91-924a-07ae60d830e4",
+             *         "_org": "739224",
+             *         "_schema": "tax",
+             *         "_title": "Tax Without Behaviour",
+             *         "_updated_at": "2022-02-07T14:49:08.831Z"
+             *       }
+             *     }
+             *   ],
+             *   "unit_amount": 10000,
+             *   "unit_amount_net": 10000,
+             *   "pricing_model": "per_unit",
+             *   "_price": {
+             *     "unit_amount": 10000,
+             *     "unit_amount_currency": "EUR",
+             *     "unit_amount_decimal": "100.00",
+             *     "sales_tax": "standard",
+             *     "is_tax_inclusive": false,
+             *     "price_display_in_journeys": "show_price",
+             *     "type": "one_time",
+             *     "billing_period": "weekly",
+             *     "billing_duration_unit": "months",
+             *     "notice_time_unit": "months",
+             *     "termination_time_unit": "months",
+             *     "renewal_duration_unit": "months",
+             *     "_schema": "price",
+             *     "_title": "Solar Panel Module",
+             *     "description": "Solar Panel Module",
+             *     "active": true,
+             *     "tax": {
+             *       "$relation": [
+             *         {
+             *           "entity_id": "24641e82-0690-4135-8b43-ef12a9b1c5dc"
+             *         }
+             *       ]
+             *     },
+             *     "_id": "7e24ff5d-d580-4136-a32f-19191eed039a",
+             *     "_org": "728",
+             *     "_created_at": "2022-06-03T16:04:10.369Z",
+             *     "_updated_at": "2022-06-03T16:04:10.369Z",
+             *     "pricing_model": "per_unit"
+             *   },
+             *   "_product": {
+             *     "name": "Cool box",
+             *     "type": "product",
+             *     "_id": "73f857a4-0fbc-4aa6-983f-87c0d6d410a6",
+             *     "_title": "Cool box"
+             *   }
+             * }
+             */
+            CompositePriceItem;
+            /**
              * Type of product recommendation
              */
             type?: "change" | "cross-sell" | "up-sell";
