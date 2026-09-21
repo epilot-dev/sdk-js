@@ -2071,7 +2071,7 @@
       },
       "Operator": {
         "type": "string",
-        "description": "Predefined comparison operator. Compatibility (enforced at write time):\n- number: equal, notEqual, greaterThan, greaterThanInclusive, lessThan, lessThanInclusive, between, regexMatch,\n  maxDigits, maxDecimals\n- date: dateBefore, dateOnOrBefore, dateAfter, dateOnOrAfter, dateBetween, notInFuture, notInPast, regexMatch\n- text: equal, notEqual, contains, doesNotContain, startsWith, endsWith, regexMatch, lengthBetween,\n  greaterThan, greaterThanInclusive, lessThan, lessThanInclusive, between, maxDigits, maxDecimals\nRange operators (between, dateBetween, lengthBetween) require a `range` value;\nunary operators (notInFuture, notInPast) require a `none` value; all others require a scalar value.\nregexMatch validates the raw input string's format and always takes a static string pattern.\nNumeric comparison operators on text rules parse the input as a number at evaluation time\n(free-text fields often hold numbers); unparsable input fails the condition.\nmaxDigits limits how many digits the written input may contain in total (grouping\nseparators, sign and the decimal separator are not counted); maxDecimals limits how many\ndigits may follow the decimal separator. Both take a non-negative integer comparison value\nand, like the other numeric operators, are also allowed on text rules.\nmaxChangesInPeriod is allowed on every input type and requires a `cadence` value. It judges\nthe change history of a context attribute rather than the input itself: the condition holds\nwhile fewer than `max_changes` changes of that attribute fall inside the period ending now.\n",
+        "description": "Predefined comparison operator. Compatibility (enforced at write time):\n- number: equal, notEqual, greaterThan, greaterThanInclusive, lessThan, lessThanInclusive, between, regexMatch,\n  maxDigits, maxDecimals\n- date: dateBefore, dateOnOrBefore, dateAfter, dateOnOrAfter, dateBetween, notInFuture, notInPast, regexMatch\n- text: equal, notEqual, contains, doesNotContain, startsWith, endsWith, regexMatch, lengthBetween,\n  greaterThan, greaterThanInclusive, lessThan, lessThanInclusive, between, maxDigits, maxDecimals\nRange operators (between, dateBetween, lengthBetween) require a `range` value;\nunary operators (notInFuture, notInPast) require a `none` value; all others require a scalar value.\nregexMatch validates the raw input string's format and always takes a static string pattern.\nNumeric comparison operators on text rules parse the input as a number at evaluation time\n(free-text fields often hold numbers); unparsable input fails the condition.\nmaxDigits limits how many digits the written input may contain in total (grouping\nseparators, sign and the decimal separator are not counted); maxDecimals limits how many\ndigits may follow the decimal separator. Both take a non-negative integer comparison value\nand, like the other numeric operators, are also allowed on text rules.\nmaxPerPeriod is allowed on every input type and requires a `cadence` value. It judges how often\nsomething happened rather than the input itself: the condition holds while fewer than `max`\ncounted records of a context entity type fall inside the period ending now.\n",
         "enum": [
           "equal",
           "notEqual",
@@ -2095,11 +2095,11 @@
           "lengthBetween",
           "maxDigits",
           "maxDecimals",
-          "maxChangesInPeriod"
+          "maxPerPeriod"
         ]
       },
       "ConditionValue": {
-        "description": "The comparison value of a condition - a scalar, a range of scalars, a cadence (maxChangesInPeriod), or nothing (unary operators).",
+        "description": "The comparison value of a condition - a scalar, a range of scalars, a cadence (maxPerPeriod), or nothing (unary operators).",
         "oneOf": [
           {
             "$ref": "#/components/schemas/StaticValue"
@@ -2402,11 +2402,12 @@
       },
       "CadenceValue": {
         "type": "object",
-        "description": "The value of a `maxChangesInPeriod` condition: which context attribute's changes are counted\nand how many are allowed within the period ending at the evaluation moment. The rule stores\nthe settings only; the consumer supplies the attribute's change timestamps (e.g. from the\nentity activity feed) at evaluation time.\n\nRolling units (`days`, `weeks`, `months`) count back from now. Calendar units\n(`calendar_weeks`, `calendar_months`) start at the beginning of the current calendar week\n(Monday) or month, extended backwards by `period - 1` units.\n",
+        "description": "The value of a `maxPerPeriod` condition: what is counted and how many are allowed within the\nperiod ending at the evaluation moment. The rule stores the settings only; the consumer resolves\nthe counted records (e.g. the tickets bound to the rule's `ticket` context) and supplies their\ntimestamps at evaluation time.\n\n`count` says what kind of thing is counted. Today only `records` exists: entities of the\ncontext type named by the first segment of `path`, dated by the attribute in the rest of the\npath (e.g. `ticket._created_at`). Further kinds may be added later without affecting existing\nrules.\n\nRolling units (`days`, `weeks`, `months`) count back from now. Calendar units\n(`calendar_weeks`, `calendar_months`) start at the beginning of the current calendar week\n(Monday) or month, extended backwards by `period - 1` units.\n",
         "required": [
           "source",
+          "count",
           "path",
-          "max_changes",
+          "max",
           "period",
           "unit"
         ],
@@ -2418,17 +2419,24 @@
               "cadence"
             ]
           },
+          "count": {
+            "type": "string",
+            "enum": [
+              "records"
+            ],
+            "description": "What is counted. `records` counts entities of the context type in `path`, dated by the attribute in `path`."
+          },
           "path": {
             "type": "string",
             "minLength": 1,
             "maxLength": 200,
             "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*(\\.[a-zA-Z0-9_]+)*$",
-            "description": "The context attribute whose changes are counted, as `<schema>.<attribute>`, e.g. `contract.installment_amount`."
+            "description": "The counted records as `<schema>.<date attribute>`, e.g. `ticket._created_at`."
           },
-          "max_changes": {
+          "max": {
             "type": "integer",
             "minimum": 0,
-            "description": "How many changes may already fall inside the period before the condition fails. 0 never allows a change."
+            "description": "How many counted records may already fall inside the period before the condition fails. 0 never allows another one."
           },
           "period": {
             "type": "integer",
@@ -2669,7 +2677,7 @@
       },
       "ContextRequirement": {
         "type": "object",
-        "description": "An entity context source the rule needs at evaluation time, referenced by `context`\nand `cadence` value paths via the schema slug as their first segment (e.g. `contract.installment_amount`).\nHow the source is resolved (which entity instance) is decided by the consuming surface,\nnot by the rule. Meter reading comparisons use the meter/meter_counter entity schemas\n(e.g. `meter_counter.current_consumption` for the previous reading value).\n",
+        "description": "An entity context source the rule needs at evaluation time, referenced by `context`\nvalue paths (e.g. `contract.installment_amount`) and `cadence` value paths (e.g. `ticket._created_at`)\nvia the schema slug as their first segment.\nHow the source is resolved (which entity instance) is decided by the consuming surface,\nnot by the rule. Meter reading comparisons use the meter/meter_counter entity schemas\n(e.g. `meter_counter.current_consumption` for the previous reading value).\n",
         "required": [
           "schema"
         ],

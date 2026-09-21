@@ -54,10 +54,15 @@ declare namespace Components {
             EnvironmentValue;
         }
         /**
-         * The value of a `maxChangesInPeriod` condition: which context attribute's changes are counted
-         * and how many are allowed within the period ending at the evaluation moment. The rule stores
-         * the settings only; the consumer supplies the attribute's change timestamps (e.g. from the
-         * entity activity feed) at evaluation time.
+         * The value of a `maxPerPeriod` condition: what is counted and how many are allowed within the
+         * period ending at the evaluation moment. The rule stores the settings only; the consumer resolves
+         * the counted records (e.g. the tickets bound to the rule's `ticket` context) and supplies their
+         * timestamps at evaluation time.
+         *
+         * `count` says what kind of thing is counted. Today only `records` exists: entities of the
+         * context type named by the first segment of `path`, dated by the attribute in the rest of the
+         * path (e.g. `ticket._created_at`). Further kinds may be added later without affecting existing
+         * rules.
          *
          * Rolling units (`days`, `weeks`, `months`) count back from now. Calendar units
          * (`calendar_weeks`, `calendar_months`) start at the beginning of the current calendar week
@@ -67,13 +72,17 @@ declare namespace Components {
         export interface CadenceValue {
             source: "cadence";
             /**
-             * The context attribute whose changes are counted, as `<schema>.<attribute>`, e.g. `contract.installment_amount`.
+             * What is counted. `records` counts entities of the context type in `path`, dated by the attribute in `path`.
+             */
+            count: "records";
+            /**
+             * The counted records as `<schema>.<date attribute>`, e.g. `ticket._created_at`.
              */
             path: string; // ^[a-zA-Z_][a-zA-Z0-9_]*(\.[a-zA-Z0-9_]+)*$
             /**
-             * How many changes may already fall inside the period before the condition fails. 0 never allows a change.
+             * How many counted records may already fall inside the period before the condition fails. 0 never allows another one.
              */
-            max_changes: number;
+            max: number;
             /**
              * Length of the period in `unit`s.
              */
@@ -123,13 +132,13 @@ declare namespace Components {
              * separators, sign and the decimal separator are not counted); maxDecimals limits how many
              * digits may follow the decimal separator. Both take a non-negative integer comparison value
              * and, like the other numeric operators, are also allowed on text rules.
-             * maxChangesInPeriod is allowed on every input type and requires a `cadence` value. It judges
-             * the change history of a context attribute rather than the input itself: the condition holds
-             * while fewer than `max_changes` changes of that attribute fall inside the period ending now.
+             * maxPerPeriod is allowed on every input type and requires a `cadence` value. It judges how often
+             * something happened rather than the input itself: the condition holds while fewer than `max`
+             * counted records of a context entity type fall inside the period ending now.
              *
              */
             Operator;
-            value: /* The comparison value of a condition - a scalar, a range of scalars, a cadence (maxChangesInPeriod), or nothing (unary operators). */ ConditionValue;
+            value: /* The comparison value of a condition - a scalar, a range of scalars, a cadence (maxPerPeriod), or nothing (unary operators). */ ConditionValue;
             /**
              * Message shown to the end user when this condition fails.
              */
@@ -152,9 +161,9 @@ declare namespace Components {
             allow_failure?: boolean;
         }
         /**
-         * The comparison value of a condition - a scalar, a range of scalars, a cadence (maxChangesInPeriod), or nothing (unary operators).
+         * The comparison value of a condition - a scalar, a range of scalars, a cadence (maxPerPeriod), or nothing (unary operators).
          */
-        export type ConditionValue = /* The comparison value of a condition - a scalar, a range of scalars, a cadence (maxChangesInPeriod), or nothing (unary operators). */ /* A fixed comparison value. */ StaticValue | /**
+        export type ConditionValue = /* The comparison value of a condition - a scalar, a range of scalars, a cadence (maxPerPeriod), or nothing (unary operators). */ /* A fixed comparison value. */ StaticValue | /**
          * A dynamic comparison value resolved from runtime context, e.g. `contract.installment_amount`
          * or `previous_reading.value`. The first path segment must match the `name` of a declared
          * context requirement.
@@ -187,10 +196,15 @@ declare namespace Components {
          *
          */
         ExternalValue | /* A lower and upper bound for range operators (between, dateBetween, lengthBetween). Bounds are inclusive. */ RangeValue | /**
-         * The value of a `maxChangesInPeriod` condition: which context attribute's changes are counted
-         * and how many are allowed within the period ending at the evaluation moment. The rule stores
-         * the settings only; the consumer supplies the attribute's change timestamps (e.g. from the
-         * entity activity feed) at evaluation time.
+         * The value of a `maxPerPeriod` condition: what is counted and how many are allowed within the
+         * period ending at the evaluation moment. The rule stores the settings only; the consumer resolves
+         * the counted records (e.g. the tickets bound to the rule's `ticket` context) and supplies their
+         * timestamps at evaluation time.
+         *
+         * `count` says what kind of thing is counted. Today only `records` exists: entities of the
+         * context type named by the first segment of `path`, dated by the attribute in the rest of the
+         * path (e.g. `ticket._created_at`). Further kinds may be added later without affecting existing
+         * rules.
          *
          * Rolling units (`days`, `weeks`, `months`) count back from now. Calendar units
          * (`calendar_weeks`, `calendar_months`) start at the beginning of the current calendar week
@@ -200,7 +214,8 @@ declare namespace Components {
         CadenceValue | /* No comparison value - used by unary operators such as notInFuture / notInPast. */ NoValue;
         /**
          * An entity context source the rule needs at evaluation time, referenced by `context`
-         * and `cadence` value paths via the schema slug as their first segment (e.g. `contract.installment_amount`).
+         * value paths (e.g. `contract.installment_amount`) and `cadence` value paths (e.g. `ticket._created_at`)
+         * via the schema slug as their first segment.
          * How the source is resolved (which entity instance) is decided by the consuming surface,
          * not by the rule. Meter reading comparisons use the meter/meter_counter entity schemas
          * (e.g. `meter_counter.current_consumption` for the previous reading value).
@@ -282,7 +297,8 @@ declare namespace Components {
              */
             contexts?: /**
              * An entity context source the rule needs at evaluation time, referenced by `context`
-             * and `cadence` value paths via the schema slug as their first segment (e.g. `contract.installment_amount`).
+             * value paths (e.g. `contract.installment_amount`) and `cadence` value paths (e.g. `ticket._created_at`)
+             * via the schema slug as their first segment.
              * How the source is resolved (which entity instance) is decided by the consuming surface,
              * not by the rule. Meter reading comparisons use the meter/meter_counter entity schemas
              * (e.g. `meter_counter.current_consumption` for the previous reading value).
@@ -622,12 +638,12 @@ declare namespace Components {
          * separators, sign and the decimal separator are not counted); maxDecimals limits how many
          * digits may follow the decimal separator. Both take a non-negative integer comparison value
          * and, like the other numeric operators, are also allowed on text rules.
-         * maxChangesInPeriod is allowed on every input type and requires a `cadence` value. It judges
-         * the change history of a context attribute rather than the input itself: the condition holds
-         * while fewer than `max_changes` changes of that attribute fall inside the period ending now.
+         * maxPerPeriod is allowed on every input type and requires a `cadence` value. It judges how often
+         * something happened rather than the input itself: the condition holds while fewer than `max`
+         * counted records of a context entity type fall inside the period ending now.
          *
          */
-        export type Operator = "equal" | "notEqual" | "greaterThan" | "greaterThanInclusive" | "lessThan" | "lessThanInclusive" | "between" | "dateBefore" | "dateOnOrBefore" | "dateAfter" | "dateOnOrAfter" | "dateBetween" | "notInFuture" | "notInPast" | "contains" | "doesNotContain" | "startsWith" | "endsWith" | "regexMatch" | "lengthBetween" | "maxDigits" | "maxDecimals" | "maxChangesInPeriod";
+        export type Operator = "equal" | "notEqual" | "greaterThan" | "greaterThanInclusive" | "lessThan" | "lessThanInclusive" | "between" | "dateBefore" | "dateOnOrBefore" | "dateAfter" | "dateOnOrAfter" | "dateBetween" | "notInFuture" | "notInPast" | "contains" | "doesNotContain" | "startsWith" | "endsWith" | "regexMatch" | "lengthBetween" | "maxDigits" | "maxDecimals" | "maxPerPeriod";
         /**
          * Condition definition for a pattern-based validation rule (2 levels deep)
          */
@@ -959,7 +975,8 @@ declare namespace Components {
              */
             contexts?: /**
              * An entity context source the rule needs at evaluation time, referenced by `context`
-             * and `cadence` value paths via the schema slug as their first segment (e.g. `contract.installment_amount`).
+             * value paths (e.g. `contract.installment_amount`) and `cadence` value paths (e.g. `ticket._created_at`)
+             * via the schema slug as their first segment.
              * How the source is resolved (which entity instance) is decided by the consuming surface,
              * not by the rule. Meter reading comparisons use the meter/meter_counter entity schemas
              * (e.g. `meter_counter.current_consumption` for the previous reading value).
@@ -1047,7 +1064,8 @@ declare namespace Components {
              */
             contexts?: /**
              * An entity context source the rule needs at evaluation time, referenced by `context`
-             * and `cadence` value paths via the schema slug as their first segment (e.g. `contract.installment_amount`).
+             * value paths (e.g. `contract.installment_amount`) and `cadence` value paths (e.g. `ticket._created_at`)
+             * via the schema slug as their first segment.
              * How the source is resolved (which entity instance) is decided by the consuming surface,
              * not by the rule. Meter reading comparisons use the meter/meter_counter entity schemas
              * (e.g. `meter_counter.current_consumption` for the previous reading value).
@@ -1132,7 +1150,8 @@ declare namespace Components {
              */
             contexts?: /**
              * An entity context source the rule needs at evaluation time, referenced by `context`
-             * and `cadence` value paths via the schema slug as their first segment (e.g. `contract.installment_amount`).
+             * value paths (e.g. `contract.installment_amount`) and `cadence` value paths (e.g. `ticket._created_at`)
+             * via the schema slug as their first segment.
              * How the source is resolved (which entity instance) is decided by the consuming surface,
              * not by the rule. Meter reading comparisons use the meter/meter_counter entity schemas
              * (e.g. `meter_counter.current_consumption` for the previous reading value).
