@@ -25,6 +25,7 @@ import type { Client as EnvironmentsClient } from './types/environments';
 import type { Client as EventCatalogClient } from './types/event-catalog';
 import type { Client as FileClient } from './types/file';
 import type { Client as IbanClient } from './types/iban';
+import type { Client as IdentityClient } from './types/identity';
 import type { Client as IntegrationToolkitClient } from './types/integration-toolkit';
 import type { Client as JourneyClient } from './types/journey';
 import type { Client as KanbanClient } from './types/kanban';
@@ -79,6 +80,7 @@ export type SDKClientMap = {
   eventCatalog: EventCatalogClient;
   file: FileClient;
   iban: IbanClient;
+  identity: IdentityClient;
   integrationToolkit: IntegrationToolkitClient;
   journey: JourneyClient;
   kanban: KanbanClient;

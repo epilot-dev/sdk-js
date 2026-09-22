@@ -26,6 +26,7 @@
   "eventCatalog": "event-catalog",
   "file": "file",
   "iban": "iban",
+  "identity": "identity",
   "integrationToolkit": "integration-toolkit",
   "journey": "journey",
   "kanban": "kanban",

@@ -1,6 +1,6 @@
 # epilot CLI — API Reference
 
-All 52 epilot APIs available via the CLI.
+All 53 epilot APIs available via the CLI.
 
 ## Setup
 
@@ -39,6 +39,7 @@ npx epilot auth login
 | Event Catalog API | `epilot event-catalog` | 15 | [event-catalog.md](./event-catalog.md) |
 | File API | `epilot file` | 38 | [file.md](./file.md) |
 | Iban API | `epilot iban` | 1 | [iban.md](./iban.md) |
+| Identity API | `epilot identity` | 18 | [identity.md](./identity.md) |
 | Integration Toolkit API | `epilot integration-toolkit` | 70 | [integration-toolkit.md](./integration-toolkit.md) |
 | Journey API | `epilot journey` | 23 | [journey.md](./journey.md) |
 | Kanban API | `epilot kanban` | 10 | [kanban.md](./kanban.md) |
