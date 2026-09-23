@@ -25,7 +25,7 @@ epilot's AAP server lives under `https://access-token.sls.epilot.io/v1/access-to
 | Capability | Arguments | Result |
 | --- | --- | --- |
 | `epilot.organizations.list` | — | the linked user's organizations annotated with this agent's grants |
-| `epilot.access_token.issue` | `{organization_id, read_only?, anonymize?, expires_in?}` | a short-lived epilot API token for that organization |
+| `epilot.access_token.issue` | `{organization_id, access_profile?, read_only?, anonymize?, expires_in?}` | a short-lived epilot API token for that organization |
 
 Full context: the epilot RFC "Agent Auth Protocol for epilot — agents as first-class principals".
 
@@ -104,14 +104,76 @@ import {
   organizationAccessCapability, // build an `epilot.access_token.issue` request with constraints
   listEpilotOrganizations, // execute epilot.organizations.list
   issueEpilotAccessToken, // execute epilot.access_token.issue
-  organizationGrants, // map grants to { organizationId, readOnly, anonymized }
+  organizationGrants, // map grants to { organizationId, profile, readOnly, anonymized, expiresAt, reason }
+  requestOrganizationAccess, // request-capability with profile + reason, validated client-side
   epilotAgentAuthIssuer, // issuer URL per stage
 } from '@epilot/agent-auth';
 
 organizationAccessCapability({ organizationId: '739224', readOnly: true, anonymize: true });
 // → { name: 'epilot.access_token.issue', constraints: { organization_id: '739224', read_only: true, anonymize: true } }
+organizationAccessCapability({ organizationId: '739224', profile: 'config:write' });
+// → { name: 'epilot.access_token.issue', constraints: { organization_id: '739224', access_profile: 'config:write' } }
 organizationAccessCapability(); // no constraints: the approval page grants the user's login organization
 ```
+
+## Access profiles and purpose
+
+An `epilot.access_token.issue` grant carries an `access_profile` constraint that scopes what tokens issued under it
+may do. `read` is the default when the constraint is absent.
+
+| `access_profile` | Title | Read-only | Anonymize allowed | Escalation grant TTL |
+| --- | --- | --- | --- | --- |
+| `read` | Read everything you can see | yes | yes | none (agent lifetime) |
+| `config:read` | Read configuration | yes | yes | 7 days |
+| `config:write` | Change configuration | no | no | 24 hours |
+| `data:read` | Read business data | yes | yes | 7 days |
+| `data:write` | Change business data | no | no | 24 hours |
+| `full` | Everything you can do | no | no | 24 hours |
+
+```ts
+import { ACCESS_PROFILES, ACCESS_PROFILE_INFO, type AccessProfile, mostPermissiveProfile } from '@epilot/agent-auth';
+
+ACCESS_PROFILES; // ['read', 'config:read', 'config:write', 'data:read', 'data:write', 'full']
+ACCESS_PROFILE_INFO['config:write'];
+// → { title: 'Change configuration', description: '…', readOnly: false, anonymizeAllowed: false, escalationTtlSeconds: 86400 }
+mostPermissiveProfile(['config:read', 'data:write']); // 'data:write'
+```
+
+**Anonymize is a read-only property.** Anonymized data must never be written back, so `anonymize: true` is only
+valid with `read`, `config:read` and `data:read`. `organizationAccessCapability({ profile: 'full', anonymize: true })`
+throws `AgentAuthError(400, 'invalid_capabilities', 'anonymize is only available with read profiles')` — the server
+rejects such a request the same way, without silent normalisation. A connection that needs both anonymized reading and
+writing holds two grants (e.g. `data:read` + anonymize and `config:write`).
+
+**Purpose (`reason`).** Every request for a profile other than `read` must state why (10–200 characters). The server
+stores it on the grant, shows it on the approval page and copies it into the token's `actor.purpose`.
+`requestOrganizationAccess` enforces both rules before anything is sent:
+
+```ts
+import { requestOrganizationAccess } from '@epilot/agent-auth';
+
+// read: anonymize defaults to true, reason optional
+await requestOrganizationAccess(client, identity, { organizationId: '911210' });
+
+// escalation: anonymize defaults to false for write profiles, reason required
+const request = await requestOrganizationAccess(client, identity, {
+  organizationId: '911210',
+  profile: 'config:write',
+  reason: 'Fix the entity mapping of the PV registration journey',
+});
+await client.waitForApproval(hostKey, identity.agentId, request.approval as never, {
+  pendingGrantIds: request.agent_capability_grants.map((g) => g.id!).filter(Boolean),
+});
+
+// throws reason_required
+await requestOrganizationAccess(client, identity, { organizationId: '911210', profile: 'data:write' });
+```
+
+Grants returned by `/agent/status` map to `{ profile, readOnly, anonymized, expiresAt, reason }` through
+`organizationGrants()`; `isGrantUsable(grant)` is `true` for active grants that have not passed `expiresAt`. When
+issuing a token, `issueEpilotAccessToken(client, identity, { organization_id, access_profile })` picks the grant to
+issue under; omit `access_profile` to use the matched grant's profile. Asking for a profile no grant covers fails with
+`403 constraint_violated`.
 
 ## Full example flow
 
@@ -124,6 +186,7 @@ import {
   issueEpilotAccessToken,
   listEpilotOrganizations,
   organizationAccessCapability,
+  requestOrganizationAccess,
 } from '@epilot/agent-auth';
 import { hostname } from 'node:os';
 
@@ -159,10 +222,12 @@ const org = organizations.find((o) => o.access.granted)!;
 const issued = await issueEpilotAccessToken(client, identity, { organization_id: org.organization_id });
 console.log(issued.token, issued.expires_at);
 
-// 5. Later: ask for more (write access to another organization). The user approves again in the browser.
-const request = await client.requestCapability(identity, {
-  capabilities: [organizationAccessCapability({ organizationId: '911210', readOnly: false })],
-  reason: 'Import meter readings',
+// 5. Later: ask for more (write access to business data in another organization). The user approves again
+//    in the browser; the reason is shown there and is required for every profile other than `read`.
+const request = await requestOrganizationAccess(client, identity, {
+  organizationId: '911210',
+  profile: 'data:write',
+  reason: 'Import meter readings from the portal export',
 });
 await client.waitForApproval(hostKey, identity.agentId, request.approval as never, {
   pendingGrantIds: request.agent_capability_grants.map((g) => g.id!).filter(Boolean),
