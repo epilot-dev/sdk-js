@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/epilot-dev/sdk-js/tree/main/clients/identity-client#readme",
   "keywords": [
+    "epilot",
     "identity",
     "oidc",
     "openid-connect",
