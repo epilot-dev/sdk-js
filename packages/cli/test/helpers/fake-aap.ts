@@ -2,7 +2,11 @@
  * Fake Agent Auth Protocol server for CLI tests, implemented with msw.
  *
  * Point the CLI at it with `process.env.EPILOT_AGENT_AUTH_ISSUER = ISSUER`.
+ * Implements the access-profile rules of the shared spec: `access_profile`
+ * constraint (default read), reason required for non-read profiles, anonymize
+ * only with read profiles, escalation grants expire per profile TTL.
  */
+import { ACCESS_PROFILE_INFO, type AccessProfile, isAccessProfile, mostPermissiveProfile } from '@epilot/agent-auth';
 import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
 import { mkdtempSync, rmSync } from 'node:fs';
@@ -16,6 +20,8 @@ export type FakeGrant = {
   capability: string;
   status: 'active' | 'pending' | 'denied';
   constraints?: Record<string, unknown>;
+  reason?: string;
+  expires_at?: string;
 };
 
 export type FakeOrg = { organization_id: string; organization_name: string; organization_type?: string };
@@ -66,19 +72,68 @@ const approval = (userCode = 'WDJB-MJHT') => ({
   interval: 1,
 });
 
+const grantProfile = (g: FakeGrant): AccessProfile =>
+  isAccessProfile(g.constraints?.access_profile) ? g.constraints.access_profile : 'read';
+
+const grantAnonymized = (g: FakeGrant): boolean =>
+  ACCESS_PROFILE_INFO[grantProfile(g)].anonymizeAllowed && g.constraints?.anonymize !== false;
+
+const usable = (g: FakeGrant) =>
+  g.status === 'active' && (!g.expires_at || new Date(g.expires_at).getTime() > Date.now());
+
+const orgGrants = (state: FakeState, orgId: string) =>
+  state.grants.filter((g) => g.capability === 'epilot.access_token.issue' && g.constraints?.organization_id === orgId);
+
 const orgAccess = (state: FakeState, orgId: string) => {
-  const grants = state.grants.filter(
-    (g) => g.capability === 'epilot.access_token.issue' && g.constraints?.organization_id === orgId,
-  );
-  const active = grants.filter((g) => g.status === 'active');
+  const grants = orgGrants(state, orgId);
+  const active = grants.filter(usable);
   const pending = grants.some((g) => g.status === 'pending');
-  const best = active.find((g) => g.constraints?.read_only === false) ?? active[0];
+  const profile = mostPermissiveProfile(active.map(grantProfile));
+  const best = active.find((g) => grantProfile(g) === profile);
   return {
     granted: active.length > 0,
     pending,
-    read_only: best ? best.constraints?.read_only !== false : true,
-    anonymized: best ? best.constraints?.anonymize !== false : true,
+    read_only: profile ? ACCESS_PROFILE_INFO[profile].readOnly : true,
+    // anonymized only when every active grant for the org is anonymized (a write grant makes it false)
+    anonymized: active.length > 0 && active.every(grantAnonymized),
+    ...(profile ? { access_profile: profile } : {}),
+    ...(best?.expires_at ? { expires_at: best.expires_at } : {}),
   };
+};
+
+/** Escalation grants expire per profile TTL when they become active. */
+const activate = (g: FakeGrant): FakeGrant => {
+  const ttl = ACCESS_PROFILE_INFO[grantProfile(g)].escalationTtlSeconds;
+  return {
+    ...g,
+    status: 'active',
+    ...(ttl ? { expires_at: new Date(Date.now() + ttl * 1000).toISOString() } : {}),
+  };
+};
+
+/** Spec §1/§3 request validation; returns an error response or undefined. */
+const validateCapabilities = (capabilities: any[], reason: unknown) => {
+  for (const cap of capabilities) {
+    if (typeof cap === 'string' || cap.name !== 'epilot.access_token.issue') continue;
+    const profile = cap.constraints?.access_profile;
+    if (profile !== undefined && !isAccessProfile(profile)) {
+      return HttpResponse.json(
+        { error: 'invalid_capabilities', message: `Unknown profile ${profile}` },
+        { status: 400 },
+      );
+    }
+    const effective: AccessProfile = isAccessProfile(profile) ? profile : 'read';
+    if (cap.constraints?.anonymize === true && !ACCESS_PROFILE_INFO[effective].anonymizeAllowed) {
+      return HttpResponse.json(
+        { error: 'invalid_capabilities', message: 'anonymize is only available with read profiles' },
+        { status: 400 },
+      );
+    }
+    if (effective !== 'read' && (typeof reason !== 'string' || reason.trim().length < 10)) {
+      return HttpResponse.json({ error: 'reason_required', message: 'A reason is required' }, { status: 400 });
+    }
+  }
+  return undefined;
 };
 
 const agentStatusBody = (state: FakeState) => ({
@@ -123,6 +178,8 @@ export const handlers = (state: FakeState) => [
   http.post(`${ISSUER}/agent/register`, async ({ request }) => {
     const body = (await request.json()) as any;
     state.registrations.push({ body, authorization: request.headers.get('authorization') ?? '' });
+    const invalid = validateCapabilities(body.capabilities, body.reason);
+    if (invalid) return invalid;
     // Requested capabilities become pending grants (organizations.list is a host default → active).
     state.grants = body.capabilities.map((cap: any, index: number) => {
       const name = typeof cap === 'string' ? cap : cap.name;
@@ -131,6 +188,7 @@ export const handlers = (state: FakeState) => [
         capability: name,
         status: name === 'epilot.organizations.list' ? 'active' : 'pending',
         constraints: typeof cap === 'string' ? undefined : cap.constraints,
+        ...(typeof cap !== 'string' && body.reason ? { reason: body.reason } : {}),
       };
     });
     return HttpResponse.json(
@@ -157,16 +215,15 @@ export const handlers = (state: FakeState) => [
       // The approval page grants the login organization when none was requested.
       state.grants = state.grants.map((g) =>
         g.status === 'pending'
-          ? {
+          ? activate({
               ...g,
-              status: 'active',
               constraints: { organization_id: state.orgs[0].organization_id, ...(g.constraints ?? {}) },
-            }
+            })
           : g,
       );
       state.grants.push(...state.extraGrantsOnApproval);
     } else if (state.agentStatus === 'active' && state.polls > state.approveGrantsAfterPolls) {
-      state.grants = state.grants.map((g) => (g.status === 'pending' ? { ...g, status: 'active' } : g));
+      state.grants = state.grants.map((g) => (g.status === 'pending' ? activate(g) : g));
     }
     return HttpResponse.json(agentStatusBody(state));
   }),
@@ -174,12 +231,15 @@ export const handlers = (state: FakeState) => [
   http.post(`${ISSUER}/agent/request-capability`, async ({ request }) => {
     const body = (await request.json()) as any;
     state.capabilityRequests.push({ body, authorization: request.headers.get('authorization') ?? '' });
+    const invalid = validateCapabilities(body.capabilities, body.reason);
+    if (invalid) return invalid;
     state.polls = 0;
     const newGrants: FakeGrant[] = body.capabilities.map((cap: any, index: number) => ({
       id: `grant_${state.grants.length + index + 1}`,
       capability: cap.name,
       status: 'pending' as const,
       constraints: cap.constraints,
+      ...(body.reason ? { reason: body.reason } : {}),
     }));
     state.grants.push(...newGrants);
     return HttpResponse.json({
@@ -209,8 +269,24 @@ export const handlers = (state: FakeState) => [
       if (!access.granted) {
         return HttpResponse.json({ error: 'grant_missing', message: `No grant for ${orgId}` }, { status: 403 });
       }
-      if (body.arguments?.read_only === false && access.read_only) {
+      const requested = body.arguments?.access_profile;
+      const active = orgGrants(state, orgId).filter(usable);
+      const grant = requested
+        ? active.find((g) => grantProfile(g) === requested)
+        : active.find((g) => grantProfile(g) === access.access_profile);
+      if (!grant) {
+        return HttpResponse.json(
+          { error: 'constraint_violated', message: `No grant covers profile ${requested}` },
+          { status: 403 },
+        );
+      }
+      const profile = grantProfile(grant);
+      const info = ACCESS_PROFILE_INFO[profile];
+      if (body.arguments?.read_only === false && info.readOnly) {
         return HttpResponse.json({ error: 'constraint_violated', message: 'read_only must be true' }, { status: 403 });
+      }
+      if (body.arguments?.anonymize === false && grantAnonymized(grant)) {
+        return HttpResponse.json({ error: 'constraint_violated', message: 'anonymize must be true' }, { status: 403 });
       }
       state.tokenCounter++;
       return HttpResponse.json({
@@ -220,8 +296,9 @@ export const handlers = (state: FakeState) => [
           organization_id: orgId,
           user_id: 'user_1',
           email: 'dev@epilot.cloud',
-          read_only: body.arguments?.read_only ?? access.read_only,
-          anonymize: body.arguments?.anonymize ?? access.anonymized,
+          access_profile: profile,
+          read_only: info.readOnly,
+          anonymize: info.anonymizeAllowed ? (body.arguments?.anonymize ?? grantAnonymized(grant)) : false,
           expires_at: new Date(Date.now() + 3600_000).toISOString(),
         },
       });
@@ -282,3 +359,5 @@ export const captureOutput = () => {
     },
   };
 };
+
+export const stripAnsi = (s: string) => s.replace(new RegExp(`${String.fromCharCode(27)}\\[[0-9;]*m`, 'g'), '');

@@ -15,6 +15,8 @@ export type Profile = {
   user_id?: string;
   /** Token expiry */
   expires_at?: string;
+  /** Access profile the token was issued with (Agent Auth logins only, e.g. "read", "config:write") */
+  access_profile?: string;
   /** Custom headers */
   headers?: Record<string, string>;
 };

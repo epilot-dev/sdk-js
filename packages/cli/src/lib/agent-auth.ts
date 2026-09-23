@@ -1,14 +1,18 @@
 /**
- * Agent Auth Protocol support for the CLI: host/agent key storage under
- * ~/.config/epilot/agent-auth/, client construction, token issuance and
- * silent refresh.
+ * Agent Auth Protocol support for the CLI (opt-in via `epilot auth login --agent`):
+ * host/agent key storage under ~/.config/epilot/agent-auth/, client construction,
+ * token issuance and silent refresh.
  *
  * - Host  = this machine (one key pair, `agent-auth/host.json`).
  * - Agent = one per profile (`agent-auth/agents/<profile|default>.json`).
+ *
+ * Profiles without an agent record (plain browser login, `--token`, `auth token`)
+ * are never touched by anything in here.
  */
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import {
+  type AccessProfile,
   type AgentIdentity,
   AgentAuthClient,
   AgentAuthError,
@@ -17,13 +21,14 @@ import {
   type KeyPair,
   epilotAgentAuthIssuer,
   generateKeyPair,
+  isAccessProfile,
   issueEpilotAccessToken,
   keyPairFromPrivateJwk,
 } from '@epilot/agent-auth';
 import { type Credentials, saveCredentials } from './auth-store.js';
 import type { Environment } from './environment.js';
 import { getConfigDir, getResolvedProfile, resolveProfileName } from './profiles.js';
-import { BOLD, RESET, YELLOW } from './utils.js';
+import { BOLD, DIM, RESET, YELLOW } from './utils.js';
 
 export type HostRecord = {
   privateKey: Ed25519Jwk;
@@ -40,6 +45,8 @@ export type AgentRecord = {
   created_at: string;
   /** Organization the current token was issued for (used for silent refresh). */
   org_id?: string;
+  /** Access profile the current token was issued with (re-used on refresh). */
+  access_profile?: AccessProfile;
   /** Access level the current token was issued with (re-used on refresh). */
   read_only?: boolean;
   anonymize?: boolean;
@@ -152,9 +159,33 @@ export const loadAgentIdentity = (profileName?: string): LoadedAgentIdentity | n
   }
 };
 
+/**
+ * A plain login (browser callback, `--token`, `auth token`) supersedes an agent
+ * that was registered for the same profile: revoke it (best effort) and forget
+ * it locally, so the silent refresh never replaces the plain token.
+ */
+export const forgetAgentForProfile = async (
+  profileName: string | undefined,
+  out: (s: string) => void = (s) => process.stdout.write(s),
+): Promise<boolean> => {
+  const loaded = loadAgentIdentity(profileName);
+  if (!loaded) return false;
+  try {
+    await loaded.client.revokeAgent(loaded.identity.hostKey, loaded.identity.agentId);
+    out(`${DIM}Agent ${loaded.record.agent_id} from a previous --agent login revoked.${RESET}\n`);
+  } catch (error) {
+    const reason = error instanceof AgentAuthError ? error.code : 'error';
+    out(`${DIM}Could not revoke agent ${loaded.record.agent_id} (${reason}); removing it locally.${RESET}\n`);
+  }
+  deleteAgentRecord(profileName);
+  return true;
+};
+
 // ─── Token issuance & refresh ────────────────────────────────────────────────
 
 export type IssueTokenOptions = {
+  /** Access profile to issue under; defaults to the matched grant's profile server-side. */
+  profile?: AccessProfile;
   readOnly?: boolean;
   anonymize?: boolean;
   /** Profile to store the credentials in (same resolution as `epilot auth login --profile`). */
@@ -164,7 +195,7 @@ export type IssueTokenOptions = {
 /**
  * Issue an epilot access token for an organization through the agent and
  * persist it exactly where `epilot auth login` stores credentials. Also
- * remembers the organization/access level on the agent record for refresh.
+ * remembers the organization/profile/access level on the agent record for refresh.
  */
 export const issueTokenForOrg = async (
   loaded: LoadedAgentIdentity,
@@ -173,15 +204,18 @@ export const issueTokenForOrg = async (
 ): Promise<EpilotIssuedAccessToken> => {
   const issued = await issueEpilotAccessToken(loaded.client, loaded.identity, {
     organization_id: orgId,
+    ...(options.profile !== undefined ? { access_profile: options.profile } : {}),
     ...(options.readOnly !== undefined ? { read_only: options.readOnly } : {}),
     ...(options.anonymize !== undefined ? { anonymize: options.anonymize } : {}),
   });
 
+  const accessProfile = isAccessProfile(issued.access_profile) ? issued.access_profile : options.profile;
   const creds: Credentials = {
     token: issued.token,
     org_id: issued.organization_id ?? orgId,
     user_id: issued.user_id,
     expires_at: issued.expires_at,
+    ...(accessProfile ? { access_profile: accessProfile } : {}),
     ...(issued.email ? { name: issued.email } : {}),
   };
   saveCredentials(creds, options.profileName);
@@ -190,6 +224,7 @@ export const issueTokenForOrg = async (
     {
       ...loaded.record,
       org_id: creds.org_id,
+      access_profile: accessProfile,
       read_only: issued.read_only ?? options.readOnly,
       anonymize: issued.anonymize ?? options.anonymize,
     },
@@ -207,8 +242,9 @@ const expiresSoon = (expiresAt?: string): boolean => {
 /**
  * Silent refresh: when the resolved profile has an agent identity and its
  * token is missing or about to expire, issue a fresh token for the profile's
- * organization and store it. Returns the valid token, or null when the
- * profile has no agent or no organization to issue for.
+ * organization (same access profile as before) and store it. Returns the
+ * valid token, or null when the profile has no agent or no organization to
+ * issue for.
  *
  * Throws AgentAuthError when issuance fails (e.g. agent_revoked).
  */
@@ -224,6 +260,7 @@ export const refreshTokenIfNeeded = async (flagProfile?: string): Promise<string
   if (!orgId) return null;
 
   const issued = await issueTokenForOrg(loaded, orgId, {
+    profile: loaded.record.access_profile,
     readOnly: loaded.record.read_only,
     anonymize: loaded.record.anonymize,
     profileName: flagProfile,
@@ -241,5 +278,20 @@ export const isAgentGoneError = (error: unknown): error is AgentAuthError =>
 
 export const printLoginAgainHint = (error: AgentAuthError): void => {
   process.stderr.write(`${YELLOW}Agent session is no longer valid (${error.code}).${RESET} `);
-  process.stderr.write(`Run ${BOLD}epilot auth login${RESET} to authenticate again.\n`);
+  process.stderr.write(`Run ${BOLD}epilot auth login --agent${RESET} to authenticate again.\n`);
+};
+
+// ─── Formatting ──────────────────────────────────────────────────────────────
+
+/** "expires in 23h" / "expires in 6d" / "expires in 12m" / "expired" for an ISO timestamp. */
+export const formatExpiresIn = (expiresAt: string | undefined, now = Date.now()): string | undefined => {
+  if (!expiresAt) return undefined;
+  const diffMs = new Date(expiresAt).getTime() - now;
+  if (Number.isNaN(diffMs)) return undefined;
+  if (diffMs <= 0) return 'expired';
+  const minutes = Math.floor(diffMs / 60_000);
+  if (minutes < 60) return `expires in ${Math.max(1, minutes)}m`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 48) return `expires in ${hours}h`;
+  return `expires in ${Math.floor(hours / 24)}d`;
 };

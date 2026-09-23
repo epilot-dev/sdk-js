@@ -3,19 +3,27 @@ import { randomBytes } from 'node:crypto';
 import { createServer } from 'node:http';
 import { hostname } from 'node:os';
 import {
+  ACCESS_PROFILES,
+  ACCESS_PROFILE_INFO,
+  type AccessProfile,
   type AgentStatusResponse,
   type DeviceAuthorizationApproval,
   EPILOT_CAPABILITIES,
   type EpilotOrganization,
   AgentAuthError,
   generateKeyPair,
+  isAccessProfile,
+  isReadProfile,
   listEpilotOrganizations,
   organizationAccessCapability,
+  validateReason,
 } from '@epilot/agent-auth';
 import {
   type AgentRecord,
   agentProfileKey,
   ensureHostKey,
+  forgetAgentForProfile,
+  formatExpiresIn,
   getAgentAuthClient,
   issueTokenForOrg,
   loadAgentIdentity,
@@ -27,20 +35,38 @@ import { type Environment, getPortalUrl, resolveEnvironment } from '../lib/envir
 import { isInteractive } from '../lib/interactive.js';
 import { BOLD, RESET, GREEN, RED, DIM, YELLOW, CYAN } from '../lib/utils.js';
 
+export const AGENT_FLAG_DESCRIPTION =
+  'Register this CLI as an Agent Auth agent (org switching, silent token refresh, scoped access profiles)';
+
 export default defineCommand({
   meta: { name: 'login', description: 'Authenticate with epilot' },
   args: {
     token: { type: 'string', description: 'Manually provide a token instead of browser login' },
     profile: { type: 'string', description: 'Save credentials to this profile' },
-    org: { type: 'string', description: 'Organization ID to request access to (default: your login organization)' },
-    readonly: { type: 'boolean', description: 'Request read-only access (cannot perform write actions)' },
+    readonly: { type: 'boolean', description: 'Generate a read-only token (cannot perform write actions)' },
     anonymize: {
       type: 'boolean',
-      description: 'Request anonymized access (personal data is masked in all API responses)',
+      description: 'Generate an anonymized token (personal data is masked in all API responses)',
     },
-    legacy: { type: 'boolean', description: 'Use the previous browser callback login instead of Agent Auth' },
-    json: { type: 'boolean', description: 'Output the login result as JSON' },
-    interactive: { type: 'boolean', default: true, description: 'Interactive mode (--no-interactive to disable)' },
+    agent: { type: 'boolean', description: AGENT_FLAG_DESCRIPTION },
+    org: {
+      type: 'string',
+      description: 'Agent mode: organization ID to request access to (default: your login organization)',
+    },
+    access: {
+      type: 'string',
+      description: `Agent mode: access profile (${ACCESS_PROFILES.join(', ')}; default: read)`,
+    },
+    reason: {
+      type: 'string',
+      description: 'Agent mode: purpose shown to the approving user (required for profiles other than read)',
+    },
+    json: { type: 'boolean', description: 'Agent mode: output the login result as JSON' },
+    interactive: {
+      type: 'boolean',
+      default: true,
+      description: 'Agent mode: interactive approval (--no-interactive to disable)',
+    },
     'use-dev': { type: 'boolean', description: 'Use dev environment (portal.dev.epilot.cloud)' },
     'use-staging': { type: 'boolean', description: 'Use staging environment (portal.staging.epilot.cloud)' },
   },
@@ -52,13 +78,24 @@ export default defineCommand({
 
     // Manual token input
     if (args.token) {
+      await forgetAgentForProfile(profileName);
       saveCredentials({ token: args.token }, profileName);
       const suffix = profileName ? ` to profile "${profileName}"` : '';
       process.stdout.write(`${GREEN}Token saved${suffix}.${RESET}\n`);
       return;
     }
 
-    if (args.legacy) {
+    if (!args.agent) {
+      const agentOnly = (['org', 'access', 'reason'] as const).filter((flag) => args[flag] !== undefined);
+      if (agentOnly.length) {
+        process.stderr.write(
+          `${RED}${agentOnly.map((f) => `--${f}`).join(', ')} require${agentOnly.length === 1 ? 's' : ''} --agent.${RESET}\n`,
+        );
+        process.stderr.write(
+          `Run ${BOLD}epilot auth login --agent ${agentOnly.map((f) => `--${f} …`).join(' ')}${RESET}.\n`,
+        );
+        process.exit(1);
+      }
       if (!process.stdin.isTTY) {
         process.stderr.write(`${RED}Browser login requires an interactive terminal.${RESET}\n`);
         process.stderr.write(
@@ -66,8 +103,9 @@ export default defineCommand({
         );
         process.exit(1);
       }
-      const token = await legacyBrowserLogin(profileName, env, readonly, anonymize);
+      const token = await browserLogin(profileName, env, readonly, anonymize);
       if (token) {
+        await forgetAgentForProfile(profileName);
         process.stdout.write(`${GREEN}${BOLD}Login successful!${RESET}\n`);
       } else {
         process.stderr.write(`${RED}Login failed or was cancelled.${RESET}\n`);
@@ -76,20 +114,25 @@ export default defineCommand({
       return;
     }
 
+    // ── Agent mode ──
     const interactive = isInteractive({ interactive: args.interactive }) && !!process.stdin.isTTY;
     if (!interactive && !args.org) {
-      process.stderr.write(`${RED}Non-interactive login requires --org <organization-id>.${RESET}\n`);
+      process.stderr.write(`${RED}Non-interactive agent login requires --org <organization-id>.${RESET}\n`);
       process.stderr.write(
-        `Run ${BOLD}epilot auth login --org <id> --no-interactive${RESET}, or use ${BOLD}--token <token>${RESET}.\n`,
+        `Run ${BOLD}epilot auth login --agent --org <id> --no-interactive${RESET}, or use ${BOLD}--token <token>${RESET}.\n`,
       );
       process.exit(1);
     }
 
     try {
+      const profile = resolveLoginProfile(args.access, readonly, anonymize);
+      const reason = await resolveReason(profile, args.reason, interactive && !args.json);
       const result = await agentLogin({
         profileName,
         env,
         org: args.org,
+        profile,
+        reason,
         readonly,
         anonymize,
         interactive,
@@ -109,6 +152,99 @@ export default defineCommand({
   },
 });
 
+// ── Access profile helpers (shared with `epilot org`) ─────────────────────────
+
+/** Read-only sibling of a profile: `config:write` → `config:read`, `full` → `read`. */
+export const readOnlySibling = (profile: AccessProfile): AccessProfile =>
+  profile === 'config:write'
+    ? 'config:read'
+    : profile === 'data:write'
+      ? 'data:read'
+      : profile === 'full'
+        ? 'read'
+        : profile;
+
+/** Parse `--access`; unknown values are an error. */
+export const parseAccessProfile = (value: unknown): AccessProfile | undefined => {
+  if (value === undefined || value === null || value === '') return undefined;
+  if (isAccessProfile(value)) return value;
+  throw new AgentAuthError(
+    400,
+    'invalid_access_profile',
+    `Unknown access profile "${String(value)}". Use one of: ${ACCESS_PROFILES.join(', ')}.`,
+  );
+};
+
+/**
+ * Profile for a login: `--access` (default read); `--readonly` downgrades a
+ * write profile to its read sibling; `--anonymize` is only valid with read profiles.
+ */
+export const resolveLoginProfile = (access: unknown, readonly: boolean, anonymize: boolean): AccessProfile => {
+  let profile = parseAccessProfile(access) ?? 'read';
+  if (readonly && !isReadProfile(profile)) {
+    const downgraded = readOnlySibling(profile);
+    process.stderr.write(`${DIM}--readonly downgrades ${profile} to ${downgraded}.${RESET}\n`);
+    profile = downgraded;
+  }
+  if (anonymize && !ACCESS_PROFILE_INFO[profile].anonymizeAllowed) {
+    throw new AgentAuthError(400, 'invalid_capabilities', 'anonymize is only available with read profiles');
+  }
+  return profile;
+};
+
+/**
+ * A purpose is required for every profile other than `read`: prompt for it in
+ * a TTY, fail with `reason_required` otherwise.
+ */
+export const resolveReason = async (
+  profile: AccessProfile,
+  reason: string | undefined,
+  canPrompt: boolean,
+): Promise<string | undefined> => {
+  try {
+    return validateReason(profile, reason);
+  } catch (error) {
+    if (!(error instanceof AgentAuthError) || error.code !== 'reason_required' || !canPrompt) {
+      if (error instanceof AgentAuthError && error.code === 'reason_required') {
+        throw new AgentAuthError(
+          400,
+          'reason_required',
+          `${error.message} Pass --reason "<why you need ${profile} access>".`,
+        );
+      }
+      throw error;
+    }
+  }
+  const { input } = await import('@inquirer/prompts');
+  const answer = await input({
+    message: `Why do you need ${profile} (${ACCESS_PROFILE_INFO[profile].title}) access? Shown to the approving user:`,
+    validate: (value) => {
+      try {
+        validateReason(profile, value);
+        return true;
+      } catch (error) {
+        return error instanceof Error ? error.message : String(error);
+      }
+    },
+  });
+  return validateReason(profile, answer);
+};
+
+/** "config:write (Change configuration), anonymized, expires in 23h" */
+export const describeAccess = (options: {
+  profile?: AccessProfile | string;
+  anonymized?: boolean;
+  expiresAt?: string;
+  readOnly?: boolean;
+}): string => {
+  const profile: AccessProfile = isAccessProfile(options.profile) ? options.profile : 'read';
+  const parts = [`${profile} ${DIM}(${ACCESS_PROFILE_INFO[profile].title})${RESET}`];
+  if (options.anonymized) parts.push(`${YELLOW}anonymized${RESET}`);
+  const expiry = formatExpiresIn(options.expiresAt);
+  if (expiry) parts.push(`${DIM}${expiry}${RESET}`);
+  return parts.join(', ');
+};
+
 // ── Agent Auth login ──────────────────────────────────────────────────────────
 
 export type AgentLoginOptions = {
@@ -116,6 +252,10 @@ export type AgentLoginOptions = {
   env: Environment;
   /** Organization to request; when omitted the approval page grants the login organization. */
   org?: string;
+  /** Access profile to request; default `read`. */
+  profile?: AccessProfile;
+  /** Purpose; required for profiles other than `read` (validated by the caller). */
+  reason?: string;
   readonly: boolean;
   anonymize: boolean;
   interactive: boolean;
@@ -130,16 +270,19 @@ export type AgentLoginResult = {
   organization_id: string;
   organization_name?: string;
   user_id: string;
+  access_profile?: AccessProfile;
   read_only: boolean;
   anonymize: boolean;
   expires_at: string;
+  grant_expires_at?: string;
+  reason?: string;
   profile?: string;
 };
 
 const isDeviceAuthorization = (approval: unknown): approval is DeviceAuthorizationApproval =>
   !!approval && (approval as { method?: string }).method === 'device_authorization';
 
-/** Print the approval URL and user code the way the legacy login printed its verification code. */
+/** Print the approval URL and user code the way the browser login prints its verification code. */
 export const printApproval = (approval: DeviceAuthorizationApproval, out: (s: string) => void): void => {
   out('\n');
   out(`  ${YELLOW}Verification code: ${BOLD}${approval.user_code}${RESET}\n`);
@@ -166,12 +309,12 @@ export const openBrowser = async (url: string, out: (s: string) => void): Promis
  */
 export const agentLogin = async (options: AgentLoginOptions): Promise<AgentLoginResult> => {
   const out = (s: string) => (options.json ? process.stderr : process.stdout).write(s);
+  const profile = options.profile ?? 'read';
   const suffix = options.profileName ? ` ${DIM}(profile: ${options.profileName})${RESET}` : '';
-  out(`\n${BOLD}epilot CLI Login${RESET}${suffix}\n\n`);
+  out(`\n${BOLD}epilot CLI Login${RESET} ${DIM}(agent mode)${RESET}${suffix}\n\n`);
   out('This registers the epilot CLI on this machine as an agent and asks you to approve it in your browser.\n');
-  if (options.readonly) {
-    out(`${YELLOW}Read-only mode: the CLI session will not be able to perform write actions.${RESET}\n`);
-  }
+  out(`  Access: ${describeAccess({ profile, anonymized: options.anonymize })}\n`);
+  if (options.reason) out(`  Reason: ${options.reason}\n`);
   if (options.anonymize) {
     out(`${YELLOW}Anonymize mode: personal data will be masked in all API responses for this CLI session.${RESET}\n`);
   }
@@ -186,11 +329,12 @@ export const agentLogin = async (options: AgentLoginOptions): Promise<AgentLogin
     name: `epilot CLI @ ${machine}`,
     host_name: machine,
     mode: 'delegated',
-    reason: 'epilot CLI login',
+    reason: options.reason ?? 'epilot CLI login',
     capabilities: [
       EPILOT_CAPABILITIES.organizationsList,
       organizationAccessCapability({
         organizationId: options.org,
+        profile,
         readOnly: options.readonly,
         anonymize: options.anonymize,
       }),
@@ -240,18 +384,27 @@ export const agentLogin = async (options: AgentLoginOptions): Promise<AgentLogin
   const { organizations } = await listEpilotOrganizations(client, loaded.identity);
   const org = await chooseOrganization(organizations, options);
 
+  // The approving user may have downgraded the profile on the approval page: issue what was granted.
+  const grantedProfile = org.access?.access_profile ?? profile;
   const issued = await issueTokenForOrg(loaded, org.organization_id, {
-    readOnly: options.readonly,
-    anonymize: options.anonymize,
+    profile: grantedProfile,
+    ...(isReadProfile(grantedProfile) && options.anonymize ? { anonymize: true } : {}),
     profileName: options.profileName,
   });
+  if (grantedProfile !== profile) {
+    out(`${YELLOW}Access was granted as ${grantedProfile} instead of the requested ${profile}.${RESET}\n`);
+  }
 
   out(`${GREEN}${BOLD}Login successful!${RESET}\n`);
   out(
     `  Organization: ${org.organization_name ? `${org.organization_name} ${DIM}(${org.organization_id})${RESET}` : org.organization_id}\n`,
   );
   out(
-    `  Access:       ${issued.read_only ? `${YELLOW}read-only${RESET}` : `${GREEN}read-write${RESET}`}${issued.anonymize ? `, ${YELLOW}anonymized${RESET}` : ''}\n`,
+    `  Access:       ${describeAccess({
+      profile: issued.access_profile ?? grantedProfile,
+      anonymized: issued.anonymize,
+      expiresAt: org.access?.expires_at,
+    })}\n`,
   );
   out(`  Token expires: ${issued.expires_at} ${DIM}(refreshed automatically while the agent is active)${RESET}\n`);
   out(`${DIM}Switch organizations with ${RESET}epilot org list${DIM} / ${RESET}epilot org use <id>${DIM}.${RESET}\n`);
@@ -263,9 +416,12 @@ export const agentLogin = async (options: AgentLoginOptions): Promise<AgentLogin
     organization_id: org.organization_id,
     organization_name: org.organization_name,
     user_id: issued.user_id,
+    access_profile: issued.access_profile ?? grantedProfile,
     read_only: issued.read_only,
     anonymize: issued.anonymize,
     expires_at: issued.expires_at,
+    ...(org.access?.expires_at ? { grant_expires_at: org.access.expires_at } : {}),
+    ...(options.reason ? { reason: options.reason } : {}),
     profile: agentProfileKey(options.profileName),
   };
 };
@@ -326,13 +482,13 @@ export const chooseOrganization = async (
 };
 
 const accessLabel = (o: EpilotOrganization): string => {
-  const parts = [o.access?.read_only ? 'read-only' : '', o.access?.anonymized ? 'anonymized' : ''].filter(Boolean);
+  const parts = [o.access?.access_profile ?? 'read', o.access?.anonymized ? 'anonymized' : ''].filter(Boolean);
   return parts.length ? ` · ${parts.join(', ')}` : '';
 };
 
-// ── Legacy browser callback login ─────────────────────────────────────────────
+// ── Browser callback login (default) ──────────────────────────────────────────
 
-export const legacyBrowserLogin = async (
+export const browserLogin = async (
   profileName?: string,
   env: Environment = 'production',
   readonly = false,

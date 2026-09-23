@@ -9,6 +9,8 @@ export type Credentials = {
   user_id?: string;
   name?: string;
   expires_at?: string;
+  /** Access profile the token was issued with (Agent Auth logins only). */
+  access_profile?: string;
 };
 
 const getConfigDir = (): string => {
@@ -53,6 +55,7 @@ export const saveCredentials = (creds: Credentials, profileName?: string): void 
       org_id: creds.org_id,
       user_id: creds.user_id,
       expires_at: creds.expires_at,
+      access_profile: creds.access_profile,
     });
   }
 
@@ -103,7 +106,8 @@ export const resolveToken = (flagToken?: string, flagProfile?: string): string |
 /**
  * Like `resolveToken`, but silently refreshes the token first when the
  * resolved profile has an Agent Auth identity and its token is missing or
- * about to expire. Flags and env vars still win.
+ * about to expire. Flags and env vars still win. Profiles without an agent
+ * (plain `epilot auth login`, `--token`, `auth token`) are untouched.
  */
 export const resolveTokenAsync = async (flagToken?: string, flagProfile?: string): Promise<string | null> => {
   if (flagToken) return flagToken;

@@ -1,6 +1,6 @@
 import { defineCommand } from 'citty';
-import { AgentAuthError, organizationGrants } from '@epilot/agent-auth';
-import { deleteAgentRecord, loadAgentIdentity } from '../lib/agent-auth.js';
+import { ACCESS_PROFILE_INFO, AgentAuthError, isAccessProfile, organizationGrants } from '@epilot/agent-auth';
+import { deleteAgentRecord, formatExpiresIn, loadAgentIdentity } from '../lib/agent-auth.js';
 import { loadCredentials, removeCredentials } from '../lib/auth-store.js';
 import { getResolvedProfile, resolveProfileName, upsertProfile } from '../lib/profiles.js';
 import { BOLD, RESET, GREEN, RED, DIM, YELLOW } from '../lib/utils.js';
@@ -14,15 +14,15 @@ export default defineCommand({
     login: () => import('./auth-login.js').then((m) => m.default),
     token: () => import('./auth-token.js').then((m) => m.default),
     logout: defineCommand({
-      meta: { name: 'logout', description: 'Revoke the agent and remove stored credentials' },
+      meta: { name: 'logout', description: 'Remove stored credentials' },
       args: {
         profile: { type: 'string', description: 'Profile to log out (or EPILOT_PROFILE env)' },
       },
       run: async ({ args }) => {
         const profileName = args.profile || process.env.EPILOT_PROFILE;
-        let anything = false;
 
-        // Revoke the Agent Auth agent (best effort), then forget it locally. The host key stays.
+        // Agent mode only: revoke the Agent Auth agent (best effort), forget it locally and clear the token it
+        // issued into the profile. The host key stays. Without an agent, logout behaves exactly as before.
         const loaded = loadAgentIdentity(profileName);
         if (loaded) {
           try {
@@ -35,24 +35,20 @@ export default defineCommand({
             );
           }
           deleteAgentRecord(profileName);
-          anything = true;
+          const resolvedName = resolveProfileName(profileName);
+          if (resolvedName && getResolvedProfile(profileName)?.token) {
+            upsertProfile(resolvedName, {
+              token: undefined,
+              org_id: undefined,
+              user_id: undefined,
+              expires_at: undefined,
+              access_profile: undefined,
+            });
+          }
         }
 
-        // Clear the token from the resolved profile, if any.
-        const resolvedName = resolveProfileName(profileName);
-        if (resolvedName && getResolvedProfile(profileName)?.token) {
-          upsertProfile(resolvedName, {
-            token: undefined,
-            org_id: undefined,
-            user_id: undefined,
-            expires_at: undefined,
-          });
-          anything = true;
-        }
-
-        if (removeCredentials()) anything = true;
-
-        if (anything) {
+        const removed = removeCredentials();
+        if (removed || loaded) {
           process.stdout.write(`${GREEN}Logged out successfully.${RESET}\n`);
         } else {
           process.stdout.write(`No stored credentials found.\n`);
@@ -66,50 +62,60 @@ export default defineCommand({
       },
       run: async ({ args }) => {
         const profileName = args.profile || process.env.EPILOT_PROFILE;
-        const creds = loadCredentials() ?? profileCredentials(profileName);
         const loaded = loadAgentIdentity(profileName);
 
-        if (!creds && !loaded) {
-          process.stdout.write(`${YELLOW}Not authenticated.${RESET}\n`);
-          process.stdout.write(`Run ${BOLD}epilot auth login${RESET} to authenticate.\n`);
+        // Without an agent: exactly the status output of a plain login.
+        if (!loaded) {
+          const plain = loadCredentials();
+          if (!plain) {
+            process.stdout.write(`${YELLOW}Not authenticated.${RESET}\n`);
+            process.stdout.write(`Run ${BOLD}epilot auth login${RESET} to authenticate.\n`);
+            return;
+          }
+          printTokenStatus(plain, { agent: false });
           return;
         }
 
+        const creds = loadCredentials() ?? profileCredentials(profileName);
         if (creds) {
-          printTokenStatus(creds);
+          printTokenStatus(creds, { agent: true });
         } else {
           process.stdout.write(`${YELLOW}No valid token stored${RESET} ${DIM}(issued on next API call)${RESET}\n`);
         }
-
-        if (loaded) {
-          process.stdout.write(`\n${BOLD}Agent Auth${RESET}\n`);
-          process.stdout.write(`  Agent:   ${loaded.record.agent_id} ${DIM}(${loaded.record.name})${RESET}\n`);
-          process.stdout.write(`  Host:    ${loaded.record.host_id}\n`);
-          process.stdout.write(`  Issuer:  ${loaded.record.issuer}\n`);
-          try {
-            const status = await loaded.client.getAgentStatus(loaded.identity.hostKey, loaded.identity.agentId);
-            const color = status.status === 'active' ? GREEN : status.status === 'pending' ? YELLOW : RED;
-            process.stdout.write(`  Status:  ${color}${status.status}${RESET}`);
-            if (status.expires_at) process.stdout.write(` ${DIM}(expires ${status.expires_at})${RESET}`);
-            process.stdout.write('\n');
-            const grants = organizationGrants(status.agent_capability_grants);
-            if (grants.length) {
-              process.stdout.write(`  Grants:\n`);
-              for (const g of grants) {
-                const level = [g.readOnly ? 'read-only' : 'read-write', g.anonymized ? 'anonymized' : ''].filter(
-                  Boolean,
-                );
-                const statusColor = g.grant.status === 'active' ? GREEN : g.grant.status === 'pending' ? YELLOW : RED;
-                const active = g.organizationId && g.organizationId === creds?.org_id ? ` ${DIM}(active)${RESET}` : '';
-                process.stdout.write(
-                  `    ${(g.organizationId ?? 'login organization').padEnd(12)} ${statusColor}${g.grant.status}${RESET} ${DIM}${level.join(', ')}${RESET}${active}\n`,
-                );
-              }
+        process.stdout.write(`\n${BOLD}Agent Auth${RESET}\n`);
+        process.stdout.write(`  Agent:   ${loaded.record.agent_id} ${DIM}(${loaded.record.name})${RESET}\n`);
+        process.stdout.write(`  Host:    ${loaded.record.host_id}\n`);
+        process.stdout.write(`  Issuer:  ${loaded.record.issuer}\n`);
+        try {
+          const status = await loaded.client.getAgentStatus(loaded.identity.hostKey, loaded.identity.agentId);
+          const color = status.status === 'active' ? GREEN : status.status === 'pending' ? YELLOW : RED;
+          process.stdout.write(`  Status:  ${color}${status.status}${RESET}`);
+          if (status.expires_at) process.stdout.write(` ${DIM}(expires ${status.expires_at})${RESET}`);
+          process.stdout.write('\n');
+          const grants = organizationGrants(status.agent_capability_grants);
+          if (grants.length) {
+            process.stdout.write(`  Grants:\n`);
+            for (const g of grants) {
+              const expiry = formatExpiresIn(g.expiresAt);
+              const expired = expiry === 'expired';
+              const level = [g.profile, g.anonymized ? 'anonymized' : '', expiry ?? ''].filter(Boolean);
+              const statusColor =
+                g.grant.status === 'active' && !expired ? GREEN : g.grant.status === 'pending' ? YELLOW : RED;
+              const active =
+                g.organizationId &&
+                g.organizationId === creds?.org_id &&
+                g.profile === (creds?.access_profile ?? 'read')
+                  ? ` ${DIM}(active)${RESET}`
+                  : '';
+              const reason = g.reason ? ` ${DIM}— "${g.reason}"${RESET}` : '';
+              process.stdout.write(
+                `    ${(g.organizationId ?? 'login organization').padEnd(12)} ${statusColor}${expired ? 'expired' : g.grant.status}${RESET} ${DIM}${level.join(', ')}${RESET}${active}${reason}\n`,
+              );
             }
-          } catch (error) {
-            const reason = error instanceof AgentAuthError ? `${error.message} (${error.code})` : String(error);
-            process.stdout.write(`  Status:  ${RED}unavailable${RESET} ${DIM}${reason}${RESET}\n`);
           }
+        } catch (error) {
+          const reason = error instanceof AgentAuthError ? `${error.message} (${error.code})` : String(error);
+          process.stdout.write(`  Status:  ${RED}unavailable${RESET} ${DIM}${reason}${RESET}\n`);
         }
       },
     }),
@@ -120,16 +126,26 @@ const profileCredentials = (profileName?: string) => {
   const profile = getResolvedProfile(profileName);
   if (!profile?.token) return null;
   if (profile.expires_at && new Date(profile.expires_at) < new Date()) return null;
-  return { token: profile.token, org_id: profile.org_id, user_id: profile.user_id, expires_at: profile.expires_at };
+  return {
+    token: profile.token,
+    org_id: profile.org_id,
+    user_id: profile.user_id,
+    expires_at: profile.expires_at,
+    access_profile: profile.access_profile,
+  };
 };
 
-const printTokenStatus = (creds: {
-  token: string;
-  org_id?: string;
-  user_id?: string;
-  name?: string;
-  expires_at?: string;
-}): void => {
+const printTokenStatus = (
+  creds: {
+    token: string;
+    org_id?: string;
+    user_id?: string;
+    name?: string;
+    expires_at?: string;
+    access_profile?: string;
+  },
+  { agent }: { agent: boolean },
+): void => {
   const claims = parseJwtPayload(creds.token);
   const isApiToken = claims?.token_type === 'api';
   const isCognitoToken = typeof claims?.iss === 'string' && claims.iss.includes('cognito-idp');
@@ -158,6 +174,11 @@ const printTokenStatus = (creds: {
   if (tokenUse) process.stdout.write(`  Use:     ${tokenUse}\n`);
   if (roles?.length) process.stdout.write(`  Roles:   ${roles.join(', ')}\n`);
   process.stdout.write(`  Access:  ${readOnly ? `${YELLOW}read-only${RESET}` : `${GREEN}read-write${RESET}`}\n`);
+  if (isAccessProfile(creds.access_profile)) {
+    process.stdout.write(
+      `  Profile: ${creds.access_profile} ${DIM}(${ACCESS_PROFILE_INFO[creds.access_profile].title})${RESET}\n`,
+    );
+  }
   if (anonymize) process.stdout.write(`  Data:    ${YELLOW}anonymized${RESET}\n`);
 
   // Expiry
@@ -165,10 +186,12 @@ const printTokenStatus = (creds: {
     const expiry = new Date(creds.expires_at);
     const now = new Date();
     const diffMs = expiry.getTime() - now.getTime();
-    const label =
-      diffMs < 86400000
+    // Agent-issued tokens live for an hour: show hours/minutes. Plain logins keep the day count.
+    const label = agent
+      ? diffMs < 86400000
         ? `${Math.floor(diffMs / 3600000)}h ${Math.floor((diffMs % 3600000) / 60000)}m`
-        : `${Math.floor(diffMs / 86400000)} days`;
+        : `${Math.floor(diffMs / 86400000)} days`
+      : `${Math.floor(diffMs / (1000 * 60 * 60 * 24))} days`;
     process.stdout.write(`  Expires: ${creds.expires_at} ${DIM}(${label})${RESET}\n`);
   } else if (claims?.exp) {
     const expiry = new Date((claims.exp as number) * 1000);
