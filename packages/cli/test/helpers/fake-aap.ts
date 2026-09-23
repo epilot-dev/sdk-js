@@ -123,6 +123,15 @@ const validateCapabilities = (capabilities: any[], reason: unknown) => {
       );
     }
     const effective: AccessProfile = isAccessProfile(profile) ? profile : 'read';
+    if (cap.constraints?.read_only === false && ACCESS_PROFILE_INFO[effective].readOnly) {
+      return HttpResponse.json(
+        {
+          error: 'invalid_capabilities',
+          message: `read_only: false contradicts the read-only access profile ${effective}; request a write profile instead`,
+        },
+        { status: 400 },
+      );
+    }
     if (cap.constraints?.anonymize === true && !ACCESS_PROFILE_INFO[effective].anonymizeAllowed) {
       return HttpResponse.json(
         { error: 'invalid_capabilities', message: 'anonymize is only available with read profiles' },

@@ -332,10 +332,10 @@ export const agentLogin = async (options: AgentLoginOptions): Promise<AgentLogin
     reason: options.reason ?? 'epilot CLI login',
     capabilities: [
       EPILOT_CAPABILITIES.organizationsList,
+      // read-only is implied by the profile (resolveLoginProfile already folded --readonly into it)
       organizationAccessCapability({
         organizationId: options.org,
         profile,
-        readOnly: options.readonly,
         anonymize: options.anonymize,
       }),
     ],

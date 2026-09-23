@@ -143,7 +143,7 @@ describe('epilot auth login --agent', () => {
       'epilot.organizations.list',
       {
         name: 'epilot.access_token.issue',
-        constraints: { access_profile: 'read', read_only: false, anonymize: false },
+        constraints: { access_profile: 'read', anonymize: false },
       },
     ]);
     expect(state.registrations[0].authorization).toMatch(/^Bearer /);
@@ -207,7 +207,7 @@ describe('epilot auth login --agent', () => {
     });
     expect(state.registrations[0].body.capabilities[1]).toEqual({
       name: 'epilot.access_token.issue',
-      constraints: { organization_id: '911210', access_profile: 'read', read_only: true, anonymize: true },
+      constraints: { organization_id: '911210', access_profile: 'read', anonymize: true },
     });
     expect(state.executions[1].body.arguments).toEqual({
       organization_id: '911210',
@@ -237,7 +237,7 @@ describe('epilot auth login --agent', () => {
     expect(registration.reason).toBe('Fix the PV registration journey mapping');
     expect(registration.capabilities[1]).toEqual({
       name: 'epilot.access_token.issue',
-      constraints: { organization_id: '739224', access_profile: 'config:write', read_only: false, anonymize: false },
+      constraints: { organization_id: '739224', access_profile: 'config:write', anonymize: false },
     });
     expect(state.executions[1].body.arguments).toEqual({ organization_id: '739224', access_profile: 'config:write' });
     expect(result).toMatchObject({
@@ -359,7 +359,6 @@ describe('epilot auth login --agent', () => {
     expect(state.registrations[0].body.capabilities[1].constraints).toEqual({
       organization_id: '739224',
       access_profile: 'config:read',
-      read_only: true,
       anonymize: true,
     });
   });
