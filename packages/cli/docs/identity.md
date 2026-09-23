@@ -37,8 +37,8 @@ epilot identity listClients
 
 **Operator Clients**
 - [`listClients`](#listclients) — List registered partner clients. The client secret is never returned.
-- [`createClient`](#createclient) — Create a partner client in `draft` status. The client secret is returned exactly once in this
-- [`getClient`](#getclient) — Read a partner client. The client secret is never returned.
+- [`createOidcClient`](#createoidcclient) — Create a partner client in `draft` status. The client secret is returned exactly once in this
+- [`getOidcClient`](#getoidcclient) — Read a partner client. The client secret is never returned.
 - [`updateClient`](#updateclient) — Replace the mutable configuration of a client. `config_version` must equal the current
 - [`retireClient`](#retireclient) — Retire a client. The record is kept as a tombstone, the `client_id` is never reused, every
 - [`activateClient`](#activateclient) — Activate a `draft` or `suspended` client. Validates that every redirect URI is an absolute
@@ -126,7 +126,7 @@ epilot identity listClients --jsonata 'results[0]'
 
 ---
 
-### `createClient`
+### `createOidcClient`
 
 Create a partner client in `draft` status. The client secret is returned exactly once in this
 
@@ -137,13 +137,13 @@ Create a partner client in `draft` status. The client secret is returned exactly
 **Sample Call**
 
 ```bash
-epilot identity createClient
+epilot identity createOidcClient
 ```
 
 With request body:
 
 ```bash
-epilot identity createClient \
+epilot identity createOidcClient \
   -d '{
   "partner_key": "babelforce",
   "display_name": "Babelforce",
@@ -160,13 +160,13 @@ epilot identity createClient \
 Using stdin pipe:
 
 ```bash
-cat body.json | epilot identity createClient
+cat body.json | epilot identity createOidcClient
 ```
 
 With JSONata filter:
 
 ```bash
-epilot identity createClient --jsonata '$'
+epilot identity createOidcClient --jsonata '$'
 ```
 
 <details>
@@ -203,7 +203,7 @@ epilot identity createClient --jsonata '$'
 
 ---
 
-### `getClient`
+### `getOidcClient`
 
 Read a partner client. The client secret is never returned.
 
@@ -218,20 +218,20 @@ Read a partner client. The client secret is never returned.
 **Sample Call**
 
 ```bash
-epilot identity getClient \
+epilot identity getOidcClient \
   -p client_id=bf-prod-x7k2
 ```
 
 Using positional args for path parameters:
 
 ```bash
-epilot identity getClient bf-prod-x7k2
+epilot identity getOidcClient bf-prod-x7k2
 ```
 
 With JSONata filter:
 
 ```bash
-epilot identity getClient -p client_id=bf-prod-x7k2 --jsonata 'client_id'
+epilot identity getOidcClient -p client_id=bf-prod-x7k2 --jsonata 'client_id'
 ```
 
 <details>

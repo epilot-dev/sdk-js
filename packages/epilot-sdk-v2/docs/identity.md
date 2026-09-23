@@ -26,8 +26,8 @@ const { data } = await identityClient.listClients(...)
 
 **Operator Clients**
 - [`listClients`](#listclients)
-- [`createClient`](#createclient)
-- [`getClient`](#getclient)
+- [`createOidcClient`](#createoidcclient)
+- [`getOidcClient`](#getoidcclient)
 - [`updateClient`](#updateclient)
 - [`retireClient`](#retireclient)
 - [`activateClient`](#activateclient)
@@ -128,7 +128,7 @@ const { data } = await client.listClients({
 
 ---
 
-### `createClient`
+### `createOidcClient`
 
 Create a partner client in `draft` status. The client secret is returned exactly once in this
 response and can never be read again; use `rotateClientSecret` to obtain a new one.
@@ -136,7 +136,7 @@ response and can never be read again; use `rotateClientSecret` to obtain a new o
 `POST /v1/identity/operator/clients`
 
 ```ts
-const { data } = await client.createClient(
+const { data } = await client.createOidcClient(
   null,
   {
     partner_key: 'babelforce',
@@ -186,14 +186,14 @@ const { data } = await client.createClient(
 
 ---
 
-### `getClient`
+### `getOidcClient`
 
 Read a partner client. The client secret is never returned.
 
 `GET /v1/identity/operator/clients/{client_id}`
 
 ```ts
-const { data } = await client.getClient({
+const { data } = await client.getOidcClient({
   client_id: 'example',
 })
 ```

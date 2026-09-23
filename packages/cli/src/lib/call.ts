@@ -42,10 +42,13 @@ export type CallArgs = {
 /**
  * Rewrite a production URL to target a different stage.
  * e.g. https://entity.sls.epilot.io → https://entity.dev.sls.epilot.io
+ * Identity uses https://id.epilot.cloud → https://id.dev.epilot.cloud.
  */
 const toStageUrl = (prodUrl: string, stage: string): string => {
   if (stage === 'prod') return prodUrl;
-  return prodUrl.replace('.sls.epilot.io', `.${stage}.sls.epilot.io`);
+  return prodUrl
+    .replace(/^https:\/\/id\.epilot\.cloud(?=\/|$)/, `https://id.${stage}.epilot.cloud`)
+    .replace('.sls.epilot.io', `.${stage}.sls.epilot.io`);
 };
 
 /**

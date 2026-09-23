@@ -76,8 +76,8 @@
         }
       },
       "post": {
-        "operationId": "createClient",
-        "summary": "createClient",
+        "operationId": "createOidcClient",
+        "summary": "createOidcClient",
         "description": "Create a partner client in `draft` status. The client secret is returned exactly once in this\nresponse and can never be read again; use `rotateClientSecret` to obtain a new one.\n",
         "tags": [
           "Operator Clients"
@@ -122,8 +122,8 @@
         }
       ],
       "get": {
-        "operationId": "getClient",
-        "summary": "getClient",
+        "operationId": "getOidcClient",
+        "summary": "getOidcClient",
         "description": "Read a partner client. The client secret is never returned.",
         "tags": [
           "Operator Clients"

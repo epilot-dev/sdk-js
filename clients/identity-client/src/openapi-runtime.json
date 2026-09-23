@@ -30,7 +30,7 @@
         "responses": {}
       },
       "post": {
-        "operationId": "createClient",
+        "operationId": "createOidcClient",
         "requestBody": {
           "required": true,
           "content": {
@@ -47,7 +47,7 @@
         }
       ],
       "get": {
-        "operationId": "getClient",
+        "operationId": "getOidcClient",
         "responses": {}
       },
       "put": {

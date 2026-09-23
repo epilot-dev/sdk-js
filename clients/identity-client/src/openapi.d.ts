@@ -441,19 +441,19 @@ declare namespace Paths {
             export type $409 = Components.Responses.Conflict;
         }
     }
-    namespace CreateClient {
+    namespace CreateIdentitySession {
+        namespace Responses {
+            export type $200 = Components.Schemas.IdentitySession;
+            export type $401 = Components.Responses.Unauthorized;
+        }
+    }
+    namespace CreateOidcClient {
         export type RequestBody = Components.Schemas.PartnerClientCreate;
         namespace Responses {
             export type $201 = Components.Schemas.PartnerClientWithSecret;
             export type $400 = Components.Responses.BadRequest;
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
-        }
-    }
-    namespace CreateIdentitySession {
-        namespace Responses {
-            export type $200 = Components.Schemas.IdentitySession;
-            export type $401 = Components.Responses.Unauthorized;
         }
     }
     namespace DeleteIdentitySession {
@@ -473,17 +473,17 @@ declare namespace Paths {
             export type $409 = Components.Responses.Conflict;
         }
     }
-    namespace GetClient {
+    namespace GetClientOrganization {
         namespace Responses {
-            export type $200 = Components.Schemas.PartnerClient;
+            export type $200 = Components.Schemas.OrgEnablement;
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
         }
     }
-    namespace GetClientOrganization {
+    namespace GetOidcClient {
         namespace Responses {
-            export type $200 = Components.Schemas.OrgEnablement;
+            export type $200 = Components.Schemas.PartnerClient;
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
@@ -680,27 +680,27 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ListClients.Responses.$200>
   /**
-   * createClient - createClient
+   * createOidcClient - createOidcClient
    * 
    * Create a partner client in `draft` status. The client secret is returned exactly once in this
    * response and can never be read again; use `rotateClientSecret` to obtain a new one.
    * 
    */
-  'createClient'(
+  'createOidcClient'(
     parameters?: Parameters<UnknownParamsObject> | null,
-    data?: Paths.CreateClient.RequestBody,
+    data?: Paths.CreateOidcClient.RequestBody,
     config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.CreateClient.Responses.$201>
+  ): OperationResponse<Paths.CreateOidcClient.Responses.$201>
   /**
-   * getClient - getClient
+   * getOidcClient - getOidcClient
    * 
    * Read a partner client. The client secret is never returned.
    */
-  'getClient'(
+  'getOidcClient'(
     parameters?: Parameters<UnknownParamsObject> | null,
     data?: any,
     config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.GetClient.Responses.$200>
+  ): OperationResponse<Paths.GetOidcClient.Responses.$200>
   /**
    * updateClient - updateClient
    * 
@@ -898,7 +898,7 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ListClients.Responses.$200>
     /**
-     * createClient - createClient
+     * createOidcClient - createOidcClient
      * 
      * Create a partner client in `draft` status. The client secret is returned exactly once in this
      * response and can never be read again; use `rotateClientSecret` to obtain a new one.
@@ -906,13 +906,13 @@ export interface PathsDictionary {
      */
     'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
-      data?: Paths.CreateClient.RequestBody,
+      data?: Paths.CreateOidcClient.RequestBody,
       config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.CreateClient.Responses.$201>
+    ): OperationResponse<Paths.CreateOidcClient.Responses.$201>
   }
   ['/v1/identity/operator/clients/{client_id}']: {
     /**
-     * getClient - getClient
+     * getOidcClient - getOidcClient
      * 
      * Read a partner client. The client secret is never returned.
      */
@@ -920,7 +920,7 @@ export interface PathsDictionary {
       parameters?: Parameters<UnknownParamsObject> | null,
       data?: any,
       config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.GetClient.Responses.$200>
+    ): OperationResponse<Paths.GetOidcClient.Responses.$200>
     /**
      * updateClient - updateClient
      * 

@@ -29,6 +29,10 @@ const identityClient = getClient();
 const { data: clients } = await identityClient.listClients({ partner_key: "babelforce" });
 ```
 
+Register and look up applications with `identityClient.createOidcClient()` and
+`identityClient.getOidcClient()`. The package's `getClient()` and `createClient()` helpers
+return SDK HTTP client instances.
+
 ## Documentation:
 
 https://docs.epilot.io/api/identity
