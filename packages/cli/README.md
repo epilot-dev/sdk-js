@@ -53,17 +53,19 @@ PARAMETER FLAGS
   -i, --include            Include response headers in output
 
 COMMANDS
-  auth login              Authenticate with epilot (approve the CLI in your browser)
-  auth login --org <id>   Log in and request access to a specific organization
+  auth login              Authenticate with epilot (browser)
   auth token              Store an API token directly
-  auth status             Show authentication status, agent and grants
-  auth logout             Revoke the agent and remove stored credentials
-  org list                List your organizations and this CLI's access
-  org use <id>            Switch the active organization
-  org request <id>        Request access to an organization (--write, --full-pii)
-  org current             Show the active organization
+  auth status             Show authentication status
+  auth logout             Remove stored credentials
   profile                 Manage named profiles
   completion              Generate shell completion scripts
+
+AGENT MODE (optional)
+  auth login --agent      Register this CLI as an Agent Auth agent (org switching, silent token refresh, scoped access profiles)
+  org list                List your organizations and this CLI's access
+  org use <id>            Switch the active organization
+  org request <id>        Request access (--access <profile> --reason "…")
+  org current             Show the active organization
 
 APIs
   access-token         Access Token API
@@ -120,12 +122,13 @@ APIs
 
 EXAMPLES
   $ epilot auth login
-  $ epilot org use 739224
   $ epilot user getMeV2
   $ epilot entity getEntity contact abc123
   $ epilot entity searchEntities -d '{"q":"*"}'
   $ epilot entity searchEntities --jsonata 'results[0]._title'
   $ echo '{"q":"*"}' | epilot entity searchEntities
+  $ epilot auth login --agent --org 739224   # agent mode (optional)
+  $ epilot org request 739224 --access config:write --reason "Fix the PV journey mapping"
 
 Run epilot <api> to list available operations.
 Run epilot <api> <operationId> --help for operation details.
@@ -134,71 +137,108 @@ Run epilot <api> <operationId> --help for operation details.
 
 ## Authentication
 
-The CLI authenticates through the [Agent Auth Protocol](https://agentauthprotocol.com/specification/v1.0-draft)
-(via [`@epilot/agent-auth`](../agent-auth)): your machine is a **host**, the CLI is an **agent** you approve once in
-the browser, and short-lived epilot tokens are issued per organization and refreshed silently.
-
 ```bash
-# Log in: prints a verification code, opens the epilot 360 login to approve the CLI, then stores a token
+# Browser-based login (opens epilot portal)
 epilot auth login
 
-# Log in for a specific organization, read-only and with personal data anonymized
-epilot auth login --org 739224 --readonly --anonymize
-
-# Non-interactive (CI / agents): requires --org; prints the approval URL and polls until approved
-epilot auth login --org 739224 --no-interactive --json
-
-# Manual token (API token or copied user token)
+# Manual token
 epilot auth login --token <your-token>
-epilot auth token
 
-# Previous browser callback login (kept for one release)
-epilot auth login --legacy
-
-# Or pass a token per command / via environment variable
+# Or pass token per-command
 epilot entity listSchemas --token <your-token>
+
+# Or via environment variable
 EPILOT_TOKEN=<your-token> epilot entity listSchemas
 
-# Status (token, agent id, host id, per-organization grants) and logout (revokes the agent)
+# Check auth status
 epilot auth status
+
+# Logout
 epilot auth logout
 ```
-
-The approval page shows the same verification code as your terminal — check that they match before approving.
-On the page you can only narrow what the CLI asked for (e.g. force read-only or anonymized), never widen it.
-
-### Organizations
-
-One approval grants access to one organization. Switching or adding organizations goes through `epilot org`:
-
-```bash
-epilot org list                 # your organizations with access status (granted / read-only / anonymized / pending)
-epilot org current              # the active organization
-epilot org use 911210           # switch: issues a token for a granted organization (asks for access otherwise)
-epilot org request 911210       # ask for read-only, anonymized access (approved in the browser)
-epilot org request 911210 --write --full-pii --reason "Import meter readings"
-epilot org request 911210 --no-interactive --json   # prints the approval and exits 0 with status "pending"
-```
-
-After an approval that happened outside the CLI (e.g. from a `--no-interactive` request), `epilot org use <id>`
-completes the switch.
-
-### Silent refresh
-
-Issued tokens are short-lived. Whenever a command runs and the stored token is missing or expires within two minutes,
-the CLI issues a fresh one through the agent and stores it — you stay logged in for as long as the agent is active
-(server-side session and lifetime limits apply). If the agent was revoked or expired, run `epilot auth login` again.
-
-Local state lives in `~/.config/epilot/agent-auth/` (`host.json` for the machine key, `agents/<profile>.json` for
-the per-profile agent; both mode 0600). `EPILOT_AGENT_AUTH_ISSUER` overrides the Agent Auth server URL (defaults per
-stage: `--use-dev`, `--use-staging`).
 
 Token resolution order:
 1. `--token` flag
 2. `EPILOT_TOKEN` environment variable
-3. Active profile token (silently refreshed through the profile's agent when needed)
+3. Active profile token
 4. Stored credentials (`~/.config/epilot/credentials.json`)
 5. Interactive prompt (if TTY)
+
+### Agent mode (optional)
+
+`epilot auth login --agent` registers the CLI through the
+[Agent Auth Protocol](https://agentauthprotocol.com/specification/v1.0-draft) (via
+[`@epilot/agent-auth`](../agent-auth)): your machine is a **host**, the CLI is an **agent** you approve once in the
+browser, and short-lived epilot tokens are issued per organization and refreshed silently. In return you get
+organization switching, scoped **access profiles** and sessions that outlive a single token. Plain logins are not
+affected: a profile without an agent behaves exactly as before.
+
+```bash
+# Register the CLI as an agent and approve it in the browser (read access, your login organization)
+epilot auth login --agent
+
+# A specific organization, an access profile and the purpose shown to the approving user
+epilot auth login --agent --org 739224 --access config:write --reason "Fix the PV registration journey mapping"
+
+# Non-interactive (CI / agents): requires --org; prints the approval URL and polls until approved
+epilot auth login --agent --org 739224 --no-interactive --json
+
+# Status shows the agent, its grants (profile, expiry, reason); logout revokes the agent
+epilot auth status
+epilot auth logout
+```
+
+Access profiles scope what the issued tokens may do. `read` is the default and lives as long as the agent; every
+other profile is an escalation that requires a `--reason` (10–200 characters, prompted for in a TTY) and expires.
+The flag is `--access` because `--profile` already selects a [named CLI profile](#profiles):
+
+| `--access` | Meaning | Read-only | Expires after |
+| --- | --- | --- | --- |
+| `read` | Read everything you can see | yes | never (agent lifetime) |
+| `config:read` | Read configuration (journeys, automations, workflows, schemas, portals, designs) | yes | 7 days |
+| `config:write` | Change configuration | no | 24 hours |
+| `data:read` | Read business data (contacts, opportunities, orders, files, messages) | yes | 7 days |
+| `data:write` | Change business data | no | 24 hours |
+| `full` | Everything your account can do | no | 24 hours |
+
+Anonymization is a read-only property: `--anonymize` (and `org request` without `--full-pii`) only applies to read
+profiles. Combining `--anonymize` with a write profile is an error ("anonymize is only available with read
+profiles"), because an agent must never write masked data back. `--readonly` with a write profile downgrades it to
+its read sibling (`config:write` → `config:read`, `full` → `read`). On the approval page the user can only narrow what
+the CLI asked for; the CLI then issues tokens for the profile that was actually granted.
+
+#### Organizations
+
+One approval grants access to one organization. Switching or adding organizations goes through `epilot org`
+(agent mode only — without an agent the commands exit 1 with "This profile has no agent identity. Run
+`epilot auth login --agent` first.", or `{"error":"agent_required"}` with `--json`):
+
+```bash
+epilot org list                 # organizations with access (profile, anonymized, "expires in 23h", pending)
+epilot org current              # the active organization and its profile
+epilot org use 911210           # switch: issues a token under the most permissive grant (asks for access otherwise)
+epilot org use 911210 --access data:read            # ...or under a specific granted profile
+epilot org request 911210       # ask for read, anonymized access (approved in the browser)
+epilot org request 911210 --full-pii                # read access with unmasked personal data
+epilot org request 911210 --access data:write --reason "Import meter readings from the portal export"
+epilot org request 911210 --access full --reason "…" --no-interactive --json   # prints the approval, exits 0 (pending)
+```
+
+`--write` is a deprecated alias for `--access full`. Write profiles always get full personal data (`--full-pii` is
+implied). After an approval that happened outside the CLI (e.g. from a `--no-interactive` request),
+`epilot org use <id>` completes the switch; `auth status` lists every grant with its profile, expiry and reason.
+
+#### Silent refresh
+
+Issued tokens are short-lived. Whenever a command runs and the stored token of an agent-mode profile is missing or
+expires within two minutes, the CLI issues a fresh one through the agent (same organization and profile) and stores
+it — you stay logged in for as long as the agent and its grant are active. If the agent was revoked or expired, run
+`epilot auth login --agent` again. A plain `epilot auth login` (or `--token`) on the same profile revokes that
+profile's agent, so plain tokens are never replaced.
+
+Local state lives in `~/.config/epilot/agent-auth/` (`host.json` for the machine key, `agents/<profile>.json` for
+the per-profile agent; both mode 0600). `EPILOT_AGENT_AUTH_ISSUER` overrides the Agent Auth server URL (defaults per
+stage: `--use-dev`, `--use-staging`).
 
 ## Profiles
 
