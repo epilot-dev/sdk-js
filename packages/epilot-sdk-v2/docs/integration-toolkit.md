@@ -76,7 +76,11 @@ const { data } = await integrationToolkitClient.acknowledgeTracking(...)
 - [`commitTypes`](#committypes)
 
 **monitoring**
+- [`queryInboundMonitoringEvents`](#queryinboundmonitoringevents)
+- [`getMonitoringStats`](#getmonitoringstats)
+- [`getMonitoringTimeSeries`](#getmonitoringtimeseries)
 - [`queryAccessLogs`](#queryaccesslogs)
+- [`queryOutboundMonitoringEvents`](#queryoutboundmonitoringevents)
 - [`queryMonitoringEventsV2`](#querymonitoringeventsv2)
 - [`getMonitoringStatsV2`](#getmonitoringstatsv2)
 - [`getMonitoringTimeSeriesV2`](#getmonitoringtimeseriesv2)
@@ -155,7 +159,7 @@ const { data } = await integrationToolkitClient.acknowledgeTracking(...)
 - [`OutboundIntegrationEventConfiguration`](#outboundintegrationeventconfiguration)
 - [`IntegrationEntity`](#integrationentity)
 - [`IntegrationEntityConditional`](#integrationentityconditional)
-- [`IntegrationEntityFold`](#integrationentityfold)
+- [`IntegrationEntityFromRows`](#integrationentityfromrows)
 - [`MappedFieldValue`](#mappedfieldvalue)
 - [`IntegrationMeterReading`](#integrationmeterreading)
 - [`PruneScopeConfig`](#prunescopeconfig)
@@ -2485,6 +2489,189 @@ const { data } = await client.deleteIntegrationAppMapping(
 
 ---
 
+### `queryInboundMonitoringEvents`
+
+Query inbound monitoring events for a specific integration.
+Returns detailed information about inbound sync events from ERP systems,
+including success rates, error breakdowns, and processing metrics.
+
+`POST /v1/integrations/{integrationId}/monitoring/inbound-events`
+
+```ts
+const { data } = await client.queryInboundMonitoringEvents(
+  {
+    integrationId: 'example',
+  },
+  {
+    use_case_id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+    event_type: 'CREATE',
+    sync_type: 'entity',
+    status: 'success',
+    error_category: 'validation',
+    correlation_id: 'string',
+    object_type: 'string',
+    event_name: 'string',
+    event_id: 'string',
+    from_date: '2025-01-01T00:00:00Z',
+    to_date: '2025-01-31T23:59:59Z',
+    limit: 50,
+    cursor: {
+      completed_at: '1970-01-01T00:00:00.000Z',
+      event_id: 'string'
+    }
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "data": [
+    {
+      "org_id": "string",
+      "event_id": "string",
+      "correlation_id": "string",
+      "integration_id": "string",
+      "use_case_id": "string",
+      "event_type": "CREATE",
+      "object_type": "string",
+      "sync_type": "entity",
+      "status": "success",
+      "error_code": "string",
+      "error_message": "string",
+      "error_category": "validation",
+      "processing_duration_ms": 0,
+      "received_at": "1970-01-01T00:00:00.000Z",
+      "completed_at": "1970-01-01T00:00:00.000Z"
+    }
+  ],
+  "next_cursor": {
+    "completed_at": "1970-01-01T00:00:00.000Z",
+    "event_id": "string"
+  },
+  "has_more": true
+}
+```
+
+</details>
+
+---
+
+### `getMonitoringStats`
+
+Get aggregated statistics for both inbound and outbound monitoring events for a specific integration.
+Returns summary metrics for inbound (ERP sync) and outbound (webhook delivery) events,
+including s
+
+`POST /v1/integrations/{integrationId}/monitoring/stats`
+
+```ts
+const { data } = await client.getMonitoringStats(
+  {
+    integrationId: 'example',
+  },
+  {
+    from_date: '2025-01-01T00:00:00Z',
+    to_date: '2025-01-31T23:59:59Z',
+    inbound_group_by: ['use_case_id', 'status'],
+    outbound_group_by: ['event_name', 'status']
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "inbound": {
+    "total_events": 0,
+    "total_correlations": 0,
+    "success_count": 0,
+    "error_count": 0,
+    "skipped_count": 0,
+    "warning_count": 0,
+    "success_rate": 0,
+    "last_error_at": "1970-01-01T00:00:00.000Z",
+    "breakdown": [
+      {}
+    ]
+  },
+  "outbound": {
+    "total_events": 0,
+    "success_count": 0,
+    "error_count": 0,
+    "pending_count": 0,
+    "success_rate": 0,
+    "last_error_at": "1970-01-01T00:00:00.000Z",
+    "breakdown": [
+      {}
+    ]
+  }
+}
+```
+
+</details>
+
+---
+
+### `getMonitoringTimeSeries`
+
+Get time-series aggregated event counts for monitoring charts.
+Returns pre-bucketed counts at configurable intervals for both inbound and outbound events.
+Maximum of 200 buckets per request. Returns 4
+
+`POST /v1/integrations/{integrationId}/monitoring/timeseries`
+
+```ts
+const { data } = await client.getMonitoringTimeSeries(
+  {
+    integrationId: 'example',
+  },
+  {
+    from_date: '2025-01-01T00:00:00Z',
+    to_date: '2025-01-31T23:59:59Z',
+    interval: '1h',
+    direction: 'both'
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "interval": "5m",
+  "from_date": "1970-01-01T00:00:00.000Z",
+  "to_date": "1970-01-01T00:00:00.000Z",
+  "buckets": [
+    {
+      "timestamp": "1970-01-01T00:00:00.000Z",
+      "inbound": {
+        "success_count": 0,
+        "error_count": 0,
+        "warning_count": 0,
+        "skipped_count": 0,
+        "total_count": 0
+      },
+      "outbound": {
+        "success_count": 0,
+        "error_count": 0,
+        "pending_count": 0,
+        "total_count": 0
+      }
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
 ### `getOutboundStatus`
 
 Get the status of all outbound use cases for a specific integration.
@@ -2854,6 +3041,68 @@ const { data } = await client.queryAccessLogs(
   "next_cursor": {
     "timestamp": "1970-01-01T00:00:00.000Z",
     "request_id": "string"
+  },
+  "has_more": true
+}
+```
+
+</details>
+
+---
+
+### `queryOutboundMonitoringEvents`
+
+Query outbound monitoring events for a specific integration.
+Returns detailed information about outbound event deliveries,
+filtered by event_name (event_catalog_event) linked to the integration's outb
+
+`POST /v1/integrations/{integrationId}/monitoring/outbound-events`
+
+```ts
+const { data } = await client.queryOutboundMonitoringEvents(
+  {
+    integrationId: 'example',
+  },
+  {
+    event_name: 'automation_flow_target',
+    status: 'succeeded',
+    webhook_config_id: 'string',
+    from_date: '2025-01-01T00:00:00Z',
+    to_date: '2025-01-31T23:59:59Z',
+    limit: 50,
+    cursor: {
+      created_at: '1970-01-01T00:00:00.000Z',
+      event_id: 'string'
+    }
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "data": [
+    {
+      "org_id": "string",
+      "event_id": "string",
+      "event_name": "string",
+      "status": "succeeded",
+      "url": "string",
+      "http_method": "string",
+      "http_response": {},
+      "webhook_config_id": "string",
+      "metadata": {},
+      "execution_context": {},
+      "payload": {},
+      "created_at": "1970-01-01T00:00:00.000Z",
+      "updated_at": "1970-01-01T00:00:00.000Z"
+    }
+  ],
+  "next_cursor": {
+    "created_at": "1970-01-01T00:00:00.000Z",
+    "event_id": "string"
   },
   "has_more": true
 }
@@ -3798,7 +4047,7 @@ everything it has to say aggregated into that on
 
 ```ts
 type ErpImportIssue = {
-  code: "UNIQUE_ID_COLUMN_MISSING" | "MAPPED_COLUMN_MISSING" | "MALFORMED_ROW" | "INVALID_ENCODING" | "EMPTY_FILE" | "TOO_MANY_ROWS" | "BLANK_ROWS_SKIPPED" | "TIER_ROWS_NOT_GROUPED" | "TIER_BANDS_CONFLICT" | "CONDITION_VALUE_MISSING" | "VARIANT_VALUE_CONFLICT" | "ATTRIBUTE_NOT_OVERRIDABLE" | "ATTRIBUTE_NOT_IN_SCHEMA" | "IS_CONDITIONAL_NOT_CONSTANT" | "SCHEMA_NOT_CONDITIONABLE" | "SCHEMA_NOT_FOUND" | "SCHEMA_DECLARES_NO_CONDITIONS" | "GROUPING_KEY_NOT_A_COLUMN" | "GROUPING_KEY_IS_FOLD_COLUMN"
+  code: "UNIQUE_ID_COLUMN_MISSING" | "MAPPED_COLUMN_MISSING" | "MALFORMED_ROW" | "INVALID_ENCODING" | "EMPTY_FILE" | "TOO_MANY_ROWS" | "BLANK_ROWS_SKIPPED" | "TIER_ROWS_NOT_GROUPED" | "TIER_BANDS_CONFLICT" | "CONDITION_VALUE_MISSING" | "VARIANT_VALUE_CONFLICT" | "ATTRIBUTE_NOT_OVERRIDABLE" | "ATTRIBUTE_NOT_IN_SCHEMA" | "IS_CONDITIONAL_NOT_CONSTANT" | "SCHEMA_NOT_CONDITIONABLE" | "SCHEMA_NOT_FOUND" | "SCHEMA_DECLARES_NO_CONDITIONS" | "GROUPING_KEY_NOT_A_COLUMN" | "GROUPING_KEY_IS_SORT_COLUMN" | "CONDITIONAL_TARGET_MODE_UNSUPPORTED"
   severity: "warning" | "blocking"
   columns?: Array<{
     name: string
@@ -3828,7 +4077,7 @@ type ErpImportValidation = {
   }>
   entity_details_truncated?: boolean
   issues?: Array<{
-    code: "UNIQUE_ID_COLUMN_MISSING" | "MAPPED_COLUMN_MISSING" | "MALFORMED_ROW" | "INVALID_ENCODING" | "EMPTY_FILE" | "TOO_MANY_ROWS" | "BLANK_ROWS_SKIPPED" | "TIER_ROWS_NOT_GROUPED" | "TIER_BANDS_CONFLICT" | "CONDITION_VALUE_MISSING" | "VARIANT_VALUE_CONFLICT" | "ATTRIBUTE_NOT_OVERRIDABLE" | "ATTRIBUTE_NOT_IN_SCHEMA" | "IS_CONDITIONAL_NOT_CONSTANT" | "SCHEMA_NOT_CONDITIONABLE" | "SCHEMA_NOT_FOUND" | "SCHEMA_DECLARES_NO_CONDITIONS" | "GROUPING_KEY_NOT_A_COLUMN" | "GROUPING_KEY_IS_FOLD_COLUMN"
+    code: "UNIQUE_ID_COLUMN_MISSING" | "MAPPED_COLUMN_MISSING" | "MALFORMED_ROW" | "INVALID_ENCODING" | "EMPTY_FILE" | "TOO_MANY_ROWS" | "BLANK_ROWS_SKIPPED" | "TIER_ROWS_NOT_GROUPED" | "TIER_BANDS_CONFLICT" | "CONDITION_VALUE_MISSING" | "VARIANT_VALUE_CONFLICT" | "ATTRIBUTE_NOT_OVERRIDABLE" | "ATTRIBUTE_NOT_IN_SCHEMA" | "IS_CONDITIONAL_NOT_CONSTANT" | "SCHEMA_NOT_CONDITIONABLE" | "SCHEMA_NOT_FOUND" | "SCHEMA_DECLARES_NO_CONDITIONS" | "GROUPING_KEY_NOT_A_COLUMN" | "GROUPING_KEY_IS_SORT_COLUMN" | "CONDITIONAL_TARGET_MODE_UNSUPPORTED"
     severity: "warning" | "blocking"
     columns?: Array<{
       name: { ... }
@@ -3872,7 +4121,7 @@ Why the import failed — present if and only if status = FAILED. `code` is the 
 
 ```ts
 type ErpImportError = {
-  code: "VALIDATION_BLOCKED" | "FILE_FORMAT_UNSUPPORTED" | "FILE_UNAVAILABLE" | "VALIDATE_TIMEOUT" | "IMPORT_TIMEOUT" | "USE_CASE_NOT_USABLE" | "IMPORT_NO_PROGRESS" | "TIER_ROWS_NOT_GROUPED" | "INTERNAL_ERROR"
+  code: "VALIDATION_BLOCKED" | "FILE_FORMAT_UNSUPPORTED" | "FILE_UNAVAILABLE" | "VALIDATE_TIMEOUT" | "IMPORT_TIMEOUT" | "USE_CASE_NOT_USABLE" | "IMPORT_NO_PROGRESS" | "TIER_ROWS_NOT_GROUPED" | "CHUNK_TOO_LARGE" | "INTERNAL_ERROR"
   message: string
 }
 ```
@@ -3978,7 +4227,7 @@ type ErpImportJob = {
     total_rows?: number
   }
   error?: {
-    code: "VALIDATION_BLOCKED" | "FILE_FORMAT_UNSUPPORTED" | "FILE_UNAVAILABLE" | "VALIDATE_TIMEOUT" | "IMPORT_TIMEOUT" | "USE_CASE_NOT_USABLE" | "IMPORT_NO_PROGRESS" | "TIER_ROWS_NOT_GROUPED" | "INTERNAL_ERROR"
+    code: "VALIDATION_BLOCKED" | "FILE_FORMAT_UNSUPPORTED" | "FILE_UNAVAILABLE" | "VALIDATE_TIMEOUT" | "IMPORT_TIMEOUT" | "USE_CASE_NOT_USABLE" | "IMPORT_NO_PROGRESS" | "TIER_ROWS_NOT_GROUPED" | "CHUNK_TOO_LARGE" | "INTERNAL_ERROR"
     message: string
   }
   correlation_id?: string
@@ -5090,7 +5339,7 @@ type InboundIntegrationEventConfiguration = {
       env_var_ref?: { ... }
     }>
     conditional?: {
-      folds: { ... }
+      from_rows: { ... }
     }
   }>
   meter_readings?: Array<{
@@ -5230,7 +5479,7 @@ type IntegrationEntity = {
     }
   }>
   conditional?: {
-    folds: Array<{
+    from_rows: Array<{
       attribute: { ... }
       sort_by: { ... }
       item: { ... }
@@ -5245,7 +5494,7 @@ Conditional Pricing extras for this target, used when it writes a conditional en
 
 ```ts
 type IntegrationEntityConditional = {
-  folds: Array<{
+  from_rows: Array<{
     attribute: string
     sort_by: {
       field: { ... }
@@ -5265,12 +5514,12 @@ type IntegrationEntityConditional = {
 }
 ```
 
-### `IntegrationEntityFold`
+### `IntegrationEntityFromRows`
 
-Collapse the rows of one variant-version into a single array attribute, ordered by a column. A commodity file carries one row per consumption band, while a variant-version holds exactly one `tiers` array.
+Build one array attribute from the rows of one variant-version, ordered by a column. A commodity file carries one row per consumption band, while a variant-version holds exactly one `tiers` array.
 
 ```ts
-type IntegrationEntityFold = {
+type IntegrationEntityFromRows = {
   attribute: string
   sort_by: {
     field: string
@@ -9160,7 +9409,7 @@ This schema exists so consumers can import the union as a type. It is
 deliberately 
 
 ```ts
-type MonitoringCode = "ACK_CONFIRMED" | "ACK_PENDING" | "ACK_TIMEOUT" | "ATTACHMENT_NOT_FOUND" | "ATTRIBUTE_TYPE_MISMATCH" | "DEPRECATED_ENDPOINT" | "DIRECT_ENTITY_NOT_ALLOWED" | "DIRECT_PAYLOAD_INVALID" | "DIRECT_VERSION_UNSUPPORTED" | "DUPLICATE_EVENT" | "ENTITY_CREATED" | "ENTITY_DELETED" | "ENTITY_NO_OP" | "ENTITY_REFERENCE_NOT_FOUND" | "ENTITY_UPDATED" | "EVENT_NOT_CONFIGURED" | "EXTERNAL_API_ERROR" | "EXTERNAL_ERROR" | "EXTERNAL_INFO" | "EXTERNAL_SUCCESS" | "EXTERNAL_WARNING" | "FAN_OUT_EMPTY" | "FAN_OUT_INVALID_RESULT" | "FILE_EXTRACTION_FAILED" | "FILE_FETCH_FAILED" | "FILE_PROXY_OK" | "FILE_PROXY_UPLOADED" | "FILE_PROXY_UPLOAD_ENQUEUED" | "FILE_PROXY_UPLOAD_FAILED" | "FILE_PROXY_UPLOAD_RETRYING" | "FILE_TOO_LARGE" | "INTEGRATION_NOT_FOUND" | "INVALID_METER_READING_ATTRIBUTES" | "LOOKUP_UNMAPPED" | "MALFORMED_PAYLOAD" | "MAPPING_EXPRESSION_FAILED" | "METERING_API_ERROR" | "METER_READING_DELETED" | "METER_READING_GROUP_FAILED" | "METER_READING_GROUP_RETRYING" | "METER_READING_UPSERTED" | "MISSING_REQUIRED_PARAM" | "MISSING_UNIQUE_IDENTIFIERS" | "MSG_ACKED" | "MSG_DEAD_LETTERED" | "MSG_ENQUEUED" | "MSG_EXPIRED_UNPOLLED" | "MSG_HEAD_BLOCKED" | "OAUTH2_TOKEN_FAILURE" | "PAYLOAD_TOO_LARGE" | "PRUNE_SCOPE_COMPLETED" | "PRUNE_SCOPE_PARTIAL_FAILURE" | "RECURSION_DEPTH_EXCEEDED" | "RELATION_REF_ITEM_NOT_FOUND" | "RELATION_REF_VALUE_UNDEFINED" | "REQUIRED_PARAM_MISSING" | "SECURE_PROXY_DISABLED" | "SECURE_PROXY_DOMAIN_BLOCKED" | "SECURE_PROXY_DOMAIN_NOT_ALLOWED" | "SECURE_PROXY_ERROR" | "SECURE_PROXY_INVALID_CONFIG" | "SECURE_PROXY_INVALID_TYPE" | "SECURE_PROXY_INVALID_URL" | "SECURE_PROXY_IP_BLOCKED" | "SECURE_PROXY_IP_NOT_ALLOWED" | "SECURE_PROXY_NOT_FOUND" | "SECURE_PROXY_UNAVAILABLE" | "SIGNATURE_VERIFICATION_FAILED" | "SIGNATURE_VERIFICATION_UNAVAILABLE" | "SOFT_DELETED_ENTITY_MATCHED" | "STEP_DISABLED" | "TIMEOUT" | "UNIQUE_ID_MULTIPLE_MATCHES" | "UNIQUE_ID_NOT_IN_SCHEMA" | "UNKNOWN_ERROR" | "USE_CASE_DISABLED" | "USE_CASE_INVALID_TYPE" | "USE_CASE_MISSING_CONFIG" | "USE_CASE_NOT_FOUND" | "WEBHOOK_DELIVERED"
+type MonitoringCode = "ACK_CONFIRMED" | "ACK_PENDING" | "ACK_TIMEOUT" | "ATTACHMENT_NOT_FOUND" | "ATTRIBUTE_TYPE_MISMATCH" | "CONDITIONAL_VARIANTS_WRITTEN" | "CONDITIONAL_VARIANT_WRITE_FAILED" | "CONDITIONAL_VARIANT_WRITE_WARNING" | "DEPRECATED_ENDPOINT" | "DIRECT_ENTITY_NOT_ALLOWED" | "DIRECT_PAYLOAD_INVALID" | "DIRECT_VERSION_UNSUPPORTED" | "DUPLICATE_EVENT" | "ENTITY_CREATED" | "ENTITY_DELETED" | "ENTITY_NO_OP" | "ENTITY_REFERENCE_NOT_FOUND" | "ENTITY_UPDATED" | "EVENT_NOT_CONFIGURED" | "EXTERNAL_API_ERROR" | "EXTERNAL_ERROR" | "EXTERNAL_INFO" | "EXTERNAL_SUCCESS" | "EXTERNAL_WARNING" | "FAN_OUT_EMPTY" | "FAN_OUT_INVALID_RESULT" | "FILE_EXTRACTION_FAILED" | "FILE_FETCH_FAILED" | "FILE_PROXY_OK" | "FILE_PROXY_UPLOADED" | "FILE_PROXY_UPLOAD_ENQUEUED" | "FILE_PROXY_UPLOAD_FAILED" | "FILE_PROXY_UPLOAD_RETRYING" | "FILE_TOO_LARGE" | "INTEGRATION_NOT_FOUND" | "INVALID_METER_READING_ATTRIBUTES" | "LOOKUP_UNMAPPED" | "MALFORMED_PAYLOAD" | "MAPPING_EXPRESSION_FAILED" | "METERING_API_ERROR" | "METER_READING_DELETED" | "METER_READING_GROUP_FAILED" | "METER_READING_GROUP_RETRYING" | "METER_READING_UPSERTED" | "MISSING_REQUIRED_PARAM" | "MISSING_UNIQUE_IDENTIFIERS" | "MSG_ACKED" | "MSG_DEAD_LETTERED" | "MSG_ENQUEUED" | "MSG_EXPIRED_UNPOLLED" | "MSG_HEAD_BLOCKED" | "OAUTH2_TOKEN_FAILURE" | "PAYLOAD_TOO_LARGE" | "PRUNE_SCOPE_COMPLETED" | "PRUNE_SCOPE_PARTIAL_FAILURE" | "RECURSION_DEPTH_EXCEEDED" | "RELATION_REF_ITEM_NOT_FOUND" | "RELATION_REF_VALUE_UNDEFINED" | "REQUIRED_PARAM_MISSING" | "SECURE_PROXY_DISABLED" | "SECURE_PROXY_DOMAIN_BLOCKED" | "SECURE_PROXY_DOMAIN_NOT_ALLOWED" | "SECURE_PROXY_ERROR" | "SECURE_PROXY_INVALID_CONFIG" | "SECURE_PROXY_INVALID_TYPE" | "SECURE_PROXY_INVALID_URL" | "SECURE_PROXY_IP_BLOCKED" | "SECURE_PROXY_IP_NOT_ALLOWED" | "SECURE_PROXY_NOT_FOUND" | "SECURE_PROXY_UNAVAILABLE" | "SIGNATURE_VERIFICATION_FAILED" | "SIGNATURE_VERIFICATION_UNAVAILABLE" | "SOFT_DELETED_ENTITY_MATCHED" | "STEP_DISABLED" | "TIMEOUT" | "UNIQUE_ID_MULTIPLE_MATCHES" | "UNIQUE_ID_NOT_IN_SCHEMA" | "UNKNOWN_ERROR" | "USE_CASE_DISABLED" | "USE_CASE_INVALID_TYPE" | "USE_CASE_MISSING_CONFIG" | "USE_CASE_NOT_FOUND" | "WEBHOOK_DELIVERED"
 ```
 
 ### `MonitoringEventV2`

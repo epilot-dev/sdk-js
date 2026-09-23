@@ -2932,7 +2932,7 @@ export declare namespace Components {
              * Enum of possible error codes.
              *
              */
-            code: "VALIDATION_BLOCKED" | "FILE_FORMAT_UNSUPPORTED" | "FILE_UNAVAILABLE" | "VALIDATE_TIMEOUT" | "IMPORT_TIMEOUT" | "USE_CASE_NOT_USABLE" | "IMPORT_NO_PROGRESS" | "TIER_ROWS_NOT_GROUPED" | "INTERNAL_ERROR";
+            code: "VALIDATION_BLOCKED" | "FILE_FORMAT_UNSUPPORTED" | "FILE_UNAVAILABLE" | "VALIDATE_TIMEOUT" | "IMPORT_TIMEOUT" | "USE_CASE_NOT_USABLE" | "IMPORT_NO_PROGRESS" | "TIER_ROWS_NOT_GROUPED" | "CHUNK_TOO_LARGE" | "INTERNAL_ERROR";
             /**
              * One English sentence, derived from `code` so the two always agree. A fallback for a client that has no translation for this code — prefer translating `code`, and never parse this. It deliberately does NOT restate `validation.issues`.
              */
@@ -2965,8 +2965,8 @@ export declare namespace Components {
          *   `columns` names what to group by.
          * - `TIER_BANDS_CONFLICT` — two rows of one variant claim the same band.
          * - `CONDITION_VALUE_MISSING` — a condition column is blank in every row.
-         * - `VARIANT_VALUE_CONFLICT` — rows of one variant disagree on a value that is not
-         *   the one being folded; the first row's value is what would be written.
+         * - `VARIANT_VALUE_CONFLICT` — rows of one variant disagree on a value outside
+         *   `from_rows`; the first row's value is what would be written.
          * - `ATTRIBUTE_NOT_OVERRIDABLE` — the schema does not let a variant override this
          *   attribute, so the mapped value would be discarded.
          * - `ATTRIBUTE_NOT_IN_SCHEMA` — the schema does not have the attribute at all.
@@ -2974,14 +2974,18 @@ export declare namespace Components {
          * The rest reject the mapping against the entity schemas, before the file is read, and
          * name the thing at fault in `subject`: `IS_CONDITIONAL_NOT_CONSTANT`,
          * `SCHEMA_NOT_CONDITIONABLE`, `SCHEMA_NOT_FOUND`, `SCHEMA_DECLARES_NO_CONDITIONS`,
-         * `GROUPING_KEY_NOT_A_COLUMN`, `GROUPING_KEY_IS_FOLD_COLUMN`.
+         * `GROUPING_KEY_NOT_A_COLUMN`, `GROUPING_KEY_IS_SORT_COLUMN`,
+         * `CONDITIONAL_TARGET_MODE_UNSUPPORTED` (a conditional target with any `mode` other
+         * than `upsert` — a row of such a target addresses one variant-version, while every
+         * other mode acts on whole entities; removing variants through an import is not
+         * supported yet, and to remove a whole entity, map it as a non-conditional target).
          */
         export interface ErpImportIssue {
             /**
              * Enum of possible issue codes.
              *
              */
-            code: "UNIQUE_ID_COLUMN_MISSING" | "MAPPED_COLUMN_MISSING" | "MALFORMED_ROW" | "INVALID_ENCODING" | "EMPTY_FILE" | "TOO_MANY_ROWS" | "BLANK_ROWS_SKIPPED" | "TIER_ROWS_NOT_GROUPED" | "TIER_BANDS_CONFLICT" | "CONDITION_VALUE_MISSING" | "VARIANT_VALUE_CONFLICT" | "ATTRIBUTE_NOT_OVERRIDABLE" | "ATTRIBUTE_NOT_IN_SCHEMA" | "IS_CONDITIONAL_NOT_CONSTANT" | "SCHEMA_NOT_CONDITIONABLE" | "SCHEMA_NOT_FOUND" | "SCHEMA_DECLARES_NO_CONDITIONS" | "GROUPING_KEY_NOT_A_COLUMN" | "GROUPING_KEY_IS_FOLD_COLUMN";
+            code: "UNIQUE_ID_COLUMN_MISSING" | "MAPPED_COLUMN_MISSING" | "MALFORMED_ROW" | "INVALID_ENCODING" | "EMPTY_FILE" | "TOO_MANY_ROWS" | "BLANK_ROWS_SKIPPED" | "TIER_ROWS_NOT_GROUPED" | "TIER_BANDS_CONFLICT" | "CONDITION_VALUE_MISSING" | "VARIANT_VALUE_CONFLICT" | "ATTRIBUTE_NOT_OVERRIDABLE" | "ATTRIBUTE_NOT_IN_SCHEMA" | "IS_CONDITIONAL_NOT_CONSTANT" | "SCHEMA_NOT_CONDITIONABLE" | "SCHEMA_NOT_FOUND" | "SCHEMA_DECLARES_NO_CONDITIONS" | "GROUPING_KEY_NOT_A_COLUMN" | "GROUPING_KEY_IS_SORT_COLUMN" | "CONDITIONAL_TARGET_MODE_UNSUPPORTED";
             severity: "warning" | "blocking";
             /**
              * The columns this issue is about, at most one entry per column per entity.
@@ -3133,8 +3137,8 @@ export declare namespace Components {
              *   `columns` names what to group by.
              * - `TIER_BANDS_CONFLICT` — two rows of one variant claim the same band.
              * - `CONDITION_VALUE_MISSING` — a condition column is blank in every row.
-             * - `VARIANT_VALUE_CONFLICT` — rows of one variant disagree on a value that is not
-             *   the one being folded; the first row's value is what would be written.
+             * - `VARIANT_VALUE_CONFLICT` — rows of one variant disagree on a value outside
+             *   `from_rows`; the first row's value is what would be written.
              * - `ATTRIBUTE_NOT_OVERRIDABLE` — the schema does not let a variant override this
              *   attribute, so the mapped value would be discarded.
              * - `ATTRIBUTE_NOT_IN_SCHEMA` — the schema does not have the attribute at all.
@@ -3142,7 +3146,11 @@ export declare namespace Components {
              * The rest reject the mapping against the entity schemas, before the file is read, and
              * name the thing at fault in `subject`: `IS_CONDITIONAL_NOT_CONSTANT`,
              * `SCHEMA_NOT_CONDITIONABLE`, `SCHEMA_NOT_FOUND`, `SCHEMA_DECLARES_NO_CONDITIONS`,
-             * `GROUPING_KEY_NOT_A_COLUMN`, `GROUPING_KEY_IS_FOLD_COLUMN`.
+             * `GROUPING_KEY_NOT_A_COLUMN`, `GROUPING_KEY_IS_SORT_COLUMN`,
+             * `CONDITIONAL_TARGET_MODE_UNSUPPORTED` (a conditional target with any `mode` other
+             * than `upsert` — a row of such a target addresses one variant-version, while every
+             * other mode acts on whole entities; removing variants through an import is not
+             * supported yet, and to remove a whole entity, map it as a non-conditional target).
              */
             ErpImportIssue[];
         }
@@ -5017,10 +5025,10 @@ export declare namespace Components {
          */
         export interface IntegrationEntityConditional {
             /**
-             * Row folds for this target. Exactly one is supported; the array is the shape for later, not a capability claim.
+             * Array attributes built from the rows of one variant-version. Exactly one is supported; the array is the shape for later, not a capability claim.
              */
-            folds: [
-                /* Collapse the rows of one variant-version into a single array attribute, ordered by a column. A commodity file carries one row per consumption band, while a variant-version holds exactly one `tiers` array. */ IntegrationEntityFold
+            from_rows: [
+                /* Build one array attribute from the rows of one variant-version, ordered by a column. A commodity file carries one row per consumption band, while a variant-version holds exactly one `tiers` array. */ IntegrationEntityFromRows
             ];
         }
         export interface IntegrationEntityField {
@@ -5075,11 +5083,11 @@ export declare namespace Components {
             EnvVarRefConfig;
         }
         /**
-         * Collapse the rows of one variant-version into a single array attribute, ordered by a column. A commodity file carries one row per consumption band, while a variant-version holds exactly one `tiers` array.
+         * Build one array attribute from the rows of one variant-version, ordered by a column. A commodity file carries one row per consumption band, while a variant-version holds exactly one `tiers` array.
          */
-        export interface IntegrationEntityFold {
+        export interface IntegrationEntityFromRows {
             /**
-             * The array attribute this fold builds, e.g. `tiers`.
+             * The array attribute built from the rows, e.g. `tiers`.
              */
             attribute: string;
             /**
@@ -5744,7 +5752,7 @@ export declare namespace Components {
          * `monitoring-code-enum.test.ts`, which fails if the two diverge.
          *
          */
-        export type MonitoringCode = "ACK_CONFIRMED" | "ACK_PENDING" | "ACK_TIMEOUT" | "ATTACHMENT_NOT_FOUND" | "ATTRIBUTE_TYPE_MISMATCH" | "DEPRECATED_ENDPOINT" | "DIRECT_ENTITY_NOT_ALLOWED" | "DIRECT_PAYLOAD_INVALID" | "DIRECT_VERSION_UNSUPPORTED" | "DUPLICATE_EVENT" | "ENTITY_CREATED" | "ENTITY_DELETED" | "ENTITY_NO_OP" | "ENTITY_REFERENCE_NOT_FOUND" | "ENTITY_UPDATED" | "EVENT_NOT_CONFIGURED" | "EXTERNAL_API_ERROR" | "EXTERNAL_ERROR" | "EXTERNAL_INFO" | "EXTERNAL_SUCCESS" | "EXTERNAL_WARNING" | "FAN_OUT_EMPTY" | "FAN_OUT_INVALID_RESULT" | "FILE_EXTRACTION_FAILED" | "FILE_FETCH_FAILED" | "FILE_PROXY_OK" | "FILE_PROXY_UPLOADED" | "FILE_PROXY_UPLOAD_ENQUEUED" | "FILE_PROXY_UPLOAD_FAILED" | "FILE_PROXY_UPLOAD_RETRYING" | "FILE_TOO_LARGE" | "INTEGRATION_NOT_FOUND" | "INVALID_METER_READING_ATTRIBUTES" | "LOOKUP_UNMAPPED" | "MALFORMED_PAYLOAD" | "MAPPING_EXPRESSION_FAILED" | "METERING_API_ERROR" | "METER_READING_DELETED" | "METER_READING_GROUP_FAILED" | "METER_READING_GROUP_RETRYING" | "METER_READING_UPSERTED" | "MISSING_REQUIRED_PARAM" | "MISSING_UNIQUE_IDENTIFIERS" | "MSG_ACKED" | "MSG_DEAD_LETTERED" | "MSG_ENQUEUED" | "MSG_EXPIRED_UNPOLLED" | "MSG_HEAD_BLOCKED" | "OAUTH2_TOKEN_FAILURE" | "PAYLOAD_TOO_LARGE" | "PRUNE_SCOPE_COMPLETED" | "PRUNE_SCOPE_PARTIAL_FAILURE" | "RECURSION_DEPTH_EXCEEDED" | "RELATION_REF_ITEM_NOT_FOUND" | "RELATION_REF_VALUE_UNDEFINED" | "REQUIRED_PARAM_MISSING" | "SECURE_PROXY_DISABLED" | "SECURE_PROXY_DOMAIN_BLOCKED" | "SECURE_PROXY_DOMAIN_NOT_ALLOWED" | "SECURE_PROXY_ERROR" | "SECURE_PROXY_INVALID_CONFIG" | "SECURE_PROXY_INVALID_TYPE" | "SECURE_PROXY_INVALID_URL" | "SECURE_PROXY_IP_BLOCKED" | "SECURE_PROXY_IP_NOT_ALLOWED" | "SECURE_PROXY_NOT_FOUND" | "SECURE_PROXY_UNAVAILABLE" | "SIGNATURE_VERIFICATION_FAILED" | "SIGNATURE_VERIFICATION_UNAVAILABLE" | "SOFT_DELETED_ENTITY_MATCHED" | "STEP_DISABLED" | "TIMEOUT" | "UNIQUE_ID_MULTIPLE_MATCHES" | "UNIQUE_ID_NOT_IN_SCHEMA" | "UNKNOWN_ERROR" | "USE_CASE_DISABLED" | "USE_CASE_INVALID_TYPE" | "USE_CASE_MISSING_CONFIG" | "USE_CASE_NOT_FOUND" | "WEBHOOK_DELIVERED";
+        export type MonitoringCode = "ACK_CONFIRMED" | "ACK_PENDING" | "ACK_TIMEOUT" | "ATTACHMENT_NOT_FOUND" | "ATTRIBUTE_TYPE_MISMATCH" | "CONDITIONAL_VARIANTS_WRITTEN" | "CONDITIONAL_VARIANT_WRITE_FAILED" | "CONDITIONAL_VARIANT_WRITE_WARNING" | "DEPRECATED_ENDPOINT" | "DIRECT_ENTITY_NOT_ALLOWED" | "DIRECT_PAYLOAD_INVALID" | "DIRECT_VERSION_UNSUPPORTED" | "DUPLICATE_EVENT" | "ENTITY_CREATED" | "ENTITY_DELETED" | "ENTITY_NO_OP" | "ENTITY_REFERENCE_NOT_FOUND" | "ENTITY_UPDATED" | "EVENT_NOT_CONFIGURED" | "EXTERNAL_API_ERROR" | "EXTERNAL_ERROR" | "EXTERNAL_INFO" | "EXTERNAL_SUCCESS" | "EXTERNAL_WARNING" | "FAN_OUT_EMPTY" | "FAN_OUT_INVALID_RESULT" | "FILE_EXTRACTION_FAILED" | "FILE_FETCH_FAILED" | "FILE_PROXY_OK" | "FILE_PROXY_UPLOADED" | "FILE_PROXY_UPLOAD_ENQUEUED" | "FILE_PROXY_UPLOAD_FAILED" | "FILE_PROXY_UPLOAD_RETRYING" | "FILE_TOO_LARGE" | "INTEGRATION_NOT_FOUND" | "INVALID_METER_READING_ATTRIBUTES" | "LOOKUP_UNMAPPED" | "MALFORMED_PAYLOAD" | "MAPPING_EXPRESSION_FAILED" | "METERING_API_ERROR" | "METER_READING_DELETED" | "METER_READING_GROUP_FAILED" | "METER_READING_GROUP_RETRYING" | "METER_READING_UPSERTED" | "MISSING_REQUIRED_PARAM" | "MISSING_UNIQUE_IDENTIFIERS" | "MSG_ACKED" | "MSG_DEAD_LETTERED" | "MSG_ENQUEUED" | "MSG_EXPIRED_UNPOLLED" | "MSG_HEAD_BLOCKED" | "OAUTH2_TOKEN_FAILURE" | "PAYLOAD_TOO_LARGE" | "PRUNE_SCOPE_COMPLETED" | "PRUNE_SCOPE_PARTIAL_FAILURE" | "RECURSION_DEPTH_EXCEEDED" | "RELATION_REF_ITEM_NOT_FOUND" | "RELATION_REF_VALUE_UNDEFINED" | "REQUIRED_PARAM_MISSING" | "SECURE_PROXY_DISABLED" | "SECURE_PROXY_DOMAIN_BLOCKED" | "SECURE_PROXY_DOMAIN_NOT_ALLOWED" | "SECURE_PROXY_ERROR" | "SECURE_PROXY_INVALID_CONFIG" | "SECURE_PROXY_INVALID_TYPE" | "SECURE_PROXY_INVALID_URL" | "SECURE_PROXY_IP_BLOCKED" | "SECURE_PROXY_IP_NOT_ALLOWED" | "SECURE_PROXY_NOT_FOUND" | "SECURE_PROXY_UNAVAILABLE" | "SIGNATURE_VERIFICATION_FAILED" | "SIGNATURE_VERIFICATION_UNAVAILABLE" | "SOFT_DELETED_ENTITY_MATCHED" | "STEP_DISABLED" | "TIMEOUT" | "UNIQUE_ID_MULTIPLE_MATCHES" | "UNIQUE_ID_NOT_IN_SCHEMA" | "UNKNOWN_ERROR" | "USE_CASE_DISABLED" | "USE_CASE_INVALID_TYPE" | "USE_CASE_MISSING_CONFIG" | "USE_CASE_NOT_FOUND" | "WEBHOOK_DELIVERED";
         export interface MonitoringEventV2 {
             /**
              * Unique monitoring event ID
@@ -10141,13 +10149,9 @@ export interface OperationMethods {
   /**
    * queryInboundMonitoringEvents - queryInboundMonitoringEvents
    * 
-   * **Deprecated and no longer implemented.** The `erp_monitoring` table this
-   * endpoint read has been retired in favour of the unified `erp_monitoring_v2`
-   * table. The endpoint is kept only so existing clients do not 404; it always
-   * responds `200` with an empty result and never reads any data.
-   * 
-   * Use `POST /v2/integrations/{integrationId}/monitoring/events` instead,
-   * filtered to `use_case_type: inbound`.
+   * Query inbound monitoring events for a specific integration.
+   * Returns detailed information about inbound sync events from ERP systems,
+   * including success rates, error breakdowns, and processing metrics.
    * 
    */
   'queryInboundMonitoringEvents'(
@@ -10158,13 +10162,9 @@ export interface OperationMethods {
   /**
    * getMonitoringStats - getMonitoringStats
    * 
-   * **Deprecated and no longer implemented.** The `erp_monitoring` and
-   * `webhook_events` tables this endpoint aggregated have been retired in favour
-   * of the unified `erp_monitoring_v2` table. The endpoint is kept only so
-   * existing clients do not 404; it always responds `200` with zeroed counters
-   * and never reads any data.
-   * 
-   * Use `POST /v2/integrations/{integrationId}/monitoring/stats` instead.
+   * Get aggregated statistics for both inbound and outbound monitoring events for a specific integration.
+   * Returns summary metrics for inbound (ERP sync) and outbound (webhook delivery) events,
+   * including success/error counts and optional breakdowns.
    * 
    */
   'getMonitoringStats'(
@@ -10175,13 +10175,9 @@ export interface OperationMethods {
   /**
    * getMonitoringTimeSeries - getMonitoringTimeSeries
    * 
-   * **Deprecated and no longer implemented.** The `erp_monitoring` and
-   * `webhook_events` tables this endpoint bucketed have been retired in favour
-   * of the unified `erp_monitoring_v2` table. The endpoint is kept only so
-   * existing clients do not 404; it always responds `200` with an empty bucket
-   * list and never reads any data.
-   * 
-   * Use `POST /v2/integrations/{integrationId}/monitoring/time-series` instead.
+   * Get time-series aggregated event counts for monitoring charts.
+   * Returns pre-bucketed counts at configurable intervals for both inbound and outbound events.
+   * Maximum of 200 buckets per request. Returns 400 if the time range and interval would exceed this limit.
    * 
    */
   'getMonitoringTimeSeries'(
@@ -10325,13 +10321,9 @@ export interface OperationMethods {
   /**
    * queryOutboundMonitoringEvents - queryOutboundMonitoringEvents
    * 
-   * **Deprecated and no longer implemented.** The `webhook_events` table this
-   * endpoint read has been retired in favour of the unified `erp_monitoring_v2`
-   * table. The endpoint is kept only so existing clients do not 404; it always
-   * responds `200` with an empty result and never reads any data.
-   * 
-   * Use `POST /v2/integrations/{integrationId}/monitoring/events` instead,
-   * filtered to `use_case_type: outbound`.
+   * Query outbound monitoring events for a specific integration.
+   * Returns detailed information about outbound event deliveries,
+   * filtered by event_name (event_catalog_event) linked to the integration's outbound use cases.
    * 
    */
   'queryOutboundMonitoringEvents'(
@@ -11122,13 +11114,9 @@ export interface PathsDictionary {
     /**
      * queryInboundMonitoringEvents - queryInboundMonitoringEvents
      * 
-     * **Deprecated and no longer implemented.** The `erp_monitoring` table this
-     * endpoint read has been retired in favour of the unified `erp_monitoring_v2`
-     * table. The endpoint is kept only so existing clients do not 404; it always
-     * responds `200` with an empty result and never reads any data.
-     * 
-     * Use `POST /v2/integrations/{integrationId}/monitoring/events` instead,
-     * filtered to `use_case_type: inbound`.
+     * Query inbound monitoring events for a specific integration.
+     * Returns detailed information about inbound sync events from ERP systems,
+     * including success rates, error breakdowns, and processing metrics.
      * 
      */
     'post'(
@@ -11141,13 +11129,9 @@ export interface PathsDictionary {
     /**
      * getMonitoringStats - getMonitoringStats
      * 
-     * **Deprecated and no longer implemented.** The `erp_monitoring` and
-     * `webhook_events` tables this endpoint aggregated have been retired in favour
-     * of the unified `erp_monitoring_v2` table. The endpoint is kept only so
-     * existing clients do not 404; it always responds `200` with zeroed counters
-     * and never reads any data.
-     * 
-     * Use `POST /v2/integrations/{integrationId}/monitoring/stats` instead.
+     * Get aggregated statistics for both inbound and outbound monitoring events for a specific integration.
+     * Returns summary metrics for inbound (ERP sync) and outbound (webhook delivery) events,
+     * including success/error counts and optional breakdowns.
      * 
      */
     'post'(
@@ -11160,13 +11144,9 @@ export interface PathsDictionary {
     /**
      * getMonitoringTimeSeries - getMonitoringTimeSeries
      * 
-     * **Deprecated and no longer implemented.** The `erp_monitoring` and
-     * `webhook_events` tables this endpoint bucketed have been retired in favour
-     * of the unified `erp_monitoring_v2` table. The endpoint is kept only so
-     * existing clients do not 404; it always responds `200` with an empty bucket
-     * list and never reads any data.
-     * 
-     * Use `POST /v2/integrations/{integrationId}/monitoring/time-series` instead.
+     * Get time-series aggregated event counts for monitoring charts.
+     * Returns pre-bucketed counts at configurable intervals for both inbound and outbound events.
+     * Maximum of 200 buckets per request. Returns 400 if the time range and interval would exceed this limit.
      * 
      */
     'post'(
@@ -11328,13 +11308,9 @@ export interface PathsDictionary {
     /**
      * queryOutboundMonitoringEvents - queryOutboundMonitoringEvents
      * 
-     * **Deprecated and no longer implemented.** The `webhook_events` table this
-     * endpoint read has been retired in favour of the unified `erp_monitoring_v2`
-     * table. The endpoint is kept only so existing clients do not 404; it always
-     * responds `200` with an empty result and never reads any data.
-     * 
-     * Use `POST /v2/integrations/{integrationId}/monitoring/events` instead,
-     * filtered to `use_case_type: outbound`.
+     * Query outbound monitoring events for a specific integration.
+     * Returns detailed information about outbound event deliveries,
+     * filtered by event_name (event_catalog_event) linked to the integration's outbound use cases.
      * 
      */
     'post'(
@@ -11735,7 +11711,7 @@ export type IntegrationEditableFields = Components.Schemas.IntegrationEditableFi
 export type IntegrationEntity = Components.Schemas.IntegrationEntity;
 export type IntegrationEntityConditional = Components.Schemas.IntegrationEntityConditional;
 export type IntegrationEntityField = Components.Schemas.IntegrationEntityField;
-export type IntegrationEntityFold = Components.Schemas.IntegrationEntityFold;
+export type IntegrationEntityFromRows = Components.Schemas.IntegrationEntityFromRows;
 export type IntegrationFieldV1 = Components.Schemas.IntegrationFieldV1;
 export type IntegrationMap = Components.Schemas.IntegrationMap;
 export type IntegrationMeterReading = Components.Schemas.IntegrationMeterReading;
